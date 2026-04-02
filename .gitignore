@@ -1,0 +1,10 @@
+node_modules
+dist
+*.local
+
+.DS_Store
+*.sw?
+
+*.tsbuildinfo
+
+src/routeTree.gen.ts
