@@ -4,10 +4,6 @@
 /* 가장 하단의 정의된 유틸리티 클래스(29개)로 사용하시면 됩니다! */
 
 :root {
-  --font-pretendard:
-    "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
-    system-ui, Roboto, sans-serif;
-
   /* -------------------------
    * Display
    * ------------------------- */
