@@ -1,5 +1,6 @@
-import { MedalFirst, MedalSecond, MedalThird } from "@/assets/svg"
 import { createFileRoute } from "@tanstack/react-router"
+
+import { MedalFirst, MedalSecond, MedalThird } from "@/assets/svg"
 
 export const Route = createFileRoute("/")({
   component: HomePage,
