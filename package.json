@@ -14,7 +14,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "prepare": "husky",
-    "generate:api-types": "openapi-typescript ./openapi.yaml -o ./src/types/api.d.ts"
+    "generate:api-types": "openapi-typescript ./openapi.yaml -o ./src/types/api.d.ts",
+    "svgr": "npx @svgr/cli -d src/assets/svg --ignore-existing --typescript --no-dimensions public/svg"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -68,5 +69,6 @@
     "*.{json,md,css}": [
       "prettier --write"
     ]
-  }
+  },
+  "packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48"
 }
