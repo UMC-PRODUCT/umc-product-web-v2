@@ -21,6 +21,26 @@
 - 로직이 자명하지 않은 경우에만 최소한의 주석을 허용합니다.
 - 변경하지 않은 코드에 주석만 추가하는 제안은 피해주세요.
 
+## 명명 규칙
+
+| 대상              | 규칙                                 | 예시                             |
+| ----------------- | ------------------------------------ | -------------------------------- |
+| 변수·함수         | camelCase                            | `userProfile`, `fetchData`       |
+| React 컴포넌트    | PascalCase                           | `UserCard`, `LoginForm`          |
+| 커스텀 훅         | `use` prefix + camelCase             | `useAuth`, `useModalOpen`        |
+| 타입·인터페이스   | PascalCase                           | `UserResponse`, `FormValues`     |
+| Zod 스키마        | camelCase + `Schema` suffix          | `loginFormSchema`                |
+| Zustand 스토어    | camelCase + `Store` suffix           | `useAuthStore`                   |
+| 상수              | UPPER_SNAKE_CASE                     | `MAX_RETRY_COUNT`                |
+| 컴포넌트 파일     | PascalCase + `.tsx`                  | `UserCard.tsx`                   |
+| 일반 유틸·훅 파일 | camelCase + `.ts` / `.tsx`           | `useAuth.ts`, `formatDate.ts`    |
+| 라우트 파일       | TanStack Router 규칙 (`_`, `$`, `.`) | `_auth.login.tsx`, `$userId.tsx` |
+| 테스트 파일       | 대상 파일명 + `.test.ts(x)`          | `UserCard.test.tsx`              |
+
+- 식별자는 **영어**만 사용합니다. 한국어·약어·줄임말은 사용하지 않습니다.
+- boolean 변수/prop은 `is`, `has`, `can`, `should` prefix를 권장합니다 (`isLoading`, `hasError`).
+- 이벤트 핸들러는 `handle` prefix를 권장합니다 (`handleSubmit`, `handleClose`).
+
 ## TypeScript
 
 - `any` 금지. 필요한 경우 `unknown` + 타입 좁히기.
