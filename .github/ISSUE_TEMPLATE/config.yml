@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: 오메추 서비스
-    url: https://omechu.log8.kr/
-    about: 오메추 서비스 바로가기
-  - name: 코드 컨벤션
-    url: https://github.com/Team-Omechu/Omechu-web/blob/develop/omechu-app/docs/CONVENTIONS.md
-    about: 코드 스타일 및 Git 컨벤션 가이드

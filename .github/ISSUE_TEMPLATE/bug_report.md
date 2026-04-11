@@ -36,17 +36,17 @@ assignees: ""
 
 <!-- 에러 로그나 스크린샷이 있다면 첨부해주세요 -->
 
-## 🏷 관련 도메인
+## 🏷 관련 영역
 
-- [ ] Auth (인증)
-- [ ] Menu (메뉴)
-- [ ] Restaurant (맛집)
-- [ ] Onboarding (온보딩)
-- [ ] MyPage (마이페이지)
-- [ ] MenuBattle (메뉴배틀)
 - [ ] UI/UX
+- [ ] Routing
+- [ ] API / Network
+- [ ] State Management
+- [ ] Build / Tooling
 - [ ] Performance
+- [ ] Accessibility
 - [ ] CI/CD
+- [ ] Docs
 
 ## 💬 기타
 
