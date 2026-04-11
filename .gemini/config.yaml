@@ -1,0 +1,14 @@
+have_fun: false # 장난스러운 멘트/톤 비활성화
+code_review:
+  disable: false # 코드 리뷰 기능 활성화
+  comment_severity_threshold: LOW # LOW 이상(마이너 포함) 모든 문제에 댓글 작성
+  max_review_comments: -1 # 리뷰 댓글 수 무제한
+  pull_request_opened:
+    help: false # PR 생성 시 도움말 제공 비활성화
+    summary: true # PR 요약 제공 활성화
+    code_review: true # PR 오픈 시 자동 리뷰 실행
+ignore_patterns:
+  - ".github/" # GitHub 워크플로우·템플릿 파일
+  - ".husky/" # Git hook 설정
+  - ".storybook/" # Storybook 설정 (향후 도입 대비)
+  - ".vscode/" # VS Code 로컬 설정
