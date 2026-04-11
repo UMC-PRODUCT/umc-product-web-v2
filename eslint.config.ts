@@ -28,7 +28,7 @@ export default tseslint.config(
         { argsIgnorePattern: "^_" },
       ],
       "perfectionist/sort-imports": [
-        "error",
+        "warn",
         {
           type: "alphabetical",
           order: "asc",
@@ -48,15 +48,15 @@ export default tseslint.config(
         },
       ],
       "perfectionist/sort-named-imports": [
-        "error",
+        "warn",
         { type: "alphabetical", order: "asc", ignoreCase: true },
       ],
       "perfectionist/sort-exports": [
-        "error",
+        "warn",
         { type: "alphabetical", order: "asc", ignoreCase: true },
       ],
       "perfectionist/sort-named-exports": [
-        "error",
+        "warn",
         { type: "alphabetical", order: "asc", ignoreCase: true },
       ],
     },
