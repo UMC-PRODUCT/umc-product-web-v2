@@ -5,9 +5,5 @@ export const Route = createFileRoute("/")({
 })
 
 function HomePage() {
-  return (
-    <div>
-      <h1>UMC Product</h1>
-    </div>
-  )
+  return <div>UMC Product</div>
 }
