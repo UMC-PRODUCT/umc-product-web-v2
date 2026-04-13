@@ -1,21 +1,16 @@
 import { ProjectCardForm } from "./ProjectCardForm/ProjectCardForm"
+import { SectionHeader } from "./SectionHeader"
 
 const MOCK_USER = { nickname: "닉넴", name: "아무개", university: "OO대 OOO" }
 export function BasicInfoForm() {
   return (
     <div className="flex flex-col gap-14 py-4">
       <div className="flex flex-col gap-4">
-        <div className="text-heading-6-semibold flex gap-2">
-          <span className="text-teal-600">01</span>
-          <span className="text-teal-gray-900">프로젝트 카드</span>
-        </div>
+        <SectionHeader index={1} title="프로젝트 카드" />
         <ProjectCardForm {...MOCK_USER} />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="text-heading-6-semibold flex gap-2">
-          <span className="text-teal-600">02</span>
-          <span className="text-teal-gray-900">기획서 링크</span>
-        </div>
+        <SectionHeader index={2} title="기획서 링크" />
         <label htmlFor="planning-link" className="sr-only">
           기획서 링크
         </label>

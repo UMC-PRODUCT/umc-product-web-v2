@@ -15,7 +15,7 @@ function StepperTestPage() {
   const [step, setStep] = useState(1)
 
   return (
-    <main className="h-screen w-full">
+    <main className="h-full min-h-screen w-full">
       <div className="bg-teal-gray-100 flex h-18 w-full items-center pl-10">
         Stepper Test Page
       </div>
@@ -23,7 +23,7 @@ function StepperTestPage() {
         <SideBar className="flex-1" />
         <section className="flex w-full flex-col gap-8 px-8.5 pt-14.5">
           <div className="h-25 w-full">페이지 제목 & 세그먼트 영역</div>
-          <div className="border-teal-gray-150 flex h-screen min-w-242 flex-col gap-2.5 rounded-[12px] border bg-white px-8.5 py-8">
+          <div className="border-teal-gray-150 flex h-full min-w-242 flex-col gap-2.5 rounded-[12px] border bg-white px-8.5 py-8">
             <div className="flex flex-col items-start gap-1.5">
               <span className="text-heading-6-semibold text-teal-gray-900">
                 프로젝트 등록
