@@ -50,6 +50,92 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  --color-white: var(--color-white);
+  --color-teal-gray-50: var(--color-teal-gray-50);
+  --color-teal-gray-100: var(--color-teal-gray-100);
+  --color-teal-gray-150: var(--color-teal-gray-150);
+  --color-teal-gray-200: var(--color-teal-gray-200);
+  --color-teal-gray-300: var(--color-teal-gray-300);
+  --color-teal-gray-400: var(--color-teal-gray-400);
+  --color-teal-gray-500: var(--color-teal-gray-500);
+  --color-teal-gray-600: var(--color-teal-gray-600);
+  --color-teal-gray-700: var(--color-teal-gray-700);
+  --color-teal-gray-800: var(--color-teal-gray-800);
+  --color-teal-gray-900: var(--color-teal-gray-900);
+
+  --color-teal-50: var(--color-teal-50);
+  --color-teal-100: var(--color-teal-100);
+  --color-teal-200: var(--color-teal-200);
+  --color-teal-300: var(--color-teal-300);
+  --color-teal-400: var(--color-teal-400);
+  --color-teal-500: var(--color-teal-500);
+  --color-teal-600: var(--color-teal-600);
+  --color-teal-700: var(--color-teal-700);
+  --color-teal-800: var(--color-teal-800);
+  --color-teal-900: var(--color-teal-900);
+
+  --color-error-50: var(--color-error-50);
+  --color-error-100: var(--color-error-100);
+  --color-error-200: var(--color-error-200);
+  --color-error-300: var(--color-error-300);
+  --color-error-400: var(--color-error-400);
+  --color-error-500: var(--color-error-500);
+  --color-error-600: var(--color-error-600);
+  --color-error-700: var(--color-error-700);
+  --color-error-800: var(--color-error-800);
+  --color-error-900: var(--color-error-900);
+
+  --color-warning-50: var(--color-warning-50);
+  --color-warning-100: var(--color-warning-100);
+  --color-warning-200: var(--color-warning-200);
+  --color-warning-300: var(--color-warning-300);
+  --color-warning-400: var(--color-warning-400);
+  --color-warning-500: var(--color-warning-500);
+  --color-warning-600: var(--color-warning-600);
+  --color-warning-700: var(--color-warning-700);
+  --color-warning-800: var(--color-warning-800);
+  --color-warning-900: var(--color-warning-900);
+
+  --color-success-50: var(--color-success-50);
+  --color-success-100: var(--color-success-100);
+  --color-success-200: var(--color-success-200);
+  --color-success-300: var(--color-success-300);
+  --color-success-400: var(--color-success-400);
+  --color-success-500: var(--color-success-500);
+  --color-success-600: var(--color-success-600);
+  --color-success-700: var(--color-success-700);
+  --color-success-800: var(--color-success-800);
+  --color-success-900: var(--color-success-900);
+
+  --color-chip-plan-100: var(--color-chip-plan-100);
+  --color-chip-plan-300: var(--color-chip-plan-300);
+  --color-chip-plan-500: var(--color-chip-plan-500);
+  --color-chip-design-100: var(--color-chip-design-100);
+  --color-chip-design-300: var(--color-chip-design-300);
+  --color-chip-design-500: var(--color-chip-design-500);
+  --color-chip-android-100: var(--color-chip-android-100);
+  --color-chip-android-300: var(--color-chip-android-300);
+  --color-chip-android-500: var(--color-chip-android-500);
+  --color-chip-ios-100: var(--color-chip-ios-100);
+  --color-chip-ios-300: var(--color-chip-ios-300);
+  --color-chip-ios-500: var(--color-chip-ios-500);
+  --color-chip-web-100: var(--color-chip-web-100);
+  --color-chip-web-300: var(--color-chip-web-300);
+  --color-chip-web-500: var(--color-chip-web-500);
+  --color-chip-nodejs-100: var(--color-chip-nodejs-100);
+  --color-chip-nodejs-300: var(--color-chip-nodejs-300);
+  --color-chip-nodejs-500: var(--color-chip-nodejs-500);
+  --color-chip-springboot-100: var(--color-chip-springboot-100);
+  --color-chip-springboot-300: var(--color-chip-springboot-300);
+  --color-chip-springboot-500: var(--color-chip-springboot-500);
+
+  --color-role-central-200: var(--color-role-central-200);
+  --color-role-central-600: var(--color-role-central-600);
+  --color-role-campus-200: var(--color-role-campus-200);
+  --color-role-campus-600: var(--color-role-campus-600);
+  --color-role-challenger-200: var(--color-role-challenger-200);
+  --color-role-challenger-600: var(--color-role-challenger-600);
 }
 
 :root {
