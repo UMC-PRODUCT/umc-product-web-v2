@@ -1,3 +1,5 @@
+import { Button } from "@/components/common/Button"
+
 import { ProjectCardForm } from "./ProjectCardForm/ProjectCardForm"
 import { SectionHeader } from "./SectionHeader"
 
@@ -21,21 +23,13 @@ export function BasicInfoForm() {
           placeholder="이곳에 링크를 입력해주세요"
         />
       </div>
-      <div className="flex justify-end">
-        <div className="text-label-1-medium flex gap-4">
-          <button
-            type="button"
-            className="bg-teal-gray-150 text-teal-gray-600 h-11 w-22.5 rounded-[12px] px-4 py-1 text-center"
-          >
-            이전
-          </button>
-          <button
-            type="button"
-            className="h-11 w-22.5 rounded-[12px] bg-teal-600 px-4 py-1 text-center text-white"
-          >
-            다음
-          </button>
-        </div>
+      <div className="flex justify-end gap-4">
+        <Button variant="weak" color="neutral">
+          이전
+        </Button>
+        <Button variant="fill" color="brand">
+          다음
+        </Button>
       </div>
     </div>
   )
