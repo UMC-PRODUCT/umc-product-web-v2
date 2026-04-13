@@ -17,7 +17,7 @@ export function SideBarItemTitle({
 }: SideBarItemTitleProps) {
   return (
     <button
-      className="flex h-12 w-full items-center justify-center"
+      className="flex h-12 w-full items-center"
       onClick={onToggle}
       aria-expanded={isOpen}
       aria-controls={`sidebar-menu-${title}`}
