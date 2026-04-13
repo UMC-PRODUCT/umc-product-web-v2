@@ -13,7 +13,7 @@ interface SideBarProps {
 
 const DEMO_DAY_EDITION = 10
 
-export default function SideBar(className: SideBarProps) {
+export default function SideBar({ className }: SideBarProps) {
   const [openTitle, setOpenTitle] = useState<string>(
     SIDEBAR_ITEMS[0]?.title ?? "",
   )
@@ -22,7 +22,7 @@ export default function SideBar(className: SideBarProps) {
     <aside
       className={cn(
         "border-teal-gray-200 flex h-fit w-55 shrink-0 flex-col items-center justify-start border-r pt-4",
-        { ...className },
+        className,
       )}
     >
       <SideBarDropDown />
