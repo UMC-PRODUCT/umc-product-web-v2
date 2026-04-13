@@ -60,9 +60,20 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
           type="url"
           {...register("planningLink")}
           aria-invalid={!!errors.planningLink}
+          aria-describedby={
+            errors.planningLink ? "planning-link-error" : undefined
+          }
           className="border-teal-gray-150 text-body-1-regular text-teal-gray-600 h-14 w-full overflow-x-auto rounded-[12px] border px-5 py-4"
           placeholder="이곳에 링크를 입력해주세요"
         />
+        {errors.planningLink && (
+          <p
+            id="planning-link-error"
+            className="text-caption-1-regular text-error-500 mt-1"
+          >
+            {errors.planningLink.message}
+          </p>
+        )}
       </div>
       <div className="flex justify-end gap-4">
         <Button type="button" variant="weak" color="neutral">

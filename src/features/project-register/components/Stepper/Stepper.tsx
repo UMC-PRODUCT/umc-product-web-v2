@@ -13,7 +13,11 @@ interface StepperProps {
 
 export function Stepper({ step, onStepChange }: StepperProps) {
   return (
-    <section className="bg-teal-gray-100 flex h-11.5 min-w-225 items-center gap-2 rounded-[14px] p-1">
+    <section
+      role="tablist"
+      aria-label="등록 단계"
+      className="bg-teal-gray-100 flex h-11.5 min-w-225 items-center gap-2 rounded-[14px] p-1"
+    >
       {ITEMS.map((item) => (
         <StepperTab
           key={item.idx}

@@ -16,6 +16,9 @@ export function ToastProvider() {
   )
   const dismissingRef = useRef(dismissingIds)
   dismissingRef.current = dismissingIds
+  const dismissTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  )
 
   // 새 토스트 등록 시 remainingMap 초기화
   useEffect(() => {
@@ -33,7 +36,8 @@ export function ToastProvider() {
     (id: string) => {
       if (dismissingRef.current.has(id)) return
       setDismissingIds((prev) => new Set([...prev, id]))
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        dismissTimers.current.delete(id)
         removeToast(id)
         setDismissingIds((prev) => {
           const next = new Set(prev)
@@ -46,9 +50,18 @@ export function ToastProvider() {
           return next
         })
       }, FADE_OUT_DURATION)
+      dismissTimers.current.set(id, timer)
     },
     [removeToast],
   )
+
+  useEffect(() => {
+    const timers = dismissTimers.current
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer))
+      timers.clear()
+    }
+  }, [])
 
   // FIFO: MAX_VISIBLE 초과 시 가장 오래된 토스트 강제 dismiss
   useEffect(() => {
@@ -91,7 +104,11 @@ export function ToastProvider() {
   const visible = toasts.slice(-MAX_VISIBLE)
 
   return (
-    <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2">
+    <div
+      className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2"
+      aria-live="polite"
+      aria-label="알림 목록"
+    >
       <div className="relative" style={{ height: "50px", width: "400px" }}>
         {visible.map((toast, i) => {
           const fromFront = visible.length - 1 - i

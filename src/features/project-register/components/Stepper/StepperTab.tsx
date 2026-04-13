@@ -18,6 +18,9 @@ export function StepperTab({
   return (
     <button
       type="button"
+      role="tab"
+      aria-selected={isSelected}
+      tabIndex={isSelected ? 0 : -1}
       onClick={onClick}
       className="relative flex h-9.5 w-full flex-1 cursor-pointer items-center gap-2 rounded-[12px] py-1 pr-5 pl-3"
     >
@@ -33,6 +36,7 @@ export function StepperTab({
         )}
       </AnimatePresence>
       <div
+        aria-hidden="true"
         className={cn(
           "text-label-3-semibold text-teal-gray-600 relative flex h-5 w-5 items-center justify-center rounded-full",
           isSelected ? "bg-teal-gray-150" : "bg-teal-gray-200",

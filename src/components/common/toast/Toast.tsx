@@ -1,5 +1,4 @@
 import { cva, type VariantProps } from "class-variance-authority"
-import { useEffect, useState } from "react"
 
 import SvgCircleCheckIcon from "@/assets/icon/check/CircleCheckIcon"
 import SvgCloseIcon from "@/assets/icon/close/CloseIcon"
@@ -65,19 +64,12 @@ export function Toast({
   dismissing,
   onDismiss,
 }: ToastProps) {
-  const [gone, setGone] = useState(false)
-
-  useEffect(() => {
-    if (dismissing && !gone) {
-      setGone(true)
-      setTimeout(onDismiss, FADE_OUT_DURATION)
-    }
-  }, [dismissing, gone, onDismiss])
-
   const resolvedColor = color ?? "primary"
 
   return (
     <div
+      role={resolvedColor === "red" ? "alert" : "status"}
+      aria-atomic="true"
       className={cn(
         toastVariants({ variant, color }),
         dismissing && "opacity-0",
@@ -86,6 +78,7 @@ export function Toast({
     >
       <div className="flex items-center gap-2.5">
         <SvgCircleCheckIcon
+          aria-hidden="true"
           width={20}
           height={20}
           className={iconColorMap[resolvedColor]}

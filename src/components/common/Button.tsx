@@ -79,17 +79,21 @@ export function Button({
 
   return (
     <Comp
-      type="button"
+      {...(!asChild && { type: "button" })}
+      aria-busy={loading || undefined}
       disabled={disabled || loading}
       className={cn(buttonVariants({ variant, color, size }), className)}
       {...props}
     >
       {loading ? (
-        <span className="flex items-center gap-1.25" aria-hidden="true">
-          <span className="animation-duration-[1000ms] h-2 w-2 animate-pulse rounded-full bg-current opacity-100" />
-          <span className="animation-duration-[1000ms] h-2 w-2 animate-pulse rounded-full bg-current opacity-60 [animation-delay:75ms]" />
-          <span className="animation-duration-[1000ms] h-2 w-2 animate-pulse rounded-full bg-current opacity-20 [animation-delay:150ms]" />
-        </span>
+        <>
+          <span className="sr-only">로딩 중</span>
+          <span className="flex items-center gap-1.25" aria-hidden="true">
+            <span className="animation-duration-[1000ms] h-2 w-2 animate-pulse rounded-full bg-current opacity-100" />
+            <span className="animation-duration-[1000ms] h-2 w-2 animate-pulse rounded-full bg-current opacity-60 [animation-delay:75ms]" />
+            <span className="animation-duration-[1000ms] h-2 w-2 animate-pulse rounded-full bg-current opacity-20 [animation-delay:150ms]" />
+          </span>
+        </>
       ) : size === "icon" ? (
         <SvgPersonButtonIcon />
       ) : (

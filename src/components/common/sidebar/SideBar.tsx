@@ -19,14 +19,15 @@ export default function SideBar({ className }: SideBarProps) {
   )
 
   return (
-    <aside
+    <nav
+      aria-label="사이드 메뉴"
       className={cn(
         "border-teal-gray-200 flex h-fit w-55 shrink-0 flex-col items-center justify-start border-r pt-4",
         className,
       )}
     >
       <SideBarDropDown />
-      <section className="flex flex-col py-4">
+      <div className="flex flex-col py-4">
         <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
           {DEMO_DAY_EDITION}th Demoday
         </span>
@@ -45,7 +46,7 @@ export default function SideBar({ className }: SideBarProps) {
             ))}
           </SideBarItem>
         ))}
-      </section>
-    </aside>
+      </div>
+    </nav>
   )
 }
