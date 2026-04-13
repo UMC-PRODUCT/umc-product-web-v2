@@ -66,6 +66,9 @@
 ## 스타일링
 
 - **Tailwind CSS v4**. 인라인 스타일·CSS-in-JS 지양.
+- v4는 `tailwind.config.js` 없이 CSS 파일(`src/app.css`)에서 `@theme inline`으로 테마를 정의합니다.
+- v4는 **모든 spacing 값을 자동 생성**합니다. `w-55`, `h-6.5`, `gap-2.75` 등은 유효한 클래스입니다 (`calc(var(--spacing) * N)`). v3처럼 고정 스케일에 제한되지 않으므로 "기본 스케일에 없다"는 지적은 하지 않습니다.
+- `@utility` 디렉티브로 커스텀 유틸리티 클래스를 정의합니다 (예: `text-heading-1-bold`, `shadow-drop-1`). 이들은 `src/styles/` 하위 CSS 파일에 정의되어 있으며 유효한 클래스입니다.
 - 클래스 병합은 `cn()` 유틸리티(`src/lib/utils.ts`)를 사용.
 - 아이콘: `lucide-react` 또는 svgr로 생성된 `@/assets/svg` 컴포넌트.
 

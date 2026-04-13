@@ -12,7 +12,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
   return (
-    <div>
+    <div className="bg-teal-gray-50 h-screen w-full">
       <Outlet />
     </div>
   )
