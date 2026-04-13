@@ -17,6 +17,7 @@ import { Route as TestSidebarProjectNoticeRouteImport } from './routes/test/side
 import { Route as TestSidebarProjectListRouteImport } from './routes/test/sidebar/project-list'
 import { Route as TestSidebarMatchingRoundRouteImport } from './routes/test/sidebar/matching-round'
 import { Route as TestSidebarMatchingNoticeRouteImport } from './routes/test/sidebar/matching-notice'
+import { Route as TestSidebarApplicationStatusRouteImport } from './routes/test/sidebar/application-status'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -62,10 +63,17 @@ const TestSidebarMatchingNoticeRoute =
     path: '/matching-notice',
     getParentRoute: () => TestSidebarRoute,
   } as any)
+const TestSidebarApplicationStatusRoute =
+  TestSidebarApplicationStatusRouteImport.update({
+    id: '/application-status',
+    path: '/application-status',
+    getParentRoute: () => TestSidebarRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
+  '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
   '/test/sidebar/project-list': typeof TestSidebarProjectListRoute
@@ -75,6 +83,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
   '/test/sidebar/project-list': typeof TestSidebarProjectListRoute
@@ -86,6 +95,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
+  '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
   '/test/sidebar/project-list': typeof TestSidebarProjectListRoute
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/test/sidebar'
+    | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
     | '/test/sidebar/project-list'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
     | '/test/sidebar/project-list'
@@ -117,6 +129,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/test/sidebar'
+    | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
     | '/test/sidebar/project-list'
@@ -188,10 +201,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestSidebarMatchingNoticeRouteImport
       parentRoute: typeof TestSidebarRoute
     }
+    '/test/sidebar/application-status': {
+      id: '/test/sidebar/application-status'
+      path: '/application-status'
+      fullPath: '/test/sidebar/application-status'
+      preLoaderRoute: typeof TestSidebarApplicationStatusRouteImport
+      parentRoute: typeof TestSidebarRoute
+    }
   }
 }
 
 interface TestSidebarRouteChildren {
+  TestSidebarApplicationStatusRoute: typeof TestSidebarApplicationStatusRoute
   TestSidebarMatchingNoticeRoute: typeof TestSidebarMatchingNoticeRoute
   TestSidebarMatchingRoundRoute: typeof TestSidebarMatchingRoundRoute
   TestSidebarProjectListRoute: typeof TestSidebarProjectListRoute
@@ -201,6 +222,7 @@ interface TestSidebarRouteChildren {
 }
 
 const TestSidebarRouteChildren: TestSidebarRouteChildren = {
+  TestSidebarApplicationStatusRoute: TestSidebarApplicationStatusRoute,
   TestSidebarMatchingNoticeRoute: TestSidebarMatchingNoticeRoute,
   TestSidebarMatchingRoundRoute: TestSidebarMatchingRoundRoute,
   TestSidebarProjectListRoute: TestSidebarProjectListRoute,
