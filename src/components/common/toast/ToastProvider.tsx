@@ -133,7 +133,7 @@ export function ToastProvider() {
                 variant={toast.variant}
                 type={toast.type}
                 remaining={remainingMap.get(toast.id) ?? toast.duration}
-                dismissing={dismissingIds.has(toast.id)}
+                isDismissing={dismissingIds.has(toast.id)}
                 onDismiss={() => dismiss(toast.id)}
               />
             </div>

@@ -51,7 +51,7 @@ interface ToastProps extends VariantProps<typeof toastVariants> {
   message: string
   type?: "default" | "time"
   remaining: number
-  dismissing: boolean
+  isDismissing: boolean
   onDismiss: () => void
 }
 
@@ -61,7 +61,7 @@ export function Toast({
   variant = "deep",
   type = "default",
   remaining,
-  dismissing,
+  isDismissing,
   onDismiss,
 }: ToastProps) {
   const resolvedColor = color ?? "primary"
@@ -72,7 +72,7 @@ export function Toast({
       aria-atomic="true"
       className={cn(
         toastVariants({ variant, color }),
-        dismissing && "opacity-0",
+        isDismissing && "opacity-0",
       )}
       style={{ transitionDuration: `${FADE_OUT_DURATION}ms` }}
     >
