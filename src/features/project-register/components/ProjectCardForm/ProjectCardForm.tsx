@@ -2,34 +2,53 @@ import { useEffect, useRef, useState } from "react"
 
 import UploadImageIcon from "@/assets/icon/upload/UploadImageIcon"
 
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+} from "react-hook-form"
+
+import type { BasicInfoFormData } from "../../schemas/basicInfoSchema"
+
 const MAX_LENGTH = 200
 
 interface ProjectCardFormProps {
   nickname: string
   name: string
   university: string
+  register: UseFormRegister<BasicInfoFormData>
+  setValue: UseFormSetValue<BasicInfoFormData>
+  watch: UseFormWatch<BasicInfoFormData>
+  errors: FieldErrors<BasicInfoFormData>
 }
 
 export function ProjectCardForm({
   nickname,
   name,
   university,
+  register,
+  setValue,
+  watch,
+  errors,
 }: ProjectCardFormProps) {
-  const [description, setDescription] = useState("")
-  const [thumbnail, setThumbnail] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const description = watch("description") ?? ""
 
   useEffect(() => {
     return () => {
-      if (thumbnail) URL.revokeObjectURL(thumbnail)
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
     }
-  }, [thumbnail])
+  }, [previewUrl])
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (thumbnail) URL.revokeObjectURL(thumbnail)
-    setThumbnail(URL.createObjectURL(file))
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setPreviewUrl(URL.createObjectURL(file))
+    setValue("thumbnail", file, { shouldValidate: true })
   }
 
   return (
@@ -37,15 +56,16 @@ export function ProjectCardForm({
       <button
         type="button"
         aria-label={
-          thumbnail ? "프로젝트 썸네일 변경" : "프로젝트 썸네일 업로드"
+          previewUrl ? "프로젝트 썸네일 변경" : "프로젝트 썸네일 업로드"
         }
+        aria-invalid={!!errors.thumbnail}
         onClick={() => fileInputRef.current?.click()}
         className="bg-teal-gray-200 hover:bg-teal-gray-400 group relative h-71.5 w-full overflow-hidden rounded-t-[12px] transition-colors"
       >
-        {thumbnail ? (
+        {previewUrl ? (
           <>
             <img
-              src={thumbnail}
+              src={previewUrl}
               alt="프로젝트 썸네일"
               className="h-full w-full object-cover"
             />
@@ -79,7 +99,7 @@ export function ProjectCardForm({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png"
         aria-hidden="true"
         className="hidden"
         onChange={handleThumbnailChange}
@@ -93,6 +113,8 @@ export function ProjectCardForm({
             id="service-title"
             type="text"
             placeholder="서비스 제목을 입력해주세요"
+            aria-invalid={!!errors.title}
+            {...register("title")}
             className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 w-2/3 bg-transparent outline-none"
           />
           <div className="text-body-2-regular text-teal-gray-500 flex items-center gap-2">
@@ -108,11 +130,11 @@ export function ProjectCardForm({
         </label>
         <textarea
           id="project-description"
+          aria-invalid={!!errors.description}
           className="placeholder:text-teal-gray-600 text-body-2-regular h-25 w-full resize-none p-2"
           placeholder={`프로젝트 한 줄 소개를 적어주세요.\n공백 포함 200자까지 가능합니다.\n 줄 바꾸기도 가능합니다.`}
           maxLength={MAX_LENGTH}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          {...register("description")}
         />
         <div
           aria-live="polite"
