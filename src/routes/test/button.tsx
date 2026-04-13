@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import SvgPersonButtonIcon from "@/assets/icon/people/PersonButtonIcon"
 import { Button } from "@/components/common/Button"
 
 export const Route = createFileRoute("/test/button")({
@@ -98,7 +99,7 @@ function ButtonTestPage() {
                   size="m"
                   variant={variant}
                   color={color}
-                  loading
+                  isLoading
                 >
                   {color === "brand" ? "Brand" : "Neutral"}
                 </Button>
@@ -111,12 +112,9 @@ function ButtonTestPage() {
           {VARIANTS.map((variant) => (
             <Row key={variant} label={`variant=${variant}`}>
               {COLORS.map((color) => (
-                <Button
-                  key={color}
-                  size="icon"
-                  variant={variant}
-                  color={color}
-                />
+                <Button key={color} size="icon" variant={variant} color={color}>
+                  <SvgPersonButtonIcon />
+                </Button>
               ))}
             </Row>
           ))}
@@ -132,7 +130,9 @@ function ButtonTestPage() {
                   variant={variant}
                   color={color}
                   disabled
-                />
+                >
+                  <SvgPersonButtonIcon />
+                </Button>
               ))}
             </Row>
           ))}
@@ -147,8 +147,10 @@ function ButtonTestPage() {
                   size="icon"
                   variant={variant}
                   color={color}
-                  loading
-                />
+                  isLoading
+                >
+                  <SvgPersonButtonIcon />
+                </Button>
               ))}
             </Row>
           ))}

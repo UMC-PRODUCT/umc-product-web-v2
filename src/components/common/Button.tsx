@@ -1,7 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "radix-ui"
 
-import SvgPersonButtonIcon from "@/assets/icon/people/PersonButtonIcon"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
@@ -60,7 +59,7 @@ interface ButtonProps
   extends
     Omit<React.ComponentProps<"button">, "color">,
     VariantProps<typeof buttonVariants> {
-  loading?: boolean
+  isLoading?: boolean
   asChild?: boolean
 }
 
@@ -69,7 +68,7 @@ export function Button({
   variant,
   color,
   size,
-  loading = false,
+  isLoading = false,
   asChild = false,
   disabled,
   children,
@@ -80,12 +79,12 @@ export function Button({
   return (
     <Comp
       {...(!asChild && { type: "button" })}
-      aria-busy={loading || undefined}
-      disabled={disabled || loading}
+      aria-busy={isLoading || undefined}
+      disabled={disabled || isLoading}
       className={cn(buttonVariants({ variant, color, size }), className)}
       {...props}
     >
-      {loading ? (
+      {isLoading ? (
         <>
           <span className="sr-only">로딩 중</span>
           <span className="flex items-center gap-1.25" aria-hidden="true">
@@ -94,8 +93,6 @@ export function Button({
             <span className="animation-duration-[1000ms] h-2 w-2 animate-pulse rounded-full bg-current opacity-20 [animation-delay:150ms]" />
           </span>
         </>
-      ) : size === "icon" ? (
-        <SvgPersonButtonIcon />
       ) : (
         children
       )}
