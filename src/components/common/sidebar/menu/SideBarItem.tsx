@@ -25,7 +25,7 @@ export function SideBarItem({
   children,
 }: SideBarItemProps) {
   return (
-    <div className="flex flex-col">
+    <div className="flex w-42 flex-col">
       <SideBarItemTitle
         title={title}
         icon={icon}

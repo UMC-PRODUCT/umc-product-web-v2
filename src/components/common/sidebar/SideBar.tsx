@@ -1,8 +1,9 @@
 import { useState } from "react"
 
+import { SideBarDropDown } from "./dropdown/SideBarDropDown"
+import { SideBarItem } from "./menu/SideBarItem"
+import { SideBarMenuItem } from "./menu/SideBarMenuItem"
 import { SIDEBAR_ITEMS } from "./sidebar.config"
-import { SideBarItem } from "./SideBarItem"
-import { SideBarMenuItem } from "./SideBarMenuItem"
 
 const DEMO_DAY_EDITION = 10
 
@@ -12,8 +13,9 @@ export default function SideBar() {
   )
 
   return (
-    <aside className="border-teal-grey-200 flex h-fit w-55 flex-col items-center justify-start border-r py-4">
-      {/* Dropdown 영역 - Admin 권한 소유자에게만 노출 */}
+    <aside className="border-teal-gray-200 flex h-fit w-55 flex-col items-center justify-start border-r py-4">
+      {/* // Todo :  Dropdown 영역 - Admin 권한 소유자에게만 노출 */}
+      <SideBarDropDown />
       <section className="flex flex-col gap-1.5 py-4">
         <span className="text-body-3-regular text-teal-gray-400">
           {DEMO_DAY_EDITION}th Demoday

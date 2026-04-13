@@ -39,7 +39,7 @@ export function SideBarItemTitle({
         />
         <div
           className={cn(
-            "text-subtitle-3",
+            "text-subtitle-3-semibold",
             isOpen ? "text-teal-600" : "text-teal-gray-600",
           )}
         >
