@@ -1,4 +1,4 @@
-import { StepperItem } from "./StepperItem"
+import { StepperTab } from "./StepperTab"
 
 const ITEMS = [
   { idx: 1, label: "기본 정보" },
@@ -15,7 +15,7 @@ export function Stepper({ step, onStepChange }: StepperProps) {
   return (
     <section className="bg-teal-gray-100 flex h-11.5 min-w-225 items-center gap-2 rounded-[14px] p-1">
       {ITEMS.map((item) => (
-        <StepperItem
+        <StepperTab
           key={item.idx}
           isSelected={item.idx === step}
           onClick={() => onStepChange(item.idx)}

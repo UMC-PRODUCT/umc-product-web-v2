@@ -2,19 +2,19 @@ import { motion } from "motion/react"
 
 import { cn } from "@/lib/utils"
 
-interface StepperItemProps {
+interface StepperTabProps {
   idx: number
   label: string
   isSelected: boolean
   onClick: () => void
 }
 
-export function StepperItem({
+export function StepperTab({
   idx,
   label,
   isSelected = false,
   onClick,
-}: StepperItemProps) {
+}: StepperTabProps) {
   return (
     <button
       type="button"
