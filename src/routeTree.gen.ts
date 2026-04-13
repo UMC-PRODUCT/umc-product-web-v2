@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestStepperRouteImport } from './routes/test/stepper'
 import { Route as TestSidebarRouteImport } from './routes/test/sidebar'
 import { Route as TestSidebarIndexRouteImport } from './routes/test/sidebar/index'
 import { Route as TestSidebarProjectRegisterRouteImport } from './routes/test/sidebar/project-register'
@@ -22,6 +23,11 @@ import { Route as TestSidebarApplicationStatusRouteImport } from './routes/test/
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestStepperRoute = TestStepperRouteImport.update({
+  id: '/test/stepper',
+  path: '/test/stepper',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestSidebarRoute = TestSidebarRouteImport.update({
@@ -73,6 +79,7 @@ const TestSidebarApplicationStatusRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
+  '/test/stepper': typeof TestStepperRoute
   '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/test/stepper': typeof TestStepperRoute
   '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
+  '/test/stepper': typeof TestStepperRoute
   '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/test/sidebar'
+    | '/test/stepper'
     | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/test/stepper'
     | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/test/sidebar'
+    | '/test/stepper'
     | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
@@ -141,6 +153,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TestSidebarRoute: typeof TestSidebarRouteWithChildren
+  TestStepperRoute: typeof TestStepperRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -150,6 +163,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/stepper': {
+      id: '/test/stepper'
+      path: '/test/stepper'
+      fullPath: '/test/stepper'
+      preLoaderRoute: typeof TestStepperRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/sidebar': {
@@ -238,6 +258,7 @@ const TestSidebarRouteWithChildren = TestSidebarRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TestSidebarRoute: TestSidebarRouteWithChildren,
+  TestStepperRoute: TestStepperRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
