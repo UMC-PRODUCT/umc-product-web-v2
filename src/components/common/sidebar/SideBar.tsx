@@ -14,7 +14,6 @@ export default function SideBar() {
 
   return (
     <aside className="border-teal-gray-200 flex h-fit w-55 flex-col items-center justify-start border-r py-4">
-      {/* // Todo :  Dropdown 영역 - Admin 권한 소유자에게만 노출 */}
       <SideBarDropDown />
       <section className="flex flex-col py-4">
         <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
