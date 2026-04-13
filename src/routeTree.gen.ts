@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestToastRouteImport } from './routes/test/toast'
+import { Route as TestStepperRouteImport } from './routes/test/stepper'
 import { Route as TestSidebarRouteImport } from './routes/test/sidebar'
+import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestSidebarIndexRouteImport } from './routes/test/sidebar/index'
 import { Route as TestSidebarProjectRegisterRouteImport } from './routes/test/sidebar/project-register'
 import { Route as TestSidebarProjectNoticeRouteImport } from './routes/test/sidebar/project-notice'
@@ -24,9 +27,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestToastRoute = TestToastRouteImport.update({
+  id: '/test/toast',
+  path: '/test/toast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestStepperRoute = TestStepperRouteImport.update({
+  id: '/test/stepper',
+  path: '/test/stepper',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestSidebarRoute = TestSidebarRouteImport.update({
   id: '/test/sidebar',
   path: '/test/sidebar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestButtonRoute = TestButtonRouteImport.update({
+  id: '/test/button',
+  path: '/test/button',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestSidebarIndexRoute = TestSidebarIndexRouteImport.update({
@@ -72,7 +90,10 @@ const TestSidebarApplicationStatusRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/test/button': typeof TestButtonRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
+  '/test/stepper': typeof TestStepperRoute
+  '/test/toast': typeof TestToastRoute
   '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
@@ -83,6 +104,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/test/button': typeof TestButtonRoute
+  '/test/stepper': typeof TestStepperRoute
+  '/test/toast': typeof TestToastRoute
   '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
@@ -94,7 +118,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/test/button': typeof TestButtonRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
+  '/test/stepper': typeof TestStepperRoute
+  '/test/toast': typeof TestToastRoute
   '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
@@ -107,7 +134,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/test/button'
     | '/test/sidebar'
+    | '/test/stepper'
+    | '/test/toast'
     | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
@@ -118,6 +148,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/test/button'
+    | '/test/stepper'
+    | '/test/toast'
     | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
@@ -128,7 +161,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/test/button'
     | '/test/sidebar'
+    | '/test/stepper'
+    | '/test/toast'
     | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
@@ -140,7 +176,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  TestButtonRoute: typeof TestButtonRoute
   TestSidebarRoute: typeof TestSidebarRouteWithChildren
+  TestStepperRoute: typeof TestStepperRoute
+  TestToastRoute: typeof TestToastRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,11 +191,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/test/toast': {
+      id: '/test/toast'
+      path: '/test/toast'
+      fullPath: '/test/toast'
+      preLoaderRoute: typeof TestToastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/stepper': {
+      id: '/test/stepper'
+      path: '/test/stepper'
+      fullPath: '/test/stepper'
+      preLoaderRoute: typeof TestStepperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/test/sidebar': {
       id: '/test/sidebar'
       path: '/test/sidebar'
       fullPath: '/test/sidebar'
       preLoaderRoute: typeof TestSidebarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/button': {
+      id: '/test/button'
+      path: '/test/button'
+      fullPath: '/test/button'
+      preLoaderRoute: typeof TestButtonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/sidebar/': {
@@ -237,7 +297,10 @@ const TestSidebarRouteWithChildren = TestSidebarRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  TestButtonRoute: TestButtonRoute,
   TestSidebarRoute: TestSidebarRouteWithChildren,
+  TestStepperRoute: TestStepperRoute,
+  TestToastRoute: TestToastRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
