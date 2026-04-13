@@ -1,0 +1,18 @@
+import type { SVGProps } from "react"
+const Svg16Icon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 16 16"
+    {...props}
+  >
+    <path
+      stroke="#9CA3A3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M4.5 7 8 10.5 11.5 7"
+    />
+  </svg>
+)
+export default Svg16Icon
