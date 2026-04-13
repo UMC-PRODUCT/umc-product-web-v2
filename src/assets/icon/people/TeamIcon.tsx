@@ -1,5 +1,5 @@
 import type { SVGProps } from "react"
-const SvgTeamIcon = (props: SVGProps<SVGSVGElement>) => (
+const TeamIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -19,4 +19,4 @@ const SvgTeamIcon = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 )
-export default SvgTeamIcon
+export default TeamIcon
