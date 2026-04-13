@@ -2,7 +2,7 @@ import { SideBarDropDownMenuItem } from "./SideBarDropDownMenuItem"
 
 interface SideBarDropDownMenuProps {
   items: string[]
-  selectedIdx: number | null
+  selectedIdx: number
   onSelect: (idx: number) => void
 }
 

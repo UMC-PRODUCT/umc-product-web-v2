@@ -14,10 +14,9 @@ const DROPDOWN_ITEMS = [
 
 export function SideBarDropDown() {
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(0)
+  const [selectedIdx, setSelectedIdx] = useState<number>(0)
 
-  const selectedLabel =
-    selectedIdx !== null ? DROPDOWN_ITEMS[selectedIdx] : DROPDOWN_ITEMS[0]
+  const selectedLabel = DROPDOWN_ITEMS[selectedIdx]
 
   return (
     <>
