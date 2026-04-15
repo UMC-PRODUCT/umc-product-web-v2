@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react"
+
 import { ImageUploader } from "@/components/common/ImageUploader"
 
 import type { Ref } from "react"
@@ -35,6 +37,18 @@ export function ProjectCardForm({
   thumbnailRef,
 }: ProjectCardFormProps) {
   const description = watch("description") ?? ""
+  const logo = watch("logo")
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!(logo instanceof File)) {
+      setLogoPreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(logo)
+    setLogoPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [logo])
 
   return (
     <div className="border-teal-gray-100 flex h-116.5 w-135 flex-col rounded-[12px] border">
@@ -51,13 +65,22 @@ export function ProjectCardForm({
           <label htmlFor="service-title" className="sr-only">
             서비스 제목
           </label>
+          {logoPreviewUrl ? (
+            <img
+              src={logoPreviewUrl}
+              alt="프로젝트 로고"
+              className="mr-1 h-10 w-10 rounded-[8px] object-cover"
+            />
+          ) : (
+            <div className="bg-teal-gray-200 mr-1 h-10 w-10 rounded-[8px]" />
+          )}
           <input
             id="service-title"
             type="text"
             placeholder="서비스 제목을 입력해주세요"
             aria-invalid={!!errors.title}
             {...register("title")}
-            className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 w-2/3 bg-transparent outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2 aria-invalid:focus:ring-teal-600"
+            className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 w-4/7 bg-transparent px-1 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2 aria-invalid:focus:ring-teal-600"
           />
           <div className="text-body-2-regular text-teal-gray-500 flex items-center gap-2">
             <span>
