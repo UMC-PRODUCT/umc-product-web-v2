@@ -7,14 +7,30 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024
 export const basicInfoSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1).max(200),
-  thumbnail: z
-    .instanceof(File)
-    .refine((f) => THUMBNAIL_ACCEPTED_TYPES.includes(f.type))
-    .refine((f) => f.size <= MAX_FILE_SIZE),
-  logo: z
-    .instanceof(File)
-    .refine((f) => LOGO_ACCEPTED_TYPES.includes(f.type))
-    .refine((f) => f.size <= MAX_FILE_SIZE),
+  thumbnail: z.any().superRefine((v, ctx) => {
+    if (!(v instanceof File)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom })
+      return z.NEVER
+    }
+    if (!THUMBNAIL_ACCEPTED_TYPES.includes(v.type)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom })
+    }
+    if (v.size > MAX_FILE_SIZE) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom })
+    }
+  }),
+  logo: z.any().superRefine((v, ctx) => {
+    if (!(v instanceof File)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom })
+      return z.NEVER
+    }
+    if (!LOGO_ACCEPTED_TYPES.includes(v.type)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom })
+    }
+    if (v.size > MAX_FILE_SIZE) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom })
+    }
+  }),
   planningLink: z.string().url(),
 })
 
