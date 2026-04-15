@@ -19,7 +19,7 @@ export const SIDEBAR_ITEMS: SideBarSection[] = [
     icon: TeamIcon,
     menus: [
       { title: "공지", to: "/test/sidebar/project-notice" },
-      { title: "프로젝트 등록", to: "/test/sidebar/project-register" },
+      { title: "프로젝트 등록", to: "/matching/projects/new" },
     ],
   },
   {
