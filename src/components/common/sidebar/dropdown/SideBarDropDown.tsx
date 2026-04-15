@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import DownChevronIcon from "@/assets/icon/chevron/SideBar/DownChevronIcon"
 import { cn } from "@/lib/utils"
@@ -15,11 +15,25 @@ const DROPDOWN_ITEMS = [
 export function SideBarDropDown() {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [selectedIdx, setSelectedIdx] = useState<number>(0)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const selectedLabel = DROPDOWN_ITEMS[selectedIdx]
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
   return (
-    <>
+    <div ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
@@ -44,11 +58,14 @@ export function SideBarDropDown() {
             <SideBarDropDownMenu
               items={DROPDOWN_ITEMS}
               selectedIdx={selectedIdx}
-              onSelect={setSelectedIdx}
+              onSelect={(idx) => {
+                setSelectedIdx(idx)
+                setIsOpen(false)
+              }}
             />
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }
