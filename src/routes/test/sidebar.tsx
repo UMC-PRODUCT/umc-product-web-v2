@@ -8,7 +8,7 @@ export const Route = createFileRoute("/test/sidebar")({
 
 function SideBarLayout() {
   return (
-    <div className="flex h-full w-full">
+    <div className="flex min-h-screen w-full">
       <SideBar />
       <main className="flex-1 p-8">
         <Outlet />

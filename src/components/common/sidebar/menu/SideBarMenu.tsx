@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from "motion/react"
 
-import { SideBarItemTitle } from "./SideBarItemTitle"
+import { SideBarMenuTitle } from "./SideBarMenuTitle"
 
 import type { ComponentType, SVGProps } from "react"
 
-interface SideBarItemProps {
+interface SideBarMenuProps {
   title: string
   icon: ComponentType<SVGProps<SVGSVGElement>>
   isOpen: boolean
@@ -17,16 +17,16 @@ const menuVariants = {
   closed: {},
 }
 
-export function SideBarItem({
+export function SideBarMenu({
   title,
   icon,
   isOpen,
   onToggle,
   children,
-}: SideBarItemProps) {
+}: SideBarMenuProps) {
   return (
     <div className="flex w-42 flex-col">
-      <SideBarItemTitle
+      <SideBarMenuTitle
         title={title}
         icon={icon}
         isOpen={isOpen}

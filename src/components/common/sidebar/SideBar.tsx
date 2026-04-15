@@ -3,7 +3,7 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 
 import { SideBarDropDown } from "./dropdown/SideBarDropDown"
-import { SideBarItem } from "./menu/SideBarItem"
+import { SideBarMenu } from "./menu/SideBarMenu"
 import { SideBarMenuItem } from "./menu/SideBarMenuItem"
 import { SIDEBAR_ITEMS } from "./sidebar.config"
 
@@ -22,7 +22,7 @@ export default function SideBar({ className }: SideBarProps) {
     <nav
       aria-label="사이드 메뉴"
       className={cn(
-        "border-teal-gray-200 flex h-fit w-55 shrink-0 flex-col items-center justify-start border-r pt-4",
+        "border-teal-gray-200 flex w-55 shrink-0 flex-col items-center justify-start border-r pt-4",
         className,
       )}
     >
@@ -32,7 +32,7 @@ export default function SideBar({ className }: SideBarProps) {
           {DEMO_DAY_EDITION}th Demoday
         </span>
         {SIDEBAR_ITEMS.map(({ title, icon, menus }) => (
-          <SideBarItem
+          <SideBarMenu
             key={title}
             title={title}
             icon={icon}
@@ -44,7 +44,7 @@ export default function SideBar({ className }: SideBarProps) {
             {menus.map((menu) => (
               <SideBarMenuItem key={menu.to} title={menu.title} to={menu.to} />
             ))}
-          </SideBarItem>
+          </SideBarMenu>
         ))}
       </div>
     </nav>

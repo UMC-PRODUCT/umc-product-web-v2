@@ -7,7 +7,7 @@ import { BasicInfoForm } from "@/features/project-register/components/BasicInfoF
 import { RecruitInfoForm } from "@/features/project-register/components/RecruitInfoForm"
 import { Stepper } from "@/features/project-register/components/Stepper/Stepper"
 
-export const Route = createFileRoute("/test/stepper")({
+export const Route = createFileRoute("/matching/projects/new")({
   component: StepperTestPage,
 })
 
@@ -20,7 +20,7 @@ function StepperTestPage() {
         Stepper Test Page
       </div>
       <div className="flex w-full">
-        <SideBar className="flex-1" />
+        <SideBar />
         <section className="flex w-full flex-col items-start justify-start gap-8 px-8.5 pt-14.5">
           <div className="h-25 w-full">페이지 제목 & 세그먼트 영역</div>
           <div className="border-teal-gray-150 flex h-full min-w-242 flex-col gap-2.5 rounded-[12px] border bg-white px-8.5 py-8">

@@ -2,19 +2,19 @@ import { cn } from "@/lib/utils"
 
 import type { ComponentType, SVGProps } from "react"
 
-interface SideBarItemTitleProps {
+interface SideBarMenuTitleProps {
   title: string
   icon: ComponentType<SVGProps<SVGSVGElement>>
   isOpen: boolean
   onToggle: () => void
 }
 
-export function SideBarItemTitle({
+export function SideBarMenuTitle({
   title,
   icon: Icon,
   isOpen,
   onToggle,
-}: SideBarItemTitleProps) {
+}: SideBarMenuTitleProps) {
   return (
     <button
       className="flex h-12 w-full items-center"
