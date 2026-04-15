@@ -1,23 +1,31 @@
-/* 최종 편집 : 2026.04.12 */
+/* 최종 편집 : 2026.04.15 */
 
 :root {
   /* -------------------------
    * Drop Shadow
    * ------------------------- */
-  --shadow-drop-neutral-2: 0px 4px 16px 0px #eff0f080;
+  --shadow-drop-neutral-1: 0px 4px 16px 0px #40444329;
+  --shadow-drop-neutral-2: 0px 4px 16px 0px #eceeee85;
   --shadow-drop-neutral-3: 0px 4px 16px 0px #eff0f04d;
+  --shadow-drop-neutral-4: 0px 4px 16px 0px #eceeee;
 
-  --shadow-drop-primary-2:
-    1px 1px 3px 0px #0b6b6433, -1px -1px 0px 0px #00000040;
-  --shadow-drop-primary-3:
+  --shadow-drop-primary-1:
     13px 0px 14px 0px #d3d8d866, 0px 0px 10px 0px #9ca3a34d,
     0px 1px 2px 0px #63c4b833;
 
   /* -------------------------
    * Inner Shadow
    * ------------------------- */
-  --shadow-inner-neutral-2: inset 1px 1px 2px 0px #d3d8d8;
-  --shadow-inner-neutral-3: inset 1px 1px 2px 0px #0b6b64;
+  --shadow-inner-neutral-1: inset 1px 1px 2px 0px #d3d8d833;
+  --shadow-inner-neutral-2:
+    inset 1px 1px 2px 0px #d3d8d826, inset -1px -1px 1px 0px #ffffff40;
+
+  --shadow-inner-primary-1:
+    inset 1px 1px 3px 0px #0b6b6421, inset -1px -1px 1px 0px #ffffff40;
+}
+
+@utility shadow-drop-neutral-1 {
+  box-shadow: var(--shadow-drop-neutral-1);
 }
 
 @utility shadow-drop-neutral-2 {
@@ -28,18 +36,22 @@
   box-shadow: var(--shadow-drop-neutral-3);
 }
 
-@utility shadow-drop-primary-2 {
-  box-shadow: var(--shadow-drop-primary-2);
+@utility shadow-drop-neutral-4 {
+  box-shadow: var(--shadow-drop-neutral-4);
 }
 
-@utility shadow-drop-primary-3 {
-  box-shadow: var(--shadow-drop-primary-3);
+@utility shadow-drop-primary-1 {
+  box-shadow: var(--shadow-drop-primary-1);
+}
+
+@utility shadow-inner-neutral-1 {
+  box-shadow: var(--shadow-inner-neutral-1);
 }
 
 @utility shadow-inner-neutral-2 {
   box-shadow: var(--shadow-inner-neutral-2);
 }
 
-@utility shadow-inner-neutral-3 {
-  box-shadow: var(--shadow-inner-neutral-3);
+@utility shadow-inner-primary-1 {
+  box-shadow: var(--shadow-inner-primary-1);
 }

@@ -136,6 +136,9 @@
   --color-role-campus-600: var(--color-role-campus-600);
   --color-role-challenger-200: var(--color-role-challenger-200);
   --color-role-challenger-600: var(--color-role-challenger-600);
+
+  --color-accent-teal-normal: var(--color-accent-teal-normal);
+  --color-accent-teal-bright: var(--color-accent-teal-bright);
 }
 
 :root {

@@ -25,9 +25,7 @@ export function SideBarItemTitle({
       <div
         className={cn(
           "hover:bg-teal-gray-100 flex h-12 w-39 items-center gap-2 rounded-[12px] pl-3 transition-all duration-200 ease-in-out",
-          isOpen
-            ? "bg-teal-100 [box-shadow:var(--shadow-inner-neutral-2),var(--shadow-inner-neutral-3)] hover:bg-teal-100"
-            : "",
+          isOpen ? "shadow-inner-primary-1 bg-teal-100 hover:bg-teal-100" : "",
         )}
       >
         <Icon

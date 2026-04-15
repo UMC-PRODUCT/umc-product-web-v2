@@ -7,7 +7,7 @@
   --color-white: #ffffff;
   --color-teal-gray-50: #fbfcfc;
   --color-teal-gray-100: #f6f7f7;
-  --color-teal-gray-150: #eff0f0;
+  --color-teal-gray-150: #eceeee;
   --color-teal-gray-200: #e9ecec;
   --color-teal-gray-300: #d3d8d8;
   --color-teal-gray-400: #9ca3a3;
@@ -34,75 +34,75 @@
   /* -------------------------
    * Color / Semantic / Error
    * ------------------------- */
-  --color-error-50: #fff5f5;
-  --color-error-100: #ffe5e5;
-  --color-error-200: #ffcfcf;
-  --color-error-300: #ffb0b0;
-  --color-error-400: #ff8686;
-  --color-error-500: #f15b5b;
-  --color-error-600: #d84040;
-  --color-error-700: #b82f2f;
-  --color-error-800: #8f2525;
-  --color-error-900: #611a1a;
+  --color-error-50: #fef2f1;
+  --color-error-100: #ffeceb;
+  --color-error-200: #fed7d7;
+  --color-error-300: #f9a3a3;
+  --color-error-400: #ee6868;
+  --color-error-500: #db3939;
+  --color-error-600: #c21f14;
+  --color-error-700: #b00303;
+  --color-error-800: #8d0202;
+  --color-error-900: #690101;
 
   /* -------------------------
    * Color / Semantic / Warning
    * ------------------------- */
-  --color-warning-50: #fffaf2;
-  --color-warning-100: #fff1d9;
-  --color-warning-200: #ffe4ad;
-  --color-warning-300: #ffd178;
-  --color-warning-400: #ffb938;
-  --color-warning-500: #f59e0b;
-  --color-warning-600: #d97706;
-  --color-warning-700: #b65c05;
-  --color-warning-800: #8f4706;
-  --color-warning-900: #633105;
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-200: #fedf89;
+  --color-warning-300: #fec84b;
+  --color-warning-400: #fdb022;
+  --color-warning-500: #f79009;
+  --color-warning-600: #dc6803;
+  --color-warning-700: #b54708;
+  --color-warning-800: #93370d;
+  --color-warning-900: #53230a;
 
   /* -------------------------
    * Color / Semantic / Success
    * ------------------------- */
-  --color-success-50: #f3fbf6;
-  --color-success-100: #dcf5e5;
-  --color-success-200: #bceacf;
-  --color-success-300: #8cdaae;
-  --color-success-400: #53c980;
-  --color-success-500: #20b15a;
-  --color-success-600: #168a46;
-  --color-success-700: #126b37;
-  --color-success-800: #0e512a;
-  --color-success-900: #0a371d;
+  --color-success-50: #ecfdf3;
+  --color-success-100: #dcfae6;
+  --color-success-200: #abefc6;
+  --color-success-300: #75e0a7;
+  --color-success-400: #47cd89;
+  --color-success-500: #17b26a;
+  --color-success-600: #079455;
+  --color-success-700: #067647;
+  --color-success-800: #085d3a;
+  --color-success-900: #063926;
 
   /* -------------------------
    * Color / Semantic / Chip / Part
    * ------------------------- */
   --color-chip-plan-100: #f3ebff;
   --color-chip-plan-300: #e8d8fc;
-  --color-chip-plan-500: #a76cde;
+  --color-chip-plan-500: #b887ea;
 
   --color-chip-design-100: #ffebf4;
   --color-chip-design-300: #ffe0f1;
-  --color-chip-design-500: #e26ba7;
+  --color-chip-design-500: #ee8fbf;
 
   --color-chip-android-100: #ecf8f2;
   --color-chip-android-300: #daf1e5;
-  --color-chip-android-500: #58a878;
+  --color-chip-android-500: #72b98e;
 
   --color-chip-ios-100: #f0f4ff;
   --color-chip-ios-300: #e5ebff;
-  --color-chip-ios-500: #6e8ff5;
+  --color-chip-ios-500: #8ea5f6;
 
   --color-chip-web-100: #fff6e0;
   --color-chip-web-300: #fff4db;
-  --color-chip-web-500: #d8b24d;
+  --color-chip-web-500: #e3c36a;
 
   --color-chip-nodejs-100: #ffebeb;
   --color-chip-nodejs-300: #ffe1e1;
-  --color-chip-nodejs-500: #e17373;
+  --color-chip-nodejs-500: #ed8e8e;
 
   --color-chip-springboot-100: #f5f0ea;
   --color-chip-springboot-300: #ede3d9;
-  --color-chip-springboot-500: #a88463;
+  --color-chip-springboot-500: #b79778;
 
   /* -------------------------
    * Color / Semantic / Chip / Role
@@ -115,4 +115,10 @@
 
   --color-role-challenger-200: #caece8;
   --color-role-challenger-600: #0b6b64;
+
+  /* -------------------------
+   * Color / Accent Teal
+   * ------------------------- */
+  --color-accent-teal-normal: #00856f;
+  --color-accent-teal-bright: #0eb27a;
 }
