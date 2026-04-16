@@ -55,9 +55,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
 
     setTimeout(() => {
       if (!(values.thumbnail instanceof File)) {
-        document
-          .querySelector<HTMLElement>('[data-focus-target="thumbnail"]')
-          ?.focus()
+        thumbnailRef.current?.focus()
         return
       }
       if (fieldErrors.title) {
