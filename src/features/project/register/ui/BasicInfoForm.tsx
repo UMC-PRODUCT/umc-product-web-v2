@@ -67,9 +67,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         return
       }
       if (!(values.logo instanceof File)) {
-        document
-          .querySelector<HTMLElement>('[data-focus-target="logo"]')
-          ?.focus()
+        logoRef.current?.focus()
         return
       }
       if (fieldErrors.planningLink) {
