@@ -15,11 +15,7 @@ export const basicInfoSchema = z.object({
       ctx.addIssue({ code: z.ZodIssueCode.custom })
     }
   }),
-  logo: z.any().superRefine((v, ctx) => {
-    if (!(v instanceof File)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom })
-      return z.NEVER
-    }
+  logo: z.instanceof(File).superRefine((v, ctx) => {
     if (!LOGO_ACCEPTED_TYPES.includes(v.type)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom })
     }
