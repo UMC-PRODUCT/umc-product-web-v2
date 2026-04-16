@@ -1,9 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/")({
-  component: HomePage,
+  beforeLoad: () => {
+    throw redirect({ to: "/matching" })
+  },
 })
-
-function HomePage() {
-  return <div>UMC Product</div>
-}

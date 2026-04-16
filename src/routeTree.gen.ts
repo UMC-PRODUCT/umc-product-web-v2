@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestSidebarRouteImport } from './routes/test/sidebar'
@@ -22,6 +23,11 @@ import { Route as TestSidebarMatchingNoticeRouteImport } from './routes/test/sid
 import { Route as TestSidebarApplicationStatusRouteImport } from './routes/test/sidebar/application-status'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 
+const MatchingRouteRoute = MatchingRouteRouteImport.update({
+  id: '/matching',
+  path: '/matching',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -83,13 +89,14 @@ const TestSidebarApplicationStatusRoute =
     getParentRoute: () => TestSidebarRoute,
   } as any)
 const MatchingProjectsNewRoute = MatchingProjectsNewRouteImport.update({
-  id: '/matching/projects/new',
-  path: '/matching/projects/new',
-  getParentRoute: () => rootRouteImport,
+  id: '/projects/new',
+  path: '/projects/new',
+  getParentRoute: () => MatchingRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
   '/test/toast': typeof TestToastRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
   '/test/toast': typeof TestToastRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -118,6 +126,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
   '/test/toast': typeof TestToastRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/matching'
     | '/test/button'
     | '/test/sidebar'
     | '/test/toast'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/matching'
     | '/test/button'
     | '/test/toast'
     | '/matching/projects/new'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/matching'
     | '/test/button'
     | '/test/sidebar'
     | '/test/toast'
@@ -176,14 +188,21 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   TestButtonRoute: typeof TestButtonRoute
   TestSidebarRoute: typeof TestSidebarRouteWithChildren
   TestToastRoute: typeof TestToastRoute
-  MatchingProjectsNewRoute: typeof MatchingProjectsNewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/matching': {
+      id: '/matching'
+      path: '/matching'
+      fullPath: '/matching'
+      preLoaderRoute: typeof MatchingRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -263,13 +282,25 @@ declare module '@tanstack/react-router' {
     }
     '/matching/projects/new': {
       id: '/matching/projects/new'
-      path: '/matching/projects/new'
+      path: '/projects/new'
       fullPath: '/matching/projects/new'
       preLoaderRoute: typeof MatchingProjectsNewRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof MatchingRouteRoute
     }
   }
 }
+
+interface MatchingRouteRouteChildren {
+  MatchingProjectsNewRoute: typeof MatchingProjectsNewRoute
+}
+
+const MatchingRouteRouteChildren: MatchingRouteRouteChildren = {
+  MatchingProjectsNewRoute: MatchingProjectsNewRoute,
+}
+
+const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
+  MatchingRouteRouteChildren,
+)
 
 interface TestSidebarRouteChildren {
   TestSidebarApplicationStatusRoute: typeof TestSidebarApplicationStatusRoute
@@ -297,10 +328,10 @@ const TestSidebarRouteWithChildren = TestSidebarRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MatchingRouteRoute: MatchingRouteRouteWithChildren,
   TestButtonRoute: TestButtonRoute,
   TestSidebarRoute: TestSidebarRouteWithChildren,
   TestToastRoute: TestToastRoute,
-  MatchingProjectsNewRoute: MatchingProjectsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
