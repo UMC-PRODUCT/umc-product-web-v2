@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import SvgPersonButtonIcon from "@/assets/icon/people/PersonButtonIcon"
-import { Button } from "@/components/common/Button"
+import SvgPersonButtonIcon from "@/shared/assets/icon/people/PersonButtonIcon"
+import { Button } from "@/shared/ui/Button"
 
 export const Route = createFileRoute("/test/button")({
   component: ButtonTestPage,
