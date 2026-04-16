@@ -7,11 +7,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024
 export const basicInfoSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1).max(200),
-  thumbnail: z.any().superRefine((v, ctx) => {
-    if (!(v instanceof File)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom })
-      return z.NEVER
-    }
+  thumbnail: z.instanceof(File).superRefine((v, ctx) => {
     if (!THUMBNAIL_ACCEPTED_TYPES.includes(v.type)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom })
     }
