@@ -1,6 +1,6 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router"
 
-import { ToastProvider } from "@/components/common/toast/ToastProvider"
+import { ToastProvider } from "@/components/toast/ToastProvider"
 
 import type { QueryClient } from "@tanstack/react-query"
 

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { useToastStore } from "@/stores/useToastStore"
+import { useToastStore } from "@/components/toast/useToastStore"
 
 export const Route = createFileRoute("/test/toast")({
   component: ToastTestPage,

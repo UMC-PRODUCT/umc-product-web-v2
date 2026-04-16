@@ -53,34 +53,41 @@ cp .env.example .env
 
 ```
 src/
-├── api/            # API 호출 함수
-├── assets/
-│   └── icons/      # SVG 아이콘 에셋
-├── components/
-│   └── ui/         # 공통 UI 컴포넌트 (shadcn/ui 패턴)
-├── hooks/          # 커스텀 훅
-├── lib/
-│   ├── axios.ts    # Axios 인스턴스 (JWT 인터셉터 포함)
-│   └── utils.ts    # cn() 유틸리티 함수
+├── shared/
+│   ├── ui/          # Primitive 컴포넌트 (Button, ImageUploader)
+│   ├── lib/         # 범용 유틸 — axios 인스턴스, cn()
+│   └── assets/      # SVG 아이콘 (svgr 자동 생성)
+├── components/      # 전역 복합 UI (도메인 무관 위젯)
+│   ├── SideBar/     # 사이드바 서브시스템
+│   └── toast/       # Toast UI + useToastStore (통합 모듈)
+├── features/
+│   └── <domain>/
+│       ├── ui/          # 도메인 전용 컴포넌트
+│       ├── model/       # Zod 스키마 + Zustand 도메인 스토어
+│       └── index.ts     # public API (barrel export)
 ├── routes/         # TanStack Router 파일 기반 라우트
-│   ├── __root.tsx  # 루트 레이아웃
-│   └── index.tsx   # 홈 페이지 (/)
-├── stores/         # Zustand 전역 상태 스토어
+│   ├── __root.tsx          # 루트 레이아웃
+│   ├── index.tsx           # 홈 페이지 (/)
+│   └── matching/
+│       ├── route.tsx       # /matching/* 공통 레이아웃 (SideBar 포함)
+│       └── projects/
+│           └── new.tsx     # 프로젝트 등록 페이지
+├── styles/         # 디자인 토큰 CSS (color, shadow, typography)
 ├── test/
 │   └── setup.ts    # Vitest 전역 설정
-└── types/          # 공통 타입 정의 (api.d.ts 자동 생성 포함)
+├── app.css         # Tailwind v4 엔트리 + @theme 토큰
+└── main.tsx        # QueryClient + Router 부트스트랩
 ```
-
-> `api/`, `components/ui/`, `hooks/`, `stores/`, `types/` 디렉토리는 초기 세팅 단계로 현재 비어 있습니다.
 
 ### 주요 파일
 
-| 파일                    | 설명                                                                       |
-| ----------------------- | -------------------------------------------------------------------------- |
-| `src/lib/axios.ts`      | Axios 인스턴스. JWT Bearer 토큰 자동 주입, 401 응답 시 `/login` 리다이렉트 |
-| `src/lib/utils.ts`      | `cn()` 함수 (clsx + tailwind-merge)                                        |
-| `src/routes/__root.tsx` | QueryClient Provider 포함 루트 레이아웃                                    |
-| `src/routeTree.gen.ts`  | TanStack Router 자동 생성 파일 (수정 금지)                                 |
+| 파일                            | 설명                                                                        |
+| ------------------------------- | --------------------------------------------------------------------------- |
+| `src/lib/axios.ts`              | Axios 인스턴스. JWT Bearer 토큰 자동 주입, 401 응답 시 `/login` 리다이렉트  |
+| `src/lib/utils.ts`              | `cn()` 함수 (clsx + tailwind-merge, 디자인 시스템 타이포그래피 클래스 포함) |
+| `src/routes/__root.tsx`         | QueryClient Provider 포함 루트 레이아웃                                     |
+| `src/routes/matching/route.tsx` | `/matching/*` 하위 페이지 공통 레이아웃 (SideBar + Outlet)                  |
+| `src/routeTree.gen.ts`          | TanStack Router 자동 생성 파일 (수정 금지)                                  |
 
 ## 스크립트
 

@@ -9,9 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestToastRouteImport } from './routes/test/toast'
-import { Route as TestStepperRouteImport } from './routes/test/stepper'
 import { Route as TestSidebarRouteImport } from './routes/test/sidebar'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestSidebarIndexRouteImport } from './routes/test/sidebar/index'
@@ -21,7 +21,13 @@ import { Route as TestSidebarProjectListRouteImport } from './routes/test/sideba
 import { Route as TestSidebarMatchingRoundRouteImport } from './routes/test/sidebar/matching-round'
 import { Route as TestSidebarMatchingNoticeRouteImport } from './routes/test/sidebar/matching-notice'
 import { Route as TestSidebarApplicationStatusRouteImport } from './routes/test/sidebar/application-status'
+import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 
+const MatchingRouteRoute = MatchingRouteRouteImport.update({
+  id: '/matching',
+  path: '/matching',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -30,11 +36,6 @@ const IndexRoute = IndexRouteImport.update({
 const TestToastRoute = TestToastRouteImport.update({
   id: '/test/toast',
   path: '/test/toast',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TestStepperRoute = TestStepperRouteImport.update({
-  id: '/test/stepper',
-  path: '/test/stepper',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestSidebarRoute = TestSidebarRouteImport.update({
@@ -87,13 +88,19 @@ const TestSidebarApplicationStatusRoute =
     path: '/application-status',
     getParentRoute: () => TestSidebarRoute,
   } as any)
+const MatchingProjectsNewRoute = MatchingProjectsNewRouteImport.update({
+  id: '/projects/new',
+  path: '/projects/new',
+  getParentRoute: () => MatchingRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
-  '/test/stepper': typeof TestStepperRoute
   '/test/toast': typeof TestToastRoute
+  '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
@@ -104,9 +111,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
-  '/test/stepper': typeof TestStepperRoute
   '/test/toast': typeof TestToastRoute
+  '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
@@ -118,10 +126,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
   '/test/sidebar': typeof TestSidebarRouteWithChildren
-  '/test/stepper': typeof TestStepperRoute
   '/test/toast': typeof TestToastRoute
+  '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
   '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
   '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
@@ -134,10 +143,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/matching'
     | '/test/button'
     | '/test/sidebar'
-    | '/test/stepper'
     | '/test/toast'
+    | '/matching/projects/new'
     | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
@@ -148,9 +158,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/matching'
     | '/test/button'
-    | '/test/stepper'
     | '/test/toast'
+    | '/matching/projects/new'
     | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
@@ -161,10 +172,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/matching'
     | '/test/button'
     | '/test/sidebar'
-    | '/test/stepper'
     | '/test/toast'
+    | '/matching/projects/new'
     | '/test/sidebar/application-status'
     | '/test/sidebar/matching-notice'
     | '/test/sidebar/matching-round'
@@ -176,14 +188,21 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   TestButtonRoute: typeof TestButtonRoute
   TestSidebarRoute: typeof TestSidebarRouteWithChildren
-  TestStepperRoute: typeof TestStepperRoute
   TestToastRoute: typeof TestToastRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/matching': {
+      id: '/matching'
+      path: '/matching'
+      fullPath: '/matching'
+      preLoaderRoute: typeof MatchingRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -196,13 +215,6 @@ declare module '@tanstack/react-router' {
       path: '/test/toast'
       fullPath: '/test/toast'
       preLoaderRoute: typeof TestToastRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/test/stepper': {
-      id: '/test/stepper'
-      path: '/test/stepper'
-      fullPath: '/test/stepper'
-      preLoaderRoute: typeof TestStepperRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/sidebar': {
@@ -268,8 +280,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestSidebarApplicationStatusRouteImport
       parentRoute: typeof TestSidebarRoute
     }
+    '/matching/projects/new': {
+      id: '/matching/projects/new'
+      path: '/projects/new'
+      fullPath: '/matching/projects/new'
+      preLoaderRoute: typeof MatchingProjectsNewRouteImport
+      parentRoute: typeof MatchingRouteRoute
+    }
   }
 }
+
+interface MatchingRouteRouteChildren {
+  MatchingProjectsNewRoute: typeof MatchingProjectsNewRoute
+}
+
+const MatchingRouteRouteChildren: MatchingRouteRouteChildren = {
+  MatchingProjectsNewRoute: MatchingProjectsNewRoute,
+}
+
+const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
+  MatchingRouteRouteChildren,
+)
 
 interface TestSidebarRouteChildren {
   TestSidebarApplicationStatusRoute: typeof TestSidebarApplicationStatusRoute
@@ -297,9 +328,9 @@ const TestSidebarRouteWithChildren = TestSidebarRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MatchingRouteRoute: MatchingRouteRouteWithChildren,
   TestButtonRoute: TestButtonRoute,
   TestSidebarRoute: TestSidebarRouteWithChildren,
-  TestStepperRoute: TestStepperRoute,
   TestToastRoute: TestToastRoute,
 }
 export const routeTree = rootRouteImport

@@ -15,7 +15,7 @@
     "test:run": "vitest run",
     "prepare": "husky",
     "generate:api-types": "openapi-typescript ./openapi.yaml -o ./src/types/api.d.ts",
-    "svgr": "npx @svgr/cli -d src/assets/svg --ignore-existing --typescript --no-dimensions public/svg"
+    "svgr": "npx @svgr/cli -d src/shared/assets --ignore-existing --typescript --no-dimensions public"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
