@@ -177,6 +177,7 @@ export function Tooltip({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleOpen = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       if (triggerRef.current) {
         setPosition(
