@@ -13,6 +13,7 @@ import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToastRouteImport } from './routes/test/toast'
+import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 
@@ -36,6 +37,11 @@ const TestToastRoute = TestToastRouteImport.update({
   path: '/test/toast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestChipRoute = TestChipRouteImport.update({
+  id: '/test/chip',
+  path: '/test/chip',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestButtonRoute = TestButtonRouteImport.update({
   id: '/test/button',
   path: '/test/button',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
+  '/test/chip': typeof TestChipRoute
   '/test/toast': typeof TestToastRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
+  '/test/chip': typeof TestChipRoute
   '/test/toast': typeof TestToastRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
+  '/test/chip': typeof TestChipRoute
   '/test/toast': typeof TestToastRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/matching'
     | '/test/button'
+    | '/test/chip'
     | '/test/toast'
     | '/test/tooltip'
     | '/matching/projects/new'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/matching'
     | '/test/button'
+    | '/test/chip'
     | '/test/toast'
     | '/test/tooltip'
     | '/matching/projects/new'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/matching'
     | '/test/button'
+    | '/test/chip'
     | '/test/toast'
     | '/test/tooltip'
     | '/matching/projects/new'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   TestButtonRoute: typeof TestButtonRoute
+  TestChipRoute: typeof TestChipRoute
   TestToastRoute: typeof TestToastRoute
   TestTooltipRoute: typeof TestTooltipRoute
 }
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/test/toast'
       fullPath: '/test/toast'
       preLoaderRoute: typeof TestToastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/chip': {
+      id: '/test/chip'
+      path: '/test/chip'
+      fullPath: '/test/chip'
+      preLoaderRoute: typeof TestChipRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/button': {
@@ -170,6 +190,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   TestButtonRoute: TestButtonRoute,
+  TestChipRoute: TestChipRoute,
   TestToastRoute: TestToastRoute,
   TestTooltipRoute: TestTooltipRoute,
 }
