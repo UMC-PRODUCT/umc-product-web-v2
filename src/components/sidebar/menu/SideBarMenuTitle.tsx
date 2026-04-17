@@ -3,6 +3,7 @@ import { cn } from "@/shared/lib/utils"
 import type { ComponentType, SVGProps } from "react"
 
 interface SideBarMenuTitleProps {
+  id: string
   title: string
   icon: ComponentType<SVGProps<SVGSVGElement>>
   isOpen: boolean
@@ -10,6 +11,7 @@ interface SideBarMenuTitleProps {
 }
 
 export function SideBarMenuTitle({
+  id,
   title,
   icon: Icon,
   isOpen,
@@ -20,7 +22,7 @@ export function SideBarMenuTitle({
       className="flex h-12 w-full items-center"
       onClick={onToggle}
       aria-expanded={isOpen}
-      aria-controls={`sidebar-menu-${title}`}
+      aria-controls={`sidebar-menu-${id}`}
     >
       <div
         className={cn(
