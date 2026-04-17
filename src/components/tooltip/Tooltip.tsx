@@ -4,6 +4,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
 } from "react"
@@ -165,6 +166,7 @@ export function Tooltip({
   sideOffset = 4,
   delayDuration = 100,
 }: TooltipProps) {
+  const tooltipId = useId()
   const isControlled = controlledOpen !== undefined
 
   const [internalOpen, setInternalOpen] = useState(defaultOpen)
@@ -208,6 +210,7 @@ export function Tooltip({
       <span
         ref={triggerRef}
         className="inline-block"
+        aria-describedby={isOpen ? tooltipId : undefined}
         onMouseEnter={handleOpen}
         onMouseLeave={handleClose}
         onFocus={handleOpen}
@@ -218,6 +221,8 @@ export function Tooltip({
       {isOpen &&
         createPortal(
           <div
+            id={tooltipId}
+            role="tooltip"
             style={position}
             className={cn(
               tooltipContentVariants({ size, dark }),
