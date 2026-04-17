@@ -4,6 +4,7 @@ import { extendTailwindMerge } from "tailwind-merge"
 const twMerge = extendTailwindMerge({
   extend: {
     classGroups: {
+      shadow: ["shadow-tooltip-light"],
       "font-size": [
         "text-display-1-bold",
         "text-display-2-medium",

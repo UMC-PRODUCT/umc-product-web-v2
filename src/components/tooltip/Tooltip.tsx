@@ -218,15 +218,10 @@ export function Tooltip({
       {isOpen &&
         createPortal(
           <div
-            style={{
-              ...position,
-              filter: !dark ? "drop-shadow(0px 6px 20px #E4E4E4)" : undefined,
-            }}
+            style={position}
             className={cn(
-              tooltipContentVariants({
-                size: size,
-                dark: dark,
-              }),
+              tooltipContentVariants({ size, dark }),
+              !dark && "shadow-tooltip-light",
             )}
           >
             {content}
