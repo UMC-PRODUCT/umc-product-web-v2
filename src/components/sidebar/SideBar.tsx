@@ -1,11 +1,11 @@
 import { useState } from "react"
 
+import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { cn } from "@/shared/lib/utils"
 
 import { SideBarDropDown } from "./dropdown/SideBarDropDown"
 import { SideBarMenu } from "./menu/SideBarMenu"
 import { SideBarMenuItem } from "./menu/SideBarMenuItem"
-import { SIDEBAR_ITEMS } from "./sidebar.config"
 
 interface SideBarProps {
   className?: string
@@ -14,8 +14,8 @@ interface SideBarProps {
 const DEMO_DAY_EDITION = 10
 
 export default function SideBar({ className }: SideBarProps) {
-  const [openTitle, setOpenTitle] = useState<string>(
-    SIDEBAR_ITEMS[0]?.title ?? "",
+  const [openSectionId, setOpenSectionId] = useState<string>(
+    SIDEBAR_ITEMS[0]?.id ?? "",
   )
 
   return (
@@ -31,18 +31,17 @@ export default function SideBar({ className }: SideBarProps) {
         <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
           {DEMO_DAY_EDITION}th Demoday
         </span>
-        {SIDEBAR_ITEMS.map(({ title, icon, menus }) => (
+        {SIDEBAR_ITEMS.map(({ id, title, icon, menus }) => (
           <SideBarMenu
-            key={title}
+            key={id}
+            id={id}
             title={title}
             icon={icon}
-            isOpen={openTitle === title}
-            onToggle={() =>
-              setOpenTitle((prev) => (prev === title ? "" : title))
-            }
+            isOpen={openSectionId === id}
+            onToggle={() => setOpenSectionId((prev) => (prev === id ? "" : id))}
           >
             {menus.map((menu) => (
-              <SideBarMenuItem key={menu.to} title={menu.title} to={menu.to} />
+              <SideBarMenuItem key={menu.id} title={menu.title} to={menu.to} />
             ))}
           </SideBarMenu>
         ))}

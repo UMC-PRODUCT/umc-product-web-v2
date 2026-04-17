@@ -11,18 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToastRouteImport } from './routes/test/toast'
-import { Route as TestSidebarRouteImport } from './routes/test/sidebar'
-import { Route as TestSegmentRouteImport } from './routes/test/segment'
+import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestButtonRouteImport } from './routes/test/button'
-import { Route as TestSidebarIndexRouteImport } from './routes/test/sidebar/index'
-import { Route as TestSegmentIndexRouteImport } from './routes/test/segment/index'
-import { Route as TestSidebarProjectRegisterRouteImport } from './routes/test/sidebar/project-register'
-import { Route as TestSidebarProjectNoticeRouteImport } from './routes/test/sidebar/project-notice'
-import { Route as TestSidebarProjectListRouteImport } from './routes/test/sidebar/project-list'
-import { Route as TestSidebarMatchingRoundRouteImport } from './routes/test/sidebar/matching-round'
-import { Route as TestSidebarMatchingNoticeRouteImport } from './routes/test/sidebar/matching-notice'
-import { Route as TestSidebarApplicationStatusRouteImport } from './routes/test/sidebar/application-status'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 
 const MatchingRouteRoute = MatchingRouteRouteImport.update({
@@ -35,19 +27,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestTooltipRoute = TestTooltipRouteImport.update({
+  id: '/test/tooltip',
+  path: '/test/tooltip',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestToastRoute = TestToastRouteImport.update({
   id: '/test/toast',
   path: '/test/toast',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TestSidebarRoute = TestSidebarRouteImport.update({
-  id: '/test/sidebar',
-  path: '/test/sidebar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TestSegmentRoute = TestSegmentRouteImport.update({
-  id: '/test/segment',
-  path: '/test/segment',
+const TestChipRoute = TestChipRouteImport.update({
+  id: '/test/chip',
+  path: '/test/chip',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestButtonRoute = TestButtonRouteImport.update({
@@ -55,51 +47,6 @@ const TestButtonRoute = TestButtonRouteImport.update({
   path: '/test/button',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TestSidebarIndexRoute = TestSidebarIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => TestSidebarRoute,
-} as any)
-const TestSegmentIndexRoute = TestSegmentIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => TestSegmentRoute,
-} as any)
-const TestSidebarProjectRegisterRoute =
-  TestSidebarProjectRegisterRouteImport.update({
-    id: '/project-register',
-    path: '/project-register',
-    getParentRoute: () => TestSidebarRoute,
-  } as any)
-const TestSidebarProjectNoticeRoute =
-  TestSidebarProjectNoticeRouteImport.update({
-    id: '/project-notice',
-    path: '/project-notice',
-    getParentRoute: () => TestSidebarRoute,
-  } as any)
-const TestSidebarProjectListRoute = TestSidebarProjectListRouteImport.update({
-  id: '/project-list',
-  path: '/project-list',
-  getParentRoute: () => TestSidebarRoute,
-} as any)
-const TestSidebarMatchingRoundRoute =
-  TestSidebarMatchingRoundRouteImport.update({
-    id: '/matching-round',
-    path: '/matching-round',
-    getParentRoute: () => TestSidebarRoute,
-  } as any)
-const TestSidebarMatchingNoticeRoute =
-  TestSidebarMatchingNoticeRouteImport.update({
-    id: '/matching-notice',
-    path: '/matching-notice',
-    getParentRoute: () => TestSidebarRoute,
-  } as any)
-const TestSidebarApplicationStatusRoute =
-  TestSidebarApplicationStatusRouteImport.update({
-    id: '/application-status',
-    path: '/application-status',
-    getParentRoute: () => TestSidebarRoute,
-  } as any)
 const MatchingProjectsNewRoute = MatchingProjectsNewRouteImport.update({
   id: '/projects/new',
   path: '/projects/new',
@@ -110,51 +57,29 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
-  '/test/segment': typeof TestSegmentRouteWithChildren
-  '/test/sidebar': typeof TestSidebarRouteWithChildren
+  '/test/chip': typeof TestChipRoute
   '/test/toast': typeof TestToastRoute
+  '/test/tooltip': typeof TestTooltipRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
-  '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
-  '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
-  '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
-  '/test/sidebar/project-list': typeof TestSidebarProjectListRoute
-  '/test/sidebar/project-notice': typeof TestSidebarProjectNoticeRoute
-  '/test/sidebar/project-register': typeof TestSidebarProjectRegisterRoute
-  '/test/segment/': typeof TestSegmentIndexRoute
-  '/test/sidebar/': typeof TestSidebarIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
+  '/test/chip': typeof TestChipRoute
   '/test/toast': typeof TestToastRoute
+  '/test/tooltip': typeof TestTooltipRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
-  '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
-  '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
-  '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
-  '/test/sidebar/project-list': typeof TestSidebarProjectListRoute
-  '/test/sidebar/project-notice': typeof TestSidebarProjectNoticeRoute
-  '/test/sidebar/project-register': typeof TestSidebarProjectRegisterRoute
-  '/test/segment': typeof TestSegmentIndexRoute
-  '/test/sidebar': typeof TestSidebarIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
-  '/test/segment': typeof TestSegmentRouteWithChildren
-  '/test/sidebar': typeof TestSidebarRouteWithChildren
+  '/test/chip': typeof TestChipRoute
   '/test/toast': typeof TestToastRoute
+  '/test/tooltip': typeof TestTooltipRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
-  '/test/sidebar/application-status': typeof TestSidebarApplicationStatusRoute
-  '/test/sidebar/matching-notice': typeof TestSidebarMatchingNoticeRoute
-  '/test/sidebar/matching-round': typeof TestSidebarMatchingRoundRoute
-  '/test/sidebar/project-list': typeof TestSidebarProjectListRoute
-  '/test/sidebar/project-notice': typeof TestSidebarProjectNoticeRoute
-  '/test/sidebar/project-register': typeof TestSidebarProjectRegisterRoute
-  '/test/segment/': typeof TestSegmentIndexRoute
-  '/test/sidebar/': typeof TestSidebarIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -162,59 +87,37 @@ export interface FileRouteTypes {
     | '/'
     | '/matching'
     | '/test/button'
-    | '/test/segment'
-    | '/test/sidebar'
+    | '/test/chip'
     | '/test/toast'
+    | '/test/tooltip'
     | '/matching/projects/new'
-    | '/test/sidebar/application-status'
-    | '/test/sidebar/matching-notice'
-    | '/test/sidebar/matching-round'
-    | '/test/sidebar/project-list'
-    | '/test/sidebar/project-notice'
-    | '/test/sidebar/project-register'
-    | '/test/segment/'
-    | '/test/sidebar/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/matching'
     | '/test/button'
+    | '/test/chip'
     | '/test/toast'
+    | '/test/tooltip'
     | '/matching/projects/new'
-    | '/test/sidebar/application-status'
-    | '/test/sidebar/matching-notice'
-    | '/test/sidebar/matching-round'
-    | '/test/sidebar/project-list'
-    | '/test/sidebar/project-notice'
-    | '/test/sidebar/project-register'
-    | '/test/segment'
-    | '/test/sidebar'
   id:
     | '__root__'
     | '/'
     | '/matching'
     | '/test/button'
-    | '/test/segment'
-    | '/test/sidebar'
+    | '/test/chip'
     | '/test/toast'
+    | '/test/tooltip'
     | '/matching/projects/new'
-    | '/test/sidebar/application-status'
-    | '/test/sidebar/matching-notice'
-    | '/test/sidebar/matching-round'
-    | '/test/sidebar/project-list'
-    | '/test/sidebar/project-notice'
-    | '/test/sidebar/project-register'
-    | '/test/segment/'
-    | '/test/sidebar/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   TestButtonRoute: typeof TestButtonRoute
-  TestSegmentRoute: typeof TestSegmentRouteWithChildren
-  TestSidebarRoute: typeof TestSidebarRouteWithChildren
+  TestChipRoute: typeof TestChipRoute
   TestToastRoute: typeof TestToastRoute
+  TestTooltipRoute: typeof TestTooltipRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -233,6 +136,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/test/tooltip': {
+      id: '/test/tooltip'
+      path: '/test/tooltip'
+      fullPath: '/test/tooltip'
+      preLoaderRoute: typeof TestTooltipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/test/toast': {
       id: '/test/toast'
       path: '/test/toast'
@@ -240,18 +150,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestToastRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/test/sidebar': {
-      id: '/test/sidebar'
-      path: '/test/sidebar'
-      fullPath: '/test/sidebar'
-      preLoaderRoute: typeof TestSidebarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/test/segment': {
-      id: '/test/segment'
-      path: '/test/segment'
-      fullPath: '/test/segment'
-      preLoaderRoute: typeof TestSegmentRouteImport
+    '/test/chip': {
+      id: '/test/chip'
+      path: '/test/chip'
+      fullPath: '/test/chip'
+      preLoaderRoute: typeof TestChipRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/button': {
@@ -260,62 +163,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/test/button'
       preLoaderRoute: typeof TestButtonRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/test/sidebar/': {
-      id: '/test/sidebar/'
-      path: '/'
-      fullPath: '/test/sidebar/'
-      preLoaderRoute: typeof TestSidebarIndexRouteImport
-      parentRoute: typeof TestSidebarRoute
-    }
-    '/test/segment/': {
-      id: '/test/segment/'
-      path: '/'
-      fullPath: '/test/segment/'
-      preLoaderRoute: typeof TestSegmentIndexRouteImport
-      parentRoute: typeof TestSegmentRoute
-    }
-    '/test/sidebar/project-register': {
-      id: '/test/sidebar/project-register'
-      path: '/project-register'
-      fullPath: '/test/sidebar/project-register'
-      preLoaderRoute: typeof TestSidebarProjectRegisterRouteImport
-      parentRoute: typeof TestSidebarRoute
-    }
-    '/test/sidebar/project-notice': {
-      id: '/test/sidebar/project-notice'
-      path: '/project-notice'
-      fullPath: '/test/sidebar/project-notice'
-      preLoaderRoute: typeof TestSidebarProjectNoticeRouteImport
-      parentRoute: typeof TestSidebarRoute
-    }
-    '/test/sidebar/project-list': {
-      id: '/test/sidebar/project-list'
-      path: '/project-list'
-      fullPath: '/test/sidebar/project-list'
-      preLoaderRoute: typeof TestSidebarProjectListRouteImport
-      parentRoute: typeof TestSidebarRoute
-    }
-    '/test/sidebar/matching-round': {
-      id: '/test/sidebar/matching-round'
-      path: '/matching-round'
-      fullPath: '/test/sidebar/matching-round'
-      preLoaderRoute: typeof TestSidebarMatchingRoundRouteImport
-      parentRoute: typeof TestSidebarRoute
-    }
-    '/test/sidebar/matching-notice': {
-      id: '/test/sidebar/matching-notice'
-      path: '/matching-notice'
-      fullPath: '/test/sidebar/matching-notice'
-      preLoaderRoute: typeof TestSidebarMatchingNoticeRouteImport
-      parentRoute: typeof TestSidebarRoute
-    }
-    '/test/sidebar/application-status': {
-      id: '/test/sidebar/application-status'
-      path: '/application-status'
-      fullPath: '/test/sidebar/application-status'
-      preLoaderRoute: typeof TestSidebarApplicationStatusRouteImport
-      parentRoute: typeof TestSidebarRoute
     }
     '/matching/projects/new': {
       id: '/matching/projects/new'
@@ -339,49 +186,13 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
   MatchingRouteRouteChildren,
 )
 
-interface TestSegmentRouteChildren {
-  TestSegmentIndexRoute: typeof TestSegmentIndexRoute
-}
-
-const TestSegmentRouteChildren: TestSegmentRouteChildren = {
-  TestSegmentIndexRoute: TestSegmentIndexRoute,
-}
-
-const TestSegmentRouteWithChildren = TestSegmentRoute._addFileChildren(
-  TestSegmentRouteChildren,
-)
-
-interface TestSidebarRouteChildren {
-  TestSidebarApplicationStatusRoute: typeof TestSidebarApplicationStatusRoute
-  TestSidebarMatchingNoticeRoute: typeof TestSidebarMatchingNoticeRoute
-  TestSidebarMatchingRoundRoute: typeof TestSidebarMatchingRoundRoute
-  TestSidebarProjectListRoute: typeof TestSidebarProjectListRoute
-  TestSidebarProjectNoticeRoute: typeof TestSidebarProjectNoticeRoute
-  TestSidebarProjectRegisterRoute: typeof TestSidebarProjectRegisterRoute
-  TestSidebarIndexRoute: typeof TestSidebarIndexRoute
-}
-
-const TestSidebarRouteChildren: TestSidebarRouteChildren = {
-  TestSidebarApplicationStatusRoute: TestSidebarApplicationStatusRoute,
-  TestSidebarMatchingNoticeRoute: TestSidebarMatchingNoticeRoute,
-  TestSidebarMatchingRoundRoute: TestSidebarMatchingRoundRoute,
-  TestSidebarProjectListRoute: TestSidebarProjectListRoute,
-  TestSidebarProjectNoticeRoute: TestSidebarProjectNoticeRoute,
-  TestSidebarProjectRegisterRoute: TestSidebarProjectRegisterRoute,
-  TestSidebarIndexRoute: TestSidebarIndexRoute,
-}
-
-const TestSidebarRouteWithChildren = TestSidebarRoute._addFileChildren(
-  TestSidebarRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   TestButtonRoute: TestButtonRoute,
-  TestSegmentRoute: TestSegmentRouteWithChildren,
-  TestSidebarRoute: TestSidebarRouteWithChildren,
+  TestChipRoute: TestChipRoute,
   TestToastRoute: TestToastRoute,
+  TestTooltipRoute: TestTooltipRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
