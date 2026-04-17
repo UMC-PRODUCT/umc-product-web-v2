@@ -13,8 +13,10 @@ import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestSidebarRouteImport } from './routes/test/sidebar'
+import { Route as TestSegmentRouteImport } from './routes/test/segment'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestSidebarIndexRouteImport } from './routes/test/sidebar/index'
+import { Route as TestSegmentIndexRouteImport } from './routes/test/segment/index'
 import { Route as TestSidebarProjectRegisterRouteImport } from './routes/test/sidebar/project-register'
 import { Route as TestSidebarProjectNoticeRouteImport } from './routes/test/sidebar/project-notice'
 import { Route as TestSidebarProjectListRouteImport } from './routes/test/sidebar/project-list'
@@ -43,6 +45,11 @@ const TestSidebarRoute = TestSidebarRouteImport.update({
   path: '/test/sidebar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestSegmentRoute = TestSegmentRouteImport.update({
+  id: '/test/segment',
+  path: '/test/segment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestButtonRoute = TestButtonRouteImport.update({
   id: '/test/button',
   path: '/test/button',
@@ -52,6 +59,11 @@ const TestSidebarIndexRoute = TestSidebarIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => TestSidebarRoute,
+} as any)
+const TestSegmentIndexRoute = TestSegmentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TestSegmentRoute,
 } as any)
 const TestSidebarProjectRegisterRoute =
   TestSidebarProjectRegisterRouteImport.update({
@@ -98,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
+  '/test/segment': typeof TestSegmentRouteWithChildren
   '/test/sidebar': typeof TestSidebarRouteWithChildren
   '/test/toast': typeof TestToastRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -107,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/test/sidebar/project-list': typeof TestSidebarProjectListRoute
   '/test/sidebar/project-notice': typeof TestSidebarProjectNoticeRoute
   '/test/sidebar/project-register': typeof TestSidebarProjectRegisterRoute
+  '/test/segment/': typeof TestSegmentIndexRoute
   '/test/sidebar/': typeof TestSidebarIndexRoute
 }
 export interface FileRoutesByTo {
@@ -121,6 +135,7 @@ export interface FileRoutesByTo {
   '/test/sidebar/project-list': typeof TestSidebarProjectListRoute
   '/test/sidebar/project-notice': typeof TestSidebarProjectNoticeRoute
   '/test/sidebar/project-register': typeof TestSidebarProjectRegisterRoute
+  '/test/segment': typeof TestSegmentIndexRoute
   '/test/sidebar': typeof TestSidebarIndexRoute
 }
 export interface FileRoutesById {
@@ -128,6 +143,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/test/button': typeof TestButtonRoute
+  '/test/segment': typeof TestSegmentRouteWithChildren
   '/test/sidebar': typeof TestSidebarRouteWithChildren
   '/test/toast': typeof TestToastRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -137,6 +153,7 @@ export interface FileRoutesById {
   '/test/sidebar/project-list': typeof TestSidebarProjectListRoute
   '/test/sidebar/project-notice': typeof TestSidebarProjectNoticeRoute
   '/test/sidebar/project-register': typeof TestSidebarProjectRegisterRoute
+  '/test/segment/': typeof TestSegmentIndexRoute
   '/test/sidebar/': typeof TestSidebarIndexRoute
 }
 export interface FileRouteTypes {
@@ -145,6 +162,7 @@ export interface FileRouteTypes {
     | '/'
     | '/matching'
     | '/test/button'
+    | '/test/segment'
     | '/test/sidebar'
     | '/test/toast'
     | '/matching/projects/new'
@@ -154,6 +172,7 @@ export interface FileRouteTypes {
     | '/test/sidebar/project-list'
     | '/test/sidebar/project-notice'
     | '/test/sidebar/project-register'
+    | '/test/segment/'
     | '/test/sidebar/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -168,12 +187,14 @@ export interface FileRouteTypes {
     | '/test/sidebar/project-list'
     | '/test/sidebar/project-notice'
     | '/test/sidebar/project-register'
+    | '/test/segment'
     | '/test/sidebar'
   id:
     | '__root__'
     | '/'
     | '/matching'
     | '/test/button'
+    | '/test/segment'
     | '/test/sidebar'
     | '/test/toast'
     | '/matching/projects/new'
@@ -183,6 +204,7 @@ export interface FileRouteTypes {
     | '/test/sidebar/project-list'
     | '/test/sidebar/project-notice'
     | '/test/sidebar/project-register'
+    | '/test/segment/'
     | '/test/sidebar/'
   fileRoutesById: FileRoutesById
 }
@@ -190,6 +212,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   TestButtonRoute: typeof TestButtonRoute
+  TestSegmentRoute: typeof TestSegmentRouteWithChildren
   TestSidebarRoute: typeof TestSidebarRouteWithChildren
   TestToastRoute: typeof TestToastRoute
 }
@@ -224,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestSidebarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/test/segment': {
+      id: '/test/segment'
+      path: '/test/segment'
+      fullPath: '/test/segment'
+      preLoaderRoute: typeof TestSegmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/test/button': {
       id: '/test/button'
       path: '/test/button'
@@ -237,6 +267,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/test/sidebar/'
       preLoaderRoute: typeof TestSidebarIndexRouteImport
       parentRoute: typeof TestSidebarRoute
+    }
+    '/test/segment/': {
+      id: '/test/segment/'
+      path: '/'
+      fullPath: '/test/segment/'
+      preLoaderRoute: typeof TestSegmentIndexRouteImport
+      parentRoute: typeof TestSegmentRoute
     }
     '/test/sidebar/project-register': {
       id: '/test/sidebar/project-register'
@@ -302,6 +339,18 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
   MatchingRouteRouteChildren,
 )
 
+interface TestSegmentRouteChildren {
+  TestSegmentIndexRoute: typeof TestSegmentIndexRoute
+}
+
+const TestSegmentRouteChildren: TestSegmentRouteChildren = {
+  TestSegmentIndexRoute: TestSegmentIndexRoute,
+}
+
+const TestSegmentRouteWithChildren = TestSegmentRoute._addFileChildren(
+  TestSegmentRouteChildren,
+)
+
 interface TestSidebarRouteChildren {
   TestSidebarApplicationStatusRoute: typeof TestSidebarApplicationStatusRoute
   TestSidebarMatchingNoticeRoute: typeof TestSidebarMatchingNoticeRoute
@@ -330,6 +379,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   TestButtonRoute: TestButtonRoute,
+  TestSegmentRoute: TestSegmentRouteWithChildren,
   TestSidebarRoute: TestSidebarRouteWithChildren,
   TestToastRoute: TestToastRoute,
 }
