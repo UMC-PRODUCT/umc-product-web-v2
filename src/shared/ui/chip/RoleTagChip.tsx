@@ -19,16 +19,7 @@ const roleTagChipVariants = cva(
   },
 )
 
-type Role =
-  | "plan"
-  | "design"
-  | "web"
-  | "ios"
-  | "android"
-  | "springboot"
-  | "nodejs"
-
-const ROLE_LABEL: Record<Role, string> = {
+const ROLE_LABEL = {
   plan: "PM",
   design: "Design",
   web: "Web",
@@ -36,7 +27,9 @@ const ROLE_LABEL: Record<Role, string> = {
   android: "Android",
   springboot: "SpringBoot",
   nodejs: "Node.js",
-}
+} as const
+
+type Role = keyof typeof ROLE_LABEL
 
 interface RoleTagChipProps {
   role: Role
