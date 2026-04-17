@@ -207,7 +207,7 @@ export function Tooltip({
     <>
       <span
         ref={triggerRef}
-        style={{ display: "inline-block" }}
+        className="inline-block"
         onMouseEnter={handleOpen}
         onMouseLeave={handleClose}
         onFocus={handleOpen}
