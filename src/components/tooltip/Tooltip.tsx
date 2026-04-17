@@ -165,8 +165,6 @@ export function Tooltip({
   sideOffset = 4,
   delayDuration = 100,
 }: TooltipProps) {
-  const resolvedSize = size ?? "big"
-  const resolvedDark = dark ?? true
   const isControlled = controlledOpen !== undefined
 
   const [internalOpen, setInternalOpen] = useState(defaultOpen)
@@ -222,19 +220,17 @@ export function Tooltip({
           <div
             style={{
               ...position,
-              filter: !resolvedDark
-                ? "drop-shadow(0px 6px 20px #E4E4E4)"
-                : undefined,
+              filter: !dark ? "drop-shadow(0px 6px 20px #E4E4E4)" : undefined,
             }}
             className={cn(
               tooltipContentVariants({
-                size: resolvedSize,
-                dark: resolvedDark,
+                size: size,
+                dark: dark,
               }),
             )}
           >
             {content}
-            <TooltipArrow size={resolvedSize} dark={resolvedDark} side={side} />
+            <TooltipArrow size={size} dark={dark} side={side} />
           </div>,
           document.body,
         )}
