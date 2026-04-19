@@ -11,11 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestButtonRouteImport } from './routes/test/button'
+import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
+import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
+import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
+import { Route as MatchingProjectsAnnounceRouteImport } from './routes/matching/projects/announce'
 
 const MatchingRouteRoute = MatchingRouteRouteImport.update({
   id: '/matching',
@@ -26,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const MatchingIndexRoute = MatchingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MatchingRouteRoute,
 } as any)
 const TestTooltipRoute = TestTooltipRouteImport.update({
   id: '/test/tooltip',
@@ -47,68 +57,117 @@ const TestButtonRoute = TestButtonRouteImport.update({
   path: '/test/button',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MatchingRoundsRoute = MatchingRoundsRouteImport.update({
+  id: '/rounds',
+  path: '/rounds',
+  getParentRoute: () => MatchingRouteRoute,
+} as any)
+const MatchingApplicationsRoute = MatchingApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => MatchingRouteRoute,
+} as any)
+const MatchingProjectsIndexRoute = MatchingProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => MatchingRouteRoute,
+} as any)
 const MatchingProjectsNewRoute = MatchingProjectsNewRouteImport.update({
   id: '/projects/new',
   path: '/projects/new',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const MatchingProjectsAnnounceRoute =
+  MatchingProjectsAnnounceRouteImport.update({
+    id: '/projects/announce',
+    path: '/projects/announce',
+    getParentRoute: () => MatchingRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
+  '/matching/applications': typeof MatchingApplicationsRoute
+  '/matching/rounds': typeof MatchingRoundsRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
   '/test/toast': typeof TestToastRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/matching/': typeof MatchingIndexRoute
+  '/matching/projects/announce': typeof MatchingProjectsAnnounceRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
+  '/matching/projects/': typeof MatchingProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/matching': typeof MatchingRouteRouteWithChildren
+  '/matching/applications': typeof MatchingApplicationsRoute
+  '/matching/rounds': typeof MatchingRoundsRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
   '/test/toast': typeof TestToastRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/matching': typeof MatchingIndexRoute
+  '/matching/projects/announce': typeof MatchingProjectsAnnounceRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
+  '/matching/projects': typeof MatchingProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/matching': typeof MatchingRouteRouteWithChildren
+  '/matching/applications': typeof MatchingApplicationsRoute
+  '/matching/rounds': typeof MatchingRoundsRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
   '/test/toast': typeof TestToastRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/matching/': typeof MatchingIndexRoute
+  '/matching/projects/announce': typeof MatchingProjectsAnnounceRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
+  '/matching/projects/': typeof MatchingProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/matching'
+    | '/matching/applications'
+    | '/matching/rounds'
     | '/test/button'
     | '/test/chip'
     | '/test/toast'
     | '/test/tooltip'
+    | '/matching/'
+    | '/matching/projects/announce'
     | '/matching/projects/new'
+    | '/matching/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/matching'
+    | '/matching/applications'
+    | '/matching/rounds'
     | '/test/button'
     | '/test/chip'
     | '/test/toast'
     | '/test/tooltip'
+    | '/matching'
+    | '/matching/projects/announce'
     | '/matching/projects/new'
+    | '/matching/projects'
   id:
     | '__root__'
     | '/'
     | '/matching'
+    | '/matching/applications'
+    | '/matching/rounds'
     | '/test/button'
     | '/test/chip'
     | '/test/toast'
     | '/test/tooltip'
+    | '/matching/'
+    | '/matching/projects/announce'
     | '/matching/projects/new'
+    | '/matching/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -135,6 +194,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/matching/': {
+      id: '/matching/'
+      path: '/'
+      fullPath: '/matching/'
+      preLoaderRoute: typeof MatchingIndexRouteImport
+      parentRoute: typeof MatchingRouteRoute
     }
     '/test/tooltip': {
       id: '/test/tooltip'
@@ -164,6 +230,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestButtonRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/matching/rounds': {
+      id: '/matching/rounds'
+      path: '/rounds'
+      fullPath: '/matching/rounds'
+      preLoaderRoute: typeof MatchingRoundsRouteImport
+      parentRoute: typeof MatchingRouteRoute
+    }
+    '/matching/applications': {
+      id: '/matching/applications'
+      path: '/applications'
+      fullPath: '/matching/applications'
+      preLoaderRoute: typeof MatchingApplicationsRouteImport
+      parentRoute: typeof MatchingRouteRoute
+    }
+    '/matching/projects/': {
+      id: '/matching/projects/'
+      path: '/projects'
+      fullPath: '/matching/projects/'
+      preLoaderRoute: typeof MatchingProjectsIndexRouteImport
+      parentRoute: typeof MatchingRouteRoute
+    }
     '/matching/projects/new': {
       id: '/matching/projects/new'
       path: '/projects/new'
@@ -171,15 +258,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsNewRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/matching/projects/announce': {
+      id: '/matching/projects/announce'
+      path: '/projects/announce'
+      fullPath: '/matching/projects/announce'
+      preLoaderRoute: typeof MatchingProjectsAnnounceRouteImport
+      parentRoute: typeof MatchingRouteRoute
+    }
   }
 }
 
 interface MatchingRouteRouteChildren {
+  MatchingApplicationsRoute: typeof MatchingApplicationsRoute
+  MatchingRoundsRoute: typeof MatchingRoundsRoute
+  MatchingIndexRoute: typeof MatchingIndexRoute
+  MatchingProjectsAnnounceRoute: typeof MatchingProjectsAnnounceRoute
   MatchingProjectsNewRoute: typeof MatchingProjectsNewRoute
+  MatchingProjectsIndexRoute: typeof MatchingProjectsIndexRoute
 }
 
 const MatchingRouteRouteChildren: MatchingRouteRouteChildren = {
+  MatchingApplicationsRoute: MatchingApplicationsRoute,
+  MatchingRoundsRoute: MatchingRoundsRoute,
+  MatchingIndexRoute: MatchingIndexRoute,
+  MatchingProjectsAnnounceRoute: MatchingProjectsAnnounceRoute,
   MatchingProjectsNewRoute: MatchingProjectsNewRoute,
+  MatchingProjectsIndexRoute: MatchingProjectsIndexRoute,
 }
 
 const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(

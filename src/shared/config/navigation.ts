@@ -44,8 +44,16 @@ export const SIDEBAR_ITEMS: SideBarSection[] = [
         title: "프로젝트 목록",
         to: "/matching/projects",
       },
-      { id: "matching-applications", title: "지원 현황", to: "/matching" },
-      { id: "matching-rounds", title: "매칭 차수 설정", to: "/matching" },
+      {
+        id: "matching-applications",
+        title: "지원 현황",
+        to: "/matching/applications",
+      },
+      {
+        id: "matching-rounds",
+        title: "매칭 차수 설정",
+        to: "/matching/rounds",
+      },
     ],
   },
 ]
