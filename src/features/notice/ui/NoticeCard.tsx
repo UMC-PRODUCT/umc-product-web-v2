@@ -53,7 +53,7 @@ const noticeChevronVariants = cva("h-7.5 w-7.5 shrink-0", {
   },
 })
 
-export interface NoticeCardProps
+interface NoticeCardProps
   extends
     Omit<ComponentPropsWithoutRef<"button">, "className">,
     VariantProps<typeof noticeTitleVariants> {
