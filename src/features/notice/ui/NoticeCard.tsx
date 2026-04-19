@@ -10,6 +10,7 @@ import {
 
 import DownChevronIcon from "@/shared/assets/icon/chevron/SideBar/DownChevronIcon"
 import { cn } from "@/shared/lib/utils"
+import { Button } from "@/shared/ui/Button"
 
 const noticeCardVariants = cva(
   "flex w-full items-center justify-between gap-2.5 rounded-[12px] bg-teal-gray-50 px-4 text-left",
@@ -52,7 +53,7 @@ const noticeChevronVariants = cva("h-7.5 w-7.5 shrink-0", {
   },
 })
 
-interface NoticeCardProps
+export interface NoticeCardProps
   extends
     Omit<ComponentPropsWithoutRef<"button">, "className">,
     VariantProps<typeof noticeTitleVariants> {
@@ -60,6 +61,9 @@ interface NoticeCardProps
   date: string
   chip?: string
   children?: ReactNode
+  canManage?: boolean
+  onDelete?: () => void
+  onEdit?: () => void
 }
 
 export function NoticeCard({
@@ -68,6 +72,9 @@ export function NoticeCard({
   chip,
   variant,
   children,
+  canManage = false,
+  onDelete,
+  onEdit,
   onClick,
   type = "button",
   ...props
@@ -131,6 +138,29 @@ export function NoticeCard({
             >
               {/* TODO: 공지 API 응답 형식에 맞추어 수정 */}
               {children}
+
+              {canManage ? (
+                <div className="flex items-center justify-end gap-2 pt-8">
+                  <Button
+                    type="button"
+                    variant="weak"
+                    color="neutral"
+                    size="m"
+                    onClick={onDelete}
+                  >
+                    삭제
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="weak"
+                    color="brand"
+                    size="m"
+                    onClick={onEdit}
+                  >
+                    수정
+                  </Button>
+                </div>
+              ) : null}
             </div>
           </motion.div>
         ) : null}
