@@ -14,8 +14,7 @@ export interface SegmentItem {
 }
 
 export interface SegmentProps {
-  /** 예: "팀 매칭" — 없으면 제목 영역 렌더 안 함 */
-  title?: string
+  title: string
   items: SegmentItem[]
   value: string
   onValueChange: (id: string) => void
@@ -31,10 +30,7 @@ export function Segment({
 }: SegmentProps) {
   return (
     <div className={cn(segmentListVariants(), className)}>
-      {title ? (
-        <div className={cn(segmentHeadingVariants())}>{title}</div>
-      ) : null}
-
+      <div className={cn(segmentHeadingVariants())}>{title}</div>
       <div role="tablist" className={cn(segmentTabRowVariants())}>
         {items.map((item) => {
           const selected = item.id === value

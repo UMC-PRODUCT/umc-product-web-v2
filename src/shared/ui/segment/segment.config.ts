@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority"
 
 /** 팀 매칭 등 페이지 제목 (프레임 상단) */
 export const segmentHeadingVariants = cva(
-  "w-full text-left text-2xl font-semibold leading-[135%] text-[#161919]",
+  "w-full text-left text-heading-5-semibold font-semibold text-teal-gray-900",
 )
 
 /** 탭 줄: 왼쪽 정렬, 탭 너비는 내용 기준 */
@@ -19,14 +19,14 @@ export const segmentTriggerVariants = cva(
   {
     variants: {
       selected: {
-        true: "border-b-[#0b6b64] font-semibold leading-[150%] text-[#0b6b64]",
+        true: "border-b-teal-600 text-subtitle-3-semibold font-semibold text-teal-600",
         false:
-          "border-b-[#d3d8d8] font-medium leading-[145%] text-[#6f7878] hover:border-b-[#9ca3a3] hover:text-[#656b6b]",
+          "border-b-teal-gray-300 text-body-1-medium font-medium text-teal-gray-500 hover:border-b-teal-gray-400 hover:text-teal-gray-600",
       },
     },
     defaultVariants: { selected: false },
   },
 )
 
-/** 제목 + 탭을 한 프레임(세로 스택, 제목↔탭 간격 24px = gap-6) */
+/** 제목 + 탭을 한 프레임 */
 export const segmentListVariants = cva("flex w-full flex-col items-start gap-6")
