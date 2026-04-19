@@ -14,12 +14,12 @@ const CHAPTERS = [
 type Chapter = (typeof CHAPTERS)[number]
 
 const chapterSelectorVariants = cva(
-  "inline-flex h-9.5 shrink-0 items-center justify-center whitespace-nowrap text-label-1-medium",
+  "inline-flex h-9.5 w-full flex-1 basis-0 items-center justify-center whitespace-nowrap rounded-[12px] transition-colors",
   {
     variants: {
       selected: {
-        true: "w-35.5 rounded-[12px] bg-white text-teal-gray-800 shadow-drop-neutral-2",
-        false: "px-0 text-teal-600",
+        true: "bg-white text-teal-gray-800 text-label-1-semibold shadow-drop-neutral-2",
+        false: "bg-transparent text-teal-600 text-subtitle-3-semibold",
       },
     },
     defaultVariants: {
@@ -40,7 +40,7 @@ export function ChapterSelector({
   return (
     <div
       className={cn(
-        "bg-teal-gray-50 shadow-inner-neutral-2 flex h-11.5 w-full min-w-225 items-center justify-between rounded-[14px] p-1",
+        "bg-teal-gray-100 shadow-inner-neutral-2 flex h-11.5 w-full items-center gap-2 rounded-[14px] p-1",
       )}
     >
       {CHAPTERS.map((chapter) => {
