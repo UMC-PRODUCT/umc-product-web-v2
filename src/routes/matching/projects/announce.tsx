@@ -89,7 +89,7 @@ function ProjectSettingsAnnouncePage() {
               공지
             </span>
             <p className="text-body-2-regular text-teal-gray-600">
-              프로젝트 설정에 대한 지부별 공지를 안내합니다.
+              프로젝트 설정에 관련한 지부별 공지를 안내합니다.
             </p>
           </div>
 
