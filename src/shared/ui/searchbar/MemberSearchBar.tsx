@@ -9,19 +9,21 @@ import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import CloseCircleIcon from "@/shared/assets/icon/close/CloseCircleIcon"
 import { cn } from "@/shared/lib/utils"
 
-type MemberItem = {
+export type MemberItem = {
   nickname: string
   name: string
+  university: string
 }
 
 interface MemberSearchBarProps extends Omit<
   ComponentPropsWithoutRef<"input">,
-  "size" | "className"
+  "size" | "className" | "onSelect"
 > {
   value: string
   onChange: ChangeEventHandler<HTMLInputElement>
   onClear: () => void
   isSelected?: boolean
+  error?: boolean
   className?: string
   inputClassName?: string
   items?: MemberItem[]
@@ -37,6 +39,7 @@ export const MemberSearchBar = forwardRef<
     onChange,
     onClear,
     isSelected = false,
+    error = false,
     className,
     inputClassName,
     items,
@@ -54,13 +57,15 @@ export const MemberSearchBar = forwardRef<
   }
 
   return (
-    <div className={cn("relative w-full max-w-[312px]", className)}>
+    <div className={cn("relative w-full max-w-78", className)}>
       <div
         className={cn(
           "shadow-inner-neutral-2 inline-flex h-11 w-full cursor-text items-center gap-1 rounded-[12px] border pl-4",
-          "border-teal-gray-300 bg-white",
-          "focus-within:border-teal-400",
-          hasValue && "border-teal-400 bg-teal-50",
+          "bg-white",
+          error
+            ? "border-error-400 focus-within:border-error-400"
+            : "border-teal-gray-300 focus-within:border-teal-400",
+          !error && hasValue && "border-teal-400 bg-teal-50",
           hasValue ? "pr-2.5" : "pr-3 focus-within:pr-2.5",
         )}
         onMouseDown={(e) => {
@@ -84,7 +89,7 @@ export const MemberSearchBar = forwardRef<
           value={value}
           onChange={onChange}
           className={cn(
-            "text-label-1-medium text-teal-gray-900 placeholder:text-teal-gray-400 min-w-0 flex-1 cursor-text bg-transparent outline-none",
+            "text-body-2-medium text-teal-gray-900 placeholder:text-teal-gray-400 min-w-0 flex-1 cursor-text bg-transparent font-medium outline-none",
             inputClassName,
           )}
           {...props}
@@ -108,7 +113,7 @@ export const MemberSearchBar = forwardRef<
         )}
       </div>
       {items && items.length > 0 && (
-        <ul className="shadow-drop-neutral-1 border-teal-gray-50 absolute top-11 right-0 z-10 flex max-h-[224px] w-full flex-col items-start overflow-y-auto rounded-[8px] border bg-white p-0.5">
+        <ul className="shadow-drop-neutral-1 border-teal-gray-50 absolute top-11 right-0 z-10 flex max-h-56 w-full flex-col items-start overflow-y-auto rounded-[8px] border bg-white p-0.5">
           {items.map((item) => (
             <li key={item.name} className="w-full">
               <button

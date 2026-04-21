@@ -8,13 +8,13 @@ export const Route = createFileRoute("/test/member-search-bar")({
 })
 
 const MOCK_MEMBERS = [
-  { nickname: "이삭", name: "강지훈" },
-  { nickname: "이방토", name: "이예원" },
-  { nickname: "헤일리", name: "한현서" },
-  { nickname: "주디", name: "양혜원" },
-  { nickname: "준오", name: "오창준" },
-  { nickname: "하늘", name: "박경운" },
-  { nickname: "벨라", name: "황지원" },
+  { nickname: "이삭", name: "강지훈", university: "OO대학교" },
+  { nickname: "이방토", name: "이예원", university: "OO대학교" },
+  { nickname: "헤일리", name: "한현서", university: "OO대학교" },
+  { nickname: "주디", name: "양혜원", university: "OO대학교" },
+  { nickname: "준오", name: "오창준", university: "OO대학교" },
+  { nickname: "하늘", name: "박경운", university: "OO대학교" },
+  { nickname: "벨라", name: "황지원", university: "OO대학교" },
 ]
 
 function Section({
