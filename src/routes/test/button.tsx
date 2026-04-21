@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import SvgPersonButtonIcon from "@/shared/assets/icon/people/PersonButtonIcon"
 import { Button } from "@/shared/ui/Button"
 
 export const Route = createFileRoute("/test/button")({
@@ -8,8 +7,8 @@ export const Route = createFileRoute("/test/button")({
 })
 
 const VARIANTS = ["fill", "weak"] as const
-const COLORS = ["brand", "neutral"] as const
-const SIZES = ["m", "s"] as const
+const COLORS = ["primary", "neutral"] as const
+const SIZES = ["xs", "s", "m"] as const
 
 function Section({
   title,
@@ -28,20 +27,47 @@ function Section({
   )
 }
 
-function Row({
-  label,
-  children,
+function ButtonTable({
+  rows,
 }: {
-  label: string
-  children: React.ReactNode
+  rows: { label: string; cells: React.ReactNode[] }[]
 }) {
   return (
-    <div className="flex items-center gap-6">
-      <span className="text-caption-2-regular text-teal-gray-400 w-28 shrink-0">
-        {label}
-      </span>
-      <div className="flex items-center gap-3">{children}</div>
-    </div>
+    <table className="border-collapse">
+      <thead>
+        <tr>
+          <th className="text-caption-2-regular text-teal-gray-400 w-36 pr-8 pb-3 text-left font-normal">
+            variant / color
+          </th>
+          {SIZES.map((s) => (
+            <th
+              key={s}
+              className="text-caption-2-regular text-teal-gray-400 px-2 pb-3 text-center font-normal"
+            >
+              {s.toUpperCase()}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr key={row.label}>
+            <td className="text-caption-2-regular text-teal-gray-400 py-2 pr-8 align-middle whitespace-nowrap">
+              {row.label}
+            </td>
+            {row.cells.map((cell, i) => (
+              <td key={i} className="px-2 py-2 text-center align-middle">
+                {cell ?? (
+                  <span className="text-caption-2-regular text-teal-gray-200">
+                    —
+                  </span>
+                )}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
@@ -53,107 +79,95 @@ function ButtonTestPage() {
       </h1>
 
       <div className="flex flex-col gap-10">
-        {SIZES.map((size) => (
-          <Section key={size} title={`Size ${size.toUpperCase()} — Default`}>
-            {VARIANTS.map((variant) => (
-              <Row key={variant} label={`variant=${variant}`}>
-                {COLORS.map((color) => (
-                  <Button
-                    key={color}
-                    size={size}
-                    variant={variant}
-                    color={color}
-                  >
-                    {color === "brand" ? "Brand" : "Neutral"}
+        <Section title="Default">
+          <ButtonTable
+            rows={VARIANTS.flatMap((variant) =>
+              COLORS.map((color) => ({
+                label: `${variant} / ${color}`,
+                cells: SIZES.map((size) => (
+                  <Button size={size} variant={variant} color={color}>
+                    버튼
                   </Button>
-                ))}
-              </Row>
-            ))}
-          </Section>
-        ))}
-
-        <Section title="Size M — Disabled">
-          {VARIANTS.map((variant) => (
-            <Row key={variant} label={`variant=${variant}`}>
-              {COLORS.map((color) => (
-                <Button
-                  key={color}
-                  size="m"
-                  variant={variant}
-                  color={color}
-                  disabled
-                >
-                  {color === "brand" ? "Brand" : "Neutral"}
-                </Button>
-              ))}
-            </Row>
-          ))}
+                )),
+              })),
+            )}
+          />
         </Section>
 
-        <Section title="Size M — Loading">
-          {VARIANTS.map((variant) => (
-            <Row key={variant} label={`variant=${variant}`}>
-              {COLORS.map((color) => (
-                <Button
-                  key={color}
-                  size="m"
-                  variant={variant}
-                  color={color}
-                  isLoading
-                >
-                  {color === "brand" ? "Brand" : "Neutral"}
-                </Button>
-              ))}
-            </Row>
-          ))}
+        <Section title="Disabled">
+          <ButtonTable
+            rows={VARIANTS.flatMap((variant) =>
+              COLORS.map((color) => ({
+                label: `${variant} / ${color}`,
+                cells: SIZES.map((size) => (
+                  <Button size={size} variant={variant} color={color} disabled>
+                    버튼
+                  </Button>
+                )),
+              })),
+            )}
+          />
         </Section>
 
-        <Section title="Icon — Default">
-          {VARIANTS.map((variant) => (
-            <Row key={variant} label={`variant=${variant}`}>
-              {COLORS.map((color) => (
-                <Button key={color} size="icon" variant={variant} color={color}>
-                  <SvgPersonButtonIcon />
-                </Button>
-              ))}
-            </Row>
-          ))}
+        <Section title="Loading">
+          <ButtonTable
+            rows={VARIANTS.flatMap((variant) =>
+              COLORS.map((color) => ({
+                label: `${variant} / ${color}`,
+                cells: SIZES.map((size) => (
+                  <Button size={size} variant={variant} color={color} isLoading>
+                    버튼
+                  </Button>
+                )),
+              })),
+            )}
+          />
         </Section>
 
-        <Section title="Icon — Disabled">
-          {VARIANTS.map((variant) => (
-            <Row key={variant} label={`variant=${variant}`}>
-              {COLORS.map((color) => (
-                <Button
-                  key={color}
-                  size="icon"
-                  variant={variant}
-                  color={color}
-                  disabled
-                >
-                  <SvgPersonButtonIcon />
-                </Button>
-              ))}
-            </Row>
-          ))}
+        <Section title="With Icon — Default">
+          <ButtonTable
+            rows={[
+              ...VARIANTS.flatMap((variant) =>
+                COLORS.map((color) => ({
+                  label: `${variant} / ${color}`,
+                  cells: [
+                    null,
+                    <Button size="s" variant={variant} color={color} icon>
+                      버튼
+                    </Button>,
+                    <Button size="m" variant={variant} color={color} icon>
+                      버튼
+                    </Button>,
+                  ],
+                })),
+              ),
+              ...VARIANTS.map((variant) => ({
+                label: `${variant} / white`,
+                cells: [
+                  <Button size="xs" variant={variant} color="white" icon>
+                    버튼
+                  </Button>,
+                  null,
+                  null,
+                ],
+              })),
+            ]}
+          />
         </Section>
 
-        <Section title="Icon — Loading">
-          {VARIANTS.map((variant) => (
-            <Row key={variant} label={`variant=${variant}`}>
-              {COLORS.map((color) => (
-                <Button
-                  key={color}
-                  size="icon"
-                  variant={variant}
-                  color={color}
-                  isLoading
-                >
-                  <SvgPersonButtonIcon />
-                </Button>
-              ))}
-            </Row>
-          ))}
+        <Section title="With Icon — Disabled">
+          <ButtonTable
+            rows={VARIANTS.map((variant) => ({
+              label: `${variant} / white`,
+              cells: [
+                <Button size="xs" variant={variant} color="white" icon disabled>
+                  버튼
+                </Button>,
+                null,
+                null,
+              ],
+            }))}
+          />
         </Section>
       </div>
     </main>
