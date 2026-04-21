@@ -133,14 +133,14 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         <Button
           type="button"
           variant="weak"
-          color="brand"
+          color="primary"
           disabled={!hasAnyValidInput}
           isLoading={isSaving}
           onClick={handleTempSave}
         >
           임시 저장
         </Button>
-        <Button type="submit" variant="fill" color="brand">
+        <Button type="submit" variant="fill" color="primary">
           다음
         </Button>
       </div>

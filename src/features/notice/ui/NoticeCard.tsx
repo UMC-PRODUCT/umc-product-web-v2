@@ -153,7 +153,7 @@ export function NoticeCard({
                   <Button
                     type="button"
                     variant="weak"
-                    color="brand"
+                    color="primary"
                     size="m"
                     onClick={onEdit}
                   >
