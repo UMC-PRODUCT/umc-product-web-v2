@@ -28,7 +28,7 @@ function ProjectRegisterPage() {
         </div>
         <Stepper step={step} onStepChange={setStep} />
         {step === 1 && <BasicInfoForm onNext={() => setStep(2)} />}
-        {step === 2 && <RecruitInfoForm />}
+        {step === 2 && <RecruitInfoForm onPrev={() => setStep(1)} />}
         {step === 3 && <ApplicationForm />}
       </div>
     </section>
