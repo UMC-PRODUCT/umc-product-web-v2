@@ -141,7 +141,7 @@ function TeamMatchingAnnouncePage() {
               공지
             </span>
             <p className="text-body-2-regular text-teal-gray-600">
-              팀 매칭에 관련한 지부별 공지를 안내합니다.
+              우리 지부의 공지를 조회합니다.
             </p>
           </div>
 
