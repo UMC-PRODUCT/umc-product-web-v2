@@ -13,7 +13,7 @@ import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
 
 const noticeCardVariants = cva(
-  "flex w-full items-center justify-between gap-2.5 rounded-[12px] bg-teal-gray-50 px-4 text-left",
+  "flex w-full items-center justify-between gap-2.5 px-4 text-left",
   {
     variants: {
       hasChip: {
@@ -62,6 +62,8 @@ interface NoticeCardProps
   chip?: string
   children?: ReactNode
   canManage?: boolean
+  expanded?: boolean
+  onExpandedChange?: (expanded: boolean) => void
   onDelete?: () => void
   onEdit?: () => void
 }
@@ -73,6 +75,8 @@ export function NoticeCard({
   variant,
   children,
   canManage = false,
+  expanded,
+  onExpandedChange,
   onDelete,
   onEdit,
   onClick,
@@ -81,9 +85,16 @@ export function NoticeCard({
 }: NoticeCardProps) {
   const contentId = useId()
   const [internalExpanded, setInternalExpanded] = useState(false)
+  const isExpanded = expanded ?? internalExpanded
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    setInternalExpanded((prev) => !prev)
+    const nextExpanded = !isExpanded
+
+    if (expanded === undefined) {
+      setInternalExpanded(nextExpanded)
+    }
+
+    onExpandedChange?.(nextExpanded)
     onClick?.(event)
   }
 
@@ -91,7 +102,7 @@ export function NoticeCard({
     <div className="w-full">
       <button
         type={type}
-        aria-expanded={internalExpanded}
+        aria-expanded={isExpanded}
         aria-controls={children ? contentId : undefined}
         className={noticeCardVariants({ hasChip: !!chip })}
         onClick={handleClick}
@@ -118,13 +129,13 @@ export function NoticeCard({
           aria-hidden="true"
           className={cn(
             noticeChevronVariants({ variant }),
-            internalExpanded && "rotate-180",
+            isExpanded && "rotate-180",
           )}
         />
       </button>
 
       <AnimatePresence>
-        {children && internalExpanded ? (
+        {children && isExpanded ? (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -134,7 +145,7 @@ export function NoticeCard({
           >
             <div
               id={contentId}
-              className="shadow-inner-neutral-2 bg-teal-gray-50 rounded-[12px] px-8 pt-6 pb-7.5"
+              className="shadow-inner-neutral-2 bg-teal-gray-50 text-teal-gray-900 rounded-[12px] px-8 pt-6 pb-7.5"
             >
               {/* TODO: 공지 API 응답 형식에 맞추어 수정 */}
               {children}
