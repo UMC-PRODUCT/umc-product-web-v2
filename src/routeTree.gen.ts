@@ -32,9 +32,11 @@ import { Route as MatchingNoticePublishRouteImport } from './routes/matching/not
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
+import { Route as MatchingNoticePublishNoticeIdRouteImport } from './routes/matching/notice-publish.$noticeId'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
 import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matching/projects/announce/index'
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
+import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
 const MatchingRouteRoute = MatchingRouteRouteImport.update({
   id: '/matching',
@@ -152,6 +154,12 @@ const MatchingProjectsNewRoute = MatchingProjectsNewRouteImport.update({
   path: '/projects/new',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const MatchingNoticePublishNoticeIdRoute =
+  MatchingNoticePublishNoticeIdRouteImport.update({
+    id: '/$noticeId',
+    path: '/$noticeId',
+    getParentRoute: () => MatchingNoticePublishRoute,
+  } as any)
 const MatchingProjectsAnnounceRouteRoute =
   MatchingProjectsAnnounceRouteRouteImport.update({
     id: '/projects/announce',
@@ -170,13 +178,19 @@ const MatchingProjectsAnnounceNoticePublishRoute =
     path: '/notice-publish',
     getParentRoute: () => MatchingProjectsAnnounceRouteRoute,
   } as any)
+const MatchingProjectsAnnounceNoticePublishNoticeIdRoute =
+  MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport.update({
+    id: '/$noticeId',
+    path: '/$noticeId',
+    getParentRoute: () => MatchingProjectsAnnounceNoticePublishRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/matching/applications': typeof MatchingApplicationsRoute
-  '/matching/notice-publish': typeof MatchingNoticePublishRoute
+  '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -194,16 +208,18 @@ export interface FileRoutesByFullPath {
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
+  '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
-  '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRoute
+  '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
+  '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRoute
   '/matching/applications': typeof MatchingApplicationsRoute
-  '/matching/notice-publish': typeof MatchingNoticePublishRoute
+  '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -220,10 +236,12 @@ export interface FileRoutesByTo {
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching': typeof MatchingIndexRoute
+  '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
-  '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRoute
+  '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/announce': typeof MatchingProjectsAnnounceIndexRoute
+  '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -231,7 +249,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/matching/applications': typeof MatchingApplicationsRoute
-  '/matching/notice-publish': typeof MatchingNoticePublishRoute
+  '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -249,10 +267,12 @@ export interface FileRoutesById {
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
+  '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
-  '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRoute
+  '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
+  '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -279,10 +299,12 @@ export interface FileRouteTypes {
     | '/test/tooltip'
     | '/matching/'
     | '/matching/projects/announce'
+    | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/announce/'
+    | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -305,10 +327,12 @@ export interface FileRouteTypes {
     | '/test/toggle-inputs'
     | '/test/tooltip'
     | '/matching'
+    | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
     | '/matching/projects'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/announce'
+    | '/matching/projects/announce/notice-publish/$noticeId'
   id:
     | '__root__'
     | '/'
@@ -333,10 +357,12 @@ export interface FileRouteTypes {
     | '/test/tooltip'
     | '/matching/'
     | '/matching/projects/announce'
+    | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/announce/'
+    | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -522,6 +548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsNewRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/matching/notice-publish/$noticeId': {
+      id: '/matching/notice-publish/$noticeId'
+      path: '/$noticeId'
+      fullPath: '/matching/notice-publish/$noticeId'
+      preLoaderRoute: typeof MatchingNoticePublishNoticeIdRouteImport
+      parentRoute: typeof MatchingNoticePublishRoute
+    }
     '/matching/projects/announce': {
       id: '/matching/projects/announce'
       path: '/projects/announce'
@@ -543,18 +576,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsAnnounceNoticePublishRouteImport
       parentRoute: typeof MatchingProjectsAnnounceRouteRoute
     }
+    '/matching/projects/announce/notice-publish/$noticeId': {
+      id: '/matching/projects/announce/notice-publish/$noticeId'
+      path: '/$noticeId'
+      fullPath: '/matching/projects/announce/notice-publish/$noticeId'
+      preLoaderRoute: typeof MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport
+      parentRoute: typeof MatchingProjectsAnnounceNoticePublishRoute
+    }
   }
 }
 
+interface MatchingNoticePublishRouteChildren {
+  MatchingNoticePublishNoticeIdRoute: typeof MatchingNoticePublishNoticeIdRoute
+}
+
+const MatchingNoticePublishRouteChildren: MatchingNoticePublishRouteChildren = {
+  MatchingNoticePublishNoticeIdRoute: MatchingNoticePublishNoticeIdRoute,
+}
+
+const MatchingNoticePublishRouteWithChildren =
+  MatchingNoticePublishRoute._addFileChildren(
+    MatchingNoticePublishRouteChildren,
+  )
+
+interface MatchingProjectsAnnounceNoticePublishRouteChildren {
+  MatchingProjectsAnnounceNoticePublishNoticeIdRoute: typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
+}
+
+const MatchingProjectsAnnounceNoticePublishRouteChildren: MatchingProjectsAnnounceNoticePublishRouteChildren =
+  {
+    MatchingProjectsAnnounceNoticePublishNoticeIdRoute:
+      MatchingProjectsAnnounceNoticePublishNoticeIdRoute,
+  }
+
+const MatchingProjectsAnnounceNoticePublishRouteWithChildren =
+  MatchingProjectsAnnounceNoticePublishRoute._addFileChildren(
+    MatchingProjectsAnnounceNoticePublishRouteChildren,
+  )
+
 interface MatchingProjectsAnnounceRouteRouteChildren {
-  MatchingProjectsAnnounceNoticePublishRoute: typeof MatchingProjectsAnnounceNoticePublishRoute
+  MatchingProjectsAnnounceNoticePublishRoute: typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   MatchingProjectsAnnounceIndexRoute: typeof MatchingProjectsAnnounceIndexRoute
 }
 
 const MatchingProjectsAnnounceRouteRouteChildren: MatchingProjectsAnnounceRouteRouteChildren =
   {
     MatchingProjectsAnnounceNoticePublishRoute:
-      MatchingProjectsAnnounceNoticePublishRoute,
+      MatchingProjectsAnnounceNoticePublishRouteWithChildren,
     MatchingProjectsAnnounceIndexRoute: MatchingProjectsAnnounceIndexRoute,
   }
 
@@ -565,7 +633,7 @@ const MatchingProjectsAnnounceRouteRouteWithChildren =
 
 interface MatchingRouteRouteChildren {
   MatchingApplicationsRoute: typeof MatchingApplicationsRoute
-  MatchingNoticePublishRoute: typeof MatchingNoticePublishRoute
+  MatchingNoticePublishRoute: typeof MatchingNoticePublishRouteWithChildren
   MatchingRoundsRoute: typeof MatchingRoundsRoute
   MatchingIndexRoute: typeof MatchingIndexRoute
   MatchingProjectsAnnounceRouteRoute: typeof MatchingProjectsAnnounceRouteRouteWithChildren
@@ -575,7 +643,7 @@ interface MatchingRouteRouteChildren {
 
 const MatchingRouteRouteChildren: MatchingRouteRouteChildren = {
   MatchingApplicationsRoute: MatchingApplicationsRoute,
-  MatchingNoticePublishRoute: MatchingNoticePublishRoute,
+  MatchingNoticePublishRoute: MatchingNoticePublishRouteWithChildren,
   MatchingRoundsRoute: MatchingRoundsRoute,
   MatchingIndexRoute: MatchingIndexRoute,
   MatchingProjectsAnnounceRouteRoute:

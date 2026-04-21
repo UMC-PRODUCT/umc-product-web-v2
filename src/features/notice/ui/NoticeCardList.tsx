@@ -5,6 +5,7 @@ import { NoticeCard } from "./NoticeCard"
 
 // TODO: 공지 API 응답 형식에 맞추어 수정
 export type NoticeItem = {
+  id: string
   title: string
   date: string
   chip?: string
@@ -15,9 +16,16 @@ export type NoticeItem = {
 interface NoticeCardListProps {
   notices: NoticeItem[]
   page: number
+  canManage?: boolean
+  onEditNotice?: (noticeId: string) => void
 }
 
-export function NoticeCardList({ notices, page }: NoticeCardListProps) {
+export function NoticeCardList({
+  notices,
+  page,
+  canManage = false,
+  onEditNotice,
+}: NoticeCardListProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
   useEffect(() => {
@@ -39,9 +47,13 @@ export function NoticeCardList({ notices, page }: NoticeCardListProps) {
               date={notice.date}
               chip={notice.chip}
               variant={notice.variant}
+              canManage={canManage}
               expanded={isExpanded}
               onExpandedChange={(nextExpanded) => {
                 setExpandedIndex(nextExpanded ? index : null)
+              }}
+              onEdit={() => {
+                onEditNotice?.(notice.id)
               }}
             >
               임시 내용

@@ -40,54 +40,64 @@ function parsePage(value: unknown): number {
 // TODO: 공지 API 응답 형식에 맞추어 수정
 const notices: NoticeItem[] = [
   {
+    id: "1",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
     variant: "accent",
   },
   {
+    id: "2",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
     variant: "accent",
   },
   {
+    id: "3",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
     variant: "accent",
   },
   {
+    id: "4",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
   },
   {
+    id: "5",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
   },
   {
+    id: "6",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
   },
   {
+    id: "7",
     title: "임시 공지",
     date: "0000.00.00",
     variant: "muted",
   },
   {
+    id: "8",
     title: "임시 공지",
     date: "0000.00.00",
     variant: "muted",
   },
   {
+    id: "9",
     title: "임시 공지",
     date: "0000.00.00",
     variant: "muted",
   },
   {
+    id: "10",
     title: "임시 공지",
     date: "0000.00.00",
     variant: "muted",
@@ -120,6 +130,13 @@ function TeamMatchingAnnouncePage() {
 
   const handleNoticePublishClick = () => {
     navigate({ to: "/matching/notice-publish" })
+  }
+
+  const handleNoticeEditClick = (noticeId: string) => {
+    navigate({
+      to: "/matching/notice-publish/$noticeId",
+      params: { noticeId },
+    })
   }
 
   return (
@@ -159,7 +176,12 @@ function TeamMatchingAnnouncePage() {
               ) : null}
             </div>
 
-            <NoticeCardList notices={notices} page={page} />
+            <NoticeCardList
+              notices={notices}
+              page={page}
+              canManage={canManage}
+              onEditNotice={handleNoticeEditClick}
+            />
           </div>
         </div>
 

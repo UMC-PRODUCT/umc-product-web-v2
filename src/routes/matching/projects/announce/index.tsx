@@ -40,17 +40,20 @@ function parsePage(value: unknown): number {
 // TODO: 공지 API 응답 형식에 맞추어 수정
 const notices: NoticeItem[] = [
   {
+    id: "1",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
     variant: "accent",
   },
   {
+    id: "2",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
   },
   {
+    id: "3",
     title: "임시 공지",
     date: "0000.00.00",
     variant: "muted",
@@ -83,6 +86,13 @@ function ProjectSettingsAnnouncePage() {
   const handleNoticePublishClick = () => {
     navigate({
       to: "/matching/projects/announce/notice-publish",
+    })
+  }
+
+  const handleNoticeEditClick = (noticeId: string) => {
+    navigate({
+      to: "/matching/projects/announce/notice-publish/$noticeId",
+      params: { noticeId },
     })
   }
 
@@ -123,7 +133,12 @@ function ProjectSettingsAnnouncePage() {
               ) : null}
             </div>
 
-            <NoticeCardList notices={notices} page={page} />
+            <NoticeCardList
+              notices={notices}
+              page={page}
+              canManage={canManage}
+              onEditNotice={handleNoticeEditClick}
+            />
           </div>
         </div>
 
