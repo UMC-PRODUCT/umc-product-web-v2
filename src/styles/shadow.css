@@ -1,4 +1,4 @@
-/* 최종 편집 : 2026.04.15 */
+/* 최종 편집 : 2026.04.22 */
 
 :root {
   /* -------------------------
@@ -19,6 +19,9 @@
   --shadow-inner-neutral-1: inset 1px 1px 2px 0px #d3d8d833;
   --shadow-inner-neutral-2:
     inset 1px 1px 2px 0px #d3d8d826, inset -1px -1px 1px 0px #ffffff40;
+
+  --shadow-inner-neutral-3: inset -1px -1px 1px 0px #ffffff40;
+  --shadow-inner-neutral-4: inset 1px 1px 2px 0px #d3d8d826;
 
   --shadow-inner-primary-1:
     inset 1px 1px 3px 0px #0b6b6421, inset -1px -1px 1px 0px #ffffff40;
@@ -50,6 +53,14 @@
 
 @utility shadow-inner-neutral-2 {
   box-shadow: var(--shadow-inner-neutral-2);
+}
+
+@utility shadow-inner-neutral-3 {
+  box-shadow: var(--shadow-inner-neutral-3);
+}
+
+@utility shadow-inner-neutral-4 {
+  box-shadow: var(--shadow-inner-neutral-4);
 }
 
 @utility shadow-inner-primary-1 {
