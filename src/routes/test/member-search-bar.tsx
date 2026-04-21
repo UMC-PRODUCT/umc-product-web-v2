@@ -39,7 +39,7 @@ function InteractiveSearchBar() {
   const [isFocused, setIsFocused] = useState(false)
   const [isSelected, setIsSelected] = useState(false)
 
-  const filtered = isFocused
+  const items = isFocused
     ? value.trim()
       ? MOCK_MEMBERS.filter(
           (m) => m.nickname.includes(value) || m.name.includes(value),
@@ -48,42 +48,26 @@ function InteractiveSearchBar() {
     : []
 
   return (
-    <div className="relative w-[312px]">
-      <MemberSearchBar
-        value={value}
-        onChange={(e) => {
-          setValue(e.target.value)
-          setIsSelected(false)
-        }}
-        onClear={() => {
-          setValue("")
-          setIsSelected(false)
-        }}
-        isSelected={isSelected}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        placeholder="멤버를 검색하세요"
-      />
-      {filtered.length > 0 && (
-        <ul className="shadow-drop-neutral-3 absolute top-full left-0 z-10 mt-1 w-full overflow-hidden rounded-[12px] bg-white">
-          {filtered.map((member) => (
-            <li key={member.name}>
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  setValue(`${member.nickname}/${member.name}`)
-                  setIsSelected(true)
-                }}
-                className="text-body-2-medium text-teal-gray-900 hover:bg-teal-gray-200 w-full px-4 py-3 text-left leading-none"
-              >
-                {member.nickname}/{member.name}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <MemberSearchBar
+      value={value}
+      onChange={(e) => {
+        setValue(e.target.value)
+        setIsSelected(false)
+      }}
+      onClear={() => {
+        setValue("")
+        setIsSelected(false)
+      }}
+      isSelected={isSelected}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      placeholder="멤버를 검색하세요"
+      items={items}
+      onSelect={(member) => {
+        setValue(`${member.nickname}/${member.name}`)
+        setIsSelected(true)
+      }}
+    />
   )
 }
 
