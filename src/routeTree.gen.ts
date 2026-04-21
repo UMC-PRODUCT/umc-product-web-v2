@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToastRouteImport } from './routes/test/toast'
+import { Route as TestMemberSearchBarRouteImport } from './routes/test/member-search-bar'
 import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
@@ -51,6 +52,11 @@ const TestTooltipRoute = TestTooltipRouteImport.update({
 const TestToastRoute = TestToastRouteImport.update({
   id: '/test/toast',
   path: '/test/toast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestMemberSearchBarRoute = TestMemberSearchBarRouteImport.update({
+  id: '/test/member-search-bar',
+  path: '/test/member-search-bar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestChipRoute = TestChipRouteImport.update({
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/matching/rounds': typeof MatchingRoundsRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
+  '/test/member-search-bar': typeof TestMemberSearchBarRoute
   '/test/toast': typeof TestToastRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/': typeof MatchingIndexRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/matching/rounds': typeof MatchingRoundsRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
+  '/test/member-search-bar': typeof TestMemberSearchBarRoute
   '/test/toast': typeof TestToastRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching': typeof MatchingIndexRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/matching/rounds': typeof MatchingRoundsRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
+  '/test/member-search-bar': typeof TestMemberSearchBarRoute
   '/test/toast': typeof TestToastRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/': typeof MatchingIndexRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/matching/rounds'
     | '/test/button'
     | '/test/chip'
+    | '/test/member-search-bar'
     | '/test/toast'
     | '/test/tooltip'
     | '/matching/'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/matching/rounds'
     | '/test/button'
     | '/test/chip'
+    | '/test/member-search-bar'
     | '/test/toast'
     | '/test/tooltip'
     | '/matching'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/matching/rounds'
     | '/test/button'
     | '/test/chip'
+    | '/test/member-search-bar'
     | '/test/toast'
     | '/test/tooltip'
     | '/matching/'
@@ -188,6 +200,7 @@ export interface RootRouteChildren {
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   TestButtonRoute: typeof TestButtonRoute
   TestChipRoute: typeof TestChipRoute
+  TestMemberSearchBarRoute: typeof TestMemberSearchBarRoute
   TestToastRoute: typeof TestToastRoute
   TestTooltipRoute: typeof TestTooltipRoute
 }
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: '/test/toast'
       fullPath: '/test/toast'
       preLoaderRoute: typeof TestToastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/member-search-bar': {
+      id: '/test/member-search-bar'
+      path: '/test/member-search-bar'
+      fullPath: '/test/member-search-bar'
+      preLoaderRoute: typeof TestMemberSearchBarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/chip': {
@@ -316,6 +336,7 @@ const rootRouteChildren: RootRouteChildren = {
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   TestButtonRoute: TestButtonRoute,
   TestChipRoute: TestChipRoute,
+  TestMemberSearchBarRoute: TestMemberSearchBarRoute,
   TestToastRoute: TestToastRoute,
   TestTooltipRoute: TestTooltipRoute,
 }
