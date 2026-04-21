@@ -17,6 +17,7 @@ import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
 import { Route as TestMemberSearchBarRouteImport } from './routes/test/member-search-bar'
+import { Route as TestCounterRouteImport } from './routes/test/counter'
 import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
@@ -65,6 +66,11 @@ const TestMemberSearchBarRoute = TestMemberSearchBarRouteImport.update({
   path: '/test/member-search-bar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestCounterRoute = TestCounterRouteImport.update({
+  id: '/test/counter',
+  path: '/test/counter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestChipRoute = TestChipRouteImport.update({
   id: '/test/chip',
   path: '/test/chip',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/matching/rounds': typeof MatchingRoundsRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
+  '/test/counter': typeof TestCounterRoute
   '/test/member-search-bar': typeof TestMemberSearchBarRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/toast': typeof TestToastRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/matching/rounds': typeof MatchingRoundsRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
+  '/test/counter': typeof TestCounterRoute
   '/test/member-search-bar': typeof TestMemberSearchBarRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/toast': typeof TestToastRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/matching/rounds': typeof MatchingRoundsRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
+  '/test/counter': typeof TestCounterRoute
   '/test/member-search-bar': typeof TestMemberSearchBarRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/toast': typeof TestToastRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/matching/rounds'
     | '/test/button'
     | '/test/chip'
+    | '/test/counter'
     | '/test/member-search-bar'
     | '/test/option-button'
     | '/test/toast'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/matching/rounds'
     | '/test/button'
     | '/test/chip'
+    | '/test/counter'
     | '/test/member-search-bar'
     | '/test/option-button'
     | '/test/toast'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/matching/rounds'
     | '/test/button'
     | '/test/chip'
+    | '/test/counter'
     | '/test/member-search-bar'
     | '/test/option-button'
     | '/test/toast'
@@ -212,6 +224,7 @@ export interface RootRouteChildren {
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   TestButtonRoute: typeof TestButtonRoute
   TestChipRoute: typeof TestChipRoute
+  TestCounterRoute: typeof TestCounterRoute
   TestMemberSearchBarRoute: typeof TestMemberSearchBarRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
   TestToastRoute: typeof TestToastRoute
@@ -274,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/test/member-search-bar'
       fullPath: '/test/member-search-bar'
       preLoaderRoute: typeof TestMemberSearchBarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/counter': {
+      id: '/test/counter'
+      path: '/test/counter'
+      fullPath: '/test/counter'
+      preLoaderRoute: typeof TestCounterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/chip': {
@@ -356,6 +376,7 @@ const rootRouteChildren: RootRouteChildren = {
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   TestButtonRoute: TestButtonRoute,
   TestChipRoute: TestChipRoute,
+  TestCounterRoute: TestCounterRoute,
   TestMemberSearchBarRoute: TestMemberSearchBarRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,
   TestToastRoute: TestToastRoute,

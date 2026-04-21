@@ -1,6 +1,8 @@
 import { useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import { Button } from "@/shared/ui/Button"
+import { Counter } from "@/shared/ui/Counter"
 import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
 
@@ -13,47 +15,16 @@ const ROLES = [
 ] as const
 
 type RoleKey = (typeof ROLES)[number]["key"]
+type Stack = (typeof ROLES)[number]["stacks"][number]
 
 interface RoleState {
   count: number
-  stack: string | undefined
+  stack: Stack | undefined
 }
 
 interface RecruitInfoFormProps {
   onPrev: () => void
-}
-
-function Stepper({
-  value,
-  onChange,
-}: {
-  value: number
-  onChange: (v: number) => void
-}) {
-  return (
-    <div className="border-teal-gray-300 flex h-10 items-center rounded-[8px] border">
-      <button
-        type="button"
-        className="text-teal-gray-500 disabled:text-teal-gray-300 flex h-full w-10 items-center justify-center disabled:cursor-not-allowed"
-        onClick={() => onChange(Math.max(0, value - 1))}
-        disabled={value === 0}
-        aria-label="인원 감소"
-      >
-        −
-      </button>
-      <span className="text-body-2-medium text-teal-gray-900 w-6 text-center">
-        {value}
-      </span>
-      <button
-        type="button"
-        className="text-teal-gray-500 flex h-full w-10 items-center justify-center"
-        onClick={() => onChange(value + 1)}
-        aria-label="인원 증가"
-      >
-        +
-      </button>
-    </div>
-  )
+  onNext: () => void
 }
 
 function buildSummaryText(
@@ -70,12 +41,19 @@ function buildSummaryText(
     .join(", ")
 }
 
-export function RecruitInfoForm({ onPrev }: RecruitInfoFormProps) {
+export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
+  const addToast = useToastStore((s) => s.addToast)
+
   const [roleStates, setRoleStates] = useState<Record<RoleKey, RoleState>>({
     design: { count: 0, stack: undefined },
     frontend: { count: 0, stack: undefined },
     backend: { count: 0, stack: undefined },
   })
+  const [savedSnapshot, setSavedSnapshot] = useState<Record<
+    RoleKey,
+    RoleState
+  > | null>(null)
+  const [hasSavedOnce, setHasSavedOnce] = useState(false)
 
   const totalCount = Object.values(roleStates).reduce(
     (sum, { count }) => sum + count,
@@ -83,6 +61,52 @@ export function RecruitInfoForm({ onPrev }: RecruitInfoFormProps) {
   )
 
   const summaryText = buildSummaryText(ROLES, roleStates)
+
+  const hasUnsavedChanges = savedSnapshot
+    ? (Object.keys(roleStates) as RoleKey[]).some(
+        (key) =>
+          roleStates[key].count !== savedSnapshot[key].count ||
+          roleStates[key].stack !== savedSnapshot[key].stack,
+      )
+    : totalCount > 0
+
+  const canTempSave = hasUnsavedChanges
+  const tempSaveLabel =
+    hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
+
+  const handleNext = () => {
+    if (totalCount === 0) {
+      addToast({
+        message: "모집 인원을 1명 이상 입력해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+      return
+    }
+    addToast({
+      message: "작성한 내용이 저장되었습니다.",
+      color: "primary",
+      variant: "deep",
+      type: "default",
+      duration: 3,
+    })
+    onNext()
+  }
+
+  const handleTempSave = () => {
+    // TODO: API 연결 후 async/await + isSaving으로 전환
+    setSavedSnapshot(roleStates)
+    setHasSavedOnce(true)
+    addToast({
+      message: "작성한 내용이 임시 저장되었습니다.",
+      color: "primary",
+      variant: "deep",
+      type: "default",
+      duration: 3,
+    })
+  }
 
   const updateCount = (key: RoleKey, count: number) => {
     setRoleStates((prev) => ({
@@ -95,7 +119,7 @@ export function RecruitInfoForm({ onPrev }: RecruitInfoFormProps) {
     }))
   }
 
-  const updateStack = (key: RoleKey, stack: string | undefined) => {
+  const updateStack = (key: RoleKey, stack: Stack | undefined) => {
     setRoleStates((prev) => ({
       ...prev,
       [key]: { ...prev[key], stack },
@@ -104,7 +128,7 @@ export function RecruitInfoForm({ onPrev }: RecruitInfoFormProps) {
 
   return (
     <div className="flex flex-col gap-6 pt-4">
-      <div className="px-4 pt-10">
+      <div className="px-4">
         <SectionHeader index={1} title="모집 인원 및 스택" />
         <div className="border-teal-gray-200 mx-8.5 flex w-full flex-col gap-11.5 border-b pt-6 pb-11">
           {ROLES.map(({ key, label, stacks }) => (
@@ -112,19 +136,26 @@ export function RecruitInfoForm({ onPrev }: RecruitInfoFormProps) {
               <span className="text-body-1-regular text-teal-gray-700 w-16 shrink-0">
                 {label}
               </span>
-              <Stepper
+              <Counter
                 value={roleStates[key].count}
                 onChange={(v) => updateCount(key, v)}
+                aria-label={`${label} 인원`}
               />
-              {stacks.length > 0 && roleStates[key].count > 0 && (
+              {stacks.length > 0 && (
                 <OptionButtonGroup
                   variant="segmented"
                   allowDeselect
                   value={roleStates[key].stack}
-                  onValueChange={(v) => updateStack(key, v)}
+                  onValueChange={(v) =>
+                    updateStack(key, v as Stack | undefined)
+                  }
                 >
                   {stacks.map((stack) => (
-                    <OptionButton key={stack} value={stack}>
+                    <OptionButton
+                      key={stack}
+                      value={stack}
+                      disabled={roleStates[key].count === 0}
+                    >
                       {stack}
                     </OptionButton>
                   ))}
@@ -145,14 +176,25 @@ export function RecruitInfoForm({ onPrev }: RecruitInfoFormProps) {
         </div>
       </div>
       <div className="flex justify-between">
-        <Button type="button" variant="weak" color="primary">
-          임시 저장
+        <Button
+          type="button"
+          variant="weak"
+          color="primary"
+          disabled={!canTempSave}
+          onClick={handleTempSave}
+        >
+          {tempSaveLabel}
         </Button>
         <div className="flex items-center gap-4">
           <Button type="button" variant="weak" color="neutral" onClick={onPrev}>
             이전
           </Button>
-          <Button type="submit" variant="fill" color="primary">
+          <Button
+            type="button"
+            variant="fill"
+            color="primary"
+            onClick={handleNext}
+          >
             다음
           </Button>
         </div>
