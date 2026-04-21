@@ -7,6 +7,8 @@ import {
   NoticeCardList,
   type NoticeItem,
 } from "@/features/notice"
+import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
+import { Button } from "@/shared/ui/Button"
 
 interface AnnounceSearch {
   chapter: Chapter
@@ -106,6 +108,8 @@ export const Route = createFileRoute("/matching/")({
 function TeamMatchingAnnouncePage() {
   const { chapter, page } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
+  // TODO: 사용자 권한 API 연동 후 실제 권한 값으로 교체
+  const canManage = true
 
   const handleChapterChange = (nextChapter: Chapter) => {
     navigate({
@@ -128,10 +132,27 @@ function TeamMatchingAnnouncePage() {
           </div>
 
           <div className="flex w-full flex-col items-center gap-2.5">
-            <ChapterSelector
-              selectedChapter={chapter}
-              onChapterChange={handleChapterChange}
-            />
+            <div className="flex w-full items-center gap-2.5">
+              <ChapterSelector
+                selectedChapter={chapter}
+                onChapterChange={handleChapterChange}
+              />
+
+              {canManage ? (
+                <Button
+                  type="button"
+                  variant="fill"
+                  color="brand"
+                  size="m"
+                  className="w-26.5 items-center gap-1 py-3 pr-4 pl-3"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span className="text-label-1-medium text-white">
+                    공지 작성
+                  </span>
+                </Button>
+              ) : null}
+            </div>
 
             <NoticeCardList notices={notices} page={page} />
           </div>
