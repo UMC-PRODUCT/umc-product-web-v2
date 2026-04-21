@@ -199,7 +199,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     <form
       noValidate
       onSubmit={handleFormSubmit}
-      className="flex flex-col justify-start gap-14 pt-4"
+      className="flex flex-col justify-start gap-14 px-4 pt-4"
     >
       <div className="flex flex-col gap-4">
         <SectionHeader index={1} title="프로젝트 카드" />
