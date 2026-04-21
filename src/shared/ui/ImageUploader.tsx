@@ -96,7 +96,8 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
           data-focus-target={focusTarget}
           onClick={() => fileInputRef.current?.click()}
           className={cn(
-            "bg-teal-gray-200 hover:bg-teal-gray-400 group relative overflow-hidden transition-colors focus:ring-2 focus:ring-teal-300 focus:outline-none focus:ring-inset",
+            "bg-teal-gray-200 hover:bg-teal-gray-400 group relative overflow-hidden transition-colors focus:ring-2 focus:outline-none focus:ring-inset",
+            error ? "focus:ring-error-400" : "focus:ring-teal-300",
             variantClasses[variant],
             variant === "logo" && previewUrl && "border-teal-gray-150 border",
             className,
