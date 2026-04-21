@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 
+import Header from "@/components/header/Header"
 import SideBar from "@/components/sidebar/SideBar"
 import { MatchingSegmentRegion } from "@/shared/ui/segment/MatchingSegmentRegion"
 
@@ -10,9 +11,7 @@ export const Route = createFileRoute("/matching")({
 function MatchingLayout() {
   return (
     <main className="h-full min-h-screen w-full">
-      <div className="bg-teal-gray-100 flex h-18 w-full items-center pl-10">
-        {/* 추후 헤더 컴포넌트로 교체 */}
-      </div>
+      <Header />
       <div className="flex w-full">
         <SideBar />
         <div className="flex min-w-0 flex-1 flex-col">
