@@ -44,21 +44,18 @@ const notices: NoticeItem[] = [
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
-    variant: "accent",
   },
   {
     id: "2",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
-    variant: "accent",
   },
   {
     id: "3",
     title: "임시 공지",
     date: "0000.00.00",
     chip: "필독",
-    variant: "accent",
   },
   {
     id: "4",
@@ -82,25 +79,21 @@ const notices: NoticeItem[] = [
     id: "7",
     title: "임시 공지",
     date: "0000.00.00",
-    variant: "muted",
   },
   {
     id: "8",
     title: "임시 공지",
     date: "0000.00.00",
-    variant: "muted",
   },
   {
     id: "9",
     title: "임시 공지",
     date: "0000.00.00",
-    variant: "muted",
   },
   {
     id: "10",
     title: "임시 공지",
     date: "0000.00.00",
-    variant: "muted",
   },
 ]
 

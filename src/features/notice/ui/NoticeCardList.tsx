@@ -9,7 +9,6 @@ export type NoticeItem = {
   title: string
   date: string
   chip?: string
-  variant?: "default" | "muted" | "accent"
 }
 
 // TODO: 공지 API 응답 형식에 맞추어 수정
@@ -36,6 +35,8 @@ export function NoticeCardList({
     <div className="flex w-full flex-col">
       {notices.map((notice, index) => {
         const isExpanded = expandedIndex === index
+        const cardVariant =
+          expandedIndex === null ? "default" : isExpanded ? "accent" : "muted"
 
         return (
           <div
@@ -46,7 +47,7 @@ export function NoticeCardList({
               title={notice.title}
               date={notice.date}
               chip={notice.chip}
-              variant={notice.variant}
+              variant={cardVariant}
               canManage={canManage}
               expanded={isExpanded}
               onExpandedChange={(nextExpanded) => {
