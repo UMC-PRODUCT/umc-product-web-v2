@@ -2,7 +2,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
-import { FilterDropdown, ProjectSearchField } from "@/features/project/list"
+import {
+  FilterDropdown,
+  MatchingProjectCard,
+  MOCK_MATCHING_PROJECTS,
+  ProjectSearchField,
+} from "@/features/project/list"
 
 export const Route = createFileRoute("/matching/projects/")({
   component: MatchingProjectsListPage,
@@ -30,7 +35,7 @@ function MatchingProjectsListPage() {
           </span>
         </div>
 
-        <div className="flex items-start justify-between self-stretch">
+        <div className="mb-3 flex items-start justify-between self-stretch">
           <ProjectSearchField />
           <div className="flex items-center gap-2">
             {PROJECT_LIST_FILTERS.map(({ id, label }) => (
@@ -49,6 +54,14 @@ function MatchingProjectsListPage() {
               />
             ))}
           </div>
+        </div>
+
+        <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-3">
+          {MOCK_MATCHING_PROJECTS.map((project) => (
+            <div key={project.id} className="min-w-0">
+              <MatchingProjectCard variant="default" data={project} />
+            </div>
+          ))}
         </div>
       </div>
     </section>
