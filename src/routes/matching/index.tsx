@@ -118,6 +118,10 @@ function TeamMatchingAnnouncePage() {
     })
   }
 
+  const handleNoticePublishClick = () => {
+    navigate({ to: "/matching/notice-publish" })
+  }
+
   return (
     <section className="w-full pt-8">
       <div className="border-teal-gray-100 flex min-h-213 w-full flex-col items-center justify-between rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
@@ -144,6 +148,7 @@ function TeamMatchingAnnouncePage() {
                   variant="fill"
                   color="brand"
                   size="m"
+                  onClick={handleNoticePublishClick}
                   className="w-26.5 items-center gap-1 py-3 pr-4 pl-3"
                 >
                   <PlusIcon className="h-4 w-4" />

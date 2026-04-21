@@ -57,7 +57,7 @@ const notices: NoticeItem[] = [
   },
 ]
 
-export const Route = createFileRoute("/matching/projects/announce")({
+export const Route = createFileRoute("/matching/projects/announce/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
     return {
       chapter: isChapter(search.chapter) ? search.chapter : DEFAULT_CHAPTER,
@@ -77,6 +77,12 @@ function ProjectSettingsAnnouncePage() {
     navigate({
       search: (prev) => ({ ...prev, chapter: nextChapter }),
       replace: true,
+    })
+  }
+
+  const handleNoticePublishClick = () => {
+    navigate({
+      to: "/matching/projects/announce/notice-publish",
     })
   }
 
@@ -106,6 +112,7 @@ function ProjectSettingsAnnouncePage() {
                   variant="fill"
                   color="brand"
                   size="m"
+                  onClick={handleNoticePublishClick}
                   className="w-26.5 items-center gap-1 py-3 pr-4 pl-3"
                 >
                   <PlusIcon className="h-4 w-4" />
