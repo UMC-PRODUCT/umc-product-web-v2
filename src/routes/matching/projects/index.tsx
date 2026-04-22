@@ -1,15 +1,8 @@
+// 프로젝트 목록 페이지
 import { createFileRoute } from "@tanstack/react-router"
+
+import { MatchingProjectsListPage } from "@/features/project/list"
 
 export const Route = createFileRoute("/matching/projects/")({
   component: MatchingProjectsListPage,
 })
-
-function MatchingProjectsListPage() {
-  return (
-    <section className="flex w-full flex-col pt-10">
-      <p className="text-body-2-regular text-teal-gray-600">
-        프로젝트 목록 (준비 중)
-      </p>
-    </section>
-  )
-}

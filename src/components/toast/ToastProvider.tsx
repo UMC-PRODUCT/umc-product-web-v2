@@ -102,13 +102,19 @@ export function ToastProvider() {
   // 최신 MAX_VISIBLE개 표시, newest가 front
   const visible = toasts.slice(-MAX_VISIBLE)
 
+  /** 토스트가 없을 때도 고정 래퍼가 남으면 하단 중앙 400×50 영역이 투명 클릭 레이어가 됨 */
+  if (visible.length === 0) return null
+
   return (
     <div
-      className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2"
+      className="pointer-events-none fixed bottom-24 left-1/2 z-50 -translate-x-1/2"
       aria-live="polite"
       aria-label="알림 목록"
     >
-      <div className="relative" style={{ height: "50px", width: "400px" }}>
+      <div
+        className="pointer-events-none relative"
+        style={{ height: "50px", width: "400px" }}
+      >
         {visible.map((toast, i) => {
           const fromFront = visible.length - 1 - i
           const translateY = -fromFront * STACK_OFFSET
@@ -119,7 +125,7 @@ export function ToastProvider() {
           return (
             <div
               key={toast.id}
-              className="absolute bottom-0 left-0 origin-bottom transition-all duration-300"
+              className="pointer-events-auto absolute bottom-0 left-0 origin-bottom transition-all duration-300"
               style={{
                 transform: `translateY(${translateY}px) scale(${scale})`,
                 zIndex,
