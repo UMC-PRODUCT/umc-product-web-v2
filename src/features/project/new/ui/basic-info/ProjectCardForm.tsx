@@ -10,7 +10,7 @@ import type {
   UseFormWatch,
 } from "react-hook-form"
 
-import type { BasicInfoFormData } from "../model/basicInfoSchema"
+import type { BasicInfoFormData } from "../../model/basicInfoSchema"
 
 const MAX_LENGTH = 200
 const MAX_LINES = 10

@@ -1,10 +1,272 @@
-export function ApplicationForm() {
+import { useState } from "react"
+
+import { useToastStore } from "@/components/toast/useToastStore"
+import {
+  getFieldTypePatch,
+  validateQuestion,
+} from "@/features/project/new/model/applicationQuestion"
+import { useApplicationForm } from "@/features/project/new/model/useApplicationForm"
+import { cn } from "@/shared/lib/utils"
+import { Button } from "@/shared/ui/Button"
+import { FloatingActionButton } from "@/shared/ui/button/FloatingActionButton"
+import { FormHeader } from "@/shared/ui/FormHeader"
+
+import { QuestionCard } from "./QuestionCard"
+import { QuestionListContainer } from "./QuestionListContainer"
+import { QuestionTypeToolbar } from "./QuestionTypeToolbar"
+
+interface ApplicationFormProps {
+  onPrev?: () => void
+  onNext?: () => void
+}
+
+export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
+  const addToast = useToastStore((s) => s.addToast)
+  const form = useApplicationForm()
+  const [savedSnapshot, setSavedSnapshot] = useState<string | null>(null)
+  const [hasSavedOnce, setHasSavedOnce] = useState(false)
+  const [errorQuestionIds, setErrorQuestionIds] = useState<string[]>([])
+
+  const currentSnapshot = JSON.stringify({
+    commonQuestions: form.commonQuestions,
+    sections: form.sections,
+  })
+
+  const hasUnsavedChanges = savedSnapshot
+    ? currentSnapshot !== savedSnapshot
+    : true
+
+  const canTempSave = hasUnsavedChanges
+  const tempSaveLabel =
+    hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
+
+  const handleTempSave = () => {
+    setSavedSnapshot(currentSnapshot)
+    setHasSavedOnce(true)
+    addToast({
+      message: "작성한 내용이 임시 저장되었습니다.",
+      color: "primary",
+      variant: "deep",
+      type: "default",
+      duration: 3,
+    })
+  }
+
+  const handlePrev = () => {
+    if (hasUnsavedChanges) {
+      addToast({
+        message: "저장되지 않은 내용이 있습니다. 임시 저장 후 이동해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+      return
+    }
+    onPrev?.()
+  }
+
+  const handleNext = () => {
+    for (const section of form.sections) {
+      if (!section.isEnabled) continue
+      if (section.questions.length === 0) {
+        addToast({
+          message: `${section.name} 섹션에 질문을 추가해주세요!`,
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3,
+        })
+        return
+      }
+    }
+
+    const errors: { questionId: string; message: string }[] = []
+    for (const [i, q] of form.commonQuestions.entries()) {
+      const err = validateQuestion(q, "공통 질문", i + 1)
+      if (err) errors.push(err)
+    }
+    for (const section of form.sections) {
+      if (!section.isEnabled) continue
+      for (const [i, q] of section.questions.entries()) {
+        const err = validateQuestion(q, section.name, i + 1)
+        if (err) errors.push(err)
+      }
+    }
+
+    const firstError = errors[0]
+    if (firstError) {
+      setErrorQuestionIds(errors.map((e) => e.questionId))
+      form.setFocusedId(firstError.questionId)
+      addToast({
+        message: firstError.message,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+      return
+    }
+
+    setErrorQuestionIds([])
+    addToast({
+      message: "작성한 내용이 저장되었습니다.",
+      color: "primary",
+      variant: "deep",
+      type: "default",
+      duration: 3,
+    })
+    onNext?.()
+  }
+
+  const focusedCommon = form.commonQuestions.find(
+    (q) => q.id === form.focusedId,
+  )
+  const focusedSectionEntry = form.sections
+    .flatMap((s) => s.questions.map((q) => ({ section: s, question: q })))
+    .find(({ question }) => question.id === form.focusedId)
+
   return (
-    <div className="flex flex-col gap-4 py-4">
-      <span className="text-heading-6-semibold text-teal-gray-800">
-        지원 문항
-      </span>
-      <div className="bg-teal-gray-50 text-body-2-regular text-teal-gray-500 flex h-40 items-center justify-center rounded-lg"></div>
+    <div className={cn("flex flex-col gap-4 py-4")}>
+      <div className="mx-auto flex w-full max-w-225 flex-col gap-6">
+        <div className="flex flex-col">
+          <FormHeader variant="common" />
+          <QuestionListContainer className="pt-0.1">
+            {form.commonQuestions.map((q, i) => (
+              <QuestionCard
+                key={q.id}
+                question={q}
+                index={i}
+                focused={form.focusedId === q.id}
+                isError={errorQuestionIds.includes(q.id)}
+                onFocus={() => form.setFocusedId(q.id)}
+                onUpdate={(patch) => {
+                  form.updateCommonQuestion(q.id, patch)
+                  setErrorQuestionIds((prev) =>
+                    prev.filter((id) => id !== q.id),
+                  )
+                }}
+                onDelete={() => form.deleteCommonQuestion(q.id)}
+              />
+            ))}
+          </QuestionListContainer>
+          {focusedCommon && (
+            <QuestionTypeToolbar
+              selected={focusedCommon.fieldType}
+              onChange={(fieldType) =>
+                form.updateCommonQuestion(
+                  focusedCommon.id,
+                  getFieldTypePatch(fieldType),
+                )
+              }
+              onAddAfter={() => form.addCommonQuestion(focusedCommon.id)}
+            />
+          )}
+        </div>
+
+        {form.sections.map((section) => (
+          <div key={section.id} className="flex flex-col">
+            <FormHeader
+              variant="part"
+              partName={section.name}
+              toggleChecked={section.isEnabled}
+              onToggleChange={(enabled) => {
+                form.updateSection(section.id, { isEnabled: enabled })
+                if (enabled && section.questions.length === 0) {
+                  form.appendSectionQuestion(section.id)
+                }
+              }}
+            />
+            {section.isEnabled && (
+              <>
+                <QuestionListContainer>
+                  {section.questions.map((q, i) => (
+                    <QuestionCard
+                      key={q.id}
+                      question={q}
+                      index={i}
+                      focused={form.focusedId === q.id}
+                      isError={errorQuestionIds.includes(q.id)}
+                      onFocus={() => form.setFocusedId(q.id)}
+                      onUpdate={(patch) => {
+                        form.updateSectionQuestion(section.id, q.id, patch)
+                        setErrorQuestionIds((prev) =>
+                          prev.filter((id) => id !== q.id),
+                        )
+                      }}
+                      onDelete={() =>
+                        form.deleteSectionQuestion(section.id, q.id)
+                      }
+                    />
+                  ))}
+                  {section.questions.length === 0 && (
+                    <div className="flex items-center justify-center py-6">
+                      <FloatingActionButton
+                        aria-label="질문 추가"
+                        onClick={() => form.appendSectionQuestion(section.id)}
+                      />
+                    </div>
+                  )}
+                </QuestionListContainer>
+                {focusedSectionEntry?.section.id === section.id && (
+                  <QuestionTypeToolbar
+                    selected={focusedSectionEntry.question.fieldType}
+                    onChange={(fieldType) =>
+                      form.updateSectionQuestion(
+                        section.id,
+                        focusedSectionEntry.question.id,
+                        getFieldTypePatch(fieldType),
+                      )
+                    }
+                    onAddAfter={() =>
+                      form.addSectionQuestion(
+                        section.id,
+                        focusedSectionEntry.question.id,
+                      )
+                    }
+                  />
+                )}
+              </>
+            )}
+          </div>
+        ))}
+
+        <div className="mb-21 flex flex-col gap-1">
+          <p className="text-body-2-regular text-teal-gray-500 whitespace-pre">
+            {`* 지원자의 파트에 따라 해당하는 섹션의 질문만 노출됩니다.\n* 개발(FE/BE) 섹션의 문항은 추후 기획-개발자 매칭 전 수정이 가능합니다.`}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex justify-between">
+        <Button
+          type="button"
+          variant="weak"
+          color="primary"
+          disabled={!canTempSave}
+          onClick={handleTempSave}
+        >
+          {tempSaveLabel}
+        </Button>
+        <div className="flex items-center gap-4">
+          <Button
+            type="button"
+            variant="weak"
+            color="neutral"
+            onClick={handlePrev}
+          >
+            이전
+          </Button>
+          <Button
+            type="button"
+            variant="fill"
+            color="primary"
+            onClick={handleNext}
+          >
+            등록하기
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -6,7 +6,7 @@ import {
   BasicInfoForm,
   RecruitInfoForm,
   Stepper,
-} from "@/features/project/register"
+} from "@/features/project/new"
 
 export const Route = createFileRoute("/matching/projects/new")({
   component: ProjectRegisterPage,
@@ -34,7 +34,12 @@ function ProjectRegisterPage() {
             onNext={() => setStep(3)}
           />
         )}
-        {step === 3 && <ApplicationForm />}
+        {step === 3 && (
+          <ApplicationForm
+            onPrev={() => setStep(2)}
+            onNext={() => setStep(4)}
+          />
+        )}
       </div>
     </section>
   )

@@ -14,11 +14,11 @@ import {
 import {
   type BasicInfoFormData,
   basicInfoSchema,
-} from "../model/basicInfoSchema"
-import { useProjectRegisterStore } from "../model/useProjectRegisterStore"
+} from "../../model/basicInfoSchema"
+import { useProjectRegisterStore } from "../../model/useProjectRegisterStore"
+import { SectionHeader } from "../shared/SectionHeader"
 import { PlanningLinkInput } from "./PlanningLinkInput"
 import { ProjectCardForm } from "./ProjectCardForm"
-import { SectionHeader } from "./SectionHeader"
 
 interface BasicInfoFormProps {
   onNext: () => void

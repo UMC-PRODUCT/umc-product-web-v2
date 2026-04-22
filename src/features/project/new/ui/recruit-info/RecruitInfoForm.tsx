@@ -6,7 +6,7 @@ import { Counter } from "@/shared/ui/Counter"
 import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
 
-import { SectionHeader } from "./SectionHeader"
+import { SectionHeader } from "../shared/SectionHeader"
 
 const ROLES = [
   { key: "design", label: "Design", stacks: [] },

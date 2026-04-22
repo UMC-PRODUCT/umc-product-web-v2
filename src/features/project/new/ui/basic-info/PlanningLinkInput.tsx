@@ -1,6 +1,6 @@
 import type { FieldError, UseFormRegister } from "react-hook-form"
 
-import type { BasicInfoFormData } from "../model/basicInfoSchema"
+import type { BasicInfoFormData } from "../../model/basicInfoSchema"
 
 interface PlanningLinkInputProps {
   register: UseFormRegister<BasicInfoFormData>
