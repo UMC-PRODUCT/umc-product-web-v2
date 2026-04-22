@@ -8,7 +8,7 @@ import {
   useState,
 } from "react"
 
-import DownChevronIcon from "@/shared/assets/icon/chevron/SideBar/DownChevronIcon"
+import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
 
