@@ -1,12 +1,5 @@
 import { Dialog } from "radix-ui"
-import {
-  createContext,
-  forwardRef,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react"
+import { createContext, forwardRef, useContext } from "react"
 
 import { cn } from "@/shared/lib/utils"
 import {
@@ -16,20 +9,6 @@ import {
 
 const ModalLayerContext = createContext(0)
 
-const modalLayers: number[] = []
-let nextModalLayer = 1
-
-function registerModalLayer() {
-  const layer = nextModalLayer++
-  modalLayers.push(layer)
-  return layer
-}
-
-function unregisterModalLayer(layer: number) {
-  const index = modalLayers.indexOf(layer)
-  if (index >= 0) modalLayers.splice(index, 1)
-}
-
 function useModalLayer() {
   return useContext(ModalLayerContext)
 }
@@ -37,16 +16,12 @@ function useModalLayer() {
 type ModalRootProps = React.ComponentPropsWithoutRef<typeof Dialog.Root>
 
 function ModalRoot({ children, ...props }: ModalRootProps) {
-  const [layer] = useState(() => registerModalLayer())
-
-  useEffect(() => {
-    return () => unregisterModalLayer(layer)
-  }, [layer])
-
-  const contextValue = useMemo(() => layer, [layer])
+  // 모달은 부모 레이어 + 1로 계산해 중첩 모달의 stack 순서를 보장함.
+  const parentLayer = useModalLayer()
+  const layer = parentLayer + 1
 
   return (
-    <ModalLayerContext.Provider value={contextValue}>
+    <ModalLayerContext.Provider value={layer}>
       <Dialog.Root {...props}>{children}</Dialog.Root>
     </ModalLayerContext.Provider>
   )

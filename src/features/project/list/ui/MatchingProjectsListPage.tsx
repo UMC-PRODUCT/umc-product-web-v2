@@ -65,46 +65,33 @@ export function MatchingProjectsListPage() {
         <div className="relative z-30 mb-3 flex items-start justify-between self-stretch">
           <ProjectSearchField />
           <div className="flex items-center gap-2">
-            {filterDescriptors.map((filter) =>
-              filter.multiSelect ? (
-                <FilterDropdown
-                  key={filter.id}
-                  label={filter.label}
-                  open={openFilterId === filter.id}
-                  onClick={() =>
-                    setOpenFilterId((prev) =>
-                      prev === filter.id ? null : filter.id,
-                    )
-                  }
-                  options={filter.options}
-                  onSelect={filter.onSelect}
-                  selectedLabel={filter.selectedLabel}
-                  multiSelect
-                  selectedValues={filter.selectedValues ?? []}
-                  onRequestClose={() => setOpenFilterId(null)}
-                  dropdownClassName={filter.dropdownClassName}
-                  className={filter.className}
-                />
-              ) : (
-                <FilterDropdown
-                  key={filter.id}
-                  label={filter.label}
-                  open={openFilterId === filter.id}
-                  onClick={() =>
-                    setOpenFilterId((prev) =>
-                      prev === filter.id ? null : filter.id,
-                    )
-                  }
-                  options={filter.options}
-                  onSelect={filter.onSelect}
-                  selectedLabel={filter.selectedLabel}
-                  selectedValue={filter.selectedValue}
-                  onRequestClose={() => setOpenFilterId(null)}
-                  dropdownClassName={filter.dropdownClassName}
-                  className={filter.className}
-                />
-              ),
-            )}
+            {filterDescriptors.map((filter) => (
+              <FilterDropdown
+                key={filter.id}
+                label={filter.label}
+                open={openFilterId === filter.id}
+                onClick={() =>
+                  setOpenFilterId((prev) =>
+                    prev === filter.id ? null : filter.id,
+                  )
+                }
+                options={filter.options}
+                onSelect={filter.onSelect}
+                selectedLabel={filter.selectedLabel}
+                onRequestClose={() => setOpenFilterId(null)}
+                dropdownClassName={filter.dropdownClassName}
+                className={filter.className}
+                {...(filter.multiSelect
+                  ? {
+                      multiSelect: true,
+                      selectedValues: filter.selectedValues ?? [],
+                    }
+                  : {
+                      multiSelect: false,
+                      selectedValue: filter.selectedValue,
+                    })}
+              />
+            ))}
           </div>
         </div>
 
