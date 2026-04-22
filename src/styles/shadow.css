@@ -9,6 +9,9 @@
   --shadow-drop-neutral-3: 0px 4px 16px 0px #eff0f04d;
   --shadow-drop-neutral-4: 0px 4px 16px 0px #eceeee;
 
+  /* Pagination custom shadow */
+  --shadow-pagination-num-hover: -1px 2.5px 4px 0px #e4e4e433;
+
   --shadow-drop-primary-1:
     13px 0px 14px 0px #d3d8d866, 0px 0px 10px 0px #9ca3a34d,
     0px 1px 2px 0px #63c4b833;
@@ -41,6 +44,10 @@
 
 @utility shadow-drop-neutral-4 {
   box-shadow: var(--shadow-drop-neutral-4);
+}
+
+@utility shadow-pagination-num-hover {
+  box-shadow: var(--shadow-pagination-num-hover);
 }
 
 @utility shadow-drop-primary-1 {

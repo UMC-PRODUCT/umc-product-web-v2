@@ -143,6 +143,13 @@ export function useMatchingProjectListFilters() {
     [selectedBranch, selectedParts, selectedRecruitStatus, selectedSchool],
   )
 
+  const filterKey = [
+    selectedBranch ?? "",
+    selectedSchool ?? "",
+    [...selectedParts].sort().join("|"),
+    selectedRecruitStatus ?? "",
+  ].join("\u0001")
+
   const handlePartSelect = useCallback((value: string) => {
     setSelectedParts((prev) =>
       prev.includes(value)
@@ -202,5 +209,6 @@ export function useMatchingProjectListFilters() {
     setOpenFilterId,
     filteredProjects,
     filterDescriptors,
+    filterKey,
   }
 }

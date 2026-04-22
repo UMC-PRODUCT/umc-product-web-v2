@@ -1,11 +1,40 @@
+import { useEffect, useMemo, useState } from "react"
+
+import { Pagination } from "@/shared/ui/Pagination"
+
 import { useMatchingProjectListFilters } from "../model/matchingProjectList"
 import { FilterDropdown } from "./FilterDropDown"
 import { MatchingProjectCard } from "./MatchingProjectCard"
 import { ProjectSearchField } from "./ProjectSearchField"
 
+const PROJECT_LIST_PAGE_SIZE = 15
+
 export function MatchingProjectsListPage() {
-  const { openFilterId, setOpenFilterId, filteredProjects, filterDescriptors } =
-    useMatchingProjectListFilters()
+  const {
+    openFilterId,
+    setOpenFilterId,
+    filteredProjects,
+    filterDescriptors,
+    filterKey,
+  } = useMatchingProjectListFilters()
+
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    setPage(1)
+  }, [filterKey])
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProjects.length / PROJECT_LIST_PAGE_SIZE),
+  )
+
+  const displayPage = Math.min(Math.max(1, page), totalPages)
+
+  const paginatedProjects = useMemo(() => {
+    const start = (displayPage - 1) * PROJECT_LIST_PAGE_SIZE
+    return filteredProjects.slice(start, start + PROJECT_LIST_PAGE_SIZE)
+  }, [filteredProjects, displayPage])
 
   return (
     <section className="relative flex w-full flex-col items-start justify-start pt-8">
@@ -17,7 +46,7 @@ export function MatchingProjectsListPage() {
           onClick={() => setOpenFilterId(null)}
         />
       )}
-      <div className="border-teal-gray-150 relative z-30 flex h-full min-w-242 flex-col gap-5 rounded-xl border bg-white px-8.5 py-8">
+      <div className="border-teal-gray-150 relative z-30 flex h-full min-w-242 flex-col gap-5 rounded-xl border bg-white px-8.5 pt-8 pb-10">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 목록
@@ -74,12 +103,21 @@ export function MatchingProjectsListPage() {
         </div>
 
         <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-3">
-          {filteredProjects.map((project) => (
+          {paginatedProjects.map((project) => (
             <div key={project.id} className="min-w-0">
               <MatchingProjectCard variant="default" data={project} />
             </div>
           ))}
         </div>
+
+        {filteredProjects.length > 0 ? (
+          <Pagination
+            className="mt-5 self-center"
+            currentPage={displayPage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        ) : null}
       </div>
     </section>
   )
