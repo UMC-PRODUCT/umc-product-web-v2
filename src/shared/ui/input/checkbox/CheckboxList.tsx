@@ -1,5 +1,7 @@
 import { cn } from "@/shared/lib/utils"
 
+import { CheckboxIndicator } from "./CheckboxIndicator"
+
 import type { ComponentProps } from "react"
 
 interface CheckboxListProps extends Omit<ComponentProps<"button">, "onChange"> {
@@ -27,27 +29,7 @@ export function CheckboxList({
       )}
       {...props}
     >
-      <span
-        aria-hidden="true"
-        className={cn(
-          "inline-flex size-5 shrink-0 items-center justify-center rounded-[6px]",
-          checked
-            ? "bg-teal-500"
-            : "border-teal-gray-300 border-[1.5px] bg-white",
-        )}
-      >
-        {checked && (
-          <svg width={12} height={9} viewBox="0 0 12 9" fill="none">
-            <path
-              d="M0.898438 4.12921L4.39844 7.89844L10.8984 0.898438"
-              stroke="white"
-              strokeWidth={1.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
-      </span>
+      <CheckboxIndicator checked={checked} variant="list" />
       <span
         className={cn(
           "text-body-2-regular",

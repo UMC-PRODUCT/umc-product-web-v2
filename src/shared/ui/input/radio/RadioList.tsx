@@ -1,5 +1,7 @@
 import { cn } from "@/shared/lib/utils"
 
+import { RadioIndicator } from "./RadioIndicator"
+
 import type { ComponentProps } from "react"
 
 interface RadioListProps extends Omit<ComponentProps<"button">, "onChange"> {
@@ -27,17 +29,7 @@ export function RadioList({
       )}
       {...props}
     >
-      <span
-        aria-hidden="true"
-        className={cn(
-          "inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px]",
-          checked
-            ? "border-teal-500 bg-white"
-            : "border-teal-gray-400 bg-white",
-        )}
-      >
-        {checked && <span className="size-3 rounded-full bg-teal-500" />}
-      </span>
+      <RadioIndicator checked={checked} variant="list" />
       <span
         className={cn(
           "text-body-2-regular",
