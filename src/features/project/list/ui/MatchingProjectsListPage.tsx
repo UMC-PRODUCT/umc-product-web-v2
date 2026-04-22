@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react"
 
+import { Modal } from "@/shared/ui/Modal"
 import { Pagination } from "@/shared/ui/Pagination"
 
 import { useMatchingProjectListFilters } from "../model/matchingProjectList"
 import { FilterDropdown } from "./FilterDropDown"
 import { MatchingProjectCard } from "./MatchingProjectCard"
+import { ProjectDetailCard } from "./ProjectDetailCard"
 import { ProjectSearchField } from "./ProjectSearchField"
+
+import type { MatchingProjectMock } from "../model/matchingProject.mock"
 
 const PROJECT_LIST_PAGE_SIZE = 15
 
@@ -19,6 +23,8 @@ export function MatchingProjectsListPage() {
   } = useMatchingProjectListFilters()
 
   const [page, setPage] = useState(1)
+  const [selectedProject, setSelectedProject] =
+    useState<MatchingProjectMock | null>(null)
 
   useEffect(() => {
     setPage(1)
@@ -105,7 +111,13 @@ export function MatchingProjectsListPage() {
         <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-3">
           {paginatedProjects.map((project) => (
             <div key={project.id} className="min-w-0">
-              <MatchingProjectCard variant="default" data={project} />
+              <button
+                type="button"
+                className="w-full text-left"
+                onClick={() => setSelectedProject(project)}
+              >
+                <MatchingProjectCard variant="default" data={project} />
+              </button>
             </div>
           ))}
         </div>
@@ -119,6 +131,22 @@ export function MatchingProjectsListPage() {
           />
         ) : null}
       </div>
+
+      <Modal.Root
+        open={Boolean(selectedProject)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedProject(null)
+        }}
+      >
+        <Modal.Portal>
+          <Modal.Overlay tone="deep" />
+          <Modal.Content>
+            {selectedProject ? (
+              <ProjectDetailCard data={selectedProject} />
+            ) : null}
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
     </section>
   )
 }
