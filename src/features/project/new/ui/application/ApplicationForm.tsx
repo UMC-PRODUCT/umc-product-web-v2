@@ -109,13 +109,6 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
     }
 
     setErrorQuestionIds([])
-    addToast({
-      message: "작성한 내용이 저장되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3,
-    })
     onNext?.()
   }
 

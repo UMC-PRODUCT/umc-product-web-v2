@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import {
   ApplicationForm,
   BasicInfoForm,
@@ -14,6 +15,20 @@ export const Route = createFileRoute("/matching/projects/new")({
 
 function ProjectRegisterPage() {
   const [step, setStep] = useState(1)
+  const navigate = useNavigate()
+  const addToast = useToastStore((s) => s.addToast)
+
+  const handleRegister = async () => {
+    // TODO: 프로젝트 등록 API 호출
+    addToast({
+      message: "프로젝트가 성공적으로 등록 되었습니다.",
+      color: "primary",
+      variant: "deep",
+      type: "default",
+      duration: 3,
+    })
+    await navigate({ to: "/matching/applications", replace: true })
+  }
 
   return (
     <section className="flex w-full flex-col items-start justify-start pt-10">
@@ -35,10 +50,7 @@ function ProjectRegisterPage() {
           />
         )}
         {step === 3 && (
-          <ApplicationForm
-            onPrev={() => setStep(2)}
-            onNext={() => setStep(4)}
-          />
+          <ApplicationForm onPrev={() => setStep(2)} onNext={handleRegister} />
         )}
       </div>
     </section>
