@@ -10,7 +10,7 @@ import type {
   UseFormWatch,
 } from "react-hook-form"
 
-import type { BasicInfoFormData } from "../model/basicInfoSchema"
+import type { BasicInfoFormData } from "../../model/basicInfoSchema"
 
 const MAX_LENGTH = 200
 const MAX_LINES = 10
@@ -19,6 +19,7 @@ interface ProjectCardFormProps {
   nickname: string
   name: string
   university: string
+  subPm?: { nickname: string; name: string; university: string } | null
   register: UseFormRegister<BasicInfoFormData>
   setValue: UseFormSetValue<BasicInfoFormData>
   watch: UseFormWatch<BasicInfoFormData>
@@ -30,6 +31,7 @@ export function ProjectCardForm({
   nickname,
   name,
   university,
+  subPm,
   register,
   setValue,
   watch,
@@ -80,14 +82,25 @@ export function ProjectCardForm({
             placeholder="서비스 제목을 입력해주세요"
             aria-invalid={!!errors.title}
             {...register("title")}
-            className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 w-4/7 bg-transparent px-1 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2 aria-invalid:focus:ring-teal-600"
+            className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 aria-invalid:focus:ring-error-500 w-4/7 bg-transparent px-1 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
           />
-          <div className="text-body-2-regular text-teal-gray-500 flex items-center gap-2">
-            <span>
-              {nickname}/{name}
-            </span>
-            <span>·</span>
-            <span>{university}</span>
+          <div className="text-body-2-regular text-teal-gray-500 flex flex-col items-end gap-0.5">
+            <div className="flex items-center gap-2">
+              <span>
+                {nickname}/{name}
+              </span>
+              <span>·</span>
+              <span>{university}</span>
+            </div>
+            {subPm && (
+              <div className="flex items-center gap-2">
+                <span>
+                  {subPm.nickname}/{subPm.name}
+                </span>
+                <span>·</span>
+                <span>{subPm.university}</span>
+              </div>
+            )}
           </div>
         </div>
         <label htmlFor="project-description" className="sr-only">
@@ -97,8 +110,8 @@ export function ProjectCardForm({
           id="project-description"
           aria-invalid={!!errors.description}
           aria-describedby="description-count"
-          className="placeholder:text-teal-gray-600 text-body-2-regular h-25 w-full resize-none p-2 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2 aria-invalid:focus:ring-teal-600"
-          placeholder={`프로젝트 한 줄 소개를 적어주세요.\n공백 포함 200자까지 가능합니다.\n 줄 바꾸기도 가능합니다.`}
+          className="placeholder:text-teal-gray-600 text-body-2-regular aria-invalid:focus:ring-error-500 h-25 w-full resize-none p-2 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
+          placeholder={`프로젝트 한 줄 소개를 적어주세요.\n최대 10줄 및 공백 포함 최대 200까지 입력 가능합니다.`}
           maxLength={MAX_LENGTH}
           onKeyDown={(e) => {
             if (

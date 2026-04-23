@@ -14,9 +14,19 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
+import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
+import { Route as TestToggleRouteImport } from './routes/test/toggle'
 import { Route as TestToastRouteImport } from './routes/test/toast'
+import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
+import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
+import { Route as TestMemberSearchBarRouteImport } from './routes/test/member-search-bar'
+import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
+import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
+import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
+import { Route as TestCounterRouteImport } from './routes/test/counter'
 import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestButtonRouteImport } from './routes/test/button'
+import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
@@ -48,9 +58,55 @@ const TestTooltipRoute = TestTooltipRouteImport.update({
   path: '/test/tooltip',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestToggleInputsRoute = TestToggleInputsRouteImport.update({
+  id: '/test/toggle-inputs',
+  path: '/test/toggle-inputs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestToggleRoute = TestToggleRouteImport.update({
+  id: '/test/toggle',
+  path: '/test/toggle',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestToastRoute = TestToastRouteImport.update({
   id: '/test/toast',
   path: '/test/toast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestQuestionFormRoute = TestQuestionFormRouteImport.update({
+  id: '/test/question-form',
+  path: '/test/question-form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestOptionButtonRoute = TestOptionButtonRouteImport.update({
+  id: '/test/option-button',
+  path: '/test/option-button',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestMemberSearchBarRoute = TestMemberSearchBarRouteImport.update({
+  id: '/test/member-search-bar',
+  path: '/test/member-search-bar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestFormHeaderRoute = TestFormHeaderRouteImport.update({
+  id: '/test/form-header',
+  path: '/test/form-header',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestFloatingActionButtonRoute =
+  TestFloatingActionButtonRouteImport.update({
+    id: '/test/floating-action-button',
+    path: '/test/floating-action-button',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const TestFieldTypeButtonRoute = TestFieldTypeButtonRouteImport.update({
+  id: '/test/field-type-button',
+  path: '/test/field-type-button',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestCounterRoute = TestCounterRouteImport.update({
+  id: '/test/counter',
+  path: '/test/counter',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestChipRoute = TestChipRouteImport.update({
@@ -61,6 +117,11 @@ const TestChipRoute = TestChipRouteImport.update({
 const TestButtonRoute = TestButtonRouteImport.update({
   id: '/test/button',
   path: '/test/button',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestApplicationFormRoute = TestApplicationFormRouteImport.update({
+  id: '/test/application-form',
+  path: '/test/application-form',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchingRoundsRoute = MatchingRoundsRouteImport.update({
@@ -96,9 +157,19 @@ export interface FileRoutesByFullPath {
   '/matching': typeof MatchingRouteRouteWithChildren
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/rounds': typeof MatchingRoundsRoute
+  '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
+  '/test/counter': typeof TestCounterRoute
+  '/test/field-type-button': typeof TestFieldTypeButtonRoute
+  '/test/floating-action-button': typeof TestFloatingActionButtonRoute
+  '/test/form-header': typeof TestFormHeaderRoute
+  '/test/member-search-bar': typeof TestMemberSearchBarRoute
+  '/test/option-button': typeof TestOptionButtonRoute
+  '/test/question-form': typeof TestQuestionFormRoute
   '/test/toast': typeof TestToastRoute
+  '/test/toggle': typeof TestToggleRoute
+  '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRoute
@@ -110,9 +181,19 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/rounds': typeof MatchingRoundsRoute
+  '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
+  '/test/counter': typeof TestCounterRoute
+  '/test/field-type-button': typeof TestFieldTypeButtonRoute
+  '/test/floating-action-button': typeof TestFloatingActionButtonRoute
+  '/test/form-header': typeof TestFormHeaderRoute
+  '/test/member-search-bar': typeof TestMemberSearchBarRoute
+  '/test/option-button': typeof TestOptionButtonRoute
+  '/test/question-form': typeof TestQuestionFormRoute
   '/test/toast': typeof TestToastRoute
+  '/test/toggle': typeof TestToggleRoute
+  '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRoute
@@ -126,9 +207,19 @@ export interface FileRoutesById {
   '/matching': typeof MatchingRouteRouteWithChildren
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/rounds': typeof MatchingRoundsRoute
+  '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
+  '/test/counter': typeof TestCounterRoute
+  '/test/field-type-button': typeof TestFieldTypeButtonRoute
+  '/test/floating-action-button': typeof TestFloatingActionButtonRoute
+  '/test/form-header': typeof TestFormHeaderRoute
+  '/test/member-search-bar': typeof TestMemberSearchBarRoute
+  '/test/option-button': typeof TestOptionButtonRoute
+  '/test/question-form': typeof TestQuestionFormRoute
   '/test/toast': typeof TestToastRoute
+  '/test/toggle': typeof TestToggleRoute
+  '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRoute
@@ -143,9 +234,19 @@ export interface FileRouteTypes {
     | '/matching'
     | '/matching/applications'
     | '/matching/rounds'
+    | '/test/application-form'
     | '/test/button'
     | '/test/chip'
+    | '/test/counter'
+    | '/test/field-type-button'
+    | '/test/floating-action-button'
+    | '/test/form-header'
+    | '/test/member-search-bar'
+    | '/test/option-button'
+    | '/test/question-form'
     | '/test/toast'
+    | '/test/toggle'
+    | '/test/toggle-inputs'
     | '/test/tooltip'
     | '/matching/'
     | '/matching/projects/announce'
@@ -157,9 +258,19 @@ export interface FileRouteTypes {
     | '/admin'
     | '/matching/applications'
     | '/matching/rounds'
+    | '/test/application-form'
     | '/test/button'
     | '/test/chip'
+    | '/test/counter'
+    | '/test/field-type-button'
+    | '/test/floating-action-button'
+    | '/test/form-header'
+    | '/test/member-search-bar'
+    | '/test/option-button'
+    | '/test/question-form'
     | '/test/toast'
+    | '/test/toggle'
+    | '/test/toggle-inputs'
     | '/test/tooltip'
     | '/matching'
     | '/matching/projects/announce'
@@ -172,9 +283,19 @@ export interface FileRouteTypes {
     | '/matching'
     | '/matching/applications'
     | '/matching/rounds'
+    | '/test/application-form'
     | '/test/button'
     | '/test/chip'
+    | '/test/counter'
+    | '/test/field-type-button'
+    | '/test/floating-action-button'
+    | '/test/form-header'
+    | '/test/member-search-bar'
+    | '/test/option-button'
+    | '/test/question-form'
     | '/test/toast'
+    | '/test/toggle'
+    | '/test/toggle-inputs'
     | '/test/tooltip'
     | '/matching/'
     | '/matching/projects/announce'
@@ -186,9 +307,19 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRoute
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
+  TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
   TestChipRoute: typeof TestChipRoute
+  TestCounterRoute: typeof TestCounterRoute
+  TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
+  TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
+  TestFormHeaderRoute: typeof TestFormHeaderRoute
+  TestMemberSearchBarRoute: typeof TestMemberSearchBarRoute
+  TestOptionButtonRoute: typeof TestOptionButtonRoute
+  TestQuestionFormRoute: typeof TestQuestionFormRoute
   TestToastRoute: typeof TestToastRoute
+  TestToggleRoute: typeof TestToggleRoute
+  TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
 }
 
@@ -229,11 +360,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestTooltipRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/test/toggle-inputs': {
+      id: '/test/toggle-inputs'
+      path: '/test/toggle-inputs'
+      fullPath: '/test/toggle-inputs'
+      preLoaderRoute: typeof TestToggleInputsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/toggle': {
+      id: '/test/toggle'
+      path: '/test/toggle'
+      fullPath: '/test/toggle'
+      preLoaderRoute: typeof TestToggleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/test/toast': {
       id: '/test/toast'
       path: '/test/toast'
       fullPath: '/test/toast'
       preLoaderRoute: typeof TestToastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/question-form': {
+      id: '/test/question-form'
+      path: '/test/question-form'
+      fullPath: '/test/question-form'
+      preLoaderRoute: typeof TestQuestionFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/option-button': {
+      id: '/test/option-button'
+      path: '/test/option-button'
+      fullPath: '/test/option-button'
+      preLoaderRoute: typeof TestOptionButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/member-search-bar': {
+      id: '/test/member-search-bar'
+      path: '/test/member-search-bar'
+      fullPath: '/test/member-search-bar'
+      preLoaderRoute: typeof TestMemberSearchBarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/form-header': {
+      id: '/test/form-header'
+      path: '/test/form-header'
+      fullPath: '/test/form-header'
+      preLoaderRoute: typeof TestFormHeaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/floating-action-button': {
+      id: '/test/floating-action-button'
+      path: '/test/floating-action-button'
+      fullPath: '/test/floating-action-button'
+      preLoaderRoute: typeof TestFloatingActionButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/field-type-button': {
+      id: '/test/field-type-button'
+      path: '/test/field-type-button'
+      fullPath: '/test/field-type-button'
+      preLoaderRoute: typeof TestFieldTypeButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/counter': {
+      id: '/test/counter'
+      path: '/test/counter'
+      fullPath: '/test/counter'
+      preLoaderRoute: typeof TestCounterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/chip': {
@@ -248,6 +442,13 @@ declare module '@tanstack/react-router' {
       path: '/test/button'
       fullPath: '/test/button'
       preLoaderRoute: typeof TestButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/application-form': {
+      id: '/test/application-form'
+      path: '/test/application-form'
+      fullPath: '/test/application-form'
+      preLoaderRoute: typeof TestApplicationFormRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matching/rounds': {
@@ -314,9 +515,19 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRoute,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
+  TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
   TestChipRoute: TestChipRoute,
+  TestCounterRoute: TestCounterRoute,
+  TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
+  TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
+  TestFormHeaderRoute: TestFormHeaderRoute,
+  TestMemberSearchBarRoute: TestMemberSearchBarRoute,
+  TestOptionButtonRoute: TestOptionButtonRoute,
+  TestQuestionFormRoute: TestQuestionFormRoute,
   TestToastRoute: TestToastRoute,
+  TestToggleRoute: TestToggleRoute,
+  TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
 }
 export const routeTree = rootRouteImport

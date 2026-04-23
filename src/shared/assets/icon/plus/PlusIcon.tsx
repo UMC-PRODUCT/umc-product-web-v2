@@ -1,18 +1,17 @@
 import type { SVGProps } from "react"
-const CheckIcon = (props: SVGProps<SVGSVGElement>) => (
+const PlusIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    fill="none"
+    fill="currentColor"
     viewBox="0 0 16 16"
-    strokeWidth={1.5}
     {...props}
   >
     <path
       stroke="currentColor"
       strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M4 7.77 6.8 11 12 5"
+      strokeWidth={1.5}
+      d="M3.758 8h8.485M8 3.757v8.486"
     />
   </svg>
 )
-export default CheckIcon
+export default PlusIcon

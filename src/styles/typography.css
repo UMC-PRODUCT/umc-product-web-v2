@@ -165,7 +165,12 @@
   --text-caption-3-regular-size: 0.6875rem;
   --text-caption-3-regular-weight: 300;
   --text-caption-3-regular-leading: 1.6;
-  --text-caption-3-regular-tracking: 0em;
+  --text-caption-3-regular-tracking: -0.02em;
+
+  --text-caption-3-medium-size: 0.6875rem;
+  --text-caption-3-medium-weight: 500;
+  --text-caption-3-medium-leading: 1.6;
+  --text-caption-3-medium-tracking: -0.02em;
 }
 
 @utility text-display-1-bold {
@@ -369,4 +374,11 @@
   font-weight: var(--text-caption-3-regular-weight);
   line-height: var(--text-caption-3-regular-leading);
   letter-spacing: var(--text-caption-3-regular-tracking);
+}
+
+@utility text-caption-3-medium {
+  font-size: var(--text-caption-3-medium-size);
+  font-weight: var(--text-caption-3-medium-weight);
+  line-height: var(--text-caption-3-medium-leading);
+  letter-spacing: var(--text-caption-3-medium-tracking);
 }

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router"
 
-import DownChevronIcon from "@/shared/assets/icon/chevron/SideBar/DownChevronIcon"
+import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import { cn } from "@/shared/lib/utils"

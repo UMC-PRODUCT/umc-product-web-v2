@@ -1,18 +1,17 @@
 import type { SVGProps } from "react"
-const CheckIcon = (props: SVGProps<SVGSVGElement>) => (
+const MinusIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
-    viewBox="0 0 16 16"
-    strokeWidth={1.5}
+    viewBox="0 0 36 38"
     {...props}
   >
     <path
       stroke="currentColor"
       strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M4 7.77 6.8 11 12 5"
+      strokeWidth={1.5}
+      d="M12 19h12"
     />
   </svg>
 )
-export default CheckIcon
+export default MinusIcon
