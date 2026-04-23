@@ -100,7 +100,11 @@ function ApplicationFormTestPage() {
       <div className="mx-auto flex max-w-225 flex-col gap-6 py-8">
         <div className="flex flex-col">
           <FormHeader variant="common" />
-          <QuestionListContainer className="pt-0.1">
+          <QuestionListContainer
+            className="pt-0.1"
+            itemIds={form.commonQuestions.map((q) => q.id)}
+            onReorder={form.reorderCommonQuestion}
+          >
             {form.commonQuestions.map((q, i) => (
               <QuestionCard
                 key={q.id}
@@ -142,7 +146,12 @@ function ApplicationFormTestPage() {
             />
             {section.isEnabled && (
               <>
-                <QuestionListContainer>
+                <QuestionListContainer
+                  itemIds={section.questions.map((q) => q.id)}
+                  onReorder={(from, to) =>
+                    form.reorderSectionQuestion(section.id, from, to)
+                  }
+                >
                   {section.questions.map((q, i) => (
                     <QuestionCard
                       key={q.id}

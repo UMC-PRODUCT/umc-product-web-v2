@@ -1,3 +1,4 @@
+import { arrayMove } from "@dnd-kit/sortable"
 import { useState } from "react"
 
 import { makeQuestion } from "@/features/project/new/model/applicationQuestion"
@@ -117,6 +118,24 @@ export function useApplicationForm(options?: UseApplicationFormOptions) {
     setFocusedId(newQ.id)
   }
 
+  function reorderCommonQuestion(fromIndex: number, toIndex: number) {
+    setCommonQuestions((prev) => arrayMove(prev, fromIndex, toIndex))
+  }
+
+  function reorderSectionQuestion(
+    sectionId: string,
+    fromIndex: number,
+    toIndex: number,
+  ) {
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id !== sectionId
+          ? s
+          : { ...s, questions: arrayMove(s.questions, fromIndex, toIndex) },
+      ),
+    )
+  }
+
   return {
     commonQuestions,
     sections,
@@ -130,5 +149,7 @@ export function useApplicationForm(options?: UseApplicationFormOptions) {
     deleteSectionQuestion,
     addSectionQuestion,
     appendSectionQuestion,
+    reorderCommonQuestion,
+    reorderSectionQuestion,
   }
 }

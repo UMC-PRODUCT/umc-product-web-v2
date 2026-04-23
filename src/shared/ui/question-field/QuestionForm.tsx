@@ -4,7 +4,7 @@ import { cn } from "@/shared/lib/utils"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 
-import type { ReactNode } from "react"
+import type { HTMLAttributes, ReactNode } from "react"
 
 interface QuestionFormProps {
   index: string
@@ -21,6 +21,7 @@ interface QuestionFormProps {
   onDelete?: () => void
   children: ReactNode
   className?: string
+  dragHandleProps?: HTMLAttributes<HTMLButtonElement>
 }
 
 function autoResize(el: HTMLTextAreaElement | null) {
@@ -44,6 +45,7 @@ export function QuestionForm({
   onDelete,
   children,
   className,
+  dragHandleProps,
 }: QuestionFormProps) {
   return (
     <article
@@ -64,7 +66,14 @@ export function QuestionForm({
         />
       )}
 
-      {focused && <DragAndDrop className="mt-4 h-3 w-6" aria-hidden />}
+      <button
+        type="button"
+        className="mt-4 inline-flex cursor-grab items-center justify-center active:cursor-grabbing"
+        aria-label="순서 변경 핸들"
+        {...dragHandleProps}
+      >
+        <DragAndDrop className="h-3 w-6" aria-hidden />
+      </button>
 
       <div className="flex w-full flex-col items-end gap-4">
         {focused ? (

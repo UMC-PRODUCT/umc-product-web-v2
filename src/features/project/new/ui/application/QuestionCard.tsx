@@ -1,3 +1,5 @@
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import { useRef, useState } from "react"
 
 import { CheckboxFieldList } from "@/shared/ui/input/checkbox/CheckboxFieldList"
@@ -97,8 +99,23 @@ export function QuestionCard({
   onUpdate,
   onDelete,
 }: QuestionCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: question.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
   return (
-    <div className="w-full">
+    <div ref={setNodeRef} style={style} className="w-full">
       <div
         onClick={focused ? undefined : onFocus}
         className={focused ? "w-full" : "w-full cursor-pointer"}
@@ -116,6 +133,7 @@ export function QuestionCard({
           required={question.required}
           onRequiredChange={(required) => onUpdate({ required })}
           onDelete={onDelete}
+          dragHandleProps={{ ...attributes, ...listeners }}
         >
           <QuestionFieldRenderer
             question={question}
