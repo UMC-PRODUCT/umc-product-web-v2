@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
@@ -27,10 +27,14 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
   const [errorQuestionIds, setErrorQuestionIds] = useState<string[]>([])
 
-  const currentSnapshot = JSON.stringify({
-    commonQuestions: form.commonQuestions,
-    sections: form.sections,
-  })
+  const currentSnapshot = useMemo(
+    () =>
+      JSON.stringify({
+        commonQuestions: form.commonQuestions,
+        sections: form.sections,
+      }),
+    [form.commonQuestions, form.sections],
+  )
 
   const hasUnsavedChanges = savedSnapshot
     ? currentSnapshot !== savedSnapshot
