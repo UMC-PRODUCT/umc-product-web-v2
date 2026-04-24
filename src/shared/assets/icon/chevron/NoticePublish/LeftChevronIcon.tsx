@@ -11,9 +11,9 @@ const LeftChevronIcon = (props: SVGProps<SVGSVGElement>) => (
     <path
       d="M9.5 13.5L4.5 8L9.5 2.5"
       stroke="#9CA3A3"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 )

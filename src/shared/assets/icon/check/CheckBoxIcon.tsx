@@ -10,9 +10,9 @@ const CheckBoxIcon = () => (
     <path
       d="M5 9.73077L8.5 13.5L15 6.5"
       stroke="white"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 )
