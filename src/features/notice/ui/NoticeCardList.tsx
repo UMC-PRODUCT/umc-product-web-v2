@@ -16,6 +16,7 @@ interface NoticeCardListProps {
   notices: NoticeItem[]
   page: number
   canManage?: boolean
+  onDeleteNotice?: (noticeId: string) => void
   onEditNotice?: (noticeId: string) => void
 }
 
@@ -23,6 +24,7 @@ export function NoticeCardList({
   notices,
   page,
   canManage = false,
+  onDeleteNotice,
   onEditNotice,
 }: NoticeCardListProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
@@ -55,6 +57,9 @@ export function NoticeCardList({
               }}
               onEdit={() => {
                 onEditNotice?.(notice.id)
+              }}
+              onDelete={() => {
+                onDeleteNotice?.(notice.id)
               }}
             >
               임시 내용
