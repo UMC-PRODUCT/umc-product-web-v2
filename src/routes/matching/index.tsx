@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import {
   type Chapter,
   CHAPTERS,
@@ -38,7 +40,7 @@ function parsePage(value: unknown): number {
 }
 
 // TODO: 공지 API 응답 형식에 맞추어 수정
-const notices: NoticeItem[] = [
+const INITIAL_NOTICES: NoticeItem[] = [
   {
     id: "1",
     title: "임시 공지",
@@ -111,6 +113,8 @@ export const Route = createFileRoute("/matching/")({
 function TeamMatchingAnnouncePage() {
   const { chapter, page } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
+  const addToast = useToastStore((state) => state.addToast)
+  const [notices, setNotices] = useState(INITIAL_NOTICES)
   // TODO: 사용자 권한 API 연동 후 실제 권한 값으로 교체
   const canManage = true
 
@@ -129,6 +133,18 @@ function TeamMatchingAnnouncePage() {
     navigate({
       to: "/matching/notice-publish/$noticeId",
       params: { noticeId },
+    })
+  }
+
+  // TODO: API 연동 후 실제 삭제 API 호출로 교체
+  const handleNoticeDeleteClick = (noticeId: string) => {
+    setNotices((prev) => prev.filter((notice) => notice.id !== noticeId))
+    addToast({
+      message: "공지가 삭제되었습니다.",
+      color: "primary",
+      variant: "deep",
+      type: "default",
+      duration: 3,
     })
   }
 
@@ -173,6 +189,7 @@ function TeamMatchingAnnouncePage() {
               notices={notices}
               page={page}
               canManage={canManage}
+              onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
             />
           </div>
