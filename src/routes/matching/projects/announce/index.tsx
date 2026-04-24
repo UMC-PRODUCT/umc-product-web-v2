@@ -118,7 +118,7 @@ function ProjectSettingsAnnouncePage() {
                 <Button
                   type="button"
                   variant="fill"
-                  color="brand"
+                  color="primary"
                   size="m"
                   onClick={handleNoticePublishClick}
                   className="w-26.5 items-center gap-1 py-3 pr-4 pl-3"
