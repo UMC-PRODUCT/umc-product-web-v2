@@ -11,6 +11,7 @@ import {
 } from "@/features/notice"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
+import { Pagination } from "@/shared/ui/Pagination"
 
 interface AnnounceSearch {
   chapter: Chapter
@@ -19,6 +20,7 @@ interface AnnounceSearch {
 
 const DEFAULT_CHAPTER: Chapter = "Chromium"
 const DEFAULT_PAGE = 1
+const NOTICE_PAGE_SIZE = 10
 
 function isChapter(value: unknown): value is Chapter {
   return (
@@ -75,6 +77,12 @@ function ProjectSettingsAnnouncePage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
   const [notices, setNotices] = useState(INITIAL_NOTICES)
+  const totalPages = Math.max(1, Math.ceil(notices.length / NOTICE_PAGE_SIZE))
+  const safePage = Math.min(Math.max(1, page), totalPages)
+  const paginatedNotices = notices.slice(
+    (safePage - 1) * NOTICE_PAGE_SIZE,
+    safePage * NOTICE_PAGE_SIZE,
+  )
   // TODO: 사용자 권한 API 연동 후 실제 권한 값으로 교체
   const canManage = true
 
@@ -107,6 +115,13 @@ function ProjectSettingsAnnouncePage() {
       variant: "deep",
       type: "default",
       duration: 3,
+    })
+  }
+
+  const handlePageChange = (nextPage: number) => {
+    navigate({
+      search: (prev) => ({ ...prev, page: nextPage }),
+      replace: true,
     })
   }
 
@@ -148,8 +163,8 @@ function ProjectSettingsAnnouncePage() {
             </div>
 
             <NoticeCardList
-              notices={notices}
-              page={page}
+              notices={paginatedNotices}
+              page={safePage}
               canManage={canManage}
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
@@ -157,9 +172,12 @@ function ProjectSettingsAnnouncePage() {
           </div>
         </div>
 
-        <span className="shadow-inner-neutral-2 text-subtitle-4-semibold bg-teal-gray-50 text-teal-gray-900 inline-flex h-7.5 w-7.5 items-center justify-center rounded-[12px]">
-          {page}
-        </span>
+        <Pagination
+          className="self-center"
+          currentPage={safePage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </section>
   )
