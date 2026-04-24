@@ -1,11 +1,11 @@
-/** 피그마 기준 Project Card_Md입니다. */
-import { cn } from "@/shared/lib/utils"
-
 import {
   DEFAULT_MATCHING_PROJECT_MOCK,
   type MatchingProjectMock,
   type MatchingProjectRecruitRow,
-} from "../model/matchingProject.mock"
+} from "@/features/project/list/model/matchingProject.mock"
+/** 피그마 기준 Project Card_Md입니다. */
+import { cn } from "@/shared/lib/utils"
+import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 
 export type MatchingProjectCardVariant =
   | "default"
@@ -15,21 +15,6 @@ export type MatchingProjectCardVariant =
 interface MatchingProjectCardProps {
   variant?: MatchingProjectCardVariant
   data?: MatchingProjectMock
-}
-
-function RecruitStatusChip({ done }: { done?: boolean }) {
-  return (
-    <span
-      className={cn(
-        "text-label-3-semibold flex shrink-0 items-center justify-center rounded-md px-2 py-0 text-center",
-        done
-          ? "bg-teal-gray-150 text-teal-gray-600"
-          : "bg-teal-100 text-teal-600",
-      )}
-    >
-      {done ? "모집 완료" : "모집 중"}
-    </span>
-  )
 }
 
 function RecruitRowItem({
@@ -48,7 +33,7 @@ function RecruitRowItem({
           {current}/{total}
         </span>
       </div>
-      <RecruitStatusChip done={done} />
+      <RecruitStatusChip done={done} className="shrink-0" />
     </div>
   )
 }
@@ -89,7 +74,7 @@ function CardBody({ data }: { data: MatchingProjectMock }) {
           </p>
         </div>
 
-        <div className="flex w-full min-w-0 flex-col items-start self-stretch">
+        <div className="flex w-full min-w-0 flex-col items-start gap-1 self-stretch">
           {data.recruitRows.map((row) => (
             <RecruitRowItem key={row.part} {...row} />
           ))}
@@ -118,7 +103,7 @@ export function MatchingProjectCard({
     >
       <div
         className={cn(
-          "shadow-drop-neutral-2 relative flex w-full min-w-0 flex-col items-stretch overflow-hidden rounded-xl bg-white transition-transform duration-300 ease-in-out group-hover:duration-[650ms] motion-reduce:transform-none motion-reduce:transition-none motion-reduce:duration-0",
+          "shadow-drop-neutral-4 relative flex w-full min-w-0 flex-col items-stretch overflow-hidden rounded-xl bg-white transition-transform duration-300 ease-in-out group-hover:duration-[650ms] motion-reduce:transform-none motion-reduce:transition-none motion-reduce:duration-0",
           forcedHover && "-translate-y-1",
           interactiveHover && !forcedHover && "group-hover:-translate-y-1",
         )}

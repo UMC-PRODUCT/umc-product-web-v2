@@ -1,7 +1,11 @@
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { cn } from "@/shared/lib/utils"
+import {
+  getVisibleSectionsByViewMode,
+  useViewModeStore,
+} from "@/shared/view-mode"
 
 import { SideBarDropDown } from "./dropdown/SideBarDropDown"
 import { SideBarMenu } from "./menu/SideBarMenu"
@@ -14,9 +18,21 @@ interface SideBarProps {
 const DEMO_DAY_EDITION = 10
 
 export default function SideBar({ className }: SideBarProps) {
-  const [openSectionId, setOpenSectionId] = useState<string>(
-    SIDEBAR_ITEMS[0]?.id ?? "",
+  const mode = useViewModeStore((s) => s.mode)
+  const visibleSections = useMemo(
+    () => getVisibleSectionsByViewMode(SIDEBAR_ITEMS, mode),
+    [mode],
   )
+  const [openSectionId, setOpenSectionId] = useState<string>(
+    visibleSections[0]?.id ?? SIDEBAR_ITEMS[0]?.id ?? "",
+  )
+
+  useEffect(() => {
+    const ids = new Set(visibleSections.map((section) => section.id))
+    if (!ids.has(openSectionId)) {
+      setOpenSectionId(visibleSections[0]?.id ?? "")
+    }
+  }, [openSectionId, visibleSections])
 
   return (
     <nav
@@ -31,7 +47,7 @@ export default function SideBar({ className }: SideBarProps) {
         <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
           {DEMO_DAY_EDITION}th Demoday
         </span>
-        {SIDEBAR_ITEMS.map(({ id, title, icon, menus }) => (
+        {visibleSections.map(({ id, title, icon, menus }) => (
           <SideBarMenu
             key={id}
             id={id}

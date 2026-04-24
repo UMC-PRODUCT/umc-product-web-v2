@@ -16,12 +16,27 @@ function normalizePathname(pathname: string): string {
 export function resolveNavigationFromPathname(pathname: string): {
   section: SideBarSection
   menu: SideBarMenu
+} | null
+export function resolveNavigationFromPathname(
+  pathname: string,
+  sections: readonly SideBarSection[],
+): {
+  section: SideBarSection
+  menu: SideBarMenu
+} | null
+export function resolveNavigationFromPathname(
+  pathname: string,
+  sections?: readonly SideBarSection[],
+): {
+  section: SideBarSection
+  menu: SideBarMenu
 } | null {
   const path = normalizePathname(pathname)
   let bestLen = -1
   let picked: { section: SideBarSection; menu: SideBarMenu } | null = null
 
-  for (const section of SIDEBAR_ITEMS) {
+  const source = sections ?? SIDEBAR_ITEMS
+  for (const section of source) {
     for (const menu of section.menus) {
       const hit = path === menu.to || path.startsWith(`${menu.to}/`)
       if (!hit) continue
