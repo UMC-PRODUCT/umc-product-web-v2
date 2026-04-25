@@ -114,7 +114,7 @@ export function NoticePublishForm({
             <button
               type="button"
               onClick={handleBackClick}
-              className="flex w-17.5 items-center gap-1 pr-3.5 pl-2"
+              className="flex items-center gap-1 pr-3.5 pl-2"
             >
               <LeftChevronIcon />
               <span className="text-label-1-medium text-teal-gray-600">
