@@ -9,11 +9,13 @@ import {
 } from "react"
 
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
+import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
+import { Modal } from "@/shared/ui/Modal"
 
 const noticeCardVariants = cva(
-  "flex w-full items-center justify-between gap-2.5 rounded-[12px] bg-teal-gray-50 px-4 text-left",
+  "flex w-full items-center justify-between gap-2.5 px-4 text-left",
   {
     variants: {
       hasChip: {
@@ -62,6 +64,8 @@ interface NoticeCardProps
   chip?: string
   children?: ReactNode
   canManage?: boolean
+  expanded?: boolean
+  onExpandedChange?: (expanded: boolean) => void
   onDelete?: () => void
   onEdit?: () => void
 }
@@ -73,6 +77,8 @@ export function NoticeCard({
   variant,
   children,
   canManage = false,
+  expanded,
+  onExpandedChange,
   onDelete,
   onEdit,
   onClick,
@@ -81,17 +87,34 @@ export function NoticeCard({
 }: NoticeCardProps) {
   const contentId = useId()
   const [internalExpanded, setInternalExpanded] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const isExpanded = expanded ?? internalExpanded
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    setInternalExpanded((prev) => !prev)
+    const nextExpanded = !isExpanded
+
+    if (expanded === undefined) {
+      setInternalExpanded(nextExpanded)
+    }
+
+    onExpandedChange?.(nextExpanded)
     onClick?.(event)
+  }
+
+  const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    setIsDeleteModalOpen(false)
+    onDelete?.()
   }
 
   return (
     <div className="w-full">
       <button
         type={type}
-        aria-expanded={internalExpanded}
+        aria-expanded={isExpanded}
         aria-controls={children ? contentId : undefined}
         className={noticeCardVariants({ hasChip: !!chip })}
         onClick={handleClick}
@@ -118,13 +141,13 @@ export function NoticeCard({
           aria-hidden="true"
           className={cn(
             noticeChevronVariants({ variant }),
-            internalExpanded && "rotate-180",
+            isExpanded && "rotate-180",
           )}
         />
       </button>
 
       <AnimatePresence>
-        {children && internalExpanded ? (
+        {children && isExpanded ? (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -134,7 +157,7 @@ export function NoticeCard({
           >
             <div
               id={contentId}
-              className="shadow-inner-neutral-2 bg-teal-gray-50 rounded-[12px] px-8 pt-6 pb-7.5"
+              className="shadow-inner-neutral-2 bg-teal-gray-50 text-teal-gray-900 rounded-[12px] px-8 pt-6 pb-7.5"
             >
               {/* TODO: 공지 API 응답 형식에 맞추어 수정 */}
               {children}
@@ -146,7 +169,7 @@ export function NoticeCard({
                     variant="weak"
                     color="neutral"
                     size="m"
-                    onClick={onDelete}
+                    onClick={handleDeleteClick}
                   >
                     삭제
                   </Button>
@@ -165,6 +188,52 @@ export function NoticeCard({
           </motion.div>
         ) : null}
       </AnimatePresence>
+
+      <Modal.Root open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <Modal.Portal>
+          <Modal.Overlay tone="light" />
+          <Modal.Content className="shadow-drop-neutral-1 flex w-[460px] max-w-[calc(100vw-32px)] flex-col gap-8 rounded-[9.2px] border border-neutral-200 bg-white px-6 py-6 focus:outline-none">
+            <div className="flex flex-col items-start gap-4">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <WarningTriangleIcon className="h-6 w-6 text-teal-500" />
+                <Modal.Title className="text-subtitle-1-semibold text-teal-500">
+                  공지 삭제
+                </Modal.Title>
+              </div>
+              <Modal.Description className="text-subtitle-3-semibold text-teal-gray-800">
+                삭제한 공지는 복구할 수 없습니다.
+                <br />
+                삭제하시겠습니까?
+              </Modal.Description>
+            </div>
+
+            <div className="flex w-full justify-end gap-3">
+              <Modal.Close asChild>
+                <Button
+                  type="button"
+                  variant="weak"
+                  color="neutral"
+                  size="s"
+                  className="rounded-[10px]"
+                >
+                  취소
+                </Button>
+              </Modal.Close>
+              {/* TODO: 삭제 API 연동하기 */}
+              <Button
+                type="button"
+                variant="fill"
+                color="primary"
+                size="s"
+                className="rounded-[10px]"
+                onClick={handleDeleteConfirm}
+              >
+                삭제
+              </Button>
+            </div>
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
     </div>
   )
 }

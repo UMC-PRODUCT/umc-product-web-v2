@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority"
 
 import { cn } from "@/shared/lib/utils"
 
-const CHAPTERS = [
+export const CHAPTERS = [
   "Chromium",
   "Ferrum",
   "Neon",
@@ -11,7 +11,7 @@ const CHAPTERS = [
   "Xenon",
 ] as const
 
-type Chapter = (typeof CHAPTERS)[number]
+export type Chapter = (typeof CHAPTERS)[number]
 
 const chapterSelectorVariants = cva(
   "inline-flex h-9.5 w-full flex-1 basis-0 items-center justify-center whitespace-nowrap rounded-[12px] transition-colors",

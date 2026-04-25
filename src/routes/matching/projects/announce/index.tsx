@@ -59,60 +59,20 @@ const INITIAL_NOTICES: NoticeItem[] = [
     id: "3",
     title: "임시 공지",
     date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "4",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "5",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "6",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "7",
-    title: "임시 공지",
-    date: "0000.00.00",
-  },
-  {
-    id: "8",
-    title: "임시 공지",
-    date: "0000.00.00",
-  },
-  {
-    id: "9",
-    title: "임시 공지",
-    date: "0000.00.00",
-  },
-  {
-    id: "10",
-    title: "임시 공지",
-    date: "0000.00.00",
   },
 ]
 
-/** 팀 매칭 · 공지 — 레이아웃 하위 인덱스 (/matching) */
-export const Route = createFileRoute("/matching/")({
+export const Route = createFileRoute("/matching/projects/announce/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
     return {
       chapter: isChapter(search.chapter) ? search.chapter : DEFAULT_CHAPTER,
       page: parsePage(search.page),
     }
   },
-  component: TeamMatchingAnnouncePage,
+  component: ProjectSettingsAnnouncePage,
 })
 
-function TeamMatchingAnnouncePage() {
+function ProjectSettingsAnnouncePage() {
   const { chapter, page } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
@@ -134,12 +94,14 @@ function TeamMatchingAnnouncePage() {
   }
 
   const handleNoticePublishClick = () => {
-    navigate({ to: "/matching/notice-publish" })
+    navigate({
+      to: "/matching/projects/announce/notice-publish",
+    })
   }
 
   const handleNoticeEditClick = (noticeId: string) => {
     navigate({
-      to: "/matching/notice-publish/$noticeId",
+      to: "/matching/projects/announce/notice-publish/$noticeId",
       params: { noticeId },
     })
   }
