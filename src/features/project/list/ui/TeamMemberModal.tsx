@@ -1,5 +1,6 @@
 import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import MemberCount from "@/shared/ui/MemberCount"
 
 import { TeamMemberRow } from "./TeamMemberRow"
 
@@ -87,9 +88,12 @@ export function TeamMemberModal({ onClose }: TeamMemberModalProps) {
           <div key={roleData.role} className="flex flex-col gap-2">
             <div className="flex items-end justify-between">
               <RoleTagChip role={roleData.role} />
-              <span className="text-caption-2-regular text-teal-gray-400">
-                {roleData.current} / {roleData.total}
-              </span>
+              <MemberCount
+                size="xs"
+                current={roleData.current}
+                total={roleData.total}
+                className="text-teal-gray-400"
+              />
             </div>
             <div className="grid grid-cols-2 gap-1">
               {roleData.members.map((member, i) => (

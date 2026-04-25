@@ -1,11 +1,13 @@
+/** 피그마 기준 Project Card_Md입니다. */
+
 import {
   DEFAULT_MATCHING_PROJECT_MOCK,
   type MatchingProjectMock,
   type MatchingProjectRecruitRow,
 } from "@/features/project/list/model/matchingProject.mock"
-/** 피그마 기준 Project Card_Md입니다. */
 import { cn } from "@/shared/lib/utils"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
+import MemberCount from "@/shared/ui/MemberCount"
 
 export type MatchingProjectCardVariant =
   | "default"
@@ -29,9 +31,7 @@ function RecruitRowItem({
         <span className="text-subtitle-4-semibold text-teal-gray-700 truncate">
           {part}
         </span>
-        <span className="text-caption-2-regular text-teal-gray-500 w-[1.5625rem] shrink-0 text-right tabular-nums">
-          {current}/{total}
-        </span>
+        <MemberCount size="xs" current={current} total={total} />
       </div>
       <RecruitStatusChip done={done} className="shrink-0" />
     </div>

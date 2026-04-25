@@ -5,6 +5,7 @@ import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { Button } from "@/shared/ui/Button"
 import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
+import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 
 import {
@@ -94,9 +95,11 @@ export function ProjectDetailCard({
                       <span className="text-body-2-medium text-teal-gray-700">
                         {row.part}
                       </span>
-                      <span className="text-body-2-medium text-teal-gray-500 tabular-nums">
-                        {row.current}/{row.total}
-                      </span>
+                      <MemberCount
+                        size="sm"
+                        current={row.current}
+                        total={row.total}
+                      />
                     </div>
                     <RecruitStatusChip done={done} />
                   </div>
