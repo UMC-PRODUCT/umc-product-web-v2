@@ -1,4 +1,7 @@
-import PersonIcon from "@/shared/assets/icon/people/PersonIcon"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import SvgPersonButtonIcon from "@/shared/assets/icon/people/PersonButtonIcon"
+import { cn } from "@/shared/lib/utils"
 
 /**
  * 사용되는 곳: 프로젝트 상세 카드 내 팀원 정보 확인 버튼
@@ -6,39 +9,50 @@ import PersonIcon from "@/shared/assets/icon/people/PersonIcon"
  */
 import type { ButtonHTMLAttributes } from "react"
 
-type Variant = "fill" | "weak"
+const teamMemberButtonVariants = cva(
+  "inline-flex h-11 min-w-[3.25rem] items-center justify-center rounded-xl px-4 py-2.5 transition-colors disabled:pointer-events-none",
+  {
+    variants: {
+      variant: {
+        fill: "bg-teal-gray-600 hover:bg-teal-gray-700 disabled:bg-teal-gray-300",
+        weak: "bg-teal-gray-150 hover:bg-teal-gray-200 disabled:bg-teal-gray-100",
+      },
+    },
+    defaultVariants: {
+      variant: "fill",
+    },
+  },
+)
 
-interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "fill" | "weak"
-}
+const iconVariants = cva("h-6 w-6", {
+  variants: {
+    variant: {
+      fill: "text-teal-gray-50",
+      weak: "text-teal-gray-600",
+    },
+  },
+  defaultVariants: {
+    variant: "fill",
+  },
+})
+
+interface TeamMemberButtonProps
+  extends
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof teamMemberButtonVariants> {}
 
 export function TeamMemberButton({
-  variant = "fill",
-  disabled = false,
+  variant,
   className,
   ...props
-}: Props) {
+}: TeamMemberButtonProps) {
   return (
     <button
-      className={`inline-flex h-11 min-h-[2.75rem] min-w-[3.25rem] items-center justify-center gap-2.5 rounded-xl px-4 py-[10px] transition-colors ${getBgClass(variant, disabled)} ${className ?? ""} `}
-      disabled={disabled}
+      type="button"
+      className={cn(teamMemberButtonVariants({ variant }), className)}
       {...props}
     >
-      <PersonIcon className={`h-6 w-6 ${getIconColor(variant)}`} />
+      <SvgPersonButtonIcon className={iconVariants({ variant })} />
     </button>
   )
-}
-
-function getBgClass(variant: Variant, disabled: boolean) {
-  if (disabled) return "bg-gray-200"
-
-  if (variant === "fill") {
-    return "bg-teal-gray-600 hover:bg-teal-gray-700"
-  }
-
-  return "bg-teal-gray-150 hover:bg-teal-gray-300/50"
-}
-
-function getIconColor(variant: Variant) {
-  return variant === "fill" ? "text-teal-gray-50" : "text-teal-gray-600"
 }
