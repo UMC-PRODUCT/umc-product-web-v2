@@ -1,5 +1,5 @@
 import { useBlocker } from "@tanstack/react-router"
-import { useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import LeftChevronIcon from "@/shared/assets/icon/chevron/NoticePublish/LeftChevronIcon"
@@ -105,6 +105,15 @@ export function NoticePublishForm({
       ? "공지 수정이 완료되었습니다."
       : "공지가 등록되었습니다."
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useLayoutEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = "360px"
+    el.style.height = `${el.scrollHeight}px`
+  }, [noticeContent])
+
   return (
     <>
       <section className="w-full pt-8">
@@ -161,7 +170,8 @@ export function NoticePublishForm({
 
           <div className="bg-teal-gray-50 shadow-inner-neutral-2 flex w-full flex-col gap-4 rounded-[12px] px-8 pt-6 pb-7.5">
             <textarea
-              className="placeholder-teal-gray-400 text-body-1-regular text-teal-gray-900 min-h-90 focus:outline-none"
+              ref={textareaRef}
+              className="placeholder-teal-gray-400 text-body-1-regular text-teal-gray-900 min-h-90 resize-none focus:outline-none"
               placeholder="내용을 입력하세요"
               value={noticeContent}
               onChange={handleContentChange}
