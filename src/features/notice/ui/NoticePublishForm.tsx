@@ -8,7 +8,6 @@ import { Button } from "@/shared/ui/Button"
 import { Modal } from "@/shared/ui/Modal"
 
 import { CheckBox } from "./CheckBox"
-import { NoticeSubmitButton } from "./NoticeSubmitButton"
 
 const MAX_CHARS = 2000
 
@@ -100,6 +99,7 @@ export function NoticePublishForm({
   const isSubmittable = noticeTitle.trim() !== "" && noticeContent.trim() !== ""
   const submitLabel = variant === "edit" ? "수정하기" : "게시하기"
   const doneLabel = variant === "edit" ? "수정 완료" : "완료"
+  const submitButtonVariant = variant === "edit" ? "weak" : "fill"
   const completionTitle = variant === "edit" ? "수정 완료" : "게시 완료"
   const completionDescription =
     variant === "edit"
@@ -145,15 +145,16 @@ export function NoticePublishForm({
                 </span>
               </div>
 
-              <NoticeSubmitButton
-                variant={variant}
-                disabled={!isSubmittable}
+              <Button
+                variant={submitButtonVariant}
+                color="primary"
+                size="m"
+                disabled={!isSubmittable || isDone}
                 isLoading={isLoading}
-                isDone={isDone}
                 onClick={handlePublishNotice}
               >
                 {isDone ? doneLabel : submitLabel}
-              </NoticeSubmitButton>
+              </Button>
             </div>
           </div>
 
