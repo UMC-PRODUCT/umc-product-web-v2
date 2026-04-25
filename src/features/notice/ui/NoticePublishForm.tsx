@@ -5,9 +5,8 @@ import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import LeftChevronIcon from "@/shared/assets/icon/chevron/NoticePublish/LeftChevronIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { Button } from "@/shared/ui/Button"
+import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { Modal } from "@/shared/ui/Modal"
-
-import { CheckBox } from "./CheckBox"
 
 const MAX_CHARS = 2000
 
@@ -136,9 +135,11 @@ export function NoticePublishForm({
 
             <div className="flex items-center gap-5">
               <div className="flex items-center gap-2">
-                <CheckBox
+                <Checkbox
                   checked={isNotificationEnabled}
-                  onCheckedChange={handleNotificationToggle}
+                  onChange={handleNotificationToggle}
+                  variant="primary"
+                  aria-label="알림 발송"
                 />
                 <span className="text-body-1-medium text-teal-gray-600">
                   알림 발송
