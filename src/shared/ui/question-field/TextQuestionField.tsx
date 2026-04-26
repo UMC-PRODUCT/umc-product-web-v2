@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 
 import { QuestionFieldBox } from "./QuestionFieldBox"
 
@@ -47,9 +48,12 @@ export function TextQuestionField({
         )}
       />
       {focused && (
-        <span className="text-body-1-regular text-teal-gray-400 self-end">
-          {value.length}/{maxLength}
-        </span>
+        <CounterLabel
+          current={value.length}
+          total={maxLength}
+          size="sm"
+          className="self-end"
+        />
       )}
     </QuestionFieldBox>
   )
