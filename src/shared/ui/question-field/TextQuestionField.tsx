@@ -19,6 +19,7 @@ export function TextQuestionField({
   onChange,
   placeholder = "답변을 작성하세요.",
   maxLength = 200,
+  showCounter = true,
   className,
 }: TextQuestionFieldProps) {
   const [focused, setFocused] = useState(false)
@@ -51,7 +52,7 @@ export function TextQuestionField({
           "w-full resize-none overflow-hidden border-none bg-transparent outline-none",
         )}
       />
-      {focused && (
+      {showCounter && focused && (
         <CounterLabel
           current={value.length}
           total={maxLength}
