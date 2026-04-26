@@ -3,21 +3,28 @@ import { useEffect, useRef, useState } from "react"
 
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { cn } from "@/shared/lib/utils"
+import {
+  useViewRoleStore,
+  type ViewRole,
+} from "@/shared/model/useViewRoleStore"
 
 import { SideBarDropDownMenu } from "./SideBarDropDownMenu"
 
-const DROPDOWN_ITEMS = [
-  "Admin View",
-  "Challenger-Plan View",
-  "Challenger-Others View",
+const DROPDOWN_ITEMS: { label: string; role: ViewRole }[] = [
+  { label: "Admin View", role: "admin" },
+  { label: "Challenger-Plan View", role: "challenger-plan" },
+  { label: "Challenger-Others View", role: "challenger-others" },
 ]
 
 export function SideBarDropDown() {
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [selectedIdx, setSelectedIdx] = useState<number>(0)
+  const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const selectedLabel = DROPDOWN_ITEMS[selectedIdx]
+  const role = useViewRoleStore((s) => s.role)
+  const setRole = useViewRoleStore((s) => s.setRole)
+
+  const selectedIdx = DROPDOWN_ITEMS.findIndex((item) => item.role === role)
+  const selectedLabel = DROPDOWN_ITEMS[selectedIdx]?.label
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -56,10 +63,10 @@ export function SideBarDropDown() {
             className="overflow-hidden"
           >
             <SideBarDropDownMenu
-              items={DROPDOWN_ITEMS}
+              items={DROPDOWN_ITEMS.map((item) => item.label)}
               selectedIdx={selectedIdx}
               onSelect={(idx) => {
-                setSelectedIdx(idx)
+                setRole(DROPDOWN_ITEMS[idx].role)
                 setIsOpen(false)
               }}
             />
