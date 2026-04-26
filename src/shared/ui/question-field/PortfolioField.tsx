@@ -63,7 +63,7 @@ export function PortfolioField({ className }: PortfolioFieldProps) {
 
   return (
     <div className={cn("flex w-full max-w-203 flex-col gap-1", className)}>
-      <div className="border-teal-gray-100 flex h-15 w-full items-center justify-between gap-1.5 rounded-[12px] border bg-white px-5 py-4">
+      <div className="flex h-15 w-full items-center justify-between gap-1.5 rounded-[12px] bg-white px-5 py-4">
         <input
           type="file"
           ref={fileInputRef}
