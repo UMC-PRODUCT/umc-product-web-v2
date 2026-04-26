@@ -24,7 +24,7 @@ export function FileUploadField({
   return (
     <div
       className={cn(
-        "flex h-15 w-full max-w-203 items-center justify-between gap-1.5 rounded-[12px] bg-white px-5 py-4",
+        "flex h-15 w-full min-w-200 items-center justify-between gap-1.5 rounded-[12px] bg-white py-4 pr-3.5 pl-5",
         className,
       )}
       {...props}
