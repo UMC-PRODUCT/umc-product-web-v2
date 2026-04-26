@@ -19,7 +19,8 @@ export function QuestionFieldBox({
     <div
       data-state={state}
       className={cn(
-        "border-teal-gray-100 flex w-[814px] flex-col justify-center gap-1.5 rounded-[12px] border bg-white px-5 py-4",
+        "flex w-full flex-col justify-center gap-1.5 rounded-[12px] bg-white px-5 py-4",
+        "data-[state=focus]:bg-[color-mix(in_srgb,var(--color-teal-50)_50%,white_50%)]",
         className,
       )}
     >

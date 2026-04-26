@@ -10,6 +10,7 @@ interface TextQuestionFieldProps {
   onChange: (value: string) => void
   placeholder?: string
   maxLength?: number
+  showCounter?: boolean
   className?: string
 }
 
@@ -32,7 +33,10 @@ export function TextQuestionField({
   }, [value])
 
   return (
-    <QuestionFieldBox state={state} className={className}>
+    <QuestionFieldBox
+      state={state}
+      className={cn("w-full min-w-200", className)}
+    >
       <textarea
         ref={textareaRef}
         rows={1}
