@@ -29,12 +29,7 @@ export function CounterLabel({
   className,
 }: CounterLabelProps) {
   return (
-    <span
-      className={cn(
-        "text-teal-gray-500 inline-flex items-center gap-0.5",
-        className,
-      )}
-    >
+    <span className={cn("inline-flex items-center gap-0.5", className)}>
       <span className={textVariants({ size })}>{current}</span>
       <span className={textVariants({ size })}>/</span>
       <span className={textVariants({ size })}>{total}</span>
