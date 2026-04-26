@@ -20,7 +20,7 @@ export function ProjectLinkButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex h-[50px] w-[200px] items-center gap-1.5 rounded-lg px-3.5 transition-colors",
+        "flex h-12.5 w-50 items-center gap-1.5 rounded-lg px-3.5 transition-colors",
         isSelected ? "bg-teal-100/80" : "hover:bg-teal-gray-100",
         className,
       )}

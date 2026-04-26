@@ -1,3 +1,5 @@
+import { ChevronsDownUp } from "lucide-react"
+
 import { cn } from "@/shared/lib/utils"
 
 const COLUMNS = [
@@ -11,10 +13,16 @@ const COLUMNS = [
 ] as const
 
 interface ApplicantTableHeadProps {
+  hasExpanded?: boolean
+  onToggleAll?: () => void
   className?: string
 }
 
-export function ApplicantTableHead({ className }: ApplicantTableHeadProps) {
+export function ApplicantTableHead({
+  hasExpanded = false,
+  onToggleAll,
+  className,
+}: ApplicantTableHeadProps) {
   return (
     <div
       role="row"
@@ -23,7 +31,7 @@ export function ApplicantTableHead({ className }: ApplicantTableHeadProps) {
         className,
       )}
     >
-      <div className="flex items-center gap-4" role="rowheader">
+      <div className="flex flex-1 items-center" role="rowheader">
         {COLUMNS.map((col) => (
           <span
             key={col.label}
@@ -38,6 +46,21 @@ export function ApplicantTableHead({ className }: ApplicantTableHeadProps) {
           </span>
         ))}
       </div>
+
+      <button
+        type="button"
+        aria-label={hasExpanded ? "모두 접기" : "모두 펼치기"}
+        onClick={onToggleAll}
+        className="shadow-inner-neutral-2 flex size-[26px] shrink-0 items-center justify-center rounded-lg bg-teal-200 transition-colors hover:bg-teal-300"
+      >
+        <ChevronsDownUp
+          size={14}
+          className={cn(
+            "text-teal-700 transition-transform",
+            !hasExpanded && "-scale-y-100",
+          )}
+        />
+      </button>
     </div>
   )
 }
