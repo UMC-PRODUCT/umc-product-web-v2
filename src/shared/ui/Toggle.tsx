@@ -16,6 +16,7 @@ export function Toggle({
   checked,
   onChange,
   size = "md",
+  disabled = false,
   className,
   "aria-label": ariaLabel,
   ...props
@@ -33,11 +34,19 @@ export function Toggle({
       role="switch"
       aria-checked={checked}
       aria-label={ariaLabel}
+      disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cn(
         "shadow-inner-neutral-2 flex items-center rounded-full p-0.5 transition-colors",
         size === "sm" ? "h-5 w-9" : "h-6 w-11",
-        checked ? "bg-teal-400" : "bg-teal-gray-300",
+        disabled
+          ? checked
+            ? "bg-teal-200"
+            : "bg-teal-gray-150"
+          : checked
+            ? "bg-teal-400"
+            : "bg-teal-gray-300",
+        disabled && "cursor-not-allowed",
         className,
       )}
       {...props}

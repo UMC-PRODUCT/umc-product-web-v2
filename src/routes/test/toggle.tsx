@@ -105,6 +105,59 @@ function ToggleTestPage() {
             </div>
           </div>
         </Section>
+
+        <Section title="Disabled — Off/On × Sm/Md">
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col items-start gap-1.5">
+              <span className="text-caption-1-medium text-teal-gray-500">
+                Sm Off
+              </span>
+              <Toggle
+                checked={false}
+                onChange={() => {}}
+                size="sm"
+                disabled
+                aria-label="Sm Off Disabled"
+              />
+            </div>
+            <div className="flex flex-col items-start gap-1.5">
+              <span className="text-caption-1-medium text-teal-gray-500">
+                Md Off
+              </span>
+              <Toggle
+                checked={false}
+                onChange={() => {}}
+                size="md"
+                disabled
+                aria-label="Md Off Disabled"
+              />
+            </div>
+            <div className="flex flex-col items-start gap-1.5">
+              <span className="text-caption-1-medium text-teal-gray-500">
+                Sm On
+              </span>
+              <Toggle
+                checked={true}
+                onChange={() => {}}
+                size="sm"
+                disabled
+                aria-label="Sm On Disabled"
+              />
+            </div>
+            <div className="flex flex-col items-start gap-1.5">
+              <span className="text-caption-1-medium text-teal-gray-500">
+                Md On
+              </span>
+              <Toggle
+                checked={true}
+                onChange={() => {}}
+                size="md"
+                disabled
+                aria-label="Md On Disabled"
+              />
+            </div>
+          </div>
+        </Section>
       </div>
     </main>
   )
