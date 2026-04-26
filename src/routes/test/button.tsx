@@ -8,7 +8,7 @@ export const Route = createFileRoute("/test/button")({
 
 const VARIANTS = ["fill", "weak"] as const
 const COLORS = ["primary", "neutral"] as const
-const SIZES = ["xs", "s", "m"] as const
+const SIZES = ["xs", "s", "m", "xl"] as const
 
 function Section({
   title,
@@ -138,6 +138,7 @@ function ButtonTestPage() {
                     <Button size="m" variant={variant} color={color} icon>
                       버튼
                     </Button>,
+                    null,
                   ],
                 })),
               ),
@@ -149,6 +150,7 @@ function ButtonTestPage() {
                   </Button>,
                   null,
                   null,
+                  null,
                 ],
               })),
             ]}
@@ -157,16 +159,84 @@ function ButtonTestPage() {
 
         <Section title="With Icon — Disabled">
           <ButtonTable
-            rows={VARIANTS.map((variant) => ({
-              label: `${variant} / white`,
-              cells: [
-                <Button size="xs" variant={variant} color="white" icon disabled>
-                  버튼
-                </Button>,
-                null,
-                null,
-              ],
-            }))}
+            rows={[
+              ...VARIANTS.flatMap((variant) =>
+                COLORS.map((color) => ({
+                  label: `${variant} / ${color}`,
+                  cells: [
+                    null,
+                    <Button
+                      size="s"
+                      variant={variant}
+                      color={color}
+                      icon
+                      disabled
+                    >
+                      버튼
+                    </Button>,
+                    <Button
+                      size="m"
+                      variant={variant}
+                      color={color}
+                      icon
+                      disabled
+                    >
+                      버튼
+                    </Button>,
+                    null,
+                  ],
+                })),
+              ),
+              ...VARIANTS.map((variant) => ({
+                label: `${variant} / white`,
+                cells: [
+                  <Button
+                    size="xs"
+                    variant={variant}
+                    color="white"
+                    icon
+                    disabled
+                  >
+                    버튼
+                  </Button>,
+                  null,
+                  null,
+                  null,
+                ],
+              })),
+            ]}
+          />
+        </Section>
+
+        <Section title="With Icon — Loading">
+          <ButtonTable
+            rows={VARIANTS.flatMap((variant) =>
+              COLORS.map((color) => ({
+                label: `${variant} / ${color}`,
+                cells: [
+                  null,
+                  <Button
+                    size="s"
+                    variant={variant}
+                    color={color}
+                    icon
+                    isLoading
+                  >
+                    버튼
+                  </Button>,
+                  <Button
+                    size="m"
+                    variant={variant}
+                    color={color}
+                    icon
+                    isLoading
+                  >
+                    버튼
+                  </Button>,
+                  null,
+                ],
+              })),
+            )}
           />
         </Section>
       </div>
