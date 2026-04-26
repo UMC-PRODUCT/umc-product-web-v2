@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
 
 import type { Ref } from "react"
@@ -134,9 +135,13 @@ export function ProjectCardForm({
           id="description-count"
           aria-live="polite"
           aria-atomic="true"
-          className="text-caption-2-regular text-teal-gray-500 flex justify-end"
+          className="flex justify-end"
         >
-          {description.length}/{MAX_LENGTH}
+          <CounterLabel
+            current={description.length}
+            total={MAX_LENGTH}
+            size="xs"
+          />
         </div>
       </div>
     </div>

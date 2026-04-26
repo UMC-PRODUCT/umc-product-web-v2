@@ -19,6 +19,7 @@ const buttonVariants = cva(
         white: "",
       },
       size: {
+        xl: "h-14 min-h-14 min-w-24 py-1 px-8 gap-2.5",
         m: "h-11 min-w-[90px] px-4",
         s: "h-10 min-w-[74px] px-5",
         xs: "h-[34px] pt-0.5",
@@ -126,9 +127,9 @@ export function Button({
         buttonVariants({ variant, color, size }),
         size === "xs" &&
           (icon ? "pr-3.5 pl-2" : "w-14.5 min-w-14.5 rounded-[8px]"),
-        size === "m" && !icon && "rounded-[10px]",
-        icon && size === "s" && "w-18.5 min-w-18.5 pr-4 pl-2.5",
-        icon && size === "m" && "w-19 min-w-19 pr-4 pl-3",
+        size === "m" && "rounded-[10px]",
+        icon && size === "s" && "min-h-10 rounded-[10px] py-1 pr-4 pl-2.5",
+        icon && size === "m" && "min-h-11 min-w-19 py-1 pr-4 pl-3",
         isLoading && "pointer-events-none cursor-default select-none",
         isLoading && variant === "fill" && color === "primary" && "bg-teal-700",
         isLoading && variant === "weak" && color === "primary" && "bg-teal-200",
