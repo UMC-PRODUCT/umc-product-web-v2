@@ -2,14 +2,12 @@ import { useEffect, useMemo, useState } from "react"
 
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { cn } from "@/shared/lib/utils"
-import {
-  getVisibleSectionsByViewMode,
-  useViewModeStore,
-} from "@/shared/view-mode"
+import { indexFromMode, useViewModeStore } from "@/shared/view-mode"
 
 import { SideBarDropDown } from "./dropdown/SideBarDropDown"
 import { SideBarMenu } from "./menu/SideBarMenu"
 import { SideBarMenuItem } from "./menu/SideBarMenuItem"
+import { getVisibleSectionsByViewMode } from "./utils"
 
 interface SideBarProps {
   className?: string
@@ -18,10 +16,13 @@ interface SideBarProps {
 const DEMO_DAY_EDITION = 10
 
 export default function SideBar({ className }: SideBarProps) {
-  const mode = useViewModeStore((s) => s.mode)
+  const isAdmin = useViewModeStore((s) => s.mode === "admin")
+  const previewMode = useViewModeStore((s) => s.previewMode)
+  const setPreviewModeByIndex = useViewModeStore((s) => s.setPreviewModeByIndex)
+
   const visibleSections = useMemo(
-    () => getVisibleSectionsByViewMode(SIDEBAR_ITEMS, mode),
-    [mode],
+    () => getVisibleSectionsByViewMode(SIDEBAR_ITEMS, previewMode),
+    [previewMode],
   )
   const [openSectionId, setOpenSectionId] = useState<string>(
     visibleSections[0]?.id ?? SIDEBAR_ITEMS[0]?.id ?? "",
@@ -42,7 +43,12 @@ export default function SideBar({ className }: SideBarProps) {
         className,
       )}
     >
-      <SideBarDropDown />
+      {isAdmin && (
+        <SideBarDropDown
+          selectedIdx={indexFromMode(previewMode)}
+          onSelect={setPreviewModeByIndex}
+        />
+      )}
       <div className="flex flex-col py-4">
         <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
           {DEMO_DAY_EDITION}th Demoday

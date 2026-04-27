@@ -3,10 +3,6 @@ import { useEffect, useMemo, useState } from "react"
 import { cn } from "@/shared/lib/utils"
 import { Modal } from "@/shared/ui/Modal"
 import { Pagination } from "@/shared/ui/Pagination"
-import {
-  resolveProjectDetailCtaMode,
-  useViewModeStore,
-} from "@/shared/view-mode"
 
 import { useMatchingProjectListFilters } from "../model/matchingProjectList"
 import { FilterDropdown } from "./FilterDropDown"
@@ -30,8 +26,6 @@ export function MatchingProjectsListPage() {
   const [page, setPage] = useState(1)
   const [selectedProject, setSelectedProject] =
     useState<MatchingProjectMock | null>(null)
-  const mode = useViewModeStore((s) => s.mode)
-  const viewerBranch = useViewModeStore((s) => s.viewerBranch)
 
   useEffect(() => {
     setPage(1)
@@ -141,14 +135,7 @@ export function MatchingProjectsListPage() {
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
             {selectedProject ? (
-              <ProjectDetailCard
-                data={selectedProject}
-                ctaMode={resolveProjectDetailCtaMode(
-                  mode,
-                  viewerBranch,
-                  selectedProject.branch,
-                )}
-              />
+              <ProjectDetailCard data={selectedProject} />
             ) : null}
           </Modal.Content>
         </Modal.Portal>

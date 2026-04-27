@@ -2,7 +2,7 @@
 import { cn } from "@/shared/lib/utils"
 
 interface RecruitStatusChipProps {
-  done?: boolean
+  done: boolean
   className?: string
 }
 

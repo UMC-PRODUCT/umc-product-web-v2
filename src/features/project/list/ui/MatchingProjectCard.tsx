@@ -25,6 +25,7 @@ function RecruitRowItem({
   total,
   done,
 }: MatchingProjectRecruitRow) {
+  const isDone = done ?? (total > 0 && current >= total)
   return (
     <div className="flex w-full min-w-0 items-center justify-between self-stretch">
       <div className="flex w-[7.3125rem] shrink-0 items-center justify-between">
@@ -33,7 +34,7 @@ function RecruitRowItem({
         </span>
         <MemberCount size="xs" current={current} total={total} />
       </div>
-      <RecruitStatusChip done={done} className="shrink-0" />
+      <RecruitStatusChip done={isDone} className="shrink-0" />
     </div>
   )
 }

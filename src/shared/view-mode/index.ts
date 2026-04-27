@@ -3,13 +3,6 @@
  */
 import { create } from "zustand"
 
-import { SIDEBAR_ID, type SideBarSection } from "@/shared/config/navigation"
-
-export type ProjectDetailCtaMode =
-  | "read-only-recruit-questions"
-  | "apply-enabled"
-  | "apply-hidden"
-
 export const VIEW_MODE_OPTIONS = [
   { mode: "admin", label: "Admin View" },
   { mode: "challenger-plan", label: "Challenger-Plan View" },
@@ -20,8 +13,10 @@ export type ViewMode = (typeof VIEW_MODE_OPTIONS)[number]["mode"]
 
 interface ViewModeState {
   mode: ViewMode
+  previewMode: ViewMode
   viewerBranch: string
   setModeByIndex: (index: number) => void
+  setPreviewModeByIndex: (index: number) => void
 }
 
 function modeFromIndex(index: number): ViewMode {
@@ -33,37 +28,11 @@ export function indexFromMode(mode: ViewMode): number {
   return idx === -1 ? 0 : idx
 }
 
-/** 임시 상태 */
+/** 임시 상태: 권한에 따른 뷰 변화를 보고 싶으시면 아래에서 임시 설정 가능합니다. */
 export const useViewModeStore = create<ViewModeState>((set) => ({
   mode: "admin",
+  previewMode: "admin",
   viewerBranch: "Selenium",
   setModeByIndex: (index) => set({ mode: modeFromIndex(index) }),
+  setPreviewModeByIndex: (index) => set({ previewMode: modeFromIndex(index) }),
 }))
-
-export function getVisibleSectionsByViewMode(
-  sections: readonly SideBarSection[],
-  mode: ViewMode,
-): SideBarSection[] {
-  if (mode === "admin") return [...sections]
-
-  return sections.map((section) => {
-    if (section.id !== SIDEBAR_ID.section.teamMatching) return section
-    return {
-      ...section,
-      menus: section.menus.filter(
-        (menu) => menu.id !== SIDEBAR_ID.item.matchingRounds,
-      ),
-    }
-  })
-}
-
-export function resolveProjectDetailCtaMode(
-  mode: ViewMode,
-  viewerBranch: string,
-  projectBranch: string,
-): ProjectDetailCtaMode {
-  if (mode === "admin" || mode === "challenger-plan") {
-    return "read-only-recruit-questions"
-  }
-  return viewerBranch === projectBranch ? "apply-enabled" : "apply-hidden"
-}

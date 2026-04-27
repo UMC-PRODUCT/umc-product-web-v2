@@ -3,22 +3,22 @@ import { useEffect, useRef, useState } from "react"
 
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { cn } from "@/shared/lib/utils"
-import {
-  indexFromMode,
-  useViewModeStore,
-  VIEW_MODE_OPTIONS,
-} from "@/shared/view-mode"
+import { VIEW_MODE_OPTIONS } from "@/shared/view-mode"
 
 import { SideBarDropDownMenu } from "./SideBarDropDownMenu"
 
-export function SideBarDropDown() {
+interface SideBarDropDownProps {
+  selectedIdx: number
+  onSelect: (idx: number) => void
+}
+
+export function SideBarDropDown({
+  selectedIdx,
+  onSelect,
+}: SideBarDropDownProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const mode = useViewModeStore((s) => s.mode)
-  const setModeByIndex = useViewModeStore((s) => s.setModeByIndex)
-
-  const selectedIdx = indexFromMode(mode)
-  const selectedLabel = VIEW_MODE_OPTIONS[selectedIdx]?.label ?? "Admin View" // 임시 레이블
+  const selectedLabel = VIEW_MODE_OPTIONS[selectedIdx]?.label ?? "Admin View"
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -60,7 +60,7 @@ export function SideBarDropDown() {
               items={VIEW_MODE_OPTIONS.map((item) => item.label)}
               selectedIdx={selectedIdx}
               onSelect={(idx) => {
-                setModeByIndex(idx)
+                onSelect(idx)
                 setIsOpen(false)
               }}
             />

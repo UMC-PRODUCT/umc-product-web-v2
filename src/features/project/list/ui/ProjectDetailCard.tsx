@@ -7,30 +7,42 @@ import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
+import { useViewModeStore } from "@/shared/view-mode"
 
 import {
   DEFAULT_MATCHING_PROJECT_MOCK,
   type MatchingProjectMock,
 } from "../model/matchingProject.mock"
+import { resolveProjectDetailCtaMode } from "../model/projectDetailCta"
 import { TeamMemberModal } from "./TeamMemberModal"
-
-import type { ProjectDetailCtaMode } from "@/shared/view-mode"
 
 type ProjectDetailCardLogo = "on" | "off"
 
 interface ProjectDetailCardProps {
   data?: MatchingProjectMock
   logo?: ProjectDetailCardLogo
-  ctaMode?: ProjectDetailCtaMode
+  viewerBranch?: string
 }
 
 export function ProjectDetailCard({
   data: dataProp,
   logo = "on",
-  ctaMode = "read-only-recruit-questions",
+  viewerBranch: viewerBranchProp,
 }: ProjectDetailCardProps) {
+  const mode = useViewModeStore((s) => s.mode)
+  const previewMode = useViewModeStore((s) => s.previewMode)
+  const effectiveMode = mode === "admin" ? previewMode : mode
+  const storeBranch = useViewModeStore((s) => s.viewerBranch)
+  const viewerBranch = viewerBranchProp ?? storeBranch
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
   const data = dataProp ?? DEFAULT_MATCHING_PROJECT_MOCK
+  // admin 드롭다운 프리뷰는 실제 지부 비교 없이 항상 "같은 지부"로 간주 (임시)
+  const isSameBranch = mode === "admin" || viewerBranch === data.branch
+  const ctaMode = resolveProjectDetailCtaMode(
+    effectiveMode,
+    isSameBranch,
+    data.isApplied ?? false,
+  )
   const cover = data.coverImage
   const showLogo = logo === "on"
 
@@ -116,12 +128,15 @@ export function ProjectDetailCard({
             <Button variant="weak" color="primary" className="flex-1">
               기획 보기
             </Button>
-            {ctaMode === "read-only-recruit-questions" ? (
+            {ctaMode === "recruit-questions" && (
               <Button className="flex-1">모집 문항 보기</Button>
-            ) : null}
-            {ctaMode === "apply-enabled" ? (
+            )}
+            {ctaMode === "my-application" && (
+              <Button className="flex-1">내 지원서 확인하기</Button>
+            )}
+            {ctaMode === "apply" && (
               <Button className="flex-1">지원하기</Button>
-            ) : null}
+            )}
           </div>
         </div>
       </div>
