@@ -4,10 +4,9 @@ import { useMemo } from "react"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { Segment, type SegmentItem } from "@/shared/ui/segment/Segment"
-import {
-  getVisibleSectionsByViewMode,
-  useViewModeStore,
-} from "@/shared/view-mode"
+import { useViewModeStore } from "@/shared/view-mode"
+
+import { getVisibleSectionsByViewMode } from "./utils"
 
 export function MatchingSegmentRegion() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })

@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 import Header from "@/components/header/Header"
+import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
 import SideBar from "@/components/sidebar/SideBar"
-import { MatchingSegmentRegion } from "@/shared/ui/segment/MatchingSegmentRegion"
 
 export const Route = createFileRoute("/matching")({
   component: MatchingLayout,
