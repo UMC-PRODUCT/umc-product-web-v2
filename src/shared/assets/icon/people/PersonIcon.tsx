@@ -4,7 +4,7 @@
  */
 import type { SVGProps } from "react"
 
-const MyBadgeOffIcon = (props: SVGProps<SVGSVGElement>) => (
+const PersonIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     viewBox="0 0 20 22"
     fill="none"
@@ -22,4 +22,4 @@ const MyBadgeOffIcon = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 )
 
-export default MyBadgeOffIcon
+export default PersonIcon
