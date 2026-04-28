@@ -1,5 +1,5 @@
-import PaginationChevronLeftIcon from "@/shared/assets/icon/chevron/Pagination/LeftChevronIcon"
-import PaginationChevronRightIcon from "@/shared/assets/icon/chevron/Pagination/RightChevronIcon"
+import PaginationChevronLeftIcon from "@/shared/assets/icon/chevron/pagination/LeftChevronIcon"
+import PaginationChevronRightIcon from "@/shared/assets/icon/chevron/pagination/RightChevronIcon"
 import { cn } from "@/shared/lib/utils"
 
 export type PaginationProps = {

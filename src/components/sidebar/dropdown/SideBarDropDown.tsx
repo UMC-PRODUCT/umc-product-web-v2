@@ -3,21 +3,22 @@ import { useEffect, useRef, useState } from "react"
 
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { cn } from "@/shared/lib/utils"
+import { VIEW_MODE_OPTIONS } from "@/shared/view-mode"
 
 import { SideBarDropDownMenu } from "./SideBarDropDownMenu"
 
-const DROPDOWN_ITEMS = [
-  "Admin View",
-  "Challenger-Plan View",
-  "Challenger-Others View",
-]
+interface SideBarDropDownProps {
+  selectedIdx: number
+  onSelect: (idx: number) => void
+}
 
-export function SideBarDropDown() {
+export function SideBarDropDown({
+  selectedIdx,
+  onSelect,
+}: SideBarDropDownProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [selectedIdx, setSelectedIdx] = useState<number>(0)
   const containerRef = useRef<HTMLDivElement>(null)
-
-  const selectedLabel = DROPDOWN_ITEMS[selectedIdx]
+  const selectedLabel = VIEW_MODE_OPTIONS[selectedIdx]?.label ?? "Admin View"
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -56,10 +57,10 @@ export function SideBarDropDown() {
             className="overflow-hidden"
           >
             <SideBarDropDownMenu
-              items={DROPDOWN_ITEMS}
+              items={VIEW_MODE_OPTIONS.map((item) => item.label)}
               selectedIdx={selectedIdx}
               onSelect={(idx) => {
-                setSelectedIdx(idx)
+                onSelect(idx)
                 setIsOpen(false)
               }}
             />

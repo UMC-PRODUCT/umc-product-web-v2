@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
+import { cn } from "@/shared/lib/utils"
 import { Modal } from "@/shared/ui/Modal"
 import { Pagination } from "@/shared/ui/Pagination"
 
@@ -95,7 +96,12 @@ export function MatchingProjectsListPage() {
           </div>
         </div>
 
-        <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-3">
+        <div
+          className={cn(
+            "grid min-w-0 grid-cols-1 gap-5 md:grid-cols-3",
+            openFilterId && "pointer-events-none",
+          )}
+        >
           {paginatedProjects.map((project) => (
             <div key={project.id} className="min-w-0">
               <button
@@ -127,7 +133,7 @@ export function MatchingProjectsListPage() {
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content>
+          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
             {selectedProject ? (
               <ProjectDetailCard data={selectedProject} />
             ) : null}
