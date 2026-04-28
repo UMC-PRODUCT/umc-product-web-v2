@@ -17,8 +17,8 @@ interface MemberCountProps {
 
 const sizeStyles: Record<MemberCountSize, { number: string; slash: string }> = {
   xs: {
-    number: "min-w-[0.5rem] text-center text-caption-2-regular",
-    slash: "w-[0.3125rem] text-right text-caption-2-regular",
+    number: "min-w-2 text-center text-caption-2-regular",
+    slash: "w-1.25 text-right text-caption-2-regular",
   },
   sm: {
     number: "min-w-[0.5625rem] text-center text-body-2-medium",

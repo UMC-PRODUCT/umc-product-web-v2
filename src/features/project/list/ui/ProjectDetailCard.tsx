@@ -120,7 +120,7 @@ export function ProjectDetailCard({
             </div>
           </div>
 
-          <div className="mt-[34px] flex w-full items-start gap-2.5">
+          <div className="mt-8.5 flex w-full items-start gap-2.5">
             <TeamMemberButton
               variant="weak"
               onClick={() => setIsTeamModalOpen(true)}
