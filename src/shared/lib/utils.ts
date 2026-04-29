@@ -13,6 +13,7 @@ const twMerge = extendTailwindMerge({
         "text-heading-3-semibold",
         "text-heading-4-semibold",
         "text-heading-5-semibold",
+        "text-heading-5-bold",
         "text-heading-6-semibold",
         "text-heading-7-semibold",
         "text-subtitle-1-semibold",
