@@ -173,7 +173,7 @@ export function ApplicationStatsSection({
             {ROUND_LABELS.map((label, i) => (
               <ChartLegendLabel
                 key={label}
-                color={ROUND_COLORS[i]}
+                color={ROUND_COLORS[i]!}
                 label={label}
               />
             ))}

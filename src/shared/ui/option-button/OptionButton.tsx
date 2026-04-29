@@ -132,7 +132,7 @@ export function OptionButton({
 
   const ariaProps = isInGroup
     ? {
-        role: (isMultiple ? "checkbox" : "radio") as const,
+        role: isMultiple ? ("checkbox" as const) : ("radio" as const),
         "aria-checked": isSelected,
       }
     : { "aria-pressed": isSelected }
