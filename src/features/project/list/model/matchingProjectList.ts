@@ -210,5 +210,6 @@ export function useMatchingProjectListFilters() {
     filteredProjects,
     filterDescriptors,
     filterKey,
+    selectedBranch,
   }
 }

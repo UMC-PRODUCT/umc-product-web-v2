@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 
 import { FormHeader } from "@/shared/ui/FormHeader"
-import { CheckboxFieldList } from "@/shared/ui/input/checkbox/CheckboxFieldList"
-import { FileUploadField } from "@/shared/ui/input/file/FileUploadField"
-import { RadioFieldList } from "@/shared/ui/input/radio/RadioFieldList"
+import { CheckboxFieldList } from "@/shared/ui/question-field/CheckboxFieldList"
+import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import { QuestionForm } from "@/shared/ui/question-field/QuestionForm"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
+import { RadioFieldList } from "@/shared/ui/question-field/RadioFieldList"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 export const Route = createFileRoute("/test/question-form")({

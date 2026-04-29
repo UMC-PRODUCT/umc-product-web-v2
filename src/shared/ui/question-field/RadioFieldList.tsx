@@ -1,19 +1,19 @@
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { cn } from "@/shared/lib/utils"
 
-import { AddOptionButton } from "./AddOptionButton"
+import { AddRadioOptionButton } from "../input/radio/AddRadioOptionButton"
 
-interface CheckboxFieldListProps {
+interface RadioFieldListProps {
   options: string[]
   onOptionsChange: (options: string[]) => void
   className?: string
 }
 
-export function CheckboxFieldList({
+export function RadioFieldList({
   options,
   onOptionsChange,
   className,
-}: CheckboxFieldListProps) {
+}: RadioFieldListProps) {
   function updateOption(index: number, value: string) {
     onOptionsChange(options.map((opt, i) => (i === index ? value : opt)))
   }
@@ -29,7 +29,7 @@ export function CheckboxFieldList({
   return (
     <div
       className={cn(
-        "border-teal-gray-100 flex w-full flex-col items-start gap-0.5 rounded-[12px] border bg-white p-1",
+        "flex w-full flex-col items-start gap-0.5 rounded-[12px] bg-white p-1",
         className,
       )}
     >
@@ -40,7 +40,7 @@ export function CheckboxFieldList({
         >
           <span
             aria-hidden
-            className="border-teal-gray-300 inline-flex size-4 shrink-0 items-center justify-center rounded-[5px] border-[1.5px] bg-white md:size-5 md:rounded-[6px]"
+            className="border-teal-gray-300 inline-flex size-4 shrink-0 items-center justify-center rounded-full border-[1.5px] bg-white md:size-5"
           />
           <input
             type="text"
@@ -59,7 +59,7 @@ export function CheckboxFieldList({
           </button>
         </label>
       ))}
-      <AddOptionButton onAdd={addOption} />
+      <AddRadioOptionButton onAdd={addOption} />
     </div>
   )
 }

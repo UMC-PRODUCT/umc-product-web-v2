@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 
 import { QuestionFieldBox } from "./QuestionFieldBox"
 
@@ -9,6 +10,7 @@ interface TextQuestionFieldProps {
   onChange: (value: string) => void
   placeholder?: string
   maxLength?: number
+  showCounter?: boolean
   className?: string
 }
 
@@ -17,6 +19,7 @@ export function TextQuestionField({
   onChange,
   placeholder = "답변을 작성하세요.",
   maxLength = 200,
+  showCounter = true,
   className,
 }: TextQuestionFieldProps) {
   const [focused, setFocused] = useState(false)
@@ -31,7 +34,10 @@ export function TextQuestionField({
   }, [value])
 
   return (
-    <QuestionFieldBox state={state} className={className}>
+    <QuestionFieldBox
+      state={state}
+      className={cn("w-full min-w-200", className)}
+    >
       <textarea
         ref={textareaRef}
         rows={1}
@@ -46,10 +52,13 @@ export function TextQuestionField({
           "w-full resize-none overflow-hidden border-none bg-transparent outline-none",
         )}
       />
-      {focused && (
-        <span className="text-body-1-regular text-teal-gray-400 self-end">
-          {value.length}/{maxLength}
-        </span>
+      {showCounter && focused && (
+        <CounterLabel
+          current={value.length}
+          total={maxLength}
+          size="sm"
+          className="self-end"
+        />
       )}
     </QuestionFieldBox>
   )

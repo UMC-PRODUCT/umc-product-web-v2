@@ -9,7 +9,7 @@ export function ProjectSearchField() {
         aria-label="프로젝트 검색"
         className="text-body-2-medium text-teal-gray-900 placeholder:text-teal-gray-400 w-full bg-transparent outline-none"
       />
-      <SearchIcon className="shrink-0" aria-hidden />
+      <SearchIcon className="color-teal-gray-400 shrink-0" aria-hidden />
     </div>
   )
 }
