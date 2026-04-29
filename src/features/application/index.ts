@@ -1,5 +1,6 @@
 export { ApplicantDetailRow } from "./ui/ApplicantDetailRow"
 export { ApplicantTableHead } from "./ui/ApplicantTableHead"
+export { ApplicationDetailModal } from "./ui/ApplicationDetailModal"
 export { ApplicationStatsSection } from "./ui/ApplicationStatsSection"
 export { ApplicationTableSection } from "./ui/ApplicationTableSection"
 export { ChartLegendLabel } from "./ui/ChartLegendLabel"
