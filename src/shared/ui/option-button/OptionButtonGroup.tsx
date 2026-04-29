@@ -59,7 +59,7 @@ export function OptionButtonGroup({
                 "flex flex-wrap gap-2",
                 orientation === "vertical" && "flex-col",
               )
-            : "flex",
+            : "bg-teal-gray-50 shadow-drop-neutral-2 flex rounded-lg",
           className,
         )}
       >
