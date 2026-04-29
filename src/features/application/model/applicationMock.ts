@@ -70,7 +70,7 @@ export const MOCK_PROJECTS: ProjectApplication[] = [
     id: "3",
     projectName: "UMC_Web",
     role: "plan",
-    challengerName: "이장토촐빈이/이제길팀",
+    challengerName: "벨라/황지원",
     challengerUniversity: "한양대ERICA",
     statusLabel: "모집 중",
     designCount: { current: 1, total: 1 },

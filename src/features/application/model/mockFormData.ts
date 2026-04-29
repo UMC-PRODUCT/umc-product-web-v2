@@ -1,8 +1,10 @@
 import type { Role } from "./types"
 
 export interface FormField {
+  label: string
   question: string
   answer: string
+  required?: boolean
 }
 
 export interface ApplicantFormData {
@@ -11,7 +13,12 @@ export interface ApplicantFormData {
   role: Role
   projectName: string
   challengerName: string
-  fields: FormField[]
+  challengerUniversity: string
+  commonFields: FormField[]
+  roleSection?: {
+    title: string
+    fields: FormField[]
+  }
 }
 
 export const MOCK_FORM_DATA: Record<string, ApplicantFormData> = {
@@ -20,45 +27,88 @@ export const MOCK_FORM_DATA: Record<string, ApplicantFormData> = {
     chapter: "Chromium",
     role: "design",
     projectName: "UMC_Web",
-    challengerName: "이방토/이예원",
-    fields: [
+    challengerName: "벨라/황지원",
+    challengerUniversity: "중앙대",
+    commonFields: [
       {
-        question: "지원 동기를 작성해주세요.",
-        answer:
-          "디자인을 통해 사용자 경험을 개선하고 싶어 UMC에 지원하게 되었습니다. 특히 팀 프로젝트에서 실무 경험을 쌓고 싶습니다.",
+        label: "Q1",
+        question: "본인의 닉네임/이름을 적어주세요.",
+        answer: "이방토/이예원",
+        required: true,
       },
       {
-        question: "관련 경험이 있다면 작성해주세요.",
-        answer:
-          "학교 동아리에서 앱 UI/UX 디자인을 담당한 경험이 있습니다. Figma를 주로 사용하며, 디자인 시스템 구축 경험도 있습니다.",
+        label: "Q2",
+        question: "합격 문자 전송을 위해 전화번호를 작성해주세요.",
+        answer: "이방토/이예원",
+        required: true,
       },
       {
-        question: "프로젝트에서 기대하는 바를 작성해주세요.",
-        answer:
-          "실제 서비스를 런칭해보는 경험을 하고 싶습니다. 개발자와의 협업을 통해 실무에 가까운 프로세스를 경험하고 싶습니다.",
+        label: "Q3",
+        question: "소속 학교/전공을 적어주세요.",
+        answer: "한양대 ERICA / 커뮤니케이션디자인학과",
+        required: true,
+      },
+      {
+        label: "Q3",
+        question: "포트폴리오를 링크 혹은 PDF 파일의 형태로 제출하세요.",
+        answer: "2026_UXUI 포트폴리오_이방토",
+        required: true,
+      },
+      {
+        label: "Q3",
+        question: "대략적인 고정일정을 알려주세요.",
+        answer: "월.수.일 알바가 있습니다.",
+        required: true,
+      },
+      {
+        label: "Q3",
+        question: "하고 싶은 말이나 참고 사항이 있다면 자유롭게 적어주세요.",
+        answer: "화이팅 ~~",
       },
     ],
+    roleSection: {
+      title: "Design",
+      fields: [
+        {
+          label: "Q3",
+          question: "사용 가능한 기술 스택을 선택하세요.",
+          answer: "옵션 1",
+          required: true,
+        },
+        {
+          label: "Q5",
+          question: "포트폴리오를 링크 혹은 PDF 파일의 형태로 제출하세요.",
+          answer: "2026_UXUI 포트폴리오_이방토",
+          required: true,
+        },
+      ],
+    },
   },
   "3-2": {
     applicantId: "3-2",
     chapter: "Chromium",
     role: "design",
     projectName: "UMC_Web",
-    challengerName: "이장토촐빈이/이제길팀",
-    fields: [
+    challengerName: "벨라/황지원",
+    challengerUniversity: "중앙대",
+    commonFields: [
       {
-        question: "지원 동기를 작성해주세요.",
-        answer:
-          "UMC의 프로젝트 중심 활동에 매력을 느껴 지원하게 되었습니다. 디자인 역량을 키우고 포트폴리오를 만들고 싶습니다.",
+        label: "Q1",
+        question: "본인의 닉네임/이름을 적어주세요.",
+        answer: "이방토/이예원",
+        required: true,
       },
       {
-        question: "관련 경험이 있다면 작성해주세요.",
-        answer:
-          "개인 프로젝트로 모바일 앱 디자인을 진행한 적이 있습니다. Adobe XD와 Figma를 활용할 수 있습니다.",
+        label: "Q2",
+        question: "합격 문자 전송을 위해 전화번호를 작성해주세요.",
+        answer: "이방토/이예원",
+        required: true,
       },
       {
-        question: "프로젝트에서 기대하는 바를 작성해주세요.",
-        answer: "팀원들과 소통하며 함께 성장하는 경험을 하고 싶습니다.",
+        label: "Q3",
+        question: "소속 학교/전공을 적어주세요.",
+        answer: "한양대 ERICA / 시각디자인학과",
+        required: true,
       },
     ],
   },
@@ -67,21 +117,26 @@ export const MOCK_FORM_DATA: Record<string, ApplicantFormData> = {
     chapter: "Chromium",
     role: "android",
     projectName: "UMC_Web",
-    challengerName: "이장토촐빈이/이제길팀",
-    fields: [
+    challengerName: "벨라/황지원",
+    challengerUniversity: "중앙대",
+    commonFields: [
       {
-        question: "지원 동기를 작성해주세요.",
-        answer:
-          "안드로이드 개발에 관심이 많아 실제 프로젝트 경험을 쌓고자 지원했습니다.",
+        label: "Q1",
+        question: "본인의 닉네임/이름을 적어주세요.",
+        answer: "이방토/이예원",
+        required: true,
       },
       {
-        question: "관련 경험이 있다면 작성해주세요.",
-        answer:
-          "Kotlin으로 간단한 투두 앱을 만들어본 경험이 있습니다. Jetpack Compose에도 관심이 있습니다.",
+        label: "Q2",
+        question: "합격 문자 전송을 위해 전화번호를 작성해주세요.",
+        answer: "이방토/이예원",
+        required: true,
       },
       {
-        question: "프로젝트에서 기대하는 바를 작성해주세요.",
-        answer: "협업 경험과 코드 리뷰 문화를 경험하고 싶습니다.",
+        label: "Q3",
+        question: "소속 학교/전공을 적어주세요.",
+        answer: "한양대 ERICA / 컴퓨터공학과",
+        required: true,
       },
     ],
   },
