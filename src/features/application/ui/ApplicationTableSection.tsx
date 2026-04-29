@@ -10,6 +10,7 @@ import { Pagination } from "@/shared/ui/Pagination"
 
 import { ApplicantDetailRow } from "./ApplicantDetailRow"
 import { ApplicantTableHead } from "./ApplicantTableHead"
+import { ApplicationDetailModal } from "./ApplicationDetailModal"
 import { ProjectStatusRow } from "./ProjectStatusRow"
 
 import type { ApplicantDetail, ProjectApplication } from "../model/types"
@@ -68,6 +69,11 @@ export function ApplicationTableSection({
   const [searchQuery, setSearchQuery] = useState("")
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
+
+  // Detail modal state
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [selectedProject, setSelectedProject] =
+    useState<ProjectApplication | null>(null)
 
   // Filter state
   const [openFilter, setOpenFilter] = useState<string | null>(null)
@@ -265,6 +271,10 @@ export function ApplicationTableSection({
                 beCount={project.beCount}
                 isExpanded={isExpanded}
                 onToggleExpand={() => toggleExpand(project.id)}
+                onProjectClick={() => {
+                  setSelectedProject(project)
+                  setDetailModalOpen(true)
+                }}
               />
 
               {isExpanded && applicants.length > 0 && (
@@ -296,6 +306,16 @@ export function ApplicationTableSection({
           onPageChange={setCurrentPage}
         />
       </div>
+
+      {/* 지원 현황 상세 모달 */}
+      {selectedProject && (
+        <ApplicationDetailModal
+          project={selectedProject}
+          chapterName="Chromium"
+          open={detailModalOpen}
+          onOpenChange={setDetailModalOpen}
+        />
+      )}
     </div>
   )
 }
