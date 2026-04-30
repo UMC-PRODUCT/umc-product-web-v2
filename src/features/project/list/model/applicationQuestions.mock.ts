@@ -108,8 +108,57 @@ const DEFAULT_SECTIONS: Section[] = [
   {
     id: "backend",
     name: "Backend",
-    isEnabled: false,
-    questions: [],
+    isEnabled: true,
+    questions: [
+      {
+        id: "q-b1",
+        title: "주력으로 사용하는 언어를 선택하세요.",
+        caption: "",
+        fieldType: "radio",
+        required: true,
+        options: ["Java", "Kotlin", "Python", "Node.js", "Go"],
+      },
+      {
+        id: "q-b2",
+        title: "사용 가능한 기술 스택을 모두 선택하세요.",
+        caption: "",
+        fieldType: "checkbox",
+        required: true,
+        options: [
+          "Spring Boot",
+          "Django",
+          "FastAPI",
+          "NestJS",
+          "Docker",
+          "AWS",
+        ],
+      },
+      {
+        id: "q-b3",
+        title: "본인의 백엔드 경험을 간단히 소개해 주세요.",
+        caption: "",
+        fieldType: "text",
+        required: true,
+        options: [],
+      },
+      {
+        id: "q-b4",
+        title: "포트폴리오를 링크 혹은 PDF 파일의 형태로 제출하세요.",
+        caption:
+          "링크를 입력하거나 파일을 첨부해 주세요. 150MB 이하의 PDF 파일만 업로드 가능합니다.",
+        fieldType: "portfolio",
+        required: false,
+        options: [],
+      },
+      {
+        id: "q-b5",
+        title: "관련 파일이 있다면 첨부해 주세요.",
+        caption: "",
+        fieldType: "file",
+        required: false,
+        options: [],
+      },
+    ],
   },
 ]
 
