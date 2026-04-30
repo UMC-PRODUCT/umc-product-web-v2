@@ -22,9 +22,9 @@ export function ProjectRoundBar({
   className,
 }: ProjectRoundBarProps) {
   return (
-    <div className={cn("flex w-15 flex-col items-center", className)}>
+    <div className={cn("flex min-w-15 flex-col items-center", className)}>
       <div
-        className="flex w-full items-end justify-center gap-[0.3125rem]"
+        className="flex w-15 items-end justify-center gap-1.25"
         style={{ height: `${maxHeightPx}px` }}
       >
         {rounds.slice(0, 3).map((value, i) => {
@@ -37,7 +37,7 @@ export function ProjectRoundBar({
             <div
               key={i}
               className={cn(
-                "w-2.5 rounded-t bg-gradient-to-b",
+                "w-2.5 rounded-t bg-linear-to-b",
                 BAR_STYLES[i] ?? BAR_STYLES[2],
               )}
               style={{ height: `${heightPx}px` }}
@@ -45,7 +45,7 @@ export function ProjectRoundBar({
           )
         })}
       </div>
-      <span className="text-body-2-medium text-teal-gray-900 mt-[0.3125rem] w-full text-center">
+      <span className="text-body-2-medium text-teal-gray-900 mt-1.25 text-center whitespace-nowrap">
         {projectName}
       </span>
     </div>
