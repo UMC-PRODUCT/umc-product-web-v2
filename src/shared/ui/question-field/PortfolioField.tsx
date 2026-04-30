@@ -6,6 +6,10 @@ import { Button } from "@/shared/ui/Button"
 
 const MAX_FILE_BYTES = 150 * 1024 * 1024
 
+export type PortfolioValue =
+  | { kind: "link"; url: string }
+  | { kind: "file"; name: string }
+
 function isValidUrl(value: string): boolean {
   try {
     const url = new URL(value)
@@ -16,24 +20,38 @@ function isValidUrl(value: string): boolean {
 }
 
 interface PortfolioFieldProps {
+  value?: PortfolioValue | null
+  onChange?: (value: PortfolioValue | null) => void
   className?: string
 }
 
-export function PortfolioField({ className }: PortfolioFieldProps) {
-  const [link, setLink] = useState("")
+export function PortfolioField({
+  value,
+  onChange,
+  className,
+}: PortfolioFieldProps) {
+  const [link, setLink] = useState(value?.kind === "link" ? value.url : "")
   const [linkError, setLinkError] = useState("")
-  const [fileName, setFileName] = useState<string | null>(null)
+  const [fileName, setFileName] = useState<string | null>(
+    value?.kind === "file" ? value.name : null,
+  )
   const [fileError, setFileError] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   function handleLinkChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setLink(e.target.value)
+    const val = e.target.value
+    setLink(val)
     setLinkError("")
+    if (!val) onChange?.(null)
   }
 
   function handleLinkBlur() {
     if (link && !isValidUrl(link)) {
       setLinkError("유효한 URL을 입력해 주세요. (예: https://example.com)")
+    } else if (link) {
+      onChange?.({ kind: "link", url: link })
+    } else {
+      onChange?.(null)
     }
   }
 
@@ -51,19 +69,21 @@ export function PortfolioField({ className }: PortfolioFieldProps) {
     setFileError("")
     setLink("")
     setLinkError("")
+    onChange?.({ kind: "file", name: file.name })
   }
 
   function handleDelete() {
     setFileName(null)
     setFileError("")
     if (fileInputRef.current) fileInputRef.current.value = ""
+    onChange?.(null)
   }
 
   const error = linkError || fileError
 
   return (
     <div className={cn("flex w-full max-w-203 flex-col gap-1", className)}>
-      <div className="flex h-15 w-full items-center justify-between gap-1.5 rounded-[12px] bg-white px-5 py-4">
+      <div className="border-teal-gray-150 flex h-15 w-full items-center justify-between gap-1.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] px-5 py-4">
         <input
           type="file"
           ref={fileInputRef}
