@@ -69,12 +69,12 @@ export function ModalFormPanel({
   return (
     <div
       className={cn(
-        "flex w-xl shrink-0 flex-col overflow-y-auto rounded-xl bg-white px-8 pb-8.5",
+        "flex w-xl shrink-0 flex-col rounded-xl bg-white px-8",
         className,
       )}
     >
-      <div className="flex flex-col gap-5.5">
-        {/* 헤더 */}
+      {/* 헤더 (고정) */}
+      <div className="shrink-0">
         <div className="flex flex-col gap-2.75 px-2 pt-14 pb-2">
           <div className="flex items-start justify-between">
             <span className="text-subtitle-4-semibold flex-1 text-teal-600">
@@ -130,69 +130,69 @@ export function ModalFormPanel({
             </div>
           </div>
         </div>
-
-        {/* 본문 */}
-        <div className="flex flex-col">
-          {/* 프로젝트 정보 */}
-          <div className="relative flex h-15 items-end px-4 py-4.5">
-            {/* 프로젝트 카드 (좌) */}
-            <ProjectTitleCard
-              projectName={projectName}
-              challengerName={challengerName}
-              challengerUniversity={challengerUniversity}
-              size="md"
-              className="absolute top-0 left-0 w-full pr-10"
-            />
-
-            {/* 역할 정보 (우) */}
-            <div className="ml-auto flex items-center gap-3">
-              <span className="text-body-2-medium text-teal-gray-700">
-                {roleLabel.toUpperCase()}
-              </span>
-              <span className="text-caption-2-regular text-teal-gray-500">
-                0/1
-              </span>
-              <span className="shadow-drop-neutral-3 text-body-3-medium rounded-md bg-teal-50 px-2 py-0.5 text-teal-600">
-                모집 중
-              </span>
-            </div>
-          </div>
-
-          {/* 질문/답변 섹션 */}
-          <div className="flex flex-col gap-5">
-            {/* 공통 질문 */}
-            <div className="flex flex-col gap-8 rounded-b-xl border border-teal-200 px-2 py-6.5">
-              {formData?.commonFields.map((field, i) => (
-                <FormFieldItem key={i} field={field} />
-              ))}
-            </div>
-
-            {/* 파트별 질문 */}
-            {formData?.roleSection && (
-              <div className="flex flex-col">
-                <div className="flex items-center justify-between rounded-t-xl border-t border-r border-l border-teal-300 bg-teal-100 py-2 pr-5 pl-7.5">
-                  <span className="text-heading-7-semibold text-teal-600">
-                    {formData.roleSection.title}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-8 rounded-b-xl border border-teal-200 px-2 py-6.5">
-                  {formData.roleSection.fields.map((field, i) => (
-                    <FormFieldItem key={i} field={field} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
-      {!formData && (
-        <div className="flex h-40 items-center justify-center">
-          <span className="text-body-2-regular text-teal-gray-400">
-            지원서 데이터가 없습니다.
-          </span>
+      {/* 본문 (스크롤) */}
+      <div className="scrollbar-none flex flex-1 flex-col overflow-y-auto pb-8.5">
+        {/* 프로젝트 정보 */}
+        <div className="relative flex h-15 items-end px-4 py-4.5">
+          {/* 프로젝트 카드 (좌) */}
+          <ProjectTitleCard
+            projectName={projectName}
+            challengerName={challengerName}
+            challengerUniversity={challengerUniversity}
+            size="md"
+            className="absolute top-0 left-0 w-full pr-10"
+          />
+
+          {/* 역할 정보 (우) */}
+          <div className="ml-auto flex items-center gap-3">
+            <span className="text-body-2-medium text-teal-gray-700">
+              {roleLabel.toUpperCase()}
+            </span>
+            <span className="text-caption-2-regular text-teal-gray-500">
+              0/1
+            </span>
+            <span className="shadow-drop-neutral-3 text-body-3-medium rounded-md bg-teal-50 px-2 py-0.5 text-teal-600">
+              모집 중
+            </span>
+          </div>
         </div>
-      )}
+
+        {/* 질문/답변 섹션 */}
+        <div className="flex flex-col gap-5">
+          {/* 공통 질문 */}
+          <div className="flex flex-col gap-8 rounded-b-xl border border-teal-200 px-2 py-6.5">
+            {formData?.commonFields.map((field, i) => (
+              <FormFieldItem key={i} field={field} />
+            ))}
+          </div>
+
+          {/* 파트별 질문 */}
+          {formData?.roleSection && (
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between rounded-t-xl border-t border-r border-l border-teal-300 bg-teal-100 py-2 pr-5 pl-7.5">
+                <span className="text-heading-7-semibold text-teal-600">
+                  {formData.roleSection.title}
+                </span>
+              </div>
+              <div className="flex flex-col gap-8 rounded-b-xl border border-teal-200 px-2 py-6.5">
+                {formData.roleSection.fields.map((field, i) => (
+                  <FormFieldItem key={i} field={field} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!formData && (
+          <div className="flex h-40 items-center justify-center">
+            <span className="text-body-2-regular text-teal-gray-400">
+              지원서 데이터가 없습니다.
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

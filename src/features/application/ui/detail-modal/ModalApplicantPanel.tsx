@@ -189,7 +189,7 @@ export function ModalApplicantPanel({
       </div>
 
       {/* 스크롤 가능 리스트 */}
-      <div className="flex flex-1 flex-col gap-12.5 overflow-y-auto px-12.5 pt-4.5 pb-8.5">
+      <div className="scrollbar-none flex flex-1 flex-col gap-12.5 overflow-y-auto px-12.5 pt-4.5 pb-8.5">
         {Array.from(grouped.entries()).map(([role, applicants]) => (
           <ApplicantRoleSection
             key={role}
