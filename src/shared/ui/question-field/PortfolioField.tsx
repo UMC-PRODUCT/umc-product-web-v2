@@ -8,7 +8,7 @@ const MAX_FILE_BYTES = 150 * 1024 * 1024
 
 export type PortfolioValue =
   | { kind: "link"; url: string }
-  | { kind: "file"; name: string }
+  | { kind: "file"; name: string; file: File }
 
 function isValidUrl(value: string): boolean {
   try {
@@ -22,12 +22,14 @@ function isValidUrl(value: string): boolean {
 interface PortfolioFieldProps {
   value?: PortfolioValue | null
   onChange?: (value: PortfolioValue | null) => void
+  error?: string
   className?: string
 }
 
 export function PortfolioField({
   value,
   onChange,
+  error: errorProp,
   className,
 }: PortfolioFieldProps) {
   const [link, setLink] = useState(value?.kind === "link" ? value.url : "")
@@ -69,7 +71,7 @@ export function PortfolioField({
     setFileError("")
     setLink("")
     setLinkError("")
-    onChange?.({ kind: "file", name: file.name })
+    onChange?.({ kind: "file", name: file.name, file })
   }
 
   function handleDelete() {
@@ -79,7 +81,7 @@ export function PortfolioField({
     onChange?.(null)
   }
 
-  const error = linkError || fileError
+  const displayError = linkError || fileError || errorProp
 
   return (
     <div className={cn("flex w-full max-w-203 flex-col gap-1", className)}>
@@ -129,8 +131,10 @@ export function PortfolioField({
         )}
       </div>
 
-      {error && (
-        <p className="text-label-2-regular text-error-600 px-1">{error}</p>
+      {displayError && (
+        <p className="text-label-2-regular text-error-600 px-1">
+          {displayError}
+        </p>
       )}
     </div>
   )
