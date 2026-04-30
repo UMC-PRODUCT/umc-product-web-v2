@@ -108,7 +108,7 @@ const DEFAULT_SECTIONS: Section[] = [
   {
     id: "backend",
     name: "Backend",
-    isEnabled: true,
+    isEnabled: false,
     questions: [
       {
         id: "q-b1",
