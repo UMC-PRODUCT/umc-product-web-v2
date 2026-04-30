@@ -1,5 +1,8 @@
-import { useMemo, useRef, useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import { Button } from "@/shared/ui/Button"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import { FormHeader } from "@/shared/ui/FormHeader"
@@ -14,7 +17,13 @@ import {
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
+import {
+  buildApplyAnswersSchema,
+  defaultByFieldType,
+} from "../model/applyValidation"
 import { isRecruitDone } from "../model/matchingProject"
+
+import type { FieldErrors, Resolver } from "react-hook-form"
 
 import type {
   Question,
@@ -29,35 +38,18 @@ const OPTION_LIST_CLASS =
   "border-teal-gray-150 flex flex-col gap-0.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] p-1"
 const COMMON_SECTION_ID = "common"
 
-function asString(v: ApplyAnswerValue | undefined): string {
-  return typeof v === "string" ? v : ""
-}
-
-function asStringArray(v: ApplyAnswerValue | undefined): string[] {
-  return Array.isArray(v) ? v : []
-}
-
-function asPortfolioValue(
-  v: ApplyAnswerValue | undefined,
-): PortfolioValue | null {
-  if (v == null || Array.isArray(v) || typeof v === "string") return null
-  return v
-}
-
-interface ProjectApplyModalProps {
-  data: MatchingProject
-  sections: Section[]
-  canToggleSection?: boolean
-  onBack: () => void
-  onSubmit: (answers: Record<string, ApplyAnswerValue>) => void
+function isPortfolioValue(v: ApplyAnswerValue): v is PortfolioValue {
+  return v !== null && typeof v === "object" && !Array.isArray(v)
 }
 
 function FileAnswerField({
   value,
   onChange,
+  error,
 }: {
   value: string | null
   onChange: (name: string | null) => void
+  error?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   return (
@@ -75,9 +67,18 @@ function FileAnswerField({
         fileName={value}
         onUpload={() => inputRef.current?.click()}
         onDelete={() => onChange(null)}
+        error={error}
       />
     </>
   )
+}
+
+interface ProjectApplyModalProps {
+  data: MatchingProject
+  sections: Section[]
+  canToggleSection?: boolean
+  onBack: () => void
+  onSubmit: (answers: Record<string, ApplyAnswerValue>) => void
 }
 
 export function ProjectApplyModal({
@@ -87,10 +88,37 @@ export function ProjectApplyModal({
   onBack,
   onSubmit,
 }: ProjectApplyModalProps) {
-  const [answers, setAnswers] = useState<Record<string, ApplyAnswerValue>>({})
+  const addToast = useToastStore((s) => s.addToast)
   const [sectionEnabled, setSectionEnabled] = useState<Record<string, boolean>>(
     () => Object.fromEntries(sections.map((s) => [s.id, s.isEnabled])),
   )
+
+  const schema = useMemo(
+    () => buildApplyAnswersSchema(sections, sectionEnabled),
+    [sections, sectionEnabled],
+  )
+
+  const defaultValues = useMemo(
+    () =>
+      Object.fromEntries(
+        sections.flatMap((s) =>
+          s.questions.map((q) => [q.id, defaultByFieldType(q)]),
+        ),
+      ),
+    [sections],
+  )
+
+  const { control, handleSubmit, clearErrors } = useForm<
+    Record<string, ApplyAnswerValue>
+  >({
+    resolver: zodResolver(schema) as Resolver<Record<string, ApplyAnswerValue>>,
+    mode: "onChange",
+    defaultValues,
+  })
+
+  useEffect(() => {
+    clearErrors()
+  }, [sectionEnabled, clearErrors])
 
   const questionIndexMap = useMemo(() => {
     const map: Record<string, number> = {}
@@ -105,75 +133,115 @@ export function ProjectApplyModal({
     return map
   }, [sections, sectionEnabled])
 
-  function setAnswer(questionId: string, value: ApplyAnswerValue) {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }))
+  function onValid(data: Record<string, ApplyAnswerValue>) {
+    onSubmit(data)
   }
 
-  function renderAnswerField(q: Question) {
-    const answer = answers[q.id]
+  function onInvalid(errs: FieldErrors<Record<string, ApplyAnswerValue>>) {
+    const firstId = Object.keys(errs)[0]
+    if (!firstId) return
+    const firstEntry = errs[firstId]
+    const firstMessage =
+      firstEntry &&
+      "message" in firstEntry &&
+      typeof firstEntry.message === "string"
+        ? firstEntry.message
+        : "필수 항목을 입력해 주세요."
+    addToast({
+      message: firstMessage,
+      color: "red",
+      variant: "deep",
+      type: "default",
+      duration: 3,
+    })
+    document
+      .querySelector(`[data-question-id="${firstId}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" })
+  }
+
+  function renderAnswerField(
+    q: Question,
+    value: ApplyAnswerValue,
+    onChange: (v: ApplyAnswerValue) => void,
+    error?: string,
+  ) {
     switch (q.fieldType) {
       case "text":
         return (
           <TextQuestionField
-            value={asString(answer)}
-            onChange={(val) => setAnswer(q.id, val)}
+            value={typeof value === "string" ? value : ""}
+            onChange={onChange}
             maxLength={500}
+            error={error}
           />
         )
       case "checkbox":
         return (
-          <div className={OPTION_LIST_CLASS}>
-            {q.options.map((opt) => (
-              <CheckboxList
-                key={opt}
-                checked={asStringArray(answer).includes(opt)}
-                onChange={(checked) => {
-                  const current = asStringArray(answer)
-                  setAnswer(
-                    q.id,
-                    checked
-                      ? [...current, opt]
-                      : current.filter((o) => o !== opt),
-                  )
-                }}
-              >
-                {opt}
-              </CheckboxList>
-            ))}
+          <div className="flex flex-col gap-1">
+            <div className={OPTION_LIST_CLASS}>
+              {q.options.map((opt) => (
+                <CheckboxList
+                  key={opt}
+                  checked={Array.isArray(value) && value.includes(opt)}
+                  onChange={(checked) => {
+                    const current = Array.isArray(value) ? value : []
+                    onChange(
+                      checked
+                        ? [...current, opt]
+                        : current.filter((o) => o !== opt),
+                    )
+                  }}
+                >
+                  {opt}
+                </CheckboxList>
+              ))}
+            </div>
+            {error && (
+              <p className="text-caption-2-regular text-error-600 px-1">
+                {error}
+              </p>
+            )}
           </div>
         )
       case "radio":
         return (
-          <div className={OPTION_LIST_CLASS}>
-            {q.options.map((opt) => (
-              <RadioList
-                key={opt}
-                checked={answer === opt}
-                onChange={(checked) => {
-                  if (checked) setAnswer(q.id, opt)
-                }}
-              >
-                {opt}
-              </RadioList>
-            ))}
+          <div className="flex flex-col gap-1">
+            <div className={OPTION_LIST_CLASS}>
+              {q.options.map((opt) => (
+                <RadioList
+                  key={opt}
+                  checked={value === opt}
+                  onChange={(checked) => {
+                    if (checked) onChange(opt)
+                  }}
+                >
+                  {opt}
+                </RadioList>
+              ))}
+            </div>
+            {error && (
+              <p className="text-caption-2-regular text-error-600 px-1">
+                {error}
+              </p>
+            )}
           </div>
         )
       case "file":
         return (
           <FileAnswerField
-            value={typeof answer === "string" ? answer : null}
-            onChange={(name) => setAnswer(q.id, name)}
+            value={typeof value === "string" ? value : null}
+            onChange={(name) => onChange(name)}
+            error={error}
           />
         )
       case "portfolio":
         return (
           <PortfolioField
-            value={asPortfolioValue(answer)}
-            onChange={(val) => setAnswer(q.id, val)}
+            value={isPortfolioValue(value) ? value : null}
+            onChange={(val: PortfolioValue | null) => onChange(val)}
+            error={error}
           />
         )
-      default:
-        return null
     }
   }
 
@@ -235,13 +303,28 @@ export function ProjectApplyModal({
                 {enabled && section.questions.length > 0 && (
                   <div className="flex flex-col items-start gap-10 self-stretch rounded-b-[12px] border border-teal-200 bg-white pt-8.5 pr-5 pb-9.5 pl-5">
                     {section.questions.map((q) => (
-                      <div key={q.id} className="flex w-full flex-col gap-3">
+                      <div
+                        key={q.id}
+                        className="flex w-full flex-col gap-3"
+                        data-question-id={q.id}
+                      >
                         <QuestionItemTitle
                           index={`Q${questionIndexMap[q.id]}`}
                           title={q.title}
                           required={q.required}
                         />
-                        {renderAnswerField(q)}
+                        <Controller
+                          name={q.id}
+                          control={control}
+                          render={({ field, fieldState }) =>
+                            renderAnswerField(
+                              q,
+                              field.value,
+                              (v: ApplyAnswerValue) => field.onChange(v),
+                              fieldState.error?.message,
+                            )
+                          }
+                        />
                       </div>
                     ))}
                   </div>
@@ -255,7 +338,12 @@ export function ProjectApplyModal({
           <Button variant="weak" color="neutral" size="xl" onClick={onBack}>
             돌아가기
           </Button>
-          <Button size="xl" onClick={() => onSubmit(answers)}>
+          <Button
+            size="xl"
+            onClick={() => {
+              void handleSubmit(onValid, onInvalid)()
+            }}
+          >
             제출하기
           </Button>
         </div>
