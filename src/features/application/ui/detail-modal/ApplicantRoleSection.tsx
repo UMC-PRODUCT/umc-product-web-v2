@@ -43,7 +43,7 @@ export function ApplicantRoleSection({
         </div>
 
         {/* 배지 */}
-        <div className="bg-teal-gray-50/50 flex items-center gap-2.5 rounded-lg px-2.5 py-1 text-[12px] leading-normal whitespace-nowrap">
+        <div className="bg-teal-gray-50 flex items-center gap-2.5 rounded-lg px-2.5 py-1 text-[12px] leading-normal whitespace-nowrap">
           {Object.entries(roundCounts)
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([round, count]) => (
