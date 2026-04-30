@@ -9,17 +9,19 @@ import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { useViewModeStore } from "@/shared/view-mode"
 
-import {
-  DEFAULT_MATCHING_PROJECT_MOCK,
-  type MatchingProjectMock,
-} from "../model/matchingProject.mock"
+import { getApplicationSections } from "../model/applicationQuestions.mock"
+import { isRecruitDone } from "../model/matchingProject"
+import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import { resolveProjectDetailCtaMode } from "../model/projectDetailCta"
+import { ProjectApplyModal } from "./ProjectApplyModal"
 import { TeamMemberModal } from "./TeamMemberModal"
+
+import type { MatchingProject } from "../model/matchingProject"
 
 type ProjectDetailCardLogo = "on" | "off"
 
 interface ProjectDetailCardProps {
-  data?: MatchingProjectMock
+  data?: MatchingProject
   logo?: ProjectDetailCardLogo
   viewerBranch?: string
 }
@@ -35,6 +37,7 @@ export function ProjectDetailCard({
   const storeBranch = useViewModeStore((s) => s.viewerBranch)
   const viewerBranch = viewerBranchProp ?? storeBranch
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
   const data = dataProp ?? DEFAULT_MATCHING_PROJECT_MOCK
   // admin 드롭다운 프리뷰는 실제 지부 비교 없이 항상 "같은 지부"로 간주 (임시)
   const isSameBranch = mode === "admin" || viewerBranch === data.branch
@@ -96,8 +99,7 @@ export function ProjectDetailCard({
 
             <div className="flex w-full flex-col items-start gap-1.5">
               {data.recruitRows.map((row) => {
-                const done =
-                  row.done ?? (row.total > 0 && row.current >= row.total)
+                const done = isRecruitDone(row)
                 return (
                   <div
                     key={row.part}
@@ -135,7 +137,12 @@ export function ProjectDetailCard({
               <Button className="flex-1">내 지원서 확인하기</Button>
             )}
             {ctaMode === "apply" && (
-              <Button className="flex-1">지원하기</Button>
+              <Button
+                className="flex-1"
+                onClick={() => setIsApplyModalOpen(true)}
+              >
+                지원하기
+              </Button>
             )}
           </div>
         </div>
@@ -146,6 +153,24 @@ export function ProjectDetailCard({
           <Modal.Overlay tone="light" />
           <Modal.Content>
             <TeamMemberModal onClose={() => setIsTeamModalOpen(false)} />
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
+
+      <Modal.Root open={isApplyModalOpen} onOpenChange={setIsApplyModalOpen}>
+        <Modal.Portal>
+          <Modal.Overlay tone="deep" />
+          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
+            <ProjectApplyModal
+              data={data}
+              sections={getApplicationSections(data.id)}
+              canToggleSection={effectiveMode !== "others"}
+              onBack={() => setIsApplyModalOpen(false)}
+              onSubmit={(answers) => {
+                console.log("[apply submit]", data.id, answers)
+                setIsApplyModalOpen(false)
+              }}
+            />
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
