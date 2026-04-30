@@ -1,12 +1,9 @@
-/** 뷰 모드 관리 파일:
- * admin, plan, others 3가지 뷰 모드 관리
- */
 import { create } from "zustand"
 
 export const VIEW_MODE_OPTIONS = [
   { mode: "admin", label: "Admin View" },
-  { mode: "challenger-plan", label: "Challenger-Plan View" },
-  { mode: "challenger-others", label: "Challenger-Others View" },
+  { mode: "pm", label: "Challenger-Plan View" },
+  { mode: "others", label: "Challenger-Others View" },
 ] as const
 
 export type ViewMode = (typeof VIEW_MODE_OPTIONS)[number]["mode"]

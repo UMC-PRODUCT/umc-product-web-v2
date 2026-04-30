@@ -16,13 +16,12 @@ interface SideBarProps {
 const DEMO_DAY_EDITION = 10
 
 export default function SideBar({ className }: SideBarProps) {
-  const isAdmin = useViewModeStore((s) => s.mode === "admin")
-  const previewMode = useViewModeStore((s) => s.previewMode)
-  const setPreviewModeByIndex = useViewModeStore((s) => s.setPreviewModeByIndex)
+  const mode = useViewModeStore((s) => s.mode)
+  const setModeByIndex = useViewModeStore((s) => s.setModeByIndex)
 
   const visibleSections = useMemo(
-    () => getVisibleSectionsByViewMode(SIDEBAR_ITEMS, previewMode),
-    [previewMode],
+    () => getVisibleSectionsByViewMode(SIDEBAR_ITEMS, mode),
+    [mode],
   )
   const [openSectionId, setOpenSectionId] = useState<string>(
     visibleSections[0]?.id ?? SIDEBAR_ITEMS[0]?.id ?? "",
@@ -43,12 +42,10 @@ export default function SideBar({ className }: SideBarProps) {
         className,
       )}
     >
-      {isAdmin && (
-        <SideBarDropDown
-          selectedIdx={indexFromMode(previewMode)}
-          onSelect={setPreviewModeByIndex}
-        />
-      )}
+      <SideBarDropDown
+        selectedIdx={indexFromMode(mode)}
+        onSelect={setModeByIndex}
+      />
       <div className="flex flex-col py-4">
         <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
           {DEMO_DAY_EDITION}th Demoday
