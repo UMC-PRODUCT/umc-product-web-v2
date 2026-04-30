@@ -1,0 +1,27 @@
+export type ProjectRecruitRow = {
+  part: string
+  current: number
+  total: number
+  done?: boolean
+}
+
+export function isRecruitDone(row: ProjectRecruitRow): boolean {
+  return row.done ?? (row.total > 0 && row.current >= row.total)
+}
+
+export type ProjectCoverImage = {
+  src: string
+  alt?: string
+}
+
+export type MatchingProject = {
+  id: string
+  branch: string
+  school: string
+  title: string
+  description: string
+  authorSchoolLine: string
+  coverImage?: ProjectCoverImage | null
+  recruitRows: ProjectRecruitRow[]
+  isApplied?: boolean
+}

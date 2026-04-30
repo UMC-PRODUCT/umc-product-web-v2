@@ -1,11 +1,12 @@
+export { isRecruitDone } from "./model/matchingProject"
+export type {
+  MatchingProject,
+  ProjectCoverImage,
+  ProjectRecruitRow,
+} from "./model/matchingProject"
 export {
   DEFAULT_MATCHING_PROJECT_MOCK,
   MOCK_MATCHING_PROJECTS,
-} from "./model/matchingProject.mock"
-export type {
-  MatchingProjectCoverImage,
-  MatchingProjectMock,
-  MatchingProjectRecruitRow,
 } from "./model/matchingProject.mock"
 export {
   filterMatchingProjects,

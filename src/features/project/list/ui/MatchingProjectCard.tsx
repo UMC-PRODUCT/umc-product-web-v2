@@ -1,13 +1,15 @@
 /** 피그마 기준 Project Card_Md입니다. */
 
-import {
-  DEFAULT_MATCHING_PROJECT_MOCK,
-  type MatchingProjectMock,
-  type MatchingProjectRecruitRow,
-} from "@/features/project/list/model/matchingProject.mock"
+import { isRecruitDone } from "@/features/project/list/model/matchingProject"
+import { DEFAULT_MATCHING_PROJECT_MOCK } from "@/features/project/list/model/matchingProject.mock"
 import { cn } from "@/shared/lib/utils"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
+
+import type {
+  MatchingProject,
+  ProjectRecruitRow,
+} from "@/features/project/list/model/matchingProject"
 
 export type MatchingProjectCardVariant =
   | "default"
@@ -16,16 +18,12 @@ export type MatchingProjectCardVariant =
 
 interface MatchingProjectCardProps {
   variant?: MatchingProjectCardVariant
-  data?: MatchingProjectMock
+  data?: MatchingProject
 }
 
-function RecruitRowItem({
-  part,
-  current,
-  total,
-  done,
-}: MatchingProjectRecruitRow) {
-  const isDone = done ?? (total > 0 && current >= total)
+function RecruitRowItem(row: ProjectRecruitRow) {
+  const { part, current, total } = row
+  const isDone = isRecruitDone(row)
   return (
     <div className="flex w-full min-w-0 items-center justify-between self-stretch">
       <div className="flex w-[7.3125rem] shrink-0 items-center justify-between">
@@ -39,7 +37,7 @@ function RecruitRowItem({
   )
 }
 
-function CardBody({ data }: { data: MatchingProjectMock }) {
+function CardBody({ data }: { data: MatchingProject }) {
   const cover = data.coverImage
 
   return (
