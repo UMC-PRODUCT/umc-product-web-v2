@@ -206,7 +206,12 @@ export function NoticePublishForm({
         </Modal.Portal>
       </Modal.Root>
 
-      <Modal.Root open={isLeaveModalOpen}>
+      <Modal.Root
+        open={isLeaveModalOpen}
+        onOpenChange={(open) => {
+          if (!open) handleLeaveCancel()
+        }}
+      >
         <Modal.Portal>
           <Modal.Overlay tone="light" />
           <Modal.Content className="shadow-drop-neutral-1 flex w-115 max-w-[calc(100vw-32px)] flex-col gap-8 rounded-[9.2px] border border-neutral-200 bg-white px-6 py-6 focus:outline-none">
