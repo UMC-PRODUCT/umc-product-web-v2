@@ -22,16 +22,14 @@ export function NoticePublishForm({
 }: NoticePublishFormProps) {
   const [noticeContent, setNoticeContent] = useState("")
   const [noticeTitle, setNoticeTitle] = useState("")
-  const [isNotificationEnabled, setIsNotificationEnabled] = useState(false)
+  const [isRequired, setIsRequired] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isDone, setIsDone] = useState(false)
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false)
 
   const hasPendingChanges =
     !isDone &&
-    (noticeTitle.trim() !== "" ||
-      noticeContent.trim() !== "" ||
-      isNotificationEnabled)
+    (noticeTitle.trim() !== "" || noticeContent.trim() !== "" || isRequired)
 
   const {
     proceed: proceedLeave,
@@ -69,8 +67,8 @@ export function NoticePublishForm({
     }
   }
 
-  const handleNotificationToggle = () => {
-    setIsNotificationEnabled((prev) => !prev)
+  const handleRequiredToggle = () => {
+    setIsRequired((prev) => !prev)
   }
 
   // TODO: API 연결 후 수정
@@ -90,7 +88,7 @@ export function NoticePublishForm({
           noticeId,
           title: noticeTitle,
           content: noticeContent,
-          isNotificationEnabled,
+          isRequired,
         },
       )
     }, 1000)
@@ -137,13 +135,13 @@ export function NoticePublishForm({
             <div className="flex items-center gap-5">
               <div className="flex items-center gap-2">
                 <Checkbox
-                  checked={isNotificationEnabled}
-                  onChange={handleNotificationToggle}
+                  checked={isRequired}
+                  onChange={handleRequiredToggle}
                   variant="primary"
-                  aria-label="알림 발송"
+                  aria-label="필독"
                 />
                 <span className="text-body-1-medium text-teal-gray-600">
-                  알림 발송
+                  필독
                 </span>
               </div>
 
