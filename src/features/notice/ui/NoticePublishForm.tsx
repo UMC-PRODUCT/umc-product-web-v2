@@ -1,5 +1,5 @@
 import { useBlocker } from "@tanstack/react-router"
-import { useLayoutEffect, useRef, useState } from "react"
+import { useState } from "react"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import LeftChevronIcon from "@/shared/assets/icon/chevron/NoticePublish/LeftChevronIcon"
@@ -7,6 +7,7 @@ import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangle
 import { Button } from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { Modal } from "@/shared/ui/Modal"
+import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 const MAX_CHARS = 2000
 
@@ -62,9 +63,9 @@ export function NoticePublishForm({
     }
   }
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (e.target.value.length <= MAX_CHARS) {
-      setNoticeContent(e.target.value)
+  const handleContentChange = (value: string) => {
+    if (value.length <= MAX_CHARS) {
+      setNoticeContent(value)
     }
   }
 
@@ -104,15 +105,6 @@ export function NoticePublishForm({
     variant === "edit"
       ? "공지 수정이 완료되었습니다."
       : "공지가 등록되었습니다."
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  useLayoutEffect(() => {
-    const el = textareaRef.current
-    if (!el) return
-    el.style.height = "360px"
-    el.style.height = `${el.scrollHeight}px`
-  }, [noticeContent])
 
   return (
     <>
@@ -168,19 +160,13 @@ export function NoticePublishForm({
             </div>
           </div>
 
-          <div className="bg-teal-gray-50 shadow-inner-neutral-2 flex w-full flex-col gap-4 rounded-[12px] px-8 pt-6 pb-7.5">
-            <textarea
-              ref={textareaRef}
-              className="placeholder-teal-gray-400 text-body-1-regular text-teal-gray-900 min-h-90 resize-none focus:outline-none"
-              placeholder="내용을 입력하세요"
-              value={noticeContent}
-              onChange={handleContentChange}
-              maxLength={MAX_CHARS}
-            />
-            <div className="text-body-2-medium text-teal-gray-400 text-right">
-              {noticeContent.length} / {MAX_CHARS}자
-            </div>
-          </div>
+          <TextQuestionField
+            value={noticeContent}
+            onChange={handleContentChange}
+            placeholder="내용을 입력하세요."
+            maxLength={2000}
+            className="bg-teal-gray-50 shadow-inner-neutral-2 data-[state=focus]:bg-teal-gray-50 flex flex-col gap-4 px-8 pt-6 pb-7.5"
+          />
         </div>
       </section>
 
