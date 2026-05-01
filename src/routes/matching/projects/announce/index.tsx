@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
@@ -21,6 +21,14 @@ interface AnnounceSearch {
 const DEFAULT_CHAPTER: Chapter = "Chromium"
 const DEFAULT_PAGE = 1
 const NOTICE_PAGE_SIZE = 10
+const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
+
+type PendingNotice = {
+  id: string
+  title: string
+  chip?: string
+  mode: "publish" | "edit"
+}
 
 function isChapter(value: unknown): value is Chapter {
   return (
@@ -39,6 +47,23 @@ function parsePage(value: unknown): number {
   return Number.isFinite(parsedPage) && parsedPage > 0
     ? Math.floor(parsedPage)
     : DEFAULT_PAGE
+}
+
+function readPendingNotice() {
+  if (typeof window === "undefined") {
+    return null
+  }
+
+  const rawValue = sessionStorage.getItem(NOTICE_COMPLETION_STORAGE_KEY)
+  if (!rawValue) return null
+
+  sessionStorage.removeItem(NOTICE_COMPLETION_STORAGE_KEY)
+
+  try {
+    return JSON.parse(rawValue) as PendingNotice
+  } catch {
+    return null
+  }
 }
 
 // TODO: 공지 API 응답 형식에 맞추어 수정
@@ -76,9 +101,31 @@ function ProjectSettingsAnnouncePage() {
   const { chapter, page } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
-  const [notices, setNotices] = useState(INITIAL_NOTICES)
+  const [pendingNotice] = useState(readPendingNotice)
+  const [notices, setNotices] = useState(() => {
+    if (!pendingNotice) return INITIAL_NOTICES
+
+    if (pendingNotice.mode === "edit") {
+      return INITIAL_NOTICES.map((notice) =>
+        notice.id === pendingNotice.id
+          ? { ...notice, title: pendingNotice.title, chip: pendingNotice.chip }
+          : notice,
+      )
+    }
+
+    return [
+      {
+        id: pendingNotice.id,
+        title: pendingNotice.title,
+        date: "0000.00.00",
+        chip: pendingNotice.chip,
+      },
+      ...INITIAL_NOTICES,
+    ]
+  })
   const totalPages = Math.max(1, Math.ceil(notices.length / NOTICE_PAGE_SIZE))
   const safePage = Math.min(Math.max(1, page), totalPages)
+  const focusedNoticeId = pendingNotice?.id ?? null
   const paginatedNotices = notices.slice(
     (safePage - 1) * NOTICE_PAGE_SIZE,
     safePage * NOTICE_PAGE_SIZE,
@@ -125,6 +172,24 @@ function ProjectSettingsAnnouncePage() {
     })
   }
 
+  useEffect(() => {
+    if (!focusedNoticeId) return
+
+    const targetIndex = notices.findIndex(
+      (notice) => notice.id === focusedNoticeId,
+    )
+
+    if (targetIndex < 0) return
+
+    const targetPage = Math.floor(targetIndex / NOTICE_PAGE_SIZE) + 1
+    if (targetPage !== safePage) {
+      navigate({
+        search: (prev) => ({ ...prev, page: targetPage }),
+        replace: true,
+      })
+    }
+  }, [focusedNoticeId, navigate, notices, safePage])
+
   return (
     <section className="w-full pt-8">
       <div className="border-teal-gray-100 flex min-h-213 w-full flex-col items-center justify-between rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
@@ -166,6 +231,7 @@ function ProjectSettingsAnnouncePage() {
               notices={paginatedNotices}
               page={safePage}
               canManage={canManage}
+              focusedNoticeId={focusedNoticeId}
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
             />

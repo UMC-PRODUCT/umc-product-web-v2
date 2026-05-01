@@ -10,6 +10,7 @@ import { Modal } from "@/shared/ui/Modal"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 const MAX_CHARS = 2000
+const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
 
 interface NoticePublishFormProps {
   variant: "publish" | "edit"
@@ -81,6 +82,18 @@ export function NoticePublishForm({
     setTimeout(() => {
       setIsLoading(false)
       setIsDone(true)
+      const completionNoticeId = noticeId ?? crypto.randomUUID()
+
+      sessionStorage.setItem(
+        NOTICE_COMPLETION_STORAGE_KEY,
+        JSON.stringify({
+          id: completionNoticeId,
+          title: noticeTitle,
+          chip: isRequired ? "필독" : undefined,
+          mode: variant,
+        }),
+      )
+
       setIsCompletionModalOpen(true)
       console.log(
         variant === "edit" ? "Updating notice:" : "Publishing notice:",
@@ -103,6 +116,10 @@ export function NoticePublishForm({
     variant === "edit"
       ? "공지 수정이 완료되었습니다."
       : "공지가 등록되었습니다."
+
+  const handleCompletionGoBack = () => {
+    window.history.back()
+  }
 
   return (
     <>
@@ -194,7 +211,7 @@ export function NoticePublishForm({
                   color="primary"
                   size="s"
                   className="rounded-[10px]"
-                  onClick={handleBackClick}
+                  onClick={handleCompletionGoBack}
                 >
                   보러가기
                 </Button>
