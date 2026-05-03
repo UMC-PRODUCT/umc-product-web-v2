@@ -22,7 +22,7 @@ export function FormHeader(props: FormHeaderProps) {
     return (
       <div
         className={cn(
-          "flex w-full items-center self-stretch rounded-t-[12px] border-t border-r border-l border-teal-300 bg-teal-100 py-2 pr-5 pl-[30px]",
+          "flex w-full items-center self-stretch rounded-t-[12px] border-t border-r border-l border-teal-300 bg-teal-100 py-2 pr-5 pl-7.5",
           props.className,
         )}
       >
@@ -36,7 +36,7 @@ export function FormHeader(props: FormHeaderProps) {
   return (
     <div
       className={cn(
-        "flex w-full items-center justify-between bg-teal-100 py-2 pr-5 pl-[30px]",
+        "flex w-full items-center justify-between bg-teal-100 py-2 pr-5 pl-7.5",
         props.toggleChecked
           ? "rounded-t-[12px] border-t border-r border-l border-teal-300"
           : "rounded-[12px] border border-teal-300",
