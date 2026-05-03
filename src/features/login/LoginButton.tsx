@@ -6,7 +6,7 @@ import KakaoLogo from "@/shared/assets/icon/logo/KakaoLogo"
 import { cn } from "@/shared/lib/utils"
 
 const loginButtonVariants = cva(
-  "min-w-[360px] min-h-[50px] w-[360px] h-[50px] rounded-[10px] px-7 flex items-center justify-center text-teal-gray-900",
+  "min-w-[360px] min-h-[50px] w-[360px] h-[50px] rounded-[10px] px-7 flex items-center justify-center",
   {
     variants: {
       social: {
@@ -35,14 +35,30 @@ export function LoginButton({ className, social, ...props }: LoginButtonProps) {
       {...props}
     >
       <div className="flex items-center justify-center gap-3">
-        {currentSocial === "apple" && <AppleLogo className="h-6 w-[20.4px]" />}
-        {currentSocial === "apple" && "Apple 로그인"}
+        {currentSocial === "apple" && (
+          <AppleLogo className="h-6 w-[20.4px] text-black" />
+        )}
+        {currentSocial === "apple" && (
+          <span className="text-label-1-medium text-teal-gray-900">
+            Apple 로그인
+          </span>
+        )}
 
         {currentSocial === "google" && <GoogleLogo className="h-5 w-5" />}
-        {currentSocial === "google" && "Google 로그인"}
+        {currentSocial === "google" && (
+          <span className="text-label-1-medium text-teal-gray-900">
+            Google 로그인
+          </span>
+        )}
 
-        {currentSocial === "kakao" && <KakaoLogo className="h-5 w-5" />}
-        {currentSocial === "kakao" && "카카오 로그인"}
+        {currentSocial === "kakao" && (
+          <KakaoLogo className="h-5 w-5 text-black" />
+        )}
+        {currentSocial === "kakao" && (
+          <span className="text-label-1-medium text-teal-gray-900">
+            카카오 로그인
+          </span>
+        )}
       </div>
     </button>
   )
