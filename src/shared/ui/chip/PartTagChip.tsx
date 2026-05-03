@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority"
 
 import { cn } from "@/shared/lib/utils"
 
-const parTagChipVariants = cva(
+const partTagChipVariants = cva(
   "inline-flex h-6 px-2.5 items-center justify-center rounded-[6px] py-0.5 text-label-2-medium text-teal-gray-800 shadow-drop-neutral-2",
   {
     variants: {
@@ -62,19 +62,19 @@ const ROLE_LABEL = {
 
 type Role = keyof typeof ROLE_LABEL
 
-interface ParTagChipProps {
+interface PartTagChipProps {
   role: Role
   type?: "default" | "light"
   className?: string
 }
 
-export function ParTagChip({
+export function PartTagChip({
   role,
   type = "default",
   className,
-}: ParTagChipProps) {
+}: PartTagChipProps) {
   return (
-    <span className={cn(parTagChipVariants({ role, type }), className)}>
+    <span className={cn(partTagChipVariants({ role, type }), className)}>
       {ROLE_LABEL[role]}
     </span>
   )
