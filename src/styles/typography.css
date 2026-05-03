@@ -45,6 +45,11 @@
   --text-heading-5-semibold-leading: 1.35;
   --text-heading-5-semibold-tracking: -0.02em;
 
+  --text-heading-5-bold-size: 1.5rem;
+  --text-heading-5-bold-weight: 600;
+  --text-heading-5-bold-leading: 1.35;
+  --text-heading-5-bold-tracking: -0.02em;
+
   --text-heading-6-semibold-size: 1.25rem;
   --text-heading-6-semibold-weight: 500;
   --text-heading-6-semibold-leading: 1.4;
@@ -220,6 +225,13 @@
   font-weight: var(--text-heading-5-semibold-weight);
   line-height: var(--text-heading-5-semibold-leading);
   letter-spacing: var(--text-heading-5-semibold-tracking);
+}
+
+@utility text-heading-5-bold {
+  font-size: var(--text-heading-5-bold-size);
+  font-weight: var(--text-heading-5-bold-weight);
+  line-height: var(--text-heading-5-bold-leading);
+  letter-spacing: var(--text-heading-5-bold-tracking);
 }
 
 @utility text-heading-6-semibold {

@@ -88,7 +88,7 @@ export function FilterDropdown(props: FilterDropdownProps) {
         aria-haspopup="listbox"
         onClick={onClick}
         className={cn(
-          "inline-flex h-11 min-w-[6.375rem] shrink-0 items-center gap-1 rounded-xl border py-0 pr-2.5 pl-4 text-left transition-colors",
+          "shadow-inner-neutral-2 inline-flex h-11 min-w-[6.375rem] shrink-0 items-center gap-1 rounded-xl border py-0 pr-2.5 pl-4 text-left transition-colors",
           highlighted
             ? "border-teal-300 bg-teal-50 text-teal-600"
             : [
@@ -98,10 +98,8 @@ export function FilterDropdown(props: FilterDropdownProps) {
           className,
         )}
       >
-        <span className="flex min-w-0 flex-1 items-center justify-between gap-1">
-          <span className="text-subtitle-4-semibold truncate">
-            {displayLabel}
-          </span>
+        <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+          <span className="text-body-2-medium truncate">{displayLabel}</span>
           <ChevronIcon active={highlighted} />
         </span>
       </button>
