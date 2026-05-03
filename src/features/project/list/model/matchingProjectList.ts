@@ -82,9 +82,10 @@ const MATCHING_PROJECT_LIST_FILTER_LAYOUT = {
     className: "w-fit min-w-20",
     dropdownClassName: "w-[9.125rem]",
   },
+  // 114px 고정 (디자이너님 요청)
   status: {
-    className: "w-fit min-w-[6.375rem]",
-    dropdownClassName: "w-[6.625rem]",
+    className: "w-[114px]",
+    dropdownClassName: "w-[114px] min-w-[114px]",
   },
 } as const
 
