@@ -176,7 +176,7 @@ export function useMatchingProjectListFilters() {
     },
     {
       id: "school",
-      label: "학교",
+      label: "PM 학교",
       options: schoolOptions,
       selectedValue: selectedSchool,
       onSelect: (value) =>
