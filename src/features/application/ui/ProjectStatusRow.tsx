@@ -121,7 +121,7 @@ export function ProjectStatusRow({
       {/* 확장/축소 버튼 */}
       <button
         type="button"
-        aria-label={isExpanded ? "\uC811\uAE30" : "\uD3BC\uCE58\uAE30"}
+        aria-label={isExpanded ? "접기" : "펼치기"}
         aria-expanded={isExpanded}
         onClick={onToggleExpand}
         className={cn(

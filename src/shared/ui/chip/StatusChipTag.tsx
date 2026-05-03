@@ -23,9 +23,9 @@ const statusTextVariants = cva("text-label-2-medium whitespace-nowrap", {
 })
 
 const STATUS_LABEL = {
-  pass: "\uD569\uACA9",
-  fail: "\uBD88\uD569\uACA9",
-  pending: "\uB300\uAE30",
+  pass: "합격",
+  fail: "불합격",
+  pending: "대기",
 } as const
 
 type StatusValue = keyof typeof STATUS_LABEL
