@@ -8,7 +8,7 @@ export const Route = createFileRoute("/test/button")({
 
 const VARIANTS = ["fill", "weak"] as const
 const COLORS = ["primary", "neutral"] as const
-const SIZES = ["xs", "s", "m", "xl"] as const
+const SIZES = ["xs", "s", "m", "lg", "xl"] as const
 
 function Section({
   title,
@@ -139,6 +139,7 @@ function ButtonTestPage() {
                       버튼
                     </Button>,
                     null,
+                    null,
                   ],
                 })),
               ),
@@ -148,6 +149,7 @@ function ButtonTestPage() {
                   <Button size="xs" variant={variant} color="white" icon>
                     버튼
                   </Button>,
+                  null,
                   null,
                   null,
                   null,
@@ -184,6 +186,7 @@ function ButtonTestPage() {
                       버튼
                     </Button>,
                     null,
+                    null,
                   ],
                 })),
               ),
@@ -199,6 +202,7 @@ function ButtonTestPage() {
                   >
                     버튼
                   </Button>,
+                  null,
                   null,
                   null,
                   null,
@@ -233,6 +237,7 @@ function ButtonTestPage() {
                   >
                     버튼
                   </Button>,
+                  null,
                   null,
                 ],
               })),
