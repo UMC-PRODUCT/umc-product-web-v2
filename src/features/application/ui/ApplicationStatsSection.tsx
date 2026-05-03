@@ -30,12 +30,6 @@ export function ApplicationStatsSection({
     1,
   )
 
-  const round1 = stats.rounds[0]
-  const round1Rate = round1
-    ? Math.round((round1.applied / round1.total) * 100)
-    : 0
-  const round1Pending = round1 ? round1.total - round1.applied : 0
-
   return (
     <div className={cn("flex flex-col gap-4", className)}>
       {/* 섹션 헤더 */}
@@ -48,58 +42,71 @@ export function ApplicationStatsSection({
 
       {/* 3열 통계 카드 */}
       <div className="flex gap-4">
-        {/* 좌: 1차 매칭 지원 현황 */}
-        <div className="shadow-drop-neutral-3 border-teal-gray-100 relative h-[280px] w-[408px] shrink-0 overflow-hidden rounded-lg border bg-white">
+        {/* N차 매칭 지원 현황 */}
+        <div className="shadow-drop-neutral-3 border-teal-gray-100 relative h-70 w-102 shrink-0 overflow-hidden rounded-lg border bg-white">
           <h3 className="text-heading-6-semibold absolute top-7 left-8 text-teal-700">
-            1차 매칭 지원 현황
+            N차 매칭 지원 현황
           </h3>
 
-          <div className="absolute top-[82px] left-9">
-            <DonutChart percentage={round1Rate} size={142} />
+          <div className="absolute top-20.5 left-9">
+            <DonutChart percentage={stats.completionRate} size={142} />
           </div>
 
           {/* 지원 완료/전 */}
-          <div className="absolute top-[82px] left-[213px] flex flex-col gap-0.5">
+          <div className="absolute top-20.5 left-53.25 flex flex-col gap-0.5">
             <div className="flex items-center gap-3.5">
-              <span className="text-subtitle-3-semibold text-teal-gray-800 w-[60px]">
+              <span className="text-subtitle-3-semibold text-teal-gray-800 w-15">
                 지원 완료
               </span>
               <span className="text-subtitle-3-semibold text-teal-500">
-                {round1?.applied ?? 0}
+                {stats.completedCount}
                 <span className="text-subtitle-3-semibold">명</span>
               </span>
             </div>
             <div className="flex items-center gap-3.5">
-              <span className="text-subtitle-3-semibold text-teal-gray-800 w-[60px]">
+              <span className="text-subtitle-3-semibold text-teal-gray-800 w-15">
                 지원 전
               </span>
               <span className="text-subtitle-3-semibold text-error-600">
-                {round1Pending}
+                {stats.pendingCount}
                 <span className="text-subtitle-3-semibold">명</span>
               </span>
             </div>
           </div>
 
-          {/* 하단 1차 지원 요약 */}
-          <div className="bg-teal-gray-50/80 absolute bottom-5 left-[200px] rounded px-3.5 py-3">
-            <div className="flex items-center gap-7">
-              <span className="text-body-3-medium text-teal-gray-600">
-                1차 지원
-              </span>
-              <div className="flex items-center gap-2 text-[0.75rem] leading-[1.4]">
-                <span className="text-label-3-semibold text-teal-500">
-                  {round1?.applied ?? 0}명
-                </span>
-                <span className="text-label-4-medium text-teal-gray-500">
-                  / {round1?.total ?? 0}명
-                </span>
-              </div>
+          {/* 하단 차수별 지원 요약 */}
+          <div
+            className="absolute bottom-5 left-50 w-44.5 rounded px-3.5 py-3"
+            style={{
+              backgroundImage:
+                "linear-gradient(90deg, rgba(246,247,247,0.5), rgba(246,247,247,0.5)), linear-gradient(90deg, #fbfcfc, #fbfcfc)",
+            }}
+          >
+            <div className="flex flex-col gap-1.25 text-[12px]">
+              {stats.rounds.map((r) => (
+                <div key={r.round} className="flex items-center gap-7">
+                  <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-[1.5]">
+                    <span className="w-4.5">{r.round}차</span>
+                    <span className="whitespace-nowrap">지원</span>
+                  </div>
+                  <div className="flex w-20 items-center justify-end gap-2 leading-[1.4]">
+                    <span className="text-label-3-semibold whitespace-nowrap text-teal-500">
+                      {r.applied}명
+                    </span>
+                    <div className="text-label-4-medium text-teal-gray-500 flex items-center justify-end gap-0.5">
+                      <span>/</span>
+                      <span className="w-8">{r.total}명</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* 중: 1차 매칭 지원 Top 4 */}
-        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex flex-1 flex-col rounded-lg border bg-white px-8 pt-7 pb-8">
+        {/* 1차 매칭 지원 Top 4 */}
+        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-[402px] shrink-0 flex-col rounded-lg border bg-white px-8 pt-7 pb-8">
+          {" "}
           <h3 className="text-heading-6-semibold text-teal-700">
             1차 매칭 지원 Top 4
           </h3>
@@ -125,7 +132,7 @@ export function ApplicationStatsSection({
         </div>
 
         {/* 우: 총원 N명 */}
-        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-[210px] shrink-0 flex-col rounded-lg border bg-white px-6 pt-7 pb-8">
+        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-52.5 shrink-0 flex-col rounded-lg border bg-white px-6 pt-7 pb-8">
           <div className="flex items-center gap-2.5">
             <PersonGraphicIcon
               width={30}
@@ -143,13 +150,13 @@ export function ApplicationStatsSection({
             </div>
           </div>
 
-          <div className="mt-[37px] flex flex-col gap-3">
+          <div className="mt-9.25 flex flex-col gap-3">
             {stats.universities.map((u) => (
               <div key={u.name} className="flex items-center justify-between">
                 <span className="text-body-2-medium text-teal-gray-600">
                   {u.name}
                 </span>
-                <div className="flex items-center gap-1 text-[0.75rem] leading-[1.4]">
+                <div className="flex items-center gap-1 text-[12px] leading-[1.4]">
                   <span className="text-label-3-semibold text-teal-500">
                     {String(u.applied).padStart(2, "0")}명
                   </span>
