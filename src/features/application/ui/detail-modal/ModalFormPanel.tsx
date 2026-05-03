@@ -105,6 +105,7 @@ export function ModalFormPanel({
               <OptionButtonGroup
                 variant="segmented"
                 value={applicant.status}
+                onValueChange={(v) => onStatusChange?.(v as StatusValue)}
                 className="w-45"
               >
                 <OptionButton value="pending" className="h-7.5">
