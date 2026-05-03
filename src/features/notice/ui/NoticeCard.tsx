@@ -153,37 +153,38 @@ export function NoticeCard({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="overflow-hidden pb-4"
           >
-            <div
-              id={contentId}
-              className="shadow-inner-neutral-2 bg-teal-gray-50 text-teal-gray-900 rounded-[12px] px-8 pt-6 pb-7.5"
-            >
-              {/* TODO: 공지 API 응답 형식에 맞추어 수정 */}
-              {children}
+            <div className="overflow-hidden pb-4">
+              <div
+                id={contentId}
+                className="shadow-inner-neutral-2 bg-teal-gray-50 text-teal-gray-900 rounded-[12px] px-8 pt-6 pb-7.5"
+              >
+                {/* TODO: 공지 API 응답 형식에 맞추어 수정 */}
+                {children}
 
-              {canManage ? (
-                <div className="flex items-center justify-end gap-2 pt-8">
-                  <Button
-                    type="button"
-                    variant="weak"
-                    color="neutral"
-                    size="m"
-                    onClick={handleDeleteClick}
-                  >
-                    삭제
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="weak"
-                    color="primary"
-                    size="m"
-                    onClick={onEdit}
-                  >
-                    수정
-                  </Button>
-                </div>
-              ) : null}
+                {canManage ? (
+                  <div className="flex items-center justify-end gap-2 pt-8">
+                    <Button
+                      type="button"
+                      variant="weak"
+                      color="neutral"
+                      size="m"
+                      onClick={handleDeleteClick}
+                    >
+                      삭제
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="weak"
+                      color="primary"
+                      size="m"
+                      onClick={onEdit}
+                    >
+                      수정
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </motion.div>
         ) : null}

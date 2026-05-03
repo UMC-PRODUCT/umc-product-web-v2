@@ -16,6 +16,7 @@ interface NoticeCardListProps {
   notices: NoticeItem[]
   page: number
   canManage?: boolean
+  focusedNoticeId?: string | null
   onDeleteNotice?: (noticeId: string) => void
   onEditNotice?: (noticeId: string) => void
 }
@@ -24,6 +25,7 @@ export function NoticeCardList({
   notices,
   page,
   canManage = false,
+  focusedNoticeId,
   onDeleteNotice,
   onEditNotice,
 }: NoticeCardListProps) {
@@ -32,6 +34,31 @@ export function NoticeCardList({
   useEffect(() => {
     setExpandedIndex(null)
   }, [page])
+
+  useEffect(() => {
+    if (!focusedNoticeId) return
+
+    const targetIndex = notices.findIndex(
+      (notice) => notice.id === focusedNoticeId,
+    )
+
+    if (targetIndex < 0) return
+
+    setExpandedIndex(targetIndex)
+  }, [focusedNoticeId, notices])
+
+  useEffect(() => {
+    if (!focusedNoticeId) return
+
+    const targetButton = document.querySelector<HTMLElement>(
+      `[data-notice-id="${focusedNoticeId}"]`,
+    )
+
+    if (!targetButton) return
+
+    targetButton.focus()
+    targetButton.scrollIntoView({ block: "center", behavior: "smooth" })
+  }, [expandedIndex, focusedNoticeId, notices])
 
   return (
     <div className="flex w-full flex-col">
@@ -52,6 +79,7 @@ export function NoticeCardList({
               variant={cardVariant}
               canManage={canManage}
               expanded={isExpanded}
+              data-notice-id={notice.id}
               onExpandedChange={(nextExpanded) => {
                 setExpandedIndex(nextExpanded ? index : null)
               }}
