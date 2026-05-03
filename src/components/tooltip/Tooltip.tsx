@@ -189,6 +189,7 @@ export function Tooltip({
           triggerRef.current.getBoundingClientRect(),
           side,
           sideOffset,
+          size,
         ),
       )
     }
