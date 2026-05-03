@@ -1,5 +1,5 @@
 import { useBlocker } from "@tanstack/react-router"
-import { useLayoutEffect, useRef, useState } from "react"
+import { useState } from "react"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import LeftChevronIcon from "@/shared/assets/icon/chevron/NoticePublish/LeftChevronIcon"
@@ -7,8 +7,10 @@ import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangle
 import { Button } from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { Modal } from "@/shared/ui/Modal"
+import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 const MAX_CHARS = 2000
+const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
 
 interface NoticePublishFormProps {
   variant: "publish" | "edit"
@@ -21,16 +23,14 @@ export function NoticePublishForm({
 }: NoticePublishFormProps) {
   const [noticeContent, setNoticeContent] = useState("")
   const [noticeTitle, setNoticeTitle] = useState("")
-  const [isNotificationEnabled, setIsNotificationEnabled] = useState(false)
+  const [isRequired, setIsRequired] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isDone, setIsDone] = useState(false)
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false)
 
   const hasPendingChanges =
     !isDone &&
-    (noticeTitle.trim() !== "" ||
-      noticeContent.trim() !== "" ||
-      isNotificationEnabled)
+    (noticeTitle.trim() !== "" || noticeContent.trim() !== "" || isRequired)
 
   const {
     proceed: proceedLeave,
@@ -62,14 +62,14 @@ export function NoticePublishForm({
     }
   }
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (e.target.value.length <= MAX_CHARS) {
-      setNoticeContent(e.target.value)
+  const handleContentChange = (value: string) => {
+    if (value.length <= MAX_CHARS) {
+      setNoticeContent(value)
     }
   }
 
-  const handleNotificationToggle = () => {
-    setIsNotificationEnabled((prev) => !prev)
+  const handleRequiredToggle = () => {
+    setIsRequired((prev) => !prev)
   }
 
   // TODO: API 연결 후 수정
@@ -82,6 +82,18 @@ export function NoticePublishForm({
     setTimeout(() => {
       setIsLoading(false)
       setIsDone(true)
+      const completionNoticeId = noticeId ?? crypto.randomUUID()
+
+      sessionStorage.setItem(
+        NOTICE_COMPLETION_STORAGE_KEY,
+        JSON.stringify({
+          id: completionNoticeId,
+          title: noticeTitle,
+          chip: isRequired ? "필독" : undefined,
+          mode: variant,
+        }),
+      )
+
       setIsCompletionModalOpen(true)
       console.log(
         variant === "edit" ? "Updating notice:" : "Publishing notice:",
@@ -89,7 +101,7 @@ export function NoticePublishForm({
           noticeId,
           title: noticeTitle,
           content: noticeContent,
-          isNotificationEnabled,
+          isRequired,
         },
       )
     }, 1000)
@@ -105,14 +117,9 @@ export function NoticePublishForm({
       ? "공지 수정이 완료되었습니다."
       : "공지가 등록되었습니다."
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  useLayoutEffect(() => {
-    const el = textareaRef.current
-    if (!el) return
-    el.style.height = "360px"
-    el.style.height = `${el.scrollHeight}px`
-  }, [noticeContent])
+  const handleCompletionGoBack = () => {
+    window.history.back()
+  }
 
   return (
     <>
@@ -145,13 +152,13 @@ export function NoticePublishForm({
             <div className="flex items-center gap-5">
               <div className="flex items-center gap-2">
                 <Checkbox
-                  checked={isNotificationEnabled}
-                  onChange={handleNotificationToggle}
+                  checked={isRequired}
+                  onChange={handleRequiredToggle}
                   variant="primary"
-                  aria-label="알림 발송"
+                  aria-label="필독"
                 />
                 <span className="text-body-1-medium text-teal-gray-600">
-                  알림 발송
+                  필독
                 </span>
               </div>
 
@@ -168,19 +175,13 @@ export function NoticePublishForm({
             </div>
           </div>
 
-          <div className="bg-teal-gray-50 shadow-inner-neutral-2 flex w-full flex-col gap-4 rounded-[12px] px-8 pt-6 pb-7.5">
-            <textarea
-              ref={textareaRef}
-              className="placeholder-teal-gray-400 text-body-1-regular text-teal-gray-900 min-h-90 resize-none focus:outline-none"
-              placeholder="내용을 입력하세요"
-              value={noticeContent}
-              onChange={handleContentChange}
-              maxLength={MAX_CHARS}
-            />
-            <div className="text-body-2-medium text-teal-gray-400 text-right">
-              {noticeContent.length} / {MAX_CHARS}자
-            </div>
-          </div>
+          <TextQuestionField
+            value={noticeContent}
+            onChange={handleContentChange}
+            placeholder="내용을 입력하세요."
+            maxLength={MAX_CHARS}
+            className="bg-teal-gray-50 shadow-inner-neutral-2 data-[state=focus]:bg-teal-gray-50 flex flex-col gap-4 px-8 pt-6 pb-7.5"
+          />
         </div>
       </section>
 
@@ -210,7 +211,7 @@ export function NoticePublishForm({
                   color="primary"
                   size="s"
                   className="rounded-[10px]"
-                  onClick={handleBackClick}
+                  onClick={handleCompletionGoBack}
                 >
                   보러가기
                 </Button>
@@ -220,7 +221,12 @@ export function NoticePublishForm({
         </Modal.Portal>
       </Modal.Root>
 
-      <Modal.Root open={isLeaveModalOpen}>
+      <Modal.Root
+        open={isLeaveModalOpen}
+        onOpenChange={(open) => {
+          if (!open) handleLeaveCancel()
+        }}
+      >
         <Modal.Portal>
           <Modal.Overlay tone="light" />
           <Modal.Content className="shadow-drop-neutral-1 flex w-115 max-w-[calc(100vw-32px)] flex-col gap-8 rounded-[9.2px] border border-neutral-200 bg-white px-6 py-6 focus:outline-none">

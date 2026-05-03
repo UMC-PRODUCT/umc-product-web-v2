@@ -230,7 +230,7 @@
   }
 }
 
-@utility scrollbar-hide {
+@utility scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
   &::-webkit-scrollbar {

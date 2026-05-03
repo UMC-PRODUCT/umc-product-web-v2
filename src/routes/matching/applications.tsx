@@ -1,15 +1,58 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { useState } from "react"
+
+import {
+  MOCK_PROJECTS,
+  MOCK_STATS,
+} from "@/features/application/model/applicationMock"
+import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
+import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
+import {
+  type Chapter,
+  ChapterSelector,
+} from "@/features/notice/ui/ChapterSelector"
+import { useViewRoleStore } from "@/shared/model/useViewRoleStore"
 
 export const Route = createFileRoute("/matching/applications")({
   component: MatchingApplicationsPage,
 })
 
 function MatchingApplicationsPage() {
+  const role = useViewRoleStore((s) => s.role)
+  const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
+
   return (
-    <section className="flex w-full flex-col pt-10">
-      <p className="text-body-2-regular text-teal-gray-600">
-        지원 현황 (준비 중)
-      </p>
+    <section className="flex w-full flex-col gap-6 pt-10">
+      {/* 페이지 헤더 */}
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-heading-6-semibold text-teal-gray-900">
+          지원 현황
+        </h1>
+        <p className="text-body-2-regular text-teal-gray-600">
+          프로젝트 지원 내역을 통합 관리합니다.
+        </p>
+      </div>
+
+      {/* 지부 선택 */}
+      <ChapterSelector
+        selectedChapter={selectedChapter}
+        onChapterChange={setSelectedChapter}
+      />
+
+      {role === "admin" && (
+        <>
+          <ApplicationStatsSection stats={MOCK_STATS} />
+          <ApplicationTableSection projects={MOCK_PROJECTS} />
+        </>
+      )}
+
+      {role !== "admin" && (
+        <div className="border-teal-gray-150 flex items-center justify-center rounded-xl border bg-white px-8.5 py-20">
+          <p className="text-body-2-regular text-teal-gray-400">
+            해당 역할의 지원 현황 뷰는 준비 중입니다.
+          </p>
+        </div>
+      )}
     </section>
   )
 }

@@ -154,6 +154,7 @@ interface TooltipProps {
   onOpenChange?: (open: boolean) => void
   sideOffset?: number
   delayDuration?: number
+  className?: string
 }
 
 export function Tooltip({
@@ -167,6 +168,7 @@ export function Tooltip({
   onOpenChange,
   sideOffset = 4,
   delayDuration = 100,
+  className,
 }: TooltipProps) {
   const tooltipId = useId()
   const isControlled = controlledOpen !== undefined
@@ -178,29 +180,49 @@ export function Tooltip({
   const triggerRef = useRef<HTMLSpanElement>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const [pinned, setPinned] = useState(false)
+
+  const updatePosition = useCallback(() => {
+    if (triggerRef.current) {
+      setPosition(
+        computePosition(
+          triggerRef.current.getBoundingClientRect(),
+          side,
+          sideOffset,
+        ),
+      )
+    }
+  }, [side, sideOffset])
+
   const handleOpen = useCallback(() => {
+    if (pinned) return
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
-      if (triggerRef.current) {
-        setPosition(
-          computePosition(
-            triggerRef.current.getBoundingClientRect(),
-            side,
-            sideOffset,
-            size,
-          ),
-        )
-      }
+      updatePosition()
       if (!isControlled) setInternalOpen(true)
       onOpenChange?.(true)
     }, delayDuration)
-  }, [side, sideOffset, delayDuration, isControlled, onOpenChange, size])
+  }, [pinned, delayDuration, isControlled, onOpenChange, updatePosition])
 
   const handleClose = useCallback(() => {
+    if (pinned) return
     if (timerRef.current) clearTimeout(timerRef.current)
     if (!isControlled) setInternalOpen(false)
     onOpenChange?.(false)
-  }, [isControlled, onOpenChange])
+  }, [pinned, isControlled, onOpenChange])
+
+  const handleClick = useCallback(() => {
+    if (pinned) {
+      setPinned(false)
+      if (!isControlled) setInternalOpen(false)
+      onOpenChange?.(false)
+    } else {
+      updatePosition()
+      setPinned(true)
+      if (!isControlled) setInternalOpen(true)
+      onOpenChange?.(true)
+    }
+  }, [pinned, isControlled, onOpenChange, updatePosition])
 
   useEffect(() => {
     return () => {
@@ -218,6 +240,7 @@ export function Tooltip({
         onMouseLeave={handleClose}
         onFocus={handleOpen}
         onBlur={handleClose}
+        onClick={handleClick}
       >
         {children}
       </span>
@@ -230,6 +253,7 @@ export function Tooltip({
             className={cn(
               tooltipContentVariants({ size, dark }),
               !dark && "shadow-tooltip-light",
+              className,
             )}
           >
             {content}
