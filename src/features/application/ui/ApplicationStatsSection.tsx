@@ -106,7 +106,6 @@ export function ApplicationStatsSection({
 
         {/* 1차 매칭 지원 Top 4 */}
         <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-[402px] shrink-0 flex-col rounded-lg border bg-white px-8 pt-7 pb-8">
-          {" "}
           <h3 className="text-heading-6-semibold text-teal-700">
             1차 매칭 지원 Top 4
           </h3>
