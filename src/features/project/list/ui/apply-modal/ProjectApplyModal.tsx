@@ -269,7 +269,7 @@ export function ProjectApplyModal({
   return (
     <>
       <div className="flex w-232 flex-col overflow-hidden rounded-2xl bg-white px-11.5 py-9">
-        <div className="max-h-[75vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="scrollbar-none max-h-[75vh] overflow-y-auto">
           <div className="flex items-start gap-6 self-stretch px-1 py-5">
             <p className="text-body-1-regular text-teal-gray-600 flex-1">
               {data.description}
