@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import { ParTagChip } from "@/shared/ui/chip/ParTagChip"
 
 export const Route = createFileRoute("/test/chip")({
   component: ChipTestPage,
@@ -49,7 +49,7 @@ function ChipTestPage() {
               </td>
               {TYPES.map((type) => (
                 <td key={type} className="px-6 py-2 text-center align-middle">
-                  <RoleTagChip role={role} type={type} />
+                  <ParTagChip role={role} type={type} />
                 </td>
               ))}
             </tr>

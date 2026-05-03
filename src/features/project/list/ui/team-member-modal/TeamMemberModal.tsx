@@ -1,5 +1,5 @@
 import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
-import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import { ParTagChip } from "@/shared/ui/chip/ParTagChip"
 import MemberCount from "@/shared/ui/MemberCount"
 
 import { TeamMemberRow } from "./TeamMemberRow"
@@ -87,7 +87,7 @@ export function TeamMemberModal({ onClose }: TeamMemberModalProps) {
         {TEAM_DATA.map((roleData) => (
           <div key={roleData.role} className="flex flex-col gap-2">
             <div className="flex items-end justify-between">
-              <RoleTagChip role={roleData.role} />
+              <ParTagChip role={roleData.role} />
               <MemberCount
                 size="xs"
                 current={roleData.current}
