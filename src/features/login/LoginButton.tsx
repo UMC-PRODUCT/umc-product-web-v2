@@ -36,7 +36,7 @@ export function LoginButton({ className, social, ...props }: LoginButtonProps) {
     >
       <div className="flex items-center justify-center gap-3">
         {currentSocial === "apple" && (
-          <AppleLogo className="h-6 w-[20.4px] text-black" />
+          <AppleLogo className="h-6 w-6 text-black" />
         )}
         {currentSocial === "apple" && (
           <span className="text-label-1-medium text-teal-gray-900">
