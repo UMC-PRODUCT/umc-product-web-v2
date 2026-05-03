@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -40,11 +39,6 @@ import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matc
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MatchingRouteRoute = MatchingRouteRouteImport.update({
   id: '/matching',
   path: '/matching',
@@ -201,7 +195,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRoute
   '/matching': typeof MatchingRouteRouteWithChildren
-  '/login': typeof LoginRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -232,7 +225,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRoute
-  '/login': typeof LoginRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -264,7 +256,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRoute
   '/matching': typeof MatchingRouteRouteWithChildren
-  '/login': typeof LoginRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -298,7 +289,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/matching'
-    | '/login'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -329,7 +319,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
-    | '/login'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -360,7 +349,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/matching'
-    | '/login'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -393,7 +381,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRoute
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
-  LoginRoute: typeof LoginRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
   TestChipRoute: typeof TestChipRoute
@@ -413,13 +400,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/matching': {
       id: '/matching'
       path: '/matching'
@@ -700,7 +680,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRoute,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
-  LoginRoute: LoginRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
   TestChipRoute: TestChipRoute,
