@@ -28,6 +28,7 @@ import { Route as TestCounterRouteImport } from './routes/test/counter'
 import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
+import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
@@ -135,6 +136,11 @@ const TestApplicationFormRoute = TestApplicationFormRouteImport.update({
   path: '/test/application-form',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MatchingStatusRoute = MatchingStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => MatchingRouteRoute,
+} as any)
 const MatchingRoundsRoute = MatchingRoundsRouteImport.update({
   id: '/rounds',
   path: '/rounds',
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
+  '/matching/status': typeof MatchingStatusRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
+  '/matching/status': typeof MatchingStatusRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
+  '/matching/status': typeof MatchingStatusRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
   '/test/chip': typeof TestChipRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
+    | '/matching/status'
     | '/test/application-form'
     | '/test/button'
     | '/test/chip'
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
+    | '/matching/status'
     | '/test/application-form'
     | '/test/button'
     | '/test/chip'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
+    | '/matching/status'
     | '/test/application-form'
     | '/test/button'
     | '/test/chip'
@@ -533,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestApplicationFormRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/matching/status': {
+      id: '/matching/status'
+      path: '/status'
+      fullPath: '/matching/status'
+      preLoaderRoute: typeof MatchingStatusRouteImport
+      parentRoute: typeof MatchingRouteRoute
+    }
     '/matching/rounds': {
       id: '/matching/rounds'
       path: '/rounds'
@@ -655,6 +674,7 @@ interface MatchingRouteRouteChildren {
   MatchingApplicationsRoute: typeof MatchingApplicationsRoute
   MatchingNoticePublishRoute: typeof MatchingNoticePublishRouteWithChildren
   MatchingRoundsRoute: typeof MatchingRoundsRoute
+  MatchingStatusRoute: typeof MatchingStatusRoute
   MatchingIndexRoute: typeof MatchingIndexRoute
   MatchingProjectsAnnounceRouteRoute: typeof MatchingProjectsAnnounceRouteRouteWithChildren
   MatchingProjectsNewRoute: typeof MatchingProjectsNewRoute
@@ -665,6 +685,7 @@ const MatchingRouteRouteChildren: MatchingRouteRouteChildren = {
   MatchingApplicationsRoute: MatchingApplicationsRoute,
   MatchingNoticePublishRoute: MatchingNoticePublishRouteWithChildren,
   MatchingRoundsRoute: MatchingRoundsRoute,
+  MatchingStatusRoute: MatchingStatusRoute,
   MatchingIndexRoute: MatchingIndexRoute,
   MatchingProjectsAnnounceRouteRoute:
     MatchingProjectsAnnounceRouteRouteWithChildren,

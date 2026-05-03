@@ -50,6 +50,11 @@ export const SIDEBAR_ITEMS: SideBarSection[] = [
         to: "/matching/applications",
       },
       {
+        id: "matching-status",
+        title: "매칭 현황",
+        to: "/matching/status",
+      },
+      {
         id: "matching-rounds",
         title: "매칭 차수 설정",
         to: "/matching/rounds",
@@ -69,6 +74,7 @@ export const SIDEBAR_ID = {
     matchingAnnounce: "matching-announce",
     matchingProjects: "matching-projects",
     matchingApplications: "matching-applications",
+    matchingStatus: "matching-status",
     matchingRounds: "matching-rounds",
   },
 } as const
