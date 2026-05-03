@@ -141,8 +141,8 @@ export function ModalFormPanel({
             projectName={projectName}
             challengerName={challengerName}
             challengerUniversity={challengerUniversity}
-            size="md"
-            className="absolute top-0 left-0 w-full pr-10"
+            size="sm"
+            className="absolute top-0 left-0 w-full"
           />
 
           {/* 역할 정보 (우) */}
