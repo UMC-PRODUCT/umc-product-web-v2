@@ -4,19 +4,7 @@ import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
 import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
 
-type Role =
-  | "plan"
-  | "design"
-  | "web"
-  | "ios"
-  | "android"
-  | "springboot"
-  | "nodejs"
-
-interface AssignmentCount {
-  current: number
-  total: number
-}
+import type { AssignmentCount, Role } from "../model/types"
 
 interface ProjectStatusRowProps {
   projectName: string
