@@ -66,7 +66,10 @@ export function ApplicationDetailModal({
   }
 
   return (
-    <Modal.Root open={open} onOpenChange={onOpenChange}>
+    <Modal.Root
+      open={open}
+      onOpenChange={(next) => (next ? onOpenChange(true) : handleClose())}
+    >
       <Modal.Portal>
         <Modal.Overlay tone="light" />
         <Modal.Content
