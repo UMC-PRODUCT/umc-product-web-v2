@@ -3,17 +3,19 @@ import { cn } from "@/shared/lib/utils"
 interface DonutChartProps {
   percentage: number
   size?: number
-  strokeWidth?: number
+  trackWidth?: number
+  progressWidth?: number
   className?: string
 }
 
 export function DonutChart({
   percentage,
   size = 142,
-  strokeWidth = 14,
+  trackWidth = 8,
+  progressWidth = 20,
   className,
 }: DonutChartProps) {
-  const radius = (size - strokeWidth) / 2
+  const radius = (size - Math.max(trackWidth, progressWidth)) / 2
   const circumference = 2 * Math.PI * radius
   const filled = (percentage / 100) * circumference
   const gap = circumference - filled
@@ -37,25 +39,25 @@ export function DonutChart({
           r={radius}
           fill="none"
           stroke="var(--color-teal-gray-150)"
-          strokeWidth={strokeWidth}
+          strokeWidth={trackWidth}
         />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--color-teal-500)"
-          strokeWidth={strokeWidth}
+          stroke="var(--color-teal-400)"
+          strokeWidth={progressWidth}
           strokeDasharray={`${filled} ${gap}`}
           strokeLinecap="round"
         />
       </svg>
 
-      <div className="absolute inset-0 flex items-center justify-center gap-px">
+      <div className="absolute inset-0 flex items-center justify-center gap-px pl-0.5">
         <span className="text-[1.625rem] leading-[1.3] font-semibold text-teal-600">
           {percentage}
         </span>
-        <span className="text-[1.25rem] leading-[1.4] font-semibold tracking-[-0.02em] text-teal-600">
+        <span className="text-[1.25rem] leading-[1.4] font-semibold tracking-[-0.01em] text-teal-600">
           %
         </span>
       </div>
