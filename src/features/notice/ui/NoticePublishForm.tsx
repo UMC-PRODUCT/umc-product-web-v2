@@ -179,7 +179,7 @@ export function NoticePublishForm({
             value={noticeContent}
             onChange={handleContentChange}
             placeholder="내용을 입력하세요."
-            maxLength={2000}
+            maxLength={MAX_CHARS}
             className="bg-teal-gray-50 shadow-inner-neutral-2 data-[state=focus]:bg-teal-gray-50 flex flex-col gap-4 px-8 pt-6 pb-7.5"
           />
         </div>
