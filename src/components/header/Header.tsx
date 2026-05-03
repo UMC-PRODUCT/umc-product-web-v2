@@ -20,12 +20,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: "블로그", to: "/blog", disabled: true },
 ]
 
-// TODO: 인증 시스템 구현 후 admin 분기 추가
-// const ADMIN_NAV_ITEMS: NavItem[] = [
-//   ...NAV_ITEMS,
-//   { label: "관리자 페이지", to: "/admin" },
-// ]
-
 export default function Header() {
   const location = useLocation()
 
@@ -35,10 +29,7 @@ export default function Header() {
         <UmcLogo className="text-teal-gray-700 h-5.5 w-17.5" />
       </Link>
 
-      <nav
-        className="border-teal-gray-100 flex items-center gap-1.5 rounded-full border p-1.5"
-        style={{ filter: "drop-shadow(0 0 8px rgba(10,86,80,0.04))" }}
-      >
+      <nav className="border-teal-gray-100 flex items-center gap-1.5 rounded-full border p-1.5 drop-shadow-[0_0_8px_rgba(10,86,80,0.04)]">
         {NAV_ITEMS.map((item) => (
           <NavigationButton
             key={item.to}

@@ -35,10 +35,8 @@ export default function GenerationListItem({
         </span>
         <span
           className={cn(
-            "text-[8px] leading-[1.6] tracking-[-0.16px]",
-            active
-              ? "font-medium text-teal-500"
-              : "text-teal-gray-300 font-medium",
+            "text-[8px] leading-[1.6] font-medium tracking-[-0.16px]",
+            active ? "text-teal-500" : "text-teal-gray-300",
           )}
         >
           {year}
