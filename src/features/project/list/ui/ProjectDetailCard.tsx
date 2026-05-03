@@ -48,7 +48,7 @@ export function ProjectDetailCard({
 
   return (
     <>
-      <div className="flex w-[33.75rem] flex-col items-start overflow-hidden rounded-xl bg-white">
+      <div className="flex w-[33.75rem] flex-col items-start overflow-hidden rounded-2xl bg-white">
         <div className="bg-teal-gray-200 flex h-[17.875rem] w-[33.75rem] items-center justify-center overflow-hidden">
           {cover?.src ? (
             <img
