@@ -199,8 +199,8 @@ export function NoticeCard({
             삭제하시겠습니까?
           </>
         }
-        cancelText="취소"
-        confirmText="삭제"
+        cancelText="돌아가기"
+        confirmText="삭제하기"
         onOpenChange={setIsDeleteModalOpen}
         onCancel={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDeleteConfirm}
