@@ -3,10 +3,10 @@ import { useState } from "react"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import LeftChevronIcon from "@/shared/assets/icon/chevron/NoticePublish/LeftChevronIcon"
-import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { Button } from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { Modal } from "@/shared/ui/Modal"
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 const MAX_CHARS = 2000
@@ -221,54 +221,24 @@ export function NoticePublishForm({
         </Modal.Portal>
       </Modal.Root>
 
-      <Modal.Root
+      <CtaModal
         open={isLeaveModalOpen}
+        title="페이지 이탈"
+        content={
+          <>
+            작성 중인 글이 있습니다.
+            <br />
+            나가시겠습니까?
+          </>
+        }
+        cancelText="돌아가기"
+        confirmText="나가기"
         onOpenChange={(open) => {
           if (!open) handleLeaveCancel()
         }}
-      >
-        <Modal.Portal>
-          <Modal.Overlay tone="light" />
-          <Modal.Content className="shadow-drop-neutral-1 flex w-115 max-w-[calc(100vw-32px)] flex-col gap-8 rounded-[9.2px] border border-neutral-200 bg-white px-6 py-6 focus:outline-none">
-            <div className="flex flex-col items-start gap-4">
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <WarningTriangleIcon className="h-6 w-6 text-teal-500" />
-                <Modal.Title className="text-subtitle-1-semibold text-teal-500">
-                  페이지 이탈
-                </Modal.Title>
-              </div>
-              <Modal.Description className="text-subtitle-3-semibold text-teal-gray-800">
-                작성 중인 글이 있습니다.
-                <br />
-                나가시겠습니까?
-              </Modal.Description>
-            </div>
-
-            <div className="flex w-full justify-end gap-3">
-              <Button
-                type="button"
-                variant="weak"
-                color="neutral"
-                size="s"
-                className="rounded-[10px]"
-                onClick={handleLeaveCancel}
-              >
-                돌아가기
-              </Button>
-              <Button
-                type="button"
-                variant="fill"
-                color="primary"
-                size="s"
-                className="rounded-[10px]"
-                onClick={handleLeaveConfirm}
-              >
-                나가기
-              </Button>
-            </div>
-          </Modal.Content>
-        </Modal.Portal>
-      </Modal.Root>
+        onCancel={handleLeaveCancel}
+        onConfirm={handleLeaveConfirm}
+      />
     </>
   )
 }

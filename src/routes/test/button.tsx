@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { LoginButton, LoginCircleButton } from "@/features/login"
 import { Button } from "@/shared/ui/Button"
 
 export const Route = createFileRoute("/test/button")({
@@ -79,6 +80,15 @@ function ButtonTestPage() {
       </h1>
 
       <div className="flex flex-col gap-10">
+        <Section title="Default">
+          <LoginButton social={"kakao"} />
+          <LoginButton social={"google"} />
+          <LoginButton social={"apple"} />
+          <LoginCircleButton social={"kakao"} />
+          <LoginCircleButton social={"google"} />
+          <LoginCircleButton social={"apple"} />
+        </Section>
+
         <Section title="Default">
           <ButtonTable
             rows={VARIANTS.flatMap((variant) =>
