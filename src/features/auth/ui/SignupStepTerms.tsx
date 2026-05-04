@@ -2,7 +2,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { registerMember } from "@/features/auth/api/register"
+import { registerMemberByOAuth } from "@/features/auth/api/register"
 import { getTermsByType } from "@/features/auth/api/terms"
 import { useSignupStore } from "@/features/auth/store/signupStore"
 import { Button } from "@/shared/ui/Button"
@@ -103,7 +103,7 @@ export function SignupStepTerms() {
 
     setIsSubmitting(true)
     try {
-      const res = await registerMember({
+      const res = await registerMemberByOAuth({
         oAuthVerificationToken,
         emailVerificationToken,
         name,

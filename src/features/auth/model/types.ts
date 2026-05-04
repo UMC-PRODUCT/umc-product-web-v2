@@ -56,6 +56,7 @@ export interface RegisterMemberRequest {
   emailVerificationToken: string
   schoolId: number
   termsAgreements: TermConsentStatus[]
+  appleRefreshToken?: string
 }
 
 export interface RegisterResponse {
