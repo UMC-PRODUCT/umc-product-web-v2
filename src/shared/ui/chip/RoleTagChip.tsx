@@ -3,78 +3,34 @@ import { cva } from "class-variance-authority"
 import { cn } from "@/shared/lib/utils"
 
 const roleTagChipVariants = cva(
-  "inline-flex h-6 px-2.5 items-center justify-center rounded-[6px] py-0.5 text-label-2-medium text-teal-gray-800 shadow-drop-neutral-2",
+  "inline-flex items-center justify-center rounded-[6px] px-2 py-[3px] text-label-2-medium text-center shadow-drop-neutral-2",
   {
     variants: {
       role: {
-        plan: "w-9",
-        design: "w-15",
-        web: "w-11.5",
-        ios: "w-10",
-        android: "w-16.5",
-        springboot: "w-22",
-        nodejs: "w-16.5",
+        central: "bg-role-central-200 text-role-central-600",
+        campus: "bg-role-campus-200 text-role-campus-600",
+        challenger: "bg-role-challenger-200 text-role-challenger-600",
       },
-      type: {
-        default: "",
-        light: "",
-      },
-    },
-    compoundVariants: [
-      { role: "plan", type: "default", className: "bg-chip-plan-300" },
-      { role: "design", type: "default", className: "bg-chip-design-300" },
-      { role: "web", type: "default", className: "bg-chip-web-300" },
-      { role: "ios", type: "default", className: "bg-chip-ios-300" },
-      { role: "android", type: "default", className: "bg-chip-android-300" },
-      {
-        role: "springboot",
-        type: "default",
-        className: "bg-chip-springboot-300",
-      },
-      { role: "nodejs", type: "default", className: "bg-chip-nodejs-300" },
-      { role: "plan", type: "light", className: "bg-chip-plan-100" },
-      { role: "design", type: "light", className: "bg-chip-design-100" },
-      { role: "web", type: "light", className: "bg-chip-web-100" },
-      { role: "ios", type: "light", className: "bg-chip-ios-100" },
-      { role: "android", type: "light", className: "bg-chip-android-100" },
-      {
-        role: "springboot",
-        type: "light",
-        className: "bg-chip-springboot-100",
-      },
-      { role: "nodejs", type: "light", className: "bg-chip-nodejs-100" },
-    ],
-    defaultVariants: {
-      type: "default",
     },
   },
 )
 
 const ROLE_LABEL = {
-  plan: "PM",
-  design: "Design",
-  web: "Web",
-  ios: "iOS",
-  android: "Android",
-  springboot: "SpringBoot",
-  nodejs: "Node.js",
+  central: "중앙 운영진",
+  campus: "캠퍼스 운영진",
+  challenger: "챌린저",
 } as const
 
 type Role = keyof typeof ROLE_LABEL
 
 interface RoleTagChipProps {
   role: Role
-  type?: "default" | "light"
   className?: string
 }
 
-export function RoleTagChip({
-  role,
-  type = "default",
-  className,
-}: RoleTagChipProps) {
+export function RoleTagChip({ role, className }: RoleTagChipProps) {
   return (
-    <span className={cn(roleTagChipVariants({ role, type }), className)}>
+    <span className={cn(roleTagChipVariants({ role }), className)}>
       {ROLE_LABEL[role]}
     </span>
   )

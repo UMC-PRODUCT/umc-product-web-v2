@@ -10,7 +10,7 @@ import { MatchingProjectCard } from "./MatchingProjectCard"
 import { ProjectDetailCard } from "./ProjectDetailCard"
 import { ProjectSearchField } from "./ProjectSearchField"
 
-import type { MatchingProjectMock } from "../model/matchingProject.mock"
+import type { MatchingProject } from "../model/matchingProject"
 
 const PROJECT_LIST_PAGE_SIZE = 15
 
@@ -25,7 +25,7 @@ export function MatchingProjectsListPage() {
 
   const [page, setPage] = useState(1)
   const [selectedProject, setSelectedProject] =
-    useState<MatchingProjectMock | null>(null)
+    useState<MatchingProject | null>(null)
 
   useEffect(() => {
     setPage(1)
