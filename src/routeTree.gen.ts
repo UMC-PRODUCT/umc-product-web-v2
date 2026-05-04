@@ -37,6 +37,7 @@ import { Route as OauthCallbackRouteImport } from './routes/oauth/callback'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
+import { Route as LoginDefaultRouteImport } from './routes/login/default'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
 import { Route as TestSignupIdPwRouteImport } from './routes/test/signup/id-pw'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
@@ -187,6 +188,11 @@ const MatchingApplicationsRoute = MatchingApplicationsRouteImport.update({
   path: '/applications',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const LoginDefaultRoute = LoginDefaultRouteImport.update({
+  id: '/login/default',
+  path: '/login/default',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchingProjectsIndexRoute = MatchingProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
@@ -239,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/signup': typeof SignupRoute
+  '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -276,6 +283,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteRoute
   '/auth-test': typeof AuthTestRoute
   '/signup': typeof SignupRoute
+  '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -314,6 +322,7 @@ export interface FileRoutesById {
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/signup': typeof SignupRoute
+  '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -354,6 +363,7 @@ export interface FileRouteTypes {
     | '/matching'
     | '/auth-test'
     | '/signup'
+    | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth-test'
     | '/signup'
+    | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/matching'
     | '/auth-test'
     | '/signup'
+    | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -468,6 +480,7 @@ export interface RootRouteChildren {
   AuthTestRoute: typeof AuthTestRoute
   SignupRoute: typeof SignupRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
+  LoginDefaultRoute: typeof LoginDefaultRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
   TestChipRoute: typeof TestChipRoute
@@ -687,6 +700,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingApplicationsRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/login/default': {
+      id: '/login/default'
+      path: '/login/default'
+      fullPath: '/login/default'
+      preLoaderRoute: typeof LoginDefaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/matching/projects/': {
       id: '/matching/projects/'
       path: '/projects'
@@ -823,6 +843,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthTestRoute: AuthTestRoute,
   SignupRoute: SignupRoute,
   OauthCallbackRoute: OauthCallbackRoute,
+  LoginDefaultRoute: LoginDefaultRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
   TestChipRoute: TestChipRoute,
