@@ -56,6 +56,7 @@ export interface RegisterMemberRequest {
   emailVerificationToken: string
   schoolId: number
   termsAgreements: TermConsentStatus[]
+  appleRefreshToken?: string
 }
 
 export interface RegisterResponse {
@@ -79,4 +80,40 @@ export interface SchoolNameItem {
 
 export interface SchoolNameListResponse {
   schools: SchoolNameItem[]
+}
+
+export interface IdPwLoginRequest {
+  loginId: string
+  password: string
+}
+
+export interface IdPwLoginResponse {
+  memberId: number
+  accessToken: string
+  refreshToken: string
+}
+
+export interface RegisterCredentialsRequest {
+  loginId: string
+  password: string
+}
+
+export interface LoginIdAvailabilityResponse {
+  loginId: string
+  available: boolean
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
+
+export interface IdPwRegisterMemberRequest {
+  loginId: string
+  rawPassword: string
+  name: string
+  nickname: string
+  emailVerificationToken: string
+  schoolId: number
+  termsAgreements: TermConsentStatus[]
 }

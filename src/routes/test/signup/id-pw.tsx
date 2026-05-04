@@ -1,36 +1,30 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useEffect } from "react"
 
 import { useSignupStore } from "@/features/auth/store/signupStore"
 import { SignupStepBasicInfo } from "@/features/auth/ui/SignupStepBasicInfo"
 import { SignupStepEmail } from "@/features/auth/ui/SignupStepEmail"
+import { SignupStepIdPwCredentials } from "@/features/auth/ui/SignupStepIdPwCredentials"
 import { SignupStepTerms } from "@/features/auth/ui/SignupStepTerms"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 
-export const Route = createFileRoute("/signup")({
-  component: SignupPage,
+export const Route = createFileRoute("/test/signup/id-pw")({
+  component: IdPwSignupPage,
 })
 
-const STEP_LABELS: Record<string, string> = {
-  email: "1 / 3",
-  "basic-info": "2 / 3",
-  terms: "3 / 3",
+const STEP_LABELS = {
+  credentials: "1 / 4",
+  email: "2 / 4",
+  "basic-info": "3 / 4",
+  terms: "4 / 4",
 }
 
-function SignupPage() {
-  const navigate = useNavigate()
-  const { step, oAuthVerificationToken, init } = useSignupStore()
+function IdPwSignupPage() {
+  const { step, initIdPw } = useSignupStore()
 
   useEffect(() => {
-    const token = sessionStorage.getItem("oauth_verification_token")
-    if (!token) {
-      void navigate({ to: "/test/login" })
-      return
-    }
-    if (!oAuthVerificationToken) {
-      init(token)
-    }
-  }, [oAuthVerificationToken, navigate, init])
+    initIdPw()
+  }, [initIdPw])
 
   return (
     <main className="flex min-h-[80vh] flex-col items-center justify-center gap-8 px-4">
@@ -41,6 +35,7 @@ function SignupPage() {
           임시 페이지 — 디자인 확정 후 교체 예정 ({STEP_LABELS[step]})
         </p>
       </div>
+      {step === "credentials" && <SignupStepIdPwCredentials />}
       {step === "email" && <SignupStepEmail />}
       {step === "basic-info" && <SignupStepBasicInfo />}
       {step === "terms" && <SignupStepTerms />}

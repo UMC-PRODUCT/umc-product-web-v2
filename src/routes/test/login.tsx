@@ -1,14 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { Chrome, MessageCircle } from "lucide-react"
+import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { loginWithApple } from "@/features/auth/api/socialLogin"
 import {
-  isApplePopupCancelled,
-  signInWithApple,
-} from "@/features/auth/lib/appleSignIn"
-import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
+  changePassword,
+  checkLoginIdAvailability,
+  loginWithIdPw,
+  registerCredentials,
+} from "@/features/auth/api/credentials"
 import { redirectToOAuth } from "@/features/auth/lib/oauthRedirect"
+import { useAuthStore } from "@/features/auth/store/authStore"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { Button } from "@/shared/ui/Button"
 
@@ -18,26 +20,22 @@ export const Route = createFileRoute("/test/login")({
 
 function LoginPage() {
   const addToast = useToastStore((s) => s.addToast)
+  const isAuthed = useAuthStore((s) => s.isAuthed)
+  const setTokens = useAuthStore((s) => s.setTokens)
+  const clearAuth = useAuthStore((s) => s.clear)
 
-  const handleAppleSignIn = async () => {
-    try {
-      const { authorizationCode } = await signInWithApple()
-      const res = await loginWithApple({ authorizationCode })
-      handleLoginResponse(res)
-    } catch (error) {
-      if (isApplePopupCancelled(error)) return
-      addToast({
-        message: "Apple 로그인에 실패했습니다. 다시 시도해주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    }
+  const showToast = (message: string, color: "primary" | "red" = "primary") => {
+    addToast({
+      message,
+      color,
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
   }
 
   return (
-    <main className="flex min-h-[80vh] flex-col items-center justify-center gap-8 px-4">
+    <main className="flex min-h-[80vh] flex-col items-center justify-center gap-10 px-4 py-10">
       <div className="flex flex-col items-center gap-3">
         <UmcLogo className="h-8 w-auto text-teal-600" />
         <p className="text-heading-2-bold text-teal-gray-900">
@@ -47,6 +45,7 @@ function LoginPage() {
           임시 페이지 — 디자인 확정 후 교체 예정
         </p>
       </div>
+
       <div className="flex w-full max-w-90 flex-col gap-3">
         <Button
           variant="weak"
@@ -77,7 +76,7 @@ function LoginPage() {
           color="neutral"
           size="xl"
           className="w-full"
-          onClick={() => void handleAppleSignIn()}
+          onClick={() => redirectToOAuth("APPLE")}
         >
           <span className="flex items-center gap-2">
             <AppleIcon size={20} />
@@ -85,8 +84,335 @@ function LoginPage() {
           </span>
         </Button>
       </div>
+
+      <div className="flex w-full max-w-90 items-center gap-3">
+        <span className="bg-teal-gray-200 h-px flex-1" />
+        <span className="text-label-2-medium text-teal-gray-400">또는</span>
+        <span className="bg-teal-gray-200 h-px flex-1" />
+      </div>
+
+      <IdPwLoginSection
+        onSuccess={(memberId, accessToken, refreshToken) => {
+          setTokens({ memberId, accessToken, refreshToken })
+          showToast(`ID/PW 로그인 성공 (memberId: ${memberId})`, "primary")
+        }}
+        onError={(message) => showToast(message, "red")}
+      />
+
+      {isAuthed && (
+        <section className="flex w-full max-w-90 flex-col gap-6 border-t pt-8">
+          <p className="text-subtitle-3-semibold text-teal-gray-800">
+            인증된 사용자 도구
+          </p>
+
+          <LoginIdAvailabilitySection
+            onResult={(loginId, available) =>
+              showToast(
+                `${loginId}: ${available ? "사용 가능" : "사용 불가"}`,
+                available ? "primary" : "red",
+              )
+            }
+            onError={(message) => showToast(message, "red")}
+          />
+
+          <RegisterCredentialsSection
+            onSuccess={() => showToast("자격증명 등록 성공", "primary")}
+            onError={(message) => showToast(message, "red")}
+          />
+
+          <ChangePasswordSection
+            onSuccess={() => showToast("비밀번호 변경 성공", "primary")}
+            onError={(message) => showToast(message, "red")}
+          />
+
+          <Button
+            variant="weak"
+            color="neutral"
+            size="m"
+            className="w-full"
+            onClick={() => {
+              clearAuth()
+              showToast("로그아웃 완료")
+            }}
+          >
+            로그아웃
+          </Button>
+        </section>
+      )}
     </main>
   )
+}
+
+interface IdPwLoginSectionProps {
+  onSuccess: (
+    memberId: number,
+    accessToken: string,
+    refreshToken: string,
+  ) => void
+  onError: (message: string) => void
+}
+
+function IdPwLoginSection({ onSuccess, onError }: IdPwLoginSectionProps) {
+  const [loginId, setLoginId] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!loginId || !password) return
+    setIsLoading(true)
+    try {
+      const res = await loginWithIdPw({ loginId, password })
+      onSuccess(res.memberId, res.accessToken, res.refreshToken)
+      setPassword("")
+    } catch (error) {
+      onError(extractErrorMessage(error, "ID/PW 로그인에 실패했습니다."))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <form
+      onSubmit={(e) => void handleSubmit(e)}
+      className="flex w-full max-w-90 flex-col gap-3"
+    >
+      <p className="text-label-1-semibold text-teal-gray-700">ID/PW 로그인</p>
+      <input
+        type="text"
+        placeholder="loginId"
+        value={loginId}
+        onChange={(e) => setLoginId(e.target.value)}
+        className="border-teal-gray-200 text-body-2-medium rounded-md border px-3 py-2 outline-none focus:border-teal-500"
+      />
+      <input
+        type="password"
+        placeholder="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="border-teal-gray-200 text-body-2-medium rounded-md border px-3 py-2 outline-none focus:border-teal-500"
+      />
+      <Button
+        type="submit"
+        variant="fill"
+        color="primary"
+        size="m"
+        className="w-full"
+        disabled={!loginId || !password}
+        isLoading={isLoading}
+      >
+        로그인
+      </Button>
+      <p className="text-label-2-medium text-teal-gray-400 text-center">
+        계정이 없으신가요?{" "}
+        <Link
+          to="/test/signup/id-pw"
+          className="text-teal-600 underline underline-offset-2"
+        >
+          회원가입
+        </Link>
+      </p>
+    </form>
+  )
+}
+
+interface LoginIdAvailabilitySectionProps {
+  onResult: (loginId: string, available: boolean) => void
+  onError: (message: string) => void
+}
+
+function LoginIdAvailabilitySection({
+  onResult,
+  onError,
+}: LoginIdAvailabilitySectionProps) {
+  const [loginId, setLoginId] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleCheck = async () => {
+    if (!loginId) return
+    setIsLoading(true)
+    try {
+      const res = await checkLoginIdAvailability(loginId)
+      onResult(res.loginId, res.available)
+    } catch (error) {
+      onError(extractErrorMessage(error, "ID 가용성 확인에 실패했습니다."))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="flex w-full flex-col gap-2">
+      <p className="text-label-1-semibold text-teal-gray-700">
+        로그인 ID 가용성 확인
+      </p>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="loginId"
+          value={loginId}
+          onChange={(e) => setLoginId(e.target.value)}
+          className="border-teal-gray-200 text-body-2-medium flex-1 rounded-md border px-3 py-2 outline-none focus:border-teal-500"
+        />
+        <Button
+          type="button"
+          variant="weak"
+          color="primary"
+          size="m"
+          onClick={() => void handleCheck()}
+          disabled={!loginId}
+          isLoading={isLoading}
+        >
+          확인
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+interface RegisterCredentialsSectionProps {
+  onSuccess: () => void
+  onError: (message: string) => void
+}
+
+function RegisterCredentialsSection({
+  onSuccess,
+  onError,
+}: RegisterCredentialsSectionProps) {
+  const [loginId, setLoginId] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!loginId || !password) return
+    setIsLoading(true)
+    try {
+      await registerCredentials({ loginId, password })
+      onSuccess()
+      setLoginId("")
+      setPassword("")
+    } catch (error) {
+      onError(extractErrorMessage(error, "자격증명 등록에 실패했습니다."))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <form
+      onSubmit={(e) => void handleSubmit(e)}
+      className="flex w-full flex-col gap-2"
+    >
+      <p className="text-label-1-semibold text-teal-gray-700">
+        자격증명 최초 등록
+      </p>
+      <input
+        type="text"
+        placeholder="loginId"
+        value={loginId}
+        onChange={(e) => setLoginId(e.target.value)}
+        className="border-teal-gray-200 text-body-2-medium rounded-md border px-3 py-2 outline-none focus:border-teal-500"
+      />
+      <input
+        type="password"
+        placeholder="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="border-teal-gray-200 text-body-2-medium rounded-md border px-3 py-2 outline-none focus:border-teal-500"
+      />
+      <Button
+        type="submit"
+        variant="weak"
+        color="primary"
+        size="m"
+        className="w-full"
+        disabled={!loginId || !password}
+        isLoading={isLoading}
+      >
+        등록
+      </Button>
+    </form>
+  )
+}
+
+interface ChangePasswordSectionProps {
+  onSuccess: () => void
+  onError: (message: string) => void
+}
+
+function ChangePasswordSection({
+  onSuccess,
+  onError,
+}: ChangePasswordSectionProps) {
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!currentPassword || !newPassword) return
+    setIsLoading(true)
+    try {
+      await changePassword({ currentPassword, newPassword })
+      onSuccess()
+      setCurrentPassword("")
+      setNewPassword("")
+    } catch (error) {
+      onError(extractErrorMessage(error, "비밀번호 변경에 실패했습니다."))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <form
+      onSubmit={(e) => void handleSubmit(e)}
+      className="flex w-full flex-col gap-2"
+    >
+      <p className="text-label-1-semibold text-teal-gray-700">비밀번호 변경</p>
+      <input
+        type="password"
+        placeholder="currentPassword"
+        value={currentPassword}
+        onChange={(e) => setCurrentPassword(e.target.value)}
+        className="border-teal-gray-200 text-body-2-medium rounded-md border px-3 py-2 outline-none focus:border-teal-500"
+      />
+      <input
+        type="password"
+        placeholder="newPassword"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        className="border-teal-gray-200 text-body-2-medium rounded-md border px-3 py-2 outline-none focus:border-teal-500"
+      />
+      <Button
+        type="submit"
+        variant="weak"
+        color="primary"
+        size="m"
+        className="w-full"
+        disabled={!currentPassword || !newPassword}
+        isLoading={isLoading}
+      >
+        변경
+      </Button>
+    </form>
+  )
+}
+
+function extractErrorMessage(error: unknown, fallback: string): string {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error &&
+    typeof (error as { response?: { data?: { message?: string } } })
+      .response === "object"
+  ) {
+    const message = (error as { response?: { data?: { message?: string } } })
+      .response?.data?.message
+    if (message) return message
+  }
+  return fallback
 }
 
 function AppleIcon({ size }: { size: number }) {
