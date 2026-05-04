@@ -15,6 +15,7 @@ import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
+import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
@@ -74,6 +75,11 @@ const MatchingIndexRoute = MatchingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MatchingRouteRoute,
+} as any)
+const LoginIndexRoute = LoginIndexRouteImport.update({
+  id: '/login/',
+  path: '/login/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TestTooltipRoute = TestTooltipRouteImport.update({
   id: '/test/tooltip',
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
@@ -290,6 +297,7 @@ export interface FileRoutesByTo {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/login': typeof LoginIndexRoute
   '/matching': typeof MatchingIndexRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -327,6 +335,7 @@ export interface FileRoutesById {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/login/'
     | '/matching/'
     | '/matching/projects/announce'
     | '/matching/notice-publish/$noticeId'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/login'
     | '/matching'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/login/'
     | '/matching/'
     | '/matching/projects/announce'
     | '/matching/notice-publish/$noticeId'
@@ -474,6 +486,7 @@ export interface RootRouteChildren {
   TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
   TestSignupIdPwRoute: typeof TestSignupIdPwRoute
+  LoginIndexRoute: typeof LoginIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -519,6 +532,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/matching/'
       preLoaderRoute: typeof MatchingIndexRouteImport
       parentRoute: typeof MatchingRouteRoute
+    }
+    '/login/': {
+      id: '/login/'
+      path: '/login'
+      fullPath: '/login/'
+      preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/test/tooltip': {
       id: '/test/tooltip'
@@ -821,6 +841,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
   TestSignupIdPwRoute: TestSignupIdPwRoute,
+  LoginIndexRoute: LoginIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
