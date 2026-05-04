@@ -2,6 +2,8 @@ import axios from "axios"
 
 import type { AxiosRequestConfig } from "axios"
 
+import type { ApiResponse } from "@/shared/lib/apiResponse"
+
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
@@ -71,17 +73,20 @@ api.interceptors.response.use(
     originalRequest._retry = true
 
     try {
-      const { data } = await api.post<{
-        accessToken: string
-        refreshToken: string
-      }>("/v1/auth/token/renew", { refreshToken })
-      localStorage.setItem("access_token", data.accessToken)
-      localStorage.setItem("refresh_token", data.refreshToken)
-      api.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`
-      drainQueue(data.accessToken)
+      const { data } = await api.post<
+        ApiResponse<{
+          accessToken: string
+          refreshToken: string
+        }>
+      >("/v1/auth/token/renew", { refreshToken })
+      const { accessToken, refreshToken: newRefreshToken } = data.result
+      localStorage.setItem("access_token", accessToken)
+      localStorage.setItem("refresh_token", newRefreshToken)
+      api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
+      drainQueue(accessToken)
       originalRequest.headers = {
         ...originalRequest.headers,
-        Authorization: `Bearer ${data.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       }
       return api(originalRequest)
     } catch (refreshError) {
