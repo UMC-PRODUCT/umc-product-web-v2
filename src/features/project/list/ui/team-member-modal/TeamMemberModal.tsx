@@ -72,7 +72,7 @@ export function TeamMemberModal({ onClose }: TeamMemberModalProps) {
       <button
         type="button"
         onClick={onClose}
-        className="hover:bg-teal-gray-100 shadow-inner-neutral-2 absolute top-[10px] right-[10px] flex items-center justify-center rounded-lg transition-colors"
+        className="hover:bg-teal-gray-100 shadow-inner-neutral-2 absolute top-2.5 right-2.5 flex items-center justify-center rounded-lg transition-colors"
         aria-label="닫기"
       >
         <SvgCloseIcon width={26} height={26} />
