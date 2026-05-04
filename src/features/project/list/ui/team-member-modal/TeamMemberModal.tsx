@@ -78,11 +78,9 @@ export function TeamMemberModal({ onClose }: TeamMemberModalProps) {
         <SvgCloseIcon width={26} height={26} />
       </button>
 
-      <div className="border-teal-gray-100 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto rounded-xl border p-[10px]">
-        <h2 className="text-heading-6-semibold text-teal-gray-900">
-          팀원 구성
-        </h2>
+      <h2 className="text-heading-6-semibold text-teal-gray-900">팀원 구성</h2>
 
+      <div className="border-teal-gray-100 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto rounded-xl border p-[10px]">
         <div className="flex flex-col gap-8">
           {TEAM_DATA.map((roleData) => (
             <div key={roleData.role} className="flex flex-col gap-2">
