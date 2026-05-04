@@ -32,19 +32,18 @@ export function LoginCircleButton({
   ...props
 }: LoginButtonProps) {
   const currentSocial = social || "apple"
-
+  const socialConfig = {
+    apple: { Icon: AppleLogo, iconClass: "h-6 w-6 text-white" },
+    google: { Icon: GoogleLogo, iconClass: "h-6 w-6" },
+    kakao: { Icon: KakaoLogo, iconClass: "h-6 w-6 text-black" },
+  } as const
+  const { Icon, iconClass } = socialConfig[currentSocial]
   return (
     <button
       className={cn(loginButtonVariants({ social }), className)}
       {...props}
     >
-      {currentSocial === "apple" && (
-        <AppleLogo className="h-6 w-6 text-white" />
-      )}
-      {currentSocial === "google" && <GoogleLogo className="h-6 w-6" />}
-      {currentSocial === "kakao" && (
-        <KakaoLogo className="h-6 w-6 text-black" />
-      )}
+      <Icon className={iconClass} />
     </button>
   )
 }

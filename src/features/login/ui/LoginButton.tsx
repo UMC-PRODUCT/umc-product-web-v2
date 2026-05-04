@@ -28,6 +28,20 @@ interface LoginButtonProps
 
 export function LoginButton({ className, social, ...props }: LoginButtonProps) {
   const currentSocial = social || "apple"
+  const socialConfig = {
+    apple: {
+      Icon: AppleLogo,
+      label: "Apple 로그인",
+      iconClass: "h-6 w-6 text-black",
+    },
+    google: { Icon: GoogleLogo, label: "Google 로그인", iconClass: "h-5 w-5" },
+    kakao: {
+      Icon: KakaoLogo,
+      label: "카카오 로그인",
+      iconClass: "h-5 w-5 text-black",
+    },
+  } as const
+  const { Icon, label, iconClass } = socialConfig[currentSocial]
 
   return (
     <button
@@ -35,30 +49,8 @@ export function LoginButton({ className, social, ...props }: LoginButtonProps) {
       {...props}
     >
       <div className="flex items-center justify-center gap-3">
-        {currentSocial === "apple" && (
-          <AppleLogo className="h-6 w-6 text-black" />
-        )}
-        {currentSocial === "apple" && (
-          <span className="text-label-1-medium text-teal-gray-900">
-            Apple 로그인
-          </span>
-        )}
-
-        {currentSocial === "google" && <GoogleLogo className="h-5 w-5" />}
-        {currentSocial === "google" && (
-          <span className="text-label-1-medium text-teal-gray-900">
-            Google 로그인
-          </span>
-        )}
-
-        {currentSocial === "kakao" && (
-          <KakaoLogo className="h-5 w-5 text-black" />
-        )}
-        {currentSocial === "kakao" && (
-          <span className="text-label-1-medium text-teal-gray-900">
-            카카오 로그인
-          </span>
-        )}
+        <Icon className={iconClass} />
+        <span className="text-label-1-medium text-teal-gray-900">{label}</span>
       </div>
     </button>
   )
