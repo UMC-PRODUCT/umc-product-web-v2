@@ -17,7 +17,7 @@ interface NoticePublishFormProps {
 
 export function NoticePublishForm({
   variant,
-  noticeId,
+  noticeId: _noticeId,
 }: NoticePublishFormProps) {
   const [noticeContent, setNoticeContent] = useState("")
   const [noticeTitle, setNoticeTitle] = useState("")
@@ -83,15 +83,15 @@ export function NoticePublishForm({
       setIsLoading(false)
       setIsDone(true)
       setIsCompletionModalOpen(true)
-      console.log(
-        variant === "edit" ? "Updating notice:" : "Publishing notice:",
-        {
-          noticeId,
-          title: noticeTitle,
-          content: noticeContent,
-          isNotificationEnabled,
-        },
-      )
+      // console.log(
+      //   variant === "edit" ? "Updating notice:" : "Publishing notice:",
+      //   {
+      //     noticeId,
+      //     title: noticeTitle,
+      //     content: noticeContent,
+      //     isNotificationEnabled,
+      //   },
+      // )
     }, 1000)
   }
 
