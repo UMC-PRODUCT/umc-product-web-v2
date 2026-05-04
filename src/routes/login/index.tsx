@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { LoginButton } from "@/features/login"
+import { Divider, LoginButton } from "@/features/login"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { Button } from "@/shared/ui/Button"
 
@@ -29,11 +29,7 @@ function SocialLoginPage() {
             <LoginButton social={"kakao"} />
           </div>
 
-          <div className="flex h-6 items-center gap-3">
-            <div className="bg-teal-gray-200 h-[1.5px] w-[80.5px] rounded-[0.75px]"></div>
-            <span className="text-teal-gray-400 text-body-1-regular">or</span>
-            <div className="bg-teal-gray-200 h-[1.5px] w-[80.5px] rounded-[0.75px]"></div>
-          </div>
+          <Divider />
 
           <div className="flex flex-col items-center gap-3.5">
             {/* TODO: 로그인 API 연동 */}
