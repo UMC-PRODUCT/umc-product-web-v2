@@ -9,12 +9,6 @@ import {
   loginWithIdPw,
   registerCredentials,
 } from "@/features/auth/api/credentials"
-import { loginWithApple } from "@/features/auth/api/socialLogin"
-import {
-  isApplePopupCancelled,
-  signInWithApple,
-} from "@/features/auth/lib/appleSignIn"
-import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import { redirectToOAuth } from "@/features/auth/lib/oauthRedirect"
 import { useAuthStore } from "@/features/auth/store/authStore"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
@@ -38,17 +32,6 @@ function LoginPage() {
       type: "default",
       duration: 3000,
     })
-  }
-
-  const handleAppleSignIn = async () => {
-    try {
-      const { authorizationCode } = await signInWithApple()
-      const res = await loginWithApple({ authorizationCode })
-      handleLoginResponse(res)
-    } catch (error) {
-      if (isApplePopupCancelled(error)) return
-      showToast("Apple 로그인에 실패했습니다. 다시 시도해주세요.", "red")
-    }
   }
 
   return (
@@ -93,7 +76,7 @@ function LoginPage() {
           color="neutral"
           size="xl"
           className="w-full"
-          onClick={() => void handleAppleSignIn()}
+          onClick={() => redirectToOAuth("APPLE")}
         >
           <span className="flex items-center gap-2">
             <AppleIcon size={20} />
