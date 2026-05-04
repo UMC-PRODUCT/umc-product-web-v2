@@ -24,7 +24,7 @@ function SignupPage() {
   useEffect(() => {
     const token = sessionStorage.getItem("oauth_verification_token")
     if (!token) {
-      void navigate({ to: "/login" })
+      void navigate({ to: "/test/login" })
       return
     }
     if (!oAuthVerificationToken) {

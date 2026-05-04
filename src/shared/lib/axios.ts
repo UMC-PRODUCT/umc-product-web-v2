@@ -48,7 +48,7 @@ api.interceptors.response.use(
     const refreshToken = localStorage.getItem("refresh_token")
     if (!refreshToken) {
       localStorage.removeItem("access_token")
-      window.location.href = "/login"
+      window.location.href = "/test/login"
       return Promise.reject(error)
     }
 
@@ -88,7 +88,7 @@ api.interceptors.response.use(
       rejectQueue(refreshError)
       localStorage.removeItem("access_token")
       localStorage.removeItem("refresh_token")
-      window.location.href = "/login"
+      window.location.href = "/test/login"
       return Promise.reject(refreshError)
     } finally {
       isRefreshing = false

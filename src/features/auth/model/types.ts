@@ -1,4 +1,4 @@
-export type OAuthProvider = "GOOGLE" | "KAKAO"
+export type OAuthProvider = "GOOGLE" | "KAKAO" | "APPLE"
 
 export type OAuthLoginCode = "LOGIN_SUCCESS" | "REGISTER_REQUIRED"
 
@@ -17,6 +17,10 @@ export interface GoogleLoginRequest {
 
 export interface KakaoLoginRequest {
   accessToken: string
+}
+
+export interface AppleLoginRequest {
+  authorizationCode: string
 }
 
 export interface SendEmailVerificationRequest {

@@ -3,6 +3,7 @@ import type { OAuthProvider } from "@/features/auth/model/types"
 const PROVIDER_PATH: Record<OAuthProvider, string> = {
   GOOGLE: "google",
   KAKAO: "kakao",
+  APPLE: "apple",
 }
 
 export function redirectToOAuth(provider: OAuthProvider) {

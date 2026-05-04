@@ -2,5 +2,5 @@ import { useAuthStore } from "@/features/auth/store/authStore"
 
 export function logout() {
   useAuthStore.getState().clear()
-  window.location.href = "/login"
+  window.location.href = "/test/login"
 }

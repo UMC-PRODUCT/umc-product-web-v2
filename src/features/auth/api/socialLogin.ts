@@ -1,6 +1,7 @@
 import { api } from "@/shared/lib/axios"
 
 import type {
+  AppleLoginRequest,
   GoogleLoginRequest,
   KakaoLoginRequest,
   OAuthLoginResponse,
@@ -21,6 +22,16 @@ export async function loginWithKakao(
 ): Promise<OAuthLoginResponse> {
   const { data } = await api.post<OAuthLoginResponse>(
     "/v1/auth/login/kakao",
+    payload,
+  )
+  return data
+}
+
+export async function loginWithApple(
+  payload: AppleLoginRequest,
+): Promise<OAuthLoginResponse> {
+  const { data } = await api.post<OAuthLoginResponse>(
+    "/v1/auth/login/apple",
     payload,
   )
   return data

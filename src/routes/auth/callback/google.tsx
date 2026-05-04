@@ -5,11 +5,11 @@ import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 
 import type { OAuthLoginResponse } from "@/features/auth/model/types"
 
-export const Route = createFileRoute("/auth/callback/kakao")({
-  component: KakaoCallbackPage,
+export const Route = createFileRoute("/auth/callback/google")({
+  component: GoogleCallbackPage,
 })
 
-function KakaoCallbackPage() {
+function GoogleCallbackPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -27,7 +27,7 @@ function KakaoCallbackPage() {
     }
 
     const res: OAuthLoginResponse = {
-      provider: "KAKAO",
+      provider: "GOOGLE",
       success: success === "true",
       code,
       accessToken: accessToken ?? undefined,
@@ -49,7 +49,7 @@ function KakaoCallbackPage() {
   return (
     <main className="flex min-h-[80vh] items-center justify-center">
       <p className="text-body-2-medium text-teal-gray-400">
-        카카오 로그인 처리 중...
+        Google 로그인 처리 중...
       </p>
     </main>
   )

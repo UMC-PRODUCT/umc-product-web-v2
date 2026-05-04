@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
@@ -23,6 +22,7 @@ import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
 import { Route as TestMemberSearchBarRouteImport } from './routes/test/member-search-bar'
+import { Route as TestLoginRouteImport } from './routes/test/login'
 import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
 import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
 import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
@@ -38,6 +38,8 @@ import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/pro
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 import { Route as MatchingNoticePublishNoticeIdRouteImport } from './routes/matching/notice-publish.$noticeId'
 import { Route as AuthCallbackKakaoRouteImport } from './routes/auth/callback/kakao'
+import { Route as AuthCallbackGoogleRouteImport } from './routes/auth/callback/google'
+import { Route as AuthCallbackAppleRouteImport } from './routes/auth/callback/apple'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
 import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matching/projects/announce/index'
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
@@ -46,11 +48,6 @@ import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } fro
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthTestRoute = AuthTestRouteImport.update({
@@ -111,6 +108,11 @@ const TestOptionButtonRoute = TestOptionButtonRouteImport.update({
 const TestMemberSearchBarRoute = TestMemberSearchBarRouteImport.update({
   id: '/test/member-search-bar',
   path: '/test/member-search-bar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestLoginRoute = TestLoginRouteImport.update({
+  id: '/test/login',
+  path: '/test/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestFormHeaderRoute = TestFormHeaderRouteImport.update({
@@ -190,6 +192,16 @@ const AuthCallbackKakaoRoute = AuthCallbackKakaoRouteImport.update({
   path: '/auth/callback/kakao',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackGoogleRoute = AuthCallbackGoogleRouteImport.update({
+  id: '/auth/callback/google',
+  path: '/auth/callback/google',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackAppleRoute = AuthCallbackAppleRouteImport.update({
+  id: '/auth/callback/apple',
+  path: '/auth/callback/apple',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchingProjectsAnnounceRouteRoute =
   MatchingProjectsAnnounceRouteRouteImport.update({
     id: '/projects/announce',
@@ -220,7 +232,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
-  '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -233,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
+  '/test/login': typeof TestLoginRoute
   '/test/member-search-bar': typeof TestMemberSearchBarRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
@@ -242,6 +254,8 @@ export interface FileRoutesByFullPath {
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
+  '/auth/callback/apple': typeof AuthCallbackAppleRoute
+  '/auth/callback/google': typeof AuthCallbackGoogleRoute
   '/auth/callback/kakao': typeof AuthCallbackKakaoRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -254,7 +268,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRoute
   '/auth-test': typeof AuthTestRoute
-  '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -267,6 +280,7 @@ export interface FileRoutesByTo {
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
+  '/test/login': typeof TestLoginRoute
   '/test/member-search-bar': typeof TestMemberSearchBarRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
@@ -275,6 +289,8 @@ export interface FileRoutesByTo {
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
   '/matching': typeof MatchingIndexRoute
+  '/auth/callback/apple': typeof AuthCallbackAppleRoute
+  '/auth/callback/google': typeof AuthCallbackGoogleRoute
   '/auth/callback/kakao': typeof AuthCallbackKakaoRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -289,7 +305,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
-  '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -302,6 +317,7 @@ export interface FileRoutesById {
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
+  '/test/login': typeof TestLoginRoute
   '/test/member-search-bar': typeof TestMemberSearchBarRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
@@ -311,6 +327,8 @@ export interface FileRoutesById {
   '/test/tooltip': typeof TestTooltipRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
+  '/auth/callback/apple': typeof AuthCallbackAppleRoute
+  '/auth/callback/google': typeof AuthCallbackGoogleRoute
   '/auth/callback/kakao': typeof AuthCallbackKakaoRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -326,7 +344,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/matching'
     | '/auth-test'
-    | '/login'
     | '/signup'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -339,6 +356,7 @@ export interface FileRouteTypes {
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
+    | '/test/login'
     | '/test/member-search-bar'
     | '/test/option-button'
     | '/test/question-form'
@@ -348,6 +366,8 @@ export interface FileRouteTypes {
     | '/test/tooltip'
     | '/matching/'
     | '/matching/projects/announce'
+    | '/auth/callback/apple'
+    | '/auth/callback/google'
     | '/auth/callback/kakao'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
@@ -360,7 +380,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth-test'
-    | '/login'
     | '/signup'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -373,6 +392,7 @@ export interface FileRouteTypes {
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
+    | '/test/login'
     | '/test/member-search-bar'
     | '/test/option-button'
     | '/test/question-form'
@@ -381,6 +401,8 @@ export interface FileRouteTypes {
     | '/test/toggle-inputs'
     | '/test/tooltip'
     | '/matching'
+    | '/auth/callback/apple'
+    | '/auth/callback/google'
     | '/auth/callback/kakao'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
@@ -394,7 +416,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/matching'
     | '/auth-test'
-    | '/login'
     | '/signup'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -407,6 +428,7 @@ export interface FileRouteTypes {
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
+    | '/test/login'
     | '/test/member-search-bar'
     | '/test/option-button'
     | '/test/question-form'
@@ -416,6 +438,8 @@ export interface FileRouteTypes {
     | '/test/tooltip'
     | '/matching/'
     | '/matching/projects/announce'
+    | '/auth/callback/apple'
+    | '/auth/callback/google'
     | '/auth/callback/kakao'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
@@ -430,7 +454,6 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRoute
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
-  LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
@@ -440,6 +463,7 @@ export interface RootRouteChildren {
   TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
   TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
   TestFormHeaderRoute: typeof TestFormHeaderRoute
+  TestLoginRoute: typeof TestLoginRoute
   TestMemberSearchBarRoute: typeof TestMemberSearchBarRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
   TestQuestionFormRoute: typeof TestQuestionFormRoute
@@ -447,6 +471,8 @@ export interface RootRouteChildren {
   TestToggleRoute: typeof TestToggleRoute
   TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
+  AuthCallbackAppleRoute: typeof AuthCallbackAppleRoute
+  AuthCallbackGoogleRoute: typeof AuthCallbackGoogleRoute
   AuthCallbackKakaoRoute: typeof AuthCallbackKakaoRoute
 }
 
@@ -457,13 +483,6 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth-test': {
@@ -548,6 +567,13 @@ declare module '@tanstack/react-router' {
       path: '/test/member-search-bar'
       fullPath: '/test/member-search-bar'
       preLoaderRoute: typeof TestMemberSearchBarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/login': {
+      id: '/test/login'
+      path: '/test/login'
+      fullPath: '/test/login'
+      preLoaderRoute: typeof TestLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/form-header': {
@@ -653,6 +679,20 @@ declare module '@tanstack/react-router' {
       path: '/auth/callback/kakao'
       fullPath: '/auth/callback/kakao'
       preLoaderRoute: typeof AuthCallbackKakaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback/google': {
+      id: '/auth/callback/google'
+      path: '/auth/callback/google'
+      fullPath: '/auth/callback/google'
+      preLoaderRoute: typeof AuthCallbackGoogleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback/apple': {
+      id: '/auth/callback/apple'
+      path: '/auth/callback/apple'
+      fullPath: '/auth/callback/apple'
+      preLoaderRoute: typeof AuthCallbackAppleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matching/projects/announce': {
@@ -761,7 +801,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRoute,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
-  LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
@@ -771,6 +810,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
   TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
   TestFormHeaderRoute: TestFormHeaderRoute,
+  TestLoginRoute: TestLoginRoute,
   TestMemberSearchBarRoute: TestMemberSearchBarRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
@@ -778,6 +818,8 @@ const rootRouteChildren: RootRouteChildren = {
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
+  AuthCallbackAppleRoute: AuthCallbackAppleRoute,
+  AuthCallbackGoogleRoute: AuthCallbackGoogleRoute,
   AuthCallbackKakaoRoute: AuthCallbackKakaoRoute,
 }
 export const routeTree = rootRouteImport
