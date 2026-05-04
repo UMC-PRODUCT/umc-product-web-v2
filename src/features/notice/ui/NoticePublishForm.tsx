@@ -19,7 +19,7 @@ interface NoticePublishFormProps {
 
 export function NoticePublishForm({
   variant,
-  noticeId: _noticeId,
+  noticeId,
 }: NoticePublishFormProps) {
   const [noticeContent, setNoticeContent] = useState("")
   const [noticeTitle, setNoticeTitle] = useState("")

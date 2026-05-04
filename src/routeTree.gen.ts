@@ -21,6 +21,7 @@ import { Route as TestToggleRouteImport } from './routes/test/toggle'
 import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
+import { Route as TestLoginRouteImport } from './routes/test/login'
 import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
 import { Route as TestIconRouteImport } from './routes/test/icon'
 import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
@@ -105,6 +106,11 @@ const TestOptionButtonRoute = TestOptionButtonRouteImport.update({
   path: '/test/option-button',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestLoginRoute = TestLoginRouteImport.update({
+  id: '/test/login',
+  path: '/test/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestInputBoxRoute = TestInputBoxRouteImport.update({
   id: '/test/input-box',
   path: '/test/input-box',
@@ -113,11 +119,6 @@ const TestInputBoxRoute = TestInputBoxRouteImport.update({
 const TestIconRoute = TestIconRouteImport.update({
   id: '/test/icon',
   path: '/test/icon',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TestLoginRoute = TestLoginRouteImport.update({
-  id: '/test/login',
-  path: '/test/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestFormHeaderRoute = TestFormHeaderRouteImport.update({
@@ -251,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/test/form-header': typeof TestFormHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
+  '/test/login': typeof TestLoginRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/toast': typeof TestToastRoute
@@ -287,6 +289,7 @@ export interface FileRoutesByTo {
   '/test/form-header': typeof TestFormHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
+  '/test/login': typeof TestLoginRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/toast': typeof TestToastRoute
@@ -324,6 +327,7 @@ export interface FileRoutesById {
   '/test/form-header': typeof TestFormHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
+  '/test/login': typeof TestLoginRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/toast': typeof TestToastRoute
@@ -363,6 +367,7 @@ export interface FileRouteTypes {
     | '/test/form-header'
     | '/test/icon'
     | '/test/input-box'
+    | '/test/login'
     | '/test/option-button'
     | '/test/question-form'
     | '/test/toast'
@@ -399,6 +404,7 @@ export interface FileRouteTypes {
     | '/test/form-header'
     | '/test/icon'
     | '/test/input-box'
+    | '/test/login'
     | '/test/option-button'
     | '/test/question-form'
     | '/test/toast'
@@ -435,6 +441,7 @@ export interface FileRouteTypes {
     | '/test/form-header'
     | '/test/icon'
     | '/test/input-box'
+    | '/test/login'
     | '/test/option-button'
     | '/test/question-form'
     | '/test/toast'
@@ -470,6 +477,7 @@ export interface RootRouteChildren {
   TestFormHeaderRoute: typeof TestFormHeaderRoute
   TestIconRoute: typeof TestIconRoute
   TestInputBoxRoute: typeof TestInputBoxRoute
+  TestLoginRoute: typeof TestLoginRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
   TestQuestionFormRoute: typeof TestQuestionFormRoute
   TestToastRoute: typeof TestToastRoute
@@ -567,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestOptionButtonRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/test/login': {
+      id: '/test/login'
+      path: '/test/login'
+      fullPath: '/test/login'
+      preLoaderRoute: typeof TestLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/test/input-box': {
       id: '/test/input-box'
       path: '/test/input-box'
@@ -579,13 +594,6 @@ declare module '@tanstack/react-router' {
       path: '/test/icon'
       fullPath: '/test/icon'
       preLoaderRoute: typeof TestIconRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/test/login': {
-      id: '/test/login'
-      path: '/test/login'
-      fullPath: '/test/login'
-      preLoaderRoute: typeof TestLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/form-header': {
@@ -824,6 +832,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestFormHeaderRoute: TestFormHeaderRoute,
   TestIconRoute: TestIconRoute,
   TestInputBoxRoute: TestInputBoxRoute,
+  TestLoginRoute: TestLoginRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
   TestToastRoute: TestToastRoute,
