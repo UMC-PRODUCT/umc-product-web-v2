@@ -82,6 +82,97 @@ function OptionButtonTestPage() {
             </OptionButtonGroup>
           </div>
         </Section>
+
+        <Section title="Segmented sm — 선택 이동 (Left/Mid/Right/Last)">
+          <div className="flex flex-col gap-3">
+            <OptionButtonGroup variant="segmented" defaultValue="design">
+              <OptionButton size="sm" value="design">
+                Design
+              </OptionButton>
+              <OptionButton size="sm" value="frontend">
+                Frontend
+              </OptionButton>
+              <OptionButton size="sm" value="backend">
+                Backend
+              </OptionButton>
+              <OptionButton size="sm" value="pm">
+                PM
+              </OptionButton>
+            </OptionButtonGroup>
+            <OptionButtonGroup variant="segmented" defaultValue="frontend">
+              <OptionButton size="sm" value="design">
+                Design
+              </OptionButton>
+              <OptionButton size="sm" value="frontend">
+                Frontend
+              </OptionButton>
+              <OptionButton size="sm" value="backend">
+                Backend
+              </OptionButton>
+              <OptionButton size="sm" value="pm">
+                PM
+              </OptionButton>
+            </OptionButtonGroup>
+            <OptionButtonGroup variant="segmented" defaultValue="backend">
+              <OptionButton size="sm" value="design">
+                Design
+              </OptionButton>
+              <OptionButton size="sm" value="frontend">
+                Frontend
+              </OptionButton>
+              <OptionButton size="sm" value="backend">
+                Backend
+              </OptionButton>
+              <OptionButton size="sm" value="pm">
+                PM
+              </OptionButton>
+            </OptionButtonGroup>
+            <OptionButtonGroup variant="segmented" defaultValue="pm">
+              <OptionButton size="sm" value="design">
+                Design
+              </OptionButton>
+              <OptionButton size="sm" value="frontend">
+                Frontend
+              </OptionButton>
+              <OptionButton size="sm" value="backend">
+                Backend
+              </OptionButton>
+              <OptionButton size="sm" value="pm">
+                PM
+              </OptionButton>
+            </OptionButtonGroup>
+          </div>
+        </Section>
+
+        <Section title="Segmented sm — 선택 없음">
+          <OptionButtonGroup variant="segmented">
+            <OptionButton size="sm" value="design">
+              Design
+            </OptionButton>
+            <OptionButton size="sm" value="frontend">
+              Frontend
+            </OptionButton>
+            <OptionButton size="sm" value="backend">
+              Backend
+            </OptionButton>
+          </OptionButtonGroup>
+        </Section>
+
+        <Section title="Segmented sm — Disabled">
+          <div className="flex flex-col gap-3">
+            <OptionButtonGroup variant="segmented" defaultValue="frontend">
+              <OptionButton size="sm" value="design" disabled>
+                Design
+              </OptionButton>
+              <OptionButton size="sm" value="frontend">
+                Frontend
+              </OptionButton>
+              <OptionButton size="sm" value="backend" disabled>
+                Backend
+              </OptionButton>
+            </OptionButtonGroup>
+          </div>
+        </Section>
       </div>
     </main>
   )

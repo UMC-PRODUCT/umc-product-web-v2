@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react"
 
 import {
-  type MatchingProjectMock,
+  type MatchingProject,
   MOCK_MATCHING_PROJECTS,
 } from "./matchingProject.mock"
 import {
@@ -20,7 +20,7 @@ export type MatchingProjectRecruitStatusKey =
   | "recruiting"
 
 export function getProjectRecruitStatus(
-  project: MatchingProjectMock,
+  project: MatchingProject,
 ): MatchingProjectRecruitStatusKey {
   if (project.recruitRows.length === 0) return "before"
 
@@ -45,9 +45,9 @@ export type MatchingProjectListFilterCriteria = {
 }
 
 export function filterMatchingProjects(
-  projects: MatchingProjectMock[],
+  projects: MatchingProject[],
   criteria: MatchingProjectListFilterCriteria,
-): MatchingProjectMock[] {
+): MatchingProject[] {
   const { branch, school, selectedParts, recruitStatus } = criteria
 
   return projects.filter((project) => {

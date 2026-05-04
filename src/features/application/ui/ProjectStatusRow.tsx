@@ -2,7 +2,7 @@ import { ChevronDown } from "lucide-react"
 
 import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
-import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 
 import type { AssignmentCount, Role } from "../model/types"
 
@@ -68,7 +68,7 @@ export function ProjectStatusRow({
 
         {/* 파트 */}
         <div className="flex h-12.5 w-30.5 items-center px-2.5">
-          <RoleTagChip role={role} />
+          <PartTagChip role={role} />
         </div>
 
         {/* 챌린저 */}
