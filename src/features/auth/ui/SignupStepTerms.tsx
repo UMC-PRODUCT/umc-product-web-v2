@@ -2,7 +2,10 @@ import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { registerMemberByOAuth } from "@/features/auth/api/register"
+import {
+  registerMemberByIdPw,
+  registerMemberByOAuth,
+} from "@/features/auth/api/register"
 import { getTermsByType } from "@/features/auth/api/terms"
 import { useSignupStore } from "@/features/auth/store/signupStore"
 import { Button } from "@/shared/ui/Button"
@@ -32,7 +35,10 @@ export function SignupStepTerms() {
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
   const {
+    mode,
     oAuthVerificationToken,
+    loginId,
+    rawPassword,
     emailVerificationToken,
     name,
     nickname,
@@ -103,14 +109,25 @@ export function SignupStepTerms() {
 
     setIsSubmitting(true)
     try {
-      const res = await registerMemberByOAuth({
-        oAuthVerificationToken,
-        emailVerificationToken,
-        name,
-        nickname,
-        schoolId,
-        termsAgreements,
-      })
+      const res =
+        mode === "id-pw"
+          ? await registerMemberByIdPw({
+              loginId,
+              rawPassword,
+              emailVerificationToken,
+              name,
+              nickname,
+              schoolId,
+              termsAgreements,
+            })
+          : await registerMemberByOAuth({
+              oAuthVerificationToken,
+              emailVerificationToken,
+              name,
+              nickname,
+              schoolId,
+              termsAgreements,
+            })
       localStorage.setItem("access_token", res.accessToken)
       localStorage.setItem("refresh_token", res.refreshToken)
       sessionStorage.removeItem("oauth_verification_token")

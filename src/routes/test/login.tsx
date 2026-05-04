@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { Chrome, MessageCircle } from "lucide-react"
 import { useState } from "react"
 
@@ -220,6 +220,15 @@ function IdPwLoginSection({ onSuccess, onError }: IdPwLoginSectionProps) {
       >
         로그인
       </Button>
+      <p className="text-label-2-medium text-teal-gray-400 text-center">
+        계정이 없으신가요?{" "}
+        <Link
+          to="/test/signup/id-pw"
+          className="text-teal-600 underline underline-offset-2"
+        >
+          회원가입
+        </Link>
+      </p>
     </form>
   )
 }

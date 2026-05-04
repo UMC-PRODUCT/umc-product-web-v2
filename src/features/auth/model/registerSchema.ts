@@ -19,5 +19,11 @@ export const termsSchema = z.object({
     .min(1, "필수 약관에 동의해주세요."),
 })
 
+export const idPwCredentialsSchema = z.object({
+  loginId: z.string().min(1, "아이디를 입력해주세요."),
+  rawPassword: z.string().min(1, "비밀번호를 입력해주세요."),
+})
+
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>
 export type TermsFormData = z.infer<typeof termsSchema>
+export type IdPwCredentialsFormData = z.infer<typeof idPwCredentialsSchema>

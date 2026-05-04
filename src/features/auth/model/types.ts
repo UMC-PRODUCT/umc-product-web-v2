@@ -107,3 +107,13 @@ export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string
 }
+
+export interface IdPwRegisterMemberRequest {
+  loginId: string
+  rawPassword: string
+  name: string
+  nickname: string
+  emailVerificationToken: string
+  schoolId: number
+  termsAgreements: TermConsentStatus[]
+}

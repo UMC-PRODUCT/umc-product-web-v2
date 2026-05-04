@@ -36,6 +36,7 @@ import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
+import { Route as TestSignupIdPwRouteImport } from './routes/test/signup/id-pw'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 import { Route as MatchingNoticePublishNoticeIdRouteImport } from './routes/matching/notice-publish.$noticeId'
 import { Route as AuthCallbackKakaoRouteImport } from './routes/auth/callback/kakao'
@@ -182,6 +183,11 @@ const MatchingProjectsIndexRoute = MatchingProjectsIndexRouteImport.update({
   path: '/projects/',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const TestSignupIdPwRoute = TestSignupIdPwRouteImport.update({
+  id: '/test/signup/id-pw',
+  path: '/test/signup/id-pw',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchingProjectsNewRoute = MatchingProjectsNewRouteImport.update({
   id: '/projects/new',
   path: '/projects/new',
@@ -266,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback/kakao': typeof AuthCallbackKakaoRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
+  '/test/signup/id-pw': typeof TestSignupIdPwRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
@@ -302,6 +309,7 @@ export interface FileRoutesByTo {
   '/auth/callback/kakao': typeof AuthCallbackKakaoRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
+  '/test/signup/id-pw': typeof TestSignupIdPwRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/announce': typeof MatchingProjectsAnnounceIndexRoute
@@ -341,6 +349,7 @@ export interface FileRoutesById {
   '/auth/callback/kakao': typeof AuthCallbackKakaoRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
+  '/test/signup/id-pw': typeof TestSignupIdPwRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
@@ -381,6 +390,7 @@ export interface FileRouteTypes {
     | '/auth/callback/kakao'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
+    | '/test/signup/id-pw'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/announce/'
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/auth/callback/kakao'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
+    | '/test/signup/id-pw'
     | '/matching/projects'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/announce'
@@ -455,6 +466,7 @@ export interface FileRouteTypes {
     | '/auth/callback/kakao'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
+    | '/test/signup/id-pw'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/announce/'
@@ -487,6 +499,7 @@ export interface RootRouteChildren {
   AuthCallbackAppleRoute: typeof AuthCallbackAppleRoute
   AuthCallbackGoogleRoute: typeof AuthCallbackGoogleRoute
   AuthCallbackKakaoRoute: typeof AuthCallbackKakaoRoute
+  TestSignupIdPwRoute: typeof TestSignupIdPwRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -680,6 +693,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsIndexRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/test/signup/id-pw': {
+      id: '/test/signup/id-pw'
+      path: '/test/signup/id-pw'
+      fullPath: '/test/signup/id-pw'
+      preLoaderRoute: typeof TestSignupIdPwRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/matching/projects/new': {
       id: '/matching/projects/new'
       path: '/projects/new'
@@ -842,6 +862,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackAppleRoute: AuthCallbackAppleRoute,
   AuthCallbackGoogleRoute: AuthCallbackGoogleRoute,
   AuthCallbackKakaoRoute: AuthCallbackKakaoRoute,
+  TestSignupIdPwRoute: TestSignupIdPwRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
