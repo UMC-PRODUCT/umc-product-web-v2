@@ -83,8 +83,8 @@ const MATCHING_PROJECT_LIST_FILTER_LAYOUT = {
     dropdownClassName: "w-[9.125rem]",
   },
   status: {
-    className: "w-[114px]",
-    dropdownClassName: "w-[114px] min-w-[114px]",
+    className: "w-[7.125rem]",
+    dropdownClassName: "w-[7.125rem] min-w-[7.125rem]",
   },
 } as const
 
