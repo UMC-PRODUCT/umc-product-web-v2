@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { LoginButton, LoginCircleButton } from "@/features/login"
 import { Button } from "@/shared/ui/Button"
 
 export const Route = createFileRoute("/test/button")({
@@ -8,7 +9,7 @@ export const Route = createFileRoute("/test/button")({
 
 const VARIANTS = ["fill", "weak"] as const
 const COLORS = ["primary", "neutral"] as const
-const SIZES = ["xs", "s", "m", "xl"] as const
+const SIZES = ["xs", "s", "m", "lg", "xl"] as const
 
 function Section({
   title,
@@ -80,6 +81,15 @@ function ButtonTestPage() {
 
       <div className="flex flex-col gap-10">
         <Section title="Default">
+          <LoginButton social={"kakao"} />
+          <LoginButton social={"google"} />
+          <LoginButton social={"apple"} />
+          <LoginCircleButton social={"kakao"} />
+          <LoginCircleButton social={"google"} />
+          <LoginCircleButton social={"apple"} />
+        </Section>
+
+        <Section title="Default">
           <ButtonTable
             rows={VARIANTS.flatMap((variant) =>
               COLORS.map((color) => ({
@@ -139,6 +149,7 @@ function ButtonTestPage() {
                       버튼
                     </Button>,
                     null,
+                    null,
                   ],
                 })),
               ),
@@ -148,6 +159,7 @@ function ButtonTestPage() {
                   <Button size="xs" variant={variant} color="white" icon>
                     버튼
                   </Button>,
+                  null,
                   null,
                   null,
                   null,
@@ -184,6 +196,7 @@ function ButtonTestPage() {
                       버튼
                     </Button>,
                     null,
+                    null,
                   ],
                 })),
               ),
@@ -199,6 +212,7 @@ function ButtonTestPage() {
                   >
                     버튼
                   </Button>,
+                  null,
                   null,
                   null,
                   null,
@@ -233,6 +247,7 @@ function ButtonTestPage() {
                   >
                     버튼
                   </Button>,
+                  null,
                   null,
                 ],
               })),

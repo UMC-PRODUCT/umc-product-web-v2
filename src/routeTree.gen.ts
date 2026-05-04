@@ -21,8 +21,8 @@ import { Route as TestToggleRouteImport } from './routes/test/toggle'
 import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
-import { Route as TestMemberSearchBarRouteImport } from './routes/test/member-search-bar'
-import { Route as TestLoginRouteImport } from './routes/test/login'
+import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
+import { Route as TestIconRouteImport } from './routes/test/icon'
 import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
 import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
 import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
@@ -105,9 +105,14 @@ const TestOptionButtonRoute = TestOptionButtonRouteImport.update({
   path: '/test/option-button',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TestMemberSearchBarRoute = TestMemberSearchBarRouteImport.update({
-  id: '/test/member-search-bar',
-  path: '/test/member-search-bar',
+const TestInputBoxRoute = TestInputBoxRouteImport.update({
+  id: '/test/input-box',
+  path: '/test/input-box',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestIconRoute = TestIconRouteImport.update({
+  id: '/test/icon',
+  path: '/test/icon',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestLoginRoute = TestLoginRouteImport.update({
@@ -244,8 +249,8 @@ export interface FileRoutesByFullPath {
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
-  '/test/login': typeof TestLoginRoute
-  '/test/member-search-bar': typeof TestMemberSearchBarRoute
+  '/test/icon': typeof TestIconRoute
+  '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/toast': typeof TestToastRoute
@@ -280,8 +285,8 @@ export interface FileRoutesByTo {
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
-  '/test/login': typeof TestLoginRoute
-  '/test/member-search-bar': typeof TestMemberSearchBarRoute
+  '/test/icon': typeof TestIconRoute
+  '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/toast': typeof TestToastRoute
@@ -317,8 +322,8 @@ export interface FileRoutesById {
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
-  '/test/login': typeof TestLoginRoute
-  '/test/member-search-bar': typeof TestMemberSearchBarRoute
+  '/test/icon': typeof TestIconRoute
+  '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/toast': typeof TestToastRoute
@@ -356,8 +361,8 @@ export interface FileRouteTypes {
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
-    | '/test/login'
-    | '/test/member-search-bar'
+    | '/test/icon'
+    | '/test/input-box'
     | '/test/option-button'
     | '/test/question-form'
     | '/test/toast'
@@ -392,8 +397,8 @@ export interface FileRouteTypes {
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
-    | '/test/login'
-    | '/test/member-search-bar'
+    | '/test/icon'
+    | '/test/input-box'
     | '/test/option-button'
     | '/test/question-form'
     | '/test/toast'
@@ -428,8 +433,8 @@ export interface FileRouteTypes {
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
-    | '/test/login'
-    | '/test/member-search-bar'
+    | '/test/icon'
+    | '/test/input-box'
     | '/test/option-button'
     | '/test/question-form'
     | '/test/toast'
@@ -463,8 +468,8 @@ export interface RootRouteChildren {
   TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
   TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
   TestFormHeaderRoute: typeof TestFormHeaderRoute
-  TestLoginRoute: typeof TestLoginRoute
-  TestMemberSearchBarRoute: typeof TestMemberSearchBarRoute
+  TestIconRoute: typeof TestIconRoute
+  TestInputBoxRoute: typeof TestInputBoxRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
   TestQuestionFormRoute: typeof TestQuestionFormRoute
   TestToastRoute: typeof TestToastRoute
@@ -562,11 +567,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestOptionButtonRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/test/member-search-bar': {
-      id: '/test/member-search-bar'
-      path: '/test/member-search-bar'
-      fullPath: '/test/member-search-bar'
-      preLoaderRoute: typeof TestMemberSearchBarRouteImport
+    '/test/input-box': {
+      id: '/test/input-box'
+      path: '/test/input-box'
+      fullPath: '/test/input-box'
+      preLoaderRoute: typeof TestInputBoxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/icon': {
+      id: '/test/icon'
+      path: '/test/icon'
+      fullPath: '/test/icon'
+      preLoaderRoute: typeof TestIconRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/login': {
@@ -810,8 +822,8 @@ const rootRouteChildren: RootRouteChildren = {
   TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
   TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
   TestFormHeaderRoute: TestFormHeaderRoute,
-  TestLoginRoute: TestLoginRoute,
-  TestMemberSearchBarRoute: TestMemberSearchBarRoute,
+  TestIconRoute: TestIconRoute,
+  TestInputBoxRoute: TestInputBoxRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
   TestToastRoute: TestToastRoute,

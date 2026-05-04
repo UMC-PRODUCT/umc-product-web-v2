@@ -1,0 +1,72 @@
+export type StatusValue = "pass" | "fail" | "pending"
+
+export type Role =
+  | "plan"
+  | "design"
+  | "web"
+  | "ios"
+  | "android"
+  | "springboot"
+  | "nodejs"
+
+export interface AssignmentCount {
+  current: number
+  total: number
+}
+
+export interface RoundCount {
+  round: number
+  applied: number
+  total: number
+}
+
+export interface TopProject {
+  name: string
+  count: number
+}
+
+export interface UniversityCount {
+  name: string
+  applied: number
+  total: number
+}
+
+export interface ProjectRoundData {
+  name: string
+  rounds: number[]
+}
+
+export interface ApplicationStats {
+  totalMembers: number
+  completionRate: number
+  completedCount: number
+  pendingCount: number
+  rounds: RoundCount[]
+  topProjects: TopProject[]
+  universities: UniversityCount[]
+  projectRounds: ProjectRoundData[]
+}
+
+export interface ApplicantDetail {
+  id: string
+  round: number
+  role: Role
+  name: string
+  university: string
+  status: StatusValue
+  processedAt: { date: string; time: string } | null
+  appliedAt: { date: string; time: string }
+}
+
+export interface ProjectApplication {
+  id: string
+  projectName: string
+  role: Role
+  challengerName: string
+  challengerUniversity: string
+  statusLabel: string
+  designCount: AssignmentCount
+  feCount: AssignmentCount
+  beCount: AssignmentCount
+  applicants: ApplicantDetail[]
+}

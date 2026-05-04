@@ -1,7 +1,8 @@
 import { createContext, useContext } from "react"
 
 interface OptionButtonGroupContextValue {
-  value: string | undefined
+  type: "single" | "multiple"
+  value: string | string[] | undefined
   onSelect: (value: string) => void
   variant: "separate" | "segmented"
 }

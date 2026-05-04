@@ -15,7 +15,7 @@ import { cn } from "@/shared/lib/utils"
 const tooltipContentVariants = cva("rounded-[6px] relative text-center", {
   variants: {
     size: {
-      big: "w-[221px] py-2 px-3 text-body-2-medium break-keep",
+      big: "w-[221px] min-h-[52px] py-2 px-3 text-body-2-medium break-keep",
       small: "py-1 px-2 text-caption-2-medium",
     },
     dark: {
@@ -45,6 +45,7 @@ function computePosition(
   rect: DOMRect,
   side: Side,
   sideOffset: number,
+  size: "big" | "small",
 ): CSSProperties {
   const cx = rect.left + rect.width / 2
   const cy = rect.top + rect.height / 2
@@ -70,15 +71,18 @@ function computePosition(
       return {
         ...base,
         left: rect.left - sideOffset,
-        top: cy,
-        transform: "translateX(-100%) translateY(-50%)",
+        top: size === "big" ? cy - 18 - ARROW_SIZE.big.width / 2 : cy,
+        transform:
+          size === "big"
+            ? "translateX(-100%)"
+            : "translateX(-100%) translateY(-50%)",
       }
     case "right":
       return {
         ...base,
         left: rect.right + sideOffset,
-        top: cy,
-        transform: "translateY(-50%)",
+        top: size === "big" ? cy - 18 - ARROW_SIZE.big.width / 2 : cy,
+        ...(size !== "big" && { transform: "translateY(-50%)" }),
       }
   }
 }
@@ -108,25 +112,23 @@ function TooltipArrow({
   const style: CSSProperties = {
     position: "absolute",
     ...(side === "top" && {
-      bottom: -svgH,
+      bottom: -svgH + 1,
       left: "50%",
       transform: "translateX(-50%)",
     }),
     ...(side === "bottom" && {
-      top: -svgH,
+      top: -svgH + 1,
       left: "50%",
       transform: "translateX(-50%)",
     }),
-    ...(side === "left" && {
-      right: -svgW,
-      top: "50%",
-      transform: "translateY(-50%)",
-    }),
-    ...(side === "right" && {
-      left: -svgW,
-      top: "50%",
-      transform: "translateY(-50%)",
-    }),
+    ...(side === "left" &&
+      (size === "big"
+        ? { right: -svgW + 1, top: 18 }
+        : { right: -svgW + 1, top: "50%", transform: "translateY(-50%)" })),
+    ...(side === "right" &&
+      (size === "big"
+        ? { left: -svgW + 1, top: 18 }
+        : { left: -svgW + 1, top: "50%", transform: "translateY(-50%)" })),
   }
 
   return (
@@ -152,6 +154,7 @@ interface TooltipProps {
   onOpenChange?: (open: boolean) => void
   sideOffset?: number
   delayDuration?: number
+  className?: string
 }
 
 export function Tooltip({
@@ -165,6 +168,7 @@ export function Tooltip({
   onOpenChange,
   sideOffset = 4,
   delayDuration = 100,
+  className,
 }: TooltipProps) {
   const tooltipId = useId()
   const isControlled = controlledOpen !== undefined
@@ -176,28 +180,50 @@ export function Tooltip({
   const triggerRef = useRef<HTMLSpanElement>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const [pinned, setPinned] = useState(false)
+
+  const updatePosition = useCallback(() => {
+    if (triggerRef.current) {
+      setPosition(
+        computePosition(
+          triggerRef.current.getBoundingClientRect(),
+          side,
+          sideOffset,
+          size,
+        ),
+      )
+    }
+  }, [side, sideOffset])
+
   const handleOpen = useCallback(() => {
+    if (pinned) return
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
-      if (triggerRef.current) {
-        setPosition(
-          computePosition(
-            triggerRef.current.getBoundingClientRect(),
-            side,
-            sideOffset,
-          ),
-        )
-      }
+      updatePosition()
       if (!isControlled) setInternalOpen(true)
       onOpenChange?.(true)
     }, delayDuration)
-  }, [side, sideOffset, delayDuration, isControlled, onOpenChange])
+  }, [pinned, delayDuration, isControlled, onOpenChange, updatePosition])
 
   const handleClose = useCallback(() => {
+    if (pinned) return
     if (timerRef.current) clearTimeout(timerRef.current)
     if (!isControlled) setInternalOpen(false)
     onOpenChange?.(false)
-  }, [isControlled, onOpenChange])
+  }, [pinned, isControlled, onOpenChange])
+
+  const handleClick = useCallback(() => {
+    if (pinned) {
+      setPinned(false)
+      if (!isControlled) setInternalOpen(false)
+      onOpenChange?.(false)
+    } else {
+      updatePosition()
+      setPinned(true)
+      if (!isControlled) setInternalOpen(true)
+      onOpenChange?.(true)
+    }
+  }, [pinned, isControlled, onOpenChange, updatePosition])
 
   useEffect(() => {
     return () => {
@@ -215,6 +241,7 @@ export function Tooltip({
         onMouseLeave={handleClose}
         onFocus={handleOpen}
         onBlur={handleClose}
+        onClick={handleClick}
       >
         {children}
       </span>
@@ -227,6 +254,7 @@ export function Tooltip({
             className={cn(
               tooltipContentVariants({ size, dark }),
               !dark && "shadow-tooltip-light",
+              className,
             )}
           >
             {content}

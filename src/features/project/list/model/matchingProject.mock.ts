@@ -1,30 +1,13 @@
-// 매칭 프로젝트 카드용 목 데이터 (임시)
-
 import { SCHOOLS_BY_BRANCH } from "./projectFilterOptions"
 
-export type MatchingProjectRecruitRow = {
-  part: string
-  current: number
-  total: number
-  done?: boolean
-}
+import type { MatchingProject, ProjectRecruitRow } from "./matchingProject"
 
-export type MatchingProjectCoverImage = {
-  src: string
-  alt?: string
-}
+export type { MatchingProject, ProjectRecruitRow }
 
-export type MatchingProjectMock = {
-  id: string
-  branch: string
-  school: string
-  title: string
-  description: string
-  authorSchoolLine: string
-  coverImage?: MatchingProjectCoverImage | null
-  recruitRows: MatchingProjectRecruitRow[]
-  isApplied?: boolean
-}
+/** @deprecated Use MatchingProject */
+export type MatchingProjectMock = MatchingProject
+/** @deprecated Use ProjectRecruitRow */
+export type MatchingProjectRecruitRow = ProjectRecruitRow
 
 /** `SCHOOLS_BY_BRANCH` 기준 추가 목 카드 생성 */
 function buildBulkMatchingMocks(
