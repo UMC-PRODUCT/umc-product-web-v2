@@ -83,8 +83,8 @@ const MATCHING_PROJECT_LIST_FILTER_LAYOUT = {
     dropdownClassName: "w-[9.125rem]",
   },
   status: {
-    className: "w-fit min-w-[6.375rem]",
-    dropdownClassName: "w-[6.625rem]",
+    className: "w-[7.125rem]",
+    dropdownClassName: "w-[7.125rem] min-w-[7.125rem]",
   },
 } as const
 
@@ -176,7 +176,7 @@ export function useMatchingProjectListFilters() {
     },
     {
       id: "school",
-      label: "학교",
+      label: "PM 학교",
       options: schoolOptions,
       selectedValue: selectedSchool,
       onSelect: (value) =>

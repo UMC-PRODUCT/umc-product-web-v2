@@ -22,7 +22,6 @@ export const SCHOOLS_BY_BRANCH = {
 } as const
 
 export const PART_OPTIONS: ProjectFilterOption[] = [
-  { value: "Design", label: "Design" },
   { value: "Web", label: "Web" },
   { value: "iOS", label: "iOS" },
   { value: "Android", label: "Android" },
