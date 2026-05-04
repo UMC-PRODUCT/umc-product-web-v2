@@ -8,7 +8,7 @@ export const basicInfoSchema = z.object({
     .max(5, "닉네임은 최대 5자입니다.")
     .regex(/^[가-힣]+$/, "닉네임은 한글만 입력 가능합니다."),
   schoolId: z
-    .number({ required_error: "학교를 선택해주세요." })
+    .number({ message: "학교를 선택해주세요." })
     .int()
     .positive("학교를 선택해주세요."),
 })

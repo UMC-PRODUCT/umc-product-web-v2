@@ -10,6 +10,7 @@ import { Button } from "@/shared/ui/Button"
 import type {
   TermConsentStatus,
   TermResponse,
+  TermType,
 } from "@/features/auth/model/types"
 
 const REQUIRED_TERM_TYPES = ["SERVICE", "PRIVACY"] as const
@@ -53,7 +54,7 @@ export function SignupStepTerms() {
           (
             r,
           ): r is PromiseFulfilledResult<{
-            type: string
+            type: TermType
             term: TermResponse
           }> => r.status === "fulfilled",
         )
