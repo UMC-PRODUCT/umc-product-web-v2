@@ -80,3 +80,29 @@ export interface SchoolNameItem {
 export interface SchoolNameListResponse {
   schools: SchoolNameItem[]
 }
+
+export interface IdPwLoginRequest {
+  loginId: string
+  password: string
+}
+
+export interface IdPwLoginResponse {
+  memberId: number
+  accessToken: string
+  refreshToken: string
+}
+
+export interface RegisterCredentialsRequest {
+  loginId: string
+  password: string
+}
+
+export interface LoginIdAvailabilityResponse {
+  loginId: string
+  available: boolean
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
