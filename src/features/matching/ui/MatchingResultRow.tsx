@@ -94,21 +94,26 @@ export function MatchingResultRow({
                 <span className="text-body-2-medium w-14.5 tracking-[-0.14px] text-teal-900">
                   {row.role}
                 </span>
-                <div
-                  className={cn(
-                    "flex items-center overflow-clip",
-                    rowIdx === 0 && "rounded-tl-1.5 rounded-tr-1.5",
-                    rowIdx === roleRows.length - 1 &&
-                      "rounded-bl-1.5 rounded-br-1.5",
-                  )}
-                >
+                <div className="flex items-center">
                   {row.blocks.map((block, blockIdx) => (
                     <MatchingBlock
                       key={blockIdx}
                       type={block.type}
                       name={block.name}
                       tagVariant={block.tagVariant}
-                      className="-mr-px"
+                      className={cn(
+                        "-mr-px",
+                        rowIdx === 0 && blockIdx === 0 && "rounded-tl-lg",
+                        rowIdx === 0 &&
+                          blockIdx === row.blocks.length - 1 &&
+                          "rounded-tr-lg",
+                        rowIdx === roleRows.length - 1 &&
+                          blockIdx === 0 &&
+                          "rounded-bl-lg",
+                        rowIdx === roleRows.length - 1 &&
+                          blockIdx === row.blocks.length - 1 &&
+                          "rounded-br-lg",
+                      )}
                     />
                   ))}
                 </div>
