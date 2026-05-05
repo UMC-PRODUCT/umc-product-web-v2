@@ -1,5 +1,7 @@
 import { api } from "@/shared/lib/axios"
 
+import type { ApiResponse } from "@/shared/lib/apiResponse"
+
 export interface MemberInfoResponse {
   id: number
   name: string
@@ -12,6 +14,7 @@ export interface MemberInfoResponse {
 }
 
 export async function getMyInfo(): Promise<MemberInfoResponse> {
-  const { data } = await api.get<MemberInfoResponse>("/v1/member/me")
-  return data
+  const { data } =
+    await api.get<ApiResponse<MemberInfoResponse>>("/v1/member/me")
+  return data.result
 }

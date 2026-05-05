@@ -7,15 +7,16 @@ import type {
   LoginIdAvailabilityResponse,
   RegisterCredentialsRequest,
 } from "@/features/auth/model/types"
+import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 export async function loginWithIdPw(
   payload: IdPwLoginRequest,
 ): Promise<IdPwLoginResponse> {
-  const { data } = await api.post<IdPwLoginResponse>(
+  const { data } = await api.post<ApiResponse<IdPwLoginResponse>>(
     "/v1/auth/login/id-pw",
     payload,
   )
-  return data
+  return data.result
 }
 
 export async function registerCredentials(
@@ -27,11 +28,11 @@ export async function registerCredentials(
 export async function checkLoginIdAvailability(
   loginId: string,
 ): Promise<LoginIdAvailabilityResponse> {
-  const { data } = await api.get<LoginIdAvailabilityResponse>(
+  const { data } = await api.get<ApiResponse<LoginIdAvailabilityResponse>>(
     "/v1/auth/login-id/availability",
     { params: { loginId } },
   )
-  return data
+  return data.result
 }
 
 export async function changePassword(

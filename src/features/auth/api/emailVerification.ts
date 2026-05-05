@@ -7,15 +7,16 @@ import type {
   SendEmailVerificationRequest,
   SendEmailVerificationResponse,
 } from "@/features/auth/model/types"
+import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 export async function sendEmailVerification(
   payload: SendEmailVerificationRequest,
 ): Promise<SendEmailVerificationResponse> {
-  const { data } = await api.post<SendEmailVerificationResponse>(
+  const { data } = await api.post<ApiResponse<SendEmailVerificationResponse>>(
     "/v1/auth/email-verification",
     payload,
   )
-  return data
+  return data.result
 }
 
 export async function resendEmailVerification(
@@ -27,9 +28,8 @@ export async function resendEmailVerification(
 export async function completeEmailVerification(
   payload: CompleteEmailVerificationRequest,
 ): Promise<CompleteEmailVerificationResponse> {
-  const { data } = await api.post<CompleteEmailVerificationResponse>(
-    "/v1/auth/email-verification/code",
-    payload,
-  )
-  return data
+  const { data } = await api.post<
+    ApiResponse<CompleteEmailVerificationResponse>
+  >("/v1/auth/email-verification/code", payload)
+  return data.result
 }
