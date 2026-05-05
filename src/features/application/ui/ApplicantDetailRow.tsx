@@ -1,6 +1,6 @@
 import { cn } from "@/shared/lib/utils"
 import { ChallengerLinkButton } from "@/shared/ui/button/ChallengerLinkButton"
-import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 import { TimestampLabel } from "@/shared/ui/TimestampLabel"
 
@@ -47,7 +47,7 @@ export function ApplicantDetailRow({
 
         {/* 파트 */}
         <div className="flex h-[50px] w-[122px] items-center px-2.5">
-          <RoleTagChip role={role} />
+          <PartTagChip role={role} />
         </div>
 
         {/* 챌린저 */}

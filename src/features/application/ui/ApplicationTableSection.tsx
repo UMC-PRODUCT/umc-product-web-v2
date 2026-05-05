@@ -29,7 +29,6 @@ const SCHOOL_OPTIONS = [
 const PART_OPTIONS = [
   { value: "all", label: "전체" },
   { value: "plan", label: "Plan" },
-  { value: "design", label: "Design" },
   { value: "web", label: "Web" },
   { value: "ios", label: "iOS" },
   { value: "android", label: "Android" },
@@ -153,7 +152,7 @@ export function ApplicationTableSection({
   const filters: (FilterDropdownProps & { name: string })[] = [
     {
       name: "school",
-      label: "학교",
+      label: "PM 학교",
       options: SCHOOL_OPTIONS,
       selectedValue: schoolFilter === "all" ? undefined : schoolFilter,
       open: openFilter === "school",

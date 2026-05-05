@@ -1,5 +1,5 @@
 import { cn } from "@/shared/lib/utils"
-import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 
 import { ApplicantRow } from "./ApplicantRow"
 
@@ -34,7 +34,7 @@ export function ApplicantRoleSection({
       {/* 섹션 헤더 */}
       <div className="flex h-6.5 items-center justify-between pr-0.5 pl-2.5">
         <div className="flex items-center gap-2.25">
-          <RoleTagChip role={role} />
+          <PartTagChip role={role} />
           <span className="text-body-1-medium text-teal-gray-400 flex items-center gap-0.5">
             <span className="min-w-2.5 text-center">{applicants.length}</span>
             <span>/</span>

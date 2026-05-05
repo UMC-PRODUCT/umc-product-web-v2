@@ -129,7 +129,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div className="px-4">
-        <SectionHeader index={1} title="모집 인원 및 스택" />
+        <SectionHeader index={2} title="모집 인원 및 스택" />
         <div className="border-teal-gray-200 mx-8.5 flex w-full flex-col gap-11.5 border-b pt-6 pb-11">
           {ROLES.map(({ key, label, stacks }) => (
             <div key={key} className="flex items-center gap-6">
