@@ -45,54 +45,59 @@ function DefaultLoginPage() {
         </button>
 
         <div className="flex flex-col items-center gap-6.5">
-          <div className="flex flex-col items-center gap-11.5">
-            <div className="flex flex-col gap-3">
-              <Input
-                variant={"id"}
-                placeholder={"ID"}
-                value={id}
-                onChange={(e) => setId(e.target.value)}
-              />
-
-              <Input
-                variant={"password"}
-                placeholder={"Password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  variant="primary"
-                  checked={isKeepLoggedIn}
-                  onChange={() => setIsKeepLoggedIn((prev) => !prev)}
-                  aria-label="로그인 유지"
+          <div className="flex flex-col items-center gap-3.5">
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col gap-3">
+                <Input
+                  variant={"id"}
+                  placeholder={"ID"}
+                  value={id}
+                  onChange={(e) => setId(e.target.value)}
                 />
 
-                <span className="text-label-1-medium text-teal-gray-500">
-                  로그인 유지
-                </span>
+                <Input
+                  variant={"password"}
+                  placeholder={"Password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    variant="primary"
+                    checked={isKeepLoggedIn}
+                    onChange={() => setIsKeepLoggedIn((prev) => !prev)}
+                    aria-label="로그인 유지"
+                  />
+
+                  <span className="text-label-1-medium text-teal-gray-500">
+                    로그인 유지
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <p className="text-body-2-medium text-error-500 h-5.5">
+                  {/* TODO: 로그인 에러 메시지 출력 */}
+                </p>
+
+                <Button
+                  size={"m"}
+                  variant={"fill"}
+                  color={"primary"}
+                  disabled={isDisabled}
+                  isLoading={isLoading}
+                  onClick={handleLogin}
+                  className="w-90 rounded-[10px]"
+                >
+                  로그인
+                </Button>
               </div>
             </div>
-
-            <div className="flex flex-col items-center gap-3.5">
-              <Button
-                size={"m"}
-                variant={"fill"}
-                color={"primary"}
-                disabled={isDisabled}
-                isLoading={isLoading}
-                onClick={handleLogin}
-                className="w-90 rounded-[10px]"
-              >
-                로그인
-              </Button>
-
-              {/* TODO: 아이디/비밀번호 찾기 연동 */}
-              <button className="text-body-1-regular text-teal-gray-500 flex h-7 items-center justify-center px-1 py-0.5">
-                아이디/비밀번호 찾기
-              </button>
-            </div>
+            {/* TODO: 아이디/비밀번호 찾기 연동 */}
+            <button className="text-body-1-regular text-teal-gray-500 flex h-7 items-center justify-center px-1 py-0.5">
+              아이디/비밀번호 찾기
+            </button>
           </div>
           <div className="flex flex-col items-center gap-4">
             <Divider />
