@@ -38,11 +38,11 @@ function SocialLoginPage() {
           <Divider />
 
           <div className="flex flex-col items-center gap-3.5">
-            {/* TODO: 로그인 API 연동 */}
             <Button
               variant={"weak"}
               color={"primary"}
               className="h-12.5 w-90 rounded-[10px] px-4 py-1 text-[16px]"
+              onClick={() => navigate({ to: "/login/default" })}
             >
               UMC 계정 로그인
             </Button>
