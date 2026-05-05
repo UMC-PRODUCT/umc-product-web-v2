@@ -1,9 +1,15 @@
+import { useState } from "react"
+
+import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
 import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import { Modal } from "@/shared/ui/Modal"
 
 import { MatchingBlock } from "./MatchingBlock"
+import { MatchingDetailModal } from "./MatchingDetailModal"
 
+import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 import type { NumberTagVariant } from "@/shared/ui/NumberTag"
 
 type BlockType = "round1" | "filled" | "none" | "blocked"
@@ -12,6 +18,7 @@ export interface MatchingBlockData {
   type: BlockType
   name?: string
   tagVariant?: NumberTagVariant
+  applicantId?: string
 }
 
 export interface MatchingRoleRow {
@@ -35,7 +42,7 @@ interface MatchingResultRowProps {
   status: "recruiting" | "completed"
   currentCount?: number
   totalCount?: number
-  onProjectClick?: () => void
+  projectData?: MatchingProject
   className?: string
 }
 
@@ -48,9 +55,14 @@ export function MatchingResultRow({
   status,
   currentCount,
   totalCount,
-  onProjectClick,
+  projectData,
   className,
 }: MatchingResultRowProps) {
+  const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
+    null,
+  )
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
+
   return (
     <div
       className={cn(
@@ -62,7 +74,7 @@ export function MatchingResultRow({
       <div className="w-42.5 shrink-0">
         <ProjectLinkButton
           name={projectName}
-          onClick={onProjectClick}
+          onClick={() => setIsProjectModalOpen(true)}
           className="w-full"
         />
       </div>
@@ -101,6 +113,11 @@ export function MatchingResultRow({
                       type={block.type}
                       name={block.name}
                       tagVariant={block.tagVariant}
+                      onNameClick={
+                        block.applicantId
+                          ? () => setSelectedApplicantId(block.applicantId!)
+                          : undefined
+                      }
                       className={cn(
                         "-mr-px",
                         rowIdx === 0 && blockIdx === 0 && "rounded-tl-lg",
@@ -141,6 +158,32 @@ export function MatchingResultRow({
           </div>
         ))}
       </div>
+
+      <Modal.Root
+        open={isProjectModalOpen}
+        onOpenChange={(open) => {
+          if (!open) setIsProjectModalOpen(false)
+        }}
+      >
+        <Modal.Portal>
+          <Modal.Overlay tone="deep" />
+          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
+            <ProjectDetailCard data={projectData} />
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
+
+      <MatchingDetailModal
+        applicantId={selectedApplicantId}
+        chapterName="Chromium"
+        projectName={projectName}
+        challengerName={challengerName}
+        challengerUniversity={challengerUniversity}
+        open={selectedApplicantId !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedApplicantId(null)
+        }}
+      />
     </div>
   )
 }
