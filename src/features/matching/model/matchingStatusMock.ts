@@ -26,13 +26,16 @@ export interface MatchingPartData {
   projects: MatchingProjectData[]
 }
 
+let blockIdCounter = 0
+
 function filledBlock(
   name: string,
   variant: "round1" | "round2" | "round3" | "random",
 ): MatchingBlockData {
+  const applicantId = `m-${++blockIdCounter}`
   return variant === "round1"
-    ? { type: "round1", name }
-    : { type: "filled", name, tagVariant: variant }
+    ? { type: "round1", name, applicantId }
+    : { type: "filled", name, tagVariant: variant, applicantId }
 }
 
 function emptyBlock(): MatchingBlockData {
