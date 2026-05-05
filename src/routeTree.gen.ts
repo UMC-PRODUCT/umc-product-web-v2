@@ -479,6 +479,7 @@ export interface RootRouteChildren {
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
   SignupRoute: typeof SignupRoute
+  LoginDefaultRoute: typeof LoginDefaultRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
@@ -842,6 +843,7 @@ const rootRouteChildren: RootRouteChildren = {
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
   SignupRoute: SignupRoute,
+  LoginDefaultRoute: LoginDefaultRoute,
   OauthCallbackRoute: OauthCallbackRoute,
   LoginDefaultRoute: LoginDefaultRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
