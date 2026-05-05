@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { useNavigate } from "@tanstack/react-router"
 
 import { Divider, LoginButton } from "@/features/login"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
@@ -9,17 +10,22 @@ export const Route = createFileRoute("/login/")({
 })
 
 function SocialLoginPage() {
+  const navigate = useNavigate({ from: Route.fullPath })
+
   return (
     // __root.tsx의 mb-12를 해제하기 위한 -mb-12
     <section className="-mb-12 flex h-screen min-h-125 w-full min-w-90 items-center justify-center">
       <div className="flex flex-col items-center gap-16 pb-6.5">
-        <div className="flex flex-col items-center gap-4.5">
+        <button
+          onClick={() => navigate({ to: "/" })}
+          className="flex flex-col items-center gap-4.5"
+        >
           <UmcLogo className="h-12.5" />
 
           <p className="text-label-2-medium text-teal-gray-900 h-5">
             UNIVERSITY MAKEUS CHALLENGE
           </p>
-        </div>
+        </button>
 
         <div className="flex flex-col items-center gap-4">
           <div className="flex flex-col items-center gap-3">

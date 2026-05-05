@@ -26,20 +26,23 @@ function DefaultLoginPage() {
     // 임시 로그인 시뮬레이션
     setTimeout(() => {
       setIsLoading(false)
-      navigate({ to: "/matching", search: { chapter: "Chromium", page: 1 } })
+      navigate({ to: "/" })
     }, 1000)
   }
   return (
     // __root.tsx의 mb-12를 해제하기 위한 -mb-12
     <section className="-mb-12 flex h-screen min-h-125 w-full min-w-90 items-center justify-center">
       <div className="flex flex-col items-center gap-10">
-        <div className="flex flex-col items-center gap-4.5">
+        <button
+          onClick={() => navigate({ to: "/" })}
+          className="flex flex-col items-center gap-4.5"
+        >
           <UmcLogo className="h-12.5" />
 
           <p className="text-label-2-medium text-teal-gray-900 h-5">
             UNIVERSITY MAKEUS CHALLENGE
           </p>
-        </div>
+        </button>
 
         <div className="flex flex-col items-center gap-6.5">
           <div className="flex flex-col items-center gap-11.5">
