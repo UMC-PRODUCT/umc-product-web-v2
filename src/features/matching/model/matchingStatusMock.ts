@@ -57,7 +57,7 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
         totalCount: 6,
         roleRows: [
           {
-            role: "Front-end",
+            role: "Frontend",
             blocks: [
               filledBlock("이수민", "round1"),
               filledBlock("박지훈", "round2"),
@@ -66,10 +66,19 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
             ],
           },
           {
-            role: "Back-end",
+            role: "Backend",
             blocks: [
               filledBlock("정민준", "round1"),
               filledBlock("한예진", "round2"),
+              blockedBlock(),
+              blockedBlock(),
+            ],
+          },
+          {
+            role: "Design",
+            blocks: [
+              filledBlock("김하늘", "round1"),
+              emptyBlock(),
               blockedBlock(),
               blockedBlock(),
             ],
@@ -85,7 +94,7 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
         totalCount: 5,
         roleRows: [
           {
-            role: "Front-end",
+            role: "Frontend",
             blocks: [
               filledBlock("김태윤", "round1"),
               filledBlock("오서현", "round1"),
@@ -94,10 +103,19 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
             ],
           },
           {
-            role: "Back-end",
+            role: "Backend",
             blocks: [
               filledBlock("윤채원", "round1"),
               filledBlock("송민재", "round3"),
+              blockedBlock(),
+              blockedBlock(),
+            ],
+          },
+          {
+            role: "Design",
+            blocks: [
+              filledBlock("조예린", "round2"),
+              blockedBlock(),
               blockedBlock(),
               blockedBlock(),
             ],
@@ -119,11 +137,29 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
         totalCount: 3,
         roleRows: [
           {
-            role: "PM",
+            role: "Frontend",
             blocks: [
               filledBlock("강지우", "round1"),
               filledBlock("임수빈", "round2"),
               emptyBlock(),
+              blockedBlock(),
+            ],
+          },
+          {
+            role: "Backend",
+            blocks: [
+              filledBlock("서도윤", "round1"),
+              blockedBlock(),
+              blockedBlock(),
+              blockedBlock(),
+            ],
+          },
+          {
+            role: "Design",
+            blocks: [
+              emptyBlock(),
+              blockedBlock(),
+              blockedBlock(),
               blockedBlock(),
             ],
           },
@@ -143,12 +179,30 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
         totalCount: 4,
         roleRows: [
           {
-            role: "UI/UX",
+            role: "Frontend",
             blocks: [
               filledBlock("나현서", "round1"),
               filledBlock("배준호", "round1"),
               filledBlock("안소희", "round2"),
               filledBlock("류시온", "random"),
+            ],
+          },
+          {
+            role: "Backend",
+            blocks: [
+              filledBlock("권민서", "round1"),
+              filledBlock("장현우", "round2"),
+              blockedBlock(),
+              blockedBlock(),
+            ],
+          },
+          {
+            role: "Design",
+            blocks: [
+              filledBlock("이소율", "round1"),
+              blockedBlock(),
+              blockedBlock(),
+              blockedBlock(),
             ],
           },
         ],
