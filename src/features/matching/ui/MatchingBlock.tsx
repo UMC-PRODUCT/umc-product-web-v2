@@ -9,6 +9,7 @@ interface MatchingBlockProps {
   type?: BlockType
   name?: string
   tagVariant?: NumberTagVariant
+  onNameClick?: () => void
   className?: string
 }
 
@@ -16,6 +17,7 @@ export function MatchingBlock({
   type = "filled",
   name,
   tagVariant = "round2",
+  onNameClick,
   className,
 }: MatchingBlockProps) {
   if (type === "blocked") {
@@ -64,9 +66,13 @@ export function MatchingBlock({
         )}
       >
         <NumberTag variant="round1" />
-        <span className="text-body-3-medium text-teal-gray-800 whitespace-nowrap">
+        <button
+          type="button"
+          onClick={onNameClick}
+          className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
+        >
           {name}
-        </span>
+        </button>
       </div>
     )
   }
@@ -80,9 +86,13 @@ export function MatchingBlock({
       )}
     >
       <NumberTag variant={tagVariant} />
-      <span className="text-body-3-medium text-teal-gray-800 whitespace-nowrap">
+      <button
+        type="button"
+        onClick={onNameClick}
+        className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
+      >
         {name}
-      </span>
+      </button>
     </div>
   )
 }
