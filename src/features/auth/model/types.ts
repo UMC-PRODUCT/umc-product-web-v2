@@ -19,8 +19,11 @@ export interface KakaoLoginRequest {
   accessToken: string
 }
 
+export type ClientType = "ANDROID" | "IOS" | "WEB"
+
 export interface AppleLoginRequest {
   authorizationCode: string
+  clientType: ClientType
 }
 
 export interface SendEmailVerificationRequest {

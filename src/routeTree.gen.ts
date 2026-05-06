@@ -15,6 +15,7 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
@@ -39,6 +40,8 @@ import { Route as LoginDefaultRouteImport } from './routes/login/default'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 import { Route as MatchingNoticePublishNoticeIdRouteImport } from './routes/matching/notice-publish.$noticeId'
+import { Route as AdminChallengerRecordsRouteImport } from './routes/admin/challenger/records'
+import { Route as AdminChallengerPointsRouteImport } from './routes/admin/challenger/points'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
 import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matching/projects/announce/index'
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
@@ -73,6 +76,11 @@ const LoginIndexRoute = LoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const TestTooltipRoute = TestTooltipRouteImport.update({
   id: '/test/tooltip',
@@ -196,6 +204,16 @@ const MatchingNoticePublishNoticeIdRoute =
     path: '/$noticeId',
     getParentRoute: () => MatchingNoticePublishRoute,
   } as any)
+const AdminChallengerRecordsRoute = AdminChallengerRecordsRouteImport.update({
+  id: '/challenger/records',
+  path: '/challenger/records',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminChallengerPointsRoute = AdminChallengerPointsRouteImport.update({
+  id: '/challenger/points',
+  path: '/challenger/points',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const MatchingProjectsAnnounceRouteRoute =
   MatchingProjectsAnnounceRouteRouteImport.update({
     id: '/projects/announce',
@@ -223,7 +241,7 @@ const MatchingProjectsAnnounceNoticePublishNoticeIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/login/default': typeof LoginDefaultRoute
@@ -247,9 +265,12 @@ export interface FileRoutesByFullPath {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
+  '/admin/challenger/points': typeof AdminChallengerPointsRoute
+  '/admin/challenger/records': typeof AdminChallengerRecordsRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
@@ -259,7 +280,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRoute
   '/auth-test': typeof AuthTestRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
@@ -282,8 +302,11 @@ export interface FileRoutesByTo {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/admin': typeof AdminIndexRoute
   '/login': typeof LoginIndexRoute
   '/matching': typeof MatchingIndexRoute
+  '/admin/challenger/points': typeof AdminChallengerPointsRoute
+  '/admin/challenger/records': typeof AdminChallengerRecordsRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
@@ -294,7 +317,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/login/default': typeof LoginDefaultRoute
@@ -318,9 +341,12 @@ export interface FileRoutesById {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
+  '/admin/challenger/points': typeof AdminChallengerPointsRoute
+  '/admin/challenger/records': typeof AdminChallengerRecordsRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
@@ -356,9 +382,12 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/admin/'
     | '/login/'
     | '/matching/'
     | '/matching/projects/announce'
+    | '/admin/challenger/points'
+    | '/admin/challenger/records'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
     | '/matching/projects/'
@@ -368,7 +397,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/auth-test'
     | '/login/default'
     | '/matching/applications'
@@ -391,8 +419,11 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/admin'
     | '/login'
     | '/matching'
+    | '/admin/challenger/points'
+    | '/admin/challenger/records'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
     | '/matching/projects'
@@ -426,9 +457,12 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/admin/'
     | '/login/'
     | '/matching/'
     | '/matching/projects/announce'
+    | '/admin/challenger/points'
+    | '/admin/challenger/records'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
     | '/matching/projects/'
@@ -439,7 +473,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRouteRoute: typeof AdminRouteRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
@@ -506,6 +540,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/login/'
       preLoaderRoute: typeof LoginIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/test/tooltip': {
       id: '/test/tooltip'
@@ -675,6 +716,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingNoticePublishNoticeIdRouteImport
       parentRoute: typeof MatchingNoticePublishRoute
     }
+    '/admin/challenger/records': {
+      id: '/admin/challenger/records'
+      path: '/challenger/records'
+      fullPath: '/admin/challenger/records'
+      preLoaderRoute: typeof AdminChallengerRecordsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/challenger/points': {
+      id: '/admin/challenger/points'
+      path: '/challenger/points'
+      fullPath: '/admin/challenger/points'
+      preLoaderRoute: typeof AdminChallengerPointsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/matching/projects/announce': {
       id: '/matching/projects/announce'
       path: '/projects/announce'
@@ -705,6 +760,22 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminChallengerPointsRoute: typeof AdminChallengerPointsRoute
+  AdminChallengerRecordsRoute: typeof AdminChallengerRecordsRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+  AdminChallengerPointsRoute: AdminChallengerPointsRoute,
+  AdminChallengerRecordsRoute: AdminChallengerRecordsRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
 
 interface MatchingNoticePublishRouteChildren {
   MatchingNoticePublishNoticeIdRoute: typeof MatchingNoticePublishNoticeIdRoute
@@ -778,7 +849,7 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRouteRoute: AdminRouteRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
   LoginDefaultRoute: LoginDefaultRoute,

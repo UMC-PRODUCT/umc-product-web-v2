@@ -29,11 +29,12 @@ export async function loginWithKakao(
 }
 
 export async function loginWithApple(
-  payload: AppleLoginRequest,
+  payload: Omit<AppleLoginRequest, "clientType">,
 ): Promise<OAuthLoginResponse> {
+  const body: AppleLoginRequest = { ...payload, clientType: "WEB" }
   const { data } = await api.post<ApiResponse<OAuthLoginResponse>>(
     "/v1/auth/login/apple",
-    payload,
+    body,
   )
   return data.result
 }
