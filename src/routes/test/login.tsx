@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { Chrome, MessageCircle } from "lucide-react"
 import { useState } from "react"
 
@@ -9,6 +9,12 @@ import {
   loginWithIdPw,
   registerCredentials,
 } from "@/features/auth/api/credentials"
+import { loginWithApple } from "@/features/auth/api/socialLogin"
+import {
+  isApplePopupCancelled,
+  signInWithApple,
+} from "@/features/auth/lib/appleSignIn"
+import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import { redirectToOAuth } from "@/features/auth/lib/oauthRedirect"
 import { useAuthStore } from "@/features/auth/store/authStore"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
@@ -23,6 +29,7 @@ function LoginPage() {
   const isAuthed = useAuthStore((s) => s.isAuthed)
   const setTokens = useAuthStore((s) => s.setTokens)
   const clearAuth = useAuthStore((s) => s.clear)
+  const navigate = useNavigate()
 
   const showToast = (message: string, color: "primary" | "red" = "primary") => {
     addToast({
@@ -32,6 +39,22 @@ function LoginPage() {
       type: "default",
       duration: 3000,
     })
+  }
+
+  const handleAppleSignIn = async () => {
+    try {
+      const { authorizationCode } = await signInWithApple()
+      const res = await loginWithApple({ authorizationCode })
+      const result = handleLoginResponse(res)
+      if (result === "LOGIN_SUCCESS") {
+        void navigate({ to: "/" })
+      } else {
+        void navigate({ to: "/signup" })
+      }
+    } catch (error) {
+      if (isApplePopupCancelled(error)) return
+      showToast("Apple 로그인에 실패했습니다. 다시 시도해주세요.", "red")
+    }
   }
 
   return (
@@ -76,7 +99,7 @@ function LoginPage() {
           color="neutral"
           size="xl"
           className="w-full"
-          onClick={() => redirectToOAuth("APPLE")}
+          onClick={() => void handleAppleSignIn()}
         >
           <span className="flex items-center gap-2">
             <AppleIcon size={20} />
