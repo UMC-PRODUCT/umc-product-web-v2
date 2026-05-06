@@ -75,7 +75,7 @@ function OAuthCallbackPage() {
     if (result === "LOGIN_SUCCESS") {
       void navigate({ to: "/" })
     } else {
-      void navigate({ to: "/signup" })
+      void navigate({ to: "/" })
     }
   }, [navigate, addToast])
 

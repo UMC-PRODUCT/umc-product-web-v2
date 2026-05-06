@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
@@ -45,11 +44,6 @@ import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matc
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthTestRoute = AuthTestRouteImport.update({
   id: '/auth-test',
   path: '/auth-test',
@@ -232,7 +226,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
-  '/signup': typeof SignupRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -268,7 +261,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRoute
   '/auth-test': typeof AuthTestRoute
-  '/signup': typeof SignupRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -305,7 +297,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRoute
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
-  '/signup': typeof SignupRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -344,7 +335,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/matching'
     | '/auth-test'
-    | '/signup'
     | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -380,7 +370,6 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth-test'
-    | '/signup'
     | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -416,7 +405,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/matching'
     | '/auth-test'
-    | '/signup'
     | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -454,7 +442,6 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRoute
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
-  SignupRoute: typeof SignupRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
@@ -478,13 +465,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth-test': {
       id: '/auth-test'
       path: '/auth-test'
@@ -801,7 +781,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRoute,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
-  SignupRoute: SignupRoute,
   LoginDefaultRoute: LoginDefaultRoute,
   OauthCallbackRoute: OauthCallbackRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,

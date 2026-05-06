@@ -38,7 +38,7 @@ function SocialLoginPage() {
       if (result === "LOGIN_SUCCESS") {
         void navigate({ to: "/" })
       } else {
-        void navigate({ to: "/signup" })
+        void navigate({ to: "/" })
       }
     } catch (error) {
       if (isApplePopupCancelled(error)) return
