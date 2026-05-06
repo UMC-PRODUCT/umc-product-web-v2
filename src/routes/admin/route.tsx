@@ -18,8 +18,8 @@ interface AdminNavItem {
 }
 
 const ADMIN_NAV: AdminNavItem[] = [
-  { label: "챌린저 상벌점", to: "/admin/challenger-points" },
-  { label: "챌린저 기록 코드", to: "/admin/challenger-records" },
+  { label: "챌린저 상벌점", to: "/admin/challenger/points" },
+  { label: "챌린저 기록 코드", to: "/admin/challenger/records" },
 ]
 
 function AdminLayout() {

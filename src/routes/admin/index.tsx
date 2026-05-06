@@ -5,5 +5,5 @@ export const Route = createFileRoute("/admin/")({
 })
 
 function AdminIndex() {
-  return <Navigate to="/admin/challenger-points" replace />
+  return <Navigate to="/admin/challenger/points" replace />
 }
