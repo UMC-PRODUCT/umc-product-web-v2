@@ -39,15 +39,15 @@ function OAuthCallbackPage() {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3000,
+        duration: 3,
       })
-      void navigate({ to: "/test/login" })
+      void navigate({ to: "/login" })
       return
     }
 
     const code = params.get("code") as OAuthLoginResponse["code"] | null
     if (!code) {
-      void navigate({ to: "/test/login" })
+      void navigate({ to: "/login" })
       return
     }
 
@@ -73,12 +73,9 @@ function OAuthCallbackPage() {
 
     const result = handleLoginResponse(res)
     if (result === "LOGIN_SUCCESS") {
-      void navigate({
-        to: "/matching",
-        search: { chapter: "Chromium", page: 1 },
-      })
+      void navigate({ to: "/" })
     } else {
-      void navigate({ to: "/signup" })
+      void navigate({ to: "/" })
     }
   }, [navigate, addToast])
 

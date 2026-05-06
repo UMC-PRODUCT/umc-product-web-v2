@@ -2,6 +2,15 @@ export interface KakaoSignInResult {
   accessToken: string
 }
 
+export function isKakaoPopupCancelled(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "error" in error &&
+    (error as { error: string }).error === "access_denied"
+  )
+}
+
 export function signInWithKakao(): Promise<KakaoSignInResult> {
   return new Promise((resolve, reject) => {
     const appKey = import.meta.env.VITE_KAKAO_APP_KEY as string | undefined
