@@ -1,6 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useNavigate } from "@tanstack/react-router"
 
+import { useToastStore } from "@/components/toast/useToastStore"
+import { loginWithApple } from "@/features/auth/api/socialLogin"
+import {
+  isApplePopupCancelled,
+  signInWithApple,
+} from "@/features/auth/lib/appleSignIn"
+import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import { Divider, LoginButton, UmcLogoButton } from "@/features/login"
 import { Button } from "@/shared/ui/Button"
 
@@ -10,6 +17,33 @@ export const Route = createFileRoute("/login/")({
 
 function SocialLoginPage() {
   const navigate = useNavigate({ from: Route.fullPath })
+  const addToast = useToastStore((s) => s.addToast)
+
+  const showToast = (message: string, color: "primary" | "red" = "primary") => {
+    addToast({
+      message,
+      color,
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
+  }
+
+  const handleAppleSignIn = async () => {
+    try {
+      const { authorizationCode } = await signInWithApple()
+      const res = await loginWithApple({ authorizationCode })
+      const result = handleLoginResponse(res)
+      if (result === "LOGIN_SUCCESS") {
+        void navigate({ to: "/" })
+      } else {
+        void navigate({ to: "/signup" })
+      }
+    } catch (error) {
+      if (isApplePopupCancelled(error)) return
+      showToast("Apple 로그인에 실패했습니다. 다시 시도해주세요.", "red")
+    }
+  }
 
   return (
     // __root.tsx의 mb-12를 해제하기 위한 -mb-12
@@ -19,8 +53,11 @@ function SocialLoginPage() {
 
         <div className="flex flex-col items-center gap-4">
           <div className="flex flex-col items-center gap-3">
-            {/* TODO: 소셜 로그인 API 연동 */}
-            <LoginButton social={"apple"} />
+            {/* TODO: Google/Kakao 소셜 로그인 API 연동 */}
+            <LoginButton
+              social={"apple"}
+              onClick={() => void handleAppleSignIn()}
+            />
             <LoginButton social={"google"} />
             <LoginButton social={"kakao"} />
           </div>

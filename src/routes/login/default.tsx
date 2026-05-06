@@ -1,6 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
+import { loginWithApple } from "@/features/auth/api/socialLogin"
+import {
+  isApplePopupCancelled,
+  signInWithApple,
+} from "@/features/auth/lib/appleSignIn"
+import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import {
   Divider,
   Input,
@@ -16,12 +23,39 @@ export const Route = createFileRoute("/login/default")({
 
 function DefaultLoginPage() {
   const navigate = useNavigate({ from: Route.fullPath })
+  const addToast = useToastStore((s) => s.addToast)
   const [id, setId] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isKeepLoggedIn, setIsKeepLoggedIn] = useState(false)
 
   const isDisabled = id.trim() === "" || password.trim() === ""
+
+  const showToast = (message: string, color: "primary" | "red" = "primary") => {
+    addToast({
+      message,
+      color,
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
+  }
+
+  const handleAppleSignIn = async () => {
+    try {
+      const { authorizationCode } = await signInWithApple()
+      const res = await loginWithApple({ authorizationCode })
+      const result = handleLoginResponse(res)
+      if (result === "LOGIN_SUCCESS") {
+        void navigate({ to: "/" })
+      } else {
+        void navigate({ to: "/signup" })
+      }
+    } catch (error) {
+      if (isApplePopupCancelled(error)) return
+      showToast("Apple 로그인에 실패했습니다. 다시 시도해주세요.", "red")
+    }
+  }
 
   const handleLogin = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -102,10 +136,13 @@ function DefaultLoginPage() {
             <Divider />
 
             <div className="flex items-center gap-8">
-              {/* TODO: 소셜 로그인 연동 */}
+              {/* TODO: Kakao/Google 소셜 로그인 연동 */}
               <LoginCircleButton social={"kakao"} />
 
-              <LoginCircleButton social={"apple"} />
+              <LoginCircleButton
+                social={"apple"}
+                onClick={() => void handleAppleSignIn()}
+              />
 
               <LoginCircleButton social={"google"} />
             </div>
