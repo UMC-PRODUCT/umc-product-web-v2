@@ -5,7 +5,7 @@ import ToggleEyeOpenedIcon from "@/shared/assets/icon/toggle/ToggleEyeOpenedIcon
 import { cn } from "@/shared/lib/utils"
 
 interface InputProps extends Omit<React.ComponentProps<"input">, "type"> {
-  variant: "id" | "password"
+  variant?: "id" | "password"
 }
 
 export function Input({
@@ -16,16 +16,12 @@ export function Input({
   ...props
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false)
-  const [internalValue, setInternalValue] = useState("")
 
   const isPassword = variant === "password"
-  const isControlled = value !== undefined
-  const displayedValue = isControlled ? String(value ?? "") : internalValue
-  const hasValue = Boolean(displayedValue.length)
+  const hasValue = !!value
   const paddingRightClass = isPassword && hasValue ? "pr-10" : "pr-2.5"
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isControlled) setInternalValue(e.target.value)
     onChange?.(e)
   }
   const inputType = isPassword ? (showPassword ? "text" : "password") : "text"
@@ -39,7 +35,7 @@ export function Input({
           paddingRightClass,
         )}
         placeholder={placeholder}
-        value={displayedValue}
+        value={value}
         onChange={handleChange}
         {...props}
       />

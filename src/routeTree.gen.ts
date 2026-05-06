@@ -481,7 +481,6 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
-  LoginDefaultRoute: typeof LoginDefaultRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
   TestChipRoute: typeof TestChipRoute
@@ -499,8 +498,8 @@ export interface RootRouteChildren {
   TestToggleRoute: typeof TestToggleRoute
   TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
-  TestSignupIdPwRoute: typeof TestSignupIdPwRoute
   LoginIndexRoute: typeof LoginIndexRoute
+  TestSignupIdPwRoute: typeof TestSignupIdPwRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -845,7 +844,6 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   LoginDefaultRoute: LoginDefaultRoute,
   OauthCallbackRoute: OauthCallbackRoute,
-  LoginDefaultRoute: LoginDefaultRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
   TestChipRoute: TestChipRoute,
@@ -863,8 +861,8 @@ const rootRouteChildren: RootRouteChildren = {
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
-  TestSignupIdPwRoute: TestSignupIdPwRoute,
   LoginIndexRoute: LoginIndexRoute,
+  TestSignupIdPwRoute: TestSignupIdPwRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
