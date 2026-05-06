@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import ToggleEyeClosedIcon from "@/shared/assets/icon/toggle/ToggleEyeClosedIcon"
 import ToggleEyeOpenedIcon from "@/shared/assets/icon/toggle/ToggleEyeOpenedIcon"
+import { cn } from "@/shared/lib/utils"
 
 interface InputProps extends Omit<React.ComponentProps<"input">, "type"> {
   variant: "id" | "password"
@@ -33,10 +34,10 @@ export function Input({
     <div className="relative">
       <input
         type={inputType}
-        className={
-          "border-teal-gray-300 shadow-inner-neutral-1 text-label-1-medium text-teal-gray-700 placeholder:text-teal-gray-400 w-90 rounded-[12px] border bg-white py-3 pl-4 outline-none focus:border-teal-400 focus:bg-teal-50 focus:text-teal-600 " +
-          paddingRightClass
-        }
+        className={cn(
+          "border-teal-gray-300 shadow-inner-neutral-1 text-label-1-medium text-teal-gray-700 placeholder:text-teal-gray-400 w-90 rounded-[12px] border bg-white py-3 pl-4 outline-none focus:border-teal-400 focus:bg-teal-50 focus:text-teal-600",
+          paddingRightClass,
+        )}
         placeholder={placeholder}
         value={displayedValue}
         onChange={handleChange}
