@@ -65,7 +65,7 @@ export function CreateRecordForm() {
     () =>
       (gisuQuery.data?.gisuList ?? []).map((item) => ({
         value: item.gisuId,
-        label: `${item.gisu}기${item.isActive ? " (활동중)" : ""}`,
+        label: `${item.gisu}기${item.isActive ? " (현재 기수)" : ""}`,
       })),
     [gisuQuery.data],
   )
