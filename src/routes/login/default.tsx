@@ -17,7 +17,7 @@ function DefaultLoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isKeepLoggedIn, setIsKeepLoggedIn] = useState(false)
 
-  const isDisabled = id.trim() === "" && password.trim() === ""
+  const isDisabled = id.trim() === "" || password.trim() === ""
 
   const handleLogin = () => {
     if (isDisabled || isLoading) return
