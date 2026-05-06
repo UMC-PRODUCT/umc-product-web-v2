@@ -19,7 +19,8 @@ function DefaultLoginPage() {
 
   const isDisabled = id.trim() === "" || password.trim() === ""
 
-  const handleLogin = () => {
+  const handleLogin = (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault()
     if (isDisabled || isLoading) return
     setIsLoading(true)
 
@@ -46,7 +47,10 @@ function DefaultLoginPage() {
 
         <div className="flex flex-col items-center gap-6.5">
           <div className="flex flex-col items-center gap-3.5">
-            <div className="flex flex-col items-center gap-4">
+            <form
+              onSubmit={handleLogin}
+              className="flex flex-col items-center gap-4"
+            >
               <div className="flex flex-col gap-3">
                 <Input
                   variant={"id"}
@@ -82,18 +86,18 @@ function DefaultLoginPage() {
                 </p>
 
                 <Button
+                  type="submit"
                   size={"m"}
                   variant={"fill"}
                   color={"primary"}
                   disabled={isDisabled}
                   isLoading={isLoading}
-                  onClick={handleLogin}
                   className="w-90 rounded-[10px]"
                 >
                   로그인
                 </Button>
               </div>
-            </div>
+            </form>
             {/* TODO: 아이디/비밀번호 찾기 연동 */}
             <button className="text-body-1-regular text-teal-gray-500 flex h-7 items-center justify-center px-1 py-0.5">
               아이디/비밀번호 찾기
