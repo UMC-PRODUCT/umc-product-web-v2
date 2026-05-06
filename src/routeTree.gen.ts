@@ -15,6 +15,7 @@ import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
+import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
@@ -36,6 +37,7 @@ import { Route as OauthCallbackRouteImport } from './routes/oauth/callback'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
+import { Route as LoginDefaultRouteImport } from './routes/login/default'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
 import { Route as TestSignupIdPwRouteImport } from './routes/test/signup/id-pw'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
@@ -74,6 +76,11 @@ const MatchingIndexRoute = MatchingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MatchingRouteRoute,
+} as any)
+const LoginIndexRoute = LoginIndexRouteImport.update({
+  id: '/login/',
+  path: '/login/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TestTooltipRoute = TestTooltipRouteImport.update({
   id: '/test/tooltip',
@@ -181,6 +188,11 @@ const MatchingApplicationsRoute = MatchingApplicationsRouteImport.update({
   path: '/applications',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const LoginDefaultRoute = LoginDefaultRouteImport.update({
+  id: '/login/default',
+  path: '/login/default',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchingProjectsIndexRoute = MatchingProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
@@ -233,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/signup': typeof SignupRoute
+  '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -254,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
@@ -269,6 +283,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteRoute
   '/auth-test': typeof AuthTestRoute
   '/signup': typeof SignupRoute
+  '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -290,6 +305,7 @@ export interface FileRoutesByTo {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/login': typeof LoginIndexRoute
   '/matching': typeof MatchingIndexRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
@@ -306,6 +322,7 @@ export interface FileRoutesById {
   '/matching': typeof MatchingRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/signup': typeof SignupRoute
+  '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -327,6 +344,7 @@ export interface FileRoutesById {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
@@ -345,6 +363,7 @@ export interface FileRouteTypes {
     | '/matching'
     | '/auth-test'
     | '/signup'
+    | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -366,6 +385,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/login/'
     | '/matching/'
     | '/matching/projects/announce'
     | '/matching/notice-publish/$noticeId'
@@ -381,6 +401,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth-test'
     | '/signup'
+    | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -402,6 +423,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/login'
     | '/matching'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/new'
@@ -417,6 +439,7 @@ export interface FileRouteTypes {
     | '/matching'
     | '/auth-test'
     | '/signup'
+    | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -438,6 +461,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/login/'
     | '/matching/'
     | '/matching/projects/announce'
     | '/matching/notice-publish/$noticeId'
@@ -455,6 +479,7 @@ export interface RootRouteChildren {
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
   SignupRoute: typeof SignupRoute
+  LoginDefaultRoute: typeof LoginDefaultRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
@@ -473,6 +498,7 @@ export interface RootRouteChildren {
   TestToggleRoute: typeof TestToggleRoute
   TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
+  LoginIndexRoute: typeof LoginIndexRoute
   TestSignupIdPwRoute: typeof TestSignupIdPwRoute
 }
 
@@ -519,6 +545,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/matching/'
       preLoaderRoute: typeof MatchingIndexRouteImport
       parentRoute: typeof MatchingRouteRoute
+    }
+    '/login/': {
+      id: '/login/'
+      path: '/login'
+      fullPath: '/login/'
+      preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/test/tooltip': {
       id: '/test/tooltip'
@@ -667,6 +700,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingApplicationsRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/login/default': {
+      id: '/login/default'
+      path: '/login/default'
+      fullPath: '/login/default'
+      preLoaderRoute: typeof LoginDefaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/matching/projects/': {
       id: '/matching/projects/'
       path: '/projects'
@@ -802,6 +842,7 @@ const rootRouteChildren: RootRouteChildren = {
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
   SignupRoute: SignupRoute,
+  LoginDefaultRoute: LoginDefaultRoute,
   OauthCallbackRoute: OauthCallbackRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
@@ -820,6 +861,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
+  LoginIndexRoute: LoginIndexRoute,
   TestSignupIdPwRoute: TestSignupIdPwRoute,
 }
 export const routeTree = rootRouteImport
