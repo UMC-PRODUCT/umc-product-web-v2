@@ -8,6 +8,7 @@ import {
   signInWithApple,
 } from "@/features/auth/lib/appleSignIn"
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
+import { redirectToOAuth } from "@/features/auth/lib/oauthRedirect"
 import { Divider, LoginButton, UmcLogoButton } from "@/features/login"
 import { Button } from "@/shared/ui/Button"
 
@@ -25,7 +26,7 @@ function SocialLoginPage() {
       color,
       variant: "deep",
       type: "default",
-      duration: 3000,
+      duration: 3,
     })
   }
 
@@ -53,13 +54,18 @@ function SocialLoginPage() {
 
         <div className="flex flex-col items-center gap-4">
           <div className="flex flex-col items-center gap-3">
-            {/* TODO: Google/Kakao 소셜 로그인 API 연동 */}
             <LoginButton
               social={"apple"}
               onClick={() => void handleAppleSignIn()}
             />
-            <LoginButton social={"google"} />
-            <LoginButton social={"kakao"} />
+            <LoginButton
+              social={"google"}
+              onClick={() => redirectToOAuth("GOOGLE")}
+            />
+            <LoginButton
+              social={"kakao"}
+              onClick={() => redirectToOAuth("KAKAO")}
+            />
           </div>
 
           <Divider />

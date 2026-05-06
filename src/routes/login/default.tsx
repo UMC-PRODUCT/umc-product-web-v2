@@ -8,6 +8,7 @@ import {
   signInWithApple,
 } from "@/features/auth/lib/appleSignIn"
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
+import { redirectToOAuth } from "@/features/auth/lib/oauthRedirect"
 import {
   Divider,
   Input,
@@ -37,7 +38,7 @@ function DefaultLoginPage() {
       color,
       variant: "deep",
       type: "default",
-      duration: 3000,
+      duration: 3,
     })
   }
 
@@ -136,15 +137,20 @@ function DefaultLoginPage() {
             <Divider />
 
             <div className="flex items-center gap-8">
-              {/* TODO: Kakao/Google 소셜 로그인 연동 */}
-              <LoginCircleButton social={"kakao"} />
+              <LoginCircleButton
+                social={"kakao"}
+                onClick={() => redirectToOAuth("KAKAO")}
+              />
 
               <LoginCircleButton
                 social={"apple"}
                 onClick={() => void handleAppleSignIn()}
               />
 
-              <LoginCircleButton social={"google"} />
+              <LoginCircleButton
+                social={"google"}
+                onClick={() => redirectToOAuth("GOOGLE")}
+              />
             </div>
           </div>
         </div>
