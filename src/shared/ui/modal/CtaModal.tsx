@@ -11,12 +11,12 @@ interface CtaModalProps {
   open: boolean
   title: string
   content: ReactNode
-  cancelText: string
+  cancelText?: string
   confirmText: string
   variant?: CtaModalVariant
   overlayTone?: "light" | "deep"
   onOpenChange: (open: boolean) => void
-  onCancel: () => void
+  onCancel?: () => void
   onConfirm: () => void
 }
 
@@ -39,7 +39,7 @@ export function CtaModal({
       open={open}
       onOpenChange={(nextOpen) => {
         onOpenChange(nextOpen)
-        if (!nextOpen) onCancel()
+        if (!nextOpen) onCancel?.()
       }}
     >
       <Modal.Portal>
@@ -60,16 +60,18 @@ export function CtaModal({
           </div>
 
           <div className="flex w-full justify-end gap-3">
-            <Button
-              type="button"
-              variant="weak"
-              color="neutral"
-              size="s"
-              className="rounded-[10px]"
-              onClick={onCancel}
-            >
-              {cancelText}
-            </Button>
+            {cancelText && (
+              <Button
+                type="button"
+                variant="weak"
+                color="neutral"
+                size="s"
+                className="rounded-[10px]"
+                onClick={onCancel}
+              >
+                {cancelText}
+              </Button>
+            )}
             <Button
               type="button"
               variant="fill"
