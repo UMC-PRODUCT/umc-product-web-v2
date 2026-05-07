@@ -54,6 +54,7 @@ export function MatchingDetailModal({
   }
 
   const handleStatusChange = (status: StatusValue) => {
+    if (status === displayApplicant?.status) return
     setPendingStatus(status)
   }
 
