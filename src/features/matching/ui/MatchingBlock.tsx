@@ -10,6 +10,7 @@ interface MatchingBlockProps {
   name?: string
   tagVariant?: NumberTagVariant
   onNameClick?: () => void
+  onAssignClick?: () => void
   className?: string
 }
 
@@ -18,6 +19,7 @@ export function MatchingBlock({
   name,
   tagVariant = "round2",
   onNameClick,
+  onAssignClick,
   className,
 }: MatchingBlockProps) {
   if (type === "blocked") {
@@ -44,16 +46,18 @@ export function MatchingBlock({
 
   if (type === "none") {
     return (
-      <div
+      <button
+        type="button"
+        onClick={onAssignClick}
         className={cn(
-          "group border-teal-gray-100 flex h-8.5 w-31 items-center border bg-white",
+          "group border-teal-gray-100 flex h-8.5 w-31 cursor-pointer items-center border bg-white",
           className,
         )}
       >
         <span className="text-body-3-medium text-teal-gray-400 hidden w-full text-center group-hover:block">
           임의 배정하기
         </span>
-      </div>
+      </button>
     )
   }
 
