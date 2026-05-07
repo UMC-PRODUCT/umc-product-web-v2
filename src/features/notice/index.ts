@@ -1,6 +1,10 @@
 export { Border } from "./ui/Border"
-export { type Chapter, CHAPTERS, ChapterSelector } from "./ui/ChapterSelector"
 export { NoticeCard } from "./ui/NoticeCard"
 export { NoticeCardList, type NoticeItem } from "./ui/NoticeCardList"
 export { NoticePublishForm } from "./ui/NoticePublishForm"
 export { NoticeSubmitButton } from "./ui/NoticeSubmitButton"
+export {
+  type Chapter,
+  CHAPTERS,
+  ChapterSelector,
+} from "@/shared/ui/segment/ChapterSelector"
