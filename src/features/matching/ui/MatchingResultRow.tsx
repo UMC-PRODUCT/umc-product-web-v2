@@ -6,6 +6,7 @@ import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
 import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
 import { Modal } from "@/shared/ui/Modal"
 
+import { AssignmentModal } from "./AssignmentModal"
 import { MatchingBlock } from "./MatchingBlock"
 import { MatchingDetailModal } from "./MatchingDetailModal"
 
@@ -62,6 +63,12 @@ export function MatchingResultRow({
     null,
   )
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
+  const [assignTarget, setAssignTarget] = useState<{
+    rowIdx: number
+    blockIdx: number
+    role: string
+  } | null>(null)
+  const [localRoleRows, setLocalRoleRows] = useState(roleRows)
 
   return (
     <div
@@ -98,7 +105,7 @@ export function MatchingResultRow({
 
       {/* 역할별 블록 테이블 */}
       <div className="flex flex-1 flex-col gap-px">
-        {roleRows.map((row, rowIdx) => (
+        {localRoleRows.map((row, rowIdx) => (
           <div key={row.role} className="flex items-center gap-3.5">
             {/* 역할 라벨 + 상태 (첫 행만) */}
             <div className="flex w-full items-center justify-between">
@@ -118,16 +125,26 @@ export function MatchingResultRow({
                           ? () => setSelectedApplicantId(block.applicantId!)
                           : undefined
                       }
+                      onAssignClick={
+                        block.type === "none"
+                          ? () =>
+                              setAssignTarget({
+                                rowIdx,
+                                blockIdx,
+                                role: row.role,
+                              })
+                          : undefined
+                      }
                       className={cn(
                         "-mr-px",
                         rowIdx === 0 && blockIdx === 0 && "rounded-tl-lg",
                         rowIdx === 0 &&
-                          blockIdx === row.blocks.length - 1 &&
+                          blockIdx === localRoleRows.length - 1 &&
                           "rounded-tr-lg",
-                        rowIdx === roleRows.length - 1 &&
+                        rowIdx === localRoleRows.length - 1 &&
                           blockIdx === 0 &&
                           "rounded-bl-lg",
-                        rowIdx === roleRows.length - 1 &&
+                        rowIdx === localRoleRows.length - 1 &&
                           blockIdx === row.blocks.length - 1 &&
                           "rounded-br-lg",
                       )}
@@ -182,6 +199,39 @@ export function MatchingResultRow({
         open={selectedApplicantId !== null}
         onOpenChange={(open) => {
           if (!open) setSelectedApplicantId(null)
+        }}
+      />
+
+      <AssignmentModal
+        open={assignTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setAssignTarget(null)
+        }}
+        projectName={projectName}
+        challengerName={challengerName}
+        challengerUniversity={challengerUniversity}
+        role={assignTarget?.role ?? ""}
+        onAssign={(challenger) => {
+          if (!assignTarget) return
+          setLocalRoleRows((prev) =>
+            prev.map((row, rIdx) =>
+              rIdx === assignTarget.rowIdx
+                ? {
+                    ...row,
+                    blocks: row.blocks.map((block, bIdx) =>
+                      bIdx === assignTarget.blockIdx
+                        ? {
+                            type: "filled" as const,
+                            name: challenger.nickname,
+                            tagVariant: "random" as const,
+                            applicantId: challenger.id,
+                          }
+                        : block,
+                    ),
+                  }
+                : row,
+            ),
+          )
         }}
       />
     </div>
