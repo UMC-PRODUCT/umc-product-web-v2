@@ -1,6 +1,7 @@
 import { Popover } from "radix-ui"
 import { useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -23,6 +24,7 @@ export function ProjectManagementMoreMenu({
 }: ProjectManagementMoreMenuProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const addToast = useToastStore((s) => s.addToast)
 
   const handleDeleteClick = () => {
     setPopoverOpen(false)
@@ -80,6 +82,13 @@ export function ProjectManagementMoreMenu({
         onConfirm={() => {
           onDelete?.()
           setDeleteOpen(false)
+          addToast({
+            message: "프로젝트가 삭제되었습니다.",
+            color: "primary",
+            variant: "deep",
+            type: "default",
+            duration: 3,
+          })
         }}
       />
     </>
