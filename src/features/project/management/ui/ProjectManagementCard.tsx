@@ -9,13 +9,19 @@ import { Modal } from "@/shared/ui/Modal"
 import { isRecruitDone } from "../../list/model/matchingProject"
 import { ProjectManagementMoreMenu } from "./ProjectManagementMoreMenu"
 
+import type { ProjectApplication } from "@/features/application/model/types"
+
 import type { MatchingProject } from "../../list/model/matchingProject"
 
 interface ProjectManagementCardProps {
   data: MatchingProject
+  projectApplication: ProjectApplication
 }
 
-export function ProjectManagementCard({ data }: ProjectManagementCardProps) {
+export function ProjectManagementCard({
+  data,
+  projectApplication,
+}: ProjectManagementCardProps) {
   const cover = data.coverImage
   const [open, setOpen] = useState(false)
 
@@ -54,7 +60,10 @@ export function ProjectManagementCard({ data }: ProjectManagementCardProps) {
                 </span>
               </div>
               <div onClick={(e) => e.stopPropagation()}>
-                <ProjectManagementMoreMenu projectName={data.title} />
+                <ProjectManagementMoreMenu
+                  projectName={data.title}
+                  projectApplication={projectApplication}
+                />
               </div>
             </div>
 

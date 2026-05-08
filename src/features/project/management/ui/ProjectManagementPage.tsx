@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 
+import { MOCK_PROJECTS } from "@/features/application/model/applicationMock"
 import { MOCK_MATCHING_PROJECTS } from "@/features/project/list/model/matchingProject.mock"
 import {
   type Chapter,
@@ -65,8 +66,14 @@ export function ProjectManagementPage() {
                 <div key={part} className="flex flex-col">
                   <ProjectManagementSubTitle title={part} className="pb-2" />
                   <div className="flex flex-col gap-4">
-                    {partProjects.map((project) => (
-                      <ProjectManagementCard key={project.id} data={project} />
+                    {partProjects.map((project, i) => (
+                      <ProjectManagementCard
+                        key={project.id}
+                        data={project}
+                        projectApplication={
+                          MOCK_PROJECTS[i % MOCK_PROJECTS.length]!
+                        }
+                      />
                     ))}
                   </div>
                 </div>
@@ -78,8 +85,12 @@ export function ProjectManagementPage() {
             )
           ) : projects.length > 0 ? (
             <div className="flex flex-col gap-3">
-              {projects.map((project) => (
-                <ProjectManagementCard key={project.id} data={project} />
+              {projects.map((project, i) => (
+                <ProjectManagementCard
+                  key={project.id}
+                  data={project}
+                  projectApplication={MOCK_PROJECTS[i % MOCK_PROJECTS.length]!}
+                />
               ))}
             </div>
           ) : (

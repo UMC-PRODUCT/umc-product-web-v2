@@ -2,34 +2,45 @@ import { Popover } from "radix-ui"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
-const MENU_ITEMS = [
-  { label: "지원현황 확인하기", onClick: () => {} },
-  { label: "기획 보기", onClick: () => {} },
-  { label: "프로젝트 수정하기", onClick: () => {} },
-  { label: "팀원 구성보기", onClick: () => {} },
-] as const
+import type { ProjectApplication } from "@/features/application/model/types"
 
 interface ProjectManagementMoreMenuProps {
   projectName: string
+  projectApplication: ProjectApplication
   onDelete?: () => void
 }
 
 export function ProjectManagementMoreMenu({
   projectName,
+  projectApplication,
   onDelete,
 }: ProjectManagementMoreMenuProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [applicationOpen, setApplicationOpen] = useState(false)
   const addToast = useToastStore((s) => s.addToast)
 
   const handleDeleteClick = () => {
     setPopoverOpen(false)
     setDeleteOpen(true)
   }
+
+  const handleApplicationClick = () => {
+    setPopoverOpen(false)
+    setApplicationOpen(true)
+  }
+
+  const MENU_ITEMS = [
+    { label: "지원현황 확인하기", onClick: handleApplicationClick },
+    { label: "기획 보기", onClick: () => {} },
+    { label: "프로젝트 수정하기", onClick: () => {} },
+    { label: "팀원 구성보기", onClick: () => {} },
+  ]
 
   return (
     <>
@@ -64,6 +75,13 @@ export function ProjectManagementMoreMenu({
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>
+
+      <ApplicationDetailModal
+        project={projectApplication}
+        chapterName="Chromium"
+        open={applicationOpen}
+        onOpenChange={setApplicationOpen}
+      />
 
       <CtaModal
         open={deleteOpen}

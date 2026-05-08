@@ -71,7 +71,7 @@ export function ApplicationDetailModal({
       onOpenChange={(next) => (next ? onOpenChange(true) : handleClose())}
     >
       <Modal.Portal>
-        <Modal.Overlay tone="light" />
+        <Modal.Overlay tone="deep" />
         <Modal.Content
           className="flex max-h-[calc(100vh-60px)] items-start gap-4"
           onPointerDownOutside={(e) => {
