@@ -33,9 +33,9 @@ export function MatchingBlock({
         <svg className="absolute inset-0 size-full" preserveAspectRatio="none">
           <line
             x1="0"
-            y1="100%"
+            y1="0"
             x2="100%"
-            y2="0"
+            y2="100%"
             stroke="#D3D8D8"
             strokeWidth="1"
           />
@@ -81,7 +81,6 @@ export function MatchingBlock({
     )
   }
 
-  // filled (default)
   return (
     <div
       className={cn(
