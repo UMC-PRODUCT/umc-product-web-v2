@@ -96,7 +96,7 @@ export function ProjectManagementCard({ data }: ProjectManagementCardProps) {
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            <ProjectDetailCard data={data} />
+            <ProjectDetailCard data={data} showEditCta />
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>

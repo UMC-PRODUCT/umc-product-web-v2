@@ -25,12 +25,14 @@ interface ProjectDetailCardProps {
   data?: MatchingProject
   logo?: ProjectDetailCardLogo
   viewerBranch?: string
+  showEditCta?: boolean
 }
 
 export function ProjectDetailCard({
   data: dataProp,
   logo = "on",
   viewerBranch: viewerBranchProp,
+  showEditCta = false,
 }: ProjectDetailCardProps) {
   const mode = useViewModeStore((s) => s.mode)
   const previewMode = useViewModeStore((s) => s.previewMode)
@@ -133,24 +135,30 @@ export function ProjectDetailCard({
             <Button variant="weak" color="primary" className="flex-1">
               기획 보기
             </Button>
-            {ctaMode === "recruit-questions" && (
-              <Button
-                className="flex-1"
-                onClick={() => setIsRecruitQuestionsModalOpen(true)}
-              >
-                모집 문항 보기
-              </Button>
-            )}
-            {ctaMode === "my-application" && (
-              <Button className="flex-1">내 지원서 확인하기</Button>
-            )}
-            {ctaMode === "apply" && (
-              <Button
-                className="flex-1"
-                onClick={() => setIsApplyModalOpen(true)}
-              >
-                지원하기
-              </Button>
+            {showEditCta ? (
+              <Button className="flex-1">프로젝트 수정하기</Button>
+            ) : (
+              <>
+                {ctaMode === "recruit-questions" && (
+                  <Button
+                    className="flex-1"
+                    onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                  >
+                    모집 문항 보기
+                  </Button>
+                )}
+                {ctaMode === "my-application" && (
+                  <Button className="flex-1">내 지원서 확인하기</Button>
+                )}
+                {ctaMode === "apply" && (
+                  <Button
+                    className="flex-1"
+                    onClick={() => setIsApplyModalOpen(true)}
+                  >
+                    지원하기
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>
