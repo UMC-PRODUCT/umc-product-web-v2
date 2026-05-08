@@ -7,14 +7,7 @@ export interface MatchingProjectData {
   projectName: string
   challengerName: string
   challengerUniversity: string
-  partRole:
-    | "plan"
-    | "design"
-    | "web"
-    | "ios"
-    | "android"
-    | "springboot"
-    | "nodejs"
+  backendPart: "springboot" | "nodejs"
   roleRows: MatchingRoleRow[]
   status: "recruiting" | "completed"
   currentCount?: number
@@ -128,36 +121,36 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
         projectName: "UMC Product",
         challengerName: "김도현",
         challengerUniversity: "인하대학교",
-        partRole: "web",
+        backendPart: "springboot",
         status: "recruiting",
-        currentCount: 4,
-        totalCount: 6,
+        currentCount: 8,
+        totalCount: 11,
         roleRows: [
           {
+            // TO=1, maxDesignCols=2 -> 1 filled + 1 blocked
+            role: "Design",
+            blocks: [filledBlock("김하늘", "round1"), blockedBlock()],
+          },
+          {
+            // TO=3, maxFeCols=5 -> 3 filled + 2 blocked
             role: "Frontend",
             blocks: [
               filledBlock("이수민", "round1"),
               filledBlock("박지훈", "round2"),
               filledBlock("최서연", "round3"),
-              emptyBlock(),
+              blockedBlock(),
+              blockedBlock(),
             ],
           },
           {
+            // TO=5, maxBeCols=5 -> 2 filled + 3 empty
             role: "Backend",
             blocks: [
               filledBlock("정민준", "round1"),
               filledBlock("한예진", "round2"),
-              blockedBlock(),
-              blockedBlock(),
-            ],
-          },
-          {
-            role: "Design",
-            blocks: [
-              filledBlock("김하늘", "round1"),
               emptyBlock(),
-              blockedBlock(),
-              blockedBlock(),
+              emptyBlock(),
+              emptyBlock(),
             ],
           },
         ],
@@ -166,33 +159,33 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
         projectName: "커뮤니티 앱",
         challengerName: "이하은",
         challengerUniversity: "서강대학교",
-        partRole: "web",
+        backendPart: "nodejs",
         status: "completed",
-        totalCount: 5,
+        totalCount: 8,
         roleRows: [
           {
+            // TO=2, maxDesignCols=2 -> 1 filled + 1 empty
+            role: "Design",
+            blocks: [filledBlock("조예린", "round2"), emptyBlock()],
+          },
+          {
+            // TO=3, maxFeCols=5 -> 3 filled + 2 blocked
             role: "Frontend",
             blocks: [
               filledBlock("김태윤", "round1"),
               filledBlock("오서현", "round1"),
               filledBlock("장우진", "round2"),
               blockedBlock(),
+              blockedBlock(),
             ],
           },
           {
+            // TO=3, maxBeCols=5 -> 2 filled + 1 empty + 2 blocked
             role: "Backend",
             blocks: [
               filledBlock("윤채원", "round1"),
               filledBlock("송민재", "round3"),
-              blockedBlock(),
-              blockedBlock(),
-            ],
-          },
-          {
-            role: "Design",
-            blocks: [
-              filledBlock("조예린", "round2"),
-              blockedBlock(),
+              emptyBlock(),
               blockedBlock(),
               blockedBlock(),
             ],
@@ -208,37 +201,29 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
         projectName: "헬스케어 플랫폼",
         challengerName: "박서준",
         challengerUniversity: "한양대학교",
-        partRole: "plan",
+        backendPart: "springboot",
         status: "recruiting",
-        currentCount: 2,
-        totalCount: 3,
+        currentCount: 3,
+        totalCount: 6,
         roleRows: [
           {
+            // TO=1 -> 1 empty
+            role: "Design",
+            blocks: [emptyBlock()],
+          },
+          {
+            // TO=3 -> 2 filled + 1 empty
             role: "Frontend",
             blocks: [
               filledBlock("강지우", "round1"),
               filledBlock("임수빈", "round2"),
               emptyBlock(),
-              blockedBlock(),
             ],
           },
           {
+            // TO=2 -> 1 filled + 1 empty
             role: "Backend",
-            blocks: [
-              filledBlock("서도윤", "round1"),
-              blockedBlock(),
-              blockedBlock(),
-              blockedBlock(),
-            ],
-          },
-          {
-            role: "Design",
-            blocks: [
-              emptyBlock(),
-              blockedBlock(),
-              blockedBlock(),
-              blockedBlock(),
-            ],
+            blocks: [filledBlock("서도윤", "round1"), emptyBlock()],
           },
         ],
       },
@@ -251,11 +236,17 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
         projectName: "쇼핑몰 리뉴얼",
         challengerName: "최유진",
         challengerUniversity: "홍익대학교",
-        partRole: "design",
+        backendPart: "springboot",
         status: "completed",
-        totalCount: 4,
+        totalCount: 8,
         roleRows: [
           {
+            // TO=1 -> 1 filled
+            role: "Design",
+            blocks: [filledBlock("이소율", "round1")],
+          },
+          {
+            // TO=4 -> 4 filled
             role: "Frontend",
             blocks: [
               filledBlock("나현서", "round1"),
@@ -265,21 +256,12 @@ export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
             ],
           },
           {
+            // TO=3 -> 2 filled + 1 empty
             role: "Backend",
             blocks: [
               filledBlock("권민서", "round1"),
               filledBlock("장현우", "round2"),
-              blockedBlock(),
-              blockedBlock(),
-            ],
-          },
-          {
-            role: "Design",
-            blocks: [
-              filledBlock("이소율", "round1"),
-              blockedBlock(),
-              blockedBlock(),
-              blockedBlock(),
+              emptyBlock(),
             ],
           },
         ],

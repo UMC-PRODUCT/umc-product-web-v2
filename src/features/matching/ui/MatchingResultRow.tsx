@@ -31,14 +31,7 @@ interface MatchingResultRowProps {
   projectName: string
   challengerName: string
   challengerUniversity: string
-  partRole:
-    | "plan"
-    | "design"
-    | "web"
-    | "ios"
-    | "android"
-    | "springboot"
-    | "nodejs"
+  backendPart: "springboot" | "nodejs"
   roleRows: MatchingRoleRow[]
   status: "recruiting" | "completed"
   currentCount?: number
@@ -51,7 +44,7 @@ export function MatchingResultRow({
   projectName,
   challengerName,
   challengerUniversity,
-  partRole,
+  backendPart,
   roleRows,
   status,
   currentCount,
@@ -99,79 +92,79 @@ export function MatchingResultRow({
           </div>
         </div>
         <div className="px-1.5">
-          <PartTagChip role={partRole} type="light" />
+          <PartTagChip role={backendPart} type="light" />
         </div>
       </div>
 
       {/* 역할별 블록 테이블 */}
       <div className="flex flex-1 flex-col gap-px">
         {localRoleRows.map((row, rowIdx) => (
-          <div key={row.role} className="flex items-center gap-3.5">
-            {/* 역할 라벨 + 상태 (첫 행만) */}
-            <div className="flex w-full items-center justify-between">
-              <div className="flex items-center gap-3.5">
-                <span className="text-body-2-medium w-14.5 tracking-[-0.14px] text-teal-900">
-                  {row.role}
-                </span>
-                <div className="flex items-center">
-                  {row.blocks.map((block, blockIdx) => (
-                    <MatchingBlock
-                      key={blockIdx}
-                      type={block.type}
-                      name={block.name}
-                      tagVariant={block.tagVariant}
-                      onNameClick={
-                        block.applicantId
-                          ? () => setSelectedApplicantId(block.applicantId!)
-                          : undefined
-                      }
-                      onAssignClick={
-                        block.type === "none"
-                          ? () =>
-                              setAssignTarget({
-                                rowIdx,
-                                blockIdx,
-                                role: row.role,
-                              })
-                          : undefined
-                      }
-                      className={cn(
-                        "-mr-px",
-                        rowIdx === 0 && blockIdx === 0 && "rounded-tl-lg",
-                        rowIdx === 0 &&
-                          blockIdx === localRoleRows.length - 1 &&
-                          "rounded-tr-lg",
-                        rowIdx === localRoleRows.length - 1 &&
-                          blockIdx === 0 &&
-                          "rounded-bl-lg",
-                        rowIdx === localRoleRows.length - 1 &&
-                          blockIdx === row.blocks.length - 1 &&
-                          "rounded-br-lg",
-                      )}
-                    />
-                  ))}
-                </div>
+          <div
+            key={row.role}
+            className="flex w-full items-center justify-between"
+          >
+            <div className="flex items-center gap-3.5">
+              <span className="text-body-2-medium w-14.5 tracking-[-0.14px] text-teal-900">
+                {row.role}
+              </span>
+              <div className="flex items-center overflow-clip">
+                {row.blocks.map((block, blockIdx) => (
+                  <MatchingBlock
+                    key={blockIdx}
+                    type={block.type}
+                    name={block.name}
+                    tagVariant={block.tagVariant}
+                    onNameClick={
+                      block.applicantId
+                        ? () => setSelectedApplicantId(block.applicantId!)
+                        : undefined
+                    }
+                    onAssignClick={
+                      block.type === "none"
+                        ? () =>
+                            setAssignTarget({
+                              rowIdx,
+                              blockIdx,
+                              role: row.role,
+                            })
+                        : undefined
+                    }
+                    className={cn(
+                      "-mr-px",
+                      rowIdx === 0 && blockIdx === 0 && "rounded-tl-[6px]",
+                      rowIdx === 0 &&
+                        blockIdx === row.blocks.length - 1 &&
+                        "rounded-tr-[6px]",
+                      rowIdx === localRoleRows.length - 1 &&
+                        blockIdx === 0 &&
+                        "rounded-bl-[6px]",
+                      rowIdx === localRoleRows.length - 1 &&
+                        blockIdx === row.blocks.length - 1 &&
+                        "rounded-br-[6px]",
+                    )}
+                  />
+                ))}
               </div>
-
-              {/* 상태 표시 (첫 행 우측) */}
-              {rowIdx === 0 && (
-                <div className="flex items-center gap-1.5">
-                  {status === "recruiting" && (
-                    <div className="flex h-6 items-center gap-1.5">
-                      <div className="bg-warning-500 size-3 rounded-full" />
-                      <span className="text-label-2-medium text-warning-500">
-                        모집 중
-                      </span>
-                    </div>
-                  )}
-                  <span className="text-subtitle-3-semibold tracking-[-0.16px] whitespace-nowrap text-teal-700">
-                    {status === "recruiting"
-                      ? `${currentCount}/${totalCount}명`
-                      : `총 ${totalCount}명`}
-                  </span>
-                </div>
-              )}
             </div>
+
+            {/* 상태 표시 (첫 행 우측) */}
+            {rowIdx === 0 && (
+              <div className="flex items-center gap-1.5">
+                {status === "recruiting" && (
+                  <div className="flex h-6 items-center gap-1.5">
+                    <div className="bg-warning-500 size-3 rounded-full" />
+                    <span className="text-label-2-medium text-warning-500">
+                      모집 중
+                    </span>
+                  </div>
+                )}
+                <span className="text-subtitle-3-semibold tracking-[-0.16px] whitespace-nowrap text-teal-700">
+                  {status === "recruiting"
+                    ? `${currentCount}/${totalCount}명`
+                    : `총 ${totalCount}명`}
+                </span>
+              </div>
+            )}
           </div>
         ))}
       </div>
