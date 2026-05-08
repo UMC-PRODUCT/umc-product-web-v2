@@ -33,6 +33,7 @@ import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
 import { Route as OauthCallbackRouteImport } from './routes/oauth/callback'
+import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
@@ -168,6 +169,11 @@ const OauthCallbackRoute = OauthCallbackRouteImport.update({
   path: '/oauth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MatchingStatusRoute = MatchingStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => MatchingRouteRoute,
+} as any)
 const MatchingRoundsRoute = MatchingRoundsRouteImport.update({
   id: '/rounds',
   path: '/rounds',
@@ -248,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
+  '/matching/status': typeof MatchingStatusRoute
   '/oauth/callback': typeof OauthCallbackRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
+  '/matching/status': typeof MatchingStatusRoute
   '/oauth/callback': typeof OauthCallbackRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
+  '/matching/status': typeof MatchingStatusRoute
   '/oauth/callback': typeof OauthCallbackRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -365,6 +374,7 @@ export interface FileRouteTypes {
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
+    | '/matching/status'
     | '/oauth/callback'
     | '/test/application-form'
     | '/test/button'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
+    | '/matching/status'
     | '/oauth/callback'
     | '/test/application-form'
     | '/test/button'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
+    | '/matching/status'
     | '/oauth/callback'
     | '/test/application-form'
     | '/test/button'
@@ -667,6 +679,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/matching/status': {
+      id: '/matching/status'
+      path: '/status'
+      fullPath: '/matching/status'
+      preLoaderRoute: typeof MatchingStatusRouteImport
+      parentRoute: typeof MatchingRouteRoute
+    }
     '/matching/rounds': {
       id: '/matching/rounds'
       path: '/rounds'
@@ -826,6 +845,7 @@ interface MatchingRouteRouteChildren {
   MatchingApplicationsRoute: typeof MatchingApplicationsRoute
   MatchingNoticePublishRoute: typeof MatchingNoticePublishRouteWithChildren
   MatchingRoundsRoute: typeof MatchingRoundsRoute
+  MatchingStatusRoute: typeof MatchingStatusRoute
   MatchingIndexRoute: typeof MatchingIndexRoute
   MatchingProjectsAnnounceRouteRoute: typeof MatchingProjectsAnnounceRouteRouteWithChildren
   MatchingProjectsNewRoute: typeof MatchingProjectsNewRoute
@@ -836,6 +856,7 @@ const MatchingRouteRouteChildren: MatchingRouteRouteChildren = {
   MatchingApplicationsRoute: MatchingApplicationsRoute,
   MatchingNoticePublishRoute: MatchingNoticePublishRouteWithChildren,
   MatchingRoundsRoute: MatchingRoundsRoute,
+  MatchingStatusRoute: MatchingStatusRoute,
   MatchingIndexRoute: MatchingIndexRoute,
   MatchingProjectsAnnounceRouteRoute:
     MatchingProjectsAnnounceRouteRouteWithChildren,

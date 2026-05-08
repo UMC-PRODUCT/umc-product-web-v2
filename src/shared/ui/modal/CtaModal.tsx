@@ -1,3 +1,4 @@
+import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
@@ -5,17 +6,18 @@ import { Modal } from "@/shared/ui/Modal"
 
 import type { ReactNode } from "react"
 
-type CtaModalVariant = "warning" | "error"
+type CtaModalVariant = "success" | "warning" | "error"
 
 interface CtaModalProps {
   open: boolean
   title: string
   content: ReactNode
-  cancelText: string
+  cancelText?: string
   confirmText: string
   variant?: CtaModalVariant
+  overlayTone?: "light" | "deep"
   onOpenChange: (open: boolean) => void
-  onCancel: () => void
+  onCancel?: () => void
   onConfirm: () => void
 }
 
@@ -26,26 +28,34 @@ export function CtaModal({
   cancelText,
   confirmText,
   variant = "warning",
+  overlayTone = "light",
   onOpenChange,
   onCancel,
   onConfirm,
 }: CtaModalProps) {
-  const toneClassName = variant === "error" ? "text-error-500" : "text-teal-500"
+  const toneClassName =
+    variant === "error"
+      ? "text-error-500"
+      : variant === "success"
+        ? "text-teal-500"
+        : "text-teal-500"
+
+  const Icon = variant === "success" ? CheckIcon : WarningTriangleIcon
 
   return (
     <Modal.Root
       open={open}
       onOpenChange={(nextOpen) => {
         onOpenChange(nextOpen)
-        if (!nextOpen) onCancel()
+        if (!nextOpen) onCancel?.()
       }}
     >
       <Modal.Portal>
-        <Modal.Overlay tone="light" />
+        <Modal.Overlay tone={overlayTone} />
         <Modal.Content className="shadow-drop-neutral-1 flex w-115 max-w-[calc(100vw-32px)] flex-col gap-8 rounded-[9.2px] border border-neutral-200 bg-white px-6 py-6 focus:outline-none">
           <div className="flex flex-col items-start gap-4">
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              <WarningTriangleIcon className={cn("h-6 w-6", toneClassName)} />
+              <Icon className={cn("h-6 w-6", toneClassName)} />
               <Modal.Title
                 className={cn("text-subtitle-1-semibold", toneClassName)}
               >
@@ -58,16 +68,18 @@ export function CtaModal({
           </div>
 
           <div className="flex w-full justify-end gap-3">
-            <Button
-              type="button"
-              variant="weak"
-              color="neutral"
-              size="s"
-              className="rounded-[10px]"
-              onClick={onCancel}
-            >
-              {cancelText}
-            </Button>
+            {cancelText && (
+              <Button
+                type="button"
+                variant="weak"
+                color="neutral"
+                size="s"
+                className="rounded-[10px]"
+                onClick={onCancel}
+              >
+                {cancelText}
+              </Button>
+            )}
             <Button
               type="button"
               variant="fill"
