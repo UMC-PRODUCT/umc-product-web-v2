@@ -30,7 +30,7 @@ export function ProjectManagementMoreMenu({
           sideOffset={10}
           avoidCollisions={false}
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="shadow-drop-neutral-1 border-teal-gray-50 z-[1100] flex w-[9.5rem] flex-col items-start gap-1 rounded-lg border bg-white pt-2 pb-0"
+          className="shadow-drop-neutral-1 border-teal-gray-50 z-[1100] flex w-[9.5rem] flex-col items-start gap-1 rounded-lg border bg-white px-0.5 pt-2.5 pb-0.5"
         >
           <span className="text-label-3-semibold text-teal-gray-400 px-4">
             바로가기
