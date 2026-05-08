@@ -34,6 +34,8 @@ export function ProjectManagementPage() {
     return map
   }, [projects])
 
+  if (mode === "others") return null
+
   return (
     <section className="relative flex w-full flex-col items-start justify-start pt-8">
       <div className="border-teal-gray-150 relative z-30 flex h-full min-w-242 flex-col gap-6 rounded-xl border bg-white px-8.5 py-8">
