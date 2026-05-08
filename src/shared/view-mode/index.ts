@@ -27,8 +27,8 @@ export function indexFromMode(mode: ViewMode): number {
 
 /** 임시 상태: 권한에 따른 뷰 변화를 보고 싶으시면 아래에서 임시 설정 가능합니다. */
 export const useViewModeStore = create<ViewModeState>((set) => ({
-  mode: "pm",
-  previewMode: "pm",
+  mode: "admin",
+  previewMode: "admin",
   viewerBranch: "Selenium",
   setModeByIndex: (index) => set({ mode: modeFromIndex(index) }),
   setPreviewModeByIndex: (index) => set({ previewMode: modeFromIndex(index) }),
