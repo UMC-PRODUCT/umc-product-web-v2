@@ -7,11 +7,9 @@ import {
 } from "@/features/application/model/applicationMock"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
-import {
-  type Chapter,
-  ChapterSelector,
-} from "@/features/notice/ui/ChapterSelector"
+import { type Chapter, CHAPTERS } from "@/features/notice/ui/ChapterSelector"
 import { useViewRoleStore } from "@/shared/model/useViewRoleStore"
+import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 
 export const Route = createFileRoute("/matching/applications")({
   component: MatchingApplicationsPage,
@@ -36,9 +34,11 @@ function MatchingApplicationsPage() {
 
         {/* 지부 선택 + 콘텐츠 */}
         <div className="mt-6 flex flex-col gap-[99px]">
-          <ChapterSelector
-            selectedChapter={selectedChapter}
-            onChapterChange={setSelectedChapter}
+          <SegmentButton
+            items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+            value={selectedChapter}
+            onValueChange={(v) => setSelectedChapter(v as Chapter)}
+            itemClassName="flex-1"
           />
 
           {role === "admin" && (
