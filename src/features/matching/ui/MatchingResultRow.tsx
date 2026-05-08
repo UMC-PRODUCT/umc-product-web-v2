@@ -3,7 +3,7 @@ import { useState } from "react"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
-import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { Modal } from "@/shared/ui/Modal"
 
 import { AssignmentModal } from "./AssignmentModal"
@@ -99,7 +99,7 @@ export function MatchingResultRow({
           </div>
         </div>
         <div className="px-1.5">
-          <RoleTagChip role={partRole} type="light" />
+          <PartTagChip role={partRole} type="light" />
         </div>
       </div>
 
