@@ -64,7 +64,7 @@ export function AssignmentModal({
   }
 
   return (
-    <Modal.Root open={open} onOpenChange={(next) => !next && handleClose()}>
+    <Modal.Root open={open} onOpenChange={handleClose}>
       <Modal.Portal>
         <Modal.Overlay tone="deep" />
         <Modal.Content className="flex w-160 max-w-[calc(100vw-32px)] flex-col rounded-xl bg-white px-12.5 pt-14 pb-10 shadow-lg focus:outline-none">

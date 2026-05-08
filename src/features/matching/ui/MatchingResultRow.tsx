@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { cn } from "@/shared/lib/utils"
@@ -62,6 +62,10 @@ export function MatchingResultRow({
     role: string
   } | null>(null)
   const [localRoleRows, setLocalRoleRows] = useState(roleRows)
+
+  useEffect(() => {
+    setLocalRoleRows(roleRows)
+  }, [roleRows])
 
   return (
     <div

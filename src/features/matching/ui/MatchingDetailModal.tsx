@@ -75,7 +75,7 @@ export function MatchingDetailModal({
   const pendingLabel = pendingStatus ? STATUS_LABEL[pendingStatus] : ""
   const processedAt = displayApplicant.processedAt
   const dateStr = processedAt
-    ? `${processedAt.date.split(".")[1]}월 ${processedAt.date.split(".")[2]}일 ${processedAt.time}`
+    ? `${processedAt.date.split(".")[1] ?? ""}월 ${processedAt.date.split(".")[2] ?? ""}일 ${processedAt.time}`
     : ""
 
   return (
