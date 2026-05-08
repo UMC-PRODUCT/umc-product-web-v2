@@ -3,6 +3,7 @@ import { useState } from "react"
 
 import {
   type Branch,
+  MATCHING_TYPES,
   type MatchingType,
   MOCK_ROUND_SCHEDULES,
   type RoundSchedule,
@@ -10,10 +11,10 @@ import {
 import { BranchSelector } from "@/features/matching/ui/BranchSelector"
 import { Calendar } from "@/features/matching/ui/Calendar"
 import { CalendarScheduleList } from "@/features/matching/ui/CalendarScheduleList"
-import { MatchingTypeSelector } from "@/features/matching/ui/MatchingTypeSelector"
 import { RoundForm } from "@/features/matching/ui/RoundForm"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 
 export const Route = createFileRoute("/matching/rounds")({
   component: MatchingRoundsPage,
@@ -142,9 +143,12 @@ function MatchingRoundsPage() {
         {/* 메인 콘텐츠 */}
         <div className="flex flex-col gap-11.5">
           {/* 매칭 타입 선택 */}
-          <MatchingTypeSelector
-            selected={matchingType}
-            onChange={setMatchingType}
+          <SegmentButton
+            items={MATCHING_TYPES.map((t) => ({ value: t, label: t }))}
+            value={matchingType}
+            onValueChange={(v) => setMatchingType(v as MatchingType)}
+            className="w-[734px]"
+            itemClassName="flex-1"
           />
 
           {/* 01 매칭 기간 설정 */}
