@@ -54,7 +54,7 @@ export function ProjectManagementCard({ data }: ProjectManagementCardProps) {
                 </span>
               </div>
               <div onClick={(e) => e.stopPropagation()}>
-                <ProjectManagementMoreMenu />
+                <ProjectManagementMoreMenu projectName={data.title} />
               </div>
             </div>
 
