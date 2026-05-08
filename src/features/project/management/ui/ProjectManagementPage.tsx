@@ -1,16 +1,42 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
+import { MOCK_MATCHING_PROJECTS } from "@/features/project/list/model/matchingProject.mock"
 import {
   type Chapter,
   ChapterSelector,
 } from "@/shared/ui/segment/ChapterSelector"
+import { useViewModeStore } from "@/shared/view-mode"
+
+import { ProjectManagementCard } from "./ProjectManagementCard"
+import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
 export function ProjectManagementPage() {
+  const mode = useViewModeStore((s) => s.mode)
+  const viewerBranch = useViewModeStore((s) => s.viewerBranch)
+
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
+
+  const projects = useMemo(() => {
+    if (mode === "pm") {
+      return MOCK_MATCHING_PROJECTS.filter((p) => p.branch === viewerBranch)
+    }
+    return MOCK_MATCHING_PROJECTS.filter((p) => p.branch === selectedChapter)
+  }, [mode, viewerBranch, selectedChapter])
+
+  const partGroups = useMemo(() => {
+    const map = new Map<string, typeof projects>()
+    for (const project of projects) {
+      for (const row of project.recruitRows) {
+        if (!map.has(row.part)) map.set(row.part, [])
+        map.get(row.part)!.push(project)
+      }
+    }
+    return map
+  }, [projects])
 
   return (
     <section className="relative flex w-full flex-col items-start justify-start pt-8">
-      <div className="border-teal-gray-150 relative z-30 flex h-full min-w-242 flex-col gap-5 rounded-xl border bg-white px-8.5 py-8">
+      <div className="border-teal-gray-150 relative z-30 flex h-full min-w-242 flex-col gap-6 rounded-xl border bg-white px-8.5 py-8">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 관리
@@ -21,10 +47,45 @@ export function ProjectManagementPage() {
             단, 매칭 중에는 일부 수정이 제한됩니다.
           </span>
         </div>
-        <ChapterSelector
-          selectedChapter={selectedChapter}
-          onChapterChange={setSelectedChapter}
-        />
+
+        {mode === "admin" && (
+          <ChapterSelector
+            selectedChapter={selectedChapter}
+            onChapterChange={setSelectedChapter}
+            className="mt-2.5"
+          />
+        )}
+
+        <div className="flex flex-col gap-10">
+          {mode === "admin" ? (
+            partGroups.size > 0 ? (
+              Array.from(partGroups.entries()).map(([part, partProjects]) => (
+                <div key={part} className="flex flex-col">
+                  <ProjectManagementSubTitle title={part} className="pb-2" />
+                  <div className="flex flex-col gap-4">
+                    {partProjects.map((project) => (
+                      <ProjectManagementCard key={project.id} data={project} />
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-body-2-medium text-teal-gray-400 py-10 text-center">
+                해당 챕터에 등록된 프로젝트가 없습니다.
+              </p>
+            )
+          ) : projects.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {projects.map((project) => (
+                <ProjectManagementCard key={project.id} data={project} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-body-2-medium text-teal-gray-400 py-10 text-center">
+              등록된 프로젝트가 없습니다.
+            </p>
+          )}
+        </div>
       </div>
     </section>
   )
