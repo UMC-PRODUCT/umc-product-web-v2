@@ -106,7 +106,7 @@ export function ModalFormPanel({
                 variant="segmented"
                 value={applicant.status}
                 onValueChange={(v) => onStatusChange?.(v as StatusValue)}
-                className="w-45"
+                className="w-60"
               >
                 <OptionButton value="pending" className="h-7.5">
                   대기
