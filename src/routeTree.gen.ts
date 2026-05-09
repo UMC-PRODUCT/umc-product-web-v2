@@ -30,6 +30,7 @@ import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-typ
 import { Route as TestCounterLabelRouteImport } from './routes/test/counter-label'
 import { Route as TestCounterRouteImport } from './routes/test/counter'
 import { Route as TestChipRouteImport } from './routes/test/chip'
+import { Route as TestCheckboxRouteImport } from './routes/test/checkbox'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
 import { Route as OauthCallbackRouteImport } from './routes/oauth/callback'
@@ -155,6 +156,11 @@ const TestChipRoute = TestChipRouteImport.update({
   path: '/test/chip',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestCheckboxRoute = TestCheckboxRouteImport.update({
+  id: '/test/checkbox',
+  path: '/test/checkbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestButtonRoute = TestButtonRouteImport.update({
   id: '/test/button',
   path: '/test/button',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/oauth/callback': typeof OauthCallbackRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
+  '/test/checkbox': typeof TestCheckboxRoute
   '/test/chip': typeof TestChipRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/oauth/callback': typeof OauthCallbackRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
+  '/test/checkbox': typeof TestCheckboxRoute
   '/test/chip': typeof TestChipRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/oauth/callback': typeof OauthCallbackRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
+  '/test/checkbox': typeof TestCheckboxRoute
   '/test/chip': typeof TestChipRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
@@ -388,6 +397,7 @@ export interface FileRouteTypes {
     | '/oauth/callback'
     | '/test/application-form'
     | '/test/button'
+    | '/test/checkbox'
     | '/test/chip'
     | '/test/counter'
     | '/test/counter-label'
@@ -427,6 +437,7 @@ export interface FileRouteTypes {
     | '/oauth/callback'
     | '/test/application-form'
     | '/test/button'
+    | '/test/checkbox'
     | '/test/chip'
     | '/test/counter'
     | '/test/counter-label'
@@ -467,6 +478,7 @@ export interface FileRouteTypes {
     | '/oauth/callback'
     | '/test/application-form'
     | '/test/button'
+    | '/test/checkbox'
     | '/test/chip'
     | '/test/counter'
     | '/test/counter-label'
@@ -505,6 +517,7 @@ export interface RootRouteChildren {
   OauthCallbackRoute: typeof OauthCallbackRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
+  TestCheckboxRoute: typeof TestCheckboxRoute
   TestChipRoute: typeof TestChipRoute
   TestCounterRoute: typeof TestCounterRoute
   TestCounterLabelRoute: typeof TestCounterLabelRoute
@@ -669,6 +682,13 @@ declare module '@tanstack/react-router' {
       path: '/test/chip'
       fullPath: '/test/chip'
       preLoaderRoute: typeof TestChipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/checkbox': {
+      id: '/test/checkbox'
+      path: '/test/checkbox'
+      fullPath: '/test/checkbox'
+      preLoaderRoute: typeof TestCheckboxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/button': {
@@ -899,6 +919,7 @@ const rootRouteChildren: RootRouteChildren = {
   OauthCallbackRoute: OauthCallbackRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
+  TestCheckboxRoute: TestCheckboxRoute,
   TestChipRoute: TestChipRoute,
   TestCounterRoute: TestCounterRoute,
   TestCounterLabelRoute: TestCounterLabelRoute,
