@@ -7,8 +7,8 @@ import {
 } from "@/features/application/model/applicationMock"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
-import { type Chapter, CHAPTERS } from "@/features/notice/ui/ChapterSelector"
 import { useViewRoleStore } from "@/shared/model/useViewRoleStore"
+import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 
 export const Route = createFileRoute("/matching/applications")({

@@ -31,16 +31,19 @@ const chapterSelectorVariants = cva(
 interface ChapterSelectorProps {
   selectedChapter: Chapter
   onChapterChange: (chapter: Chapter) => void
+  className?: string
 }
 
 export function ChapterSelector({
   selectedChapter,
   onChapterChange,
+  className,
 }: ChapterSelectorProps) {
   return (
     <div
       className={cn(
         "bg-teal-gray-100 shadow-inner-neutral-2 flex h-11.5 w-full items-center gap-2 rounded-[14px] p-1",
+        className,
       )}
     >
       {CHAPTERS.map((chapter) => {

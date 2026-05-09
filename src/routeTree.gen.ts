@@ -40,6 +40,7 @@ import { Route as MatchingApplicationsRouteImport } from './routes/matching/appl
 import { Route as LoginDefaultRouteImport } from './routes/login/default'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
+import { Route as MatchingProjectsManagementRouteImport } from './routes/matching/projects/management'
 import { Route as MatchingNoticePublishNoticeIdRouteImport } from './routes/matching/notice-publish.$noticeId'
 import { Route as AdminChallengerRecordsRouteImport } from './routes/admin/challenger/records'
 import { Route as AdminChallengerPointsRouteImport } from './routes/admin/challenger/points'
@@ -204,6 +205,12 @@ const MatchingProjectsNewRoute = MatchingProjectsNewRouteImport.update({
   path: '/projects/new',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const MatchingProjectsManagementRoute =
+  MatchingProjectsManagementRouteImport.update({
+    id: '/projects/management',
+    path: '/projects/management',
+    getParentRoute: () => MatchingRouteRoute,
+  } as any)
 const MatchingNoticePublishNoticeIdRoute =
   MatchingNoticePublishNoticeIdRouteImport.update({
     id: '/$noticeId',
@@ -279,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
+  '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
@@ -316,6 +324,7 @@ export interface FileRoutesByTo {
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
+  '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
@@ -357,6 +366,7 @@ export interface FileRoutesById {
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
+  '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
@@ -399,6 +409,7 @@ export interface FileRouteTypes {
     | '/admin/challenger/points'
     | '/admin/challenger/records'
     | '/matching/notice-publish/$noticeId'
+    | '/matching/projects/management'
     | '/matching/projects/new'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
@@ -436,6 +447,7 @@ export interface FileRouteTypes {
     | '/admin/challenger/points'
     | '/admin/challenger/records'
     | '/matching/notice-publish/$noticeId'
+    | '/matching/projects/management'
     | '/matching/projects/new'
     | '/matching/projects'
     | '/matching/projects/announce/notice-publish'
@@ -476,6 +488,7 @@ export interface FileRouteTypes {
     | '/admin/challenger/points'
     | '/admin/challenger/records'
     | '/matching/notice-publish/$noticeId'
+    | '/matching/projects/management'
     | '/matching/projects/new'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
@@ -728,6 +741,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsNewRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/matching/projects/management': {
+      id: '/matching/projects/management'
+      path: '/projects/management'
+      fullPath: '/matching/projects/management'
+      preLoaderRoute: typeof MatchingProjectsManagementRouteImport
+      parentRoute: typeof MatchingRouteRoute
+    }
     '/matching/notice-publish/$noticeId': {
       id: '/matching/notice-publish/$noticeId'
       path: '/$noticeId'
@@ -848,6 +868,7 @@ interface MatchingRouteRouteChildren {
   MatchingStatusRoute: typeof MatchingStatusRoute
   MatchingIndexRoute: typeof MatchingIndexRoute
   MatchingProjectsAnnounceRouteRoute: typeof MatchingProjectsAnnounceRouteRouteWithChildren
+  MatchingProjectsManagementRoute: typeof MatchingProjectsManagementRoute
   MatchingProjectsNewRoute: typeof MatchingProjectsNewRoute
   MatchingProjectsIndexRoute: typeof MatchingProjectsIndexRoute
 }
@@ -860,6 +881,7 @@ const MatchingRouteRouteChildren: MatchingRouteRouteChildren = {
   MatchingIndexRoute: MatchingIndexRoute,
   MatchingProjectsAnnounceRouteRoute:
     MatchingProjectsAnnounceRouteRouteWithChildren,
+  MatchingProjectsManagementRoute: MatchingProjectsManagementRoute,
   MatchingProjectsNewRoute: MatchingProjectsNewRoute,
   MatchingProjectsIndexRoute: MatchingProjectsIndexRoute,
 }

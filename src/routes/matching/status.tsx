@@ -7,8 +7,8 @@ import { MOCK_MATCHING_PARTS } from "@/features/matching/model/matchingStatusMoc
 import { MatchingPartSection } from "@/features/matching/ui/MatchingPartSection"
 import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"
 import { MatchingTableHead } from "@/features/matching/ui/MatchingTableHead"
-import { type Chapter, CHAPTERS } from "@/features/notice/ui/ChapterSelector"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
+import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 
 export const Route = createFileRoute("/matching/status")({
   component: MatchingStatusPage,

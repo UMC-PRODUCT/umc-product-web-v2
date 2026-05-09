@@ -31,6 +31,11 @@ export const SIDEBAR_ITEMS: SideBarSection[] = [
         title: "프로젝트 등록",
         to: "/matching/projects/new",
       },
+      {
+        id: "project-management",
+        title: "프로젝트 관리",
+        to: "/matching/projects/management",
+      },
     ],
   },
   {
@@ -71,6 +76,7 @@ export const SIDEBAR_ID = {
   item: {
     projectAnnounce: "project-announce",
     projectRegister: "project-register",
+    projectManagement: "project-management",
     matchingAnnounce: "matching-announce",
     matchingProjects: "matching-projects",
     matchingApplications: "matching-applications",
