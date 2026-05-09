@@ -11,6 +11,7 @@ const MoreVerticalIcon = ({
   ...props
 }: MoreVerticalIconProps) => (
   <button
+    type="button"
     className={cn(
       "hover:bg-teal-gray-100 flex h-[1.625rem] w-[1.625rem] items-center justify-center rounded-lg transition-colors",
       buttonClassName,

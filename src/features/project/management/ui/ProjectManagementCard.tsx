@@ -63,6 +63,7 @@ export function ProjectManagementCard({
                 <ProjectManagementMoreMenu
                   projectName={data.title}
                   projectApplication={projectApplication}
+                  chapterName={data.branch}
                 />
               </div>
             </div>

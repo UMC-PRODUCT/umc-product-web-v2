@@ -12,12 +12,14 @@ import type { ProjectApplication } from "@/features/application/model/types"
 interface ProjectManagementMoreMenuProps {
   projectName: string
   projectApplication: ProjectApplication
+  chapterName: string
   onDelete?: () => void
 }
 
 export function ProjectManagementMoreMenu({
   projectName,
   projectApplication,
+  chapterName,
   onDelete,
 }: ProjectManagementMoreMenuProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
@@ -78,7 +80,7 @@ export function ProjectManagementMoreMenu({
 
       <ApplicationDetailModal
         project={projectApplication}
-        chapterName="Chromium"
+        chapterName={chapterName}
         open={applicationOpen}
         onOpenChange={setApplicationOpen}
       />

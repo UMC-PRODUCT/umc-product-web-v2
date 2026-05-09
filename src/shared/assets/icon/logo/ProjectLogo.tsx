@@ -1,5 +1,6 @@
 /** 프로젝트 상세 카드 중 프로젝트 로고 이미지 */
 /** 피그마 기준 40 Logo Frame */
+import { cn } from "@/shared/lib/utils"
 
 type ProjectLogoSize = 30 | 32 | 40 | 50
 
@@ -19,7 +20,10 @@ export function ProjectLogo({
 }) {
   return (
     <div
-      className={`bg-teal-gray-200 overflow-hidden rounded-lg ${sizeClass[size]}`}
+      className={cn(
+        "bg-teal-gray-200 overflow-hidden rounded-lg",
+        sizeClass[size],
+      )}
     >
       {src && (
         <img
