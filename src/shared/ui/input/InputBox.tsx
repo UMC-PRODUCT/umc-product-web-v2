@@ -16,8 +16,15 @@ import EyeOpen from "@/shared/assets/icon/eye/EyeOpen"
 import { cn } from "@/shared/lib/utils"
 
 export type InputBoxState = "default" | "success" | "error" | "disabled"
-export type InputBoxType = "default" | "clear" | "password"
+export type InputBoxType = "default" | "clear" | "password" | "verification"
 export type InputBoxSize = "md" | "sm"
+
+function formatRemainingSeconds(seconds: number): string {
+  const s = Math.max(0, seconds)
+  const mm = String(Math.floor(s / 60)).padStart(2, "0")
+  const ss = String(s % 60).padStart(2, "0")
+  return `${mm}:${ss}`
+}
 
 const inputBoxVariants = cva(
   "inline-flex h-11 w-[300px] items-center gap-1 rounded-[12px] border pl-4 cursor-text shadow-inner-neutral-2 transition-colors",
@@ -49,6 +56,7 @@ interface InputBoxProps extends Omit<
   className?: string
   inputClassName?: string
   rightAdornment?: ReactNode
+  remainingSeconds?: number
 }
 
 export const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
@@ -63,6 +71,7 @@ export const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
       className,
       inputClassName,
       rightAdornment,
+      remainingSeconds,
       ...props
     },
     ref,
@@ -78,10 +87,12 @@ export const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
       state === "success" ||
       state === "error" ||
       (type === "clear" && isFilled) ||
-      type === "password"
+      type === "password" ||
+      type === "verification"
 
     const prClass = (() => {
       if (!hasAdornment) return isFilled ? "pr-4" : "pr-3"
+      if (type === "verification") return "pr-3"
       if (state === "success" || state === "error") return "pr-2.5"
       return "pr-3"
     })()
@@ -97,6 +108,28 @@ export const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
 
     const renderAdornment = () => {
       if (rightAdornment !== undefined) return rightAdornment
+
+      if (type === "verification") {
+        const timerColorClass =
+          state === "error"
+            ? "text-error-500"
+            : state === "disabled"
+              ? "text-teal-gray-300"
+              : "text-teal-500"
+        const timerFontClass =
+          size === "sm" ? "text-body-2-medium" : "text-label-1-medium"
+        return (
+          <span
+            className={cn(
+              "shrink-0 tabular-nums",
+              timerColorClass,
+              timerFontClass,
+            )}
+          >
+            {formatRemainingSeconds(remainingSeconds ?? 0)}
+          </span>
+        )
+      }
 
       if (state === "success") {
         const icon = <CheckIcon width={20} height={20} aria-hidden="true" />
