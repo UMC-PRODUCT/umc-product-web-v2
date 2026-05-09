@@ -38,7 +38,7 @@ export function Pagination({
           aria-label="이전 페이지"
           onClick={() => onPageChange(safePage - 1)}
         >
-          <LeftChevronIcon aria-hidden className="pointer-events-none" />
+          <LeftChevronIcon aria-hidden className="pointer-events-none size-4" />
         </button>
       ) : null}
 
@@ -72,7 +72,10 @@ export function Pagination({
           aria-label="다음 페이지"
           onClick={() => onPageChange(safePage + 1)}
         >
-          <RightChevronIcon aria-hidden className="pointer-events-none" />
+          <RightChevronIcon
+            aria-hidden
+            className="pointer-events-none size-4"
+          />
         </button>
       ) : null}
     </nav>
