@@ -134,7 +134,7 @@ export function Dropdown<T extends string | number>({
                     <span className="truncate">{option.label}</span>
                     {isSelected && (
                       <CheckIcon
-                        className="shrink-0 text-teal-500"
+                        className="size-4 shrink-0 text-teal-500"
                         aria-hidden
                       />
                     )}
