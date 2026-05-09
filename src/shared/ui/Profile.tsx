@@ -13,19 +13,11 @@ interface ProfileProps {
 
 export default function Profile({ size = 40, src, className }: ProfileProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedValue, setSelectedValue] = useState<string | undefined>()
-
-  const handleSelect = (value: string) => {
-    setSelectedValue(value)
-    // TODO: Handle menu item selection
-  }
 
   return (
     <ProfileDropdown
       open={isOpen}
       onOpenChange={setIsOpen}
-      selectedValue={selectedValue}
-      onSelect={handleSelect}
       triggerClassName={cn(
         "shrink-0 overflow-hidden rounded-full transition-opacity hover:opacity-80",
         className,

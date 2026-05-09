@@ -9,8 +9,6 @@ import { RoleTagChip } from "./chip/RoleTagChip"
 interface ProfileDropdownProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  selectedValue?: string
-  onSelect?: (value: string) => void
   children?: React.ReactNode
   dropdownClassName?: string
   triggerClassName?: string
