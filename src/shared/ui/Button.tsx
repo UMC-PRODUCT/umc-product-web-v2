@@ -19,8 +19,8 @@ const buttonVariants = cva(
         white: "",
       },
       size: {
-        xl: "h-14 min-h-14 min-w-24 py-1 px-8 gap-2.5",
-        lg: "h-[50px] min-h-11 min-w-[84px] py-1 px-4 gap-2.5 rounded-[10px]",
+        xl: "h-14 min-h-14 min-w-24 py-1 px-8 gap-2.5 text-heading-7-semibold",
+        lg: "h-[50px] min-h-11 min-w-[84px] py-1 px-4 gap-2.5 rounded-[10px] text-heading-7-semibold",
         m: "h-11 min-w-[90px] px-4",
         s: "h-10 min-w-[74px] px-5",
         xs: "h-[34px] pt-0.5",
