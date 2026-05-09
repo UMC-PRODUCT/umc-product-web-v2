@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 
-import TypeCheckSizeSm from "@/shared/assets/icon/check/TypeCheckSizeSm"
+import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { cn } from "@/shared/lib/utils"
 
@@ -84,7 +84,7 @@ export function Dropdown<T extends string | number>({
         <span className="truncate">{displayLabel}</span>
         <DownChevronIcon
           className={cn(
-            "size-4 shrink-0 transition-transform",
+            "text-teal-gray-400 size-4 shrink-0 transition-transform",
             open && "rotate-180",
           )}
         />
@@ -133,7 +133,7 @@ export function Dropdown<T extends string | number>({
                   >
                     <span className="truncate">{option.label}</span>
                     {isSelected && (
-                      <TypeCheckSizeSm
+                      <CheckIcon
                         className="shrink-0 text-teal-500"
                         aria-hidden
                       />

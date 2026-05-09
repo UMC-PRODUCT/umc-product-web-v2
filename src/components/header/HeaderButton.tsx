@@ -26,7 +26,7 @@ export default function HeaderButton({
     >
       {label}
       {type === "trailing-icon" && (
-        <DownChevronIcon className="ml-0.5 size-4" />
+        <DownChevronIcon className="text-teal-gray-400 ml-0.5 size-4" />
       )}
     </button>
   )

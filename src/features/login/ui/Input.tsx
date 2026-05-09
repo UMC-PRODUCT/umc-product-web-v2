@@ -1,7 +1,7 @@
 import { useState } from "react"
 
-import ToggleEyeClosedIcon from "@/shared/assets/icon/toggle/ToggleEyeClosedIcon"
-import ToggleEyeOpenedIcon from "@/shared/assets/icon/toggle/ToggleEyeOpenedIcon"
+import EyeClosed from "@/shared/assets/icon/eye/EyeClosed"
+import EyeOpen from "@/shared/assets/icon/eye/EyeOpen"
 import { cn } from "@/shared/lib/utils"
 
 interface InputProps extends Omit<React.ComponentProps<"input">, "type"> {
@@ -48,9 +48,9 @@ export function Input({
           className="text-teal-gray-400 absolute top-1/2 right-2.5 -translate-y-1/2"
         >
           {showPassword ? (
-            <ToggleEyeOpenedIcon className="h-5 w-5" />
+            <EyeOpen className="h-5 w-5" />
           ) : (
-            <ToggleEyeClosedIcon className="h-5 w-5" />
+            <EyeClosed className="h-5 w-5" />
           )}
         </button>
       ) : null}

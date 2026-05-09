@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority"
 
-import SvgPersonButtonIcon from "@/shared/assets/icon/people/PersonButtonIcon"
+import PersonButtonIcon from "@/shared/assets/icon/people/PersonButtonIcon"
 import { Button } from "@/shared/ui/Button"
 
 import type { ButtonHTMLAttributes } from "react"
@@ -35,7 +35,7 @@ export function TeamMemberButton({
       className={`min-w-[3.25rem] rounded-xl ${className ?? ""}`}
       {...props}
     >
-      <SvgPersonButtonIcon className={iconVariants({ variant })} />
+      <PersonButtonIcon className={iconVariants({ variant })} />
     </Button>
   )
 }

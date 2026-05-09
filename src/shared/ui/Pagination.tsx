@@ -1,5 +1,5 @@
-import PaginationChevronLeftIcon from "@/shared/assets/icon/chevron/pagination/LeftChevronIcon"
-import PaginationChevronRightIcon from "@/shared/assets/icon/chevron/pagination/RightChevronIcon"
+import LeftChevronIcon from "@/shared/assets/icon/chevron/LeftChevronIcon"
+import RightChevronIcon from "@/shared/assets/icon/chevron/RightChevronIcon"
 import { cn } from "@/shared/lib/utils"
 
 export type PaginationProps = {
@@ -38,10 +38,7 @@ export function Pagination({
           aria-label="이전 페이지"
           onClick={() => onPageChange(safePage - 1)}
         >
-          <PaginationChevronLeftIcon
-            aria-hidden
-            className="pointer-events-none"
-          />
+          <LeftChevronIcon aria-hidden className="pointer-events-none" />
         </button>
       ) : null}
 
@@ -75,10 +72,7 @@ export function Pagination({
           aria-label="다음 페이지"
           onClick={() => onPageChange(safePage + 1)}
         >
-          <PaginationChevronRightIcon
-            aria-hidden
-            className="pointer-events-none"
-          />
+          <RightChevronIcon aria-hidden className="pointer-events-none" />
         </button>
       ) : null}
     </nav>

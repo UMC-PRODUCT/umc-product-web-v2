@@ -1,6 +1,6 @@
 import type { SVGProps } from "react"
 
-const PaginationChevronRightIcon = (props: SVGProps<SVGSVGElement>) => (
+const RightChevronIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     width={16}
     height={16}
@@ -19,4 +19,4 @@ const PaginationChevronRightIcon = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 )
 
-export default PaginationChevronRightIcon
+export default RightChevronIcon
