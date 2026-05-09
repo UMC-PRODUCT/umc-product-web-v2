@@ -34,7 +34,7 @@ export function DropdownItem({
       >
         {label}
         {isSelected && (
-          <CheckIcon className="shrink-0 text-teal-500" aria-hidden />
+          <CheckIcon className="size-4 shrink-0 text-teal-500" aria-hidden />
         )}
       </span>
     </button>
