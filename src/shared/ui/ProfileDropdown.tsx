@@ -13,6 +13,8 @@ interface ProfileDropdownProps {
   onSelect?: (value: string) => void
   children?: React.ReactNode
   dropdownClassName?: string
+  triggerClassName?: string
+  triggerStyle?: React.CSSProperties
 }
 
 export function ProfileDropdown({
@@ -20,6 +22,8 @@ export function ProfileDropdown({
   onOpenChange,
   children,
   dropdownClassName,
+  triggerClassName,
+  triggerStyle,
 }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(open)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -48,9 +52,10 @@ export function ProfileDropdown({
         aria-expanded={isOpen}
         aria-haspopup="menu"
         onClick={() => handleOpenChange(!isOpen)}
-        className="flex items-center"
+        className={cn("flex items-center", triggerClassName)}
+        style={triggerStyle}
       >
-        {children}
+        <div className="size-full">{children}</div>
       </button>
 
       {isOpen && (

@@ -26,25 +26,17 @@ export default function Profile({ size = 40, src, className }: ProfileProps) {
       onOpenChange={setIsOpen}
       selectedValue={selectedValue}
       onSelect={handleSelect}
+      triggerClassName={cn(
+        "shrink-0 overflow-hidden rounded-full transition-opacity hover:opacity-80",
+        className,
+      )}
+      triggerStyle={{ width: size, height: size }}
     >
-      <button
-        type="button"
-        aria-expanded={isOpen}
-        aria-haspopup="menu"
-        className={cn(
-          "shrink-0 overflow-hidden rounded-full transition-opacity hover:opacity-80",
-          className,
-        )}
-        style={{ width: size, height: size }}
-      >
-        <div className="size-full">
-          {src ? (
-            <img src={src} alt="profile" className="size-full object-cover" />
-          ) : (
-            <ProfileIcon className="size-full" />
-          )}
-        </div>
-      </button>
+      {src ? (
+        <img src={src} alt="profile" className="size-full object-cover" />
+      ) : (
+        <ProfileIcon className="size-full" />
+      )}
     </ProfileDropdown>
   )
 }
