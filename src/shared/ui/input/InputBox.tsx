@@ -110,20 +110,22 @@ export const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
       if (rightAdornment !== undefined) return rightAdornment
 
       if (type === "verification") {
-        const timerColorClass =
-          state === "error"
-            ? "text-error-500"
-            : state === "disabled"
-              ? "text-teal-gray-300"
-              : "text-teal-500"
-        const timerFontClass =
-          size === "sm" ? "text-body-2-medium" : "text-label-1-medium"
+        const timerColorClass: Record<InputBoxState, string> = {
+          default: "text-teal-500",
+          success: "text-teal-500",
+          error: "text-error-500",
+          disabled: "text-teal-gray-300",
+        }
+        const timerFontClass: Record<InputBoxSize, string> = {
+          md: "text-label-1-medium",
+          sm: "text-body-2-medium",
+        }
         return (
           <span
             className={cn(
               "shrink-0 tabular-nums",
-              timerColorClass,
-              timerFontClass,
+              timerColorClass[state],
+              timerFontClass[size],
             )}
           >
             {formatRemainingSeconds(remainingSeconds ?? 0)}
