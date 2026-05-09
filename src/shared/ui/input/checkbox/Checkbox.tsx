@@ -5,6 +5,8 @@ import { CheckboxIndicator } from "./CheckboxIndicator"
 
 import type { ComponentProps } from "react"
 
+import type { CheckboxSize } from "./CheckboxIndicator"
+
 type CheckboxVariant = "gray" | "primary" | "issue"
 
 interface CheckboxProps extends Omit<
@@ -14,6 +16,7 @@ interface CheckboxProps extends Omit<
   checked: boolean
   onChange: (checked: boolean) => void
   variant?: CheckboxVariant
+  size?: CheckboxSize
   disabled?: boolean
   "aria-label"?: string
 }
@@ -22,6 +25,7 @@ export function Checkbox({
   checked,
   onChange,
   variant = "gray",
+  size = "default",
   disabled = false,
   className,
   "aria-label": ariaLabel,
@@ -46,6 +50,7 @@ export function Checkbox({
       <CheckboxIndicator
         checked={checked}
         variant={variant}
+        size={size}
         disabled={disabled}
       />
     </ToggleButton>
