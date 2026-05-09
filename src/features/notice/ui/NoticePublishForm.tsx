@@ -131,7 +131,7 @@ export function NoticePublishForm({
               onClick={handleBackClick}
               className="flex items-center gap-1 pr-3.5 pl-2"
             >
-              <LeftChevronIcon className="text-teal-gray-400" />
+              <LeftChevronIcon className="text-teal-gray-400 size-4" />
               <span className="text-label-1-medium text-teal-gray-600">
                 목록으로
               </span>
