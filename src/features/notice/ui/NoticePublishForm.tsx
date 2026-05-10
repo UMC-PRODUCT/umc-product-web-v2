@@ -2,7 +2,7 @@ import { useBlocker } from "@tanstack/react-router"
 import { useState } from "react"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
-import LeftChevronIcon from "@/shared/assets/icon/chevron/NoticePublish/LeftChevronIcon"
+import LeftChevronIcon from "@/shared/assets/icon/chevron/LeftChevronIcon"
 import { Button } from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { Modal } from "@/shared/ui/Modal"
@@ -131,7 +131,7 @@ export function NoticePublishForm({
               onClick={handleBackClick}
               className="flex items-center gap-1 pr-3.5 pl-2"
             >
-              <LeftChevronIcon />
+              <LeftChevronIcon className="text-teal-gray-400 size-4" />
               <span className="text-label-1-medium text-teal-gray-600">
                 목록으로
               </span>

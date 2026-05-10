@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import {
   InputBox,
+  type InputBoxSize,
   type InputBoxState,
   type InputBoxType,
 } from "@/shared/ui/input/InputBox"
@@ -22,6 +23,14 @@ const STATES = [
   "disabled",
 ] as const satisfies InputBoxState[]
 const TYPES = ["default", "clear", "password"] as const satisfies InputBoxType[]
+const SIZES = ["sm", "md"] as const satisfies InputBoxSize[]
+
+const VERIFICATION_CASES: { seconds: number; label: string }[] = [
+  { seconds: 180, label: "03:00" },
+  { seconds: 65, label: "01:05" },
+  { seconds: 5, label: "00:05" },
+  { seconds: 0, label: "00:00" },
+]
 
 const MOCK_MEMBERS: MemberItem[] = [
   { nickname: "이삭", name: "강지훈", university: "OO대학교" },
@@ -126,6 +135,65 @@ function InteractiveSearchBar() {
         setIsSelected(true)
       }}
     />
+  )
+}
+
+function VerificationCountdownDemo() {
+  const [value, setValue] = useState("")
+  const [remaining, setRemaining] = useState(180)
+  const [running, setRunning] = useState(false)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (!running) return
+    intervalRef.current = setInterval(() => {
+      setRemaining((prev) => {
+        if (prev <= 1) {
+          setRunning(false)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [running])
+
+  function handleReset() {
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    setRemaining(180)
+    setRunning(false)
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <InputBox
+        type="verification"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        remainingSeconds={remaining}
+        inputMode="numeric"
+        maxLength={6}
+        placeholder="인증번호 6자리"
+      />
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setRunning((r) => !r)}
+          className="text-caption-2-regular rounded bg-teal-500 px-3 py-1 text-white"
+        >
+          {running ? "일시정지" : "시작"}
+        </button>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="text-caption-2-regular border-teal-gray-300 rounded border px-3 py-1"
+        >
+          리셋 (03:00)
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -254,6 +322,71 @@ function InputBoxTestPage() {
 
         <Section title="MemberSearchBar (Controlled) — InputBox 합성 검증">
           <InteractiveSearchBar />
+        </Section>
+
+        <Section title="Verification (MM:SS Timer) — State × Size Matrix">
+          <table className="border-collapse">
+            <thead>
+              <tr>
+                <th className="text-caption-2-regular text-teal-gray-400 w-28 pr-8 pb-3 text-left font-normal">
+                  state / size
+                </th>
+                {SIZES.map((size) => (
+                  <th
+                    key={size}
+                    className="text-caption-2-regular text-teal-gray-400 px-4 pb-3 text-center font-normal"
+                  >
+                    {size}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {STATES.map((state) => (
+                <tr key={state}>
+                  <td className="text-caption-2-regular text-teal-gray-400 py-3 pr-8 align-middle">
+                    {state}
+                  </td>
+                  {SIZES.map((size) => (
+                    <td key={size} className="px-4 py-3 align-middle">
+                      <InputBox
+                        type="verification"
+                        state={state}
+                        size={size}
+                        value=""
+                        onChange={() => {}}
+                        remainingSeconds={179}
+                        placeholder="인증번호"
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Section>
+
+        <Section title="Verification — 타이머 값 케이스">
+          <div className="flex flex-wrap items-end gap-8">
+            {VERIFICATION_CASES.map(({ seconds, label }) => (
+              <div key={seconds} className="flex flex-col gap-2">
+                <span className="text-caption-2-regular text-teal-gray-400">
+                  {label}
+                </span>
+                <InputBox
+                  type="verification"
+                  value=""
+                  onChange={() => {}}
+                  remainingSeconds={seconds}
+                  placeholder="인증번호"
+                />
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Verification — 인터랙티브 카운트다운">
+          <VerificationCountdownDemo />
         </Section>
       </div>
     </main>

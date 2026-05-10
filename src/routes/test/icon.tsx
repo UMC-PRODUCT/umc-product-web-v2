@@ -1,37 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import BangIcon from "@/shared/assets/icon/bang/BangIcon"
 import CircleBang from "@/shared/assets/icon/bang/CircleBang"
 import CheckBoxIcon from "@/shared/assets/icon/check/CheckBoxIcon"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import CircleCheckIcon from "@/shared/assets/icon/check/CircleCheckIcon"
-import TypeCheckSizeSm from "@/shared/assets/icon/check/TypeCheckSizeSm"
+import LeftChevronIconFilled from "@/shared/assets/icon/chevron/filled/LeftChevronIconFilled"
+import RightChevronIconFilled from "@/shared/assets/icon/chevron/filled/RightChevronIconFilled"
 import FilterDropDownIcon from "@/shared/assets/icon/chevron/FilterDropDownIcon"
 import LeftChevronIcon from "@/shared/assets/icon/chevron/LeftChevronIcon"
-import NoticePublishLeftChevronIcon from "@/shared/assets/icon/chevron/NoticePublish/LeftChevronIcon"
-import PaginationLeftChevronIcon from "@/shared/assets/icon/chevron/pagination/LeftChevronIcon"
-import PaginationRightChevronIcon from "@/shared/assets/icon/chevron/pagination/RightChevronIcon"
+import RightChevronIcon from "@/shared/assets/icon/chevron/RightChevronIcon"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import CloseCircleIcon from "@/shared/assets/icon/close/CloseCircleIcon"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import DragAndDrop from "@/shared/assets/icon/drag-and-drop/DragAndDrop"
+import CollapseAllIcon from "@/shared/assets/icon/expand-collapse/CollapseAllIcon"
+import ExpandAllIcon from "@/shared/assets/icon/expand-collapse/ExpandAllIcon"
 import EyeClosed from "@/shared/assets/icon/eye/EyeClosed"
 import EyeOpen from "@/shared/assets/icon/eye/EyeOpen"
+import FilterIcon from "@/shared/assets/icon/filter/FilterIcon"
 import TrashCan from "@/shared/assets/icon/garbage/TrashCan"
+import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import MinusIcon from "@/shared/assets/icon/minus/MinusIcon"
+import MyIcon from "@/shared/assets/icon/people/MyIcon"
 import PersonButtonIcon from "@/shared/assets/icon/people/PersonButtonIcon"
 import PersonIcon from "@/shared/assets/icon/people/PersonIcon"
 import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import TeamIcon from "@/shared/assets/icon/people/TeamIcon"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
+import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
 import ToggleCheckboxIcon from "@/shared/assets/icon/toggle/ToggleCheckboxIcon"
 import ToggleFileUploadIcon from "@/shared/assets/icon/toggle/ToggleFileUploadIcon"
 import ToggleRadioIcon from "@/shared/assets/icon/toggle/ToggleRadioIcon"
 import ToggleTextIcon from "@/shared/assets/icon/toggle/ToggleTextIcon"
+import CloudUploadIcon from "@/shared/assets/icon/upload/CloudUploadIcon"
 import FileClip from "@/shared/assets/icon/upload/FileClip"
 import UploadImageIcon from "@/shared/assets/icon/upload/UploadImageIcon"
 
@@ -77,6 +84,9 @@ function IconTestPage() {
           <IconCard name="CircleBang">
             <CircleBang width={24} height={24} />
           </IconCard>
+          <IconCard name="BangIcon">
+            <BangIcon width={24} height={24} />
+          </IconCard>
         </Section>
 
         <Section title="check">
@@ -89,29 +99,26 @@ function IconTestPage() {
           <IconCard name="CircleCheckIcon">
             <CircleCheckIcon width={24} height={24} />
           </IconCard>
-          <IconCard name="TypeCheckSizeSm">
-            <TypeCheckSizeSm width={24} height={24} />
-          </IconCard>
         </Section>
 
         <Section title="chevron">
           <IconCard name="LeftChevronIcon">
             <LeftChevronIcon width={24} height={24} />
           </IconCard>
+          <IconCard name="RightChevronIcon">
+            <RightChevronIcon width={24} height={24} />
+          </IconCard>
           <IconCard name="FilterDropDownIcon">
             <FilterDropDownIcon width={24} height={24} />
-          </IconCard>
-          <IconCard name="PaginationLeft ChevronIcon">
-            <PaginationLeftChevronIcon width={24} height={24} />
-          </IconCard>
-          <IconCard name="PaginationRight ChevronIcon">
-            <PaginationRightChevronIcon width={24} height={24} />
           </IconCard>
           <IconCard name="DownChevronIcon (sidebar)">
             <DownChevronIcon width={24} height={24} />
           </IconCard>
-          <IconCard name="NoticePublish LeftChevronIcon">
-            <NoticePublishLeftChevronIcon width={24} height={24} />
+          <IconCard name="LeftChevronIcon Filled">
+            <LeftChevronIconFilled width={24} height={24} />
+          </IconCard>
+          <IconCard name="RightChevronIcon Filled">
+            <RightChevronIconFilled width={24} height={24} />
           </IconCard>
         </Section>
 
@@ -188,6 +195,9 @@ function IconTestPage() {
           <IconCard name="ProfileIcon">
             <ProfileIcon width={40} height={40} />
           </IconCard>
+          <IconCard name="MyIcon">
+            <MyIcon width={24} height={24} />
+          </IconCard>
         </Section>
 
         <Section title="search">
@@ -218,6 +228,36 @@ function IconTestPage() {
           <IconCard name="UploadImageIcon">
             <UploadImageIcon width={24} height={24} />
           </IconCard>
+          <IconCard name="CloudUploadIcon">
+            <CloudUploadIcon width={24} height={24} />
+          </IconCard>
+        </Section>
+
+        <Section title="hamburger">
+          <IconCard name="HamburgerIcon">
+            <HamburgerIcon width={24} height={24} />
+          </IconCard>
+        </Section>
+
+        <Section title="filter">
+          <IconCard name="FilterIcon">
+            <FilterIcon width={24} height={24} />
+          </IconCard>
+        </Section>
+
+        <Section title="reset">
+          <IconCard name="ResetIcon">
+            <ResetIcon width={24} height={24} />
+          </IconCard>
+        </Section>
+
+        <Section title="expand-collapse">
+          <IconCard name="ExpandAllIcon">
+            <ExpandAllIcon width={24} height={24} />
+          </IconCard>
+          <IconCard name="CollapseAllIcon">
+            <CollapseAllIcon width={24} height={24} />
+          </IconCard>
         </Section>
 
         <Section title="currentColor 적용 (text-teal-500)">
@@ -245,6 +285,24 @@ function IconTestPage() {
             </IconCard>
             <IconCard name="SearchIcon">
               <SearchIcon width={24} height={24} />
+            </IconCard>
+            <IconCard name="BangIcon">
+              <BangIcon width={24} height={24} />
+            </IconCard>
+            <IconCard name="HamburgerIcon">
+              <HamburgerIcon width={24} height={24} />
+            </IconCard>
+            <IconCard name="FilterIcon">
+              <FilterIcon width={24} height={24} />
+            </IconCard>
+            <IconCard name="ResetIcon">
+              <ResetIcon width={24} height={24} />
+            </IconCard>
+            <IconCard name="ExpandAllIcon">
+              <ExpandAllIcon width={24} height={24} />
+            </IconCard>
+            <IconCard name="MyIcon">
+              <MyIcon width={24} height={24} />
             </IconCard>
           </div>
         </Section>

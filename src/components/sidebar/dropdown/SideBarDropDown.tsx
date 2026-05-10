@@ -45,7 +45,7 @@ export function SideBarDropDown({
         <span className="text-teal-gray-600 text-body-3-regular">
           {selectedLabel}
         </span>
-        <DownChevronIcon className="h-4 w-4" />
+        <DownChevronIcon className="text-teal-gray-400 h-4 w-4" />
       </button>
       <AnimatePresence>
         {isOpen && (

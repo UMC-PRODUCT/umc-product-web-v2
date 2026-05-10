@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 import LeftChevronIcon from "@/shared/assets/icon/chevron/LeftChevronIcon"
-import PaginationChevronRightIcon from "@/shared/assets/icon/chevron/pagination/RightChevronIcon"
+import RightChevronIcon from "@/shared/assets/icon/chevron/RightChevronIcon"
 import { cn } from "@/shared/lib/utils"
 
 import { CalendarDayCell } from "./CalendarDayCell"
@@ -168,7 +168,7 @@ export function Calendar({
             onClick={() => navigate(1)}
             className="text-teal-gray-400 hover:bg-teal-gray-100 flex h-6.5 w-6.5 cursor-pointer items-center justify-center rounded-lg hover:shadow-[inset_1px_1px_2px_rgba(211,216,216,0.2)]"
           >
-            <PaginationChevronRightIcon className="h-4 w-4" />
+            <RightChevronIcon className="h-4 w-4" />
           </button>
         </div>
       </div>

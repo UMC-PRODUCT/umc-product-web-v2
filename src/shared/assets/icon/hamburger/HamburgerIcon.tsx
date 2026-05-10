@@ -1,5 +1,5 @@
 import type { SVGProps } from "react"
-const DownChevronIcon = (props: SVGProps<SVGSVGElement>) => (
+const HamburgerIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -9,10 +9,9 @@ const DownChevronIcon = (props: SVGProps<SVGSVGElement>) => (
     <path
       stroke="currentColor"
       strokeLinecap="round"
-      strokeLinejoin="round"
       strokeWidth={1.5}
-      d="M4.5 7 8 10.5 11.5 7"
+      d="M4 4h8M4 8h8M4 12h8"
     />
   </svg>
 )
-export default DownChevronIcon
+export default HamburgerIcon

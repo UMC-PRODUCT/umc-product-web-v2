@@ -1,4 +1,4 @@
-import TypeCheckSizeSm from "@/shared/assets/icon/check/TypeCheckSizeSm"
+import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { cn } from "@/shared/lib/utils"
 
 interface DropdownItemProps {
@@ -34,7 +34,7 @@ export function DropdownItem({
       >
         {label}
         {isSelected && (
-          <TypeCheckSizeSm className="shrink-0 text-teal-500" aria-hidden />
+          <CheckIcon className="size-4 shrink-0 text-teal-500" aria-hidden />
         )}
       </span>
     </button>
