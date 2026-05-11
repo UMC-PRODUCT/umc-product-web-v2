@@ -38,10 +38,10 @@ export function ProjectManagementMoreMenu({
   }
 
   const MENU_ITEMS = [
-    { label: "지원현황 확인하기", onClick: handleApplicationClick },
+    { label: "지원 현황 확인하기", onClick: handleApplicationClick },
     { label: "기획 보기", onClick: () => {} },
     { label: "프로젝트 수정하기", onClick: () => {} },
-    { label: "팀원 구성보기", onClick: () => {} },
+    { label: "팀원 구성 보기", onClick: () => {} },
   ]
 
   return (

@@ -88,7 +88,7 @@ export function FilterDropdown(props: FilterDropdownProps) {
         aria-haspopup="listbox"
         onClick={onClick}
         className={cn(
-          "shadow-inner-neutral-2 inline-flex h-11 min-w-[6.375rem] shrink-0 items-center gap-1 rounded-xl border py-0 pr-2.5 pl-4 text-left transition-colors",
+          "shadow-inner-neutral-2 inline-flex h-11 min-w-20 shrink-0 items-center gap-1 rounded-xl border py-0 pr-2.5 pl-4 text-left transition-colors",
           highlighted
             ? "border-teal-300 bg-teal-50 text-teal-600"
             : [
