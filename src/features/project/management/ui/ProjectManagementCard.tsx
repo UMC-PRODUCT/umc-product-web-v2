@@ -36,7 +36,7 @@ export function ProjectManagementCard({
           if (e.key === "Enter" || e.key === " ") setOpen(true)
         }}
       >
-        <div className="bg-teal-gray-200 text-teal-gray-400 flex h-[10.5625rem] w-80 shrink-0 items-center justify-center overflow-hidden rounded-l-[0.625rem] text-center text-sm">
+        <div className="bg-teal-gray-200 text-teal-gray-400 flex h-[10.5625rem] w-80 shrink-0 items-center justify-center overflow-hidden rounded-[0.625rem] text-center text-sm">
           {cover?.src ? (
             <img
               src={cover.src}
