@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
+import CircleBang from "@/shared/assets/icon/bang/CircleBang"
+import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
@@ -8,32 +10,46 @@ export const Route = createFileRoute("/signup/")({
   component: SignUpPage,
 })
 
-const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
-  e.preventDefault()
-}
-
 function SignUpPage() {
   const [email, setEmail] = useState("")
   const [verifiedEmail, setVerifiedEmail] = useState("")
   const [code, setCode] = useState("")
   const [isCodeVisible, setIsCodeVisible] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState(0)
+  const [showVerificationSent, setShowVerificationSent] = useState(false)
+  // TODO: 이메일 인증 API 연결
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isEmailDuplicated, setIsEmailDuplicated] = useState(false)
+  const [isCodeInvalid, setIsCodeInvalid] = useState(false)
+  const [isCodeExpired, setIsCodeExpired] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const isEmailValid = email.includes("@")
   const isEmailChanged = email !== verifiedEmail
   const navigate = useNavigate({ from: Route.fullPath })
 
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    // TODO: 이메일 인증 API 연결
+  }
+
   useEffect(() => {
     if (remainingSeconds <= 0 && intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
+      if (isCodeVisible && remainingSeconds === 0) {
+        setIsCodeExpired(true)
+      }
     }
-  }, [remainingSeconds])
+  }, [remainingSeconds, isCodeVisible])
 
   const handleVerificationClick = () => {
     setVerifiedEmail(email)
     setCode("")
     setIsCodeVisible(true)
+    setShowVerificationSent(true)
+    setIsCodeInvalid(false)
+    setIsCodeExpired(false)
     setRemainingSeconds(600)
 
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -68,7 +84,10 @@ function SignUpPage() {
             <form onSubmit={handleSubmit} className="flex items-center gap-1.5">
               <InputBox
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setShowVerificationSent(false)
+                }}
                 state="default"
               />
               <Button
@@ -82,9 +101,25 @@ function SignUpPage() {
               </Button>
             </form>
 
-            <p className="text-body-2-medium text-error-500 h-5.5">
-              {/* TODO: "이미 가입된 이메일입니다." or "인증 메일을 받지 못하셨나요?" 출력 */}
-            </p>
+            <div className="flex h-5.5 items-center gap-1">
+              {showVerificationSent && (
+                <>
+                  <CircleBang className="text-teal-gray-300 h-4 w-4" />
+                  <p className="text-teal-gray-300 text-body-2-medium underline">
+                    인증 메일을 받지 못하셨나요?
+                  </p>
+                </>
+              )}
+
+              {isEmailDuplicated && (
+                <>
+                  <CheckIcon className="text-error-500 h-4 w-4" />
+                  <p className="text-error-500 text-body-2-medium">
+                    이미 가입된 이메일입니다.
+                  </p>
+                </>
+              )}
+            </div>
           </div>
 
           {isCodeVisible && (
@@ -99,17 +134,37 @@ function SignUpPage() {
               <InputBox
                 type="verification"
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={(e) => {
+                  setCode(e.target.value)
+                  setIsCodeInvalid(false)
+                }}
                 placeholder="숫자 6자리 입력"
                 remainingSeconds={remainingSeconds}
                 inputMode="numeric"
                 maxLength={6}
+                state={isCodeInvalid ? "error" : "default"}
                 className="w-full"
               />
 
-              <p className="text-body-2-medium text-error-500 h-5.5">
-                {/* TODO: "인증번호가 일치하지 않아요." or "인증번호 입력 시간이 지났어요." 출력 */}
-              </p>
+              <div className="flex h-5.5 items-center gap-1">
+                {isCodeInvalid && (
+                  <>
+                    <CircleBang className="text-error-500 h-4 w-4" />
+                    <p className="text-error-500 text-body-2-medium underline">
+                      인증번호가 일치하지 않아요.
+                    </p>
+                  </>
+                )}
+
+                {isCodeExpired && (
+                  <>
+                    <CircleBang className="text-error-500 h-4 w-4" />
+                    <p className="text-error-500 text-body-2-medium underline">
+                      인증번호 입력 시간이 지났어요.
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
@@ -118,7 +173,7 @@ function SignUpPage() {
               size={"m"}
               color={"primary"}
               variant={"fill"}
-              disabled={code.length !== 6}
+              disabled={code.length !== 6 || isCodeInvalid || isCodeExpired}
               className="w-full"
             >
               다음
