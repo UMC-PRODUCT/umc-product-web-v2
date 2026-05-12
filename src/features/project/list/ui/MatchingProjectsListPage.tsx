@@ -23,6 +23,7 @@ export function MatchingProjectsListPage() {
     filterKey,
   } = useMatchingProjectListFilters()
 
+  const [searchQuery, setSearchQuery] = useState("")
   const [page, setPage] = useState(1)
   const [selectedProject, setSelectedProject] =
     useState<MatchingProject | null>(null)
@@ -64,7 +65,7 @@ export function MatchingProjectsListPage() {
         </div>
 
         <div className="relative z-30 mb-3 flex items-start justify-between self-stretch">
-          <ProjectSearchField />
+          <ProjectSearchField value={searchQuery} onChange={setSearchQuery} />
           <div className="flex items-center gap-2">
             {filterDescriptors.map((filter) => (
               <FilterDropdown
