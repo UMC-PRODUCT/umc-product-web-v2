@@ -5,18 +5,25 @@ import {
   MOCK_PROJECTS,
   MOCK_STATS,
 } from "@/features/application/model/applicationMock"
+import {
+  MOCK_CHALLENGER_PROJECT,
+  MOCK_CHALLENGER_STATS,
+} from "@/features/application/model/challengerMock"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
-import { useViewRoleStore } from "@/shared/model/useViewRoleStore"
-import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
+import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
+import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
+import { useViewModeStore } from "@/shared/view-mode"
 
 export const Route = createFileRoute("/matching/applications")({
   component: MatchingApplicationsPage,
 })
 
+const CHALLENGER_PROJECTS = MOCK_PROJECTS.filter((p) => p.id === "3")
+
 function MatchingApplicationsPage() {
-  const role = useViewRoleStore((s) => s.role)
+  const mode = useViewModeStore((s) => s.mode)
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
 
   return (
@@ -32,23 +39,35 @@ function MatchingApplicationsPage() {
           </p>
         </div>
 
-        {/* 지부 선택 + 콘텐츠 */}
+        {/* 콘텐츠 */}
         <div className="mt-6 flex flex-col gap-[99px]">
-          <SegmentButton
-            items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
-            value={selectedChapter}
-            onValueChange={(v) => setSelectedChapter(v as Chapter)}
-            itemClassName="flex-1"
-          />
-
-          {role === "admin" && (
-            <div className="flex flex-col gap-[57px] pl-4">
-              <ApplicationStatsSection stats={MOCK_STATS} />
-              <ApplicationTableSection projects={MOCK_PROJECTS} />
-            </div>
+          {/* admin: 지부 선택 + 통계 + 테이블 */}
+          {mode === "admin" && (
+            <>
+              <SegmentButton
+                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+                value={selectedChapter}
+                onValueChange={(v) => setSelectedChapter(v as Chapter)}
+                itemClassName="flex-1"
+              />
+              <div className="flex flex-col gap-[57px] pl-4">
+                <ApplicationStatsSection stats={MOCK_STATS} />
+                <ApplicationTableSection projects={MOCK_PROJECTS} />
+              </div>
+            </>
           )}
 
-          {role !== "admin" && (
+          {/* pm: PM 챌린저 뷰 */}
+          {mode === "pm" && (
+            <ChallengerApplicationView
+              project={MOCK_CHALLENGER_PROJECT}
+              stats={MOCK_CHALLENGER_STATS}
+              projects={CHALLENGER_PROJECTS}
+            />
+          )}
+
+          {/* others: 준비 중 */}
+          {mode === "others" && (
             <div className="border-teal-gray-150 flex items-center justify-center rounded-xl border bg-white px-8.5 py-20">
               <p className="text-body-2-regular text-teal-gray-400">
                 해당 역할의 지원 현황 뷰는 준비 중입니다.
