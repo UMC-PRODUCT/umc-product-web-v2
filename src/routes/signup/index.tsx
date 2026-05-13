@@ -415,16 +415,16 @@ function SignUpPage() {
                       영문, 숫자, 특수문자 중 2종류 이상 포함한 8-16자
                     </p>
                   </>
-
-                  {hasInvalidSpecialChar && (
-                    <>
-                      <CheckIcon className="text-error-500 h-4 w-4" />
-                      <p className="text-error-500 text-body-2-medium">
-                        사용 가능한 특수문자 !#$&*@?
-                      </p>
-                    </>
-                  )}
                 </div>
+
+                {hasInvalidSpecialChar && (
+                  <div className="flex h-5.5 items-center gap-1">
+                    <CheckIcon className="text-error-500 h-4 w-4" />
+                    <p className="text-error-500 text-body-2-medium">
+                      사용 가능한 특수문자 !#$&*@?
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="flex w-full flex-col gap-1.5">
