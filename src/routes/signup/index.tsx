@@ -7,6 +7,9 @@ import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
+const REMAINING_SECONDS = 3 // 10분
+const VERIFICATION_CODE = "123456" // 임시 인증 번호
+
 const idSchema = z
   .string()
   .min(5, "아이디는 5자 이상이어야 합니다")
@@ -29,6 +32,36 @@ const passwordSchema = z
     "사용 가능한 특수문자 !#$&*@?",
   )
 
+type ValidationState = "default" | "pending" | "valid" | "invalid"
+
+const getValidationColor = (state: ValidationState): string => {
+  const colorMap: Record<ValidationState, string> = {
+    default: "text-teal-gray-500",
+    pending: "text-teal-gray-500",
+    valid: "text-success-600",
+    invalid: "text-error-500",
+  }
+  return colorMap[state]
+}
+
+const getIdValidationState = (
+  id: string,
+  isValid: boolean,
+): ValidationState => {
+  if (id === "") return "default"
+  return isValid ? "valid" : "invalid"
+}
+
+const getPasswordValidationState = (
+  password: string,
+  isValid: boolean,
+  hasInvalidSpecialChar: boolean,
+): ValidationState => {
+  if (password === "") return "default"
+  if (hasInvalidSpecialChar) return "invalid"
+  return isValid ? "valid" : "invalid"
+}
+
 export const Route = createFileRoute("/signup/")({
   component: SignUpPage,
 })
@@ -43,33 +76,32 @@ function SignUpPage() {
   const [isCodeVisible, setIsCodeVisible] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const [showVerificationSent, setShowVerificationSent] = useState(false)
-  // TODO: 이메일 인증 API 연결
+  // TODO: 이메일 검사 API 연동
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isEmailDuplicated, setIsEmailDuplicated] = useState(false)
   const [isCodeInvalid, setIsCodeInvalid] = useState(false)
   const [isCodeExpired, setIsCodeExpired] = useState(false)
-
+  const [hasExpiredBefore, setHasExpiredBefore] = useState(false)
+  const [isVerificationRequested, setIsVerificationRequested] = useState(false)
   const [isVerificationComplete, setIsVerificationComplete] = useState(false)
   const [isIdValid, setIsIdValid] = useState(false)
   const [isIdDuplicated, setIsIdDuplicated] = useState(false)
   const [isPasswordValid, setIsPasswordValid] = useState(false)
   const [hasInvalidSpecialChar, setHasInvalidSpecialChar] = useState(false)
   const [isPasswordMatch, setIsPasswordMatch] = useState(false)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   const isEmailValid = email.includes("@")
   const isEmailChanged = email !== verifiedEmail
+
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate({ from: Route.fullPath })
 
   const handleEmailSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
-
-    // TODO: 이메일 인증 API 연결
   }
 
   const handleIdSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
-
-    // TODO: 아이디 인증 API 연결
   }
 
   const handleIdChange = (value: string) => {
@@ -86,17 +118,22 @@ function SignUpPage() {
     // API 중복 시 setIsIdDuplicated(true)
   }
 
-  const handlePasswordChange = (value: string) => {
-    setPassword(value)
-
+  const getPasswordValidationError = (value: string) => {
     const result = passwordSchema.safeParse(value)
-    const hasSpecialError = !result.success
+    return !result.success
       ? result.error.issues.some((issue) =>
           issue.message.includes("사용 가능한 특수문자"),
         )
       : false
+  }
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value)
+
+    const hasSpecialError = getPasswordValidationError(value)
     setHasInvalidSpecialChar(hasSpecialError)
 
+    const result = passwordSchema.safeParse(value)
     const isValid = result.success && !hasSpecialError
     setIsPasswordValid(isValid)
 
@@ -111,33 +148,14 @@ function SignUpPage() {
   }
 
   const handleCodeComplete = () => {
-    // TODO: 인증번호 검증 API 연결
-    if (code === "123456") {
+    if (code === VERIFICATION_CODE) {
       setIsVerificationComplete(true)
     } else {
       setIsCodeInvalid(true)
     }
   }
 
-  useEffect(() => {
-    if (remainingSeconds <= 0 && intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-      if (isCodeVisible && remainingSeconds === 0) {
-        setIsCodeExpired(true)
-      }
-    }
-  }, [remainingSeconds, isCodeVisible])
-
-  const handleVerificationClick = () => {
-    setVerifiedEmail(email)
-    setCode("")
-    setIsCodeVisible(true)
-    setShowVerificationSent(true)
-    setIsCodeInvalid(false)
-    setIsCodeExpired(false)
-    setRemainingSeconds(600)
-
+  const startVerificationTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     intervalRef.current = setInterval(() => {
       setRemainingSeconds((prev) => {
@@ -150,8 +168,54 @@ function SignUpPage() {
     }, 1000)
   }
 
+  const handleVerificationClick = () => {
+    setVerifiedEmail(email)
+    setCode("")
+    setIsCodeVisible(true)
+    setShowVerificationSent(true)
+    setIsCodeInvalid(false)
+    setIsCodeExpired(false)
+    setIsVerificationRequested(true)
+    setRemainingSeconds(REMAINING_SECONDS)
+    startVerificationTimer()
+  }
+
+  useEffect(() => {
+    if (remainingSeconds <= 0 && intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+      if (isCodeVisible && remainingSeconds === 0) {
+        setIsCodeExpired(true)
+        setHasExpiredBefore(true)
+        setIsVerificationRequested(false)
+      }
+    }
+  }, [remainingSeconds, isCodeVisible])
+
+  const verificationButtonDisabled = isVerificationRequested
+    ? true
+    : hasExpiredBefore || isCodeExpired
+      ? false
+      : !isEmailValid || (isCodeVisible && !isEmailChanged)
+
+  const verificationButtonText =
+    hasExpiredBefore || isCodeExpired ? "다시 받기" : "인증하기"
+
+  const nextButtonDisabled = !isVerificationComplete
+    ? code.length !== 6 || isCodeInvalid || isCodeExpired
+    : !isIdValid || isIdDuplicated || !isPasswordValid || !isPasswordMatch
+
+  const idValidationState = getIdValidationState(id, isIdValid)
+  const idValidationColor = getValidationColor(idValidationState)
+
+  const passwordValidationState = getPasswordValidationState(
+    password,
+    isPasswordValid,
+    hasInvalidSpecialChar,
+  )
+  const passwordValidationColor = getValidationColor(passwordValidationState)
+
   return (
-    // __root.tsx의 mb-12를 해제하기 위한 -mb-12
     <section className="-mb-12 flex h-screen min-h-74 w-full min-w-90 items-center justify-center">
       <div className="flex flex-col items-center gap-10">
         <span className="text-heading-3-semibold text-teal-gray-900">
@@ -178,6 +242,7 @@ function SignUpPage() {
                     onChange={(e) => {
                       setEmail(e.target.value)
                       setShowVerificationSent(false)
+                      setIsVerificationRequested(false)
                     }}
                     state="default"
                   />
@@ -185,12 +250,10 @@ function SignUpPage() {
                     size={"m"}
                     color={"primary"}
                     variant={"weak"}
-                    disabled={
-                      !isEmailValid || (isCodeVisible && !isEmailChanged)
-                    }
+                    disabled={verificationButtonDisabled}
                     onClick={handleVerificationClick}
                   >
-                    인증하기
+                    {verificationButtonText}
                   </Button>
                 </form>
 
@@ -242,8 +305,8 @@ function SignUpPage() {
                   <div className="flex h-5.5 items-center gap-1">
                     {isCodeInvalid && (
                       <>
-                        <CircleBang className="text-error-500 h-4 w-4" />
-                        <p className="text-error-500 text-body-2-medium underline">
+                        <CheckIcon className="text-error-500 h-4 w-4" />
+                        <p className="text-error-500 text-body-2-medium">
                           인증번호가 일치하지 않아요.
                         </p>
                       </>
@@ -251,8 +314,8 @@ function SignUpPage() {
 
                     {isCodeExpired && (
                       <>
-                        <CircleBang className="text-error-500 h-4 w-4" />
-                        <p className="text-error-500 text-body-2-medium underline">
+                        <CheckIcon className="text-error-500 h-4 w-4" />
+                        <p className="text-error-500 text-body-2-medium">
                           인증번호 입력 시간이 지났어요.
                         </p>
                       </>
@@ -281,11 +344,9 @@ function SignUpPage() {
                     value={id}
                     onChange={(e) => handleIdChange(e.target.value)}
                     state={
-                      isIdDuplicated
+                      isIdDuplicated || (id !== "" && !isIdValid)
                         ? "error"
-                        : id !== "" && !isIdValid
-                          ? "error"
-                          : "default"
+                        : "default"
                     }
                     rightAdornment={<></>}
                   />
@@ -303,24 +364,8 @@ function SignUpPage() {
                 <div className="flex h-5.5 items-center gap-1">
                   {!isIdDuplicated && (
                     <>
-                      <CheckIcon
-                        className={`h-4 w-4 ${
-                          id === ""
-                            ? "text-teal-gray-500"
-                            : isIdValid
-                              ? "text-success-600"
-                              : "text-error-500"
-                        }`}
-                      />
-                      <p
-                        className={`text-body-2-medium ${
-                          id === ""
-                            ? "text-teal-gray-500"
-                            : isIdValid
-                              ? "text-success-600"
-                              : "text-error-500"
-                        }`}
-                      >
+                      <CheckIcon className={`h-4 w-4 ${idValidationColor}`} />
+                      <p className={`text-body-2-medium ${idValidationColor}`}>
                         5~20자의 영문, 숫자와 특수기호(_),(-) 사용 가능
                       </p>
                     </>
@@ -362,26 +407,10 @@ function SignUpPage() {
                 <div className="flex h-5.5 items-center gap-1">
                   <>
                     <CheckIcon
-                      className={`h-4 w-4 ${
-                        password === ""
-                          ? "text-teal-gray-500"
-                          : hasInvalidSpecialChar
-                            ? "text-error-500"
-                            : isPasswordValid
-                              ? "text-success-600"
-                              : "text-error-500"
-                      }`}
+                      className={`h-4 w-4 ${passwordValidationColor}`}
                     />
                     <p
-                      className={`text-body-2-medium ${
-                        password === ""
-                          ? "text-teal-gray-500"
-                          : hasInvalidSpecialChar
-                            ? "text-error-500"
-                            : isPasswordValid
-                              ? "text-success-600"
-                              : "text-error-500"
-                      }`}
+                      className={`text-body-2-medium ${passwordValidationColor}`}
                     >
                       영문, 숫자, 특수문자 중 2종류 이상 포함한 8-16자
                     </p>
@@ -444,14 +473,7 @@ function SignUpPage() {
               size={"m"}
               color={"primary"}
               variant={"fill"}
-              disabled={
-                !isVerificationComplete
-                  ? code.length !== 6 || isCodeInvalid || isCodeExpired
-                  : !isIdValid ||
-                    isIdDuplicated ||
-                    !isPasswordValid ||
-                    !isPasswordMatch
-              }
+              disabled={nextButtonDisabled}
               className="w-full"
               onClick={() => {
                 if (!isVerificationComplete && code.length === 6) {
