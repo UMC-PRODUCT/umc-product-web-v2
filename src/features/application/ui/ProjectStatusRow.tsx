@@ -113,12 +113,12 @@ export function ProjectStatusRow({
         aria-expanded={isExpanded}
         onClick={onToggleExpand}
         className={cn(
-          "shadow-inner-neutral-2 flex size-7.5 shrink-0 items-center justify-center rounded-[10px] transition-colors",
+          "shadow-inner-neutral-2 flex size-[30px] shrink-0 items-center justify-center rounded-[10px] transition-colors",
           isExpanded ? "bg-teal-100/50" : "hover:bg-teal-gray-150 bg-white",
         )}
       >
         <ChevronDown
-          size={17}
+          size={30}
           className={cn(
             "text-teal-gray-600 transition-transform",
             isExpanded && "rotate-180",
