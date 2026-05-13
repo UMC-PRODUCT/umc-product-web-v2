@@ -19,7 +19,14 @@ const statusTextVariants = cva("text-label-2-medium whitespace-nowrap", {
       fail: "text-error-600",
       pending: "text-warning-600",
     },
+    disabled: {
+      true: "",
+      false: "",
+    },
   },
+  compoundVariants: [
+    { value: "pending", disabled: true, className: "text-warning-500" },
+  ],
 })
 
 const STATUS_LABEL = {
@@ -57,13 +64,13 @@ export function StatusChipTag({
   return (
     <span
       className={cn(
-        "border-teal-gray-100 shadow-drop-neutral-2 inline-flex h-[26px] items-center gap-1.5 rounded-xl border bg-white py-0.5 pr-[11px] pl-[9px]",
-        disabled && "border-transparent opacity-60",
+        "shadow-drop-neutral-2 inline-flex h-6.5 items-center gap-1.5 rounded-xl py-0.5 pr-2.75 pl-2.25",
+        !disabled && "border-teal-gray-100 border bg-white",
         className,
       )}
     >
       <span className={statusDotVariants({ value })} />
-      <span className={statusTextVariants({ value })}>
+      <span className={statusTextVariants({ value, disabled })}>
         {STATUS_LABEL[value]}
       </span>
     </span>

@@ -1,6 +1,7 @@
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { cn } from "@/shared/lib/utils"
 import { StatusChipDropdown } from "@/shared/ui/chip/StatusChipDropdown"
+import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
@@ -50,6 +51,7 @@ interface ModalFormPanelProps {
   challengerUniversity: string
   onStatusChange?: (status: StatusValue) => void
   onClose: () => void
+  statusDisabled?: boolean
   className?: string
 }
 
@@ -62,6 +64,7 @@ export function ModalFormPanel({
   challengerUniversity,
   onStatusChange,
   onClose,
+  statusDisabled = false,
   className,
 }: ModalFormPanelProps) {
   const roleLabel = ROLE_LABEL[applicant.role] ?? applicant.role
@@ -106,16 +109,16 @@ export function ModalFormPanel({
                 variant="segmented"
                 value={applicant.status}
                 onValueChange={(v) => onStatusChange?.(v as StatusValue)}
-                className="w-60"
+                className={cn("w-60", statusDisabled && "pointer-events-none")}
               >
-                <OptionButton value="pending" className="h-7.5">
-                  대기
+                <OptionButton value="pass" className="h-7.5 gap-0.5">
+                  합격
                 </OptionButton>
-                <OptionButton value="fail" className="h-7.5">
+                <OptionButton value="fail" className="h-7.5 gap-0.5">
                   불합격
                 </OptionButton>
-                <OptionButton value="pass" className="h-7.5">
-                  합격
+                <OptionButton value="pending" className="h-7.5 gap-0.5">
+                  대기
                 </OptionButton>
               </OptionButtonGroup>
             </div>
@@ -124,10 +127,14 @@ export function ModalFormPanel({
               <span className="text-body-2-medium text-teal-gray-600">
                 {applicant.name} · {applicant.university}
               </span>
-              <StatusChipDropdown
-                value={applicant.status}
-                onValueChange={onStatusChange}
-              />
+              {statusDisabled ? (
+                <StatusChipTag value={applicant.status} type="chip" disabled />
+              ) : (
+                <StatusChipDropdown
+                  value={applicant.status}
+                  onValueChange={onStatusChange}
+                />
+              )}
             </div>
           </div>
         </div>

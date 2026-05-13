@@ -56,25 +56,42 @@ const APPLICATION_STATUS_OPTIONS = [
   { value: "pending", label: "대기" },
 ]
 
+type FilterName = "round" | "part" | "school" | "recruit" | "appStatus"
+
 interface ApplicationTableSectionProps {
   projects: ProjectApplication[]
+  searchPlaceholder?: string
+  visibleFilters?: FilterName[]
+  /** 현재 활성 차수 (이전 차수의 상태 칩 disabled 처리) */
+  currentRound?: number
   className?: string
 }
 
+const DEFAULT_FILTERS: FilterName[] = [
+  "school",
+  "part",
+  "round",
+  "recruit",
+  "appStatus",
+]
+
 export function ApplicationTableSection({
   projects,
+  searchPlaceholder = "프로젝트 명으로 검색하세요.",
+  visibleFilters = DEFAULT_FILTERS,
+  currentRound,
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
 
-  // Detail modal state
+  // 상세 모달 상태
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] =
     useState<ProjectApplication | null>(null)
 
-  // Filter state
+  // 필터 상태
   const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [schoolFilter, setSchoolFilter] = useState("all")
   const [partFilter, setPartFilter] = useState("all")
@@ -99,7 +116,7 @@ export function ApplicationTableSection({
 
   const closeFilter = useCallback(() => setOpenFilter(null), [])
 
-  // Filter projects
+  // 프로젝트 필터링
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {
       if (
@@ -132,7 +149,7 @@ export function ApplicationTableSection({
     }
   }, [hasExpanded, pagedProjects])
 
-  // Filter applicants within expanded rows
+  // 펼친 행 내 지원자 필터링
   const filterApplicants = useCallback(
     (applicants: ApplicantDetail[]) => {
       return applicants.filter((a) => {
@@ -149,78 +166,90 @@ export function ApplicationTableSection({
     [partFilter, roundFilter, appStatusFilter, schoolFilter],
   )
 
-  const filters: (FilterDropdownProps & { name: string })[] = [
-    {
-      name: "school",
-      label: "PM 학교",
-      options: SCHOOL_OPTIONS,
-      selectedValue: schoolFilter === "all" ? undefined : schoolFilter,
-      open: openFilter === "school",
-      onClick: () => toggleFilter("school"),
-      onSelect: (v: string) => {
-        setSchoolFilter(v)
-        setCurrentPage(1)
+  const filters: (FilterDropdownProps & { name: string })[] = useMemo(
+    () => [
+      {
+        name: "school",
+        label: "학교",
+        options: SCHOOL_OPTIONS,
+        selectedValue: schoolFilter === "all" ? undefined : schoolFilter,
+        open: openFilter === "school",
+        onClick: () => toggleFilter("school"),
+        onSelect: (v: string) => {
+          setSchoolFilter(v)
+          setCurrentPage(1)
+        },
+        onRequestClose: closeFilter,
+        className: "min-w-0",
       },
-      onRequestClose: closeFilter,
-      className: "min-w-0",
-    },
-    {
-      name: "part",
-      label: "파트",
-      options: PART_OPTIONS,
-      selectedValue: partFilter === "all" ? undefined : partFilter,
-      open: openFilter === "part",
-      onClick: () => toggleFilter("part"),
-      onSelect: (v: string) => {
-        setPartFilter(v)
-        setCurrentPage(1)
+      {
+        name: "part",
+        label: "파트",
+        options: PART_OPTIONS,
+        selectedValue: partFilter === "all" ? undefined : partFilter,
+        open: openFilter === "part",
+        onClick: () => toggleFilter("part"),
+        onSelect: (v: string) => {
+          setPartFilter(v)
+          setCurrentPage(1)
+        },
+        onRequestClose: closeFilter,
+        className: "min-w-0",
       },
-      onRequestClose: closeFilter,
-      className: "min-w-0",
-    },
-    {
-      name: "round",
-      label: "차수",
-      options: ROUND_OPTIONS,
-      selectedValue: roundFilter === "all" ? undefined : roundFilter,
-      open: openFilter === "round",
-      onClick: () => toggleFilter("round"),
-      onSelect: (v: string) => {
-        setRoundFilter(v)
-        setCurrentPage(1)
+      {
+        name: "round",
+        label: "차수",
+        options: ROUND_OPTIONS,
+        selectedValue: roundFilter === "all" ? undefined : roundFilter,
+        open: openFilter === "round",
+        onClick: () => toggleFilter("round"),
+        onSelect: (v: string) => {
+          setRoundFilter(v)
+          setCurrentPage(1)
+        },
+        onRequestClose: closeFilter,
+        className: "min-w-0",
       },
-      onRequestClose: closeFilter,
-      className: "min-w-0",
-    },
-    {
-      name: "recruit",
-      label: "모집 상태",
-      options: RECRUIT_STATUS_OPTIONS,
-      selectedValue: recruitFilter === "all" ? undefined : recruitFilter,
-      open: openFilter === "recruit",
-      onClick: () => toggleFilter("recruit"),
-      onSelect: (v: string) => {
-        setRecruitFilter(v)
-        setCurrentPage(1)
+      {
+        name: "recruit",
+        label: "모집 상태",
+        options: RECRUIT_STATUS_OPTIONS,
+        selectedValue: recruitFilter === "all" ? undefined : recruitFilter,
+        open: openFilter === "recruit",
+        onClick: () => toggleFilter("recruit"),
+        onSelect: (v: string) => {
+          setRecruitFilter(v)
+          setCurrentPage(1)
+        },
+        onRequestClose: closeFilter,
+        className: "min-w-0",
       },
-      onRequestClose: closeFilter,
-      className: "min-w-0",
-    },
-    {
-      name: "appStatus",
-      label: "지원 상태",
-      options: APPLICATION_STATUS_OPTIONS,
-      selectedValue: appStatusFilter === "all" ? undefined : appStatusFilter,
-      open: openFilter === "appStatus",
-      onClick: () => toggleFilter("appStatus"),
-      onSelect: (v: string) => {
-        setAppStatusFilter(v)
-        setCurrentPage(1)
+      {
+        name: "appStatus",
+        label: "지원 상태",
+        options: APPLICATION_STATUS_OPTIONS,
+        selectedValue: appStatusFilter === "all" ? undefined : appStatusFilter,
+        open: openFilter === "appStatus",
+        onClick: () => toggleFilter("appStatus"),
+        onSelect: (v: string) => {
+          setAppStatusFilter(v)
+          setCurrentPage(1)
+        },
+        onRequestClose: closeFilter,
+        className: "min-w-0",
       },
-      onRequestClose: closeFilter,
-      className: "min-w-0",
-    },
-  ]
+    ],
+    [
+      schoolFilter,
+      partFilter,
+      roundFilter,
+      recruitFilter,
+      appStatusFilter,
+      openFilter,
+      toggleFilter,
+      closeFilter,
+    ],
+  )
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>
@@ -232,7 +261,7 @@ export function ApplicationTableSection({
         <div className="shadow-inner-neutral-2 bg-teal-gray-100 flex h-11 w-[456px] items-center gap-2 rounded-xl px-4">
           <input
             type="text"
-            placeholder="프로젝트 명으로 검색하세요."
+            placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value)
@@ -243,9 +272,12 @@ export function ApplicationTableSection({
           <Search size={24} className="text-teal-gray-400 shrink-0" />
         </div>
         <div className="flex items-center gap-2">
-          {filters.map((f) => (
-            <FilterDropdown key={f.name} {...f} />
-          ))}
+          {visibleFilters
+            .map((name) => filters.find((f) => f.name === name))
+            .filter(Boolean)
+            .map((f) => (
+              <FilterDropdown key={f!.name} {...f!} />
+            ))}
         </div>
       </div>
 
@@ -313,6 +345,7 @@ export function ApplicationTableSection({
           chapterName="Chromium"
           open={detailModalOpen}
           onOpenChange={setDetailModalOpen}
+          currentRound={currentRound}
         />
       )}
     </div>
