@@ -1,0 +1,19 @@
+/* 커스텀 clip-path / background 유틸리티 */
+
+@utility bg-stats-breakdown {
+  background-image:
+    linear-gradient(90deg, rgba(246, 247, 247, 0.5), rgba(246, 247, 247, 0.5)),
+    linear-gradient(90deg, #fbfcfc, #fbfcfc);
+}
+
+@utility clip-trapezoid-sm {
+  clip-path: path("M 8 0 H 210 Q 218 0 224 5 L 278 60 H 0 V 8 Q 0 0 8 0 Z");
+}
+
+@utility clip-trapezoid-md {
+  clip-path: path("M 12 0 H 268 Q 280 0 288 8 L 352 85 H 0 V 12 Q 0 0 12 0 Z");
+}
+
+@utility clip-trapezoid-lg {
+  clip-path: path("M 12 0 H 268 Q 280 0 288 8 L 352 85 H 0 V 12 Q 0 0 12 0 Z");
+}

@@ -56,13 +56,7 @@ export function ChallengerStatsSection({
           </div>
 
           {/* 하단 차수별 breakdown */}
-          <div
-            className="absolute right-7.5 bottom-8 w-44.5 rounded px-3.5 py-3"
-            style={{
-              backgroundImage:
-                "linear-gradient(90deg, rgba(246,247,247,0.5), rgba(246,247,247,0.5)), linear-gradient(90deg, #fbfcfc, #fbfcfc)",
-            }}
-          >
+          <div className="bg-stats-breakdown absolute right-7.5 bottom-8 w-44.5 rounded px-3.5 py-3">
             <div className="flex flex-col gap-1.25 text-[12px]">
               {stats.rounds.map((r) => (
                 <div key={r.round} className="flex items-center gap-7">
