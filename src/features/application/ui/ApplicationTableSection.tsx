@@ -58,11 +58,13 @@ const APPLICATION_STATUS_OPTIONS = [
 
 interface ApplicationTableSectionProps {
   projects: ProjectApplication[]
+  searchPlaceholder?: string
   className?: string
 }
 
 export function ApplicationTableSection({
   projects,
+  searchPlaceholder = "프로젝트 명으로 검색하세요.",
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -232,7 +234,7 @@ export function ApplicationTableSection({
         <div className="shadow-inner-neutral-2 bg-teal-gray-100 flex h-11 w-[456px] items-center gap-2 rounded-xl px-4">
           <input
             type="text"
-            placeholder="프로젝트 명으로 검색하세요."
+            placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value)
