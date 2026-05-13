@@ -56,27 +56,39 @@ const APPLICATION_STATUS_OPTIONS = [
   { value: "pending", label: "대기" },
 ]
 
+type FilterName = "round" | "part" | "school" | "recruit" | "appStatus"
+
 interface ApplicationTableSectionProps {
   projects: ProjectApplication[]
   searchPlaceholder?: string
+  visibleFilters?: FilterName[]
   className?: string
 }
+
+const DEFAULT_FILTERS: FilterName[] = [
+  "school",
+  "part",
+  "round",
+  "recruit",
+  "appStatus",
+]
 
 export function ApplicationTableSection({
   projects,
   searchPlaceholder = "프로젝트 명으로 검색하세요.",
+  visibleFilters = DEFAULT_FILTERS,
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
 
-  // Detail modal state
+  // 상세 모달 상태
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] =
     useState<ProjectApplication | null>(null)
 
-  // Filter state
+  // 필터 상태
   const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [schoolFilter, setSchoolFilter] = useState("all")
   const [partFilter, setPartFilter] = useState("all")
@@ -101,7 +113,7 @@ export function ApplicationTableSection({
 
   const closeFilter = useCallback(() => setOpenFilter(null), [])
 
-  // Filter projects
+  // 프로젝트 필터링
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {
       if (
@@ -134,7 +146,7 @@ export function ApplicationTableSection({
     }
   }, [hasExpanded, pagedProjects])
 
-  // Filter applicants within expanded rows
+  // 펼친 행 내 지원자 필터링
   const filterApplicants = useCallback(
     (applicants: ApplicantDetail[]) => {
       return applicants.filter((a) => {
@@ -154,7 +166,7 @@ export function ApplicationTableSection({
   const filters: (FilterDropdownProps & { name: string })[] = [
     {
       name: "school",
-      label: "PM 학교",
+      label: "학교",
       options: SCHOOL_OPTIONS,
       selectedValue: schoolFilter === "all" ? undefined : schoolFilter,
       open: openFilter === "school",
@@ -245,9 +257,12 @@ export function ApplicationTableSection({
           <Search size={24} className="text-teal-gray-400 shrink-0" />
         </div>
         <div className="flex items-center gap-2">
-          {filters.map((f) => (
-            <FilterDropdown key={f.name} {...f} />
-          ))}
+          {visibleFilters
+            .map((name) => filters.find((f) => f.name === name))
+            .filter(Boolean)
+            .map((f) => (
+              <FilterDropdown key={f!.name} {...f!} />
+            ))}
         </div>
       </div>
 
