@@ -4,6 +4,7 @@ import { z } from "zod"
 
 import CircleBang from "@/shared/assets/icon/bang/CircleBang"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
+import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
@@ -31,6 +32,13 @@ const passwordSchema = z
     (pw) => /^[a-zA-Z0-9!#$&*@?]*$/.test(pw),
     "사용 가능한 특수문자 !#$&*@?",
   )
+
+const nicknameSchema = z
+  .string()
+  .regex(/^[가-힣\s]*$/)
+  .refine((nickname) => nickname.replace(/\s/g, "").length >= 1)
+  .refine((nickname) => nickname.replace(/\s/g, "").length <= 5)
+  .refine((nickname) => !/\s/.test(nickname))
 
 type ValidationState = "default" | "pending" | "valid" | "invalid"
 
@@ -62,6 +70,14 @@ const getPasswordValidationState = (
   return isValid ? "valid" : "invalid"
 }
 
+const getNicknameValidationState = (
+  nickname: string,
+  isValid: boolean,
+): ValidationState => {
+  if (nickname === "") return "default"
+  return isValid ? "valid" : "invalid"
+}
+
 export const Route = createFileRoute("/signup/")({
   component: SignUpPage,
 })
@@ -73,6 +89,8 @@ function SignUpPage() {
   const [id, setId] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [name, setName] = useState("")
+  const [nickname, setNickname] = useState("")
   const [isCodeVisible, setIsCodeVisible] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const [showVerificationSent, setShowVerificationSent] = useState(false)
@@ -84,11 +102,14 @@ function SignUpPage() {
   const [hasExpiredBefore, setHasExpiredBefore] = useState(false)
   const [isVerificationRequested, setIsVerificationRequested] = useState(false)
   const [isVerificationComplete, setIsVerificationComplete] = useState(false)
+  const [isAccountCreationComplete, setIsAccountCreationComplete] =
+    useState(false)
   const [isIdValid, setIsIdValid] = useState(false)
   const [isIdDuplicated, setIsIdDuplicated] = useState(false)
   const [isPasswordValid, setIsPasswordValid] = useState(false)
   const [hasInvalidSpecialChar, setHasInvalidSpecialChar] = useState(false)
   const [isPasswordMatch, setIsPasswordMatch] = useState(false)
+  const [isNicknameValid, setIsNicknameValid] = useState(false)
 
   const isEmailValid = email.includes("@")
   const isEmailChanged = email !== verifiedEmail
@@ -147,12 +168,23 @@ function SignUpPage() {
     setIsPasswordMatch(password === value)
   }
 
+  const handleNicknameChange = (value: string) => {
+    setNickname(value)
+
+    const result = nicknameSchema.safeParse(value)
+    setIsNicknameValid(result.success)
+  }
+
   const handleCodeComplete = () => {
     if (code === VERIFICATION_CODE) {
       setIsVerificationComplete(true)
     } else {
       setIsCodeInvalid(true)
     }
+  }
+
+  const handleAccountCreationComplete = () => {
+    setIsAccountCreationComplete(true)
   }
 
   const startVerificationTimer = () => {
@@ -201,9 +233,11 @@ function SignUpPage() {
   const verificationButtonText =
     hasExpiredBefore || isCodeExpired ? "다시 받기" : "인증하기"
 
-  const nextButtonDisabled = !isVerificationComplete
+  const accountCreationNextButtonDisabled = !isVerificationComplete
     ? code.length !== 6 || isCodeInvalid || isCodeExpired
     : !isIdValid || isIdDuplicated || !isPasswordValid || !isPasswordMatch
+
+  const profileInfoNextButtonDisabled = !name || !isNicknameValid
 
   const idValidationState = getIdValidationState(id, isIdValid)
   const idValidationColor = getValidationColor(idValidationState)
@@ -214,6 +248,12 @@ function SignUpPage() {
     hasInvalidSpecialChar,
   )
   const passwordValidationColor = getValidationColor(passwordValidationState)
+
+  const nicknameValidationState = getNicknameValidationState(
+    nickname,
+    isNicknameValid,
+  )
+  const nicknameValidationColor = getValidationColor(nicknameValidationState)
 
   return (
     <section className="-mb-12 flex h-screen min-h-74 w-full min-w-90 items-center justify-center">
@@ -326,7 +366,7 @@ function SignUpPage() {
             </>
           )}
 
-          {isVerificationComplete && (
+          {isVerificationComplete && !isAccountCreationComplete && (
             <>
               <div className="flex flex-col gap-1.5">
                 <div>
@@ -468,16 +508,89 @@ function SignUpPage() {
             </>
           )}
 
+          {isAccountCreationComplete && (
+            <>
+              <div className="flex w-full flex-col gap-1.5">
+                <div>
+                  <span className="text-body-1-medium text-teal-gray-600">
+                    학교
+                  </span>
+                  <span className="text-body-1-medium text-error-600">*</span>
+                </div>
+
+                <div className="border-teal-gray-300 shadow-inner-neutral-1 flex w-90 items-center justify-between rounded-[12px] border bg-white py-3 pr-2.5 pl-4">
+                  <span className="text-body-2-medium text-teal-gray-400">
+                    학교를 선택해주세요.
+                  </span>
+                  <DownChevronIcon className="text-teal-gray-400 h-5 w-5" />
+                </div>
+              </div>
+
+              <div className="flex w-full flex-col gap-1.5">
+                <div>
+                  <span className="text-body-1-medium text-teal-gray-600">
+                    이름
+                  </span>
+                  <span className="text-body-1-medium text-error-600">*</span>
+                </div>
+
+                <InputBox
+                  type="default"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="flex w-full flex-col gap-1.5">
+                <div>
+                  <span className="text-body-1-medium text-teal-gray-600">
+                    닉네임
+                  </span>
+                  <span className="text-body-1-medium text-error-600">*</span>
+                </div>
+
+                <InputBox
+                  type="default"
+                  value={nickname}
+                  onChange={(e) => handleNicknameChange(e.target.value)}
+                  state={
+                    nickname !== "" && !isNicknameValid ? "error" : "default"
+                  }
+                  className="w-full"
+                />
+
+                <div className="flex h-5.5 items-center gap-1">
+                  <CheckIcon className={`h-4 w-4 ${nicknameValidationColor}`} />
+                  <p
+                    className={`text-body-2-medium ${nicknameValidationColor}`}
+                  >
+                    공백 없이 한글 1-5자
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+
           <div className="flex w-full flex-col items-center gap-4">
             <Button
               size={"m"}
               color={"primary"}
               variant={"fill"}
-              disabled={nextButtonDisabled}
+              disabled={
+                isAccountCreationComplete
+                  ? profileInfoNextButtonDisabled
+                  : accountCreationNextButtonDisabled
+              }
               className="w-full"
               onClick={() => {
                 if (!isVerificationComplete && code.length === 6) {
                   handleCodeComplete()
+                } else if (
+                  isVerificationComplete &&
+                  !isAccountCreationComplete
+                ) {
+                  handleAccountCreationComplete()
                 }
               }}
             >
