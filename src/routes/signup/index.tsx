@@ -7,7 +7,7 @@ import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
-const REMAINING_SECONDS = 3 // 10분
+const REMAINING_SECONDS = 600 // 10분
 const VERIFICATION_CODE = "123456" // 임시 인증 번호
 
 const idSchema = z
@@ -303,7 +303,7 @@ function SignUpPage() {
                   />
 
                   <div className="flex h-5.5 items-center gap-1">
-                    {isCodeInvalid && (
+                    {isCodeInvalid && !isCodeExpired && (
                       <>
                         <CheckIcon className="text-error-500 h-4 w-4" />
                         <p className="text-error-500 text-body-2-medium">
