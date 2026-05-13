@@ -65,8 +65,11 @@ export function ProjectTitleCard({
   return (
     <div className={cn("flex items-end", className)}>
       <div
-        className="flex h-21.25 w-4/5 shrink-0 items-center gap-5 rounded-bl-xl bg-teal-50 bg-linear-to-r px-5.5 py-4"
-        style={{ clipPath: "polygon(0 0, 80% 0, 100% 100%, 0 100%)" }}
+        className="flex h-21.25 w-88 shrink-0 items-center gap-5 bg-teal-50 bg-linear-to-r px-5.5 py-4"
+        style={{
+          clipPath:
+            "path('M 12 0 H 268 Q 280 0 288 8 L 352 85 H 0 V 12 Q 0 0 12 0 Z')",
+        }}
       >
         <div className="bg-teal-gray-200 size-12.5 shrink-0 rounded-lg" />
         <div className="flex flex-col gap-1">
@@ -78,7 +81,7 @@ export function ProjectTitleCard({
           </span>
         </div>
       </div>
-      <div className="-ml-2 h-2.5 flex-1 rounded-tr-xl bg-teal-100" />
+      <div className="-ml-2 h-2.5 flex-1 rounded-tr-xl bg-teal-50" />
     </div>
   )
 }
