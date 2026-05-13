@@ -1,135 +1,79 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
-import { z } from "zod"
 
-import { type School, SchoolDropdown } from "@/features/signup"
-import CircleBang from "@/shared/assets/icon/bang/CircleBang"
-import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
+import {
+  AccountCreationStep,
+  ProfileInfoStep,
+  type School,
+  VerificationStep,
+} from "@/features/signup"
+import {
+  getPasswordValidationError,
+  idSchema,
+  nicknameSchema,
+  passwordSchema,
+} from "@/features/signup/validation"
 import { Button } from "@/shared/ui/Button"
-import { InputBox } from "@/shared/ui/input/InputBox"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 const REMAINING_SECONDS = 600 // 10분
 // TODO: API 연동 후 실제 인증번호 사용
 const VERIFICATION_CODE = "123456" // 임시 인증 번호
 
-const idSchema = z
-  .string()
-  .min(5, "아이디는 5자 이상이어야 합니다")
-  .max(20, "아이디는 20자 이하여야 합니다")
-  .regex(/^[a-z0-9_-]*$/, "5~20자의 영문, 숫자와 특수기호(_),(-) 사용 가능")
-
-const passwordSchema = z
-  .string()
-  .min(8, "비밀번호는 8자 이상이어야 합니다")
-  .max(16, "비밀번호는 16자 이하여야 합니다")
-  .refine((pw) => {
-    const hasLetter = /[a-zA-Z]/.test(pw)
-    const hasNumber = /[0-9]/.test(pw)
-    const hasSpecial = /[!#$&*@?]/.test(pw)
-    const typeCount = [hasLetter, hasNumber, hasSpecial].filter(Boolean).length
-    return typeCount >= 2
-  }, "영문, 숫자, 특수문자 중 2종류 이상 포함한 8-16자")
-  .refine(
-    (pw) => /^[a-zA-Z0-9!#$&*@?]*$/.test(pw),
-    "사용 가능한 특수문자 !#$&*@?",
-  )
-
-const nicknameSchema = z
-  .string()
-  .regex(/^[가-힣\s]*$/)
-  .refine((nickname) => nickname.replace(/\s/g, "").length >= 1)
-  .refine((nickname) => nickname.replace(/\s/g, "").length <= 5)
-  .refine((nickname) => !/\s/.test(nickname))
-
-type ValidationState = "default" | "pending" | "valid" | "invalid"
-
-const getValidationColor = (state: ValidationState): string => {
-  const colorMap: Record<ValidationState, string> = {
-    default: "text-teal-gray-500",
-    pending: "text-teal-gray-500",
-    valid: "text-success-600",
-    invalid: "text-error-500",
-  }
-  return colorMap[state]
-}
-
-const getIdValidationState = (
-  id: string,
-  isValid: boolean,
-): ValidationState => {
-  if (id === "") return "default"
-  return isValid ? "valid" : "invalid"
-}
-
-const getPasswordValidationState = (
-  password: string,
-  isValid: boolean,
-  hasInvalidSpecialChar: boolean,
-): ValidationState => {
-  if (password === "") return "default"
-  if (hasInvalidSpecialChar) return "invalid"
-  return isValid ? "valid" : "invalid"
-}
-
-const getNicknameValidationState = (
-  nickname: string,
-  isValid: boolean,
-): ValidationState => {
-  if (nickname === "") return "default"
-  return isValid ? "valid" : "invalid"
-}
-
 export const Route = createFileRoute("/signup/")({
   component: SignUpPage,
 })
 
 function SignUpPage() {
+  // 이메일 상태
   const [email, setEmail] = useState("")
   const [verifiedEmail, setVerifiedEmail] = useState("")
   const [code, setCode] = useState("")
-  const [id, setId] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [school, setSchool] = useState<School | undefined>(undefined)
-  const [name, setName] = useState("")
-  const [nickname, setNickname] = useState("")
+  const [isEmailChanged, setIsEmailChanged] = useState(false)
+
+  // 인증번호 상태
   const [isCodeVisible, setIsCodeVisible] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const [showVerificationSent, setShowVerificationSent] = useState(false)
   const [showSpamGuideModal, setShowSpamGuideModal] = useState(false)
-  // TODO: 이메일 인증 API 연동
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isEmailDuplicated, setIsEmailDuplicated] = useState(false)
   const [isCodeInvalid, setIsCodeInvalid] = useState(false)
   const [isCodeExpired, setIsCodeExpired] = useState(false)
   const [hasExpiredBefore, setHasExpiredBefore] = useState(false)
   const [isVerificationRequested, setIsVerificationRequested] = useState(false)
   const [isVerificationComplete, setIsVerificationComplete] = useState(false)
-  const [isAccountCreationComplete, setIsAccountCreationComplete] =
-    useState(false)
+
+  // 아이디, 비밀번호 상태
+  const [id, setId] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [isIdValid, setIsIdValid] = useState(false)
   const [isIdDuplicated, setIsIdDuplicated] = useState(false)
   const [isPasswordValid, setIsPasswordValid] = useState(false)
   const [hasInvalidSpecialChar, setHasInvalidSpecialChar] = useState(false)
   const [isPasswordMatch, setIsPasswordMatch] = useState(false)
+  const [isAccountCreationComplete, setIsAccountCreationComplete] =
+    useState(false)
+
+  // 학교, 이름, 닉네임 상태
+  const [school, setSchool] = useState<School | undefined>(undefined)
+  const [name, setName] = useState("")
+  const [nickname, setNickname] = useState("")
   const [isNicknameValid, setIsNicknameValid] = useState(false)
 
   const isEmailValid = email.includes("@")
-  const isEmailChanged = email !== verifiedEmail
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate({ from: Route.fullPath })
 
-  const handleEmailSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // TODO: 이메일 인증 요청 API 연동
-    // 이메일로 인증 코드 전송
+  const handleEmailChange = (value: string) => {
+    setEmail(value)
+    setShowVerificationSent(false)
+    setIsVerificationRequested(false)
   }
 
-  const handleIdSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // TODO: 필요시 ID 폼 서브밋 처리
+  const handleCodeChange = (value: string) => {
+    setCode(value)
+    setIsCodeInvalid(false)
   }
 
   const handleIdChange = (value: string) => {
@@ -147,15 +91,7 @@ function SignUpPage() {
     // - 중복된 아이디: setIsIdDuplicated(true)
   }
 
-  const getPasswordValidationError = (value: string) => {
-    const result = passwordSchema.safeParse(value)
-    return !result.success
-      ? result.error.issues.some((issue) =>
-          issue.message.includes("사용 가능한 특수문자"),
-        )
-      : false
-  }
-
+  // Password Handlers
   const handlePasswordChange = (value: string) => {
     setPassword(value)
 
@@ -183,6 +119,37 @@ function SignUpPage() {
     setIsNicknameValid(result.success)
   }
 
+  const startVerificationTimer = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    intervalRef.current = setInterval(() => {
+      setRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) clearInterval(intervalRef.current)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
+  const handleVerificationClick = () => {
+    setVerifiedEmail(email)
+    setCode("")
+    setIsCodeVisible(true)
+    setShowVerificationSent(true)
+    setIsCodeInvalid(false)
+    setIsCodeExpired(false)
+    setIsVerificationRequested(true)
+    setRemainingSeconds(REMAINING_SECONDS)
+    setIsEmailChanged(false)
+    startVerificationTimer()
+  }
+
+  const handleSpamGuideConfirm = () => {
+    handleVerificationClick()
+    setShowSpamGuideModal(false)
+  }
+
   const handleCodeComplete = () => {
     // TODO: 인증번호 검증 API 연동
     // API 요청 후:
@@ -200,36 +167,16 @@ function SignUpPage() {
     setIsAccountCreationComplete(true)
   }
 
-  const startVerificationTimer = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    intervalRef.current = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          if (intervalRef.current) clearInterval(intervalRef.current)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-  }
+  // 이메일 검증
+  useEffect(() => {
+    if (isCodeVisible && email !== verifiedEmail) {
+      setIsEmailChanged(true)
+    } else {
+      setIsEmailChanged(false)
+    }
+  }, [email, verifiedEmail, isCodeVisible])
 
-  const handleSpamGuideConfirm = () => {
-    handleVerificationClick()
-    setShowSpamGuideModal(false)
-  }
-
-  const handleVerificationClick = () => {
-    setVerifiedEmail(email)
-    setCode("")
-    setIsCodeVisible(true)
-    setShowVerificationSent(true)
-    setIsCodeInvalid(false)
-    setIsCodeExpired(false)
-    setIsVerificationRequested(true)
-    setRemainingSeconds(REMAINING_SECONDS)
-    startVerificationTimer()
-  }
-
+  // 인증번호 타이머
   useEffect(() => {
     if (remainingSeconds <= 0 && intervalRef.current) {
       clearInterval(intervalRef.current)
@@ -242,6 +189,7 @@ function SignUpPage() {
     }
   }, [remainingSeconds, isCodeVisible])
 
+  // 각종 버튼 상태
   const verificationButtonDisabled = isVerificationRequested
     ? true
     : hasExpiredBefore || isCodeExpired
@@ -257,22 +205,6 @@ function SignUpPage() {
 
   const profileInfoNextButtonDisabled = !school || !name || !isNicknameValid
 
-  const idValidationState = getIdValidationState(id, isIdValid)
-  const idValidationColor = getValidationColor(idValidationState)
-
-  const passwordValidationState = getPasswordValidationState(
-    password,
-    isPasswordValid,
-    hasInvalidSpecialChar,
-  )
-  const passwordValidationColor = getValidationColor(passwordValidationState)
-
-  const nicknameValidationState = getNicknameValidationState(
-    nickname,
-    isNicknameValid,
-  )
-  const nicknameValidationColor = getValidationColor(nicknameValidationState)
-
   return (
     <>
       <section className="-mb-12 flex h-screen min-h-74 w-full min-w-90 items-center justify-center">
@@ -283,324 +215,50 @@ function SignUpPage() {
 
           <div className="flex w-full flex-col items-center gap-8">
             {!isVerificationComplete && (
-              <>
-                <div className="flex flex-col gap-1.5">
-                  <div>
-                    <span className="text-body-1-medium text-teal-gray-600">
-                      이메일
-                    </span>
-                    <span className="text-body-1-medium text-error-600">*</span>
-                  </div>
-
-                  <form
-                    onSubmit={handleEmailSubmit}
-                    className="flex items-center gap-1.5"
-                  >
-                    <InputBox
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value)
-                        setShowVerificationSent(false)
-                        setIsVerificationRequested(false)
-                      }}
-                      state="default"
-                    />
-                    <Button
-                      size={"m"}
-                      color={"primary"}
-                      variant={"weak"}
-                      disabled={verificationButtonDisabled}
-                      onClick={handleVerificationClick}
-                    >
-                      {verificationButtonText}
-                    </Button>
-                  </form>
-
-                  <div className="flex h-5.5 items-center gap-1">
-                    {showVerificationSent && (
-                      <button
-                        type="button"
-                        onClick={() => setShowSpamGuideModal(true)}
-                        className="flex items-center gap-1"
-                      >
-                        <CircleBang className="text-teal-gray-300 h-4 w-4" />
-                        <p className="text-teal-gray-300 text-body-2-medium underline">
-                          인증 메일을 받지 못하셨나요?
-                        </p>
-                      </button>
-                    )}
-
-                    {isEmailDuplicated && (
-                      <>
-                        <CheckIcon className="text-error-500 h-4 w-4" />
-                        <p className="text-error-500 text-body-2-medium">
-                          이미 가입된 이메일입니다.
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {isCodeVisible && (
-                  <div className="flex w-full flex-col gap-1.5">
-                    <div>
-                      <span className="text-body-1-medium text-teal-gray-600">
-                        인증번호
-                      </span>
-                      <span className="text-body-1-medium text-error-600">
-                        *
-                      </span>
-                    </div>
-
-                    <InputBox
-                      type="verification"
-                      value={code}
-                      onChange={(e) => {
-                        setCode(e.target.value)
-                        setIsCodeInvalid(false)
-                      }}
-                      placeholder="숫자 6자리 입력"
-                      remainingSeconds={remainingSeconds}
-                      inputMode="numeric"
-                      maxLength={6}
-                      state={isCodeInvalid ? "error" : "default"}
-                      className="w-full"
-                    />
-
-                    <div className="flex h-5.5 items-center gap-1">
-                      {isCodeInvalid && !isCodeExpired && (
-                        <>
-                          <CheckIcon className="text-error-500 h-4 w-4" />
-                          <p className="text-error-500 text-body-2-medium">
-                            인증번호가 일치하지 않아요.
-                          </p>
-                        </>
-                      )}
-
-                      {isCodeExpired && (
-                        <>
-                          <CheckIcon className="text-error-500 h-4 w-4" />
-                          <p className="text-error-500 text-body-2-medium">
-                            인증번호 입력 시간이 지났어요.
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
+              <VerificationStep
+                email={email}
+                code={code}
+                remainingSeconds={remainingSeconds}
+                showVerificationSent={showVerificationSent}
+                isCodeVisible={isCodeVisible}
+                isCodeInvalid={isCodeInvalid}
+                isCodeExpired={isCodeExpired}
+                verificationButtonDisabled={verificationButtonDisabled}
+                verificationButtonText={verificationButtonText}
+                onEmailChange={handleEmailChange}
+                onCodeChange={handleCodeChange}
+                onVerificationClick={handleVerificationClick}
+                onSpamGuideClick={() => setShowSpamGuideModal(true)}
+              />
             )}
 
             {isVerificationComplete && !isAccountCreationComplete && (
-              <>
-                <div className="flex flex-col gap-1.5">
-                  <div>
-                    <span className="text-body-1-medium text-teal-gray-600">
-                      아이디
-                    </span>
-                    <span className="text-body-1-medium text-error-600">*</span>
-                  </div>
-
-                  <form
-                    onSubmit={handleIdSubmit}
-                    className="flex items-center gap-1.5"
-                  >
-                    <InputBox
-                      value={id}
-                      onChange={(e) => handleIdChange(e.target.value)}
-                      state={
-                        isIdDuplicated || (id !== "" && !isIdValid)
-                          ? "error"
-                          : "default"
-                      }
-                      rightAdornment={<></>}
-                    />
-                    <Button
-                      size={"m"}
-                      color={"primary"}
-                      variant={"weak"}
-                      disabled={!isIdValid}
-                      onClick={handleIdDuplicateCheck}
-                    >
-                      중복 확인
-                    </Button>
-                  </form>
-
-                  <div className="flex h-5.5 items-center gap-1">
-                    {!isIdDuplicated && (
-                      <>
-                        <CheckIcon className={`h-4 w-4 ${idValidationColor}`} />
-                        <p
-                          className={`text-body-2-medium ${idValidationColor}`}
-                        >
-                          5~20자의 영문, 숫자와 특수기호(_),(-) 사용 가능
-                        </p>
-                      </>
-                    )}
-
-                    {isIdDuplicated && (
-                      <>
-                        <CheckIcon className="text-error-500 h-4 w-4" />
-                        <p className="text-error-500 text-body-2-medium">
-                          중복된 아이디입니다.
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex w-full flex-col gap-1.5">
-                  <div>
-                    <span className="text-body-1-medium text-teal-gray-600">
-                      비밀번호
-                    </span>
-                    <span className="text-body-1-medium text-error-600">*</span>
-                  </div>
-
-                  <InputBox
-                    type="password"
-                    value={password}
-                    onChange={(e) => handlePasswordChange(e.target.value)}
-                    state={
-                      password !== "" &&
-                      !isPasswordValid &&
-                      !hasInvalidSpecialChar
-                        ? "error"
-                        : "default"
-                    }
-                    className="w-full"
-                  />
-
-                  <div className="flex h-5.5 items-center gap-1">
-                    <>
-                      <CheckIcon
-                        className={`h-4 w-4 ${passwordValidationColor}`}
-                      />
-                      <p
-                        className={`text-body-2-medium ${passwordValidationColor}`}
-                      >
-                        영문, 숫자, 특수문자 중 2종류 이상 포함한 8-16자
-                      </p>
-                    </>
-                  </div>
-
-                  {hasInvalidSpecialChar && (
-                    <div className="flex h-5.5 items-center gap-1">
-                      <CheckIcon className="text-error-500 h-4 w-4" />
-                      <p className="text-error-500 text-body-2-medium">
-                        사용 가능한 특수문자 !#$&*@?
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex w-full flex-col gap-1.5">
-                  <div>
-                    <span className="text-body-1-medium text-teal-gray-600">
-                      비밀번호 확인
-                    </span>
-                    <span className="text-body-1-medium text-error-600">*</span>
-                  </div>
-
-                  <InputBox
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) =>
-                      handleConfirmPasswordChange(e.target.value)
-                    }
-                    state={
-                      confirmPassword !== "" && !isPasswordMatch
-                        ? "error"
-                        : "default"
-                    }
-                    className="w-full"
-                  />
-
-                  {confirmPassword && !isPasswordMatch && (
-                    <div className="flex h-5.5 items-center gap-1">
-                      <CheckIcon className="text-error-500 h-4 w-4" />
-                      <p className="text-error-500 text-body-2-medium">
-                        비밀번호와 일치하지 않습니다.
-                      </p>
-                    </div>
-                  )}
-
-                  {confirmPassword && isPasswordMatch && (
-                    <div className="flex h-5.5 items-center gap-1">
-                      <CheckIcon className="text-success-600 h-4 w-4" />
-                      <p className="text-success-600 text-body-2-medium">
-                        비밀번호 일치
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </>
+              <AccountCreationStep
+                id={id}
+                password={password}
+                confirmPassword={confirmPassword}
+                isIdValid={isIdValid}
+                isIdDuplicated={isIdDuplicated}
+                isPasswordValid={isPasswordValid}
+                hasInvalidSpecialChar={hasInvalidSpecialChar}
+                isPasswordMatch={isPasswordMatch}
+                onIdChange={handleIdChange}
+                onPasswordChange={handlePasswordChange}
+                onConfirmPasswordChange={handleConfirmPasswordChange}
+                onIdDuplicateCheck={handleIdDuplicateCheck}
+              />
             )}
 
             {isAccountCreationComplete && (
-              <>
-                <div className="flex w-full flex-col gap-1.5">
-                  <div>
-                    <span className="text-body-1-medium text-teal-gray-600">
-                      학교
-                    </span>
-                    <span className="text-body-1-medium text-error-600">*</span>
-                  </div>
-
-                  {/* TODO: 학교 목록 API 연동 예정 */}
-                  <SchoolDropdown
-                    value={school}
-                    onChange={(selectedSchool) => setSchool(selectedSchool)}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="flex w-full flex-col gap-1.5">
-                  <div>
-                    <span className="text-body-1-medium text-teal-gray-600">
-                      이름
-                    </span>
-                    <span className="text-body-1-medium text-error-600">*</span>
-                  </div>
-
-                  <InputBox
-                    type="default"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="flex w-full flex-col gap-1.5">
-                  <div>
-                    <span className="text-body-1-medium text-teal-gray-600">
-                      닉네임
-                    </span>
-                    <span className="text-body-1-medium text-error-600">*</span>
-                  </div>
-
-                  <InputBox
-                    type="default"
-                    value={nickname}
-                    onChange={(e) => handleNicknameChange(e.target.value)}
-                    state={
-                      nickname !== "" && !isNicknameValid ? "error" : "default"
-                    }
-                    className="w-full"
-                  />
-
-                  <div className="flex h-5.5 items-center gap-1">
-                    <CheckIcon
-                      className={`h-4 w-4 ${nicknameValidationColor}`}
-                    />
-                    <p
-                      className={`text-body-2-medium ${nicknameValidationColor}`}
-                    >
-                      공백 없이 한글 1-5자
-                    </p>
-                  </div>
-                </div>
-              </>
+              <ProfileInfoStep
+                school={school}
+                name={name}
+                nickname={nickname}
+                isNicknameValid={isNicknameValid}
+                onSchoolChange={setSchool}
+                onNameChange={setName}
+                onNicknameChange={handleNicknameChange}
+              />
             )}
 
             <div className="flex w-full flex-col items-center gap-4">
