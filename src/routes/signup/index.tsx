@@ -2,9 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import { z } from "zod"
 
+import { type School, SchoolDropdown } from "@/features/signup"
 import CircleBang from "@/shared/assets/icon/bang/CircleBang"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
-import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
@@ -90,6 +90,7 @@ function SignUpPage() {
   const [id, setId] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [school, setSchool] = useState<School | undefined>(undefined)
   const [name, setName] = useState("")
   const [nickname, setNickname] = useState("")
   const [isCodeVisible, setIsCodeVisible] = useState(false)
@@ -247,7 +248,7 @@ function SignUpPage() {
     ? code.length !== 6 || isCodeInvalid || isCodeExpired
     : !isIdValid || isIdDuplicated || !isPasswordValid || !isPasswordMatch
 
-  const profileInfoNextButtonDisabled = !name || !isNicknameValid
+  const profileInfoNextButtonDisabled = !school || !name || !isNicknameValid
 
   const idValidationState = getIdValidationState(id, isIdValid)
   const idValidationColor = getValidationColor(idValidationState)
@@ -528,14 +529,12 @@ function SignUpPage() {
                   <span className="text-body-1-medium text-error-600">*</span>
                 </div>
 
-                {/* TODO: 학교 선택 UI 및 API 연동 필요 */}
-                {/* API에서 학교 목록을 받아 드롭다운으로 표시 */}
-                <div className="border-teal-gray-300 shadow-inner-neutral-1 flex w-90 items-center justify-between rounded-[12px] border bg-white py-3 pr-2.5 pl-4">
-                  <span className="text-body-2-medium text-teal-gray-400">
-                    학교를 선택해주세요.
-                  </span>
-                  <DownChevronIcon className="text-teal-gray-400 h-5 w-5" />
-                </div>
+                {/* TODO: 학교 목록 API 연동 예정 */}
+                <SchoolDropdown
+                  value={school}
+                  onChange={(selectedSchool) => setSchool(selectedSchool)}
+                  className="w-full"
+                />
               </div>
 
               <div className="flex w-full flex-col gap-1.5">
