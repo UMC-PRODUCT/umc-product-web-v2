@@ -1,5 +1,6 @@
 import { cn } from "@/shared/lib/utils"
 import { StatusChipDropdown } from "@/shared/ui/chip/StatusChipDropdown"
+import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 
 import type { StatusValue } from "../../model/types"
 
@@ -13,6 +14,7 @@ interface ApplicantRowProps {
   isSelected?: boolean
   onClick?: () => void
   onStatusChange?: (status: StatusValue) => void
+  statusDisabled?: boolean
 }
 
 export function ApplicantRow({
@@ -25,6 +27,7 @@ export function ApplicantRow({
   isSelected = false,
   onClick,
   onStatusChange,
+  statusDisabled = false,
 }: ApplicantRowProps) {
   return (
     <div
@@ -55,7 +58,15 @@ export function ApplicantRow({
             </span>
           </div>
           <div className="flex h-12.5 w-25 flex-col items-start justify-center px-2.5">
-            <StatusChipDropdown value={status} onValueChange={onStatusChange} />
+            {/* TODO: API 연동 시 차수별 마감 여부로 disabled 분기 */}
+            {statusDisabled ? (
+              <StatusChipTag value={status} type="chip" disabled />
+            ) : (
+              <StatusChipDropdown
+                value={status}
+                onValueChange={onStatusChange}
+              />
+            )}
           </div>
         </div>
 

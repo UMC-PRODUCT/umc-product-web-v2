@@ -62,6 +62,8 @@ interface ApplicationTableSectionProps {
   projects: ProjectApplication[]
   searchPlaceholder?: string
   visibleFilters?: FilterName[]
+  /** 현재 활성 차수 (이전 차수의 상태 칩 disabled 처리) */
+  currentRound?: number
   className?: string
 }
 
@@ -77,6 +79,7 @@ export function ApplicationTableSection({
   projects,
   searchPlaceholder = "프로젝트 명으로 검색하세요.",
   visibleFilters = DEFAULT_FILTERS,
+  currentRound,
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -330,6 +333,7 @@ export function ApplicationTableSection({
           chapterName="Chromium"
           open={detailModalOpen}
           onOpenChange={setDetailModalOpen}
+          currentRound={currentRound}
         />
       )}
     </div>

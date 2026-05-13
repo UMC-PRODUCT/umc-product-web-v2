@@ -13,6 +13,8 @@ interface ApplicationDetailModalProps {
   chapterName: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** 현재 활성 차수 (이전 차수의 상태 칩 disabled 처리) */
+  currentRound?: number
 }
 
 export function ApplicationDetailModal({
@@ -20,6 +22,7 @@ export function ApplicationDetailModal({
   chapterName,
   open,
   onOpenChange,
+  currentRound,
 }: ApplicationDetailModalProps) {
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
     null,
@@ -101,6 +104,7 @@ export function ApplicationDetailModal({
                 setStatusOverrides((prev) => ({ ...prev, [id]: status }))
               }
               onClose={handleClose}
+              currentRound={currentRound}
             />
           </div>
 
@@ -119,6 +123,9 @@ export function ApplicationDetailModal({
                 }))
               }
               onClose={handlePanelClose}
+              statusDisabled={
+                currentRound != null && selectedApplicant.round < currentRound
+              }
               className="max-h-[calc(100vh-60px)] shadow-xl"
             />
           )}

@@ -20,10 +20,12 @@ export function ChallengerApplicationView({
   return (
     <div className={cn("flex flex-col gap-[57px] pl-4", className)}>
       <ChallengerStatsSection stats={stats} />
+      {/* TODO: API 연동 시 현재 활성 차수를 서버에서 받아오도록 변경 */}
       <ApplicationTableSection
         projects={projects}
         searchPlaceholder="닉네임/이름으로 검색하세요."
         visibleFilters={["round", "part", "school", "appStatus"]}
+        currentRound={2}
       />
     </div>
   )

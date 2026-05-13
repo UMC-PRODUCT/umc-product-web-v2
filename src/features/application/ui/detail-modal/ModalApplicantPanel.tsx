@@ -28,6 +28,7 @@ interface ModalApplicantPanelProps {
   onApplicantClick: (id: string) => void
   onStatusChange?: (applicantId: string, status: StatusValue) => void
   onClose: () => void
+  currentRound?: number
   className?: string
 }
 
@@ -42,6 +43,7 @@ export function ModalApplicantPanel({
   onApplicantClick,
   onStatusChange,
   onClose,
+  currentRound,
   className,
 }: ModalApplicantPanelProps) {
   const filteredApplicants = useMemo(() => {
@@ -199,6 +201,7 @@ export function ModalApplicantPanel({
             selectedApplicantId={selectedApplicantId}
             onApplicantClick={onApplicantClick}
             onStatusChange={onStatusChange}
+            currentRound={currentRound}
           />
         ))}
 
