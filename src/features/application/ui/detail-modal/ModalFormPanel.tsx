@@ -105,24 +105,22 @@ export function ModalFormPanel({
                   파트 지원서
                 </span>
               </h3>
-              {!statusDisabled && (
-                <OptionButtonGroup
-                  variant="segmented"
-                  value={applicant.status}
-                  onValueChange={(v) => onStatusChange?.(v as StatusValue)}
-                  className="w-60"
-                >
-                  <OptionButton value="pending" className="h-7.5">
-                    대기
-                  </OptionButton>
-                  <OptionButton value="fail" className="h-7.5">
-                    불합격
-                  </OptionButton>
-                  <OptionButton value="pass" className="h-7.5">
-                    합격
-                  </OptionButton>
-                </OptionButtonGroup>
-              )}
+              <OptionButtonGroup
+                variant="segmented"
+                value={applicant.status}
+                onValueChange={(v) => onStatusChange?.(v as StatusValue)}
+                className={cn("w-60", statusDisabled && "pointer-events-none")}
+              >
+                <OptionButton value="pass" className="h-7.5 gap-0.5">
+                  합격
+                </OptionButton>
+                <OptionButton value="fail" className="h-7.5 gap-0.5">
+                  불합격
+                </OptionButton>
+                <OptionButton value="pending" className="h-7.5 gap-0.5">
+                  대기
+                </OptionButton>
+              </OptionButtonGroup>
             </div>
 
             <div className="flex items-center gap-2">
