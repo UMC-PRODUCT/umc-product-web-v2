@@ -12,6 +12,7 @@ import {
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
+import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 import { useViewModeStore } from "@/shared/view-mode"
@@ -28,7 +29,7 @@ function MatchingApplicationsPage() {
 
   return (
     <section className="flex w-full flex-col pt-10">
-      <div className="border-teal-gray-100 flex w-288 flex-col rounded-xl border bg-white px-8.5 py-8">
+      <div className="border-teal-gray-100 flex w-6xl flex-col rounded-xl border bg-white px-8.5 py-8">
         {/* 페이지 헤더 */}
         <div className="flex flex-col gap-1.5">
           <h1 className="text-heading-6-semibold text-teal-gray-900">
@@ -39,8 +40,19 @@ function MatchingApplicationsPage() {
           </p>
         </div>
 
+        {/* PM 챌린저: 프로젝트 카드 */}
+        {mode === "pm" && (
+          <ProjectTitleCard
+            className="mt-6"
+            projectName={MOCK_CHALLENGER_PROJECT.projectName}
+            challengerName={MOCK_CHALLENGER_PROJECT.pmName}
+            challengerUniversity={MOCK_CHALLENGER_PROJECT.pmUniversity}
+            size="lg"
+          />
+        )}
+
         {/* 콘텐츠 */}
-        <div className="mt-6 flex flex-col gap-[99px]">
+        <div className="mt-6 flex flex-col gap-24.75">
           {/* admin: 지부 선택 + 통계 + 테이블 */}
           {mode === "admin" && (
             <>
@@ -50,7 +62,7 @@ function MatchingApplicationsPage() {
                 onValueChange={(v) => setSelectedChapter(v as Chapter)}
                 itemClassName="flex-1"
               />
-              <div className="flex flex-col gap-[57px] pl-4">
+              <div className="flex flex-col gap-14.25 pl-4">
                 <ApplicationStatsSection stats={MOCK_STATS} />
                 <ApplicationTableSection projects={MOCK_PROJECTS} />
               </div>
@@ -60,7 +72,6 @@ function MatchingApplicationsPage() {
           {/* pm: PM 챌린저 뷰 */}
           {mode === "pm" && (
             <ChallengerApplicationView
-              project={MOCK_CHALLENGER_PROJECT}
               stats={MOCK_CHALLENGER_STATS}
               projects={CHALLENGER_PROJECTS}
             />
