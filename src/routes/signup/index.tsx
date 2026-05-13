@@ -9,6 +9,7 @@ import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
 const REMAINING_SECONDS = 600 // 10분
+// TODO: API 연동 후 실제 인증번호 사용
 const VERIFICATION_CODE = "123456" // 임시 인증 번호
 
 const idSchema = z
@@ -94,7 +95,7 @@ function SignUpPage() {
   const [isCodeVisible, setIsCodeVisible] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const [showVerificationSent, setShowVerificationSent] = useState(false)
-  // TODO: 이메일 검사 API 연동
+  // TODO: 이메일 인증 API 연동
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isEmailDuplicated, setIsEmailDuplicated] = useState(false)
   const [isCodeInvalid, setIsCodeInvalid] = useState(false)
@@ -119,10 +120,13 @@ function SignUpPage() {
 
   const handleEmailSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
+    // TODO: 이메일 인증 요청 API 연동
+    // 이메일로 인증 코드 전송
   }
 
   const handleIdSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
+    // TODO: 필요시 ID 폼 서브밋 처리
   }
 
   const handleIdChange = (value: string) => {
@@ -134,9 +138,10 @@ function SignUpPage() {
   }
 
   const handleIdDuplicateCheck = () => {
-    // TODO: 아이디 중복 확인 API 연결
-    // API 성공 시 setIsIdDuplicated(false)
-    // API 중복 시 setIsIdDuplicated(true)
+    // TODO: 아이디 중복 확인 API 연동
+    // API 요청 후:
+    // - 사용 가능한 아이디: setIsIdDuplicated(false)
+    // - 중복된 아이디: setIsIdDuplicated(true)
   }
 
   const getPasswordValidationError = (value: string) => {
@@ -176,6 +181,10 @@ function SignUpPage() {
   }
 
   const handleCodeComplete = () => {
+    // TODO: 인증번호 검증 API 연동
+    // API 요청 후:
+    // - 인증번호 일치: setIsVerificationComplete(true)
+    // - 인증번호 불일치: setIsCodeInvalid(true)
     if (code === VERIFICATION_CODE) {
       setIsVerificationComplete(true)
     } else {
@@ -184,6 +193,7 @@ function SignUpPage() {
   }
 
   const handleAccountCreationComplete = () => {
+    // TODO: 회원가입 정보 제출 API 연동 필요 (학교/이름/닉네임 입력 후)
     setIsAccountCreationComplete(true)
   }
 
@@ -518,6 +528,8 @@ function SignUpPage() {
                   <span className="text-body-1-medium text-error-600">*</span>
                 </div>
 
+                {/* TODO: 학교 선택 UI 및 API 연동 필요 */}
+                {/* API에서 학교 목록을 받아 드롭다운으로 표시 */}
                 <div className="border-teal-gray-300 shadow-inner-neutral-1 flex w-90 items-center justify-between rounded-[12px] border bg-white py-3 pr-2.5 pl-4">
                   <span className="text-body-2-medium text-teal-gray-400">
                     학교를 선택해주세요.
@@ -591,6 +603,10 @@ function SignUpPage() {
                   !isAccountCreationComplete
                 ) {
                   handleAccountCreationComplete()
+                } else if (isAccountCreationComplete) {
+                  // TODO: 최종 회원가입 API 연동
+                  // 이메일, 아이디, 비밀번호, 이름, 닉네임, 학교 정보를 서버로 전송
+                  // API 성공 시 로그인 페이지로 이동
                 }
               }}
             >
