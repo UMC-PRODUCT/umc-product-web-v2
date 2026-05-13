@@ -1,5 +1,5 @@
-import { ChevronsDownUp } from "lucide-react"
-
+import CollapseAllIcon from "@/shared/assets/icon/expand-collapse/CollapseAllIcon"
+import ExpandAllIcon from "@/shared/assets/icon/expand-collapse/ExpandAllIcon"
 import { cn } from "@/shared/lib/utils"
 
 const COLUMNS = [
@@ -53,13 +53,11 @@ export function ApplicantTableHead({
         onClick={onToggleAll}
         className="shadow-inner-neutral-2 flex size-[26px] shrink-0 items-center justify-center rounded-lg bg-teal-200 transition-colors hover:bg-teal-300"
       >
-        <ChevronsDownUp
-          size={14}
-          className={cn(
-            "text-teal-700 transition-transform",
-            !hasExpanded && "-scale-y-100",
-          )}
-        />
+        {hasExpanded ? (
+          <CollapseAllIcon width={24} height={24} className="text-teal-700" />
+        ) : (
+          <ExpandAllIcon width={24} height={24} className="text-teal-700" />
+        )}
       </button>
     </div>
   )

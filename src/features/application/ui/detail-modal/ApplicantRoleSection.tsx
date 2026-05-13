@@ -12,6 +12,7 @@ interface ApplicantRoleSectionProps {
   selectedApplicantId: string | null
   onApplicantClick: (id: string) => void
   onStatusChange?: (applicantId: string, status: StatusValue) => void
+  currentRound?: number
   className?: string
 }
 
@@ -22,6 +23,7 @@ export function ApplicantRoleSection({
   selectedApplicantId,
   onApplicantClick,
   onStatusChange,
+  currentRound,
   className,
 }: ApplicantRoleSectionProps) {
   const roundCounts = applicants.reduce<Record<number, number>>((acc, a) => {
@@ -71,6 +73,9 @@ export function ApplicantRoleSection({
             isSelected={selectedApplicantId === applicant.id}
             onClick={() => onApplicantClick(applicant.id)}
             onStatusChange={(s) => onStatusChange?.(applicant.id, s)}
+            statusDisabled={
+              currentRound != null && applicant.round < currentRound
+            }
           />
         ))}
       </div>

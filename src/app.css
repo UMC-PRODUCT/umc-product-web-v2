@@ -4,6 +4,7 @@
 @import "./styles/color.css";
 @import "./styles/typography.css";
 @import "./styles/shadow.css";
+@import "./styles/custom.css";
 
 @custom-variant dark (&:is(.dark *));
 
