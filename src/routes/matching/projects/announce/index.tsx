@@ -114,7 +114,7 @@ function ProjectSettingsAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
-  // 공지사항 조회 (PM 대상)
+  // 공지사항 조회 (PM 대상: SCHOOL_CORE)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: noticesData, isLoading } = useQuery({
     queryKey: [
@@ -128,8 +128,7 @@ function ProjectSettingsAnnouncePage() {
       getNotices({
         gisuId: Number(activeGisuId),
         chapterId: selectedChapterId ? Number(selectedChapterId) : undefined,
-        noticeTab: "CHALLENGER",
-        part: "PLAN",
+        noticeTab: "SCHOOL_CORE",
         page: page - 1,
         size: NOTICE_PAGE_SIZE,
         sort: "createdAt,DESC",
@@ -172,6 +171,7 @@ function ProjectSettingsAnnouncePage() {
   const handleNoticePublishClick = () => {
     navigate({
       to: "/matching/projects/announce/notice-publish",
+      search: { chapter },
     })
   }
 

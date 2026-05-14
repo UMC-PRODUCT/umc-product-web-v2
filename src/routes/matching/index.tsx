@@ -169,7 +169,10 @@ function TeamMatchingAnnouncePage() {
   }
 
   const handleNoticePublishClick = () => {
-    navigate({ to: "/matching/notice-publish" })
+    navigate({
+      to: "/matching/notice-publish",
+      search: { chapter },
+    })
   }
 
   const handleNoticeEditClick = (noticeId: string) => {
