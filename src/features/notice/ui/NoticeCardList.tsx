@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 
 import { Border } from "./Border"
 import { NoticeCard } from "./NoticeCard"
@@ -19,6 +19,7 @@ interface NoticeCardListProps {
   focusedNoticeId?: string | null
   onDeleteNotice?: (noticeId: string) => void
   onEditNotice?: (noticeId: string) => void
+  renderContent?: (noticeId: string) => ReactNode
 }
 
 export function NoticeCardList({
@@ -28,6 +29,7 @@ export function NoticeCardList({
   focusedNoticeId,
   onDeleteNotice,
   onEditNotice,
+  renderContent,
 }: NoticeCardListProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
@@ -90,7 +92,7 @@ export function NoticeCardList({
                 onDeleteNotice?.(notice.id)
               }}
             >
-              임시 내용
+              {renderContent ? renderContent(notice.id) : "임시 내용"}
             </NoticeCard>
 
             {!isExpanded && index < notices.length - 1 ? <Border /> : null}
