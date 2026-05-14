@@ -8,7 +8,7 @@ import {
   getValidationColor,
   type SignUpFormData,
 } from "../validation"
-import { SchoolDropdown } from "./SchoolDropdown"
+import { type School, SchoolDropdown } from "./SchoolDropdown"
 
 export function ProfileInfoStep() {
   const {
@@ -41,7 +41,7 @@ export function ProfileInfoStep() {
           control={control}
           render={({ field }) => (
             <SchoolDropdown
-              value={field.value || undefined}
+              value={(field.value as School) || undefined}
               onChange={field.onChange}
               className="w-full"
             />
