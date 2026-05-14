@@ -2,8 +2,9 @@ import { cn } from "@/shared/lib/utils"
 
 interface ProjectTitleCardProps {
   projectName: string
-  challengerName: string
-  challengerUniversity: string
+  challengerName?: string
+  challengerUniversity?: string
+  subtitle?: string
   size?: "lg" | "md" | "sm"
   className?: string
 }
@@ -12,6 +13,7 @@ export function ProjectTitleCard({
   projectName,
   challengerName,
   challengerUniversity,
+  subtitle,
   size = "lg",
   className,
 }: ProjectTitleCardProps) {
@@ -26,7 +28,7 @@ export function ProjectTitleCard({
               {projectName}
             </span>
             <span className="text-caption-2-medium text-teal-gray-600">
-              {challengerName} · {challengerUniversity}
+              {subtitle ?? `${challengerName} · ${challengerUniversity}`}
             </span>
           </div>
         </div>
