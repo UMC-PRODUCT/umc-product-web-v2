@@ -1,94 +1,21 @@
-import { useCallback, useMemo, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import {
-  type MatchingProject,
-  MOCK_MATCHING_PROJECTS,
-} from "./matchingProject.mock"
+  getAllGisu,
+  getChaptersWithSchools,
+} from "@/features/challenger/api/organization"
+
+import { getMatchingProjects, type ProjectItem } from "../api/matchingProject"
 import {
-  BRANCH_OPTIONS,
-  getSchoolOptionsByBranch,
   PART_OPTIONS,
   type ProjectFilterOption,
   RECRUIT_STATUS_OPTIONS,
 } from "./projectFilterOptions"
 
-// ─── 모집 상태 ──────
+import type { PartQuotaStatus, ProjectPart } from "../api/matchingProject"
 
-export type MatchingProjectRecruitStatusKey =
-  | "before"
-  | "completed"
-  | "recruiting"
-
-export function getProjectRecruitStatus(
-  project: MatchingProject,
-): MatchingProjectRecruitStatusKey {
-  if (project.recruitRows.length === 0) return "before"
-
-  const allCompleted = project.recruitRows.every(
-    (row) => row.total > 0 && row.current >= row.total,
-  )
-  if (allCompleted) return "completed"
-
-  const allBefore = project.recruitRows.every((row) => row.current === 0)
-  if (allBefore) return "before"
-
-  return "recruiting"
-}
-
-// ─── 목록 필터 ───-
-
-export type MatchingProjectListFilterCriteria = {
-  branch?: string
-  school?: string
-  selectedParts: string[]
-  recruitStatus?: string
-}
-
-export function filterMatchingProjects(
-  projects: MatchingProject[],
-  criteria: MatchingProjectListFilterCriteria,
-): MatchingProject[] {
-  const { branch, school, selectedParts, recruitStatus } = criteria
-
-  return projects.filter((project) => {
-    if (branch && project.branch !== branch) return false
-    if (school && project.school !== school) return false
-
-    const projectParts = new Set(project.recruitRows.map((row) => row.part))
-    const partMatched =
-      selectedParts.length === 0 ||
-      selectedParts.every((part) => projectParts.has(part))
-    if (!partMatched) return false
-
-    if (recruitStatus && getProjectRecruitStatus(project) !== recruitStatus) {
-      return false
-    }
-
-    return true
-  })
-}
-
-// ─── 칩, 패널 클래스 ──────
-const MATCHING_PROJECT_LIST_FILTER_LAYOUT = {
-  branch: {
-    className: "w-fit min-w-20",
-    dropdownClassName: "w-[9.5rem]",
-  },
-  school: {
-    className: "w-fit min-w-20",
-    dropdownClassName: "w-[9.5rem]",
-  },
-  part: {
-    className: "w-fit min-w-20",
-    dropdownClassName: "w-[9.125rem]",
-  },
-  status: {
-    className: "w-[7.125rem]",
-    dropdownClassName: "w-[7.125rem] min-w-[7.125rem]",
-  },
-} as const
-
-// ─── 페이지 훅 (상태 + 필터 UI 디스크립터) ──────
+export const MATCHING_PROJECT_PAGE_SIZE = 15
 
 export type MatchingProjectListFilterId =
   | "branch"
@@ -109,19 +36,103 @@ export type MatchingProjectListFilterDescriptor = {
   multiSelect?: boolean
 }
 
+const FILTER_LAYOUT = {
+  branch: { className: "w-fit min-w-20", dropdownClassName: "w-[9.5rem]" },
+  school: { className: "w-fit min-w-20", dropdownClassName: "w-[9.5rem]" },
+  part: { className: "w-fit min-w-20", dropdownClassName: "w-[9.125rem]" },
+  status: {
+    className: "w-[7.125rem]",
+    dropdownClassName: "w-[7.125rem] min-w-[7.125rem]",
+  },
+} as const
+
 export function useMatchingProjectListFilters() {
   const [openFilterId, setOpenFilterId] = useState<string | null>(null)
   const [selectedBranch, setSelectedBranch] = useState<string>()
   const [selectedSchool, setSelectedSchool] = useState<string>()
-  const [selectedParts, setSelectedParts] = useState<string[]>([])
-  const [selectedRecruitStatus, setSelectedRecruitStatus] = useState<string>()
+  const [selectedParts, setSelectedParts] = useState<ProjectPart[]>([])
+  const [selectedRecruitStatus, setSelectedRecruitStatus] =
+    useState<PartQuotaStatus>()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [page, setPage] = useState(1)
 
-  const schoolOptions = getSchoolOptionsByBranch(selectedBranch)
+  useEffect(() => {
+    setPage(1)
+  }, [
+    selectedBranch,
+    selectedSchool,
+    selectedParts,
+    selectedRecruitStatus,
+    searchQuery,
+  ])
+
+  const { data: gisuData } = useQuery({
+    queryKey: ["gisu", "active"],
+    queryFn: async () => {
+      const res = await getAllGisu()
+      const active = res.gisuList.find((g) => g.isActive)
+      return active ? Number(active.gisuId) : null
+    },
+  })
+
+  const activeGisuId = gisuData ?? undefined
+
+  const { data: chaptersData } = useQuery({
+    queryKey: ["chaptersWithSchools", activeGisuId],
+    queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
+    enabled: activeGisuId !== undefined,
+  })
+
+  const branchOptions: ProjectFilterOption[] = useMemo(
+    () =>
+      (chaptersData?.chapters ?? []).map((ch) => ({
+        value: ch.chapterId,
+        label: ch.chapterName,
+      })),
+    [chaptersData],
+  )
+
+  const schoolOptions: ProjectFilterOption[] = useMemo(
+    () =>
+      selectedBranch
+        ? (
+            chaptersData?.chapters.find((ch) => ch.chapterId === selectedBranch)
+              ?.schools ?? []
+          ).map((s) => ({ value: s.schoolId, label: s.schoolName }))
+        : [],
+    [chaptersData, selectedBranch],
+  )
+
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      "matchingProjects",
+      activeGisuId,
+      page,
+      searchQuery,
+      selectedBranch,
+      selectedSchool,
+      selectedParts,
+      selectedRecruitStatus,
+    ],
+    queryFn: () =>
+      getMatchingProjects({
+        gisuId: activeGisuId!,
+        keyword: searchQuery || undefined,
+        chapterId: selectedBranch ? Number(selectedBranch) : undefined,
+        schoolIds: selectedSchool ? [Number(selectedSchool)] : undefined,
+        parts: selectedParts.length > 0 ? selectedParts : undefined,
+        partQuotaStatus: selectedRecruitStatus,
+        page: page - 1,
+        size: MATCHING_PROJECT_PAGE_SIZE,
+      }),
+    enabled: activeGisuId !== undefined,
+  })
 
   const selectedPartLabel = useMemo(() => {
     if (selectedParts.length === 0) return undefined
-    if (selectedParts.length === 1) return selectedParts[0]
-    return `${selectedParts[0]} 외 ${selectedParts.length - 1}`
+    if (selectedParts.length === 1)
+      return PART_OPTIONS.find((o) => o.value === selectedParts[0])?.label
+    return `${PART_OPTIONS.find((o) => o.value === selectedParts[0])?.label} 외 ${selectedParts.length - 1}`
   }, [selectedParts])
 
   const selectedRecruitStatusLabel = useMemo(
@@ -132,47 +143,33 @@ export function useMatchingProjectListFilters() {
     [selectedRecruitStatus],
   )
 
-  const filteredProjects = useMemo(
-    () =>
-      filterMatchingProjects(MOCK_MATCHING_PROJECTS, {
-        branch: selectedBranch,
-        school: selectedSchool,
-        selectedParts,
-        recruitStatus: selectedRecruitStatus,
-      }),
-    [selectedBranch, selectedParts, selectedRecruitStatus, selectedSchool],
-  )
-
-  const filterKey = [
-    selectedBranch ?? "",
-    selectedSchool ?? "",
-    [...selectedParts].sort().join("|"),
-    selectedRecruitStatus ?? "",
-  ].join("\u0001")
-
   const handlePartSelect = useCallback((value: string) => {
-    setSelectedParts((prev) =>
-      prev.includes(value)
-        ? prev.filter((selected) => selected !== value)
-        : [...prev, value],
-    )
+    setSelectedParts((prev) => {
+      const part = value as ProjectPart
+      return prev.includes(part)
+        ? prev.filter((selected) => selected !== part)
+        : [...prev, part]
+    })
   }, [])
 
   const handleRecruitStatusSelect = useCallback((value: string) => {
-    setSelectedRecruitStatus((prev) => (prev === value ? undefined : value))
+    setSelectedRecruitStatus((prev) => {
+      const status = value as PartQuotaStatus
+      return prev === status ? undefined : status
+    })
   }, [])
 
   const filterDescriptors: MatchingProjectListFilterDescriptor[] = [
     {
       id: "branch",
       label: "지부",
-      options: BRANCH_OPTIONS,
+      options: branchOptions,
       selectedValue: selectedBranch,
       onSelect: (value) => {
         setSelectedBranch((prev) => (prev === value ? undefined : value))
         setSelectedSchool(undefined)
       },
-      ...MATCHING_PROJECT_LIST_FILTER_LAYOUT.branch,
+      ...FILTER_LAYOUT.branch,
     },
     {
       id: "school",
@@ -181,7 +178,7 @@ export function useMatchingProjectListFilters() {
       selectedValue: selectedSchool,
       onSelect: (value) =>
         setSelectedSchool((prev) => (prev === value ? undefined : value)),
-      ...MATCHING_PROJECT_LIST_FILTER_LAYOUT.school,
+      ...FILTER_LAYOUT.school,
     },
     {
       id: "part",
@@ -191,7 +188,7 @@ export function useMatchingProjectListFilters() {
       selectedLabel: selectedPartLabel,
       onSelect: handlePartSelect,
       multiSelect: true,
-      ...MATCHING_PROJECT_LIST_FILTER_LAYOUT.part,
+      ...FILTER_LAYOUT.part,
     },
     {
       id: "status",
@@ -200,16 +197,21 @@ export function useMatchingProjectListFilters() {
       selectedValue: selectedRecruitStatus,
       selectedLabel: selectedRecruitStatusLabel,
       onSelect: handleRecruitStatusSelect,
-      ...MATCHING_PROJECT_LIST_FILTER_LAYOUT.status,
+      ...FILTER_LAYOUT.status,
     },
   ]
 
   return {
     openFilterId,
     setOpenFilterId,
-    filteredProjects,
+    projects: data?.content ?? ([] as ProjectItem[]),
+    totalPages: Math.max(1, data?.totalPages ?? 1),
+    page,
+    setPage,
+    isLoading,
+    searchQuery,
+    setSearchQuery,
     filterDescriptors,
-    filterKey,
     selectedBranch,
   }
 }
