@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
@@ -16,7 +16,7 @@ import {
   NoticeDetailContent,
   type NoticeItem,
 } from "@/features/notice"
-import { getNotices } from "@/features/notice/api/noticeApi"
+import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { Pagination } from "@/shared/ui/Pagination"
@@ -114,7 +114,7 @@ function ProjectSettingsAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
-  // 공지사항 조회 (PM 대상: SCHOOL_CORE)
+  // 공지사항 조회 (PM 대상)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: noticesData, isLoading } = useQuery({
     queryKey: [
@@ -128,7 +128,8 @@ function ProjectSettingsAnnouncePage() {
       getNotices({
         gisuId: Number(activeGisuId),
         chapterId: selectedChapterId ? Number(selectedChapterId) : undefined,
-        noticeTab: "SCHOOL_CORE",
+        noticeTab: "CHALLENGER",
+        part: "PLAN",
         page: page - 1,
         size: NOTICE_PAGE_SIZE,
         sort: "createdAt,DESC",
@@ -158,6 +159,25 @@ function ProjectSettingsAnnouncePage() {
   const safePage = Math.min(Math.max(1, page), totalPages)
   const focusedNoticeId = pendingNotice?.id ?? null
 
+  const queryClient = useQueryClient()
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteNotice(Number(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] })
+      addToast({
+        message: "공지가 삭제되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+    },
+    onError: () => {
+      // TODO: 삭제 실패 시 동작 추가
+    },
+  })
+
   // TODO: 사용자 권한 API 연동 후 실제 권한 값으로 교체
   const canManage = true
 
@@ -182,16 +202,8 @@ function ProjectSettingsAnnouncePage() {
     })
   }
 
-  // TODO: API 연동 후 실제 삭제 API 호출로 교체
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleNoticeDeleteClick = (noticeId: string) => {
-    addToast({
-      message: "공지가 삭제되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3,
-    })
+    deleteMutation.mutate(noticeId)
   }
 
   const handlePageChange = (nextPage: number) => {
