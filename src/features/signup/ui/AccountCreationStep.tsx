@@ -112,12 +112,10 @@ export function AccountCreationStep({
         />
 
         <div className="flex h-5.5 items-center gap-1">
-          <>
-            <CheckIcon className={`h-4 w-4 ${passwordValidationColor}`} />
-            <p className={`text-body-2-medium ${passwordValidationColor}`}>
-              영문, 숫자, 특수문자 중 2종류 이상 포함한 8-16자
-            </p>
-          </>
+          <CheckIcon className={`h-4 w-4 ${passwordValidationColor}`} />
+          <p className={`text-body-2-medium ${passwordValidationColor}`}>
+            영문, 숫자, 특수문자 중 2종류 이상 포함한 8-16자
+          </p>
         </div>
 
         {hasInvalidSpecialChar && (
