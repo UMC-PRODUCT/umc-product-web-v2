@@ -24,10 +24,9 @@ export const passwordSchema = z
 
 export const nicknameSchema = z
   .string()
-  .regex(/^[가-힣\s]*$/)
-  .refine((nickname) => nickname.replace(/\s/g, "").length >= 1)
-  .refine((nickname) => nickname.replace(/\s/g, "").length <= 5)
-  .refine((nickname) => !/\s/.test(nickname))
+  .min(1)
+  .max(5)
+  .regex(/^[가-힣]*$/, "공백 없이 한글 1-5자")
 
 export type ValidationState = "default" | "pending" | "valid" | "invalid"
 
