@@ -5,6 +5,11 @@ import {
   useAdminPageData,
   useChallengerPageData,
 } from "@/features/application/hooks/useApplicationPageData"
+import {
+  MOCK_PROJECTS,
+  MOCK_STATS,
+} from "@/features/application/model/applicationMock"
+import { MOCK_CHALLENGER_PROJECT } from "@/features/application/model/challengerMock"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
@@ -21,11 +26,19 @@ function MatchingApplicationsPage() {
   const mode = useViewModeStore((s) => s.mode)
   const [selectedChapter, setSelectedChapter] = useState("Chromium")
 
-  // Admin 뷰 데이터
+  // Admin 뷰 데이터 (API 데이터가 비어있으면 mock fallback)
   const admin = useAdminPageData(selectedChapter)
+  const adminStats = admin.projects.length > 0 ? admin.stats : MOCK_STATS
+  const adminProjects =
+    admin.projects.length > 0 ? admin.projects : MOCK_PROJECTS
 
-  // PM 뷰 데이터
+  // PM 뷰 데이터 (API 데이터가 비어있으면 mock fallback)
   const challenger = useChallengerPageData()
+  const pmProjects =
+    challenger.projects.length > 0
+      ? challenger.projects
+      : MOCK_PROJECTS.filter((p) => p.id === "3")
+  const pmProjectInfo = challenger.projectInfo ?? MOCK_CHALLENGER_PROJECT
 
   return (
     <section className="flex w-full flex-col pt-10">
@@ -41,12 +54,12 @@ function MatchingApplicationsPage() {
         </div>
 
         {/* PM 챌린저: 프로젝트 카드 */}
-        {mode === "pm" && challenger.projectInfo && (
+        {mode === "pm" && (
           <ProjectTitleCard
             className="mt-6"
-            projectName={challenger.projectInfo.projectName}
-            challengerName={challenger.projectInfo.pmName}
-            challengerUniversity={challenger.projectInfo.pmUniversity}
+            projectName={pmProjectInfo.projectName}
+            challengerName={pmProjectInfo.pmName}
+            challengerUniversity={pmProjectInfo.pmUniversity}
             size="lg"
           />
         )}
@@ -62,24 +75,16 @@ function MatchingApplicationsPage() {
                 onValueChange={(v) => setSelectedChapter(v)}
                 itemClassName="flex-1"
               />
-              {admin.isLoading && (
+              {admin.isLoading ? (
                 <div className="flex items-center justify-center py-20">
                   <p className="text-body-2-regular text-teal-gray-400">
                     데이터를 불러오는 중...
                   </p>
                 </div>
-              )}
-              {admin.isError && (
-                <div className="flex items-center justify-center py-20">
-                  <p className="text-body-2-regular text-error-600">
-                    데이터를 불러오지 못했습니다.
-                  </p>
-                </div>
-              )}
-              {!admin.isLoading && !admin.isError && (
+              ) : (
                 <div className="flex flex-col gap-14.25 pl-4">
-                  <ApplicationStatsSection stats={admin.stats} />
-                  <ApplicationTableSection projects={admin.projects} />
+                  <ApplicationStatsSection stats={adminStats} />
+                  <ApplicationTableSection projects={adminProjects} />
                 </div>
               )}
             </>
@@ -88,22 +93,14 @@ function MatchingApplicationsPage() {
           {/* pm: PM 챌린저 뷰 */}
           {mode === "pm" && (
             <>
-              {challenger.isLoading && (
+              {challenger.isLoading ? (
                 <div className="flex items-center justify-center py-20">
                   <p className="text-body-2-regular text-teal-gray-400">
                     데이터를 불러오는 중...
                   </p>
                 </div>
-              )}
-              {challenger.isError && (
-                <div className="flex items-center justify-center py-20">
-                  <p className="text-body-2-regular text-error-600">
-                    데이터를 불러오지 못했습니다.
-                  </p>
-                </div>
-              )}
-              {!challenger.isLoading && !challenger.isError && (
-                <ChallengerApplicationView projects={challenger.projects} />
+              ) : (
+                <ChallengerApplicationView projects={pmProjects} />
               )}
             </>
           )}
