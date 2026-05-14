@@ -7,7 +7,8 @@ import type { AxiosRequestConfig } from "axios"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  /** .env.development, .env.production으로 분리한다면 수정하기 */
+  baseURL: import.meta.env.DEV ? "/api" : import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
