@@ -51,3 +51,8 @@ export async function postNotice(body: PostNoticeRequest) {
 export async function patchNotice(noticeId: number, body: PatchNoticeRequest) {
   await api.patch<ApiResponse<void>>(`/v1/notices/${noticeId}`, body)
 }
+
+// 공지사항 수정
+export async function deleteNotice(noticeId: number) {
+  await api.delete<ApiResponse<void>>(`/v1/notices/${noticeId}`)
+}
