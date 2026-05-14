@@ -68,7 +68,7 @@ function SignUpPage() {
   const [isAccountCreationComplete, setIsAccountCreationComplete] =
     useState(false)
 
-  const isEmailValid = email.includes("@")
+  const isEmailValid = email !== "" && !errors.email
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate({ from: Route.fullPath })
