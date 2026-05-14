@@ -108,3 +108,10 @@ export interface PostNoticeRequest {
 export interface PostNoticeResponse {
   noticeId: number
 }
+
+// PATCH /api/v1/notices/{noticeId} Request Body
+export interface PatchNoticeRequest {
+  title: string
+  content: string
+  mustRead: boolean
+}
