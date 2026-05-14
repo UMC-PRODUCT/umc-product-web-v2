@@ -43,7 +43,12 @@ export function useChallengerPageData() {
   const projects = projectsQuery.data?.content ?? []
 
   const applicantsQuery = useQuery({
-    queryKey: [...applicationKeys.all, "managed-applicants", gisuId],
+    queryKey: [
+      ...applicationKeys.all,
+      "managed-applicants",
+      gisuId,
+      projects.map((p) => p.id),
+    ],
     queryFn: async () => {
       const results = await Promise.all(
         projects.map(async (p) => {
@@ -57,20 +62,25 @@ export function useChallengerPageData() {
   })
 
   // 서버 데이터 -> 프론트 타입으로 변환
-  const transformed: ProjectApplication[] = projects.map((p) =>
-    toProjectApplication(p, applicantsQuery.data?.get(p.id) ?? []),
+  const transformed: ProjectApplication[] = useMemo(
+    () =>
+      projects.map((p) =>
+        toProjectApplication(p, applicantsQuery.data?.get(p.id) ?? []),
+      ),
+    [projects, applicantsQuery.data],
   )
 
   // PM 프로젝트 정보 (프로젝트 카드용)
-  const firstProject = projects[0]
-  const projectInfo = firstProject
-    ? {
-        projectName: firstProject.name,
-        pmName:
-          firstProject.productOwner.nickname || firstProject.productOwner.name,
-        pmUniversity: firstProject.productOwner.schoolName,
-      }
-    : null
+  const projectInfo = useMemo(() => {
+    const firstProject = projects[0]
+    if (!firstProject) return null
+    return {
+      projectName: firstProject.name,
+      pmName:
+        firstProject.productOwner.nickname || firstProject.productOwner.name,
+      pmUniversity: firstProject.productOwner.schoolName,
+    }
+  }, [projects])
 
   return {
     projects: transformed,
@@ -80,7 +90,7 @@ export function useChallengerPageData() {
       projectsQuery.isLoading ||
       applicantsQuery.isLoading,
     isError: gisuQuery.isError || projectsQuery.isError,
-    error: gisuQuery.error ?? projectsQuery.error,
+    error: gisuQuery.error ?? projectsQuery.error ?? applicantsQuery.error,
   }
 }
 
@@ -190,7 +200,13 @@ export function useAdminPageData(chapterName?: string) {
 
   // 각 프로젝트의 지원자 목록 조회
   const applicantsQuery = useQuery({
-    queryKey: [...applicationKeys.all, "admin-applicants", gisuId, chapterId],
+    queryKey: [
+      ...applicationKeys.all,
+      "admin-applicants",
+      gisuId,
+      chapterId,
+      projects.map((p) => p.id),
+    ],
     queryFn: async () => {
       const results = await Promise.all(
         projects.map(async (p) => {
@@ -204,8 +220,12 @@ export function useAdminPageData(chapterName?: string) {
   })
 
   // 서버 데이터 -> 프론트 타입 변환
-  const transformed: ProjectApplication[] = projects.map((p) =>
-    toProjectApplication(p, applicantsQuery.data?.get(p.id) ?? []),
+  const transformed: ProjectApplication[] = useMemo(
+    () =>
+      projects.map((p) =>
+        toProjectApplication(p, applicantsQuery.data?.get(p.id) ?? []),
+      ),
+    [projects, applicantsQuery.data],
   )
 
   // 통계 계산
