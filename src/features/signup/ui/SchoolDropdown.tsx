@@ -145,6 +145,7 @@ export function SchoolDropdown({
         className={cn(
           "shadow-inner-neutral-2 text-label-1-medium inline-flex h-11 w-full min-w-90 items-center justify-between gap-1 rounded-[12px] border pr-2.5 pl-4 transition-colors",
           stateClass,
+          !open && "hover:bg-teal-gray-50",
         )}
       >
         <span className="truncate">{displayLabel}</span>
