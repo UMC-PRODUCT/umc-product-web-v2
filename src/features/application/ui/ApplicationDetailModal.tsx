@@ -2,7 +2,8 @@ import { useMemo, useState } from "react"
 
 import { Modal } from "@/shared/ui/Modal"
 
-import { MOCK_FORM_DATA } from "../model/mockFormData"
+import { useApplicationDetail } from "../hooks/useApplications"
+import { toApplicantFormData } from "../model/mappers"
 import { ModalApplicantPanel } from "./detail-modal/ModalApplicantPanel"
 import { ModalFormPanel } from "./detail-modal/ModalFormPanel"
 
@@ -50,9 +51,19 @@ export function ApplicationDetailModal({
       ) ?? null)
     : null
 
-  const formData = selectedApplicantId
-    ? (MOCK_FORM_DATA[selectedApplicantId] ?? null)
-    : null
+  // 지원서 상세 API 호출
+  const projectId = Number(project.id)
+  const applicationId = selectedApplicantId ? Number(selectedApplicantId) : 0
+  const detailQuery = useApplicationDetail(projectId, applicationId)
+
+  // 서버 formResponse -> 프론트 ApplicantFormData 변환
+  const formData = useMemo(() => {
+    if (!detailQuery.data?.formResponse || !selectedApplicantId) return null
+    return toApplicantFormData(
+      detailQuery.data.formResponse,
+      selectedApplicantId,
+    )
+  }, [detailQuery.data, selectedApplicantId])
 
   const hasPanel = selectedApplicant !== null
 
