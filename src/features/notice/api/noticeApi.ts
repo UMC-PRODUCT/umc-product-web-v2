@@ -7,6 +7,8 @@ import type {
   NoticeSummaryResponse,
   NoticeTabEnum,
   PartEnum,
+  PostNoticeRequest,
+  PostNoticeResponse,
 } from "../model/apiTypes"
 
 // 공지사항 전체 조회
@@ -31,6 +33,15 @@ export async function getNotices(params: {
 export async function getNoticeDetail(noticeId: number) {
   const { data } = await api.get<ApiResponse<NoticeDetailResponse>>(
     `/v1/notices/${noticeId}`,
+  )
+  return data.result
+}
+
+// 공지사항 생성
+export async function postNotice(body: PostNoticeRequest) {
+  const { data } = await api.post<ApiResponse<PostNoticeResponse>>(
+    `/v1/notices`,
+    body,
   )
   return data.result
 }

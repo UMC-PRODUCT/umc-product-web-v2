@@ -94,3 +94,17 @@ export interface NoticeDetailResponse {
   viewCount: number
   createdAt: string // "2026-05-14T11:10:02.955Z"
 }
+
+// POST /api/v1/notices Request Body
+export interface PostNoticeRequest {
+  title: string
+  content: string
+  shouldNotify: boolean
+  mustRead: boolean
+  targetInfo: TargetInfo
+}
+
+// POST /api/v1/notices 응답 항목
+export interface PostNoticeResponse {
+  noticeId: number
+}
