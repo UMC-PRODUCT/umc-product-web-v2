@@ -2,30 +2,43 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
 import {
+  useAdminPageData,
+  useChallengerPageData,
+} from "@/features/application/hooks/useApplicationPageData"
+import {
   MOCK_PROJECTS,
   MOCK_STATS,
 } from "@/features/application/model/applicationMock"
-import {
-  MOCK_CHALLENGER_PROJECT,
-  MOCK_CHALLENGER_STATS,
-} from "@/features/application/model/challengerMock"
+import { MOCK_CHALLENGER_PROJECT } from "@/features/application/model/challengerMock"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
+import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 import { useViewModeStore } from "@/shared/view-mode"
 
 export const Route = createFileRoute("/matching/applications")({
   component: MatchingApplicationsPage,
 })
 
-const CHALLENGER_PROJECTS = MOCK_PROJECTS.filter((p) => p.id === "3")
-
 function MatchingApplicationsPage() {
   const mode = useViewModeStore((s) => s.mode)
-  const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
+  const [selectedChapter, setSelectedChapter] = useState("Chromium")
+
+  // Admin 뷰 데이터 (API 데이터가 비어있으면 mock fallback)
+  const admin = useAdminPageData(selectedChapter)
+  const adminStats = admin.projects.length > 0 ? admin.stats : MOCK_STATS
+  const adminProjects =
+    admin.projects.length > 0 ? admin.projects : MOCK_PROJECTS
+
+  // PM 뷰 데이터 (API 데이터가 비어있으면 mock fallback)
+  const challenger = useChallengerPageData()
+  const pmProjects =
+    challenger.projects.length > 0
+      ? challenger.projects
+      : MOCK_PROJECTS.filter((p) => p.id === "3")
+  const pmProjectInfo = challenger.projectInfo ?? MOCK_CHALLENGER_PROJECT
 
   return (
     <section className="flex w-full flex-col pt-10">
@@ -44,9 +57,9 @@ function MatchingApplicationsPage() {
         {mode === "pm" && (
           <ProjectTitleCard
             className="mt-6"
-            projectName={MOCK_CHALLENGER_PROJECT.projectName}
-            challengerName={MOCK_CHALLENGER_PROJECT.pmName}
-            challengerUniversity={MOCK_CHALLENGER_PROJECT.pmUniversity}
+            projectName={pmProjectInfo.projectName}
+            challengerName={pmProjectInfo.pmName}
+            challengerUniversity={pmProjectInfo.pmUniversity}
             size="lg"
           />
         )}
@@ -59,22 +72,37 @@ function MatchingApplicationsPage() {
               <SegmentButton
                 items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
                 value={selectedChapter}
-                onValueChange={(v) => setSelectedChapter(v as Chapter)}
+                onValueChange={(v) => setSelectedChapter(v)}
                 itemClassName="flex-1"
               />
-              <div className="flex flex-col gap-14.25 pl-4">
-                <ApplicationStatsSection stats={MOCK_STATS} />
-                <ApplicationTableSection projects={MOCK_PROJECTS} />
-              </div>
+              {admin.isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-body-2-regular text-teal-gray-400">
+                    데이터를 불러오는 중...
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-14.25 pl-4">
+                  <ApplicationStatsSection stats={adminStats} />
+                  <ApplicationTableSection projects={adminProjects} />
+                </div>
+              )}
             </>
           )}
 
           {/* pm: PM 챌린저 뷰 */}
           {mode === "pm" && (
-            <ChallengerApplicationView
-              stats={MOCK_CHALLENGER_STATS}
-              projects={CHALLENGER_PROJECTS}
-            />
+            <>
+              {challenger.isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-body-2-regular text-teal-gray-400">
+                    데이터를 불러오는 중...
+                  </p>
+                </div>
+              ) : (
+                <ChallengerApplicationView projects={pmProjects} />
+              )}
+            </>
           )}
 
           {/* others: 준비 중 */}

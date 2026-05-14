@@ -1,10 +1,16 @@
 import PersonGraphicIcon from "@/shared/assets/icon/people/PersonGraphicIcon"
 import { cn } from "@/shared/lib/utils"
 
-import { DonutChart } from "./DonutChart"
 import { RankBar } from "./RankBar"
+import { RoundDonutChart } from "./RoundDonutChart"
 
 import type { ChallengerStats } from "../model/challengerMock"
+
+const ROUND_COLORS = [
+  "#81D3C9",
+  "var(--color-teal-100)",
+  "var(--color-teal-gray-50)",
+] as const
 
 interface ChallengerStatsSectionProps {
   stats: ChallengerStats
@@ -28,10 +34,31 @@ export function ChallengerStatsSection({
             매칭 차수별 지원률
           </h3>
 
-          {/* 도넛 차트 */}
+          {/* 도넛 차트 (차수별 3세그먼트) */}
           <div className="absolute top-20.5 left-9">
-            <DonutChart percentage={stats.completionRate} size={142} />
+            <RoundDonutChart
+              percentage={stats.completionRate}
+              segments={stats.rounds.map((r, i) => ({
+                value: r.applied,
+                color: ROUND_COLORS[i] ?? ROUND_COLORS[0]!,
+              }))}
+              size={142}
+            />
           </div>
+
+          {/* 커넥터 라인 (도넛 -> 1차 범례) */}
+          <svg
+            width="40"
+            height="12"
+            viewBox="0 0 40 12"
+            fill="none"
+            className="absolute top-[90px] left-[160px]"
+          >
+            <path
+              d="M0.353342 10.8125L-0.000214756 11.166L0.706886 11.8731L1.06044 11.5196L0.706892 11.166L0.353342 10.8125ZM9.20703 2.66602V2.16602H8.99993L8.85348 2.31246L9.20703 2.66602ZM34.1654 2.66602C34.1654 4.13877 35.3593 5.33268 36.832 5.33268C38.3048 5.33268 39.4987 4.13877 39.4987 2.66602C39.4987 1.19326 38.3048 -0.000651121 36.832 -0.000651121C35.3593 -0.000651121 34.1654 1.19326 34.1654 2.66602ZM0.706892 11.166L1.06044 11.5196L9.56058 3.01957L9.20703 2.66602L8.85348 2.31246L0.353342 10.8125L0.706892 11.166ZM9.20703 2.66602V3.16602H36.832V2.66602V2.16602H9.20703V2.66602Z"
+              fill="#63C4B8"
+            />
+          </svg>
 
           {/* 우측 범례: 1차 17명 / 2차 2명 */}
           <div className="absolute top-20.5 left-53.25 flex w-27.5 flex-col gap-0.5">
@@ -40,10 +67,10 @@ export function ChallengerStatsSection({
                 key={r.round}
                 className="flex items-center justify-between px-0.5"
               >
-                <span className="text-subtitle-3-semibold text-teal-gray-800 w-15">
+                <span className="text-subtitle-3-semibold text-teal-gray-800 w-7">
                   {r.round}차
                 </span>
-                <div className="flex items-center gap-px text-right whitespace-nowrap">
+                <div className="flex items-center gap-px whitespace-nowrap">
                   <span className="text-subtitle-3-semibold text-teal-500">
                     {r.applied}
                   </span>
