@@ -1,11 +1,13 @@
+import { useFormContext } from "react-hook-form"
+
 import CircleBang from "@/shared/assets/icon/bang/CircleBang"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
+import { type SignUpFormData } from "../validation"
+
 interface VerificationStepProps {
-  email: string
-  code: string
   remainingSeconds: number
   showVerificationSent: boolean
   isCodeVisible: boolean
@@ -13,15 +15,11 @@ interface VerificationStepProps {
   isCodeExpired: boolean
   verificationButtonDisabled: boolean
   verificationButtonText: string
-  onEmailChange: (value: string) => void
-  onCodeChange: (value: string) => void
   onVerificationClick: () => void
   onSpamGuideClick: () => void
 }
 
 export function VerificationStep({
-  email,
-  code,
   remainingSeconds,
   showVerificationSent,
   isCodeVisible,
@@ -29,11 +27,13 @@ export function VerificationStep({
   isCodeExpired,
   verificationButtonDisabled,
   verificationButtonText,
-  onEmailChange,
-  onCodeChange,
   onVerificationClick,
   onSpamGuideClick,
 }: VerificationStepProps) {
+  const { register, watch } = useFormContext<SignUpFormData>()
+  const email = watch("email")
+  const code = watch("code")
+
   return (
     <>
       <div className="flex flex-col gap-1.5">
@@ -42,12 +42,8 @@ export function VerificationStep({
           <span className="text-body-1-medium text-error-600">*</span>
         </div>
 
-        <form className="flex items-center gap-1.5">
-          <InputBox
-            value={email}
-            onChange={(e) => onEmailChange(e.target.value)}
-            state="default"
-          />
+        <div className="flex items-center gap-1.5">
+          <InputBox {...register("email")} value={email} state="default" />
           <Button
             size={"m"}
             color={"primary"}
@@ -57,7 +53,7 @@ export function VerificationStep({
           >
             {verificationButtonText}
           </Button>
-        </form>
+        </div>
 
         <div className="flex h-5.5 items-center gap-1">
           {showVerificationSent && (
@@ -85,9 +81,9 @@ export function VerificationStep({
           </div>
 
           <InputBox
+            {...register("code")}
             type="verification"
             value={code}
-            onChange={(e) => onCodeChange(e.target.value)}
             placeholder="숫자 6자리 입력"
             remainingSeconds={remainingSeconds}
             inputMode="numeric"

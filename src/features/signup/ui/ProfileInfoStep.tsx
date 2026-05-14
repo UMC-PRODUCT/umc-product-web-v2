@@ -1,28 +1,27 @@
+import { Controller, useFormContext } from "react-hook-form"
+
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
-import { getSimpleValidationState, getValidationColor } from "../validation"
-import { type School, SchoolDropdown } from "./SchoolDropdown"
+import {
+  getSimpleValidationState,
+  getValidationColor,
+  type SignUpFormData,
+} from "../validation"
+import { SchoolDropdown } from "./SchoolDropdown"
 
-interface ProfileInfoStepProps {
-  school: School | undefined
-  name: string
-  nickname: string
-  isNicknameValid: boolean
-  onSchoolChange: (school: School) => void
-  onNameChange: (value: string) => void
-  onNicknameChange: (value: string) => void
-}
+export function ProfileInfoStep() {
+  const {
+    register,
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<SignUpFormData>()
 
-export function ProfileInfoStep({
-  school,
-  name,
-  nickname,
-  isNicknameValid,
-  onSchoolChange,
-  onNameChange,
-  onNicknameChange,
-}: ProfileInfoStepProps) {
+  const name = watch("name")
+  const nickname = watch("nickname")
+
+  const isNicknameValid = !errors.nickname
   const nicknameValidationState = getSimpleValidationState(
     nickname,
     isNicknameValid,
@@ -37,11 +36,16 @@ export function ProfileInfoStep({
           <span className="text-body-1-medium text-error-600">*</span>
         </div>
 
-        {/* TODO: 학교 목록 API 연동 예정 */}
-        <SchoolDropdown
-          value={school}
-          onChange={onSchoolChange}
-          className="w-full"
+        <Controller
+          name="school"
+          control={control}
+          render={({ field }) => (
+            <SchoolDropdown
+              value={field.value || undefined}
+              onChange={field.onChange}
+              className="w-full"
+            />
+          )}
         />
       </div>
 
@@ -52,9 +56,9 @@ export function ProfileInfoStep({
         </div>
 
         <InputBox
+          {...register("name")}
           type="default"
           value={name}
-          onChange={(e) => onNameChange(e.target.value)}
           className="w-full"
         />
       </div>
@@ -66,9 +70,9 @@ export function ProfileInfoStep({
         </div>
 
         <InputBox
+          {...register("nickname")}
           type="default"
           value={nickname}
-          onChange={(e) => onNicknameChange(e.target.value)}
           state={nickname !== "" && !isNicknameValid ? "error" : "default"}
           className="w-full"
         />

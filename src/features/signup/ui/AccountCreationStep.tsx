@@ -1,38 +1,40 @@
+import { useFormContext } from "react-hook-form"
+
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
-import { getSimpleValidationState, getValidationColor } from "../validation"
+import {
+  getPasswordValidationError,
+  getSimpleValidationState,
+  getValidationColor,
+  type SignUpFormData,
+} from "../validation"
 
 interface AccountCreationStepProps {
-  id: string
-  password: string
-  confirmPassword: string
-  isIdValid: boolean
   isIdDuplicated: boolean
-  isPasswordValid: boolean
-  hasInvalidSpecialChar: boolean
-  isPasswordMatch: boolean
-  onIdChange: (value: string) => void
-  onPasswordChange: (value: string) => void
-  onConfirmPasswordChange: (value: string) => void
   onIdDuplicateCheck: () => void
 }
 
 export function AccountCreationStep({
-  id,
-  password,
-  confirmPassword,
-  isIdValid,
   isIdDuplicated,
-  isPasswordValid,
-  hasInvalidSpecialChar,
-  isPasswordMatch,
-  onIdChange,
-  onPasswordChange,
-  onConfirmPasswordChange,
   onIdDuplicateCheck,
 }: AccountCreationStepProps) {
+  const {
+    register,
+    watch,
+    formState: { errors },
+  } = useFormContext<SignUpFormData>()
+
+  const id = watch("id")
+  const password = watch("password")
+  const confirmPassword = watch("confirmPassword")
+
+  const isIdValid = !errors.id
+  const isPasswordValid = !errors.password
+  const isPasswordMatch = password !== "" && password === confirmPassword
+  const hasInvalidSpecialChar = getPasswordValidationError(password)
+
   const idValidationState = getSimpleValidationState(id, isIdValid)
   const idValidationColor = getValidationColor(idValidationState)
   const passwordValidationState = hasInvalidSpecialChar
@@ -48,10 +50,10 @@ export function AccountCreationStep({
           <span className="text-body-1-medium text-error-600">*</span>
         </div>
 
-        <form className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5">
           <InputBox
+            {...register("id")}
             value={id}
-            onChange={(e) => onIdChange(e.target.value)}
             state={
               isIdDuplicated || (id !== "" && !isIdValid) ? "error" : "default"
             }
@@ -61,12 +63,12 @@ export function AccountCreationStep({
             size={"m"}
             color={"primary"}
             variant={"weak"}
-            disabled={!isIdValid}
+            disabled={!isIdValid || id === ""}
             onClick={onIdDuplicateCheck}
           >
             중복 확인
           </Button>
-        </form>
+        </div>
 
         <div className="flex h-5.5 items-center gap-1">
           {!isIdDuplicated && (
@@ -98,9 +100,9 @@ export function AccountCreationStep({
         </div>
 
         <InputBox
+          {...register("password")}
           type="password"
           value={password}
-          onChange={(e) => onPasswordChange(e.target.value)}
           state={
             password !== "" && !isPasswordValid && !hasInvalidSpecialChar
               ? "error"
@@ -137,9 +139,9 @@ export function AccountCreationStep({
         </div>
 
         <InputBox
+          {...register("confirmPassword")}
           type="password"
           value={confirmPassword}
-          onChange={(e) => onConfirmPasswordChange(e.target.value)}
           state={
             confirmPassword !== "" && !isPasswordMatch ? "error" : "default"
           }

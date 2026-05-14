@@ -1,5 +1,10 @@
 import { z } from "zod"
 
+export const emailSchema = z
+  .string()
+  .email("올바른 이메일 형식을 입력해주세요.")
+export const codeSchema = z.string().length(6, "인증번호 6자리를 입력해주세요.")
+
 export const idSchema = z
   .string()
   .min(5, "아이디는 5자 이상이어야 합니다")
@@ -27,6 +32,24 @@ export const nicknameSchema = z
   .min(1)
   .max(5)
   .regex(/^[가-힣]*$/, "공백 없이 한글 1-5자")
+
+export const signUpSchema = z
+  .object({
+    email: emailSchema,
+    code: codeSchema,
+    id: idSchema,
+    password: passwordSchema,
+    confirmPassword: z.string(),
+    school: z.string().min(1, "학교를 선택해주세요."),
+    name: z.string().min(1, "이름을 입력해주세요."),
+    nickname: nicknameSchema,
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "비밀번호가 일치하지 않습니다.",
+    path: ["confirmPassword"],
+  })
+
+export type SignUpFormData = z.infer<typeof signUpSchema>
 
 export type ValidationState = "default" | "pending" | "valid" | "invalid"
 

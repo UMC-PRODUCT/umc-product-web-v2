@@ -1,18 +1,14 @@
+import { zodResolver } from "@hookform/resolvers/zod"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
+import { FormProvider, useForm } from "react-hook-form"
 
 import {
   AccountCreationStep,
   ProfileInfoStep,
-  type School,
   VerificationStep,
 } from "@/features/signup"
-import {
-  getPasswordValidationError,
-  idSchema,
-  nicknameSchema,
-  passwordSchema,
-} from "@/features/signup/validation"
+import { type SignUpFormData, signUpSchema } from "@/features/signup/validation"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
@@ -25,13 +21,38 @@ export const Route = createFileRoute("/signup/")({
 })
 
 function SignUpPage() {
-  // 이메일 상태
-  const [email, setEmail] = useState("")
-  const [verifiedEmail, setVerifiedEmail] = useState("")
-  const [code, setCode] = useState("")
-  const [isEmailChanged, setIsEmailChanged] = useState(false)
+  const methods = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      code: "",
+      id: "",
+      password: "",
+      confirmPassword: "",
+      school: "",
+      name: "",
+      nickname: "",
+    },
+  })
 
-  // 인증번호 상태
+  const {
+    watch,
+    setValue,
+    formState: { errors },
+  } = methods
+  const email = watch("email")
+  const code = watch("code")
+  const id = watch("id")
+  const password = watch("password")
+  const confirmPassword = watch("confirmPassword")
+  const school = watch("school")
+  const name = watch("name")
+  const nickname = watch("nickname")
+
+  // 인증 상태
+  const [verifiedEmail, setVerifiedEmail] = useState("")
+  const [isEmailChanged, setIsEmailChanged] = useState(false)
   const [isCodeVisible, setIsCodeVisible] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const [showVerificationSent, setShowVerificationSent] = useState(false)
@@ -42,130 +63,31 @@ function SignUpPage() {
   const [isVerificationRequested, setIsVerificationRequested] = useState(false)
   const [isVerificationComplete, setIsVerificationComplete] = useState(false)
 
-  // 아이디, 비밀번호 상태
-  const [id, setId] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [isIdValid, setIsIdValid] = useState(false)
+  // 계정 생성 상태
   const [isIdDuplicated, setIsIdDuplicated] = useState(false)
-  const [isPasswordValid, setIsPasswordValid] = useState(false)
-  const [hasInvalidSpecialChar, setHasInvalidSpecialChar] = useState(false)
-  const [isPasswordMatch, setIsPasswordMatch] = useState(false)
   const [isAccountCreationComplete, setIsAccountCreationComplete] =
     useState(false)
-
-  // 학교, 이름, 닉네임 상태
-  const [school, setSchool] = useState<School | undefined>(undefined)
-  const [name, setName] = useState("")
-  const [nickname, setNickname] = useState("")
-  const [isNicknameValid, setIsNicknameValid] = useState(false)
 
   const isEmailValid = email.includes("@")
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate({ from: Route.fullPath })
 
-  const handleEmailChange = (value: string) => {
-    setEmail(value)
+  // 이메일 변경 시 사이드 이펙트
+  useEffect(() => {
     setShowVerificationSent(false)
     setIsVerificationRequested(false)
-  }
+  }, [email])
 
-  const handleCodeChange = (value: string) => {
-    setCode(value)
+  // 인증번호 변경 시 사이드 이펙트
+  useEffect(() => {
     setIsCodeInvalid(false)
-  }
+  }, [code])
 
-  const handleIdChange = (value: string) => {
-    setId(value)
+  // 아이디 변경 시 사이드 이펙트
+  useEffect(() => {
     setIsIdDuplicated(false)
-
-    const result = idSchema.safeParse(value)
-    setIsIdValid(result.success)
-  }
-
-  const handleIdDuplicateCheck = () => {
-    // TODO: 아이디 중복 확인 API 연동
-    // API 요청 후:
-    // - 사용 가능한 아이디: setIsIdDuplicated(false)
-    // - 중복된 아이디: setIsIdDuplicated(true)
-  }
-
-  // Password Handlers
-  const handlePasswordChange = (value: string) => {
-    setPassword(value)
-
-    const hasSpecialError = getPasswordValidationError(value)
-    setHasInvalidSpecialChar(hasSpecialError)
-
-    const result = passwordSchema.safeParse(value)
-    const isValid = result.success && !hasSpecialError
-    setIsPasswordValid(isValid)
-
-    if (confirmPassword) {
-      setIsPasswordMatch(value === confirmPassword)
-    }
-  }
-
-  const handleConfirmPasswordChange = (value: string) => {
-    setConfirmPassword(value)
-    setIsPasswordMatch(password === value)
-  }
-
-  const handleNicknameChange = (value: string) => {
-    setNickname(value)
-
-    const result = nicknameSchema.safeParse(value)
-    setIsNicknameValid(result.success)
-  }
-
-  const startVerificationTimer = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    intervalRef.current = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          if (intervalRef.current) clearInterval(intervalRef.current)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-  }
-
-  const handleVerificationClick = () => {
-    setVerifiedEmail(email)
-    setCode("")
-    setIsCodeVisible(true)
-    setShowVerificationSent(true)
-    setIsCodeInvalid(false)
-    setIsCodeExpired(false)
-    setIsVerificationRequested(true)
-    setRemainingSeconds(REMAINING_SECONDS)
-    setIsEmailChanged(false)
-    startVerificationTimer()
-  }
-
-  const handleSpamGuideConfirm = () => {
-    handleVerificationClick()
-    setShowSpamGuideModal(false)
-  }
-
-  const handleCodeComplete = () => {
-    // TODO: 인증번호 검증 API 연동
-    // API 요청 후:
-    // - 인증번호 일치: setIsVerificationComplete(true)
-    // - 인증번호 불일치: setIsCodeInvalid(true)
-    if (code === VERIFICATION_CODE) {
-      setIsVerificationComplete(true)
-    } else {
-      setIsCodeInvalid(true)
-    }
-  }
-
-  const handleAccountCreationComplete = () => {
-    // TODO: 회원가입 정보 제출 API 연동 필요 (학교/이름/닉네임 입력 후)
-    setIsAccountCreationComplete(true)
-  }
+  }, [id])
 
   // 이메일 검증
   useEffect(() => {
@@ -189,6 +111,55 @@ function SignUpPage() {
     }
   }, [remainingSeconds, isCodeVisible])
 
+  const startVerificationTimer = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    intervalRef.current = setInterval(() => {
+      setRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) clearInterval(intervalRef.current)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
+  const handleVerificationClick = () => {
+    setVerifiedEmail(email)
+    setValue("code", "")
+    setIsCodeVisible(true)
+    setShowVerificationSent(true)
+    setIsCodeInvalid(false)
+    setIsCodeExpired(false)
+    setIsVerificationRequested(true)
+    setRemainingSeconds(REMAINING_SECONDS)
+    setIsEmailChanged(false)
+    startVerificationTimer()
+  }
+
+  const handleSpamGuideConfirm = () => {
+    handleVerificationClick()
+    setShowSpamGuideModal(false)
+  }
+
+  const handleCodeComplete = () => {
+    // TODO: 인증번호 검증 API 연동
+    if (code === VERIFICATION_CODE) {
+      setIsVerificationComplete(true)
+    } else {
+      setIsCodeInvalid(true)
+    }
+  }
+
+  const handleAccountCreationComplete = () => {
+    // TODO: 회원가입 정보 제출 API 연동 필요 (학교/이름/닉네임 입력 후)
+    setIsAccountCreationComplete(true)
+  }
+
+  const handleIdDuplicateCheck = () => {
+    // TODO: 아이디 중복 확인 API 연동
+  }
+
   // 각종 버튼 상태
   const verificationButtonDisabled = isVerificationRequested
     ? true
@@ -199,14 +170,19 @@ function SignUpPage() {
   const verificationButtonText =
     hasExpiredBefore || isCodeExpired ? "다시 받기" : "인증하기"
 
+  const isIdValid = id !== "" && !errors.id
+  const isPasswordValid = password !== "" && !errors.password
+  const isPasswordMatch = password !== "" && password === confirmPassword
+
   const accountCreationNextButtonDisabled = !isVerificationComplete
     ? code.length !== 6 || isCodeInvalid || isCodeExpired
     : !isIdValid || isIdDuplicated || !isPasswordValid || !isPasswordMatch
 
+  const isNicknameValid = nickname !== "" && !errors.nickname
   const profileInfoNextButtonDisabled = !school || !name || !isNicknameValid
 
   return (
-    <>
+    <FormProvider {...methods}>
       <section className="-mb-12 flex h-screen min-h-74 w-full min-w-90 items-center justify-center">
         <div className="flex flex-col items-center gap-10">
           <span className="text-heading-3-semibold text-teal-gray-900">
@@ -216,8 +192,6 @@ function SignUpPage() {
           <div className="flex w-full flex-col items-center gap-8">
             {!isVerificationComplete && (
               <VerificationStep
-                email={email}
-                code={code}
                 remainingSeconds={remainingSeconds}
                 showVerificationSent={showVerificationSent}
                 isCodeVisible={isCodeVisible}
@@ -225,8 +199,6 @@ function SignUpPage() {
                 isCodeExpired={isCodeExpired}
                 verificationButtonDisabled={verificationButtonDisabled}
                 verificationButtonText={verificationButtonText}
-                onEmailChange={handleEmailChange}
-                onCodeChange={handleCodeChange}
                 onVerificationClick={handleVerificationClick}
                 onSpamGuideClick={() => setShowSpamGuideModal(true)}
               />
@@ -234,32 +206,12 @@ function SignUpPage() {
 
             {isVerificationComplete && !isAccountCreationComplete && (
               <AccountCreationStep
-                id={id}
-                password={password}
-                confirmPassword={confirmPassword}
-                isIdValid={isIdValid}
                 isIdDuplicated={isIdDuplicated}
-                isPasswordValid={isPasswordValid}
-                hasInvalidSpecialChar={hasInvalidSpecialChar}
-                isPasswordMatch={isPasswordMatch}
-                onIdChange={handleIdChange}
-                onPasswordChange={handlePasswordChange}
-                onConfirmPasswordChange={handleConfirmPasswordChange}
                 onIdDuplicateCheck={handleIdDuplicateCheck}
               />
             )}
 
-            {isAccountCreationComplete && (
-              <ProfileInfoStep
-                school={school}
-                name={name}
-                nickname={nickname}
-                isNicknameValid={isNicknameValid}
-                onSchoolChange={setSchool}
-                onNameChange={setName}
-                onNicknameChange={handleNicknameChange}
-              />
-            )}
+            {isAccountCreationComplete && <ProfileInfoStep />}
 
             <div className="flex w-full flex-col items-center gap-4">
               <Button
@@ -321,6 +273,6 @@ function SignUpPage() {
         onCancel={() => setShowSpamGuideModal(false)}
         onConfirm={handleSpamGuideConfirm}
       />
-    </>
+    </FormProvider>
   )
 }
