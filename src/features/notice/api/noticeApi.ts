@@ -3,6 +3,7 @@ import { api } from "@/shared/lib/axios"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 import type {
+  NoticeDetailResponse,
   NoticeSummaryResponse,
   NoticeTabEnum,
   PartEnum,
@@ -22,6 +23,14 @@ export async function getNotices(params: {
   const { data } = await api.get<ApiResponse<NoticeSummaryResponse>>(
     `/v1/notices`,
     { params },
+  )
+  return data.result
+}
+
+// 공지사항 상세 조회
+export async function getNoticeDetail(noticeId: number) {
+  const { data } = await api.get<ApiResponse<NoticeDetailResponse>>(
+    `/v1/notices/${noticeId}`,
   )
   return data.result
 }

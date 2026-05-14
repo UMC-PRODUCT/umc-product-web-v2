@@ -14,6 +14,7 @@ export type NoticeTabEnum =
   | "SCHOOL_CORE"
   | "SCHOOL_PART_LEADER"
 
+// GET /api/v1/notices 응답 항목
 export interface NoticeSummaryResponse {
   content: NoticeSummaryResponseContent[]
   page: number
@@ -31,16 +32,65 @@ export interface NoticeSummaryResponseContent {
   shouldSendNotification: boolean
   mustRead: boolean
   viewCount: number
-  createdAt: string
-  targetInfo: {
-    targetGisuId: number
-    targetChapterId: number
-    targetSchoolId: number
-    targetParts: PartEnum[]
-    targetNoticeTab: NoticeTabEnum
-  }
+  createdAt: string // "2026-05-14T11:10:02.955Z"
+  targetInfo: TargetInfo
   authorChallengerId: number
   authorMemberId: number
   authorNickname: string
   authorName: string
+}
+
+export interface TargetInfo {
+  targetGisuId: number
+  targetChapterId: number
+  targetSchoolId: number
+  targetParts: PartEnum[]
+  targetNoticeTab: NoticeTabEnum
+}
+
+// GET /api/v1/notices/{noticeId} 응답 항목
+export interface NoticeDetailResponse {
+  id: number
+  title: string
+  content: string
+  authorChallengerId: number
+  authorMemberId: number
+  mustRead: boolean
+  vote: {
+    voteId: number
+    title: string
+    isAnonymous: boolean
+    allowMultipleChoice: boolean
+    status: string
+    startsAt: string // "2026-05-14T11:10:02.955Z"
+    endsAtExclusive: string
+    totalParticipants: number
+    options: [
+      {
+        optionId: number
+        content: string
+        voteCount: number
+        voteRate: number
+        selectedMemberIds: number[]
+      },
+    ]
+    mySelectedOptionIds: number[]
+  }
+  images: [
+    {
+      id: number
+      url: string
+      displayOrder: number
+    },
+  ]
+  links: [
+    {
+      id: number
+      url: string
+      displayOrder: number
+    },
+  ]
+  targetInfo: TargetInfo
+  viewCount: number
+  createdAt: string // "2026-05-14T11:10:02.955Z"
 }
