@@ -1,6 +1,6 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useBlocker } from "@tanstack/react-router"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { useAuthStore } from "@/features/auth/store/authStore"
 import { getMemberProfile } from "@/features/challenger/api/member"
@@ -16,8 +16,12 @@ import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
-import { postNotice } from "../api/noticeApi"
-import { type NoticeTabEnum, type PartEnum } from "../model/apiTypes"
+import { getNoticeDetail, patchNotice, postNotice } from "../api/noticeApi"
+import {
+  type NoticeTabEnum,
+  type PartEnum,
+  type PatchNoticeRequest,
+} from "../model/apiTypes"
 
 const MAX_CHARS = 2000
 const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
@@ -37,6 +41,7 @@ export function NoticePublishForm({
   targetParts = [],
   chapter,
 }: NoticePublishFormProps) {
+  const queryClient = useQueryClient()
   const [noticeContent, setNoticeContent] = useState("")
   const [noticeTitle, setNoticeTitle] = useState("")
   const [isRequired, setIsRequired] = useState(false)
@@ -64,6 +69,22 @@ export function NoticePublishForm({
     queryFn: () => getMemberProfile(String(memberId)),
     enabled: !!memberId,
   })
+
+  // 공지 상세 조회 (수정 모드일 때)
+  const { data: noticeDetail } = useQuery({
+    queryKey: ["notice", "detail", noticeId],
+    queryFn: () => getNoticeDetail(Number(noticeId)),
+    enabled: variant === "edit" && !!noticeId,
+  })
+
+  // 수정 모드일 때 기존 데이터로 폼 채우기
+  useEffect(() => {
+    if (variant === "edit" && noticeDetail) {
+      setNoticeTitle(noticeDetail.title)
+      setNoticeContent(noticeDetail.content)
+      setIsRequired(noticeDetail.mustRead)
+    }
+  }, [variant, noticeDetail])
 
   const activeGisuId = useMemo(() => {
     if (!gisuData) return null
@@ -99,6 +120,7 @@ export function NoticePublishForm({
   const publishMutation = useMutation({
     mutationFn: postNotice,
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] })
       setIsLoading(false)
       setIsDone(true)
 
@@ -119,6 +141,35 @@ export function NoticePublishForm({
     onError: () => {
       setIsLoading(false)
       // TODO: 에러 처리 (토스트 등)
+    },
+  })
+
+  const editMutation = useMutation({
+    mutationFn: ({ id, body }: { id: number; body: PatchNoticeRequest }) =>
+      patchNotice(id, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] })
+      queryClient.invalidateQueries({
+        queryKey: ["notice", "detail", noticeId],
+      })
+      setIsLoading(false)
+      setIsDone(true)
+
+      sessionStorage.setItem(
+        NOTICE_COMPLETION_STORAGE_KEY,
+        JSON.stringify({
+          id: noticeId,
+          title: noticeTitle,
+          chip: isRequired ? "필독" : undefined,
+          mode: variant,
+        }),
+      )
+
+      setIsCompletionModalOpen(true)
+    },
+    onError: () => {
+      setIsLoading(false)
+      // TODO: 에러 처리
     },
   })
 
@@ -179,19 +230,15 @@ export function NoticePublishForm({
         shouldNotify: false, // UI에 알림 여부 토글이 없으므로 기본값 false
         targetInfo,
       })
-    } else {
-      // TODO: edit API 연결
-      console.log("Updating notice:", {
-        noticeId,
-        title: noticeTitle,
-        content: noticeContent,
-        isRequired,
+    } else if (variant === "edit" && noticeId) {
+      editMutation.mutate({
+        id: Number(noticeId),
+        body: {
+          title: noticeTitle,
+          content: noticeContent,
+          mustRead: isRequired,
+        },
       })
-      setTimeout(() => {
-        setIsLoading(false)
-        setIsDone(true)
-        setIsCompletionModalOpen(true)
-      }, 1000)
     }
   }
 

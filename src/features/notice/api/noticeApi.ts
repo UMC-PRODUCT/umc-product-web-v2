@@ -49,9 +49,5 @@ export async function postNotice(body: PostNoticeRequest) {
 
 // 공지사항 수정
 export async function patchNotice(noticeId: number, body: PatchNoticeRequest) {
-  const { data } = await api.patch<ApiResponse<void>>(
-    `/v1/notices/${noticeId}`,
-    body,
-  )
-  return data
+  await api.patch<ApiResponse<void>>(`/v1/notices/${noticeId}`, body)
 }

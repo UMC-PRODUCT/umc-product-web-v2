@@ -11,5 +11,11 @@ export const Route = createFileRoute(
 function ProjectSettingsNoticePublishEditPage() {
   const { noticeId } = Route.useParams()
 
-  return <NoticePublishForm variant="edit" noticeId={noticeId} />
+  return (
+    <NoticePublishForm
+      variant="edit"
+      noticeId={noticeId}
+      noticeTab="CHALLENGER"
+    />
+  )
 }
