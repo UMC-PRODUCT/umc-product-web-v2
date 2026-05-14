@@ -5,7 +5,6 @@ import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
 import {
-  getPasswordValidationError,
   getSimpleValidationState,
   getValidationColor,
   type SignUpFormData,
@@ -33,7 +32,8 @@ export function AccountCreationStep({
   const isIdValid = !errors.id
   const isPasswordValid = !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
-  const hasInvalidSpecialChar = getPasswordValidationError(password)
+  const hasInvalidSpecialChar =
+    !!errors.password?.message?.includes("사용 가능한 특수문자")
 
   const idValidationState = getSimpleValidationState(id, isIdValid)
   const idValidationColor = getValidationColor(idValidationState)

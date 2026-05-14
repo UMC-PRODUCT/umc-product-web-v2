@@ -77,12 +77,3 @@ export const getPasswordValidationState = (
   if (hasInvalidSpecialChar) return "invalid"
   return isValid ? "valid" : "invalid"
 }
-
-export const getPasswordValidationError = (value: string): boolean => {
-  const result = passwordSchema.safeParse(value)
-  return !result.success
-    ? result.error.issues.some((issue) =>
-        issue.message.includes("사용 가능한 특수문자"),
-      )
-    : false
-}
