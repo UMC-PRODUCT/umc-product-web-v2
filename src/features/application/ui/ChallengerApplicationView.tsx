@@ -13,21 +13,21 @@ interface ChallengerApplicationViewProps {
   className?: string
 }
 
-// 지원자 데이터에서 PM 통계를 계산
+// 프로젝트 데이터에서 PM 통계 계산
 function computeStats(projects: ProjectApplication[]): ChallengerStats {
   const allApplicants = projects.flatMap((p) => p.applicants)
+
+  // 지원 가용자 = 전체 파트 quota 합산
+  const totalQuota = projects.reduce(
+    (sum, p) => sum + p.designCount.total + p.feCount.total + p.beCount.total,
+    0,
+  )
 
   // 차수별 지원자 수 집계
   const roundMap = new Map<number, number>()
   for (const a of allApplicants) {
     roundMap.set(a.round, (roundMap.get(a.round) ?? 0) + 1)
   }
-
-  // 총 모집 인원 (전체 파트 quota 합산)
-  const totalQuota = projects.reduce(
-    (sum, p) => sum + p.designCount.total + p.feCount.total + p.beCount.total,
-    0,
-  )
 
   const rounds = Array.from(roundMap.entries())
     .sort(([a], [b]) => a - b)
@@ -37,7 +37,7 @@ function computeStats(projects: ProjectApplication[]): ChallengerStats {
       total: totalQuota,
     }))
 
-  // 대학별 지원자 수 집계 (상위 5개)
+  // 대학별 지원자 수 (상위 5개)
   const uniMap = new Map<string, number>()
   for (const a of allApplicants) {
     uniMap.set(a.university, (uniMap.get(a.university) ?? 0) + 1)
@@ -47,7 +47,7 @@ function computeStats(projects: ProjectApplication[]): ChallengerStats {
     .slice(0, 5)
     .map(([name, count]) => ({ name, count }))
 
-  // 전체 지원률 (전체 지원자 / 전체 모집 인원)
+  // 지원률 = 지원자 / 지원 가용자
   const completionRate =
     totalQuota > 0 ? Math.round((allApplicants.length / totalQuota) * 100) : 0
 
