@@ -132,7 +132,7 @@ export function PortfolioField({
       </div>
 
       {displayError && (
-        <p className="text-label-2-regular text-error-600 px-1">
+        <p className="text-caption-2-regular text-error-600 px-1">
           {displayError}
         </p>
       )}

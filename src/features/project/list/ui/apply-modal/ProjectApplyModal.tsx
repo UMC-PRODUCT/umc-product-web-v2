@@ -12,6 +12,7 @@ import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
+import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import {
   PortfolioField,
@@ -172,9 +173,19 @@ export function ProjectApplyModal({
       type: "default",
       duration: 3,
     })
-    document
-      .querySelector(`[data-question-id="${firstId}"]`)
-      ?.scrollIntoView({ behavior: "smooth", block: "center" })
+    const questionEl = document.querySelector(`[data-question-id="${firstId}"]`)
+    questionEl?.scrollIntoView({ behavior: "smooth", block: "center" })
+    const candidates = questionEl?.querySelectorAll<HTMLElement>(
+      'input:not([type="hidden"]), textarea, button',
+    )
+    if (candidates) {
+      for (const el of Array.from(candidates)) {
+        if (el.offsetParent !== null) {
+          el.focus()
+          break
+        }
+      }
+    }
   }
 
   function renderAnswerField(
@@ -268,92 +279,101 @@ export function ProjectApplyModal({
 
   return (
     <>
-      <div className="flex w-232 flex-col overflow-hidden rounded-2xl bg-white px-11.5 py-9">
-        <div className="scrollbar-none max-h-[75vh] overflow-y-auto">
-          <div className="flex items-start gap-6 self-stretch px-1 py-5">
-            <p className="text-body-1-regular text-teal-gray-600 flex-1">
-              {data.description}
-            </p>
-            <div className="flex w-74.5 shrink-0 flex-col gap-1.25">
-              {data.recruitRows.map((row) => {
-                const done = isRecruitDone(row)
-                return (
-                  <div
-                    key={row.part}
-                    className="flex w-full items-center justify-between pr-1"
-                  >
-                    <div className="flex w-30.5 items-center justify-between">
-                      <span className="text-body-2-medium text-teal-gray-700">
-                        {row.part}
-                      </span>
-                      <MemberCount
-                        size="sm"
-                        current={row.current}
-                        total={row.total}
-                      />
+      <div className="relative">
+        <div className="absolute -top-14.5 flex w-full flex-col">
+          <ProjectTitleCard
+            size="sm"
+            projectName={data.title}
+            subtitle={data.authorSchoolLine}
+          />
+        </div>
+        <div className="flex w-232 flex-col rounded-b-2xl bg-white">
+          <div className="scrollbar-none max-h-[75vh] overflow-y-auto px-11.5 py-9">
+            <div className="flex items-start gap-6 self-stretch px-1 py-5">
+              <p className="text-body-1-regular text-teal-gray-600 flex-1">
+                {data.description}
+              </p>
+              <div className="flex w-74.5 shrink-0 flex-col gap-1.25">
+                {data.recruitRows.map((row) => {
+                  const done = isRecruitDone(row)
+                  return (
+                    <div
+                      key={row.part}
+                      className="flex w-full items-center justify-between pr-1"
+                    >
+                      <div className="flex w-30.5 items-center justify-between">
+                        <span className="text-body-2-medium text-teal-gray-700">
+                          {row.part}
+                        </span>
+                        <MemberCount
+                          size="sm"
+                          current={row.current}
+                          total={row.total}
+                        />
+                      </div>
+                      <RecruitStatusChip done={done} />
                     </div>
-                    <RecruitStatusChip done={done} />
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col gap-5 pb-6">
+              {sections.map((section) => {
+                const isCommon = section.id === COMMON_SECTION_ID
+                const enabled = sectionEnabled[section.id] ?? section.isEnabled
+
+                return (
+                  <div key={section.id}>
+                    {isCommon ? (
+                      <FormHeader variant="common" />
+                    ) : (
+                      <FormHeader
+                        variant="part"
+                        partName={section.name}
+                        toggleChecked={enabled}
+                        showToggle={canToggleSection}
+                        onToggleChange={(checked) =>
+                          setSectionEnabled((prev) => ({
+                            ...prev,
+                            [section.id]: checked,
+                          }))
+                        }
+                      />
+                    )}
+                    {enabled && section.questions.length > 0 && (
+                      <div className="flex flex-col items-start gap-10 self-stretch rounded-b-[12px] border border-teal-200 bg-white pt-8.5 pr-5 pb-9.5 pl-5">
+                        {section.questions.map((q) => (
+                          <div
+                            key={q.id}
+                            className="flex w-full flex-col gap-3"
+                            data-question-id={q.id}
+                          >
+                            <QuestionItemTitle
+                              index={`Q${questionIndexMap[q.id]}`}
+                              title={q.title}
+                              required={q.required}
+                            />
+                            <Controller
+                              name={q.id}
+                              control={control}
+                              render={({ field, fieldState }) =>
+                                renderAnswerField(
+                                  q,
+                                  field.value,
+                                  (v: ApplyAnswerValue) => field.onChange(v),
+                                  fieldState.error?.message,
+                                )
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )
               })}
             </div>
-          </div>
-
-          <div className="flex w-full flex-col gap-5 pb-6">
-            {sections.map((section) => {
-              const isCommon = section.id === COMMON_SECTION_ID
-              const enabled = sectionEnabled[section.id] ?? section.isEnabled
-
-              return (
-                <div key={section.id}>
-                  {isCommon ? (
-                    <FormHeader variant="common" />
-                  ) : (
-                    <FormHeader
-                      variant="part"
-                      partName={section.name}
-                      toggleChecked={enabled}
-                      showToggle={canToggleSection}
-                      onToggleChange={(checked) =>
-                        setSectionEnabled((prev) => ({
-                          ...prev,
-                          [section.id]: checked,
-                        }))
-                      }
-                    />
-                  )}
-                  {enabled && section.questions.length > 0 && (
-                    <div className="flex flex-col items-start gap-10 self-stretch rounded-b-[12px] border border-teal-200 bg-white pt-8.5 pr-5 pb-9.5 pl-5">
-                      {section.questions.map((q) => (
-                        <div
-                          key={q.id}
-                          className="flex w-full flex-col gap-3"
-                          data-question-id={q.id}
-                        >
-                          <QuestionItemTitle
-                            index={`Q${questionIndexMap[q.id]}`}
-                            title={q.title}
-                            required={q.required}
-                          />
-                          <Controller
-                            name={q.id}
-                            control={control}
-                            render={({ field, fieldState }) =>
-                              renderAnswerField(
-                                q,
-                                field.value,
-                                (v: ApplyAnswerValue) => field.onChange(v),
-                                fieldState.error?.message,
-                              )
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
           </div>
 
           <div className="border-teal-gray-100 flex justify-center gap-3 border-t px-6 py-4">

@@ -47,7 +47,24 @@ function fieldSchema(q: Question, enabled: boolean): z.ZodTypeAny {
         ? z.string().min(1, "파일을 첨부해 주세요.")
         : z.string().nullable().optional()
     case "portfolio":
-      return required ? portfolioSchema : portfolioSchema.nullable().optional()
+      if (required) {
+        return z.any().superRefine((val, ctx) => {
+          if (val === null || val === undefined) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "포트폴리오를 제출해 주세요.",
+            })
+            return z.NEVER
+          }
+          const parsed = portfolioSchema.safeParse(val)
+          if (!parsed.success) {
+            for (const issue of parsed.error.issues) {
+              ctx.addIssue(issue)
+            }
+          }
+        })
+      }
+      return portfolioSchema.nullable().optional()
   }
 }
 
