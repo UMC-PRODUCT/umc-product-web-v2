@@ -13,6 +13,7 @@ import {
   Divider,
   Input,
   LoginCircleButton,
+  SmallDivider,
   UmcLogoButton,
 } from "@/features/login"
 import { Button } from "@/shared/ui/Button"
@@ -128,10 +129,21 @@ function DefaultLoginPage() {
                 </Button>
               </div>
             </form>
-            {/* TODO: 아이디/비밀번호 찾기 연동 */}
-            <button className="text-body-1-regular text-teal-gray-500 flex h-7 items-center justify-center px-1 py-0.5">
-              아이디/비밀번호 찾기
-            </button>
+            <div className="flex h-7 items-center gap-3">
+              {/* TODO: 아이디/비밀번호 찾기 연동 */}
+              <button className="text-body-1-regular text-teal-gray-500 flex items-center justify-center px-1 py-0.5">
+                아이디/비밀번호 찾기
+              </button>
+
+              <SmallDivider />
+
+              <button
+                onClick={() => navigate({ to: "/signup" })}
+                className="text-body-1-regular flex items-center justify-center px-1 py-0.5 text-teal-500"
+              >
+                회원가입
+              </button>
+            </div>
           </div>
           <div className="flex flex-col items-center gap-4">
             <Divider />
