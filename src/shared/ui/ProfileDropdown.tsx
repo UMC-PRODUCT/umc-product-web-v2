@@ -110,27 +110,21 @@ export function ProfileDropdown({
 
               <div className="border-teal-gray-100 flex w-full flex-col gap-0.5 rounded-[10px] border px-0.5 py-0.5">
                 {/* TODO: 기수 선택 시 글로벌 상태 변경 */}
-                <GenerationListItem
-                  generation={10}
-                  year={2026}
-                  active={true}
-                  className="w-full"
-                />
-                <GenerationListItem
-                  generation={9}
-                  year={2025}
-                  className="w-full"
-                />
-                <GenerationListItem
-                  generation={8}
-                  year={2025}
-                  className="w-full"
-                />
-                <GenerationListItem
-                  generation={7}
-                  year={2024}
-                  className="w-full"
-                />
+                {me?.challengerRecords && me.challengerRecords.length > 0 ? (
+                  me.challengerRecords.map((record, index) => (
+                    <GenerationListItem
+                      key={record.challengerId}
+                      generation={Number(record.gisu)}
+                      year={2026} // API에서 연도 정보를 제공하지 않으므로 임시값 사용
+                      active={index === 0} // 현재는 첫 번째 항목을 활성 상태로 표시
+                      className="w-full"
+                    />
+                  ))
+                ) : (
+                  <div className="text-caption-3-medium text-teal-gray-400 py-2 text-center">
+                    참여 기록이 없습니다.
+                  </div>
+                )}
               </div>
             </div>
           </div>
