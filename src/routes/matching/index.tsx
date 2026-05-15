@@ -117,8 +117,8 @@ function TeamMatchingAnnouncePage() {
   }, [chaptersData, chapter])
 
   // 공지사항 조회 (전체 챌린저 대상: CHALLENGER)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data: noticesData, isLoading } = useQuery({
+  // TODO: 공지사항 조회 실패 / 로딩 중 처리 로직 추가
+  const { data: noticesData } = useQuery({
     queryKey: [
       "notices",
       "team-matching",

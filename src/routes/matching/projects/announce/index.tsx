@@ -117,8 +117,8 @@ function ProjectSettingsAnnouncePage() {
   }, [chaptersData, chapter])
 
   // 공지사항 조회: PM(PLAN CHALLENGER) 대상
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data: noticesData, isLoading } = useQuery({
+  // TODO: 공지사항 조회 실패 / 로딩 중 처리 로직 추가
+  const { data: noticesData } = useQuery({
     queryKey: [
       "notices",
       "project-settings",
