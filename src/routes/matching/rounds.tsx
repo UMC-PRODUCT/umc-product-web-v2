@@ -1,12 +1,24 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useBlocker } from "@tanstack/react-router"
-import { useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import {
+  createMatchingRound,
+  getMatchingRounds,
+  updateMatchingRound,
+} from "@/features/application/api/applicationApi"
+import { applicationKeys } from "@/features/application/api/applicationKeys"
+import { useChapters } from "@/features/application/hooks/useApplicationPageData"
+import {
   type Branch,
+  emptyRoundSchedules,
   MATCHING_TYPES,
   type MatchingType,
-  MOCK_ROUND_SCHEDULES,
+  PHASES,
   type RoundSchedule,
+  toISODatetime,
+  toRoundSchedule,
+  toServerMatchingType,
 } from "@/features/matching/model/matchingRoundMock"
 import { BranchSelector } from "@/features/matching/ui/BranchSelector"
 import { Calendar } from "@/features/matching/ui/Calendar"
@@ -39,9 +51,94 @@ function formatDateStr(date: Date): string {
 
 function MatchingRoundsPage() {
   const [matchingType, setMatchingType] =
-    useState<MatchingType>("Plan-Design 매칭")
+    useState<MatchingType>("Plan-Develop 매칭")
   const [selectedBranch, setSelectedBranch] = useState<Branch>("Chromium")
-  const [rounds, setRounds] = useState<RoundSchedule[]>(MOCK_ROUND_SCHEDULES)
+  const [rounds, setRounds] = useState<RoundSchedule[]>(
+    emptyRoundSchedules(matchingType),
+  )
+  const [pickingEnd, setPickingEnd] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
+  const [saveState, setSaveState] = useState<"idle" | "loading" | "completed">(
+    "idle",
+  )
+  const [showSaveModal, setShowSaveModal] = useState(false)
+
+  const queryClient = useQueryClient()
+
+  // 지부 목록 조회 -> branch name -> chapterId 매핑
+  const chaptersQuery = useChapters()
+  const chapters = useMemo(
+    () => chaptersQuery.data?.chapters ?? [],
+    [chaptersQuery.data],
+  )
+
+  const chapterId = useMemo(() => {
+    const found = chapters.find((c) => c.name === selectedBranch)
+    return found ? Number(found.id) : undefined
+  }, [selectedBranch, chapters])
+
+  // 매칭 차수 목록 조회
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(chapterId),
+    queryFn: () => getMatchingRounds(chapterId),
+    enabled: chapterId !== undefined,
+  })
+
+  // 서버 데이터 -> 선택된 매칭 타입 필터링 -> RoundSchedule 변환
+  const serverType = toServerMatchingType(matchingType)
+
+  const syncRoundsFromServer = useCallback(() => {
+    const allRounds = roundsQuery.data ?? []
+    const filtered = allRounds.filter((r) => r.type === serverType)
+    if (filtered.length === 0) {
+      setRounds(emptyRoundSchedules(matchingType))
+    } else {
+      // phase 순서대로 정렬
+      const phaseOrder = { FIRST: 0, SECOND: 1, THIRD: 2 }
+      const sorted = [...filtered].sort(
+        (a, b) => (phaseOrder[a.phase] ?? 0) - (phaseOrder[b.phase] ?? 0),
+      )
+      const mapped = sorted.map(toRoundSchedule)
+      // 누락된 phase 채우기
+      const result: RoundSchedule[] = PHASES.map((phase) => {
+        const existing = mapped.find((r) => r.phase === phase)
+        return (
+          existing ?? {
+            phase,
+            roundLabel:
+              phase === "FIRST" ? "1차" : phase === "SECOND" ? "2차" : "3차",
+            title: matchingType,
+            startDate: "",
+            endDate: "",
+            startTime: "00:00",
+            endTime: "23:59",
+          }
+        )
+      })
+      setRounds(result)
+    }
+    setIsDirty(false)
+    setSaveState("idle")
+  }, [roundsQuery.data, serverType, matchingType])
+
+  // 서버 데이터 변경 시 로컬 동기화
+  useEffect(() => {
+    syncRoundsFromServer()
+  }, [syncRoundsFromServer])
+
+  // 매칭 타입 변경 시 dirty 초기화
+  const handleMatchingTypeChange = (type: MatchingType) => {
+    setMatchingType(type)
+    setIsDirty(false)
+    setSaveState("idle")
+  }
+
+  // 지부 변경 시 dirty 초기화
+  const handleBranchChange = (branch: Branch) => {
+    setSelectedBranch(branch)
+    setIsDirty(false)
+    setSaveState("idle")
+  }
 
   const isRoundExpired = (round: RoundSchedule) => {
     const end = parseDate(round.endDate)
@@ -54,12 +151,6 @@ function MatchingRoundsPage() {
   const firstActiveIdx = rounds.findIndex((r) => !isRoundExpired(r))
   const selectedRoundIdx =
     firstActiveIdx === -1 ? rounds.length - 1 : firstActiveIdx
-  const [pickingEnd, setPickingEnd] = useState(false)
-  const [isDirty, setIsDirty] = useState(false)
-  const [saveState, setSaveState] = useState<"idle" | "loading" | "completed">(
-    "idle",
-  )
-  const [showSaveModal, setShowSaveModal] = useState(false)
 
   const {
     proceed: proceedLeave,
@@ -94,14 +185,56 @@ function MatchingRoundsPage() {
     if (saveState === "completed") setSaveState("idle")
   }
 
-  const handleSave = () => {
-    setSaveState("loading")
-    // TODO: API 호출
-    setTimeout(() => {
+  // 저장 mutation
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (chapterId === undefined) throw new Error("지부를 선택해주세요.")
+      const promises = rounds.map((round) => {
+        // 날짜가 비어있으면 스킵
+        if (!round.startDate || !round.endDate) return Promise.resolve()
+
+        const startsAt = toISODatetime(round.startDate, round.startTime)
+        const endsAt = toISODatetime(round.endDate, round.endTime)
+        // decisionDeadline: endsAt과 동일하게 설정
+        const decisionDeadline = endsAt
+
+        if (round.id) {
+          // 기존 라운드 수정
+          return updateMatchingRound(round.id, {
+            startsAt,
+            endsAt,
+            decisionDeadline,
+          })
+        }
+        // 신규 라운드 생성
+        return createMatchingRound({
+          name: `${round.roundLabel} ${matchingType}`,
+          type: serverType,
+          phase: round.phase,
+          chapterId,
+          startsAt,
+          endsAt,
+          decisionDeadline,
+        })
+      })
+      await Promise.all(promises)
+    },
+    onSuccess: () => {
       setSaveState("completed")
       setIsDirty(false)
       setShowSaveModal(true)
-    }, 1500)
+      queryClient.invalidateQueries({
+        queryKey: applicationKeys.matchingRounds(chapterId),
+      })
+    },
+    onError: () => {
+      setSaveState("idle")
+    },
+  })
+
+  const handleSave = () => {
+    setSaveState("loading")
+    saveMutation.mutate()
   }
 
   const saveButtonText =
@@ -144,9 +277,13 @@ function MatchingRoundsPage() {
         <div className="flex flex-col gap-11.5">
           {/* 매칭 타입 선택 */}
           <SegmentButton
-            items={MATCHING_TYPES.map((t) => ({ value: t, label: t }))}
+            items={MATCHING_TYPES.map((t) => ({
+              value: t,
+              label: t,
+              disabled: t === "Plan-Design 매칭",
+            }))}
             value={matchingType}
-            onValueChange={(v) => setMatchingType(v as MatchingType)}
+            onValueChange={(v) => handleMatchingTypeChange(v as MatchingType)}
             className="w-[734px]"
             itemClassName="flex-1"
           />
@@ -167,7 +304,7 @@ function MatchingRoundsPage() {
                     </span>
                     <BranchSelector
                       selected={selectedBranch}
-                      onChange={setSelectedBranch}
+                      onChange={handleBranchChange}
                     />
                   </div>
                 </div>
