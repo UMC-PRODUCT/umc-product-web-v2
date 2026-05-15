@@ -2,6 +2,7 @@ import type { FieldType, Question, Section } from "../model/applicationQuestion"
 import type {
   ApiPart,
   ApplicationQuestionItem,
+  GetApplicationFormResponse,
   PartQuotaEntry,
   UpsertApplicationFormRequest,
 } from "./types"
@@ -65,6 +66,69 @@ function toApiQuestion(q: Question, idx: number): ApplicationQuestionItem {
     orderNo: idx,
     options: q.options.map((content, i) => ({ content, orderNo: i })),
   }
+}
+
+const API_FIELD_TYPE_TO_UI: Record<ApplicationQuestionItem["type"], FieldType> =
+  {
+    SHORT_TEXT: "text",
+    LONG_TEXT: "text",
+    RADIO: "radio",
+    DROPDOWN: "radio",
+    CHECKBOX: "checkbox",
+    FILE: "file",
+    SCHEDULE: "file",
+    PORTFOLIO: "portfolio",
+  }
+
+function allowedPartsToSectionId(
+  allowedParts: ApiPart[],
+  fallbackId: number,
+): string {
+  const partsSet = new Set(allowedParts)
+  if (partsSet.has("DESIGN")) return "design"
+  if (partsSet.has("WEB") || partsSet.has("IOS") || partsSet.has("ANDROID"))
+    return "frontend"
+  if (partsSet.has("SPRINGBOOT") || partsSet.has("NODEJS")) return "backend"
+  return String(fallbackId)
+}
+
+export function mapApplicationFormToSections(
+  response: GetApplicationFormResponse,
+): Section[] {
+  return (response.sections ?? [])
+    .slice()
+    .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
+    .map((apiSection) => {
+      const id =
+        apiSection.type === "COMMON"
+          ? "common"
+          : allowedPartsToSectionId(
+              (apiSection.allowedParts ?? []) as ApiPart[],
+              apiSection.sectionId ?? 0,
+            )
+
+      const questions: Question[] = apiSection.questions
+        .slice()
+        .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
+        .map((apiQ) => ({
+          id: String(apiQ.questionId),
+          title: apiQ.title,
+          caption: apiQ.description ?? "",
+          fieldType: API_FIELD_TYPE_TO_UI[apiQ.type],
+          required: apiQ.isRequired ?? false,
+          options: apiQ.options
+            .slice()
+            .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
+            .map((o) => o.content),
+        }))
+
+      return {
+        id,
+        name: apiSection.title,
+        isEnabled: true,
+        questions,
+      }
+    })
 }
 
 export function buildUpsertApplicationFormBody(
