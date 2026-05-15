@@ -1,6 +1,18 @@
 const KAKAO_REDIRECT_PATH = "/oauth/kakao/callback"
 const KAKAO_STATE_STORAGE_KEY = "kakao_oauth_state"
 
+function generateSecureState(): string {
+  if (typeof crypto?.randomUUID === "function") {
+    return crypto.randomUUID()
+  }
+  if (typeof crypto?.getRandomValues === "function") {
+    const bytes = new Uint8Array(16)
+    crypto.getRandomValues(bytes)
+    return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")
+  }
+  throw new Error("보안 난수 생성기를 사용할 수 없습니다.")
+}
+
 export function getKakaoRedirectUri(): string {
   return `${window.location.origin}${KAKAO_REDIRECT_PATH}`
 }
@@ -25,10 +37,7 @@ export function startKakaoSignIn(): void {
     window.Kakao.init(appKey)
   }
 
-  const state =
-    typeof crypto?.randomUUID === "function"
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2) + Date.now().toString(36)
+  const state = generateSecureState()
   sessionStorage.setItem(KAKAO_STATE_STORAGE_KEY, state)
 
   window.Kakao.Auth.authorize({
