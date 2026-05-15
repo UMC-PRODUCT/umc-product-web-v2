@@ -199,7 +199,7 @@ export function MatchingResultRow({
         onOpenChange={(open) => {
           if (!open) setSelectedApplicantId(null)
         }}
-        statusDisabled={!isEditable}
+        isEditable={isEditable}
       />
 
       {isEditable && (
