@@ -43,6 +43,7 @@ function ProjectRegisterPage() {
   const application = useProjectRegisterStore((s) => s.application)
   const reset = useProjectRegisterStore((s) => s.reset)
   const setGisuId = useProjectRegisterStore((s) => s.setGisuId)
+  const setApplication = useProjectRegisterStore((s) => s.setApplication)
 
   useQuery({ queryKey: ["me"], queryFn: getMe })
 
@@ -78,8 +79,10 @@ function ProjectRegisterPage() {
   useEffect(() => {
     if (applicationFormQuery.data) {
       hydrateApplicationFormIntoStore(applicationFormQuery.data)
+    } else if (applicationFormQuery.data === null) {
+      setApplication({ commonQuestions: [], sections: [] })
     }
-  }, [applicationFormQuery.data])
+  }, [applicationFormQuery.data, setApplication])
 
   const submitMutation = useMutation({
     mutationFn: async () => {
