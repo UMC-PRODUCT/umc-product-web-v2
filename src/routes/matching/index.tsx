@@ -27,7 +27,6 @@ interface AnnounceSearch {
   page: number
 }
 
-const DEFAULT_CHAPTER: Chapter = "Chromium"
 const DEFAULT_PAGE = 1
 const NOTICE_PAGE_SIZE = 10
 const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
@@ -78,8 +77,10 @@ function readPendingNotice() {
 /** 팀 매칭 공지 페이지 (/matching) */
 export const Route = createFileRoute("/matching/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
+    // TODO: 사용자 지부 불러오기. 아래는 임시 상태.
+    const userChapter = useViewModeStore.getState().viewerBranch as Chapter
     return {
-      chapter: isChapter(search.chapter) ? search.chapter : DEFAULT_CHAPTER,
+      chapter: isChapter(search.chapter) ? search.chapter : userChapter,
       page: parsePage(search.page),
     }
   },
@@ -160,7 +161,9 @@ function TeamMatchingAnnouncePage() {
   const focusedNoticeId = pendingNotice?.id ?? null
 
   const queryClient = useQueryClient()
+  // TODO: 사용자 권한 및 지부 불러오기. 아래는 임시 상태.
   const mode = useViewModeStore((s) => s.mode)
+  const userChapter = useViewModeStore((s) => s.viewerBranch) as Chapter
   const canManage = mode === "admin"
 
   const deleteMutation = useMutation({
@@ -181,6 +184,17 @@ function TeamMatchingAnnouncePage() {
   })
 
   const handleChapterChange = (nextChapter: Chapter) => {
+    if (mode !== "admin" && nextChapter !== userChapter) {
+      addToast({
+        message: "소속된 지부의 공지만 확인할 수 있습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+      return
+    }
+
     navigate({
       search: (prev) => ({ ...prev, chapter: nextChapter }),
       replace: true,
