@@ -11,6 +11,8 @@ import {
 
 interface MatchingDetailModalProps {
   applicantId: string | null
+  projectId?: number
+  memberId?: number
   chapterName: string
   projectName: string
   challengerName: string
@@ -18,10 +20,13 @@ interface MatchingDetailModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   isEditable?: boolean
+  onConfirmUnmatch?: () => void
 }
 
 export function MatchingDetailModal({
   applicantId,
+  projectId: _projectId,
+  memberId: _memberId,
   chapterName,
   projectName,
   challengerName,
@@ -29,6 +34,7 @@ export function MatchingDetailModal({
   open,
   onOpenChange,
   isEditable = false,
+  onConfirmUnmatch,
 }: MatchingDetailModalProps) {
   const [showUnmatchConfirm, setShowUnmatchConfirm] = useState(false)
 
@@ -46,7 +52,7 @@ export function MatchingDetailModal({
   }
 
   const handleConfirmUnmatch = () => {
-    // TODO: 매칭 해제 API 호출 (서버 endpoint 추가 후 연동)
+    onConfirmUnmatch?.()
     setShowUnmatchConfirm(false)
     handleClose()
   }

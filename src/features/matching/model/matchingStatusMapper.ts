@@ -76,13 +76,14 @@ function toMatchingProject(
     maxCols: number,
   ): MatchingRoleRow {
     const approved = approvedByRole.get(role) ?? []
-    const filledBlocks: MatchingBlockData[] = approved.map((app) =>
-      phaseToBlock(
+    const filledBlocks: MatchingBlockData[] = approved.map((app) => ({
+      ...phaseToBlock(
         toRoundNumber(app.matchingRound.phase),
         app.applicant.nickname || app.applicant.name,
         String(app.applicationId),
       ),
-    )
+      memberId: app.applicant.memberId,
+    }))
     const emptyCount = Math.max(0, quota - approved.length)
     const emptyBlocks: MatchingBlockData[] = Array.from(
       { length: emptyCount },
@@ -113,6 +114,7 @@ function toMatchingProject(
   const currentCount = applicants.filter((a) => a.status === "APPROVED").length
 
   return {
+    projectId: project.id,
     projectName: project.name,
     challengerName: project.productOwner.nickname || project.productOwner.name,
     challengerUniversity: project.productOwner.schoolName,

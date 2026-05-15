@@ -84,6 +84,31 @@ export async function getMatchingRounds(chapterId?: number) {
   return data.result
 }
 
+// 프로젝트 팀원 추가 (수동 배정)
+export async function addProjectMember(
+  projectId: number,
+  body: { memberId: number; part: string },
+) {
+  const { data } = await api.post<ApiResponse<unknown>>(
+    `/v1/projects/${projectId}/members`,
+    body,
+  )
+  return data.result
+}
+
+// 프로젝트 팀원 제거 (매칭 해제)
+export async function removeProjectMember(
+  projectId: number,
+  memberId: number,
+  reason?: string,
+) {
+  const { data } = await api.delete<ApiResponse<unknown>>(
+    `/v1/projects/${projectId}/members/${memberId}`,
+    { params: reason ? { reason } : undefined },
+  )
+  return data.result
+}
+
 // 지원서 합불 결정
 export async function updateApplicationDecision(
   projectId: number,
