@@ -54,7 +54,13 @@ export function useMatchingProjectListFilters() {
   const [selectedRecruitStatus, setSelectedRecruitStatus] =
     useState<PartQuotaStatus>()
   const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("")
   const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   useEffect(() => {
     setPage(1)
@@ -63,7 +69,7 @@ export function useMatchingProjectListFilters() {
     selectedSchool,
     selectedParts,
     selectedRecruitStatus,
-    searchQuery,
+    debouncedSearchQuery,
   ])
 
   const { data: gisuData } = useQuery({
@@ -108,7 +114,7 @@ export function useMatchingProjectListFilters() {
       "matchingProjects",
       activeGisuId,
       page,
-      searchQuery,
+      debouncedSearchQuery,
       selectedBranch,
       selectedSchool,
       selectedParts,
@@ -117,7 +123,7 @@ export function useMatchingProjectListFilters() {
     queryFn: () =>
       getMatchingProjects({
         gisuId: activeGisuId!,
-        keyword: searchQuery || undefined,
+        keyword: debouncedSearchQuery || undefined,
         chapterId: selectedBranch ? Number(selectedBranch) : undefined,
         schoolIds: selectedSchool ? [Number(selectedSchool)] : undefined,
         parts: selectedParts.length > 0 ? selectedParts : undefined,
