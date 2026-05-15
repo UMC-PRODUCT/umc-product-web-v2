@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 
+import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
 import { useSignupStore } from "@/features/auth/store/signupStore"
 import { SignupStepBasicInfo } from "@/features/auth/ui/SignupStepBasicInfo"
 import { SignupStepEmail } from "@/features/auth/ui/SignupStepEmail"
@@ -7,7 +8,7 @@ import { SignupStepTerms } from "@/features/auth/ui/SignupStepTerms"
 
 export const Route = createFileRoute("/signup/oauth")({
   beforeLoad: () => {
-    const token = sessionStorage.getItem("oauth_verification_token")
+    const token = sessionStorage.getItem(OAUTH_VERIFICATION_TOKEN_KEY)
     if (!token) {
       throw redirect({ to: "/login" })
     }

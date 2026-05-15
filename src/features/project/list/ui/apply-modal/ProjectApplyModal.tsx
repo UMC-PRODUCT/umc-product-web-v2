@@ -171,7 +171,7 @@ export function ProjectApplyModal({
       color: "red",
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
     const questionEl = document.querySelector(`[data-question-id="${firstId}"]`)
     questionEl?.scrollIntoView({ behavior: "smooth", block: "center" })

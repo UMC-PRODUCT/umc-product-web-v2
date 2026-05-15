@@ -23,7 +23,7 @@ export async function loginWithKakao(
   payload: KakaoLoginRequest,
 ): Promise<OAuthLoginResponse> {
   const { data } = await api.post<ApiResponse<OAuthLoginResponse>>(
-    "/v1/auth/login/kakao",
+    "/v1/auth/login/kakao/code",
     payload,
   )
   return data.result

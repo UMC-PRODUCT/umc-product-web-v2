@@ -35,7 +35,6 @@ import { Route as TestCheckboxRouteImport } from './routes/test/checkbox'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
 import { Route as SignupOauthRouteImport } from './routes/signup/oauth'
-import { Route as OauthCallbackRouteImport } from './routes/oauth/callback'
 import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
@@ -184,11 +183,6 @@ const SignupOauthRoute = SignupOauthRouteImport.update({
   path: '/signup/oauth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OauthCallbackRoute = OauthCallbackRouteImport.update({
-  id: '/oauth/callback',
-  path: '/oauth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MatchingStatusRoute = MatchingStatusRouteImport.update({
   id: '/status',
   path: '/status',
@@ -286,7 +280,6 @@ export interface FileRoutesByFullPath {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
-  '/oauth/callback': typeof OauthCallbackRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -329,7 +322,6 @@ export interface FileRoutesByTo {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
-  '/oauth/callback': typeof OauthCallbackRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -374,7 +366,6 @@ export interface FileRoutesById {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
-  '/oauth/callback': typeof OauthCallbackRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -421,7 +412,6 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
-    | '/oauth/callback'
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
@@ -464,7 +454,6 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
-    | '/oauth/callback'
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
@@ -508,7 +497,6 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
-    | '/oauth/callback'
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
@@ -550,7 +538,6 @@ export interface RootRouteChildren {
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
-  OauthCallbackRoute: typeof OauthCallbackRoute
   SignupOauthRoute: typeof SignupOauthRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
@@ -756,13 +743,6 @@ declare module '@tanstack/react-router' {
       path: '/signup/oauth'
       fullPath: '/signup/oauth'
       preLoaderRoute: typeof SignupOauthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/oauth/callback': {
-      id: '/oauth/callback'
-      path: '/oauth/callback'
-      fullPath: '/oauth/callback'
-      preLoaderRoute: typeof OauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matching/status': {
@@ -976,7 +956,6 @@ const rootRouteChildren: RootRouteChildren = {
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
   LoginDefaultRoute: LoginDefaultRoute,
-  OauthCallbackRoute: OauthCallbackRoute,
   SignupOauthRoute: SignupOauthRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,

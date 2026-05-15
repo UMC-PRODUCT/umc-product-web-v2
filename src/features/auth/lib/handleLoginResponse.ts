@@ -1,5 +1,7 @@
 import type { OAuthLoginResponse } from "@/features/auth/model/types"
 
+export const OAUTH_VERIFICATION_TOKEN_KEY = "oauth_verification_token"
+
 export function handleLoginResponse(
   res: OAuthLoginResponse,
 ): "LOGIN_SUCCESS" | "REGISTER_REQUIRED" {
@@ -10,7 +12,7 @@ export function handleLoginResponse(
   }
 
   sessionStorage.setItem(
-    "oauth_verification_token",
+    OAUTH_VERIFICATION_TOKEN_KEY,
     res.oAuthVerificationToken ?? "",
   )
   sessionStorage.setItem("oauth_provider", res.provider)

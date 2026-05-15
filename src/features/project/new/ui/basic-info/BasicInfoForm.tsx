@@ -177,7 +177,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
       color: "red",
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
 
     if (focusFn) setTimeout(focusFn, 0)
@@ -252,7 +252,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         color: "primary",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     } catch {
       addToast({
@@ -275,7 +275,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
       color: "primary",
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
     onNext()
   }
@@ -289,7 +289,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       setTimeout(() => pm1Ref.current?.focus(), 0)
       return
@@ -301,7 +301,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       setTimeout(() => pm2Ref.current?.focus(), 0)
       return
