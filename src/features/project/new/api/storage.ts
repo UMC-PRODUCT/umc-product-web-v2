@@ -50,12 +50,17 @@ export async function uploadFileFlow(
     fileSize: file.size,
     category,
   })
+  if (!prepared.uploadUrl || !prepared.uploadMethod || !prepared.fileId) {
+    throw new Error(
+      "업로드 URL, 메서드 또는 파일 ID가 응답에 포함되지 않았습니다.",
+    )
+  }
   await uploadToSignedUrl(
-    prepared.uploadUrl!,
-    prepared.uploadMethod!,
+    prepared.uploadUrl,
+    prepared.uploadMethod,
     (prepared.headers ?? {}) as Record<string, string>,
     file,
   )
-  await confirmUpload(prepared.fileId!)
-  return { fileId: prepared.fileId! }
+  await confirmUpload(prepared.fileId)
+  return { fileId: prepared.fileId }
 }
