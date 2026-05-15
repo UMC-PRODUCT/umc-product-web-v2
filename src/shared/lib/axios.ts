@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 
 import type { AxiosRequestConfig } from "axios"
 
@@ -41,9 +41,13 @@ api.interceptors.response.use(
     const body = response.data as { success?: boolean; message?: string }
     if (body && typeof body === "object" && body.success === false) {
       return Promise.reject(
-        Object.assign(new Error(body.message ?? "요청에 실패했습니다."), {
+        new AxiosError(
+          body.message ?? "요청에 실패했습니다.",
+          AxiosError.ERR_BAD_RESPONSE,
+          response.config,
+          response.request,
           response,
-        }),
+        ),
       )
     }
     return response
