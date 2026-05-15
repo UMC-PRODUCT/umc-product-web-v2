@@ -48,7 +48,7 @@ function fieldSchema(q: Question, enabled: boolean): z.ZodTypeAny {
         : z.string().nullable().optional()
     case "portfolio":
       if (required) {
-        return z.any().superRefine((val, ctx) => {
+        return z.unknown().superRefine((val, ctx) => {
           if (val === null || val === undefined) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -59,7 +59,11 @@ function fieldSchema(q: Question, enabled: boolean): z.ZodTypeAny {
           const parsed = portfolioSchema.safeParse(val)
           if (!parsed.success) {
             for (const issue of parsed.error.issues) {
-              ctx.addIssue(issue)
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: issue.message,
+                path: issue.path,
+              })
             }
           }
         })
