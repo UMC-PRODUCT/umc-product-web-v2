@@ -91,6 +91,20 @@ export function ApplicationStatsSection({
             <DonutChart percentage={stats.completionRate} size={142} />
           </div>
 
+          {/* 커넥터 라인 (도넛 -> 완료/전 범례) */}
+          <svg
+            width="40"
+            height="12"
+            viewBox="0 0 40 12"
+            fill="none"
+            className="absolute top-22.5 left-40"
+          >
+            <path
+              d="M0.353342 10.8125L-0.000214756 11.166L0.706886 11.8731L1.06044 11.5196L0.706892 11.166L0.353342 10.8125ZM9.20703 2.66602V2.16602H8.99993L8.85348 2.31246L9.20703 2.66602ZM34.1654 2.66602C34.1654 4.13877 35.3593 5.33268 36.832 5.33268C38.3048 5.33268 39.4987 4.13877 39.4987 2.66602C39.4987 1.19326 38.3048 -0.000651121 36.832 -0.000651121C35.3593 -0.000651121 34.1654 1.19326 34.1654 2.66602ZM0.706892 11.166L1.06044 11.5196L9.56058 3.01957L9.20703 2.66602L8.85348 2.31246L0.353342 10.8125L0.706892 11.166ZM9.20703 2.66602V3.16602H36.832V2.66602V2.16602H9.20703V2.66602Z"
+              fill="#63C4B8"
+            />
+          </svg>
+
           {/* 지원 완료/전 */}
           <div className="absolute top-20.5 left-53.25 flex flex-col gap-0.5">
             <div className="flex items-center gap-3.5">
@@ -124,7 +138,7 @@ export function ApplicationStatsSection({
             <div className="flex flex-col gap-1.25 text-[12px]">
               {stats.rounds.map((r) => (
                 <div key={r.round} className="flex items-center gap-7">
-                  <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-[1.5]">
+                  <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-normal">
                     <span className="w-4.5">{r.round}차</span>
                     <span className="whitespace-nowrap">
                       {labels.roundSuffix}
@@ -146,7 +160,7 @@ export function ApplicationStatsSection({
         </div>
 
         {/* 1차 매칭 지원 Top 4 */}
-        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-[402px] shrink-0 flex-col rounded-lg border bg-white px-8 pt-7 pb-8">
+        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-100.5 shrink-0 flex-col rounded-lg border bg-white px-8 pt-7 pb-8">
           <h3 className="text-heading-6-semibold text-teal-700">
             {currentRound}차 매칭 {labels.roundSuffix} Top 4
           </h3>
