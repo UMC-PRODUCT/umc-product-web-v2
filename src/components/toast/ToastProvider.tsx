@@ -80,7 +80,7 @@ export function ToastProvider() {
           if (dismissingRef.current.has(toast.id)) return
           const current = next.get(toast.id)
           if (current === undefined || current <= 0) return
-          next.set(toast.id, current - 1)
+          next.set(toast.id, Math.max(0, current - 1000))
           changed = true
         })
         return changed ? next : prev
