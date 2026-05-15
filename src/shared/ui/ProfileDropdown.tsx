@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 
 import GenerationListItem from "@/components/header/GenerationListItem"
+import { logout } from "@/features/auth/lib/logout"
 import { cn } from "@/shared/lib/utils"
 
 import ProfileIcon from "../assets/icon/people/ProfileIcon"
@@ -141,7 +142,7 @@ export function ProfileDropdown({
                 계정 삭제
               </span>
             </button>
-            <button type="button" className="h-6 w-15">
+            <button type="button" onClick={logout} className="h-6 w-15">
               <span className="text-body-2-medium text-teal-gray-700">
                 로그아웃
               </span>
