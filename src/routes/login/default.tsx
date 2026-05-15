@@ -102,14 +102,20 @@ function DefaultLoginPage() {
                   variant={"id"}
                   placeholder={"ID"}
                   value={id}
-                  onChange={(e) => setId(e.target.value)}
+                  onChange={(e) => {
+                    setId(e.target.value)
+                    if (loginError) setLoginError("")
+                  }}
                 />
 
                 <Input
                   variant={"password"}
                   placeholder={"Password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    if (loginError) setLoginError("")
+                  }}
                 />
 
                 <div className="flex items-center gap-2">
