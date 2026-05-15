@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 
 import GenerationListItem from "@/components/header/GenerationListItem"
+import { useMe } from "@/features/auth/hooks/useMe"
 import { logout } from "@/features/auth/lib/logout"
 import { cn } from "@/shared/lib/utils"
 
@@ -26,6 +27,8 @@ export function ProfileDropdown({
 }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(open)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  const { data: me } = useMe()
 
   useEffect(() => {
     if (!isOpen) return
@@ -65,23 +68,30 @@ export function ProfileDropdown({
             dropdownClassName,
           )}
         >
-          {/* TODO: 사용자 정보 API 연동 */}
           <div className="flex flex-col gap-2.5 px-2.5">
             <div className="h-11.5 w-11.5 shrink-0 overflow-hidden rounded-full">
-              <ProfileIcon className="size-full" />
+              {me?.profileImageLink ? (
+                <img
+                  src={me.profileImageLink}
+                  alt={me.name}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <ProfileIcon className="size-full" />
+              )}
             </div>
 
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center justify-between">
                 <span className="text-teal-gray-900 text-subtitle-3-semibold">
-                  이방토/이예원
+                  {me ? `${me.nickname}/${me.name}` : ""}
                 </span>
 
                 <RoleTagChip role="challenger" />
               </div>
 
               <span className="text-caption-2-medium text-teal-gray-500">
-                한양대 ERICA
+                {me?.schoolName ?? ""}
               </span>
             </div>
           </div>
