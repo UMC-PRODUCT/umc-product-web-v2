@@ -4,13 +4,20 @@ import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { loginWithIdPw } from "@/features/auth/api/credentials"
-import { loginWithApple } from "@/features/auth/api/socialLogin"
+import {
+  loginWithApple,
+  loginWithGoogle,
+} from "@/features/auth/api/socialLogin"
 import {
   isApplePopupCancelled,
   signInWithApple,
 } from "@/features/auth/lib/appleSignIn"
+import {
+  isGooglePopupCancelled,
+  signInWithGoogle,
+} from "@/features/auth/lib/googleSignIn"
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
-import { redirectToOAuth } from "@/features/auth/lib/oauthRedirect"
+import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
 import {
   Divider,
   Input,
@@ -55,11 +62,36 @@ function DefaultLoginPage() {
       if (result === "LOGIN_SUCCESS") {
         void navigate({ to: "/" })
       } else {
-        void navigate({ to: "/" })
+        void navigate({ to: "/signup/oauth" })
       }
     } catch (error) {
       if (isApplePopupCancelled(error)) return
       showToast("Apple 로그인에 실패했습니다. 다시 시도해주세요.", "red")
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const { accessToken } = await signInWithGoogle()
+      const res = await loginWithGoogle({ accessToken })
+      const result = handleLoginResponse(res)
+      if (result === "LOGIN_SUCCESS") {
+        void navigate({ to: "/" })
+      } else {
+        void navigate({ to: "/signup/oauth" })
+      }
+    } catch (error) {
+      if (isGooglePopupCancelled(error)) return
+      showToast("Google 로그인에 실패했습니다. 다시 시도해주세요.", "red")
+    }
+  }
+
+  const handleKakaoSignIn = () => {
+    try {
+      startKakaoSignIn()
+    } catch (error) {
+      console.error("[Kakao Sign-In]", error)
+      showToast("Kakao 로그인에 실패했습니다. 다시 시도해주세요.", "red")
     }
   }
 
@@ -170,10 +202,7 @@ function DefaultLoginPage() {
             <Divider />
 
             <div className="flex items-center gap-8">
-              <LoginCircleButton
-                social={"kakao"}
-                onClick={() => redirectToOAuth("KAKAO")}
-              />
+              <LoginCircleButton social={"kakao"} onClick={handleKakaoSignIn} />
 
               <LoginCircleButton
                 social={"apple"}
@@ -182,7 +211,7 @@ function DefaultLoginPage() {
 
               <LoginCircleButton
                 social={"google"}
-                onClick={() => redirectToOAuth("GOOGLE")}
+                onClick={() => void handleGoogleSignIn()}
               />
             </div>
           </div>
