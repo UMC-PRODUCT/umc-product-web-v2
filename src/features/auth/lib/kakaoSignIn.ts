@@ -25,7 +25,10 @@ export function startKakaoSignIn(): void {
     window.Kakao.init(appKey)
   }
 
-  const state = crypto.randomUUID()
+  const state =
+    typeof crypto?.randomUUID === "function"
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2) + Date.now().toString(36)
   sessionStorage.setItem(KAKAO_STATE_STORAGE_KEY, state)
 
   window.Kakao.Auth.authorize({
