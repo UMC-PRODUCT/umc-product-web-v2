@@ -154,6 +154,29 @@ export interface DecisionResponse {
   status: ApplicationStatusEnum
 }
 
+// POST /api/v1/project/matching-rounds
+export interface CreateMatchingRoundRequest {
+  name: string
+  description?: string
+  type: MatchingType
+  phase: MatchingPhase
+  chapterId: number
+  startsAt: string // ISO 8601
+  endsAt: string
+  decisionDeadline: string
+}
+
+// PATCH /api/v1/project/matching-rounds/{matchingRoundId}
+export interface UpdateMatchingRoundRequest {
+  name?: string
+  description?: string
+  type?: MatchingType
+  phase?: MatchingPhase
+  startsAt?: string
+  endsAt?: string
+  decisionDeadline?: string
+}
+
 // 페이지네이션 공통
 export interface PageResponse<T> {
   content: T[]
