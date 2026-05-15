@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { loginWithKakao } from "@/features/auth/api/socialLogin"
+import { loginWithKakaoCode } from "@/features/auth/api/socialLogin"
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import {
   consumeKakaoState,
@@ -60,7 +60,7 @@ function KakaoCallbackPage() {
 
     void (async () => {
       try {
-        const res = await loginWithKakao({
+        const res = await loginWithKakaoCode({
           authorizationCode: code,
           redirectUri: getKakaoRedirectUri(),
         })

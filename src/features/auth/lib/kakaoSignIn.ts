@@ -1,3 +1,8 @@
+const KAKAO_STATE_KEY = "kakao_oauth_state"
+const KAKAO_REDIRECT_URI_ENV = import.meta.env.VITE_KAKAO_REDIRECT_URI as
+  | string
+  | undefined
+
 export interface KakaoSignInResult {
   accessToken: string
 }
@@ -9,6 +14,18 @@ export function isKakaoPopupCancelled(error: unknown): boolean {
     "error" in error &&
     (error as { error: string }).error === "access_denied"
   )
+}
+
+export function getKakaoRedirectUri(): string {
+  if (KAKAO_REDIRECT_URI_ENV) return KAKAO_REDIRECT_URI_ENV
+  return `${window.location.origin}/oauth/kakao/callback`
+}
+
+export function consumeKakaoState(state: string | null): boolean {
+  const saved = sessionStorage.getItem(KAKAO_STATE_KEY)
+  sessionStorage.removeItem(KAKAO_STATE_KEY)
+  if (!saved || !state) return false
+  return saved === state
 }
 
 export function signInWithKakao(): Promise<KakaoSignInResult> {
