@@ -17,4 +17,21 @@ export const applicationKeys = {
     [...applicationKeys.all, "rounds", chapterId] as const,
 
   chapters: () => [...applicationKeys.all, "chapters"] as const,
+
+  // 매칭 현황 페이지 전용
+  matchingParts: (gisuId: number, chapterId?: number) =>
+    [...applicationKeys.all, "matching-parts", gisuId, chapterId] as const,
+
+  matchingApplicants: (
+    gisuId: number,
+    chapterId?: number,
+    projectIds?: number[],
+  ) =>
+    [
+      ...applicationKeys.all,
+      "matching-applicants",
+      gisuId,
+      chapterId,
+      projectIds,
+    ] as const,
 }

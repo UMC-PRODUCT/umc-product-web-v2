@@ -17,7 +17,7 @@ import { toProjectApplication } from "../model/mappers"
 import type { ApplicationStats, ProjectApplication } from "../model/types"
 
 // 활성 기수 ID 조회
-function useActiveGisuId() {
+export function useActiveGisuId() {
   return useQuery({
     queryKey: ["gisu", "active"],
     queryFn: async () => {
@@ -40,7 +40,10 @@ export function useChallengerPageData() {
   })
 
   // 프로젝트 목록이 로드되면 각 프로젝트의 지원자 목록도 함께 조회
-  const projects = projectsQuery.data?.content ?? []
+  const projects = useMemo(
+    () => projectsQuery.data?.content ?? [],
+    [projectsQuery.data],
+  )
 
   const applicantsQuery = useQuery({
     queryKey: [
@@ -103,7 +106,9 @@ export function useChapters() {
 }
 
 // 프로젝트 + 지원자 데이터에서 ApplicationStats 계산
-function computeAdminStats(projects: ProjectApplication[]): ApplicationStats {
+export function computeAdminStats(
+  projects: ProjectApplication[],
+): ApplicationStats {
   const allApplicants = projects.flatMap((p) => p.applicants)
 
   // 차수별 지원자 수
@@ -180,7 +185,10 @@ export function useAdminPageData(chapterName?: string) {
   const gisuId = gisuQuery.data ?? 0
 
   const chaptersQuery = useChapters()
-  const chapters = chaptersQuery.data?.chapters ?? []
+  const chapters = useMemo(
+    () => chaptersQuery.data?.chapters ?? [],
+    [chaptersQuery.data],
+  )
 
   // 선택된 챕터 이름 -> chapterId 매핑
   const chapterId = useMemo(() => {
@@ -196,7 +204,10 @@ export function useAdminPageData(chapterName?: string) {
     enabled: gisuId > 0,
   })
 
-  const projects = projectsQuery.data?.content ?? []
+  const projects = useMemo(
+    () => projectsQuery.data?.content ?? [],
+    [projectsQuery.data],
+  )
 
   // 각 프로젝트의 지원자 목록 조회
   const applicantsQuery = useQuery({
@@ -234,6 +245,7 @@ export function useAdminPageData(chapterName?: string) {
   return {
     projects: transformed,
     stats,
+    dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
     chapters,
     isLoading:
       gisuQuery.isLoading ||

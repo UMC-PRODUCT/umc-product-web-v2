@@ -18,11 +18,24 @@ const ROUND_LABELS = ["1차 지원", "2차 지원", "3차 지원"] as const
 
 interface ApplicationStatsSectionProps {
   stats: ApplicationStats
+  dataUpdatedAt?: number
   className?: string
+}
+
+function formatUpdatedAt(timestamp?: number): string {
+  if (!timestamp) return ""
+  const d = new Date(timestamp)
+  const yy = String(d.getFullYear()).slice(2)
+  const MM = String(d.getMonth() + 1).padStart(2, "0")
+  const dd = String(d.getDate()).padStart(2, "0")
+  const HH = String(d.getHours()).padStart(2, "0")
+  const mm = String(d.getMinutes()).padStart(2, "0")
+  return `${yy}.${MM}.${dd} ${HH}:${mm} 기준`
 }
 
 export function ApplicationStatsSection({
   stats,
+  dataUpdatedAt,
   className,
 }: ApplicationStatsSectionProps) {
   const maxRoundValue = Math.max(
@@ -35,9 +48,11 @@ export function ApplicationStatsSection({
       {/* 섹션 헤더 */}
       <div className="flex items-center justify-between">
         <h2 className="text-heading-6-semibold text-teal-700">01 지원 통계</h2>
-        <span className="text-caption-1-regular text-teal-gray-400">
-          26.04.24 04:48 기준
-        </span>
+        {dataUpdatedAt && (
+          <span className="text-caption-1-regular text-teal-gray-400">
+            {formatUpdatedAt(dataUpdatedAt)}
+          </span>
+        )}
       </div>
 
       {/* 3열 통계 카드 */}
