@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
-import { useState } from "react"
+import { useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
@@ -33,6 +33,13 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
   const [errorQuestionIds, setErrorQuestionIds] = useState<string[]>([])
 
+  const lastSavedSnapshotRef = useRef<string | null>(null)
+  const currentSnapshot = useMemo(
+    () => JSON.stringify({ c: form.commonQuestions, s: form.sections }),
+    [form.commonQuestions, form.sections],
+  )
+  const isDirty = lastSavedSnapshotRef.current !== currentSnapshot
+
   const saveAppMutation = useMutation({
     mutationFn: async () => {
       if (!projectId)
@@ -46,6 +53,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
       return upsertApplicationForm(projectId, body)
     },
     onSuccess: () => {
+      lastSavedSnapshotRef.current = currentSnapshot
       setHasSavedOnce(true)
       addToast({
         message: "작성한 내용이 임시 저장되었습니다.",
@@ -66,9 +74,11 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
     },
   })
 
-  const canTempSave = !saveAppMutation.isPending
+  const canTempSave = !saveAppMutation.isPending && (isDirty || !hasSavedOnce)
   const tempSaveLabel =
-    hasSavedOnce && !saveAppMutation.isPending ? "저장 완료" : "임시 저장"
+    hasSavedOnce && !isDirty && !saveAppMutation.isPending
+      ? "저장 완료"
+      : "임시 저장"
 
   const handleTempSave = () => {
     saveAppMutation.mutate()
