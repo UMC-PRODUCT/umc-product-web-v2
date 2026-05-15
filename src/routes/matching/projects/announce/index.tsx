@@ -20,6 +20,7 @@ import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { Pagination } from "@/shared/ui/Pagination"
+import { useViewModeStore } from "@/shared/view-mode"
 
 interface AnnounceSearch {
   chapter: Chapter
@@ -114,7 +115,7 @@ function ProjectSettingsAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
-  // 공지사항 조회 (PM 대상)
+  // 공지사항 조회: PM(PLAN CHALLENGER) 대상
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: noticesData, isLoading } = useQuery({
     queryKey: [
@@ -160,6 +161,8 @@ function ProjectSettingsAnnouncePage() {
   const focusedNoticeId = pendingNotice?.id ?? null
 
   const queryClient = useQueryClient()
+  const mode = useViewModeStore((s) => s.mode)
+  const canManage = mode === "admin"
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteNotice(Number(id)),
@@ -177,9 +180,6 @@ function ProjectSettingsAnnouncePage() {
       // TODO: 삭제 실패 시 동작 추가
     },
   })
-
-  // TODO: 사용자 권한 API 연동 후 실제 권한 값으로 교체
-  const canManage = true
 
   const handleChapterChange = (nextChapter: Chapter) => {
     navigate({

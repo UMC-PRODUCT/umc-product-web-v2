@@ -20,6 +20,7 @@ import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { Pagination } from "@/shared/ui/Pagination"
+import { useViewModeStore } from "@/shared/view-mode"
 
 interface AnnounceSearch {
   chapter: Chapter
@@ -159,6 +160,8 @@ function TeamMatchingAnnouncePage() {
   const focusedNoticeId = pendingNotice?.id ?? null
 
   const queryClient = useQueryClient()
+  const mode = useViewModeStore((s) => s.mode)
+  const canManage = mode === "admin"
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteNotice(Number(id)),
@@ -176,9 +179,6 @@ function TeamMatchingAnnouncePage() {
       // TODO: 삭제 실패 시 동작 추가
     },
   })
-
-  // TODO: 사용자 권한 API 연동 후 실제 권한 값으로 교체
-  const canManage = true
 
   const handleChapterChange = (nextChapter: Chapter) => {
     navigate({
