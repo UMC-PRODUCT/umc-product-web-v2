@@ -1,6 +1,13 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useBlocker } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
+import { useAuthStore } from "@/features/auth/store/authStore"
+import { getMemberProfile } from "@/features/challenger/api/member"
+import {
+  getAllChapters,
+  getAllGisu,
+} from "@/features/challenger/api/organization"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import LeftChevronIcon from "@/shared/assets/icon/chevron/LeftChevronIcon"
 import { Button } from "@/shared/ui/Button"
@@ -9,24 +16,162 @@ import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
+import { getNoticeDetail, patchNotice, postNotice } from "../api/noticeApi"
+import {
+  type NoticeTabEnum,
+  type PartEnum,
+  type PatchNoticeRequest,
+} from "../model/apiTypes"
+
 const MAX_CHARS = 2000
 const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
 
 interface NoticePublishFormProps {
   variant: "publish" | "edit"
   noticeId?: string
+  noticeTab: NoticeTabEnum
+  targetParts?: PartEnum[]
+  chapter?: string
 }
 
 export function NoticePublishForm({
   variant,
   noticeId,
+  noticeTab,
+  targetParts = [],
+  chapter,
 }: NoticePublishFormProps) {
+  const queryClient = useQueryClient()
   const [noticeContent, setNoticeContent] = useState("")
   const [noticeTitle, setNoticeTitle] = useState("")
   const [isRequired, setIsRequired] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isDone, setIsDone] = useState(false)
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false)
+
+  const memberId = useAuthStore((s) => s.memberId)
+
+  // 기수 정보 조회
+  const { data: gisuData } = useQuery({
+    queryKey: ["gisu", "all"],
+    queryFn: getAllGisu,
+  })
+
+  // 지부 정보 조회
+  const { data: chaptersData } = useQuery({
+    queryKey: ["chapters", "all"],
+    queryFn: getAllChapters,
+  })
+
+  // 내 정보 조회
+  const { data: profile } = useQuery({
+    queryKey: ["member", "profile", memberId],
+    queryFn: () => getMemberProfile(String(memberId)),
+    enabled: !!memberId,
+  })
+
+  // 공지 상세 조회 (수정 모드일 때)
+  const { data: noticeDetail } = useQuery({
+    queryKey: ["notice", "detail", noticeId],
+    queryFn: () => getNoticeDetail(Number(noticeId)),
+    enabled: variant === "edit" && !!noticeId,
+  })
+
+  // 수정 모드일 때 기존 데이터로 폼 채우기
+  useEffect(() => {
+    if (variant === "edit" && noticeDetail) {
+      setNoticeTitle(noticeDetail.title)
+      setNoticeContent(noticeDetail.content)
+      setIsRequired(noticeDetail.mustRead)
+    }
+  }, [variant, noticeDetail])
+
+  const activeGisuId = useMemo(() => {
+    if (!gisuData) return null
+    const active = gisuData.gisuList.find((g) => g.isActive)
+    return active ? active.gisuId : gisuData.gisuList[0]?.gisuId || null
+  }, [gisuData])
+
+  const targetInfo = useMemo(() => {
+    if (!profile) return null
+
+    const activeRecord =
+      profile.challengerRecords?.find((r) => r.challengerStatus === "ACTIVE") ||
+      profile.challengerRecords?.[0]
+
+    if (!activeRecord) return null
+
+    // 만약 파라미터로 chapter가 넘어왔다면 해당 지부의 ID를 찾아서 사용
+    let chapterId = Number(activeRecord.chapterId)
+    if (chapter && chaptersData) {
+      const found = chaptersData.chapters.find((c) => c.name === chapter)
+      if (found) chapterId = Number(found.id)
+    }
+
+    return {
+      targetGisuId: Number(activeGisuId || activeRecord.gisuId),
+      targetChapterId: chapterId,
+      targetSchoolId: Number(activeRecord.schoolId),
+      targetParts: targetParts,
+      targetNoticeTab: noticeTab,
+    }
+  }, [profile, activeGisuId, noticeTab, targetParts, chapter, chaptersData])
+
+  const publishMutation = useMutation({
+    mutationFn: postNotice,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] })
+      setIsLoading(false)
+      setIsDone(true)
+
+      const completionNoticeId = String(data.noticeId)
+
+      sessionStorage.setItem(
+        NOTICE_COMPLETION_STORAGE_KEY,
+        JSON.stringify({
+          id: completionNoticeId,
+          title: noticeTitle,
+          chip: isRequired ? "필독" : undefined,
+          mode: variant,
+        }),
+      )
+
+      setIsCompletionModalOpen(true)
+    },
+    onError: () => {
+      setIsLoading(false)
+      // TODO: 에러 처리 (토스트 등)
+    },
+  })
+
+  const editMutation = useMutation({
+    mutationFn: ({ id, body }: { id: number; body: PatchNoticeRequest }) =>
+      patchNotice(id, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] })
+      queryClient.invalidateQueries({
+        queryKey: ["notice", "detail", noticeId],
+      })
+      setIsLoading(false)
+      setIsDone(true)
+
+      sessionStorage.setItem(
+        NOTICE_COMPLETION_STORAGE_KEY,
+        JSON.stringify({
+          id: noticeId,
+          title: noticeTitle,
+          chip: isRequired ? "필독" : undefined,
+          mode: variant,
+        }),
+      )
+
+      setIsCompletionModalOpen(true)
+    },
+    onError: () => {
+      setIsLoading(false)
+      // TODO: 에러 처리
+    },
+  })
 
   const hasPendingChanges =
     !isDone &&
@@ -72,39 +217,29 @@ export function NoticePublishForm({
     setIsRequired((prev) => !prev)
   }
 
-  // TODO: API 연결 후 수정
   const handlePublishNotice = () => {
-    if (isLoading || isDone) return
+    if (isLoading || isDone || !targetInfo) return
 
     setIsLoading(true)
 
-    // 1초 후 loading -> done 상태로 변경 (API 호출 시뮬레이션)
-    setTimeout(() => {
-      setIsLoading(false)
-      setIsDone(true)
-      const completionNoticeId = noticeId ?? crypto.randomUUID()
-
-      sessionStorage.setItem(
-        NOTICE_COMPLETION_STORAGE_KEY,
-        JSON.stringify({
-          id: completionNoticeId,
-          title: noticeTitle,
-          chip: isRequired ? "필독" : undefined,
-          mode: variant,
-        }),
-      )
-
-      setIsCompletionModalOpen(true)
-      console.log(
-        variant === "edit" ? "Updating notice:" : "Publishing notice:",
-        {
-          noticeId,
+    if (variant === "publish") {
+      publishMutation.mutate({
+        title: noticeTitle,
+        content: noticeContent,
+        mustRead: isRequired,
+        shouldNotify: false, // UI에 알림 여부 토글이 없으므로 기본값 false
+        targetInfo,
+      })
+    } else if (variant === "edit" && noticeId) {
+      editMutation.mutate({
+        id: Number(noticeId),
+        body: {
           title: noticeTitle,
           content: noticeContent,
-          isRequired,
+          mustRead: isRequired,
         },
-      )
-    }, 1000)
+      })
+    }
   }
 
   const isSubmittable = noticeTitle.trim() !== "" && noticeContent.trim() !== ""
@@ -166,7 +301,7 @@ export function NoticePublishForm({
                 variant={submitButtonVariant}
                 color="primary"
                 size="m"
-                disabled={!isSubmittable || isDone}
+                disabled={!isSubmittable || isDone || !targetInfo}
                 isLoading={isLoading}
                 onClick={handlePublishNotice}
               >

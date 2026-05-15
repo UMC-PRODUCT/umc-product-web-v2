@@ -1,24 +1,32 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import dayjs from "dayjs"
+import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import {
+  getAllChapters,
+  getAllGisu,
+} from "@/features/challenger/api/organization"
 import {
   type Chapter,
   CHAPTERS,
   ChapterSelector,
   NoticeCardList,
+  NoticeDetailContent,
   type NoticeItem,
 } from "@/features/notice"
+import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { Pagination } from "@/shared/ui/Pagination"
+import { useViewModeStore } from "@/shared/view-mode"
 
 interface AnnounceSearch {
   chapter: Chapter
   page: number
 }
 
-const DEFAULT_CHAPTER: Chapter = "Chromium"
 const DEFAULT_PAGE = 1
 const NOTICE_PAGE_SIZE = 10
 const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
@@ -66,31 +74,13 @@ function readPendingNotice() {
   }
 }
 
-// TODO: 공지 API 응답 형식에 맞추어 수정
-const INITIAL_NOTICES: NoticeItem[] = [
-  {
-    id: "1",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "2",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "3",
-    title: "임시 공지",
-    date: "0000.00.00",
-  },
-]
-
+/** 프로젝트 설정 공지 페이지 (/matching/projects/announce) */
 export const Route = createFileRoute("/matching/projects/announce/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
+    // TODO: 사용자 지부 불러오기. 아래는 임시 상태.
+    const userChapter = useViewModeStore.getState().viewerBranch as Chapter
     return {
-      chapter: isChapter(search.chapter) ? search.chapter : DEFAULT_CHAPTER,
+      chapter: isChapter(search.chapter) ? search.chapter : userChapter,
       page: parsePage(search.page),
     }
   },
@@ -102,38 +92,110 @@ function ProjectSettingsAnnouncePage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
   const [pendingNotice] = useState(readPendingNotice)
-  const [notices, setNotices] = useState(() => {
-    if (!pendingNotice) return INITIAL_NOTICES
 
-    if (pendingNotice.mode === "edit") {
-      return INITIAL_NOTICES.map((notice) =>
-        notice.id === pendingNotice.id
-          ? { ...notice, title: pendingNotice.title, chip: pendingNotice.chip }
-          : notice,
-      )
-    }
-
-    return [
-      {
-        id: pendingNotice.id,
-        title: pendingNotice.title,
-        date: "0000.00.00",
-        chip: pendingNotice.chip,
-      },
-      ...INITIAL_NOTICES,
-    ]
+  // 기수 정보 조회
+  const { data: gisuData } = useQuery({
+    queryKey: ["gisu", "all"],
+    queryFn: getAllGisu,
   })
-  const totalPages = Math.max(1, Math.ceil(notices.length / NOTICE_PAGE_SIZE))
+
+  // 지부 정보 조회
+  const { data: chaptersData } = useQuery({
+    queryKey: ["chapters", "all"],
+    queryFn: getAllChapters,
+  })
+
+  const activeGisuId = useMemo(() => {
+    if (!gisuData) return null
+    const active = gisuData.gisuList.find((g) => g.isActive)
+    return active ? active.gisuId : gisuData.gisuList[0]?.gisuId || null
+  }, [gisuData])
+
+  const selectedChapterId = useMemo(() => {
+    if (!chaptersData) return null
+    return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
+  }, [chaptersData, chapter])
+
+  // 공지사항 조회: PM(PLAN CHALLENGER) 대상
+  // TODO: 공지사항 조회 실패 / 로딩 중 처리 로직 추가
+  const { data: noticesData } = useQuery({
+    queryKey: [
+      "notices",
+      "project-settings",
+      activeGisuId,
+      selectedChapterId,
+      page,
+    ],
+    queryFn: () =>
+      getNotices({
+        gisuId: Number(activeGisuId),
+        chapterId: selectedChapterId ? Number(selectedChapterId) : undefined,
+        noticeTab: "CHALLENGER",
+        part: "PLAN",
+        page: page - 1,
+        size: NOTICE_PAGE_SIZE,
+        sort: "createdAt,DESC",
+      }),
+    enabled: !!activeGisuId,
+  })
+
+  const notices = useMemo(() => {
+    if (!noticesData) return []
+
+    const mappedNotices: NoticeItem[] = noticesData.content.map((item) => ({
+      id: String(item.id),
+      title: item.title,
+      date: dayjs(item.createdAt).format("YYYY.MM.DD"),
+      chip: item.mustRead ? "필독" : undefined,
+    }))
+
+    // 필독 공지 상단 정렬
+    return [...mappedNotices].sort((a, b) => {
+      if (a.chip === "필독" && b.chip !== "필독") return -1
+      if (a.chip !== "필독" && b.chip === "필독") return 1
+      return 0
+    })
+  }, [noticesData])
+
+  const totalPages = noticesData?.totalPages || 1
   const safePage = Math.min(Math.max(1, page), totalPages)
   const focusedNoticeId = pendingNotice?.id ?? null
-  const paginatedNotices = notices.slice(
-    (safePage - 1) * NOTICE_PAGE_SIZE,
-    safePage * NOTICE_PAGE_SIZE,
-  )
-  // TODO: 사용자 권한 API 연동 후 실제 권한 값으로 교체
-  const canManage = true
+
+  const queryClient = useQueryClient()
+  // TODO: 사용자 권한 및 지부 불러오기. 아래는 임시 상태.
+  const mode = useViewModeStore((s) => s.mode)
+  const userChapter = useViewModeStore((s) => s.viewerBranch) as Chapter
+  const canManage = mode === "admin"
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteNotice(Number(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] })
+      addToast({
+        message: "공지가 삭제되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+    },
+    onError: () => {
+      // TODO: 삭제 실패 시 동작 추가
+    },
+  })
 
   const handleChapterChange = (nextChapter: Chapter) => {
+    if (mode !== "admin" && nextChapter !== userChapter) {
+      addToast({
+        message: "소속된 지부의 공지만 확인할 수 있습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+      return
+    }
+
     navigate({
       search: (prev) => ({ ...prev, chapter: nextChapter }),
       replace: true,
@@ -143,6 +205,7 @@ function ProjectSettingsAnnouncePage() {
   const handleNoticePublishClick = () => {
     navigate({
       to: "/matching/projects/announce/notice-publish",
+      search: { chapter },
     })
   }
 
@@ -153,16 +216,8 @@ function ProjectSettingsAnnouncePage() {
     })
   }
 
-  // TODO: API 연동 후 실제 삭제 API 호출로 교체
   const handleNoticeDeleteClick = (noticeId: string) => {
-    setNotices((prev) => prev.filter((notice) => notice.id !== noticeId))
-    addToast({
-      message: "공지가 삭제되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3,
-    })
+    deleteMutation.mutate(noticeId)
   }
 
   const handlePageChange = (nextPage: number) => {
@@ -228,12 +283,15 @@ function ProjectSettingsAnnouncePage() {
             </div>
 
             <NoticeCardList
-              notices={paginatedNotices}
+              notices={notices}
               page={safePage}
               canManage={canManage}
               focusedNoticeId={focusedNoticeId}
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
+              renderContent={(noticeId) => (
+                <NoticeDetailContent noticeId={noticeId} />
+              )}
             />
           </div>
         </div>
