@@ -126,7 +126,7 @@ export function CreateRecordForm() {
         color: "primary",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
     onError: () => {
@@ -135,7 +135,7 @@ export function CreateRecordForm() {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
   })

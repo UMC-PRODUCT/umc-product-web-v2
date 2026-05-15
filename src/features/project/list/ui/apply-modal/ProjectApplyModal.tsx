@@ -170,7 +170,7 @@ export function ProjectApplyModal({
       color: "red",
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
     document
       .querySelector(`[data-question-id="${firstId}"]`)

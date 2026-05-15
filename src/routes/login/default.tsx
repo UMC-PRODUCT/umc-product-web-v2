@@ -50,7 +50,7 @@ function DefaultLoginPage() {
       color,
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
   }
 

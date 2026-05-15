@@ -175,7 +175,7 @@ function TeamMatchingAnnouncePage() {
         color: "primary",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
     onError: () => {
@@ -190,7 +190,7 @@ function TeamMatchingAnnouncePage() {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       return
     }

@@ -30,7 +30,7 @@ function KakaoCallbackPage() {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       void navigate({ to: "/login" })
     }

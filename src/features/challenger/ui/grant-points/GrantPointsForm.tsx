@@ -66,7 +66,7 @@ export function GrantPointsForm({ challengerId }: GrantPointsFormProps) {
         color: "primary",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       reset({ description: "" })
       void queryClient.invalidateQueries({
@@ -82,7 +82,7 @@ export function GrantPointsForm({ challengerId }: GrantPointsFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
   })
