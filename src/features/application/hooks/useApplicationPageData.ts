@@ -106,8 +106,10 @@ export function useChapters() {
 }
 
 // 프로젝트 + 지원자 데이터에서 ApplicationStats 계산
+// filterRound: 지정 시 topProjects를 해당 차수 지원자만으로 계산
 export function computeAdminStats(
   projects: ProjectApplication[],
+  filterRound?: number,
 ): ApplicationStats {
   const allApplicants = projects.flatMap((p) => p.applicants)
 
@@ -134,9 +136,14 @@ export function computeAdminStats(
       total: totalQuota,
     }))
 
-  // 프로젝트별 지원자 수 Top 4
+  // 프로젝트별 지원자 수 Top 4 (filterRound 지정 시 해당 차수만)
   const projectCounts = projects
-    .map((p) => ({ name: p.projectName, count: p.applicants.length }))
+    .map((p) => ({
+      name: p.projectName,
+      count: filterRound
+        ? p.applicants.filter((a) => a.round === filterRound).length
+        : p.applicants.length,
+    }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 4)
 

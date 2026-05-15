@@ -19,8 +19,27 @@ const ROUND_LABELS = ["1차 지원", "2차 지원", "3차 지원"] as const
 interface ApplicationStatsSectionProps {
   stats: ApplicationStats
   dataUpdatedAt?: number
+  variant?: "application" | "matching"
+  currentRound?: number
   className?: string
 }
+
+const VARIANT_LABELS = {
+  application: {
+    sectionTitle: "01 지원 통계",
+    cardTitle: "N차 매칭 지원 현황",
+    completedLabel: "지원 완료",
+    pendingLabel: "지원 전",
+    roundSuffix: "지원",
+  },
+  matching: {
+    sectionTitle: "01 매칭 통계",
+    cardTitle: "지부 프로젝트 매칭률",
+    completedLabel: "매칭 완료",
+    pendingLabel: "매칭 전",
+    roundSuffix: "매칭",
+  },
+} as const
 
 function formatUpdatedAt(timestamp?: number): string {
   if (!timestamp) return ""
@@ -36,8 +55,11 @@ function formatUpdatedAt(timestamp?: number): string {
 export function ApplicationStatsSection({
   stats,
   dataUpdatedAt,
+  variant = "application",
+  currentRound = 1,
   className,
 }: ApplicationStatsSectionProps) {
+  const labels = VARIANT_LABELS[variant]
   const maxRoundValue = Math.max(
     ...stats.projectRounds.flatMap((p) => p.rounds),
     1,
@@ -47,7 +69,9 @@ export function ApplicationStatsSection({
     <div className={cn("flex flex-col gap-4", className)}>
       {/* 섹션 헤더 */}
       <div className="flex items-center justify-between">
-        <h2 className="text-heading-6-semibold text-teal-700">01 지원 통계</h2>
+        <h2 className="text-heading-6-semibold text-teal-700">
+          {labels.sectionTitle}
+        </h2>
         {dataUpdatedAt && (
           <span className="text-caption-1-regular text-teal-gray-400">
             {formatUpdatedAt(dataUpdatedAt)}
@@ -60,7 +84,7 @@ export function ApplicationStatsSection({
         {/* N차 매칭 지원 현황 */}
         <div className="shadow-drop-neutral-3 border-teal-gray-100 relative h-70 w-102 shrink-0 overflow-hidden rounded-lg border bg-white">
           <h3 className="text-heading-6-semibold absolute top-7 left-8 text-teal-700">
-            N차 매칭 지원 현황
+            {labels.cardTitle}
           </h3>
 
           <div className="absolute top-20.5 left-9">
@@ -71,7 +95,7 @@ export function ApplicationStatsSection({
           <div className="absolute top-20.5 left-53.25 flex flex-col gap-0.5">
             <div className="flex items-center gap-3.5">
               <span className="text-subtitle-3-semibold text-teal-gray-800 w-15">
-                지원 완료
+                {labels.completedLabel}
               </span>
               <span className="text-subtitle-3-semibold text-teal-500">
                 {stats.completedCount}
@@ -80,7 +104,7 @@ export function ApplicationStatsSection({
             </div>
             <div className="flex items-center gap-3.5">
               <span className="text-subtitle-3-semibold text-teal-gray-800 w-15">
-                지원 전
+                {labels.pendingLabel}
               </span>
               <span className="text-subtitle-3-semibold text-error-600">
                 {stats.pendingCount}
@@ -102,7 +126,9 @@ export function ApplicationStatsSection({
                 <div key={r.round} className="flex items-center gap-7">
                   <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-[1.5]">
                     <span className="w-4.5">{r.round}차</span>
-                    <span className="whitespace-nowrap">지원</span>
+                    <span className="whitespace-nowrap">
+                      {labels.roundSuffix}
+                    </span>
                   </div>
                   <div className="flex w-20 items-center justify-end gap-2 leading-[1.4]">
                     <span className="text-label-3-semibold whitespace-nowrap text-teal-500">
@@ -122,7 +148,7 @@ export function ApplicationStatsSection({
         {/* 1차 매칭 지원 Top 4 */}
         <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-[402px] shrink-0 flex-col rounded-lg border bg-white px-8 pt-7 pb-8">
           <h3 className="text-heading-6-semibold text-teal-700">
-            1차 매칭 지원 Top 4
+            {currentRound}차 매칭 {labels.roundSuffix} Top 4
           </h3>
           <div className="mt-10 flex items-end gap-2.5 px-2.5">
             {stats.topProjects.slice(0, 4).map((project, i) => {

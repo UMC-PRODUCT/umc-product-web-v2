@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import {
   getAllProjects,
   getManagedProjects,
+  getMatchingRounds,
   getProjectApplications,
 } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
@@ -12,10 +13,32 @@ import {
   useActiveGisuId,
   useChapters,
 } from "@/features/application/hooks/useApplicationPageData"
-import { toProjectApplication } from "@/features/application/model/mappers"
+import {
+  toProjectApplication,
+  toRoundNumber,
+} from "@/features/application/model/mappers"
 import { useViewModeStore } from "@/shared/view-mode"
 
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"
+
+import type { MatchingRoundResponse } from "@/features/application/model/apiTypes"
+
+// 매칭 라운드 목록에서 현재 활성 차수 번호 계산
+function getCurrentRound(rounds: MatchingRoundResponse[]): number {
+  const now = Date.now()
+  // 현재 진행 중인 라운드 (startsAt <= now <= endsAt)
+  const active = rounds.find(
+    (r) =>
+      new Date(r.startsAt).getTime() <= now &&
+      now <= new Date(r.endsAt).getTime(),
+  )
+  if (active) return toRoundNumber(active.phase)
+  // 없으면 가장 최근 라운드
+  const sorted = [...rounds].sort(
+    (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
+  )
+  return sorted.length > 0 ? toRoundNumber(sorted[0].phase) : 1
+}
 
 export function useMatchingStatusData(chapterName?: string) {
   const mode = useViewModeStore((s) => s.mode)
@@ -36,6 +59,16 @@ export function useMatchingStatusData(chapterName?: string) {
     const found = chapters.find((c) => c.name === chapterName)
     return found ? Number(found.id) : undefined
   }, [isAdmin, chapterName, chapters])
+
+  // 매칭 차수 조회
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(chapterId),
+    queryFn: () => getMatchingRounds(chapterId),
+  })
+  const currentRound = useMemo(
+    () => getCurrentRound(roundsQuery.data ?? []),
+    [roundsQuery.data],
+  )
 
   // admin: 전체 프로젝트 / pm,others: 내 프로젝트
   const projectsQuery = useQuery({
@@ -85,16 +118,21 @@ export function useMatchingStatusData(chapterName?: string) {
       ),
     [projects, applicantsQuery.data],
   )
-  const stats = useMemo(() => computeAdminStats(transformed), [transformed])
+  const stats = useMemo(
+    () => computeAdminStats(transformed, currentRound),
+    [transformed, currentRound],
+  )
 
   return {
     matchingParts,
     stats,
+    currentRound,
     dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
     isAdmin,
     isLoading:
       gisuQuery.isLoading ||
       chaptersQuery.isLoading ||
+      roundsQuery.isLoading ||
       projectsQuery.isLoading ||
       applicantsQuery.isLoading,
     isError:

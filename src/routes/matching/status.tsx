@@ -21,7 +21,7 @@ function MatchingStatusPage() {
   const isAdmin = mode === "admin"
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
 
-  const { matchingParts, stats, dataUpdatedAt, isLoading } =
+  const { matchingParts, stats, currentRound, dataUpdatedAt, isLoading } =
     useMatchingStatusData(isAdmin ? selectedChapter : undefined)
 
   // API 데이터 없으면 mock fallback
@@ -66,6 +66,8 @@ function MatchingStatusPage() {
               <ApplicationStatsSection
                 stats={displayStats}
                 dataUpdatedAt={dataUpdatedAt}
+                variant="matching"
+                currentRound={currentRound}
               />
 
               {/* 02 매칭 결과 시트 */}
