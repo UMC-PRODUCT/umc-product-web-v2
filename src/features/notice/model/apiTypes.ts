@@ -65,31 +65,25 @@ export interface NoticeDetailResponse {
     startsAt: string // "2026-05-14T11:10:02.955Z"
     endsAtExclusive: string
     totalParticipants: number
-    options: [
-      {
-        optionId: number
-        content: string
-        voteCount: number
-        voteRate: number
-        selectedMemberIds: number[]
-      },
-    ]
+    options: {
+      optionId: number
+      content: string
+      voteCount: number
+      voteRate: number
+      selectedMemberIds: number[]
+    }[]
     mySelectedOptionIds: number[]
   }
-  images: [
-    {
-      id: number
-      url: string
-      displayOrder: number
-    },
-  ]
-  links: [
-    {
-      id: number
-      url: string
-      displayOrder: number
-    },
-  ]
+  images: {
+    id: number
+    url: string
+    displayOrder: number
+  }[]
+  links: {
+    id: number
+    url: string
+    displayOrder: number
+  }[]
   targetInfo: TargetInfo
   viewCount: number
   createdAt: string // "2026-05-14T11:10:02.955Z"
