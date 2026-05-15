@@ -1,5 +1,5 @@
 import { arrayMove } from "@dnd-kit/sortable"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import { makeQuestion } from "@/features/project/new/model/applicationQuestion"
 
@@ -44,10 +44,13 @@ export function useApplicationForm() {
   const setApplication = useProjectRegisterStore((s) => s.setApplication)
   const [focusedId, setFocusedId] = useState<string | null>(null)
 
-  const commonQuestions: Question[] =
-    storeApplication.commonQuestions.length > 0
-      ? storeApplication.commonQuestions
-      : [makeQuestion()]
+  const commonQuestions = useMemo<Question[]>(
+    () =>
+      storeApplication.commonQuestions.length > 0
+        ? storeApplication.commonQuestions
+        : [makeQuestion()],
+    [storeApplication.commonQuestions],
+  )
 
   const sections: Section[] =
     storeApplication.sections.length > 0
