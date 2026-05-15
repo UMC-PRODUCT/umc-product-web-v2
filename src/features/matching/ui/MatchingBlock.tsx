@@ -45,6 +45,17 @@ export function MatchingBlock({
   }
 
   if (type === "none") {
+    if (!onAssignClick) {
+      // 읽기 전용: 빈 블록만 표시
+      return (
+        <div
+          className={cn(
+            "border-teal-gray-100 flex h-8.5 w-31 items-center border bg-white",
+            className,
+          )}
+        />
+      )
+    }
     return (
       <button
         type="button"

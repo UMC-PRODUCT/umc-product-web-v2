@@ -37,6 +37,7 @@ interface MatchingResultRowProps {
   currentCount?: number
   totalCount?: number
   projectData?: MatchingProject
+  isEditable?: boolean
   className?: string
 }
 
@@ -50,6 +51,7 @@ export function MatchingResultRow({
   currentCount,
   totalCount,
   projectData,
+  isEditable = true,
   className,
 }: MatchingResultRowProps) {
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
@@ -124,7 +126,7 @@ export function MatchingResultRow({
                         : undefined
                     }
                     onAssignClick={
-                      block.type === "none"
+                      isEditable && block.type === "none"
                         ? () =>
                             setAssignTarget({
                               rowIdx,
@@ -197,40 +199,43 @@ export function MatchingResultRow({
         onOpenChange={(open) => {
           if (!open) setSelectedApplicantId(null)
         }}
+        statusDisabled={!isEditable}
       />
 
-      <AssignmentModal
-        open={assignTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) setAssignTarget(null)
-        }}
-        projectName={projectName}
-        challengerName={challengerName}
-        challengerUniversity={challengerUniversity}
-        role={assignTarget?.role ?? ""}
-        onAssign={(challenger) => {
-          if (!assignTarget) return
-          setLocalRoleRows((prev) =>
-            prev.map((row, rIdx) =>
-              rIdx === assignTarget.rowIdx
-                ? {
-                    ...row,
-                    blocks: row.blocks.map((block, bIdx) =>
-                      bIdx === assignTarget.blockIdx
-                        ? {
-                            type: "filled" as const,
-                            name: challenger.nickname,
-                            tagVariant: "random" as const,
-                            applicantId: challenger.id,
-                          }
-                        : block,
-                    ),
-                  }
-                : row,
-            ),
-          )
-        }}
-      />
+      {isEditable && (
+        <AssignmentModal
+          open={assignTarget !== null}
+          onOpenChange={(open) => {
+            if (!open) setAssignTarget(null)
+          }}
+          projectName={projectName}
+          challengerName={challengerName}
+          challengerUniversity={challengerUniversity}
+          role={assignTarget?.role ?? ""}
+          onAssign={(challenger) => {
+            if (!assignTarget) return
+            setLocalRoleRows((prev) =>
+              prev.map((row, rIdx) =>
+                rIdx === assignTarget.rowIdx
+                  ? {
+                      ...row,
+                      blocks: row.blocks.map((block, bIdx) =>
+                        bIdx === assignTarget.blockIdx
+                          ? {
+                              type: "filled" as const,
+                              name: challenger.nickname,
+                              tagVariant: "random" as const,
+                              applicantId: challenger.id,
+                            }
+                          : block,
+                      ),
+                    }
+                  : row,
+              ),
+            )
+          }}
+        />
+      )}
     </div>
   )
 }

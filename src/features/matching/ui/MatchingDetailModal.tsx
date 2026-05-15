@@ -25,6 +25,7 @@ interface MatchingDetailModalProps {
   challengerUniversity: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  statusDisabled?: boolean
 }
 
 export function MatchingDetailModal({
@@ -35,6 +36,7 @@ export function MatchingDetailModal({
   challengerUniversity,
   open,
   onOpenChange,
+  statusDisabled = false,
 }: MatchingDetailModalProps) {
   const [statusOverride, setStatusOverride] = useState<StatusValue | null>(null)
   const [pendingStatus, setPendingStatus] = useState<StatusValue | null>(null)
@@ -93,7 +95,8 @@ export function MatchingDetailModal({
             projectName={projectName}
             challengerName={challengerName}
             challengerUniversity={challengerUniversity}
-            onStatusChange={handleStatusChange}
+            onStatusChange={statusDisabled ? undefined : handleStatusChange}
+            statusDisabled={statusDisabled}
             onClose={handleClose}
             className="max-h-[calc(100vh-60px)] shadow-xl"
           />
