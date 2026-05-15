@@ -52,7 +52,7 @@ export function ProjectDetailCard({
     useState(false)
   const data = dataProp ?? DEFAULT_MATCHING_PROJECT_MOCK
 
-  const projectIdNum = Number(data.id)
+  const projectIdNum = /^\d+$/.test(data.id) ? Number(data.id) : NaN
   const isShowingFormModal = isApplyModalOpen || isRecruitQuestionsModalOpen
   const {
     data: applicationForm,
@@ -224,7 +224,7 @@ export function ProjectDetailCard({
                   불러오는 중...
                 </span>
               </div>
-            ) : applicationForm === null ? (
+            ) : applicationForm == null ? (
               <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
                 <span className="text-body-2-regular text-teal-gray-500">
                   등록된 모집 문항이 없습니다.
@@ -247,7 +247,7 @@ export function ProjectDetailCard({
                   불러오는 중...
                 </span>
               </div>
-            ) : applicationForm === null ? (
+            ) : applicationForm == null ? (
               <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
                 <span className="text-body-2-regular text-teal-gray-500">
                   등록된 지원 양식이 없습니다.
