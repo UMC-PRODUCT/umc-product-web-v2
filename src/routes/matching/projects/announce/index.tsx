@@ -116,7 +116,7 @@ function ProjectSettingsAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
-  // 공지사항 조회 (PM 대상: SCHOOL_CORE)
+  // 공지사항 조회: PM(PLAN CHALLENGER) 대상
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: noticesData, isLoading } = useQuery({
     queryKey: [
@@ -130,7 +130,8 @@ function ProjectSettingsAnnouncePage() {
       getNotices({
         gisuId: Number(activeGisuId),
         chapterId: selectedChapterId ? Number(selectedChapterId) : undefined,
-        noticeTab: "SCHOOL_CORE",
+        noticeTab: "CHALLENGER",
+        part: "PLAN",
         page: page - 1,
         size: NOTICE_PAGE_SIZE,
         sort: "createdAt,DESC",
