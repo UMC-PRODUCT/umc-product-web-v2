@@ -107,6 +107,7 @@ export function ProjectManagementCard({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
+            <Modal.Title className="sr-only">{data.title}</Modal.Title>
             <ProjectDetailCard data={data} showEditCta />
           </Modal.Content>
         </Modal.Portal>

@@ -17,16 +17,16 @@ import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 export { SCHOOLS_BY_BRANCH }
 
 export const PART_OPTIONS: ProjectFilterOption[] = [
-  { value: "Web", label: "Web" },
-  { value: "iOS", label: "iOS" },
-  { value: "Android", label: "Android" },
-  { value: "SpringBoot", label: "SpringBoot" },
-  { value: "Node.js", label: "Node.js" },
+  { value: "WEB", label: "Web" },
+  { value: "IOS", label: "iOS" },
+  { value: "ANDROID", label: "Android" },
+  { value: "SPRINGBOOT", label: "SpringBoot" },
+  { value: "NODEJS", label: "Node.js" },
 ]
 
 export const RECRUIT_STATUS_OPTIONS: ProjectFilterOption[] = [
-  { value: "recruiting", label: "모집 중" },
-  { value: "completed", label: "모집 완료" },
+  { value: "RECRUITING", label: "모집 중" },
+  { value: "COMPLETED", label: "모집 완료" },
 ]
 
 export function getSchoolOptionsByBranch(

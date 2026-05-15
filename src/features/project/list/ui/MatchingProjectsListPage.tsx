@@ -46,8 +46,12 @@ export function MatchingProjectsListPage() {
     filterDescriptors,
   } = useMatchingProjectListFilters()
 
-  const [selectedProject, setSelectedProject] =
-    useState<MatchingProject | null>(null)
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
+    null,
+  )
+  const [selectedProjectChapterId, setSelectedProjectChapterId] = useState<
+    number | null
+  >(null)
 
   return (
     <section className="relative flex w-full flex-col items-start justify-start pt-8">
@@ -115,7 +119,10 @@ export function MatchingProjectsListPage() {
                 <button
                   type="button"
                   className="w-full text-left"
-                  onClick={() => setSelectedProject(project)}
+                  onClick={() => {
+                    setSelectedProjectId(item.id)
+                    setSelectedProjectChapterId(item.chapterId)
+                  }}
                 >
                   <MatchingProjectCard variant="default" data={project} />
                 </button>
@@ -135,20 +142,24 @@ export function MatchingProjectsListPage() {
       </div>
 
       <Modal.Root
-        open={Boolean(selectedProject)}
+        open={selectedProjectId !== null}
         onOpenChange={(open) => {
-          if (!open) setSelectedProject(null)
+          if (!open) {
+            setSelectedProjectId(null)
+            setSelectedProjectChapterId(null)
+          }
         }}
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            <Modal.Title className="sr-only">
-              {selectedProject?.title}
-            </Modal.Title>
-            {selectedProject ? (
-              <ProjectDetailCard data={selectedProject} />
-            ) : null}
+            <Modal.Title className="sr-only">프로젝트 상세</Modal.Title>
+            {selectedProjectId !== null && (
+              <ProjectDetailCard
+                projectId={selectedProjectId}
+                projectChapterId={selectedProjectChapterId ?? undefined}
+              />
+            )}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
