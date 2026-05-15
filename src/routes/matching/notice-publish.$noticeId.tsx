@@ -9,5 +9,11 @@ export const Route = createFileRoute("/matching/notice-publish/$noticeId")({
 function TeamMatchingNoticePublishEditPage() {
   const { noticeId } = Route.useParams()
 
-  return <NoticePublishForm variant="edit" noticeId={noticeId} />
+  return (
+    <NoticePublishForm
+      variant="edit"
+      noticeId={noticeId}
+      noticeTab="CHALLENGER"
+    />
+  )
 }

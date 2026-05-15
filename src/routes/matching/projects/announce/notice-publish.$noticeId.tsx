@@ -16,6 +16,7 @@ function ProjectSettingsNoticePublishEditPage() {
       variant="edit"
       noticeId={noticeId}
       noticeTab="CHALLENGER"
+      targetParts={["PLAN"]}
     />
   )
 }
