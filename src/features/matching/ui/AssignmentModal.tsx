@@ -1,6 +1,8 @@
-import { useState } from "react"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
+import { useEffect, useMemo, useState } from "react"
 
 import { Tooltip } from "@/components/tooltip/Tooltip"
+import { searchMembers } from "@/features/challenger/api/member"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
@@ -8,13 +10,20 @@ import { Button } from "@/shared/ui/Button"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
-import {
-  MOCK_ASSIGNABLE_CHALLENGERS,
-  ROLE_LABEL_TO_PART,
-} from "../model/matchingStatusMock"
 import { AssignmentChallengerRow } from "./AssignmentChallengerRow"
 
+import type { Part } from "@/features/challenger/model/types"
+
 import type { AssignableChallenger } from "../model/matchingStatusMock"
+
+function useDebounced<T>(value: T, delayMs = 300) {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const handle = window.setTimeout(() => setDebounced(value), delayMs)
+    return () => window.clearTimeout(handle)
+  }, [value, delayMs])
+  return debounced
+}
 
 interface AssignmentModalProps {
   open: boolean
@@ -23,6 +32,10 @@ interface AssignmentModalProps {
   challengerName: string
   challengerUniversity: string
   role: string
+  part?: Part
+  gisuId?: number
+  chapterId?: number
+  approvedMemberIds?: Set<string>
   onAssign: (challenger: AssignableChallenger) => void
 }
 
@@ -32,28 +45,60 @@ export function AssignmentModal({
   projectName,
   challengerName,
   challengerUniversity,
-  role,
+  role: _role,
+  part,
+  gisuId,
+  chapterId,
+  approvedMemberIds,
   onAssign,
 }: AssignmentModalProps) {
   const [search, setSearch] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showComplete, setShowComplete] = useState(false)
 
-  const partRole = ROLE_LABEL_TO_PART[role]
+  const debouncedSearch = useDebounced(search.trim(), 300)
+  const enabled = debouncedSearch.length >= 1 && open
 
-  const filtered =
-    search.trim() === ""
-      ? []
-      : MOCK_ASSIGNABLE_CHALLENGERS.filter(
-          (c) => c.partRole === partRole && c.nickname.includes(search.trim()),
-        )
+  const { data, isFetching } = useQuery({
+    queryKey: [
+      "matching",
+      "assignable-members",
+      debouncedSearch,
+      part,
+      gisuId,
+      chapterId,
+    ],
+    queryFn: () =>
+      searchMembers({
+        keyword: debouncedSearch,
+        part,
+        gisuId: gisuId ? String(gisuId) : undefined,
+        chapterId: chapterId ? String(chapterId) : undefined,
+        page: 0,
+        size: 20,
+      }),
+    enabled,
+    placeholderData: keepPreviousData,
+  })
+
+  // 이미 매칭된 챌린저 제외
+  const filtered = useMemo(() => {
+    const items = data?.page.content ?? []
+    if (!approvedMemberIds || approvedMemberIds.size === 0) return items
+    return items.filter((m) => !approvedMemberIds.has(m.memberId))
+  }, [data, approvedMemberIds])
 
   const handleAssign = () => {
-    const challenger = MOCK_ASSIGNABLE_CHALLENGERS.find(
-      (c) => c.id === selectedId,
-    )
-    if (!challenger) return
-    onAssign(challenger)
+    const member = filtered.find((m) => m.memberId === selectedId)
+    if (!member) return
+    // SearchMemberItem -> AssignableChallenger 변환
+    onAssign({
+      id: member.memberId,
+      nickname: member.nickname,
+      university: member.schoolName,
+      partRole: (member.part?.toLowerCase() ??
+        "web") as AssignableChallenger["partRole"],
+    })
     setShowComplete(true)
   }
 
@@ -159,22 +204,33 @@ export function AssignmentModal({
 
               {/* 챌린저 목록 */}
               <div className="flex max-h-55 flex-col gap-px overflow-y-auto">
-                {filtered.length === 0 ? (
+                {isFetching && filtered.length === 0 ? (
+                  <div className="flex items-center justify-center py-8">
+                    <span className="text-body-3-medium text-teal-gray-400">
+                      검색 중...
+                    </span>
+                  </div>
+                ) : filtered.length === 0 ? (
                   <div className="flex items-center justify-center py-8">
                     <span className="text-body-3-medium text-teal-gray-400">
                       검색 결과가 없습니다
                     </span>
                   </div>
                 ) : (
-                  filtered.map((c) => (
+                  filtered.map((m) => (
                     <AssignmentChallengerRow
-                      key={c.id}
-                      nickname={c.nickname}
-                      university={c.university}
-                      partRole={c.partRole}
-                      selected={selectedId === c.id}
+                      key={m.memberId}
+                      nickname={m.nickname}
+                      university={m.schoolName}
+                      partRole={
+                        (m.part?.toLowerCase() ??
+                          "web") as AssignableChallenger["partRole"]
+                      }
+                      selected={selectedId === m.memberId}
                       onClick={() =>
-                        setSelectedId(selectedId === c.id ? null : c.id)
+                        setSelectedId(
+                          selectedId === m.memberId ? null : m.memberId,
+                        )
                       }
                     />
                   ))

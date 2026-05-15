@@ -104,6 +104,20 @@ export function useMatchingStatusData(chapterName?: string) {
     enabled: projects.length > 0,
   })
 
+  // 전체 프로젝트에서 APPROVED된 멤버 ID 수집 (수동 배정 시 필터링용)
+  const approvedMemberIds = useMemo(() => {
+    const ids = new Set<string>()
+    if (!applicantsQuery.data) return ids
+    for (const applicants of applicantsQuery.data.values()) {
+      for (const app of applicants) {
+        if (app.status === "APPROVED") {
+          ids.add(String(app.applicant.memberId))
+        }
+      }
+    }
+    return ids
+  }, [applicantsQuery.data])
+
   // 매칭 현황 데이터 변환
   const matchingParts = useMemo(
     () => toMatchingPartDataList(projects, applicantsQuery.data ?? new Map()),
@@ -127,6 +141,9 @@ export function useMatchingStatusData(chapterName?: string) {
     matchingParts,
     stats,
     currentRound,
+    gisuId,
+    chapterId,
+    approvedMemberIds,
     dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
     isAdmin,
     isLoading:

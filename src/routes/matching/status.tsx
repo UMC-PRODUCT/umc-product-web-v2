@@ -21,8 +21,16 @@ function MatchingStatusPage() {
   const isAdmin = mode === "admin"
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
 
-  const { matchingParts, stats, currentRound, dataUpdatedAt, isLoading } =
-    useMatchingStatusData(selectedChapter)
+  const {
+    matchingParts,
+    stats,
+    currentRound,
+    gisuId,
+    chapterId,
+    approvedMemberIds,
+    dataUpdatedAt,
+    isLoading,
+  } = useMatchingStatusData(selectedChapter)
 
   // API 데이터 없으면 mock fallback
   const displayParts =
@@ -83,6 +91,7 @@ function MatchingStatusPage() {
                       {part.projects.map((project) => (
                         <MatchingResultRow
                           key={project.projectName}
+                          projectId={project.projectId}
                           projectName={project.projectName}
                           challengerName={project.challengerName}
                           challengerUniversity={project.challengerUniversity}
@@ -92,6 +101,9 @@ function MatchingStatusPage() {
                           currentCount={project.currentCount}
                           totalCount={project.totalCount}
                           isEditable={isAdmin}
+                          gisuId={gisuId}
+                          chapterId={chapterId}
+                          approvedMemberIds={approvedMemberIds}
                         />
                       ))}
                     </MatchingPartSection>
