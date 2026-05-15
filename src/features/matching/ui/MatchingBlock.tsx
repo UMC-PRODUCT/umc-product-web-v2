@@ -66,7 +66,7 @@ export function MatchingBlock({
         )}
       >
         <span className="text-body-3-medium text-teal-gray-400 hidden w-full text-center group-hover:block">
-          임의 배정하기
+          수동 배정하기
         </span>
       </button>
     )

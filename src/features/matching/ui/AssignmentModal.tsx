@@ -1,5 +1,6 @@
 import { useState } from "react"
 
+import { Tooltip } from "@/components/tooltip/Tooltip"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
@@ -67,14 +68,14 @@ export function AssignmentModal({
     <Modal.Root open={open} onOpenChange={handleClose}>
       <Modal.Portal>
         <Modal.Overlay tone="deep" />
-        <Modal.Content className="flex w-160 max-w-[calc(100vw-32px)] flex-col rounded-xl bg-white px-12.5 pt-14 pb-10 shadow-lg focus:outline-none">
-          <Modal.Title className="sr-only">팀원 임의 배정</Modal.Title>
+        <Modal.Content className="flex h-157.5 w-185 max-w-[calc(100vw-32px)] flex-col rounded-xl bg-white px-12.5 pt-14 pb-10 shadow-lg focus:outline-none">
+          <Modal.Title className="sr-only">팀원 수동 배정</Modal.Title>
 
           {/* 헤더 */}
           <div className="flex items-start justify-between">
             <div className="flex flex-col gap-4">
               <span className="text-subtitle-4-semibold text-teal-600">
-                팀원 임의 배정
+                팀원 수동 배정
               </span>
               <div className="flex flex-col gap-1.5">
                 <span className="text-heading-5-bold text-teal-gray-800">
@@ -86,7 +87,33 @@ export function AssignmentModal({
               </div>
             </div>
             <div className="flex items-center gap-2.5">
-              <InfoCircleIcon className="text-teal-gray-400 h-6 w-6" />
+              <Tooltip
+                content={
+                  <div className="text-left">
+                    <p className="text-caption-2-bold text-teal-500">
+                      팀원 수동 배정
+                    </p>
+                    <p className="text-caption-2-regular text-teal-gray-600">
+                      매칭 차수나 마감 기한과 관계없이 팀원을 언제든 추가하거나
+                      해제할 수 있습니다.
+                      <br />
+                      변경 사항은 즉시 반영됩니다.
+                    </p>
+                  </div>
+                }
+                size="big"
+                dark={false}
+                side="left"
+                className="min-h-17.5! w-100!"
+              >
+                <button
+                  type="button"
+                  className="flex items-center justify-center"
+                  aria-label="정보"
+                >
+                  <InfoCircleIcon className="text-teal-gray-400 h-6 w-6" />
+                </button>
+              </Tooltip>
               <button
                 type="button"
                 onClick={handleClose}
@@ -118,8 +145,8 @@ export function AssignmentModal({
           {search.trim() !== "" && (
             <div className="mt-4 flex flex-col gap-0.5">
               {/* 테이블 헤더 */}
-              <div className="bg-teal-gray-100 flex items-center gap-5 rounded-t-xl px-[35px] py-2">
-                <span className="text-body-3-medium text-teal-gray-500 w-[142px] shrink-0">
+              <div className="bg-teal-gray-100 flex items-center gap-5 rounded-t-xl px-8.75 py-2">
+                <span className="text-body-3-medium text-teal-gray-500 w-35.5 shrink-0">
                   닉네임/이름
                 </span>
                 <span className="text-body-3-medium text-teal-gray-500 w-36 shrink-0">
@@ -156,18 +183,20 @@ export function AssignmentModal({
             </div>
           )}
 
-          {/* 하단 버튼 */}
-          <div className="mt-auto flex justify-center pt-8">
-            <Button
-              variant="fill"
-              color="primary"
-              size="lg"
-              onClick={handleAssign}
-              className="w-50 rounded-[10px]"
-            >
-              해당 프로젝트에 배정
-            </Button>
-          </div>
+          {/* 하단 버튼: 검색 결과가 있을 때만 표시 */}
+          {search.trim() !== "" && (
+            <div className="mt-auto flex justify-center pt-8">
+              <Button
+                variant="fill"
+                color="primary"
+                size="lg"
+                onClick={handleAssign}
+                className="w-50 rounded-[10px]"
+              >
+                해당 프로젝트에 배정
+              </Button>
+            </div>
+          )}
         </Modal.Content>
       </Modal.Portal>
 
@@ -177,7 +206,7 @@ export function AssignmentModal({
         variant="warning"
         overlayTone="deep"
         title="배정 완료"
-        content="팀원 임의 배정이 완료되었습니다."
+        content="팀원 수동 배정이 완료되었습니다."
         confirmText="확인"
         onOpenChange={() => handleClose()}
         onConfirm={handleClose}
