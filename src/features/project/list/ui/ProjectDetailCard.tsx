@@ -17,6 +17,8 @@ import { ProjectApplyModal } from "./apply-modal/ProjectApplyModal"
 import { RecruitQuestionsViewModal } from "./apply-modal/RecruitQuestionsViewModal"
 import { TeamMemberModal } from "./team-member-modal/TeamMemberModal"
 
+import type { ViewMode } from "@/shared/view-mode"
+
 import type { MatchingProject } from "../model/matchingProject"
 
 type ProjectDetailCardLogo = "on" | "off"

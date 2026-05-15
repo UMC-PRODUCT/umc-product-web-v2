@@ -37,7 +37,7 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): number {
   const sorted = [...rounds].sort(
     (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
   )
-  return sorted.length > 0 ? toRoundNumber(sorted[0].phase) : 1
+  return sorted.length > 0 ? toRoundNumber(sorted[0]!.phase) : 1
 }
 
 export function useMatchingStatusData(chapterName?: string) {
