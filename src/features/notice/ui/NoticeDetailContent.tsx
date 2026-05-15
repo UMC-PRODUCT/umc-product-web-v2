@@ -41,7 +41,7 @@ export function NoticeDetailContent({ noticeId }: NoticeDetailContentProps) {
 
       {data.images && data.images.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-4">
-          {data.images
+          {[...data.images]
             .sort((a, b) => a.displayOrder - b.displayOrder)
             .map((image) => (
               <img
@@ -56,7 +56,7 @@ export function NoticeDetailContent({ noticeId }: NoticeDetailContentProps) {
 
       {data.links && data.links.length > 0 && (
         <div className="flex flex-col gap-2 pt-4">
-          {data.links
+          {[...data.links]
             .sort((a, b) => a.displayOrder - b.displayOrder)
             .map((link) => (
               <a
