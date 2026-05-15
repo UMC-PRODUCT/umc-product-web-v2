@@ -81,13 +81,19 @@ export function MatchingBlock({
         )}
       >
         <NumberTag variant="round1" />
-        <button
-          type="button"
-          onClick={onNameClick}
-          className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
-        >
-          {name}
-        </button>
+        {onNameClick ? (
+          <button
+            type="button"
+            onClick={onNameClick}
+            className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
+          >
+            {name}
+          </button>
+        ) : (
+          <span className="text-body-3-medium text-teal-gray-800 whitespace-nowrap">
+            {name}
+          </span>
+        )}
       </div>
     )
   }
@@ -95,18 +101,25 @@ export function MatchingBlock({
   return (
     <div
       className={cn(
-        "border-teal-gray-100 hover:bg-teal-gray-50/50 flex h-8.5 w-31 items-center gap-1.5 border bg-white p-2",
+        "border-teal-gray-100 flex h-8.5 w-31 items-center gap-1.5 border bg-white p-2",
+        onNameClick && "hover:bg-teal-gray-50/50",
         className,
       )}
     >
       <NumberTag variant={tagVariant} />
-      <button
-        type="button"
-        onClick={onNameClick}
-        className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
-      >
-        {name}
-      </button>
+      {onNameClick ? (
+        <button
+          type="button"
+          onClick={onNameClick}
+          className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
+        >
+          {name}
+        </button>
+      ) : (
+        <span className="text-body-3-medium text-teal-gray-800 whitespace-nowrap">
+          {name}
+        </span>
+      )}
     </div>
   )
 }

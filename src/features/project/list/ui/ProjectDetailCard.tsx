@@ -26,6 +26,7 @@ interface ProjectDetailCardProps {
   logo?: ProjectDetailCardLogo
   viewerBranch?: string
   showEditCta?: boolean
+  modeOverride?: ViewMode
 }
 
 export function ProjectDetailCard({
@@ -33,10 +34,11 @@ export function ProjectDetailCard({
   logo = "on",
   viewerBranch: viewerBranchProp,
   showEditCta = false,
+  modeOverride,
 }: ProjectDetailCardProps) {
   const mode = useViewModeStore((s) => s.mode)
   const previewMode = useViewModeStore((s) => s.previewMode)
-  const effectiveMode = mode === "admin" ? previewMode : mode
+  const effectiveMode = modeOverride ?? (mode === "admin" ? previewMode : mode)
   const storeBranch = useViewModeStore((s) => s.viewerBranch)
   const viewerBranch = viewerBranchProp ?? storeBranch
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)

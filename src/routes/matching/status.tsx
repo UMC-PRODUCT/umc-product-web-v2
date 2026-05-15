@@ -22,7 +22,7 @@ function MatchingStatusPage() {
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
 
   const { matchingParts, stats, currentRound, dataUpdatedAt, isLoading } =
-    useMatchingStatusData(isAdmin ? selectedChapter : undefined)
+    useMatchingStatusData(selectedChapter)
 
   // API 데이터 없으면 mock fallback
   const displayParts =
@@ -44,15 +44,12 @@ function MatchingStatusPage() {
 
         {/* 지부 선택 + 콘텐츠 */}
         <div className="mt-6 flex flex-col gap-[99px]">
-          {/* admin만 챕터 선택 표시 */}
-          {isAdmin && (
-            <SegmentButton
-              items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
-              value={selectedChapter}
-              onValueChange={(v) => setSelectedChapter(v as Chapter)}
-              itemClassName="flex-1"
-            />
-          )}
+          <SegmentButton
+            items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+            value={selectedChapter}
+            onValueChange={(v) => setSelectedChapter(v as Chapter)}
+            itemClassName="flex-1"
+          />
 
           {isLoading ? (
             <div className="flex items-center justify-center py-20">

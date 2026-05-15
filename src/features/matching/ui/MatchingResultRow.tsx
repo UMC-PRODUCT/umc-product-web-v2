@@ -121,7 +121,7 @@ export function MatchingResultRow({
                     name={block.name}
                     tagVariant={block.tagVariant}
                     onNameClick={
-                      block.applicantId
+                      isEditable && block.applicantId
                         ? () => setSelectedApplicantId(block.applicantId!)
                         : undefined
                     }
@@ -184,7 +184,10 @@ export function MatchingResultRow({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            <ProjectDetailCard data={projectData} />
+            <ProjectDetailCard
+              data={projectData}
+              modeOverride={isEditable ? undefined : "others"}
+            />
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>

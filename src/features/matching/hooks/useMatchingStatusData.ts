@@ -53,12 +53,12 @@ export function useMatchingStatusData(chapterName?: string) {
     [chaptersQuery.data],
   )
 
-  // admin만 챕터 필터링
+  // 챕터 필터링
   const chapterId = useMemo(() => {
-    if (!isAdmin || !chapterName || chapters.length === 0) return undefined
+    if (!chapterName || chapters.length === 0) return undefined
     const found = chapters.find((c) => c.name === chapterName)
     return found ? Number(found.id) : undefined
-  }, [isAdmin, chapterName, chapters])
+  }, [chapterName, chapters])
 
   // 매칭 차수 조회
   const roundsQuery = useQuery({
