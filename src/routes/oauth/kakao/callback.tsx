@@ -17,10 +17,12 @@ function KakaoCallbackPage() {
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
   const didRun = useRef(false)
+  const isActiveRef = useRef(true)
 
   useEffect(() => {
     if (didRun.current) return
     didRun.current = true
+    isActiveRef.current = true
 
     const showError = (message: string) => {
       addToast({
@@ -64,6 +66,7 @@ function KakaoCallbackPage() {
           authorizationCode: code,
           redirectUri: getKakaoRedirectUri(),
         })
+        if (!isActiveRef.current) return
         const result = handleLoginResponse(res)
         if (result === "LOGIN_SUCCESS") {
           void navigate({ to: "/" })
@@ -71,10 +74,15 @@ function KakaoCallbackPage() {
           void navigate({ to: "/signup/oauth" })
         }
       } catch (err) {
+        if (!isActiveRef.current) return
         console.error("[Kakao Callback] login failed", err)
         showError("Kakao 로그인에 실패했습니다. 다시 시도해주세요.")
       }
     })()
+
+    return () => {
+      isActiveRef.current = false
+    }
   }, [navigate, addToast])
 
   return (
