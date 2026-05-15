@@ -81,7 +81,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       return
     }
@@ -90,7 +90,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
       color: "primary",
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
     onNext()
   }
@@ -104,7 +104,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
       color: "primary",
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
   }
 

@@ -1,15 +1,8 @@
-interface KakaoAuthObject {
-  access_token: string
-  token_type: string
-  refresh_token?: string
-  expires_in: number
+interface KakaoAuthAuthorizeOptions {
+  redirectUri: string
+  state?: string
   scope?: string
-}
-
-interface KakaoAuthLoginOptions {
-  success: (authObj: KakaoAuthObject) => void
-  fail: (err: unknown) => void
-  throughTalk?: boolean
+  prompt?: string
 }
 
 interface Window {
@@ -17,7 +10,7 @@ interface Window {
     init: (appKey: string) => void
     isInitialized: () => boolean
     Auth: {
-      login: (options: KakaoAuthLoginOptions) => void
+      authorize: (options: KakaoAuthAuthorizeOptions) => void
     }
   }
 }

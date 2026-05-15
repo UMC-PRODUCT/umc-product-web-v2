@@ -30,7 +30,7 @@ export function LookupRecordForm() {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
   })

@@ -34,13 +34,14 @@ import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestCheckboxRouteImport } from './routes/test/checkbox'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
-import { Route as OauthCallbackRouteImport } from './routes/oauth/callback'
+import { Route as SignupOauthRouteImport } from './routes/signup/oauth'
 import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
 import { Route as LoginDefaultRouteImport } from './routes/login/default'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
+import { Route as OauthKakaoCallbackRouteImport } from './routes/oauth/kakao/callback'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 import { Route as MatchingProjectsManagementRouteImport } from './routes/matching/projects/management'
 import { Route as MatchingNoticePublishNoticeIdRouteImport } from './routes/matching/notice-publish.$noticeId'
@@ -177,9 +178,9 @@ const TestApplicationFormRoute = TestApplicationFormRouteImport.update({
   path: '/test/application-form',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OauthCallbackRoute = OauthCallbackRouteImport.update({
-  id: '/oauth/callback',
-  path: '/oauth/callback',
+const SignupOauthRoute = SignupOauthRouteImport.update({
+  id: '/signup/oauth',
+  path: '/signup/oauth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchingStatusRoute = MatchingStatusRouteImport.update({
@@ -211,6 +212,11 @@ const MatchingProjectsIndexRoute = MatchingProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
   getParentRoute: () => MatchingRouteRoute,
+} as any)
+const OauthKakaoCallbackRoute = OauthKakaoCallbackRouteImport.update({
+  id: '/oauth/kakao/callback',
+  path: '/oauth/kakao/callback',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MatchingProjectsNewRoute = MatchingProjectsNewRouteImport.update({
   id: '/projects/new',
@@ -274,7 +280,7 @@ export interface FileRoutesByFullPath {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
-  '/oauth/callback': typeof OauthCallbackRoute
+  '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
   '/test/checkbox': typeof TestCheckboxRoute
@@ -302,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
+  '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
@@ -315,7 +322,7 @@ export interface FileRoutesByTo {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
-  '/oauth/callback': typeof OauthCallbackRoute
+  '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
   '/test/checkbox': typeof TestCheckboxRoute
@@ -342,6 +349,7 @@ export interface FileRoutesByTo {
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
+  '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/announce': typeof MatchingProjectsAnnounceIndexRoute
@@ -358,7 +366,7 @@ export interface FileRoutesById {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
-  '/oauth/callback': typeof OauthCallbackRoute
+  '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
   '/test/checkbox': typeof TestCheckboxRoute
@@ -386,6 +394,7 @@ export interface FileRoutesById {
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
+  '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
@@ -403,7 +412,7 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
-    | '/oauth/callback'
+    | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
     | '/test/checkbox'
@@ -431,6 +440,7 @@ export interface FileRouteTypes {
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/management'
     | '/matching/projects/new'
+    | '/oauth/kakao/callback'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/announce/'
@@ -444,7 +454,7 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
-    | '/oauth/callback'
+    | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
     | '/test/checkbox'
@@ -471,6 +481,7 @@ export interface FileRouteTypes {
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/management'
     | '/matching/projects/new'
+    | '/oauth/kakao/callback'
     | '/matching/projects'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/announce'
@@ -486,7 +497,7 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
-    | '/oauth/callback'
+    | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
     | '/test/checkbox'
@@ -514,6 +525,7 @@ export interface FileRouteTypes {
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/management'
     | '/matching/projects/new'
+    | '/oauth/kakao/callback'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/announce/'
@@ -526,7 +538,7 @@ export interface RootRouteChildren {
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
-  OauthCallbackRoute: typeof OauthCallbackRoute
+  SignupOauthRoute: typeof SignupOauthRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
   TestCheckboxRoute: typeof TestCheckboxRoute
@@ -546,6 +558,7 @@ export interface RootRouteChildren {
   TestTooltipRoute: typeof TestTooltipRoute
   LoginIndexRoute: typeof LoginIndexRoute
   SignupIndexRoute: typeof SignupIndexRoute
+  OauthKakaoCallbackRoute: typeof OauthKakaoCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -725,11 +738,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestApplicationFormRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/oauth/callback': {
-      id: '/oauth/callback'
-      path: '/oauth/callback'
-      fullPath: '/oauth/callback'
-      preLoaderRoute: typeof OauthCallbackRouteImport
+    '/signup/oauth': {
+      id: '/signup/oauth'
+      path: '/signup/oauth'
+      fullPath: '/signup/oauth'
+      preLoaderRoute: typeof SignupOauthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matching/status': {
@@ -773,6 +786,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/matching/projects/'
       preLoaderRoute: typeof MatchingProjectsIndexRouteImport
       parentRoute: typeof MatchingRouteRoute
+    }
+    '/oauth/kakao/callback': {
+      id: '/oauth/kakao/callback'
+      path: '/oauth/kakao/callback'
+      fullPath: '/oauth/kakao/callback'
+      preLoaderRoute: typeof OauthKakaoCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/matching/projects/new': {
       id: '/matching/projects/new'
@@ -936,7 +956,7 @@ const rootRouteChildren: RootRouteChildren = {
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
   LoginDefaultRoute: LoginDefaultRoute,
-  OauthCallbackRoute: OauthCallbackRoute,
+  SignupOauthRoute: SignupOauthRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
   TestCheckboxRoute: TestCheckboxRoute,
@@ -956,6 +976,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestTooltipRoute: TestTooltipRoute,
   LoginIndexRoute: LoginIndexRoute,
   SignupIndexRoute: SignupIndexRoute,
+  OauthKakaoCallbackRoute: OauthKakaoCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

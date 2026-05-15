@@ -52,7 +52,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
       color: "primary",
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
   }
 
@@ -63,7 +63,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       return
     }
@@ -79,7 +79,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
           color: "red",
           variant: "deep",
           type: "default",
-          duration: 3,
+          duration: 3000,
         })
         return
       }
@@ -107,7 +107,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       return
     }

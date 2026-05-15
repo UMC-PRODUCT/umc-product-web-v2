@@ -7,6 +7,7 @@ import {
   registerMemberByOAuth,
 } from "@/features/auth/api/register"
 import { getTermsByType } from "@/features/auth/api/terms"
+import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
 import { useSignupStore } from "@/features/auth/store/signupStore"
 import { Button } from "@/shared/ui/Button"
 
@@ -130,7 +131,7 @@ export function SignupStepTerms() {
             })
       localStorage.setItem("access_token", res.accessToken)
       localStorage.setItem("refresh_token", res.refreshToken)
-      sessionStorage.removeItem("oauth_verification_token")
+      sessionStorage.removeItem(OAUTH_VERIFICATION_TOKEN_KEY)
       sessionStorage.removeItem("oauth_provider")
       reset()
       void navigate({
