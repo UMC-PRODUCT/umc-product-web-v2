@@ -83,7 +83,7 @@ export function MatchingDetailModal({
   return (
     <Modal.Root open={open} onOpenChange={(next) => !next && handleClose()}>
       <Modal.Portal>
-        <Modal.Overlay tone="light" />
+        <Modal.Overlay tone="deep" />
         <Modal.Content className="flex max-h-[calc(100vh-60px)] items-start">
           <Modal.Title className="sr-only">
             {displayApplicant.name} 지원서 상세
