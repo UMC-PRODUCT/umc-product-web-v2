@@ -1,37 +1,35 @@
-export interface KakaoSignInResult {
-  accessToken: string
+const KAKAO_REDIRECT_PATH = "/oauth/kakao/callback"
+const KAKAO_STATE_STORAGE_KEY = "kakao_oauth_state"
+
+export function getKakaoRedirectUri(): string {
+  return `${window.location.origin}${KAKAO_REDIRECT_PATH}`
 }
 
-export function isKakaoPopupCancelled(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "error" in error &&
-    (error as { error: string }).error === "access_denied"
-  )
+export function consumeKakaoState(received: string | null): boolean {
+  const saved = sessionStorage.getItem(KAKAO_STATE_STORAGE_KEY)
+  sessionStorage.removeItem(KAKAO_STATE_STORAGE_KEY)
+  return Boolean(saved) && saved === received
 }
 
-export function signInWithKakao(): Promise<KakaoSignInResult> {
-  return new Promise((resolve, reject) => {
-    const appKey = import.meta.env.VITE_KAKAO_APP_KEY as string | undefined
+export function startKakaoSignIn(): void {
+  const appKey = import.meta.env.VITE_KAKAO_APP_KEY as string | undefined
 
-    if (!appKey) {
-      reject(new Error("VITE_KAKAO_APP_KEY가 설정되지 않았습니다."))
-      return
-    }
-    if (!window.Kakao) {
-      reject(new Error("Kakao SDK가 로드되지 않았습니다."))
-      return
-    }
+  if (!appKey) {
+    throw new Error("VITE_KAKAO_APP_KEY가 설정되지 않았습니다.")
+  }
+  if (!window.Kakao) {
+    throw new Error("Kakao SDK가 로드되지 않았습니다.")
+  }
 
-    if (!window.Kakao.isInitialized()) {
-      window.Kakao.init(appKey)
-    }
+  if (!window.Kakao.isInitialized()) {
+    window.Kakao.init(appKey)
+  }
 
-    window.Kakao.Auth.login({
-      success: (authObj) => resolve({ accessToken: authObj.access_token }),
-      fail: (err) => reject(err),
-      throughTalk: false,
-    })
+  const state = crypto.randomUUID()
+  sessionStorage.setItem(KAKAO_STATE_STORAGE_KEY, state)
+
+  window.Kakao.Auth.authorize({
+    redirectUri: getKakaoRedirectUri(),
+    state,
   })
 }

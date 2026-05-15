@@ -16,7 +16,8 @@ export interface GoogleLoginRequest {
 }
 
 export interface KakaoLoginRequest {
-  accessToken: string
+  authorizationCode: string
+  redirectUri: string
 }
 
 export type ClientType = "ANDROID" | "IOS" | "WEB"
