@@ -130,16 +130,16 @@ export function ProfileDropdown({
             className="bg-teal-gray-100 h-px w-full rounded-[0.5px]"
           />
 
-          {/* TODO: 계정 연동/계정 삭제/로그아웃 기능 추가 */}
+          {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결 */}
           <div className="flex flex-col gap-0.5 px-2.5">
             <button type="button" className="h-6 w-15">
               <span className="text-body-2-medium text-teal-gray-700">
-                계정 연동
+                기수 관리
               </span>
             </button>
             <button type="button" className="h-6 w-15">
               <span className="text-body-2-medium text-teal-gray-700">
-                계정 삭제
+                계정 설정
               </span>
             </button>
             <button type="button" onClick={logout} className="h-6 w-15">
