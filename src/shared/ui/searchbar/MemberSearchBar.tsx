@@ -8,6 +8,7 @@ import { cn } from "@/shared/lib/utils"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
 export type MemberItem = {
+  id: string
   nickname: string
   name: string
   university: string
@@ -63,7 +64,7 @@ export const MemberSearchBar = forwardRef<
       {items && items.length > 0 && (
         <ul className="shadow-drop-neutral-1 border-teal-gray-50 scrollbar-hide absolute top-11 left-0 z-10 flex max-h-56 w-74.5 flex-col items-start overflow-y-auto rounded-[8px] border bg-white p-0.5">
           {items.map((item) => (
-            <li key={item.name} className="w-full">
+            <li key={item.id} className="w-full">
               <button
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}

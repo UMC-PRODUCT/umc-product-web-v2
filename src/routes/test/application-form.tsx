@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import {
-  getFieldTypePatch,
-  makeQuestion,
-} from "@/features/project/new/model/applicationQuestion"
+import { getFieldTypePatch } from "@/features/project/new/model/applicationQuestion"
 import { useApplicationForm } from "@/features/project/new/model/useApplicationForm"
 import { QuestionCard } from "@/features/project/new/ui/application/QuestionCard"
 import { QuestionListContainer } from "@/features/project/new/ui/application/QuestionListContainer"
@@ -17,41 +14,7 @@ export const Route = createFileRoute("/test/application-form")({
 })
 
 function ApplicationFormTestPage() {
-  const form = useApplicationForm({
-    initialCommonQuestions: () => [
-      makeQuestion({ title: "첫번째 질문 (링크도 여기서 받)" }),
-      makeQuestion({
-        title: "두번째 질문",
-        fieldType: "radio",
-        options: ["옵션 1"],
-      }),
-      makeQuestion({
-        title: "세번째 질문",
-        fieldType: "checkbox",
-        options: ["옵션 1"],
-      }),
-      makeQuestion({
-        title: "네번째 질문 사진을 올려주세요.",
-        fieldType: "file",
-      }),
-      makeQuestion({
-        title: "포트폴리오를 링크 혹은 PDF 파일의 형태로 제출하세요.",
-        fieldType: "portfolio",
-      }),
-    ],
-    initialSections: () => [
-      {
-        id: "design",
-        name: "Design",
-        isEnabled: true,
-        questions: [
-          makeQuestion({ title: "디자인 파트 지원자에게 보일 질문" }),
-        ],
-      },
-      { id: "frontend", name: "Frontend", isEnabled: false, questions: [] },
-      { id: "backend", name: "Backend", isEnabled: false, questions: [] },
-    ],
-  })
+  const form = useApplicationForm()
 
   const focusedCommon = form.commonQuestions.find(
     (q) => q.id === form.focusedId,

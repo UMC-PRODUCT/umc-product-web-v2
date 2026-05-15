@@ -3,6 +3,8 @@ import { useState } from "react"
 
 import { makeQuestion } from "@/features/project/new/model/applicationQuestion"
 
+import { useProjectRegisterStore } from "./useProjectRegisterStore"
+
 import type {
   Question,
   Section,
@@ -31,44 +33,46 @@ function removeById<T extends { id: string }>(arr: T[], id: string): T[] {
   return arr.filter((el) => el.id !== id)
 }
 
-interface UseApplicationFormOptions {
-  initialCommonQuestions?: () => Question[]
-  initialSections?: () => Section[]
-}
+const DEFAULT_SECTIONS: Section[] = [
+  { id: "design", name: "Design", isEnabled: false, questions: [] },
+  { id: "frontend", name: "Frontend", isEnabled: false, questions: [] },
+  { id: "backend", name: "Backend", isEnabled: false, questions: [] },
+]
 
-export function useApplicationForm(options?: UseApplicationFormOptions) {
-  const [commonQuestions, setCommonQuestions] = useState<Question[]>(
-    options?.initialCommonQuestions ?? (() => [makeQuestion()]),
-  )
-
-  const [sections, setSections] = useState<Section[]>(
-    options?.initialSections ??
-      (() => [
-        { id: "design", name: "Design", isEnabled: false, questions: [] },
-        { id: "frontend", name: "Frontend", isEnabled: false, questions: [] },
-        { id: "backend", name: "Backend", isEnabled: false, questions: [] },
-      ]),
-  )
-
+export function useApplicationForm() {
+  const storeApplication = useProjectRegisterStore((s) => s.application)
+  const setApplication = useProjectRegisterStore((s) => s.setApplication)
   const [focusedId, setFocusedId] = useState<string | null>(null)
 
+  const commonQuestions: Question[] =
+    storeApplication.commonQuestions.length > 0
+      ? storeApplication.commonQuestions
+      : [makeQuestion()]
+
+  const sections: Section[] =
+    storeApplication.sections.length > 0
+      ? storeApplication.sections
+      : DEFAULT_SECTIONS
+
   function updateCommonQuestion(id: string, patch: Partial<Question>) {
-    setCommonQuestions((prev) => updateById(prev, id, patch))
+    setApplication({ commonQuestions: updateById(commonQuestions, id, patch) })
   }
 
   function deleteCommonQuestion(id: string) {
-    setCommonQuestions((prev) => removeById(prev, id))
+    setApplication({ commonQuestions: removeById(commonQuestions, id) })
     setFocusedId((prev) => (prev === id ? null : prev))
   }
 
   function addCommonQuestion(afterId: string) {
     const newQ = makeQuestion()
-    setCommonQuestions((prev) => insertAfter(prev, afterId, newQ))
+    setApplication({
+      commonQuestions: insertAfter(commonQuestions, afterId, newQ),
+    })
     setFocusedId(newQ.id)
   }
 
   function updateSection(sectionId: string, patch: Partial<Section>) {
-    setSections((prev) => updateById(prev, sectionId, patch))
+    setApplication({ sections: updateById(sections, sectionId, patch) })
   }
 
   function updateSectionQuestion(
@@ -76,50 +80,52 @@ export function useApplicationForm(options?: UseApplicationFormOptions) {
     questionId: string,
     patch: Partial<Question>,
   ) {
-    setSections((prev) =>
-      prev.map((s) =>
+    setApplication({
+      sections: sections.map((s) =>
         s.id !== sectionId
           ? s
           : { ...s, questions: updateById(s.questions, questionId, patch) },
       ),
-    )
+    })
   }
 
   function deleteSectionQuestion(sectionId: string, questionId: string) {
-    setSections((prev) =>
-      prev.map((s) =>
+    setApplication({
+      sections: sections.map((s) =>
         s.id !== sectionId
           ? s
           : { ...s, questions: removeById(s.questions, questionId) },
       ),
-    )
+    })
     setFocusedId((prev) => (prev === questionId ? null : prev))
   }
 
   function addSectionQuestion(sectionId: string, afterId: string) {
     const newQ = makeQuestion()
-    setSections((prev) =>
-      prev.map((s) =>
+    setApplication({
+      sections: sections.map((s) =>
         s.id !== sectionId
           ? s
           : { ...s, questions: insertAfter(s.questions, afterId, newQ) },
       ),
-    )
+    })
     setFocusedId(newQ.id)
   }
 
   function appendSectionQuestion(sectionId: string) {
     const newQ = makeQuestion()
-    setSections((prev) =>
-      prev.map((s) =>
+    setApplication({
+      sections: sections.map((s) =>
         s.id !== sectionId ? s : { ...s, questions: [...s.questions, newQ] },
       ),
-    )
+    })
     setFocusedId(newQ.id)
   }
 
   function reorderCommonQuestion(fromIndex: number, toIndex: number) {
-    setCommonQuestions((prev) => arrayMove(prev, fromIndex, toIndex))
+    setApplication({
+      commonQuestions: arrayMove(commonQuestions, fromIndex, toIndex),
+    })
   }
 
   function reorderSectionQuestion(
@@ -127,13 +133,13 @@ export function useApplicationForm(options?: UseApplicationFormOptions) {
     fromIndex: number,
     toIndex: number,
   ) {
-    setSections((prev) =>
-      prev.map((s) =>
+    setApplication({
+      sections: sections.map((s) =>
         s.id !== sectionId
           ? s
           : { ...s, questions: arrayMove(s.questions, fromIndex, toIndex) },
       ),
-    )
+    })
   }
 
   return {
