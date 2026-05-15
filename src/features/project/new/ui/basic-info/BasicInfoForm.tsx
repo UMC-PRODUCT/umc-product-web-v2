@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { searchMembers } from "@/features/challenger/api/member"
 import {
+  addProjectMember,
   createProjectDraft,
   memberKeys,
   updateProjectDraft,
@@ -55,6 +56,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
   const gisuId = useProjectRegisterStore((s) => s.gisuId)
   const setProjectId = useProjectRegisterStore((s) => s.setProjectId)
   const setBasicInfo = useProjectRegisterStore((s) => s.setBasicInfo)
+  const basicDraftFields = useProjectRegisterStore((s) => s.basicDraftFields)
   const addToast = useToastStore((s) => s.addToast)
 
   const [isSaving, setIsSaving] = useState(false)
@@ -137,13 +139,23 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     shouldFocusError: false,
   })
 
+  useEffect(() => {
+    if (!basicDraftFields) return
+    const { title, description, planningLink } = basicDraftFields
+    if (title) setValue("title", title, { shouldDirty: false })
+    if (description)
+      setValue("description", description, { shouldDirty: false })
+    if (planningLink)
+      setValue("planningLink", planningLink, { shouldDirty: false })
+  }, [basicDraftFields, setValue])
+
   const onInvalid = (fieldErrors: typeof errors) => {
     const values = getValues()
 
     let message = "모든 항목을 입력해주세요"
     let focusFn: (() => void) | null = null
 
-    if (!(values.thumbnail instanceof File)) {
+    if (!(values.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
       message = "썸네일 이미지를 등록해주세요!"
       focusFn = () => thumbnailRef.current?.focus()
     } else if (fieldErrors.title) {
@@ -152,7 +164,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     } else if (fieldErrors.description) {
       message = "프로젝트 소개를 입력해주세요!"
       focusFn = () => setFocus("description")
-    } else if (!(values.logo instanceof File)) {
+    } else if (!(values.logo instanceof File) && !uploaded.logoUrl) {
       message = "로고 이미지를 등록해주세요!"
       focusFn = () => logoRef.current?.focus()
     } else if (fieldErrors.planningLink) {
@@ -221,6 +233,15 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         thumbnailFileId: thumbnailFileId ?? undefined,
         logoFileId: logoFileId ?? undefined,
       })
+
+      const prevPm2Id = savedSnapshot?.pm2?.id
+      const currPm2Id = pm2Member?.id
+      if (currPm2Id && currPm2Id !== prevPm2Id) {
+        await addProjectMember(resolvedProjectId, {
+          memberId: Number(currPm2Id),
+          part: "PLAN",
+        })
+      }
 
       setPmInfo({ isMultiPm, pm1: pm1Member, pm2: pm2Member })
       reset(values, { keepValues: true, keepDirty: false })
@@ -313,6 +334,8 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
             watch={watch}
             errors={errors}
             thumbnailRef={thumbnailRef}
+            thumbnailUrl={uploaded.thumbnailUrl ?? undefined}
+            logoUrl={uploaded.logoUrl ?? undefined}
           />
           <div className="flex w-78 shrink-0 flex-col gap-2">
             <MemberSearchBar
@@ -400,9 +423,10 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
           ref={logoRef}
           focusTarget="logo"
           variant="logo"
+          initialUrl={uploaded.logoUrl ?? undefined}
           onChange={(file) => {
             setValue("logo", file, { shouldDirty: true, shouldValidate: true })
-            setUploaded({ logoFileId: null })
+            setUploaded({ logoFileId: null, logoUrl: null })
           }}
         />
       </div>

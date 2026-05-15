@@ -19,4 +19,15 @@ export function hydrateDraftIntoStore(draft: DraftProjectResponse): void {
     pm1,
     pm2,
   })
+
+  store.setBasicDraftFields({
+    title: draft.name ?? "",
+    description: draft.description ?? "",
+    planningLink: draft.externalLink ?? "",
+  })
+
+  store.setUploaded({
+    thumbnailUrl: draft.thumbnailImageUrl ?? null,
+    logoUrl: draft.logoImageUrl ?? null,
+  })
 }

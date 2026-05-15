@@ -39,6 +39,7 @@ const variantAccept: Record<ImageUploaderVariant, string> = {
 interface ImageUploaderProps {
   variant?: ImageUploaderVariant
   onChange: (file: File) => void
+  initialUrl?: string
   error?: string
   errorId?: string
   className?: string
@@ -47,10 +48,19 @@ interface ImageUploaderProps {
 
 export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
   function ImageUploader(
-    { variant = "thumbnail", onChange, error, errorId, className, focusTarget },
+    {
+      variant = "thumbnail",
+      onChange,
+      initialUrl,
+      error,
+      errorId,
+      className,
+      focusTarget,
+    },
     ref,
   ) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const activePreview = previewUrl ?? initialUrl ?? null
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const labels = variantLabels[variant]
@@ -90,7 +100,7 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
         <button
           ref={ref}
           type="button"
-          aria-label={previewUrl ? labels.change : labels.upload}
+          aria-label={activePreview ? labels.change : labels.upload}
           aria-invalid={!!error}
           aria-describedby={errorId}
           data-focus-target={focusTarget}
@@ -99,14 +109,16 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
             "bg-teal-gray-200 hover:bg-teal-gray-400 group relative overflow-hidden transition-colors focus:ring-2 focus:outline-none focus:ring-inset",
             error ? "focus:ring-error-400" : "focus:ring-teal-300",
             variantClasses[variant],
-            variant === "logo" && previewUrl && "border-teal-gray-150 border",
+            variant === "logo" &&
+              activePreview &&
+              "border-teal-gray-150 border",
             className,
           )}
         >
-          {previewUrl ? (
+          {activePreview ? (
             <>
               <img
-                src={previewUrl}
+                src={activePreview}
                 alt={labels.change}
                 className="h-full w-full object-cover"
               />

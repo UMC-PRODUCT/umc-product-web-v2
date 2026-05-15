@@ -37,7 +37,17 @@ function rejectQueue(err: unknown) {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const body = response.data as { success?: boolean; message?: string }
+    if (body && typeof body === "object" && body.success === false) {
+      return Promise.reject(
+        Object.assign(new Error(body.message ?? "요청에 실패했습니다."), {
+          response,
+        }),
+      )
+    }
+    return response
+  },
   async (error) => {
     const originalRequest = error.config as AxiosRequestConfig & {
       _retry?: boolean

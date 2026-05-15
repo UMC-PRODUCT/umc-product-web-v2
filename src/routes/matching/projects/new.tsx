@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -11,18 +11,26 @@ import {
 } from "@/features/project/new"
 import {
   buildUpsertApplicationFormBody,
+  getApplicationForm,
   getMyDraft,
   gisuKeys,
   projectKeys,
   submitProject,
   upsertApplicationForm,
 } from "@/features/project/new/api"
+import { hydrateApplicationFormIntoStore } from "@/features/project/new/model/applicationFormHydrator"
 import { hydrateDraftIntoStore } from "@/features/project/new/model/draftHydrator"
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
 
 export const Route = createFileRoute("/matching/projects/new")({
+  beforeLoad: () => {
+    const token = localStorage.getItem("access_token")
+    if (!token) {
+      throw redirect({ to: "/login" })
+    }
+  },
   component: ProjectRegisterPage,
 })
 
@@ -60,6 +68,18 @@ function ProjectRegisterPage() {
       hydrateDraftIntoStore(draftQuery.data)
     }
   }, [draftQuery.data, projectId])
+
+  const applicationFormQuery = useQuery({
+    queryKey: projectKeys.applicationForm(projectId ?? 0),
+    queryFn: () => getApplicationForm(projectId!),
+    enabled: !!projectId,
+  })
+
+  useEffect(() => {
+    if (applicationFormQuery.data) {
+      hydrateApplicationFormIntoStore(applicationFormQuery.data)
+    }
+  }, [applicationFormQuery.data])
 
   const submitMutation = useMutation({
     mutationFn: async () => {

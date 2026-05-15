@@ -26,6 +26,8 @@ interface ProjectCardFormProps {
   watch: UseFormWatch<BasicInfoFormData>
   errors: FieldErrors<BasicInfoFormData>
   thumbnailRef?: Ref<HTMLButtonElement>
+  thumbnailUrl?: string
+  logoUrl?: string
 }
 
 export function ProjectCardForm({
@@ -38,18 +40,23 @@ export function ProjectCardForm({
   watch,
   errors,
   thumbnailRef,
+  thumbnailUrl,
+  logoUrl,
 }: ProjectCardFormProps) {
   const description = watch("description") ?? ""
   const logo = watch("logo")
-  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null)
+  const [localLogoPreviewUrl, setLocalLogoPreviewUrl] = useState<string | null>(
+    null,
+  )
+  const logoPreviewUrl = localLogoPreviewUrl ?? logoUrl ?? null
 
   useEffect(() => {
     if (!(logo instanceof File)) {
-      setLogoPreviewUrl(null)
+      setLocalLogoPreviewUrl(null)
       return
     }
     const url = URL.createObjectURL(logo)
-    setLogoPreviewUrl(url)
+    setLocalLogoPreviewUrl(url)
     return () => URL.revokeObjectURL(url)
   }, [logo])
 
@@ -59,6 +66,7 @@ export function ProjectCardForm({
         ref={thumbnailRef}
         focusTarget="thumbnail"
         variant="thumbnail"
+        initialUrl={thumbnailUrl}
         onChange={(file) =>
           setValue("thumbnail", file, { shouldValidate: true })
         }
