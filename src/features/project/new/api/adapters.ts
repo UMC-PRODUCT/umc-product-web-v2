@@ -76,7 +76,7 @@ const API_FIELD_TYPE_TO_UI: Record<ApplicationQuestionItem["type"], FieldType> =
     DROPDOWN: "radio",
     CHECKBOX: "checkbox",
     FILE: "file",
-    SCHEDULE: "file",
+    SCHEDULE: "text",
     PORTFOLIO: "portfolio",
   }
 
