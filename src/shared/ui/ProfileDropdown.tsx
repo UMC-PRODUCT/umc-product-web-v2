@@ -82,7 +82,7 @@ export function ProfileDropdown({
             </div>
 
             <div className="flex flex-col gap-0.5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <span className="text-teal-gray-900 text-subtitle-3-semibold">
                   {me ? `${me.nickname}/${me.name}` : ""}
                 </span>
@@ -140,8 +140,8 @@ export function ProfileDropdown({
             className="bg-teal-gray-100 h-px w-full rounded-[0.5px]"
           />
 
-          {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결 */}
-          <div className="flex flex-col gap-0.5 px-2.5">
+          {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결/로그아웃 API 연동 */}
+          <div className="flex flex-col gap-1 px-2.5">
             <button type="button" className="h-6 w-15">
               <span className="text-body-2-medium text-teal-gray-700">
                 기수 관리
@@ -153,7 +153,7 @@ export function ProfileDropdown({
               </span>
             </button>
             <button type="button" onClick={logout} className="h-6 w-15">
-              <span className="text-body-2-medium text-teal-gray-700">
+              <span className="text-body-2-medium text-error-500">
                 로그아웃
               </span>
             </button>
