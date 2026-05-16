@@ -31,8 +31,7 @@ export function ProfileDropdown({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const mode = useViewModeStore((s) => s.mode)
-  const hasToken = !!localStorage.getItem("access_token")
-  const { data: me } = useMe({ enabled: hasToken })
+  const { data: me } = useMe()
 
   useEffect(() => {
     if (!isOpen) return
