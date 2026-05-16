@@ -17,7 +17,7 @@ const roleTagChipVariants = cva(
 
 const ROLE_LABEL = {
   central: "중앙 운영진",
-  campus: "캠퍼스 운영진",
+  campus: "교내 운영진",
   challenger: "챌린저",
 } as const
 
