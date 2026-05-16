@@ -69,9 +69,10 @@ function parseServerDatetime(iso: string): { date: string; time: string } {
   return { date: `${y}-${m}-${d}`, time: `${hh}:${mm}` }
 }
 
-// UI date + time -> ISO datetime 문자열
+// UI date + time -> ISO datetime 문자열 (로컬 시간 -> UTC 변환)
 export function toISODatetime(date: string, time: string): string {
-  return `${date}T${time}:00`
+  const dt = new Date(`${date}T${time}:00`)
+  return dt.toISOString()
 }
 
 // 서버 응답 -> RoundSchedule 변환
@@ -79,7 +80,7 @@ export function toRoundSchedule(r: MatchingRoundResponse): RoundSchedule {
   const start = parseServerDatetime(r.startsAt)
   const end = parseServerDatetime(r.endsAt)
   return {
-    id: r.id,
+    id: Number(r.id),
     phase: r.phase,
     roundLabel: PHASE_LABEL[r.phase],
     title: toUIMatchingType(r.type),

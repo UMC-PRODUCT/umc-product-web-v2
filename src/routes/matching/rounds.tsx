@@ -42,13 +42,6 @@ function parseDate(dateStr: string): Date | null {
   return new Date(y, m - 1, d)
 }
 
-function formatDateStr(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, "0")
-  const d = String(date.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
-}
-
 function MatchingRoundsPage() {
   const [matchingType, setMatchingType] =
     useState<MatchingType>("Plan-Develop 매칭")
@@ -56,7 +49,6 @@ function MatchingRoundsPage() {
   const [rounds, setRounds] = useState<RoundSchedule[]>(
     emptyRoundSchedules(matchingType),
   )
-  const [pickingEnd, setPickingEnd] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
   const [saveState, setSaveState] = useState<"idle" | "loading" | "completed">(
     "idle",
@@ -140,18 +132,6 @@ function MatchingRoundsPage() {
     setSaveState("idle")
   }
 
-  const isRoundExpired = (round: RoundSchedule) => {
-    const end = parseDate(round.endDate)
-    if (!end) return false
-    const now = new Date()
-    now.setHours(0, 0, 0, 0)
-    return end < now
-  }
-
-  const firstActiveIdx = rounds.findIndex((r) => !isRoundExpired(r))
-  const selectedRoundIdx =
-    firstActiveIdx === -1 ? rounds.length - 1 : firstActiveIdx
-
   const {
     proceed: proceedLeave,
     reset: resetLeave,
@@ -164,14 +144,17 @@ function MatchingRoundsPage() {
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
 
-  const selectedRound = rounds[selectedRoundIdx]!
-
-  const highlightRange = (() => {
-    const start = parseDate(selectedRound.startDate)
-    const end = parseDate(selectedRound.endDate)
-    if (!start || !end) return null
-    return { start, end }
-  })()
+  // 모든 라운드의 날짜 범위를 합쳐서 하이라이트
+  const highlightRanges = useMemo(() => {
+    return rounds
+      .map((r) => {
+        const start = parseDate(r.startDate)
+        const end = parseDate(r.endDate)
+        if (!start || !end) return null
+        return { start, end }
+      })
+      .filter(Boolean) as { start: Date; end: Date }[]
+  }, [rounds])
 
   const updateRound = (
     idx: number,
@@ -195,8 +178,10 @@ function MatchingRoundsPage() {
 
         const startsAt = toISODatetime(round.startDate, round.startTime)
         const endsAt = toISODatetime(round.endDate, round.endTime)
-        // decisionDeadline: endsAt과 동일하게 설정
-        const decisionDeadline = endsAt
+        // decisionDeadline: endsAt 이후여야 하므로 +1초
+        const dlDt = new Date(endsAt)
+        dlDt.setSeconds(dlDt.getSeconds() + 1)
+        const decisionDeadline = dlDt.toISOString()
 
         if (round.id) {
           // 기존 라운드 수정
@@ -240,24 +225,6 @@ function MatchingRoundsPage() {
   const saveButtonText =
     saveState === "completed" ? "저장 완료" : isDirty ? "수정하기" : "저장하기"
   const saveButtonDisabled = !isDirty || saveState === "completed"
-
-  const handleDateClick = (date: Date) => {
-    const dateStr = formatDateStr(date)
-    if (!pickingEnd) {
-      updateRound(selectedRoundIdx, "startDate", dateStr)
-      updateRound(selectedRoundIdx, "endDate", dateStr)
-      setPickingEnd(true)
-    } else {
-      const startDate = parseDate(selectedRound.startDate)
-      if (startDate && date >= startDate) {
-        updateRound(selectedRoundIdx, "endDate", dateStr)
-      } else {
-        updateRound(selectedRoundIdx, "startDate", dateStr)
-        updateRound(selectedRoundIdx, "endDate", dateStr)
-      }
-      setPickingEnd(false)
-    }
-  }
 
   return (
     <section className="flex w-full flex-col gap-6 pt-10">
@@ -316,13 +283,12 @@ function MatchingRoundsPage() {
                 <div className="ml-4 w-101 shrink-0">
                   <div className="border-teal-gray-100 flex flex-col gap-5 rounded-2xl border bg-white px-3 pt-2 pb-3 drop-shadow-[0px_4px_8px_rgba(239,240,240,0.3)]">
                     <Calendar
-                      highlightRange={highlightRange}
-                      onDateClick={handleDateClick}
+                      highlightRanges={highlightRanges}
                       className="border-0 bg-transparent"
                     />
 
                     <div className="flex flex-col gap-2">
-                      {rounds.map((round, idx) => (
+                      {rounds.map((round) => (
                         <CalendarScheduleList
                           key={round.roundLabel}
                           roundLabel={round.roundLabel}
@@ -330,13 +296,7 @@ function MatchingRoundsPage() {
                           startDate={round.startDate}
                           startTime={round.startTime}
                           endTime={round.endTime}
-                          state={
-                            isRoundExpired(round)
-                              ? "disabled"
-                              : idx === firstActiveIdx
-                                ? "active"
-                                : "default"
-                          }
+                          state={round.startDate ? "default" : "disabled"}
                         />
                       ))}
                     </div>

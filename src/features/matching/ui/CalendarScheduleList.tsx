@@ -8,6 +8,7 @@ interface CalendarScheduleListProps {
   startTime: string // "00:00"
   endTime: string // "23:59"
   state?: "default" | "active" | "disabled"
+  onClick?: () => void
   className?: string
 }
 
@@ -33,6 +34,7 @@ export function CalendarScheduleList({
   startTime,
   endTime,
   state = "default",
+  onClick,
   className,
 }: CalendarScheduleListProps) {
   const isActive = state === "active"
@@ -40,9 +42,20 @@ export function CalendarScheduleList({
 
   return (
     <div
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter") onClick()
+            }
+          : undefined
+      }
       className={cn(
         "flex w-95 rounded-lg border-l-8 border-l-teal-500 pl-2",
         isActive ? "bg-teal-50" : "bg-teal-gray-50",
+        onClick && "cursor-pointer",
         className,
       )}
     >
