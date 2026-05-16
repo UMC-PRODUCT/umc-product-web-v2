@@ -21,7 +21,7 @@ const ROLE_LABEL = {
   challenger: "챌린저",
 } as const
 
-type Role = keyof typeof ROLE_LABEL
+export type Role = keyof typeof ROLE_LABEL
 
 interface RoleTagChipProps {
   role: Role

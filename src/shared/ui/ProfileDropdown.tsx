@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import GenerationListItem from "@/components/header/GenerationListItem"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { logout } from "@/features/auth/lib/logout"
+import { toRoleTag } from "@/features/auth/model/mappers"
 import { cn } from "@/shared/lib/utils"
 
 import ProfileIcon from "../assets/icon/people/ProfileIcon"
@@ -47,6 +48,8 @@ export function ProfileDropdown({
     onOpenChange?.(newOpen)
   }
 
+  const role = me?.roles?.[0] ? toRoleTag(me.roles[0].roleType) : "challenger"
+
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -87,7 +90,7 @@ export function ProfileDropdown({
                   {me ? `${me.nickname}/${me.name}` : ""}
                 </span>
 
-                <RoleTagChip role="challenger" />
+                <RoleTagChip role={role} />
               </div>
 
               <span className="text-caption-2-medium text-teal-gray-500">
