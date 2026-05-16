@@ -5,6 +5,7 @@ import { useMe } from "@/features/auth/hooks/useMe"
 import { logout } from "@/features/auth/lib/logout"
 import { toRoleTag } from "@/features/auth/model/mappers"
 import { cn } from "@/shared/lib/utils"
+import { useViewModeStore } from "@/shared/view-mode"
 
 import ProfileIcon from "../assets/icon/people/ProfileIcon"
 import { RoleTagChip } from "./chip/RoleTagChip"
@@ -29,7 +30,9 @@ export function ProfileDropdown({
   const [isOpen, setIsOpen] = useState(open)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const { data: me } = useMe()
+  const mode = useViewModeStore((s) => s.mode)
+  const hasToken = !!localStorage.getItem("access_token")
+  const { data: me } = useMe({ enabled: hasToken })
 
   useEffect(() => {
     if (!isOpen) return
@@ -139,11 +142,13 @@ export function ProfileDropdown({
 
           {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결/로그아웃 API 연동 */}
           <div className="flex flex-col gap-1 px-2.5">
-            <button type="button" className="h-6 w-15">
-              <span className="text-body-2-medium text-teal-gray-700">
-                기수 관리
-              </span>
-            </button>
+            {mode === "admin" && (
+              <button type="button" className="h-6 w-15">
+                <span className="text-body-2-medium text-teal-gray-700">
+                  기수 관리
+                </span>
+              </button>
+            )}
             <button type="button" className="h-6 w-15">
               <span className="text-body-2-medium text-teal-gray-700">
                 계정 설정
