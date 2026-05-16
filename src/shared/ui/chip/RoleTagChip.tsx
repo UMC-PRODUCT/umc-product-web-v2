@@ -17,11 +17,11 @@ const roleTagChipVariants = cva(
 
 const ROLE_LABEL = {
   central: "중앙 운영진",
-  campus: "캠퍼스 운영진",
+  campus: "교내 운영진",
   challenger: "챌린저",
 } as const
 
-type Role = keyof typeof ROLE_LABEL
+export type Role = keyof typeof ROLE_LABEL
 
 interface RoleTagChipProps {
   role: Role

@@ -1,5 +1,9 @@
 import { api } from "@/shared/lib/axios"
 
+import type {
+  ChallengerInfoResponse,
+  ChallengerRoleResponse,
+} from "@/features/challenger/model/types"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 export interface MemberInfoResponse {
@@ -11,6 +15,8 @@ export interface MemberInfoResponse {
   schoolName: string
   profileImageLink: string
   status: "ACTIVE" | "INACTIVE" | "WITHDRAWN"
+  roles: ChallengerRoleResponse[]
+  challengerRecords?: ChallengerInfoResponse[]
 }
 
 export async function getMyInfo(): Promise<MemberInfoResponse> {
