@@ -1,5 +1,7 @@
-import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { useEffect, useMemo, useState } from "react"
 
+import { searchMembers } from "@/features/challenger/api/member"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
@@ -7,11 +9,9 @@ import { Button } from "@/shared/ui/Button"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
-import {
-  MOCK_ASSIGNABLE_CHALLENGERS,
-  ROLE_LABEL_TO_PART,
-} from "../model/matchingStatusMock"
 import { AssignmentChallengerRow } from "./AssignmentChallengerRow"
+
+import type { Part } from "@/features/challenger/model/types"
 
 import type { AssignableChallenger } from "../model/matchingStatusMock"
 
@@ -22,6 +22,9 @@ interface AssignmentModalProps {
   challengerName: string
   challengerUniversity: string
   role: string
+  gisuId?: number
+  chapterId?: number
+  part?: Part
   onAssign: (challenger: AssignableChallenger) => void
 }
 
@@ -31,26 +34,61 @@ export function AssignmentModal({
   projectName,
   challengerName,
   challengerUniversity,
-  role,
+  role: _role,
+  gisuId,
+  chapterId,
+  part,
   onAssign,
 }: AssignmentModalProps) {
   const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showComplete, setShowComplete] = useState(false)
 
-  const partRole = ROLE_LABEL_TO_PART[role]
+  // 검색어 debounce (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim())
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [search])
 
-  const filtered =
-    search.trim() === ""
-      ? []
-      : MOCK_ASSIGNABLE_CHALLENGERS.filter(
-          (c) => c.partRole === partRole && c.nickname.includes(search.trim()),
-        )
+  // searchMembers API 호출
+  const searchQuery = useQuery({
+    queryKey: [
+      "matching",
+      "assignable-members",
+      debouncedSearch,
+      gisuId,
+      chapterId,
+      part,
+    ],
+    queryFn: () =>
+      searchMembers({
+        keyword: debouncedSearch,
+        gisuId: gisuId ? String(gisuId) : undefined,
+        chapterId: chapterId ? String(chapterId) : undefined,
+        part,
+        page: 0,
+        size: 20,
+      }),
+    enabled: debouncedSearch.length > 0 && open,
+  })
+
+  // 서버 응답 -> AssignableChallenger 변환
+  const filtered: AssignableChallenger[] = useMemo(() => {
+    if (!searchQuery.data) return []
+    return searchQuery.data.page.content.map((item) => ({
+      id: item.memberId,
+      nickname: item.nickname,
+      university: item.schoolName,
+      partRole: (item.part?.toLowerCase() ??
+        "web") as AssignableChallenger["partRole"],
+    }))
+  }, [searchQuery.data])
 
   const handleAssign = () => {
-    const challenger = MOCK_ASSIGNABLE_CHALLENGERS.find(
-      (c) => c.id === selectedId,
-    )
+    const challenger = filtered.find((c) => c.id === selectedId)
     if (!challenger) return
     onAssign(challenger)
     setShowComplete(true)

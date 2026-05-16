@@ -17,7 +17,7 @@ import { toProjectApplication } from "../model/mappers"
 import type { ApplicationStats, ProjectApplication } from "../model/types"
 
 // 활성 기수 ID 조회
-function useActiveGisuId() {
+export function useActiveGisuId() {
   return useQuery({
     queryKey: ["gisu", "active"],
     queryFn: async () => {

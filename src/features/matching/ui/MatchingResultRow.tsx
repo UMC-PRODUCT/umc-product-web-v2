@@ -10,6 +10,7 @@ import { AssignmentModal } from "./AssignmentModal"
 import { MatchingBlock } from "./MatchingBlock"
 import { MatchingDetailModal } from "./MatchingDetailModal"
 
+import type { Part } from "@/features/challenger/model/types"
 import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 import type { NumberTagVariant } from "@/shared/ui/NumberTag"
 
@@ -27,6 +28,23 @@ export interface MatchingRoleRow {
   blocks: MatchingBlockData[]
 }
 
+// 역할 라벨 -> 서버 Part enum 변환
+function roleLabelToPart(
+  role: string,
+  backendPart: "springboot" | "nodejs",
+): Part | undefined {
+  switch (role) {
+    case "Frontend":
+      return "WEB"
+    case "Backend":
+      return backendPart === "nodejs" ? "NODEJS" : "SPRINGBOOT"
+    case "Design":
+      return "DESIGN"
+    default:
+      return undefined
+  }
+}
+
 interface MatchingResultRowProps {
   projectName: string
   challengerName: string
@@ -37,6 +55,8 @@ interface MatchingResultRowProps {
   currentCount?: number
   totalCount?: number
   projectData?: MatchingProject
+  gisuId?: number
+  chapterId?: number
   className?: string
 }
 
@@ -50,6 +70,8 @@ export function MatchingResultRow({
   currentCount,
   totalCount,
   projectData,
+  gisuId,
+  chapterId,
   className,
 }: MatchingResultRowProps) {
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
@@ -208,6 +230,13 @@ export function MatchingResultRow({
         challengerName={challengerName}
         challengerUniversity={challengerUniversity}
         role={assignTarget?.role ?? ""}
+        gisuId={gisuId}
+        chapterId={chapterId}
+        part={
+          assignTarget
+            ? roleLabelToPart(assignTarget.role, backendPart)
+            : undefined
+        }
         onAssign={(challenger) => {
           if (!assignTarget) return
           setLocalRoleRows((prev) =>

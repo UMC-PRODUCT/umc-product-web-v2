@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
+import {
+  useActiveGisuId,
+  useChapters,
+} from "@/features/application/hooks/useApplicationPageData"
 import { MOCK_STATS } from "@/features/application/model/applicationMock"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { MOCK_MATCHING_PARTS } from "@/features/matching/model/matchingStatusMock"
@@ -16,6 +20,16 @@ export const Route = createFileRoute("/matching/status")({
 
 function MatchingStatusPage() {
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
+
+  const gisuQuery = useActiveGisuId()
+  const gisuId = gisuQuery.data ?? undefined
+
+  const chaptersQuery = useChapters()
+  const chapterId = useMemo(() => {
+    const chapters = chaptersQuery.data?.chapters ?? []
+    const found = chapters.find((c) => c.name === selectedChapter)
+    return found ? Number(found.id) : undefined
+  }, [chaptersQuery.data, selectedChapter])
 
   return (
     <section className="flex w-full flex-col pt-10">
@@ -67,6 +81,8 @@ function MatchingStatusPage() {
                         status={project.status}
                         currentCount={project.currentCount}
                         totalCount={project.totalCount}
+                        gisuId={gisuId}
+                        chapterId={chapterId}
                       />
                     ))}
                   </MatchingPartSection>
