@@ -78,7 +78,7 @@ export default function SideBar({ className }: SideBarProps) {
       {availableOptions.length >= 2 && (
         <SideBarDropDown
           options={availableOptions}
-          selectedIdx={selectedDropdownIdx === -1 ? 0 : selectedDropdownIdx}
+          selectedIdx={selectedDropdownIdx}
           onSelect={(idx) => {
             const selected = availableOptions[idx]
             if (selected) setMode(selected.mode)
