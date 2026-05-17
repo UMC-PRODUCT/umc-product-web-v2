@@ -111,7 +111,7 @@ export function NoticePublishForm({
       targetGisuId: Number(activeGisuId),
       targetChapterId: chapterId,
       targetSchoolId: null,
-      targetParts: targetParts,
+      targetParts,
       targetNoticeTab: noticeTab,
     }
   }, [profile, activeGisuId, noticeTab, targetParts, chapter, chaptersData])
