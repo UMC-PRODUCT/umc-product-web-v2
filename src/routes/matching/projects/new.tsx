@@ -18,11 +18,13 @@ import {
   submitProject,
   upsertApplicationForm,
 } from "@/features/project/new/api"
+import { canAccessProjectNew } from "@/features/project/new/api/permissions"
 import { hydrateApplicationFormIntoStore } from "@/features/project/new/model/applicationFormHydrator"
 import { hydrateDraftIntoStore } from "@/features/project/new/model/draftHydrator"
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
+import { useViewModeStore } from "@/shared/view-mode"
 
 export const Route = createFileRoute("/matching/projects/new")({
   beforeLoad: () => {
@@ -37,7 +39,14 @@ export const Route = createFileRoute("/matching/projects/new")({
 function ProjectRegisterPage() {
   const [step, setStep] = useState(1)
   const navigate = useNavigate()
+  const viewMode = useViewModeStore((s) => s.mode)
   const addToast = useToastStore((s) => s.addToast)
+
+  useEffect(() => {
+    if (!canAccessProjectNew(viewMode)) {
+      navigate({ to: "/matching/projects" })
+    }
+  }, [viewMode, navigate])
 
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
@@ -116,6 +125,14 @@ function ProjectRegisterPage() {
     },
   })
 
+  const handleBasicInfoNext = () => {
+    setStep(viewMode === "pm" ? 3 : 2)
+  }
+
+  const handleApplicationFormPrev = () => {
+    setStep(viewMode === "pm" ? 1 : 2)
+  }
+
   const handleRegister = () => {
     submitMutation.mutate()
   }
@@ -131,8 +148,12 @@ function ProjectRegisterPage() {
             내 프로젝트의 대한 정보를 등록하고 모집 폼을 작성합니다.
           </span>
         </div>
-        <Stepper step={step} onStepChange={setStep} />
-        {step === 1 && <BasicInfoForm onNext={() => setStep(2)} />}
+        <Stepper
+          step={step}
+          onStepChange={setStep}
+          disabledSteps={viewMode === "pm" ? [2] : []}
+        />
+        {step === 1 && <BasicInfoForm onNext={handleBasicInfoNext} />}
         {step === 2 && (
           <RecruitInfoForm
             onPrev={() => setStep(1)}
@@ -140,7 +161,10 @@ function ProjectRegisterPage() {
           />
         )}
         {step === 3 && (
-          <ApplicationForm onPrev={() => setStep(2)} onNext={handleRegister} />
+          <ApplicationForm
+            onPrev={handleApplicationFormPrev}
+            onNext={handleRegister}
+          />
         )}
       </div>
     </section>
