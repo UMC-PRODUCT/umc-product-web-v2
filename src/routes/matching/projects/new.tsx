@@ -133,6 +133,9 @@ function ProjectRegisterPage() {
     setStep(viewMode === "pm" ? 1 : 2)
   }
 
+  const isStep3Locked =
+    (viewMode === "pm" || viewMode === "admin") && !projectId
+
   const handleStepChange = (idx: number) => {
     if (viewMode === "pm" && idx === 2) return
     setStep(idx)
@@ -156,7 +159,14 @@ function ProjectRegisterPage() {
         <Stepper
           step={step}
           onStepChange={handleStepChange}
-          disabledSteps={viewMode === "pm" ? [2] : []}
+          disabledSteps={[
+            ...(viewMode === "pm" ? [2] : []),
+            ...(isStep3Locked ? [3] : []),
+          ]}
+          disabledTooltips={{
+            2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
+            3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+          }}
         />
         {step === 1 && <BasicInfoForm onNext={handleBasicInfoNext} />}
         {step === 2 && (
