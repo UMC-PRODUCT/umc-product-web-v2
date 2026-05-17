@@ -41,7 +41,7 @@ export function SideBarDropDown({
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        aria-haspopup="listbox"
+        aria-haspopup="menu"
         className={cn(
           "flex h-6.5 w-43 justify-between rounded-[8px] py-1 pr-2 pl-3",
           isOpen ? "bg-teal-gray-200" : "bg-teal-gray-150",
