@@ -25,7 +25,11 @@ export function StepperTab({
       )}
     >
       {disabled && (
-        <span className="bg-teal-gray-800 text-label-3-semibold pointer-events-none absolute -top-9 left-1/2 z-10 -translate-x-1/2 rounded-[6px] px-2.5 py-1.5 whitespace-nowrap text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        <span
+          id={`stepper-tab-tooltip-${idx}`}
+          role="tooltip"
+          className="bg-teal-gray-800 text-label-3-semibold pointer-events-none absolute -top-9 left-1/2 z-10 -translate-x-1/2 rounded-[6px] px-2.5 py-1.5 whitespace-nowrap text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        >
           수정이 불가능합니다
         </span>
       )}
@@ -34,6 +38,7 @@ export function StepperTab({
         role="tab"
         aria-selected={isSelected}
         aria-disabled={disabled}
+        aria-describedby={disabled ? `stepper-tab-tooltip-${idx}` : undefined}
         tabIndex={isSelected ? 0 : -1}
         onClick={disabled ? undefined : onClick}
         className={cn(

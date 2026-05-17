@@ -133,6 +133,11 @@ function ProjectRegisterPage() {
     setStep(viewMode === "pm" ? 1 : 2)
   }
 
+  const handleStepChange = (idx: number) => {
+    if (viewMode === "pm" && idx === 2) return
+    setStep(idx)
+  }
+
   const handleRegister = () => {
     submitMutation.mutate()
   }
@@ -150,7 +155,7 @@ function ProjectRegisterPage() {
         </div>
         <Stepper
           step={step}
-          onStepChange={setStep}
+          onStepChange={handleStepChange}
           disabledSteps={viewMode === "pm" ? [2] : []}
         />
         {step === 1 && <BasicInfoForm onNext={handleBasicInfoNext} />}
