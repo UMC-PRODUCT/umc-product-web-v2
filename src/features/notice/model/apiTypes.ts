@@ -43,7 +43,7 @@ export interface NoticeSummaryResponseContent {
 export interface TargetInfo {
   targetGisuId: number
   targetChapterId: number
-  targetSchoolId: number
+  targetSchoolId: number | null
   targetParts: PartEnum[]
   targetNoticeTab: NoticeTabEnum
 }
