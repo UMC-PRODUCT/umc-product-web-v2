@@ -1,3 +1,5 @@
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
+
 import type { SearchMemberItem } from "@/features/challenger/model/types"
 import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"
 
@@ -6,7 +8,7 @@ export function toMemberItem(item: SearchMemberItem): MemberItem {
     id: item.memberId,
     nickname: item.nickname,
     name: item.name,
-    university: item.schoolName,
+    university: formatSchoolName(item.schoolName),
   }
 }
 
@@ -21,6 +23,6 @@ export function memberBriefToItem(brief: {
     id: String(brief.memberId),
     nickname: brief.nickname ?? "",
     name: brief.name ?? "",
-    university: brief.schoolName ?? "",
+    university: formatSchoolName(brief.schoolName),
   }
 }

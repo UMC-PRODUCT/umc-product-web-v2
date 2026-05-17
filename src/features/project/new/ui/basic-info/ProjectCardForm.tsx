@@ -98,7 +98,7 @@ export function ProjectCardForm({
             className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 aria-invalid:focus:ring-error-500 w-4/7 bg-transparent px-1 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
           />
           <div className="text-body-2-regular text-teal-gray-500 flex flex-col items-end gap-0.5">
-            <div className="flex items-center gap-2">
+            <div className="flex w-fit items-center gap-2 whitespace-nowrap">
               <span>
                 {nickname}/{name}
               </span>
@@ -106,7 +106,7 @@ export function ProjectCardForm({
               <span>{university}</span>
             </div>
             {subPm && (
-              <div className="flex items-center gap-2">
+              <div className="flex w-fit items-center gap-2 whitespace-nowrap">
                 <span>
                   {subPm.nickname}/{subPm.name}
                 </span>

@@ -1,26 +1,25 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { searchMembers } from "@/features/challenger/api/member"
+import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
   addProjectMember,
   createProjectDraft,
-  memberKeys,
   updateProjectDraft,
   uploadFileFlow,
 } from "@/features/project/new/api"
 import { toMemberItem } from "@/features/project/new/api/memberAdapter"
+import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
-import {
-  type MemberItem,
-  MemberSearchBar,
-} from "@/shared/ui/searchbar/MemberSearchBar"
+import { useViewModeStore } from "@/shared/view-mode"
 
 import {
   type BasicInfoFormData,
@@ -30,22 +29,35 @@ import { useProjectRegisterStore } from "../../model/useProjectRegisterStore"
 import { SectionHeader } from "../shared/SectionHeader"
 import { ProjectCardForm } from "./ProjectCardForm"
 
+import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"
+
 interface BasicInfoFormProps {
   onNext: () => void
-}
-
-function useDebounced<T>(value: T, delayMs = 250) {
-  const [debounced, setDebounced] = useState(value)
-  useEffect(() => {
-    const handle = window.setTimeout(() => setDebounced(value), delayMs)
-    return () => window.clearTimeout(handle)
-  }, [value, delayMs])
-  return debounced
 }
 
 export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
   const meQuery = useQuery({ queryKey: ["me"], queryFn: getMe })
   const me = meQuery.data
+
+  const viewMode = useViewModeStore((s) => s.mode)
+  const activeGisuQuery = useQuery({
+    queryKey: ["gisu", "active"],
+    queryFn: getActiveGisu,
+    staleTime: 5 * 60 * 1000,
+  })
+  const activeGisuId = activeGisuQuery.data?.gisuId
+
+  const pmListQuery = useQuery({
+    queryKey: ["member", "list", { part: "PLAN", gisuId: activeGisuId }],
+    queryFn: () =>
+      searchMembers({
+        part: "PLAN",
+        gisuId: activeGisuId != null ? String(activeGisuId) : undefined,
+        size: 200,
+      }),
+    enabled: activeGisuId != null,
+    staleTime: 60 * 1000,
+  })
 
   const storePmInfo = useProjectRegisterStore((s) => s.pmInfo)
   const setPmInfo = useProjectRegisterStore((s) => s.setPmInfo)
@@ -67,61 +79,43 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
   } | null>(null)
 
   const [isMultiPm, setIsMultiPm] = useState(storePmInfo.isMultiPm)
-  const [pm1Value, setPm1Value] = useState(
-    storePmInfo.pm1
-      ? `${storePmInfo.pm1.nickname}/${storePmInfo.pm1.name}`
-      : "",
-  )
-  const [pm1Focused, setPm1Focused] = useState(false)
-  const [pm1Selected, setPm1Selected] = useState(storePmInfo.pm1 !== null)
   const [pm1Member, setPm1Member] = useState<MemberItem | null>(storePmInfo.pm1)
   const [pm1Error, setPm1Error] = useState(false)
-
-  const [pm2Value, setPm2Value] = useState(
-    storePmInfo.pm2
-      ? `${storePmInfo.pm2.nickname}/${storePmInfo.pm2.name}`
-      : "",
-  )
-  const [pm2Focused, setPm2Focused] = useState(false)
-  const [pm2Selected, setPm2Selected] = useState(storePmInfo.pm2 !== null)
   const [pm2Member, setPm2Member] = useState<MemberItem | null>(storePmInfo.pm2)
   const [pm2Error, setPm2Error] = useState(false)
 
-  const debouncedPm1 = useDebounced(pm1Value)
-  const debouncedPm2 = useDebounced(pm2Value)
+  const allPmMembers = useMemo(
+    () => (pmListQuery.data?.page.content ?? []).map(toMemberItem),
+    [pmListQuery.data],
+  )
 
-  const pm1SearchEnabled =
-    pm1Focused && !pm1Selected && debouncedPm1.length >= 2
-  const pm2SearchEnabled =
-    pm2Focused && !pm2Selected && debouncedPm2.length >= 2
+  const pm1Options = useMemo(() => {
+    const filtered =
+      viewMode === "pm" && me
+        ? allPmMembers.filter((m) => m.id === me.id)
+        : allPmMembers
+    return filtered.map((m) => ({
+      value: m.id,
+      label: `${m.nickname}/${m.name} · ${m.university}`,
+    }))
+  }, [allPmMembers, viewMode, me])
 
-  const pm1Query = useQuery({
-    queryKey: memberKeys.search(debouncedPm1),
-    queryFn: () => searchMembers({ keyword: debouncedPm1, size: 20 }),
-    enabled: pm1SearchEnabled,
-    placeholderData: (prev) => prev,
-  })
-
-  const pm2Query = useQuery({
-    queryKey: memberKeys.search(debouncedPm2),
-    queryFn: () => searchMembers({ keyword: debouncedPm2, size: 20 }),
-    enabled: pm2SearchEnabled,
-    placeholderData: (prev) => prev,
-  })
-
-  const pm1Items: MemberItem[] =
-    pm1Focused && !pm1Selected
-      ? (pm1Query.data?.page.content ?? []).map(toMemberItem)
-      : []
-  const pm2Items: MemberItem[] =
-    pm2Focused && !pm2Selected
-      ? (pm2Query.data?.page.content ?? []).map(toMemberItem)
-      : []
+  const pm2Options = useMemo(() => {
+    const excludeIds = new Set(
+      [pm1Member?.id, viewMode === "pm" && me ? me.id : undefined].filter(
+        Boolean,
+      ),
+    )
+    return allPmMembers
+      .filter((m) => !excludeIds.has(m.id))
+      .map((m) => ({
+        value: m.id,
+        label: `${m.nickname}/${m.name} · ${m.university}`,
+      }))
+  }, [allPmMembers, pm1Member, viewMode, me])
 
   const thumbnailRef = useRef<HTMLButtonElement>(null)
   const logoRef = useRef<HTMLButtonElement>(null)
-  const pm1Ref = useRef<HTMLInputElement>(null)
-  const pm2Ref = useRef<HTMLInputElement>(null)
 
   const {
     register,
@@ -284,7 +278,6 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         type: "default",
         duration: 3000,
       })
-      setTimeout(() => pm1Ref.current?.focus(), 0)
       return
     }
     if (isMultiPm && !pm2Member) {
@@ -296,7 +289,6 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         type: "default",
         duration: 3000,
       })
-      setTimeout(() => pm2Ref.current?.focus(), 0)
       return
     }
     void handleSubmit(onSubmit, onInvalid)(e)
@@ -304,7 +296,10 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
 
   const displayNickname = pm1Member?.nickname ?? me?.nickname ?? "-"
   const displayName = pm1Member?.name ?? me?.name ?? "-"
-  const displayUniversity = pm1Member?.university ?? me?.schoolName ?? "-"
+  const displayUniversity =
+    formatSchoolName(pm1Member?.university ?? me?.schoolName) || "-"
+
+  const pmDropdownDisabled = activeGisuId == null || pmListQuery.isLoading
 
   return (
     <form
@@ -331,70 +326,44 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
             logoUrl={uploaded.logoUrl ?? undefined}
           />
           <div className="flex w-78 shrink-0 flex-col gap-2">
-            <MemberSearchBar
-              ref={pm1Ref}
-              value={pm1Value}
-              onChange={(e) => {
-                setPm1Value(e.target.value)
-                setPm1Selected(false)
-                setPm1Member(null)
+            <Dropdown<string>
+              id="pm1-select"
+              value={pm1Member?.id}
+              onChange={(memberId) => {
+                const found =
+                  allPmMembers.find((m) => m.id === memberId) ?? null
+                setPm1Member(found)
+                setPm1Error(false)
               }}
-              onClear={() => {
-                setPm1Value("")
-                setPm1Selected(false)
-                setPm1Member(null)
-              }}
-              isSelected={pm1Selected}
-              error={pm1Error}
-              onFocus={() => setPm1Focused(true)}
-              onBlur={() => setPm1Focused(false)}
+              options={pm1Options}
               placeholder={
                 isMultiPm
                   ? "메인 PM 닉네임/이름을 선택하세요."
                   : "PM 닉네임/이름을 선택하세요."
               }
-              items={pm1Items}
-              onSelect={(member) => {
-                setPm1Value(`${member.nickname}/${member.name}`)
-                setPm1Selected(true)
-                setPm1Member(member)
-                setPm1Error(false)
-              }}
+              error={pm1Error}
+              disabled={pmDropdownDisabled}
             />
             {isMultiPm && (
-              <MemberSearchBar
-                ref={pm2Ref}
-                value={pm2Value}
-                onChange={(e) => {
-                  setPm2Value(e.target.value)
-                  setPm2Selected(false)
-                  setPm2Member(null)
-                }}
-                onClear={() => {
-                  setPm2Value("")
-                  setPm2Selected(false)
-                  setPm2Member(null)
-                }}
-                isSelected={pm2Selected}
-                error={pm2Error}
-                onFocus={() => setPm2Focused(true)}
-                onBlur={() => setPm2Focused(false)}
-                placeholder="PM 닉네임/이름을 선택하세요."
-                items={pm2Items}
-                onSelect={(member) => {
-                  setPm2Value(`${member.nickname}/${member.name}`)
-                  setPm2Selected(true)
-                  setPm2Member(member)
+              <Dropdown<string>
+                id="pm2-select"
+                value={pm2Member?.id}
+                onChange={(memberId) => {
+                  const found =
+                    allPmMembers.find((m) => m.id === memberId) ?? null
+                  setPm2Member(found)
                   setPm2Error(false)
                 }}
+                options={pm2Options}
+                placeholder="PM 닉네임/이름을 선택하세요."
+                error={pm2Error}
+                disabled={pmDropdownDisabled}
               />
             )}
             <button
               type="button"
               onClick={() => {
                 if (isMultiPm) {
-                  setPm2Value("")
-                  setPm2Selected(false)
                   setPm2Member(null)
                   setPm2Error(false)
                 }
