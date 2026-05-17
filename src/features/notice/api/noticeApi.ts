@@ -40,10 +40,12 @@ export async function getNoticeDetail(noticeId: number) {
 
 // 공지사항 생성
 export async function postNotice(body: PostNoticeRequest) {
+  console.log(body)
   const { data } = await api.post<ApiResponse<PostNoticeResponse>>(
     `/v1/notices`,
     body,
   )
+
   return data.result
 }
 

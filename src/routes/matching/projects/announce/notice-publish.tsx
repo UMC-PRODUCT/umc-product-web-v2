@@ -31,7 +31,8 @@ function ProjectSettingsNoticePublishPage() {
   return (
     <NoticePublishForm
       variant="publish"
-      noticeTab="SCHOOL_CORE"
+      noticeTab="CHALLENGER"
+      targetParts={["PLAN"]}
       chapter={chapter}
     />
   )
