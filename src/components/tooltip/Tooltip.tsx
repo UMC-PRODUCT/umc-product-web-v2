@@ -155,6 +155,7 @@ interface TooltipProps {
   sideOffset?: number
   delayDuration?: number
   className?: string
+  triggerClassName?: string
 }
 
 export function Tooltip({
@@ -169,6 +170,7 @@ export function Tooltip({
   sideOffset = 4,
   delayDuration = 100,
   className,
+  triggerClassName,
 }: TooltipProps) {
   const tooltipId = useId()
   const isControlled = controlledOpen !== undefined
@@ -235,7 +237,7 @@ export function Tooltip({
     <>
       <span
         ref={triggerRef}
-        className="inline-block"
+        className={cn("inline-block", triggerClassName)}
         aria-describedby={isOpen ? tooltipId : undefined}
         onMouseEnter={handleOpen}
         onMouseLeave={handleClose}
