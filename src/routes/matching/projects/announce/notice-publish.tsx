@@ -2,6 +2,8 @@ import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router"
 
 import { NoticePublishForm } from "@/features/notice"
 
+import type { PartEnum } from "@/features/notice/model/apiTypes"
+
 interface NoticePublishSearch {
   chapter?: string
 }
@@ -16,6 +18,9 @@ export const Route = createFileRoute(
   },
   component: ProjectSettingsNoticePublishPage,
 })
+
+// PM 챌린저
+const TEMP_TARGET_PARTS: PartEnum[] = ["PLAN"]
 
 function ProjectSettingsNoticePublishPage() {
   const { chapter } = Route.useSearch()
@@ -32,7 +37,7 @@ function ProjectSettingsNoticePublishPage() {
     <NoticePublishForm
       variant="publish"
       noticeTab="CHALLENGER"
-      targetParts={["PLAN"]}
+      targetParts={TEMP_TARGET_PARTS}
       chapter={chapter}
     />
   )
