@@ -69,7 +69,7 @@ export function ProfileDropdown({
         <div
           role="menu"
           className={cn(
-            "shadow-drop-neutral-1 fixed top-15 right-8.5 flex min-w-50 flex-col gap-3 rounded-[6px] bg-white px-3 pt-4.5 pb-3.5",
+            "shadow-drop-neutral-1 absolute top-10 right-0 flex w-max min-w-50 flex-col gap-3 rounded-[6px] bg-white px-3 pt-4.5 pb-3.5",
             dropdownClassName,
           )}
         >
@@ -88,11 +88,11 @@ export function ProfileDropdown({
 
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-teal-gray-900 text-subtitle-3-semibold">
+                <span className="text-teal-gray-900 text-subtitle-3-semibold whitespace-nowrap">
                   {me ? `${me.nickname}/${me.name}` : ""}
                 </span>
 
-                <RoleTagChip role={role} />
+                <RoleTagChip role={role} className="shrink-0" />
               </div>
 
               <span className="text-caption-2-medium text-teal-gray-500">
