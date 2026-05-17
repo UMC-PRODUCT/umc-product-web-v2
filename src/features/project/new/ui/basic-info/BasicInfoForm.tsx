@@ -140,6 +140,17 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
       setValue("description", description, { shouldDirty: false })
   }, [basicDraftFields, setValue])
 
+  useEffect(() => {
+    setPm1Member(storePmInfo.pm1)
+    setPm2Member(storePmInfo.pm2)
+    setIsMultiPm(storePmInfo.isMultiPm)
+    setSavedSnapshot({
+      pm1: storePmInfo.pm1,
+      pm2: storePmInfo.pm2,
+      isMultiPm: storePmInfo.isMultiPm,
+    })
+  }, [storePmInfo])
+
   const onInvalid = (fieldErrors: typeof errors) => {
     const values = getValues()
 

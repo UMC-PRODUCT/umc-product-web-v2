@@ -1,7 +1,5 @@
-import type {
-  MemberInfoResponse,
-  RoleType,
-} from "@/features/challenger/model/types"
+import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { RoleType } from "@/features/challenger/model/types"
 import type { Role } from "@/shared/ui/chip/RoleTagChip"
 import type { ViewMode } from "@/shared/view-mode"
 
