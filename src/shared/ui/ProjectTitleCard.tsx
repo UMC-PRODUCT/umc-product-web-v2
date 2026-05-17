@@ -2,8 +2,9 @@ import { cn } from "@/shared/lib/utils"
 
 interface ProjectTitleCardProps {
   projectName: string
-  challengerName: string
-  challengerUniversity: string
+  challengerName?: string
+  challengerUniversity?: string
+  subtitle?: string
   size?: "lg" | "md" | "sm"
   className?: string
 }
@@ -12,9 +13,16 @@ export function ProjectTitleCard({
   projectName,
   challengerName,
   challengerUniversity,
+  subtitle,
   size = "lg",
   className,
 }: ProjectTitleCardProps) {
+  const subtitleText =
+    subtitle ??
+    (challengerName && challengerUniversity
+      ? `${challengerName} · ${challengerUniversity}`
+      : (challengerName ?? challengerUniversity ?? null))
+
   // sm
   if (size === "sm") {
     return (
@@ -25,9 +33,11 @@ export function ProjectTitleCard({
             <span className="text-subtitle-4-semibold text-teal-gray-800">
               {projectName}
             </span>
-            <span className="text-caption-2-medium text-teal-gray-600">
-              {challengerName} · {challengerUniversity}
-            </span>
+            {subtitleText && (
+              <span className="text-caption-2-medium text-teal-gray-600">
+                {subtitleText}
+              </span>
+            )}
           </div>
         </div>
         <div className="-ml-1.5 h-1.75 flex-1 rounded-tr-xl bg-teal-100" />
@@ -45,9 +55,11 @@ export function ProjectTitleCard({
             <span className="text-heading-6-semibold text-teal-gray-800">
               {projectName}
             </span>
-            <span className="text-body-2-medium text-teal-gray-600">
-              {challengerName} · {challengerUniversity}
-            </span>
+            {subtitleText && (
+              <span className="text-body-2-medium text-teal-gray-600">
+                {subtitleText}
+              </span>
+            )}
           </div>
         </div>
         <div className="-ml-2 h-2.5 flex-1 rounded-tr-xl bg-teal-100" />
@@ -64,9 +76,11 @@ export function ProjectTitleCard({
           <span className="text-heading-6-semibold text-teal-gray-800">
             {projectName}
           </span>
-          <span className="text-body-2-medium text-teal-gray-600">
-            {challengerName} · {challengerUniversity}
-          </span>
+          {subtitleText && (
+            <span className="text-body-2-medium text-teal-gray-600">
+              {subtitleText}
+            </span>
+          )}
         </div>
       </div>
       <div className="-ml-2 h-2.5 flex-1 rounded-tr-xl bg-teal-50" />

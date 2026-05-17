@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
 
+import { useProjectRegisterStore } from "../../model/useProjectRegisterStore"
+
 import type { Ref } from "react"
 import type {
   FieldErrors,
@@ -26,6 +28,8 @@ interface ProjectCardFormProps {
   watch: UseFormWatch<BasicInfoFormData>
   errors: FieldErrors<BasicInfoFormData>
   thumbnailRef?: Ref<HTMLButtonElement>
+  thumbnailUrl?: string
+  logoUrl?: string
 }
 
 export function ProjectCardForm({
@@ -38,18 +42,24 @@ export function ProjectCardForm({
   watch,
   errors,
   thumbnailRef,
+  thumbnailUrl,
+  logoUrl,
 }: ProjectCardFormProps) {
+  const setUploaded = useProjectRegisterStore((s) => s.setUploaded)
   const description = watch("description") ?? ""
   const logo = watch("logo")
-  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null)
+  const [localLogoPreviewUrl, setLocalLogoPreviewUrl] = useState<string | null>(
+    null,
+  )
+  const logoPreviewUrl = localLogoPreviewUrl ?? logoUrl ?? null
 
   useEffect(() => {
     if (!(logo instanceof File)) {
-      setLogoPreviewUrl(null)
+      setLocalLogoPreviewUrl(null)
       return
     }
     const url = URL.createObjectURL(logo)
-    setLogoPreviewUrl(url)
+    setLocalLogoPreviewUrl(url)
     return () => URL.revokeObjectURL(url)
   }, [logo])
 
@@ -59,9 +69,11 @@ export function ProjectCardForm({
         ref={thumbnailRef}
         focusTarget="thumbnail"
         variant="thumbnail"
-        onChange={(file) =>
+        initialUrl={thumbnailUrl}
+        onChange={(file) => {
           setValue("thumbnail", file, { shouldValidate: true })
-        }
+          setUploaded({ thumbnailFileId: null, thumbnailUrl: null })
+        }}
       />
       <div className="h-fit w-full rounded-[12px] p-5">
         <div className="mb-2.5 flex items-center justify-between">

@@ -12,6 +12,7 @@ type FormHeaderPartProps = {
   toggleChecked: boolean
   onToggleChange: (checked: boolean) => void
   showToggle?: boolean
+  toggleDisabled?: boolean
   className?: string
 }
 
@@ -54,6 +55,7 @@ export function FormHeader(props: FormHeaderProps) {
           <Toggle
             checked={props.toggleChecked}
             onChange={props.onToggleChange}
+            disabled={props.toggleDisabled}
             size="sm"
             aria-label="섹션 사용 토글"
           />

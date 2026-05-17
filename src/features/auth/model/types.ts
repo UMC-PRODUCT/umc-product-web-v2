@@ -20,6 +20,11 @@ export interface KakaoLoginRequest {
   redirectUri: string
 }
 
+export interface KakaoCodeLoginRequest {
+  authorizationCode: string
+  redirectUri: string
+}
+
 export type ClientType = "ANDROID" | "IOS" | "WEB"
 
 export interface AppleLoginRequest {
