@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useState } from "react"
 
+import { useMe } from "@/features/auth/hooks/useMe"
+import { rolesToViewModes } from "@/features/auth/model/mappers"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { cn } from "@/shared/lib/utils"
-import { indexFromMode, useViewModeStore } from "@/shared/view-mode"
+import {
+  useViewModeStore,
+  VIEW_MODE_OPTIONS,
+  type ViewMode,
+} from "@/shared/view-mode"
 
 import { SideBarDropDown } from "./dropdown/SideBarDropDown"
 import { SideBarMenu } from "./menu/SideBarMenu"
@@ -15,13 +21,36 @@ interface SideBarProps {
 
 const DEMO_DAY_EDITION = 10
 
+function resolveActiveMode(
+  mode: ViewMode,
+  availableModes: ViewMode[],
+): ViewMode {
+  if (availableModes.length === 0) return mode
+  return availableModes.includes(mode) ? mode : availableModes[0]!
+}
+
 export default function SideBar({ className }: SideBarProps) {
   const mode = useViewModeStore((s) => s.mode)
-  const setModeByIndex = useViewModeStore((s) => s.setModeByIndex)
+  const setMode = useViewModeStore((s) => s.setMode)
+
+  const { data: me } = useMe()
+
+  const availableModes = useMemo(() => rolesToViewModes(me?.roles), [me?.roles])
+
+  const availableOptions = useMemo(
+    () => VIEW_MODE_OPTIONS.filter((opt) => availableModes.includes(opt.mode)),
+    [availableModes],
+  )
+
+  const activeMode = resolveActiveMode(mode, availableModes)
+
+  useEffect(() => {
+    if (activeMode !== mode) setMode(activeMode)
+  }, [activeMode, mode, setMode])
 
   const visibleSections = useMemo(
-    () => getVisibleSectionsByViewMode(SIDEBAR_ITEMS, mode),
-    [mode],
+    () => getVisibleSectionsByViewMode(SIDEBAR_ITEMS, activeMode),
+    [activeMode],
   )
   const [openSectionId, setOpenSectionId] = useState<string>(
     visibleSections[0]?.id ?? SIDEBAR_ITEMS[0]?.id ?? "",
@@ -29,10 +58,14 @@ export default function SideBar({ className }: SideBarProps) {
 
   useEffect(() => {
     const ids = new Set(visibleSections.map((section) => section.id))
-    if (!ids.has(openSectionId)) {
-      setOpenSectionId(visibleSections[0]?.id ?? "")
-    }
-  }, [openSectionId, visibleSections])
+    setOpenSectionId((prev) =>
+      ids.has(prev) ? prev : (visibleSections[0]?.id ?? ""),
+    )
+  }, [visibleSections])
+
+  const selectedDropdownIdx = availableOptions.findIndex(
+    (opt) => opt.mode === activeMode,
+  )
 
   return (
     <nav
@@ -42,10 +75,16 @@ export default function SideBar({ className }: SideBarProps) {
         className,
       )}
     >
-      <SideBarDropDown
-        selectedIdx={indexFromMode(mode)}
-        onSelect={setModeByIndex}
-      />
+      {availableOptions.length >= 2 && (
+        <SideBarDropDown
+          options={availableOptions}
+          selectedIdx={selectedDropdownIdx === -1 ? 0 : selectedDropdownIdx}
+          onSelect={(idx) => {
+            const selected = availableOptions[idx]
+            if (selected) setMode(selected.mode)
+          }}
+        />
+      )}
       <div className="flex flex-col py-4">
         <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
           {DEMO_DAY_EDITION}th Demoday

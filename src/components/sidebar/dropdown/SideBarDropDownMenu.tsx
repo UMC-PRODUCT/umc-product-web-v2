@@ -15,7 +15,7 @@ export function SideBarDropDownMenu({
     <div className="flex flex-col justify-center gap-1 rounded-[8px] bg-white p-0.5">
       {items.map((item, idx) => (
         <SideBarDropDownMenuItem
-          key={idx}
+          key={item}
           label={item}
           isSelected={selectedIdx === idx}
           onClick={() => onSelect(idx)}
