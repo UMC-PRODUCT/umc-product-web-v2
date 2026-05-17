@@ -33,7 +33,7 @@ export default function SideBar({ className }: SideBarProps) {
   const mode = useViewModeStore((s) => s.mode)
   const setMode = useViewModeStore((s) => s.setMode)
 
-  const { data: me } = useMe()
+  const { data: me, isLoading: isMeLoading } = useMe()
 
   const availableModes = useMemo(() => rolesToViewModes(me?.roles), [me?.roles])
 
@@ -85,25 +85,33 @@ export default function SideBar({ className }: SideBarProps) {
           }}
         />
       )}
-      <div className="flex flex-col py-4">
-        <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
-          {DEMO_DAY_EDITION}th Demoday
-        </span>
-        {visibleSections.map(({ id, title, icon, menus }) => (
-          <SideBarMenu
-            key={id}
-            id={id}
-            title={title}
-            icon={icon}
-            isOpen={openSectionId === id}
-            onToggle={() => setOpenSectionId((prev) => (prev === id ? "" : id))}
-          >
-            {menus.map((menu) => (
-              <SideBarMenuItem key={menu.id} title={menu.title} to={menu.to} />
-            ))}
-          </SideBarMenu>
-        ))}
-      </div>
+      {!isMeLoading && (
+        <div className="flex flex-col py-4">
+          <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
+            {DEMO_DAY_EDITION}th Demoday
+          </span>
+          {visibleSections.map(({ id, title, icon, menus }) => (
+            <SideBarMenu
+              key={id}
+              id={id}
+              title={title}
+              icon={icon}
+              isOpen={openSectionId === id}
+              onToggle={() =>
+                setOpenSectionId((prev) => (prev === id ? "" : id))
+              }
+            >
+              {menus.map((menu) => (
+                <SideBarMenuItem
+                  key={menu.id}
+                  title={menu.title}
+                  to={menu.to}
+                />
+              ))}
+            </SideBarMenu>
+          ))}
+        </div>
+      )}
     </nav>
   )
 }
