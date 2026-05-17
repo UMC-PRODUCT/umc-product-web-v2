@@ -23,7 +23,6 @@ export const basicInfoSchema = z.object({
       ctx.addIssue({ code: z.ZodIssueCode.custom })
     }
   }),
-  planningLink: z.string().url(),
 })
 
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>
