@@ -9,9 +9,14 @@ const ITEMS = [
 interface StepperProps {
   step: number
   onStepChange: (idx: number) => void
+  disabledSteps?: number[]
 }
 
-export function Stepper({ step, onStepChange }: StepperProps) {
+export function Stepper({
+  step,
+  onStepChange,
+  disabledSteps = [],
+}: StepperProps) {
   return (
     <section
       role="tablist"
@@ -22,6 +27,7 @@ export function Stepper({ step, onStepChange }: StepperProps) {
         <StepperTab
           key={item.idx}
           isSelected={item.idx === step}
+          disabled={disabledSteps.includes(item.idx)}
           onClick={() => onStepChange(item.idx)}
           {...item}
         />
