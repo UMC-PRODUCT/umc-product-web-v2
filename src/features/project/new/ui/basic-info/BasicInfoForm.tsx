@@ -149,20 +149,20 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
   const onInvalid = (fieldErrors: typeof errors) => {
     const values = getValues()
 
-    let message = "모든 항목을 입력해주세요"
+    let message = "모든 항목을 입력해 주세요."
     let focusFn: (() => void) | null = null
 
-    if (!(values.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
-      message = "썸네일 이미지를 등록해주세요!"
-      focusFn = () => thumbnailRef.current?.focus()
-    } else if (fieldErrors.title) {
-      message = "서비스 제목을 입력해주세요!"
+    if (fieldErrors.title) {
+      message = "프로젝트 이름을 입력해 주세요."
       focusFn = () => setFocus("title")
     } else if (fieldErrors.description) {
-      message = "프로젝트 소개를 입력해주세요!"
+      message = "프로젝트 한 줄 소개를 입력해 주세요."
       focusFn = () => setFocus("description")
+    } else if (!(values.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
+      message = "프로젝트 대표 이미지를 업로드해 주세요."
+      focusFn = () => thumbnailRef.current?.focus()
     } else if (!(values.logo instanceof File) && !uploaded.logoUrl) {
-      message = "로고 이미지를 등록해주세요!"
+      message = "프로젝트 로고를 업로드해 주세요."
       focusFn = () => logoRef.current?.focus()
     }
 
@@ -278,7 +278,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     if (!pm1Member) {
       setPm1Error(true)
       addToast({
-        message: "PM을 선택해주세요!",
+        message: "PM을 선택해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
@@ -290,7 +290,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     if (isMultiPm && !pm2Member) {
       setPm2Error(true)
       addToast({
-        message: "두 번째 PM을 선택해주세요!",
+        message: "모든 PM을 선택해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",

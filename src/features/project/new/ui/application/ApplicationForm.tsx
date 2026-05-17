@@ -121,7 +121,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
       setErrorQuestionIds(errors.map((e) => e.questionId))
       form.setFocusedId(firstError.questionId)
       addToast({
-        message: firstError.message,
+        message: "질문 입력을 완료해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
