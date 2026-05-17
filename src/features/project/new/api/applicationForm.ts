@@ -14,7 +14,7 @@ export async function getApplicationForm(
   const { data } = await api.get<
     ApiResponse<GetApplicationFormResponse | null>
   >(`/v1/projects/${projectId}/application-form`)
-  return data.result
+  return data.result ?? null
 }
 
 export async function upsertApplicationForm(

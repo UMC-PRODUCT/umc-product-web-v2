@@ -37,7 +37,7 @@ export async function getMyDraft(
     "/v1/projects/me/draft",
     { params: { gisuId } },
   )
-  return data.result
+  return data.result ?? null
 }
 
 export async function submitProject(
