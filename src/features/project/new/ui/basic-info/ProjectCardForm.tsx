@@ -123,8 +123,8 @@ export function ProjectCardForm({
           id="project-description"
           aria-invalid={!!errors.description}
           aria-describedby="description-count"
-          className="placeholder:text-teal-gray-600 text-body-2-regular aria-invalid:focus:ring-error-500 h-25 w-full resize-none p-2 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
-          placeholder={`프로젝트 한 줄 소개를 적어주세요.\n최대 10줄 및 공백 포함 최대 200까지 입력 가능합니다.`}
+          className="placeholder:text-teal-gray-400 text-body-2-regular aria-invalid:focus:ring-error-500 h-25 w-full resize-none p-2 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
+          placeholder={`프로젝트 한 줄 소개를 적어주세요.`}
           maxLength={MAX_LENGTH}
           onKeyDown={(e) => {
             if (
