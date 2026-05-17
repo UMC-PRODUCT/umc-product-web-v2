@@ -58,7 +58,7 @@ export function SignupStepBasicInfo() {
       <div className="flex flex-col gap-1">
         <p className="text-heading-3-bold">기본 정보</p>
         <p className="text-label-2-medium text-teal-gray-400">
-          프로필에 표시될 정보를 입력해주세요.
+          프로필에 표시될 정보를 입력해 주세요.
         </p>
       </div>
 
@@ -69,7 +69,7 @@ export function SignupStepBasicInfo() {
             {...register("name")}
             type="text"
             maxLength={10}
-            placeholder="이름을 입력해주세요. (최대 10자)"
+            placeholder="이름을 입력해 주세요. (최대 10자)"
             className="border-teal-gray-200 text-body-2-medium w-full rounded-lg border px-4 py-3 outline-none focus:border-teal-600"
           />
           {errors.name && (
@@ -85,7 +85,7 @@ export function SignupStepBasicInfo() {
             {...register("nickname")}
             type="text"
             maxLength={5}
-            placeholder="한글 1~5자로 입력해주세요."
+            placeholder="한글 1~5자로 입력해 주세요."
             className="border-teal-gray-200 text-body-2-medium w-full rounded-lg border px-4 py-3 outline-none focus:border-teal-600"
           />
           {errors.nickname && (

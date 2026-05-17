@@ -268,7 +268,7 @@ useEffect(() => {
 
 ```ts
 } else if (fieldErrors.planningLink) {
-  message = "기획서 링크를 입력해주세요!"
+  message = "기획서 링크를 입력해 주세요!"
   focusFn = () => setFocus("planningLink")
 }
 ```

@@ -64,7 +64,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
   const handleNext = () => {
     if (totalCount === 0) {
       addToast({
-        message: "모집 인원을 1명 이상 입력해주세요.",
+        message: "모집 인원을 1명 이상 입력해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",

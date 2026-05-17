@@ -43,7 +43,7 @@ export function validateQuestion(
 ): ValidationError | null {
   if (question.fieldType !== "portfolio" && question.title.trim() === "") {
     return {
-      message: `${locationLabel} ${questionNumber}번 질문의 제목을 입력해주세요!`,
+      message: `${locationLabel} ${questionNumber}번 질문의 제목을 입력해 주세요!`,
       questionId: question.id,
     }
   }

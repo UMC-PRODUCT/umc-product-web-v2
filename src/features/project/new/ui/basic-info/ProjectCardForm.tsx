@@ -92,7 +92,7 @@ export function ProjectCardForm({
           <input
             id="service-title"
             type="text"
-            placeholder="서비스 제목을 입력해주세요"
+            placeholder="서비스 제목을 입력해 주세요"
             aria-invalid={!!errors.title}
             {...register("title")}
             className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 aria-invalid:focus:ring-error-500 w-4/7 bg-transparent px-1 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
