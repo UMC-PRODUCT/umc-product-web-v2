@@ -58,7 +58,11 @@ api.interceptors.response.use(
       _retry?: boolean
     }
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    if (
+      error.response?.status !== 401 ||
+      originalRequest._retry ||
+      originalRequest.url?.includes("/v1/auth/login")
+    ) {
       return Promise.reject(error)
     }
 

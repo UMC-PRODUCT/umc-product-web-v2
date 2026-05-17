@@ -22,5 +22,7 @@ export interface MemberInfoResponse {
 export async function getMyInfo(): Promise<MemberInfoResponse> {
   const { data } =
     await api.get<ApiResponse<MemberInfoResponse>>("/v1/member/me")
+
+  console.log(data.result)
   return data.result
 }
