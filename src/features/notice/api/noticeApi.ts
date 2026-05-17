@@ -44,6 +44,7 @@ export async function postNotice(body: PostNoticeRequest) {
     `/v1/notices`,
     body,
   )
+
   return data.result
 }
 

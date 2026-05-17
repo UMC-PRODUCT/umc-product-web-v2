@@ -93,26 +93,25 @@ export function NoticePublishForm({
   }, [gisuData])
 
   const targetInfo = useMemo(() => {
-    if (!profile) return null
-
     const activeRecord =
-      profile.challengerRecords?.find((r) => r.challengerStatus === "ACTIVE") ||
-      profile.challengerRecords?.[0]
-
-    if (!activeRecord) return null
+      profile?.challengerRecords?.find(
+        (r) => r.challengerStatus === "ACTIVE",
+      ) || profile?.challengerRecords?.[0]
 
     // 만약 파라미터로 chapter가 넘어왔다면 해당 지부의 ID를 찾아서 사용
-    let chapterId = Number(activeRecord.chapterId)
+    let chapterId = activeRecord ? Number(activeRecord.chapterId) : 0
     if (chapter && chaptersData) {
       const found = chaptersData.chapters.find((c) => c.name === chapter)
       if (found) chapterId = Number(found.id)
     }
 
+    if (!activeGisuId || !chapterId) return null
+
     return {
-      targetGisuId: Number(activeGisuId || activeRecord.gisuId),
+      targetGisuId: Number(activeGisuId),
       targetChapterId: chapterId,
-      targetSchoolId: Number(activeRecord.schoolId),
-      targetParts: targetParts,
+      targetSchoolId: null,
+      targetParts,
       targetNoticeTab: noticeTab,
     }
   }, [profile, activeGisuId, noticeTab, targetParts, chapter, chaptersData])
@@ -218,11 +217,12 @@ export function NoticePublishForm({
   }
 
   const handlePublishNotice = () => {
-    if (isLoading || isDone || !targetInfo) return
+    if (isLoading || isDone) return
+    if (variant === "publish" && !targetInfo) return
 
     setIsLoading(true)
 
-    if (variant === "publish") {
+    if (variant === "publish" && targetInfo) {
       publishMutation.mutate({
         title: noticeTitle,
         content: noticeContent,
@@ -301,7 +301,11 @@ export function NoticePublishForm({
                 variant={submitButtonVariant}
                 color="primary"
                 size="m"
-                disabled={!isSubmittable || isDone || !targetInfo}
+                disabled={
+                  !isSubmittable ||
+                  isDone ||
+                  (variant === "publish" && !targetInfo)
+                }
                 isLoading={isLoading}
                 onClick={handlePublishNotice}
               >
