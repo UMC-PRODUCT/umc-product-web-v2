@@ -369,7 +369,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
                 }
                 setIsMultiPm((prev) => !prev)
               }}
-              className="text-body-2-medium text-teal-gray-400 flex items-center gap-1 self-end pr-3.5 font-medium underline decoration-solid underline-offset-auto"
+              className="text-body-2-medium text-teal-gray-400 flex items-center gap-1 self-start pl-0.5 font-medium underline decoration-solid underline-offset-auto"
             >
               <InfoCircleIcon width={14} height={14} aria-hidden="true" />
               <span>
