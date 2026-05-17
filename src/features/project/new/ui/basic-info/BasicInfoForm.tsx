@@ -28,7 +28,6 @@ import {
 } from "../../model/basicInfoSchema"
 import { useProjectRegisterStore } from "../../model/useProjectRegisterStore"
 import { SectionHeader } from "../shared/SectionHeader"
-import { PlanningLinkInput } from "./PlanningLinkInput"
 import { ProjectCardForm } from "./ProjectCardForm"
 
 interface BasicInfoFormProps {
@@ -141,12 +140,10 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
 
   useEffect(() => {
     if (!basicDraftFields) return
-    const { title, description, planningLink } = basicDraftFields
+    const { title, description } = basicDraftFields
     if (title) setValue("title", title, { shouldDirty: false })
     if (description)
       setValue("description", description, { shouldDirty: false })
-    if (planningLink)
-      setValue("planningLink", planningLink, { shouldDirty: false })
   }, [basicDraftFields, setValue])
 
   const onInvalid = (fieldErrors: typeof errors) => {
@@ -167,9 +164,6 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     } else if (!(values.logo instanceof File) && !uploaded.logoUrl) {
       message = "로고 이미지를 등록해주세요!"
       focusFn = () => logoRef.current?.focus()
-    } else if (fieldErrors.planningLink) {
-      message = "기획서 링크를 입력해주세요!"
-      focusFn = () => setFocus("planningLink")
     }
 
     addToast({
@@ -229,7 +223,6 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
       await updateProjectDraft(resolvedProjectId, {
         name: values.title,
         description: values.description,
-        externalLink: values.planningLink,
         thumbnailFileId: thumbnailFileId ?? undefined,
         logoFileId: logoFileId ?? undefined,
       })
@@ -429,10 +422,6 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
             setUploaded({ logoFileId: null, logoUrl: null })
           }}
         />
-      </div>
-      <div className="flex flex-col gap-4">
-        <SectionHeader index={3} title="기획서 링크" />
-        <PlanningLinkInput register={register} error={errors.planningLink} />
       </div>
       <div className="flex justify-between">
         <Button
