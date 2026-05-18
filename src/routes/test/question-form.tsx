@@ -145,7 +145,7 @@ function QuestionFormTestPage() {
         QuestionForm Test Page
       </h1>
 
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col">
         <Section title="Focus=False — caption 없음">
           <TextFormSection
             index="Q1"
