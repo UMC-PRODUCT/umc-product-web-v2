@@ -64,7 +64,7 @@ export function ProjectCardForm({
   }, [logo])
 
   return (
-    <div className="border-teal-gray-100 shadow-drop-neutral-2 flex h-116.5 w-135 flex-col rounded-[12px] border bg-white">
+    <div className="border-teal-gray-100 shadow-drop-neutral-2 flex h-fit w-135 flex-col rounded-[12px] border bg-white">
       <ImageUploader
         ref={thumbnailRef}
         focusTarget="thumbnail"
