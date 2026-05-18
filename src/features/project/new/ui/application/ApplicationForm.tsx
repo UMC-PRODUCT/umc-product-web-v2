@@ -158,6 +158,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
                 index={i}
                 focused={form.focusedId === q.id}
                 isError={errorQuestionIds.includes(q.id)}
+                canDelete={form.commonQuestions.length > 1}
                 onFocus={() => form.setFocusedId(q.id)}
                 onUpdate={(patch) => {
                   form.updateCommonQuestion(q.id, patch)
