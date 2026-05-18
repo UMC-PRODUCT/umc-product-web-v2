@@ -56,10 +56,11 @@ Route: `/matching/projects/new`
 **`src/features/project/new/ui/stepper/StepperTab.tsx`**
 
 - `disabled?: boolean` prop 추가
+- `disabledTooltip?: string` prop 추가
 - `disabled`일 때:
-  - 클릭 이벤트 차단
-  - 탭 버튼에 `disabled` attribute 적용 (cursor-not-allowed, opacity 감소)
-  - tooltip wrapper 적용: hover 시 "수정이 불가능합니다" 툴팁 표시
+  - 클릭 이벤트 차단 (`onClick={disabled ? undefined : onClick}`)
+  - 탭 버튼에 `aria-disabled` 적용 (cursor-not-allowed, opacity 감소)
+  - `disabledTooltip`이 있을 경우 `@/components/tooltip/Tooltip` (`hoverOnly`) 래핑하여 hover 시 툴팁 표시
 
 **`src/features/project/new/ui/stepper/Stepper.tsx`**
 
