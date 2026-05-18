@@ -194,7 +194,10 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
   const tempSaveLabel =
     hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
 
-  const handleTempSave = async () => {
+  const handleTempSave = async (options?: {
+    silent?: boolean
+  }): Promise<boolean> => {
+    const silent = options?.silent ?? false
     const values = getValues()
     setIsSaving(true)
     try {
@@ -245,13 +248,16 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
       reset(values, { keepValues: true, keepDirty: false })
       setSavedSnapshot({ pm1: pm1Member, pm2: pm2Member, isMultiPm })
       setHasSavedOnce(true)
-      addToast({
-        message: "작성한 내용이 임시 저장되었습니다.",
-        color: "primary",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
+      if (!silent) {
+        addToast({
+          message: "작성한 내용이 임시 저장되었습니다.",
+          color: "primary",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+      return true
     } catch {
       addToast({
         message: "임시 저장에 실패했습니다. 다시 시도해주세요.",
@@ -260,14 +266,16 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         type: "default",
         duration: 3000,
       })
+      return false
     } finally {
       setIsSaving(false)
     }
   }
 
-  const onSubmit = (data: BasicInfoFormData) => {
+  const onSubmit = async (data: BasicInfoFormData) => {
+    const ok = await handleTempSave({ silent: true })
+    if (!ok) return
     setBasicInfo(data)
-    setPmInfo({ isMultiPm, pm1: pm1Member, pm2: pm2Member })
     addToast({
       message: "작성한 내용이 저장되었습니다.",
       color: "primary",
@@ -410,11 +418,17 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
           color="primary"
           disabled={!canTempSave}
           isLoading={isSaving}
-          onClick={handleTempSave}
+          onClick={() => void handleTempSave()}
         >
           {tempSaveLabel}
         </Button>
-        <Button type="submit" variant="fill" color="primary">
+        <Button
+          type="submit"
+          variant="fill"
+          color="primary"
+          disabled={isSaving}
+          isLoading={isSaving}
+        >
           다음
         </Button>
       </div>
