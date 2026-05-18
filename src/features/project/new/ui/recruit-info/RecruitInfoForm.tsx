@@ -156,7 +156,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
             <span>명</span>
           </div>
           <span className="text-teal-gray-700 text-body-1-regular ml-7.5">
-            {summaryText || "직군별 인원을 선택해주세요"}
+            {summaryText || "직군별 인원을 선택해 주세요"}
           </span>
         </div>
       </div>
