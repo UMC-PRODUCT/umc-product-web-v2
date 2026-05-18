@@ -52,7 +52,7 @@ export function QuestionForm({
   return (
     <article
       className={cn(
-        "relative flex w-full flex-col items-center gap-2.5 overflow-hidden px-6 pb-6",
+        "relative flex w-full flex-col items-center gap-2.5 px-6 pb-6",
         focused ? "" : "mt-4 pt-4",
         className,
       )}
@@ -61,7 +61,7 @@ export function QuestionForm({
         <span
           aria-hidden
           className={cn(
-            "absolute top-0 bottom-0 left-0 w-2",
+            "absolute top-0 bottom-0 -left-px w-2",
             isError ? "bg-error-600" : "bg-teal-500",
             isFirst ? "rounded-bl-[12px]" : "rounded-l-[12px]",
           )}
