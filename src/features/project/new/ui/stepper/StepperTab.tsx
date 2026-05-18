@@ -29,8 +29,8 @@ export function StepperTab({
       tabIndex={isSelected ? 0 : -1}
       onClick={disabled ? undefined : onClick}
       className={cn(
-        "relative flex h-full w-full cursor-pointer items-center gap-2 rounded-[12px] py-1 pr-5 pl-3",
-        disabled && "opacity-40",
+        "relative flex h-full w-full items-center gap-2 rounded-[12px] py-1 pr-5 pl-3",
+        disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
       )}
     >
       <AnimatePresence>
