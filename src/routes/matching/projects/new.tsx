@@ -24,6 +24,7 @@ import { hydrateDraftIntoStore } from "@/features/project/new/model/draftHydrato
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { useViewModeStore } from "@/shared/view-mode"
 
 export const Route = createFileRoute("/matching/projects/new")({
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/matching/projects/new")({
 
 function ProjectRegisterPage() {
   const [step, setStep] = useState(1)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const navigate = useNavigate()
   const viewMode = useViewModeStore((s) => s.mode)
   const addToast = useToastStore((s) => s.addToast)
@@ -103,16 +105,9 @@ function ProjectRegisterPage() {
       await upsertApplicationForm(projectId, body)
       return submitProject(projectId)
     },
-    onSuccess: async () => {
-      addToast({
-        message: "프로젝트가 성공적으로 등록되었습니다.",
-        color: "primary",
-        variant: "deep",
-        type: "default",
-        duration: 3,
-      })
+    onSuccess: () => {
       reset()
-      await navigate({ to: "/matching/applications", replace: true })
+      setShowSuccessModal(true)
     },
     onError: () => {
       addToast({
@@ -143,6 +138,11 @@ function ProjectRegisterPage() {
 
   const handleRegister = () => {
     submitMutation.mutate()
+  }
+
+  const handleSuccessConfirm = async () => {
+    setShowSuccessModal(false)
+    await navigate({ to: "/matching/projects", replace: true })
   }
 
   return (
@@ -182,6 +182,15 @@ function ProjectRegisterPage() {
           />
         )}
       </div>
+      <CtaModal
+        open={showSuccessModal}
+        variant="success"
+        title="등록 완료"
+        content="프로젝트 등록이 완료되었습니다."
+        confirmText="확인"
+        onOpenChange={setShowSuccessModal}
+        onConfirm={handleSuccessConfirm}
+      />
     </section>
   )
 }
