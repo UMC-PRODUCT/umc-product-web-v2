@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react"
@@ -16,7 +17,7 @@ const tooltipContentVariants = cva("rounded-[6px] relative text-center", {
   variants: {
     size: {
       big: "w-[221px] min-h-[52px] py-2 px-3 text-body-2-medium break-keep",
-      small: "py-1 px-2 text-caption-2-medium",
+      small: "py-1 px-2 text-caption-2-medium whitespace-nowrap",
     },
     dark: {
       true: "bg-teal-gray-500 text-white",
@@ -154,6 +155,8 @@ interface TooltipProps {
   onOpenChange?: (open: boolean) => void
   sideOffset?: number
   delayDuration?: number
+  autoHideDuration?: number
+  hoverOnly?: boolean
   className?: string
   triggerClassName?: string
 }
@@ -169,6 +172,8 @@ export function Tooltip({
   onOpenChange,
   sideOffset = 4,
   delayDuration = 100,
+  autoHideDuration,
+  hoverOnly = false,
   className,
   triggerClassName,
 }: TooltipProps) {
@@ -181,6 +186,7 @@ export function Tooltip({
 
   const triggerRef = useRef<HTMLSpanElement>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autoHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [pinned, setPinned] = useState(false)
 
@@ -230,8 +236,31 @@ export function Tooltip({
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
+      if (autoHideTimerRef.current) clearTimeout(autoHideTimerRef.current)
     }
   }, [])
+
+  useEffect(() => {
+    if (!isOpen || !autoHideDuration) return
+    autoHideTimerRef.current = setTimeout(() => {
+      setPinned(false)
+      if (!isControlled) setInternalOpen(false)
+      onOpenChange?.(false)
+    }, autoHideDuration)
+    return () => {
+      if (autoHideTimerRef.current) clearTimeout(autoHideTimerRef.current)
+    }
+  }, [isOpen, autoHideDuration, isControlled, onOpenChange])
+
+  useLayoutEffect(() => {
+    if (!isOpen) return
+    window.addEventListener("scroll", updatePosition, true)
+    window.addEventListener("resize", updatePosition)
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true)
+      window.removeEventListener("resize", updatePosition)
+    }
+  }, [isOpen, updatePosition])
 
   return (
     <>
@@ -243,7 +272,7 @@ export function Tooltip({
         onMouseLeave={handleClose}
         onFocus={handleOpen}
         onBlur={handleClose}
-        onClick={handleClick}
+        onClick={hoverOnly ? undefined : handleClick}
       >
         {children}
       </span>

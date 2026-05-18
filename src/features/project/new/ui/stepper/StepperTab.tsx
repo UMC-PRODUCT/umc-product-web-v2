@@ -77,6 +77,7 @@ export function StepperTab({
           size="small"
           dark={true}
           side="bottom"
+          hoverOnly
           triggerClassName="block w-full h-full"
         >
           {button}
