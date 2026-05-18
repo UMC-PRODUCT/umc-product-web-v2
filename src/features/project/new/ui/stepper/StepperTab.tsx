@@ -76,7 +76,7 @@ export function StepperTab({
           content={disabledTooltip}
           size="small"
           dark={true}
-          side="top"
+          side="bottom"
           triggerClassName="block w-full h-full"
         >
           {button}
