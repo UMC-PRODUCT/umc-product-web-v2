@@ -1,4 +1,4 @@
-import { SCHOOLS_BY_BRANCH } from "@/features/project/list/model/projectFilterOptions"
+import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 const KNOWN_ABBREVIATIONS: ReadonlySet<string> = new Set(
   Object.values(SCHOOLS_BY_BRANCH).flat(),
