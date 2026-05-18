@@ -1,6 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
-import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -31,11 +38,18 @@ import { ProjectCardForm } from "./ProjectCardForm"
 
 import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"
 
+export interface BasicInfoFormHandle {
+  validate: () => Promise<boolean>
+}
+
 interface BasicInfoFormProps {
   onNext: () => void
 }
 
-export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
+export const BasicInfoForm = forwardRef<
+  BasicInfoFormHandle,
+  BasicInfoFormProps
+>(function BasicInfoForm({ onNext }, ref) {
   const meQuery = useQuery({ queryKey: ["me"], queryFn: getMe })
   const me = meQuery.data
 
@@ -125,12 +139,47 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     getValues,
     reset,
     watch,
+    trigger,
+    formState,
     formState: { errors, dirtyFields },
   } = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
     mode: "onChange",
     shouldFocusError: false,
   })
+
+  useImperativeHandle(ref, () => ({
+    validate: async () => {
+      if (!pm1Member) {
+        setPm1Error(true)
+        addToast({
+          message: "PM을 선택해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return false
+      }
+      if (isMultiPm && !pm2Member) {
+        setPm2Error(true)
+        addToast({
+          message: "모든 PM을 선택해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return false
+      }
+      const valid = await trigger()
+      if (!valid) {
+        onInvalid(formState.errors)
+        return false
+      }
+      return true
+    },
+  }))
 
   useEffect(() => {
     if (!basicDraftFields) return
@@ -199,6 +248,16 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
   }): Promise<boolean> => {
     const silent = options?.silent ?? false
     const values = getValues()
+    if (!projectId && !pm1Member) {
+      addToast({
+        message: "PM을 선택한 뒤 임시 저장해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
     setIsSaving(true)
     try {
       let resolvedProjectId = projectId
@@ -206,7 +265,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         if (!gisuId) throw new Error("기수 정보를 불러오는 중입니다.")
         const created = await createProjectDraft({
           gisuId,
-          productOwnerMemberId: pm1Member ? Number(pm1Member.id) : undefined,
+          productOwnerMemberId: Number(pm1Member!.id),
         })
         const newId = created.projectId
         if (!newId) throw new Error("프로젝트 생성 실패")
@@ -434,4 +493,4 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
       </div>
     </form>
   )
-}
+})

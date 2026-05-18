@@ -1,6 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import {
+  createFileRoute,
+  redirect,
+  useBlocker,
+  useNavigate,
+} from "@tanstack/react-router"
+import { useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
@@ -16,6 +21,7 @@ import {
   gisuKeys,
   projectKeys,
   submitProject,
+  transferOwnership,
   upsertApplicationForm,
 } from "@/features/project/new/api"
 import { canAccessProjectNew } from "@/features/project/new/api/permissions"
@@ -26,6 +32,8 @@ import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { useViewModeStore } from "@/shared/view-mode"
+
+import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
 export const Route = createFileRoute("/matching/projects/new")({
   beforeLoad: () => {
@@ -43,6 +51,7 @@ function ProjectRegisterPage() {
   const navigate = useNavigate()
   const viewMode = useViewModeStore((s) => s.mode)
   const addToast = useToastStore((s) => s.addToast)
+  const basicInfoRef = useRef<BasicInfoFormHandle>(null)
 
   useEffect(() => {
     if (!canAccessProjectNew(viewMode)) {
@@ -52,9 +61,31 @@ function ProjectRegisterPage() {
 
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
+  const recruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
+  const pmInfo = useProjectRegisterStore((s) => s.pmInfo)
   const reset = useProjectRegisterStore((s) => s.reset)
   const setGisuId = useProjectRegisterStore((s) => s.setGisuId)
   const setApplication = useProjectRegisterStore((s) => s.setApplication)
+
+  const isStoreDirty = useProjectRegisterStore((s) => {
+    const recruitTotal =
+      s.recruitInfo.design.count +
+      s.recruitInfo.frontend.count +
+      s.recruitInfo.backend.count
+    return (
+      s.projectId !== null ||
+      s.basicInfo !== null ||
+      s.basicDraftFields !== null ||
+      s.pmInfo.pm1 !== null ||
+      s.pmInfo.pm2 !== null ||
+      s.pmInfo.isMultiPm ||
+      s.uploaded.thumbnailFileId !== null ||
+      s.uploaded.logoFileId !== null ||
+      recruitTotal > 0 ||
+      s.application.commonQuestions.length > 0 ||
+      s.application.sections.length > 0
+    )
+  })
 
   useQuery({ queryKey: ["me"], queryFn: getMe })
 
@@ -103,7 +134,13 @@ function ProjectRegisterPage() {
         application.sections,
       )
       await upsertApplicationForm(projectId, body)
-      return submitProject(projectId)
+      const result = await submitProject(projectId)
+      if (pmInfo.pm1) {
+        await transferOwnership(projectId, {
+          newOwnerMemberId: Number(pmInfo.pm1.id),
+        })
+      }
+      return result
     },
     onSuccess: () => {
       reset()
@@ -128,13 +165,47 @@ function ProjectRegisterPage() {
     setStep(viewMode === "pm" ? 1 : 2)
   }
 
-  const isStep3Locked =
-    (viewMode === "pm" || viewMode === "admin") && !projectId
+  const isStep3Locked = false
 
-  const handleStepChange = (idx: number) => {
+  const handleStepChange = async (idx: number) => {
     if (viewMode === "pm" && idx === 2) return
+    if (idx <= step) {
+      setStep(idx)
+      return
+    }
+    if (step === 1) {
+      const ok = await basicInfoRef.current?.validate()
+      if (!ok) return
+    } else if (step === 2) {
+      const total = Object.values(recruitInfo).reduce(
+        (sum, { count }) => sum + count,
+        0,
+      )
+      if (total === 0) {
+        addToast({
+          message: "모집 인원을 1명 이상 입력해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
+    }
     setStep(idx)
   }
+
+  const {
+    proceed: proceedLeave,
+    reset: resetLeave,
+    status: leaveBlockStatus,
+  } = useBlocker({
+    shouldBlockFn: () => isStoreDirty,
+    withResolver: true,
+    enableBeforeUnload: isStoreDirty,
+  })
+
+  const isLeaveModalOpen = leaveBlockStatus === "blocked"
 
   const handleRegister = () => {
     submitMutation.mutate()
@@ -168,7 +239,9 @@ function ProjectRegisterPage() {
             3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
           }}
         />
-        {step === 1 && <BasicInfoForm onNext={handleBasicInfoNext} />}
+        {step === 1 && (
+          <BasicInfoForm ref={basicInfoRef} onNext={handleBasicInfoNext} />
+        )}
         {step === 2 && (
           <RecruitInfoForm
             onPrev={() => setStep(1)}
@@ -190,6 +263,25 @@ function ProjectRegisterPage() {
         confirmText="확인"
         onOpenChange={setShowSuccessModal}
         onConfirm={handleSuccessConfirm}
+      />
+      <CtaModal
+        open={isLeaveModalOpen}
+        onOpenChange={(open) => {
+          if (!open) resetLeave?.()
+        }}
+        variant="warning"
+        title="페이지 이탈"
+        content={
+          <>
+            작성 중인 내용이 저장되지 않습니다.
+            <br />
+            나가시겠습니까?
+          </>
+        }
+        cancelText="돌아가기"
+        confirmText="나가기"
+        onCancel={() => resetLeave?.()}
+        onConfirm={() => proceedLeave?.()}
       />
     </section>
   )
