@@ -1,8 +1,16 @@
+import { useState } from "react"
+
 import { useToastStore } from "@/components/toast/useToastStore"
+import {
+  buildPartQuotasEntries,
+  canPerform,
+  updatePartQuotas,
+} from "@/features/project/new/api"
 import { Button } from "@/shared/ui/Button"
 import { Counter } from "@/shared/ui/Counter"
 import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
+import { useViewModeStore } from "@/shared/view-mode"
 
 import {
   type RoleKey,
@@ -45,9 +53,14 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
   const addToast = useToastStore((s) => s.addToast)
   const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
+  const projectId = useProjectRegisterStore((s) => s.projectId)
+  const viewMode = useViewModeStore((s) => s.mode)
+
+  const [isSaving, setIsSaving] = useState(false)
+  const [hasSavedOnce, setHasSavedOnce] = useState(false)
+  const [savedTotalCount, setSavedTotalCount] = useState<number | null>(null)
 
   const roleStates = storeRecruitInfo
-  const hasSavedOnce = false
 
   const totalCount = Object.values(roleStates).reduce(
     (sum, { count }) => sum + count,
@@ -56,12 +69,59 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
 
   const summaryText = buildSummaryText(ROLES, roleStates)
 
-  const hasUnsavedChanges = totalCount > 0
-  const canTempSave = hasUnsavedChanges
+  const hasUnsavedChanges = savedTotalCount !== totalCount
+  const canTempSave = totalCount > 0 && hasUnsavedChanges && !isSaving
   const tempSaveLabel =
     hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
 
-  const handleNext = () => {
+  const savePartQuotas = async (silent = false): Promise<boolean> => {
+    if (!canPerform("updatePartQuotas", viewMode)) {
+      setRecruitInfo(roleStates)
+      return true
+    }
+    if (!projectId) {
+      addToast({
+        message: "기본 정보를 먼저 임시 저장해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
+    setIsSaving(true)
+    try {
+      await updatePartQuotas(projectId, {
+        entries: buildPartQuotasEntries(roleStates),
+      })
+      setRecruitInfo(roleStates)
+      setSavedTotalCount(totalCount)
+      setHasSavedOnce(true)
+      if (!silent) {
+        addToast({
+          message: "작성한 내용이 임시 저장되었습니다.",
+          color: "primary",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+      return true
+    } catch {
+      addToast({
+        message: "임시 저장에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleNext = async () => {
     if (totalCount === 0) {
       addToast({
         message: "모집 인원을 1명 이상 입력해 주세요.",
@@ -72,6 +132,8 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
       })
       return
     }
+    const ok = await savePartQuotas(true)
+    if (!ok) return
     addToast({
       message: "작성한 내용이 저장되었습니다.",
       color: "primary",
@@ -83,14 +145,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
   }
 
   const handleTempSave = () => {
-    setRecruitInfo(roleStates)
-    addToast({
-      message: "작성한 내용이 임시 저장되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3000,
-    })
+    void savePartQuotas(false)
   }
 
   const updateCount = (key: RoleKey, count: number) => {
@@ -166,6 +221,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
           variant="weak"
           color="primary"
           disabled={!canTempSave}
+          isLoading={isSaving}
           onClick={handleTempSave}
         >
           {tempSaveLabel}
@@ -178,7 +234,8 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
             type="button"
             variant="fill"
             color="primary"
-            onClick={handleNext}
+            disabled={isSaving}
+            onClick={() => void handleNext()}
           >
             다음
           </Button>
