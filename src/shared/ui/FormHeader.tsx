@@ -22,12 +22,12 @@ export function FormHeader(props: FormHeaderProps) {
   if (props.variant === "common") {
     return (
       <div
-        className={cn(
-          "flex w-full items-center self-stretch rounded-t-[12px] border-t border-r border-l border-teal-300 bg-teal-100 py-2 pr-5 pl-7.5",
-          props.className,
-        )}
+        className={cn("flex w-full items-end self-stretch", props.className)}
       >
-        <span className="text-heading-7-semibold text-teal-600">공통 문항</span>
+        <div className="rounded-t-[12px] bg-teal-500 px-[42px] pt-2 pb-0.5">
+          <span className="text-heading-7-semibold text-white">공통 문항</span>
+        </div>
+        <div className="h-1.5 flex-1 rounded-tr-[12px] bg-teal-500" />
       </div>
     )
   }

@@ -1,26 +1,32 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
-import { useEffect, useRef, useState } from "react"
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { searchMembers } from "@/features/challenger/api/member"
+import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
   addProjectMember,
   createProjectDraft,
-  memberKeys,
   updateProjectDraft,
   uploadFileFlow,
 } from "@/features/project/new/api"
 import { toMemberItem } from "@/features/project/new/api/memberAdapter"
+import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
-import {
-  type MemberItem,
-  MemberSearchBar,
-} from "@/shared/ui/searchbar/MemberSearchBar"
+import { useViewModeStore } from "@/shared/view-mode"
 
 import {
   type BasicInfoFormData,
@@ -28,25 +34,44 @@ import {
 } from "../../model/basicInfoSchema"
 import { useProjectRegisterStore } from "../../model/useProjectRegisterStore"
 import { SectionHeader } from "../shared/SectionHeader"
-import { PlanningLinkInput } from "./PlanningLinkInput"
 import { ProjectCardForm } from "./ProjectCardForm"
+
+import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"
+
+export interface BasicInfoFormHandle {
+  validate: () => Promise<boolean>
+}
 
 interface BasicInfoFormProps {
   onNext: () => void
 }
 
-function useDebounced<T>(value: T, delayMs = 250) {
-  const [debounced, setDebounced] = useState(value)
-  useEffect(() => {
-    const handle = window.setTimeout(() => setDebounced(value), delayMs)
-    return () => window.clearTimeout(handle)
-  }, [value, delayMs])
-  return debounced
-}
-
-export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
+export const BasicInfoForm = forwardRef<
+  BasicInfoFormHandle,
+  BasicInfoFormProps
+>(function BasicInfoForm({ onNext }, ref) {
   const meQuery = useQuery({ queryKey: ["me"], queryFn: getMe })
   const me = meQuery.data
+
+  const viewMode = useViewModeStore((s) => s.mode)
+  const activeGisuQuery = useQuery({
+    queryKey: ["gisu", "active"],
+    queryFn: getActiveGisu,
+    staleTime: 5 * 60 * 1000,
+  })
+  const activeGisuId = activeGisuQuery.data?.gisuId
+
+  const pmListQuery = useQuery({
+    queryKey: ["member", "list", { part: "PLAN", gisuId: activeGisuId }],
+    queryFn: () =>
+      searchMembers({
+        part: "PLAN",
+        gisuId: activeGisuId != null ? String(activeGisuId) : undefined,
+        size: 200,
+      }),
+    enabled: activeGisuId != null,
+    staleTime: 60 * 1000,
+  })
 
   const storePmInfo = useProjectRegisterStore((s) => s.pmInfo)
   const setPmInfo = useProjectRegisterStore((s) => s.setPmInfo)
@@ -68,61 +93,43 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
   } | null>(null)
 
   const [isMultiPm, setIsMultiPm] = useState(storePmInfo.isMultiPm)
-  const [pm1Value, setPm1Value] = useState(
-    storePmInfo.pm1
-      ? `${storePmInfo.pm1.nickname}/${storePmInfo.pm1.name}`
-      : "",
-  )
-  const [pm1Focused, setPm1Focused] = useState(false)
-  const [pm1Selected, setPm1Selected] = useState(storePmInfo.pm1 !== null)
   const [pm1Member, setPm1Member] = useState<MemberItem | null>(storePmInfo.pm1)
   const [pm1Error, setPm1Error] = useState(false)
-
-  const [pm2Value, setPm2Value] = useState(
-    storePmInfo.pm2
-      ? `${storePmInfo.pm2.nickname}/${storePmInfo.pm2.name}`
-      : "",
-  )
-  const [pm2Focused, setPm2Focused] = useState(false)
-  const [pm2Selected, setPm2Selected] = useState(storePmInfo.pm2 !== null)
   const [pm2Member, setPm2Member] = useState<MemberItem | null>(storePmInfo.pm2)
   const [pm2Error, setPm2Error] = useState(false)
 
-  const debouncedPm1 = useDebounced(pm1Value)
-  const debouncedPm2 = useDebounced(pm2Value)
+  const allPmMembers = useMemo(
+    () => (pmListQuery.data?.page.content ?? []).map(toMemberItem),
+    [pmListQuery.data],
+  )
 
-  const pm1SearchEnabled =
-    pm1Focused && !pm1Selected && debouncedPm1.length >= 2
-  const pm2SearchEnabled =
-    pm2Focused && !pm2Selected && debouncedPm2.length >= 2
+  const pm1Options = useMemo(() => {
+    const filtered =
+      viewMode === "pm" && me
+        ? allPmMembers.filter((m) => m.id === me.id)
+        : allPmMembers
+    return filtered.map((m) => ({
+      value: m.id,
+      label: `${m.nickname}/${m.name} · ${m.university}`,
+    }))
+  }, [allPmMembers, viewMode, me])
 
-  const pm1Query = useQuery({
-    queryKey: memberKeys.search(debouncedPm1),
-    queryFn: () => searchMembers({ keyword: debouncedPm1, size: 20 }),
-    enabled: pm1SearchEnabled,
-    placeholderData: (prev) => prev,
-  })
-
-  const pm2Query = useQuery({
-    queryKey: memberKeys.search(debouncedPm2),
-    queryFn: () => searchMembers({ keyword: debouncedPm2, size: 20 }),
-    enabled: pm2SearchEnabled,
-    placeholderData: (prev) => prev,
-  })
-
-  const pm1Items: MemberItem[] =
-    pm1Focused && !pm1Selected
-      ? (pm1Query.data?.page.content ?? []).map(toMemberItem)
-      : []
-  const pm2Items: MemberItem[] =
-    pm2Focused && !pm2Selected
-      ? (pm2Query.data?.page.content ?? []).map(toMemberItem)
-      : []
+  const pm2Options = useMemo(() => {
+    const excludeIds = new Set(
+      [pm1Member?.id, viewMode === "pm" && me ? me.id : undefined].filter(
+        Boolean,
+      ),
+    )
+    return allPmMembers
+      .filter((m) => !excludeIds.has(m.id))
+      .map((m) => ({
+        value: m.id,
+        label: `${m.nickname}/${m.name} · ${m.university}`,
+      }))
+  }, [allPmMembers, pm1Member, viewMode, me])
 
   const thumbnailRef = useRef<HTMLButtonElement>(null)
   const logoRef = useRef<HTMLButtonElement>(null)
-  const pm1Ref = useRef<HTMLInputElement>(null)
-  const pm2Ref = useRef<HTMLInputElement>(null)
 
   const {
     register,
@@ -132,6 +139,8 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     getValues,
     reset,
     watch,
+    trigger,
+    formState,
     formState: { errors, dirtyFields },
   } = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
@@ -139,37 +148,76 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     shouldFocusError: false,
   })
 
+  useImperativeHandle(ref, () => ({
+    validate: async () => {
+      if (!pm1Member) {
+        setPm1Error(true)
+        addToast({
+          message: "PM을 선택해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return false
+      }
+      if (isMultiPm && !pm2Member) {
+        setPm2Error(true)
+        addToast({
+          message: "모든 PM을 선택해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return false
+      }
+      const valid = await trigger()
+      if (!valid) {
+        onInvalid(formState.errors)
+        return false
+      }
+      return true
+    },
+  }))
+
   useEffect(() => {
     if (!basicDraftFields) return
-    const { title, description, planningLink } = basicDraftFields
+    const { title, description } = basicDraftFields
     if (title) setValue("title", title, { shouldDirty: false })
     if (description)
       setValue("description", description, { shouldDirty: false })
-    if (planningLink)
-      setValue("planningLink", planningLink, { shouldDirty: false })
   }, [basicDraftFields, setValue])
+
+  useEffect(() => {
+    setPm1Member(storePmInfo.pm1)
+    setPm2Member(storePmInfo.pm2)
+    setIsMultiPm(storePmInfo.isMultiPm)
+    setSavedSnapshot({
+      pm1: storePmInfo.pm1,
+      pm2: storePmInfo.pm2,
+      isMultiPm: storePmInfo.isMultiPm,
+    })
+  }, [storePmInfo])
 
   const onInvalid = (fieldErrors: typeof errors) => {
     const values = getValues()
 
-    let message = "모든 항목을 입력해주세요"
+    let message = "모든 항목을 입력해 주세요."
     let focusFn: (() => void) | null = null
 
-    if (!(values.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
-      message = "썸네일 이미지를 등록해주세요!"
-      focusFn = () => thumbnailRef.current?.focus()
-    } else if (fieldErrors.title) {
-      message = "서비스 제목을 입력해주세요!"
+    if (fieldErrors.title) {
+      message = "프로젝트 이름을 입력해 주세요."
       focusFn = () => setFocus("title")
     } else if (fieldErrors.description) {
-      message = "프로젝트 소개를 입력해주세요!"
+      message = "프로젝트 한 줄 소개를 입력해 주세요."
       focusFn = () => setFocus("description")
+    } else if (!(values.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
+      message = "프로젝트 대표 이미지를 업로드해 주세요."
+      focusFn = () => thumbnailRef.current?.focus()
     } else if (!(values.logo instanceof File) && !uploaded.logoUrl) {
-      message = "로고 이미지를 등록해주세요!"
+      message = "프로젝트 로고를 업로드해 주세요."
       focusFn = () => logoRef.current?.focus()
-    } else if (fieldErrors.planningLink) {
-      message = "기획서 링크를 입력해주세요!"
-      focusFn = () => setFocus("planningLink")
     }
 
     addToast({
@@ -195,8 +243,21 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
   const tempSaveLabel =
     hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
 
-  const handleTempSave = async () => {
+  const handleTempSave = async (options?: {
+    silent?: boolean
+  }): Promise<boolean> => {
+    const silent = options?.silent ?? false
     const values = getValues()
+    if (!projectId && !pm1Member) {
+      addToast({
+        message: "PM을 선택한 뒤 임시 저장해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
     setIsSaving(true)
     try {
       let resolvedProjectId = projectId
@@ -204,7 +265,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         if (!gisuId) throw new Error("기수 정보를 불러오는 중입니다.")
         const created = await createProjectDraft({
           gisuId,
-          productOwnerMemberId: pm1Member ? Number(pm1Member.id) : undefined,
+          productOwnerMemberId: Number(pm1Member!.id),
         })
         const newId = created.projectId
         if (!newId) throw new Error("프로젝트 생성 실패")
@@ -229,7 +290,6 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
       await updateProjectDraft(resolvedProjectId, {
         name: values.title,
         description: values.description,
-        externalLink: values.planningLink,
         thumbnailFileId: thumbnailFileId ?? undefined,
         logoFileId: logoFileId ?? undefined,
       })
@@ -247,29 +307,34 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
       reset(values, { keepValues: true, keepDirty: false })
       setSavedSnapshot({ pm1: pm1Member, pm2: pm2Member, isMultiPm })
       setHasSavedOnce(true)
-      addToast({
-        message: "작성한 내용이 임시 저장되었습니다.",
-        color: "primary",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
+      if (!silent) {
+        addToast({
+          message: "작성한 내용이 임시 저장되었습니다.",
+          color: "primary",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+      return true
     } catch {
       addToast({
         message: "임시 저장에 실패했습니다. 다시 시도해주세요.",
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
+      return false
     } finally {
       setIsSaving(false)
     }
   }
 
-  const onSubmit = (data: BasicInfoFormData) => {
+  const onSubmit = async (data: BasicInfoFormData) => {
+    const ok = await handleTempSave({ silent: true })
+    if (!ok) return
     setBasicInfo(data)
-    setPmInfo({ isMultiPm, pm1: pm1Member, pm2: pm2Member })
     addToast({
       message: "작성한 내용이 저장되었습니다.",
       color: "primary",
@@ -285,25 +350,23 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
     if (!pm1Member) {
       setPm1Error(true)
       addToast({
-        message: "PM을 선택해주세요!",
+        message: "PM을 선택해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
         duration: 3000,
       })
-      setTimeout(() => pm1Ref.current?.focus(), 0)
       return
     }
     if (isMultiPm && !pm2Member) {
       setPm2Error(true)
       addToast({
-        message: "두 번째 PM을 선택해주세요!",
+        message: "모든 PM을 선택해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
         duration: 3000,
       })
-      setTimeout(() => pm2Ref.current?.focus(), 0)
       return
     }
     void handleSubmit(onSubmit, onInvalid)(e)
@@ -311,7 +374,10 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
 
   const displayNickname = pm1Member?.nickname ?? me?.nickname ?? "-"
   const displayName = pm1Member?.name ?? me?.name ?? "-"
-  const displayUniversity = pm1Member?.university ?? me?.schoolName ?? "-"
+  const displayUniversity =
+    formatSchoolName(pm1Member?.university ?? me?.schoolName) || "-"
+
+  const pmDropdownDisabled = activeGisuId == null || pmListQuery.isLoading
 
   return (
     <form
@@ -338,76 +404,50 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
             logoUrl={uploaded.logoUrl ?? undefined}
           />
           <div className="flex w-78 shrink-0 flex-col gap-2">
-            <MemberSearchBar
-              ref={pm1Ref}
-              value={pm1Value}
-              onChange={(e) => {
-                setPm1Value(e.target.value)
-                setPm1Selected(false)
-                setPm1Member(null)
+            <Dropdown<string>
+              id="pm1-select"
+              value={pm1Member?.id}
+              onChange={(memberId) => {
+                const found =
+                  allPmMembers.find((m) => m.id === memberId) ?? null
+                setPm1Member(found)
+                setPm1Error(false)
               }}
-              onClear={() => {
-                setPm1Value("")
-                setPm1Selected(false)
-                setPm1Member(null)
-              }}
-              isSelected={pm1Selected}
-              error={pm1Error}
-              onFocus={() => setPm1Focused(true)}
-              onBlur={() => setPm1Focused(false)}
+              options={pm1Options}
               placeholder={
                 isMultiPm
                   ? "메인 PM 닉네임/이름을 선택하세요."
                   : "PM 닉네임/이름을 선택하세요."
               }
-              items={pm1Items}
-              onSelect={(member) => {
-                setPm1Value(`${member.nickname}/${member.name}`)
-                setPm1Selected(true)
-                setPm1Member(member)
-                setPm1Error(false)
-              }}
+              error={pm1Error}
+              disabled={pmDropdownDisabled}
             />
             {isMultiPm && (
-              <MemberSearchBar
-                ref={pm2Ref}
-                value={pm2Value}
-                onChange={(e) => {
-                  setPm2Value(e.target.value)
-                  setPm2Selected(false)
-                  setPm2Member(null)
-                }}
-                onClear={() => {
-                  setPm2Value("")
-                  setPm2Selected(false)
-                  setPm2Member(null)
-                }}
-                isSelected={pm2Selected}
-                error={pm2Error}
-                onFocus={() => setPm2Focused(true)}
-                onBlur={() => setPm2Focused(false)}
-                placeholder="PM 닉네임/이름을 선택하세요."
-                items={pm2Items}
-                onSelect={(member) => {
-                  setPm2Value(`${member.nickname}/${member.name}`)
-                  setPm2Selected(true)
-                  setPm2Member(member)
+              <Dropdown<string>
+                id="pm2-select"
+                value={pm2Member?.id}
+                onChange={(memberId) => {
+                  const found =
+                    allPmMembers.find((m) => m.id === memberId) ?? null
+                  setPm2Member(found)
                   setPm2Error(false)
                 }}
+                options={pm2Options}
+                placeholder="PM 닉네임/이름을 선택하세요."
+                error={pm2Error}
+                disabled={pmDropdownDisabled}
               />
             )}
             <button
               type="button"
               onClick={() => {
                 if (isMultiPm) {
-                  setPm2Value("")
-                  setPm2Selected(false)
                   setPm2Member(null)
                   setPm2Error(false)
                 }
                 setIsMultiPm((prev) => !prev)
               }}
-              className="text-body-2-medium text-teal-gray-400 flex items-center gap-1 self-end pr-3.5 font-medium underline decoration-solid underline-offset-auto"
+              className="text-body-2-medium text-teal-gray-400 flex items-center gap-1 self-start pl-0.5 font-medium underline decoration-solid underline-offset-auto"
             >
               <InfoCircleIcon width={14} height={14} aria-hidden="true" />
               <span>
@@ -430,10 +470,6 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
           }}
         />
       </div>
-      <div className="flex flex-col gap-4">
-        <SectionHeader index={3} title="기획서 링크" />
-        <PlanningLinkInput register={register} error={errors.planningLink} />
-      </div>
       <div className="flex justify-between">
         <Button
           type="button"
@@ -441,14 +477,20 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
           color="primary"
           disabled={!canTempSave}
           isLoading={isSaving}
-          onClick={handleTempSave}
+          onClick={() => void handleTempSave()}
         >
           {tempSaveLabel}
         </Button>
-        <Button type="submit" variant="fill" color="primary">
+        <Button
+          type="submit"
+          variant="fill"
+          color="primary"
+          disabled={isSaving}
+          isLoading={isSaving}
+        >
           다음
         </Button>
       </div>
     </form>
   )
-}
+})

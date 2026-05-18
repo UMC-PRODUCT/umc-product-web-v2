@@ -18,3 +18,7 @@ export class ClientPermissionError extends Error {
     this.name = "ClientPermissionError"
   }
 }
+
+export function canAccessProjectNew(viewMode: ViewMode): boolean {
+  return viewMode === "admin" || viewMode === "pm"
+}

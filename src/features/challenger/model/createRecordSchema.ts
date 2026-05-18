@@ -54,8 +54,8 @@ export const createRecordSchema = z
     memberName: z
       .string()
       .trim()
-      .min(1, "이름을 입력해주세요.")
-      .max(50, "이름은 50자 이하로 입력해주세요."),
+      .min(1, "이름을 입력해 주세요.")
+      .max(50, "이름은 50자 이하로 입력해 주세요."),
   })
   .superRefine((data, ctx) => {
     if (

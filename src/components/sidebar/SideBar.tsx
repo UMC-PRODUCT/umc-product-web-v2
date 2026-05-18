@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 
 import { useMe } from "@/features/auth/hooks/useMe"
-import { rolesToViewModes } from "@/features/auth/model/mappers"
+import { memberToViewModes } from "@/features/auth/model/mappers"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { cn } from "@/shared/lib/utils"
 import {
@@ -35,7 +35,7 @@ export default function SideBar({ className }: SideBarProps) {
 
   const { data: me, isLoading: isMeLoading } = useMe()
 
-  const availableModes = useMemo(() => rolesToViewModes(me?.roles), [me?.roles])
+  const availableModes = useMemo(() => memberToViewModes(me), [me])
 
   const availableOptions = useMemo(
     () => VIEW_MODE_OPTIONS.filter((opt) => availableModes.includes(opt.mode)),

@@ -94,11 +94,11 @@ export function useApplicationForm() {
 
   function deleteSectionQuestion(sectionId: string, questionId: string) {
     setApplication({
-      sections: sections.map((s) =>
-        s.id !== sectionId
-          ? s
-          : { ...s, questions: removeById(s.questions, questionId) },
-      ),
+      sections: sections.map((s) => {
+        if (s.id !== sectionId) return s
+        const questions = removeById(s.questions, questionId)
+        return { ...s, questions, isEnabled: questions.length > 0 }
+      }),
     })
     setFocusedId((prev) => (prev === questionId ? null : prev))
   }

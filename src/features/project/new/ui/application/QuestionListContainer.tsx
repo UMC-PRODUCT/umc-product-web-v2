@@ -55,7 +55,7 @@ export function QuestionListContainer({
       <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
         <div
           className={cn(
-            "shadow-inner-neutral-2 bg-teal-gray-50 flex w-full flex-col items-start gap-10 rounded-b-[12px] border-r border-b border-l border-teal-300",
+            "shadow-inner-neutral-2 bg-teal-gray-50 flex w-full flex-col items-start rounded-b-[12px] border-r border-b border-l border-teal-300",
             className,
           )}
         >

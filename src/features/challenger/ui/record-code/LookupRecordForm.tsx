@@ -73,7 +73,7 @@ export function LookupRecordForm() {
             }}
             type="clear"
             state="default"
-            placeholder="6자리 코드를 입력해주세요."
+            placeholder="6자리 코드를 입력해 주세요."
             inputClassName="tracking-[0.3em] uppercase"
             className="w-full max-w-none"
           />

@@ -18,6 +18,7 @@ interface QuestionFormProps {
   readonlyTitle?: boolean
   required?: boolean
   onRequiredChange?: (checked: boolean) => void
+  canDelete?: boolean
   onDelete?: () => void
   children: ReactNode
   className?: string
@@ -42,6 +43,7 @@ export function QuestionForm({
   readonlyTitle = false,
   required = false,
   onRequiredChange,
+  canDelete = true,
   onDelete,
   children,
   className,
@@ -50,8 +52,8 @@ export function QuestionForm({
   return (
     <article
       className={cn(
-        "relative flex w-full flex-col items-center gap-2.5 overflow-hidden px-6 pb-6",
-        focused ? "" : "mt-4",
+        "relative flex w-full flex-col items-center gap-2.5 px-6 pb-6",
+        focused ? "" : "mt-4 pt-4",
         className,
       )}
     >
@@ -59,21 +61,23 @@ export function QuestionForm({
         <span
           aria-hidden
           className={cn(
-            "absolute top-0 bottom-0 left-0 w-2",
+            "absolute top-0 bottom-0 -left-px w-2",
             isError ? "bg-error-600" : "bg-teal-500",
             isFirst ? "rounded-bl-[12px]" : "rounded-l-[12px]",
           )}
         />
       )}
 
-      <button
-        type="button"
-        className="mt-4 inline-flex cursor-grab items-center justify-center active:cursor-grabbing"
-        aria-label="순서 변경 핸들"
-        {...dragHandleProps}
-      >
-        <DragAndDrop className="h-3 w-6" aria-hidden />
-      </button>
+      {focused && (
+        <button
+          type="button"
+          className="mt-4 inline-flex cursor-grab items-center justify-center active:cursor-grabbing"
+          aria-label="순서 변경 핸들"
+          {...dragHandleProps}
+        >
+          <DragAndDrop className="h-3 w-6" aria-hidden />
+        </button>
+      )}
 
       <div className="flex w-full flex-col items-end gap-4">
         {focused ? (
@@ -135,7 +139,7 @@ export function QuestionForm({
         {focused && (
           <div className="flex items-center gap-4">
             <Checkbox
-              variant="gray"
+              variant="primary"
               checked={required}
               onChange={onRequiredChange ?? (() => {})}
               aria-label="필수 항목 여부"
@@ -143,14 +147,16 @@ export function QuestionForm({
             <span className="text-body-1-medium text-teal-gray-600">
               필수 항목
             </span>
-            <button
-              type="button"
-              onClick={onDelete}
-              aria-label="질문 삭제"
-              className="text-teal-gray-500 inline-flex size-6.5 items-center justify-center"
-            >
-              <TrashCan className="h-6.5 w-6.5" />
-            </button>
+            {canDelete && (
+              <button
+                type="button"
+                onClick={onDelete}
+                aria-label="질문 삭제"
+                className="text-teal-gray-500 inline-flex size-6.5 items-center justify-center"
+              >
+                <TrashCan className="h-6.5 w-6.5" />
+              </button>
+            )}
           </div>
         )}
       </div>

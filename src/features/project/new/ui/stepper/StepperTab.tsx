@@ -1,11 +1,14 @@
 import { AnimatePresence, motion } from "motion/react"
 
+import { Tooltip } from "@/components/tooltip/Tooltip"
 import { cn } from "@/shared/lib/utils"
 
 interface StepperTabProps {
   idx: number
   label: string
   isSelected: boolean
+  disabled?: boolean
+  disabledTooltip?: string
   onClick: () => void
 }
 
@@ -13,16 +16,22 @@ export function StepperTab({
   idx,
   label,
   isSelected = false,
+  disabled = false,
+  disabledTooltip,
   onClick,
 }: StepperTabProps) {
-  return (
+  const button = (
     <button
       type="button"
       role="tab"
       aria-selected={isSelected}
+      aria-disabled={disabled}
       tabIndex={isSelected ? 0 : -1}
-      onClick={onClick}
-      className="relative flex h-9.5 w-full flex-1 cursor-pointer items-center gap-2 rounded-[12px] py-1 pr-5 pl-3"
+      onClick={disabled ? undefined : onClick}
+      className={cn(
+        "relative flex h-full w-full items-center gap-2 rounded-[12px] py-1 pr-5 pl-3",
+        disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
+      )}
     >
       <AnimatePresence>
         {isSelected && (
@@ -53,5 +62,29 @@ export function StepperTab({
         {label}
       </span>
     </button>
+  )
+
+  return (
+    <div
+      className={cn(
+        "relative flex h-9.5 w-full flex-1",
+        disabled && "cursor-not-allowed",
+      )}
+    >
+      {disabled && disabledTooltip ? (
+        <Tooltip
+          content={disabledTooltip}
+          size="small"
+          dark={true}
+          side="bottom"
+          hoverOnly
+          triggerClassName="block w-full h-full"
+        >
+          {button}
+        </Tooltip>
+      ) : (
+        button
+      )}
+    </div>
   )
 }

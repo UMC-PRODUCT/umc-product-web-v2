@@ -75,7 +75,7 @@ export function SignupStepIdPwCredentials() {
       <div className="flex flex-col gap-1">
         <p className="text-heading-3-bold">계정 정보</p>
         <p className="text-label-2-medium text-teal-gray-400">
-          로그인에 사용할 아이디와 비밀번호를 입력해주세요.
+          로그인에 사용할 아이디와 비밀번호를 입력해 주세요.
         </p>
       </div>
 
@@ -86,7 +86,7 @@ export function SignupStepIdPwCredentials() {
             <input
               {...register("loginId")}
               type="text"
-              placeholder="아이디를 입력해주세요."
+              placeholder="아이디를 입력해 주세요."
               className="border-teal-gray-200 text-body-2-medium flex-1 rounded-lg border px-4 py-3 outline-none focus:border-teal-600"
             />
             <Button
@@ -118,7 +118,7 @@ export function SignupStepIdPwCredentials() {
           <input
             {...register("rawPassword")}
             type="password"
-            placeholder="비밀번호를 입력해주세요."
+            placeholder="비밀번호를 입력해 주세요."
             className="border-teal-gray-200 text-body-2-medium w-full rounded-lg border px-4 py-3 outline-none focus:border-teal-600"
           />
           {errors.rawPassword && (

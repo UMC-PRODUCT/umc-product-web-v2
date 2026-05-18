@@ -287,21 +287,21 @@ function QuestionFormTestPage() {
 
         <Section title="QuestionItemTitle — 반응형 컨테이너">
           <div className="flex flex-col gap-4">
-            <div className="border-teal-gray-100 w-[300px] rounded-lg border bg-white p-4">
+            <div className="border-teal-gray-100 w-75 rounded-lg border bg-white p-4">
               <QuestionItemTitle
                 index="Q1"
                 title="좁은 컨테이너에서의 제목 렌더링"
                 caption="캡션도 함께 줄바꿈되는지 확인합니다"
               />
             </div>
-            <div className="border-teal-gray-100 w-[500px] rounded-lg border bg-white p-4">
+            <div className="border-teal-gray-100 w-125 rounded-lg border bg-white p-4">
               <QuestionItemTitle
                 index="Q2"
                 title="중간 너비 컨테이너에서의 제목 렌더링"
                 caption="캡션 (선택 사항)"
               />
             </div>
-            <div className="border-teal-gray-100 w-[800px] rounded-lg border bg-white p-4">
+            <div className="border-teal-gray-100 w-200 rounded-lg border bg-white p-4">
               <QuestionItemTitle
                 index="Q3"
                 title="넓은 컨테이너에서의 제목 렌더링"

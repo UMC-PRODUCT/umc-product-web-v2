@@ -2,6 +2,7 @@ import ToggleCheckboxIcon from "@/shared/assets/icon/toggle/ToggleCheckboxIcon"
 import ToggleFileUploadIcon from "@/shared/assets/icon/toggle/ToggleFileUploadIcon"
 import ToggleRadioIcon from "@/shared/assets/icon/toggle/ToggleRadioIcon"
 import ToggleTextIcon from "@/shared/assets/icon/toggle/ToggleTextIcon"
+import CloudUploadIcon from "@/shared/assets/icon/upload/CloudUploadIcon"
 import { FieldTypeButtonGroup } from "@/shared/ui/button/FieldTypeButtonGroup"
 import { FloatingActionButton } from "@/shared/ui/button/FloatingActionButton"
 
@@ -12,7 +13,7 @@ const FIELD_TYPE_OPTIONS: FieldTypeOption[] = [
   { key: "text", label: "텍스트", icon: ToggleTextIcon },
   { key: "radio", label: "단일 선택", icon: ToggleRadioIcon },
   { key: "checkbox", label: "복수 선택", icon: ToggleCheckboxIcon },
-  { key: "file", label: "파일 업로드", icon: ToggleFileUploadIcon },
+  { key: "file", label: "파일 업로드", icon: CloudUploadIcon },
   { key: "portfolio", label: "포트폴리오", icon: ToggleFileUploadIcon },
 ]
 

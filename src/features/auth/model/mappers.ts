@@ -1,7 +1,5 @@
-import type {
-  ChallengerRoleResponse,
-  RoleType,
-} from "@/features/challenger/model/types"
+import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { RoleType } from "@/features/challenger/model/types"
 import type { Role } from "@/shared/ui/chip/RoleTagChip"
 import type { ViewMode } from "@/shared/view-mode"
 
@@ -23,20 +21,16 @@ export function toRoleTag(roleType: RoleType): Role {
   return ROLE_MAP[roleType]
 }
 
-export function roleToViewMode(role: ChallengerRoleResponse): ViewMode {
-  const { roleType, responsiblePart } = role
-  if (roleType !== "CHALLENGER") return "admin"
-  if (responsiblePart === "PLAN") return "pm"
-  if (responsiblePart === "ADMIN") return "admin"
-  return "others"
-}
-
-export function rolesToViewModes(
-  roles: ChallengerRoleResponse[] | undefined,
+export function memberToViewModes(
+  me: MemberInfoResponse | undefined,
 ): ViewMode[] {
-  if (!roles?.length) return []
-  const set = new Set<ViewMode>()
-  for (const r of roles) set.add(roleToViewMode(r))
-  const order: ViewMode[] = ["admin", "pm", "others"]
-  return order.filter((m) => set.has(m))
+  if (!me) return []
+  if (me.roles?.length) return ["admin"]
+  const records = me.challengerRecords
+  if (!records?.length) return []
+  const latest = [...records].sort(
+    (a, b) => Number(b.gisuId) - Number(a.gisuId),
+  )[0]!
+  if (latest.part === "PLAN") return ["pm"]
+  return ["others"]
 }

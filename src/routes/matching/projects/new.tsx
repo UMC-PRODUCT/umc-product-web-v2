@@ -1,6 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import {
+  createFileRoute,
+  redirect,
+  useBlocker,
+  useNavigate,
+} from "@tanstack/react-router"
+import { useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
@@ -16,13 +21,19 @@ import {
   gisuKeys,
   projectKeys,
   submitProject,
+  transferOwnership,
   upsertApplicationForm,
 } from "@/features/project/new/api"
+import { canAccessProjectNew } from "@/features/project/new/api/permissions"
 import { hydrateApplicationFormIntoStore } from "@/features/project/new/model/applicationFormHydrator"
 import { hydrateDraftIntoStore } from "@/features/project/new/model/draftHydrator"
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useViewModeStore } from "@/shared/view-mode"
+
+import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
 export const Route = createFileRoute("/matching/projects/new")({
   beforeLoad: () => {
@@ -36,14 +47,45 @@ export const Route = createFileRoute("/matching/projects/new")({
 
 function ProjectRegisterPage() {
   const [step, setStep] = useState(1)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const navigate = useNavigate()
+  const viewMode = useViewModeStore((s) => s.mode)
   const addToast = useToastStore((s) => s.addToast)
+  const basicInfoRef = useRef<BasicInfoFormHandle>(null)
+
+  useEffect(() => {
+    if (!canAccessProjectNew(viewMode)) {
+      navigate({ to: "/matching/projects" })
+    }
+  }, [viewMode, navigate])
 
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
+  const recruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
+  const pmInfo = useProjectRegisterStore((s) => s.pmInfo)
   const reset = useProjectRegisterStore((s) => s.reset)
   const setGisuId = useProjectRegisterStore((s) => s.setGisuId)
   const setApplication = useProjectRegisterStore((s) => s.setApplication)
+
+  const isStoreDirty = useProjectRegisterStore((s) => {
+    const recruitTotal =
+      s.recruitInfo.design.count +
+      s.recruitInfo.frontend.count +
+      s.recruitInfo.backend.count
+    return (
+      s.projectId !== null ||
+      s.basicInfo !== null ||
+      s.basicDraftFields !== null ||
+      s.pmInfo.pm1 !== null ||
+      s.pmInfo.pm2 !== null ||
+      s.pmInfo.isMultiPm ||
+      s.uploaded.thumbnailFileId !== null ||
+      s.uploaded.logoFileId !== null ||
+      recruitTotal > 0 ||
+      s.application.commonQuestions.length > 0 ||
+      s.application.sections.length > 0
+    )
+  })
 
   useQuery({ queryKey: ["me"], queryFn: getMe })
 
@@ -92,18 +134,17 @@ function ProjectRegisterPage() {
         application.sections,
       )
       await upsertApplicationForm(projectId, body)
-      return submitProject(projectId)
+      const result = await submitProject(projectId)
+      if (pmInfo.pm1) {
+        await transferOwnership(projectId, {
+          newOwnerMemberId: Number(pmInfo.pm1.id),
+        })
+      }
+      return result
     },
-    onSuccess: async () => {
-      addToast({
-        message: "프로젝트가 성공적으로 등록되었습니다.",
-        color: "primary",
-        variant: "deep",
-        type: "default",
-        duration: 3,
-      })
+    onSuccess: () => {
       reset()
-      await navigate({ to: "/matching/applications", replace: true })
+      setShowSuccessModal(true)
     },
     onError: () => {
       addToast({
@@ -116,8 +157,63 @@ function ProjectRegisterPage() {
     },
   })
 
+  const handleBasicInfoNext = () => {
+    setStep(viewMode === "pm" ? 3 : 2)
+  }
+
+  const handleApplicationFormPrev = () => {
+    setStep(viewMode === "pm" ? 1 : 2)
+  }
+
+  const isStep3Locked = false
+
+  const handleStepChange = async (idx: number) => {
+    if (viewMode === "pm" && idx === 2) return
+    if (idx <= step) {
+      setStep(idx)
+      return
+    }
+    if (step === 1) {
+      const ok = await basicInfoRef.current?.validate()
+      if (!ok) return
+    } else if (step === 2) {
+      const total = Object.values(recruitInfo).reduce(
+        (sum, { count }) => sum + count,
+        0,
+      )
+      if (total === 0) {
+        addToast({
+          message: "모집 인원을 1명 이상 입력해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
+    }
+    setStep(idx)
+  }
+
+  const {
+    proceed: proceedLeave,
+    reset: resetLeave,
+    status: leaveBlockStatus,
+  } = useBlocker({
+    shouldBlockFn: () => isStoreDirty,
+    withResolver: true,
+    enableBeforeUnload: isStoreDirty,
+  })
+
+  const isLeaveModalOpen = leaveBlockStatus === "blocked"
+
   const handleRegister = () => {
     submitMutation.mutate()
+  }
+
+  const handleSuccessConfirm = async () => {
+    setShowSuccessModal(false)
+    await navigate({ to: "/matching/projects", replace: true })
   }
 
   return (
@@ -131,8 +227,21 @@ function ProjectRegisterPage() {
             내 프로젝트의 대한 정보를 등록하고 모집 폼을 작성합니다.
           </span>
         </div>
-        <Stepper step={step} onStepChange={setStep} />
-        {step === 1 && <BasicInfoForm onNext={() => setStep(2)} />}
+        <Stepper
+          step={step}
+          onStepChange={handleStepChange}
+          disabledSteps={[
+            ...(viewMode === "pm" ? [2] : []),
+            ...(isStep3Locked ? [3] : []),
+          ]}
+          disabledTooltips={{
+            2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
+            3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+          }}
+        />
+        {step === 1 && (
+          <BasicInfoForm ref={basicInfoRef} onNext={handleBasicInfoNext} />
+        )}
         {step === 2 && (
           <RecruitInfoForm
             onPrev={() => setStep(1)}
@@ -140,9 +249,40 @@ function ProjectRegisterPage() {
           />
         )}
         {step === 3 && (
-          <ApplicationForm onPrev={() => setStep(2)} onNext={handleRegister} />
+          <ApplicationForm
+            onPrev={handleApplicationFormPrev}
+            onNext={handleRegister}
+          />
         )}
       </div>
+      <CtaModal
+        open={showSuccessModal}
+        variant="success"
+        title="등록 완료"
+        content="프로젝트 등록이 완료되었습니다."
+        confirmText="확인"
+        onOpenChange={setShowSuccessModal}
+        onConfirm={handleSuccessConfirm}
+      />
+      <CtaModal
+        open={isLeaveModalOpen}
+        onOpenChange={(open) => {
+          if (!open) resetLeave?.()
+        }}
+        variant="warning"
+        title="페이지 이탈"
+        content={
+          <>
+            작성 중인 내용이 저장되지 않습니다.
+            <br />
+            나가시겠습니까?
+          </>
+        }
+        cancelText="돌아가기"
+        confirmText="나가기"
+        onCancel={() => resetLeave?.()}
+        onConfirm={() => proceedLeave?.()}
+      />
     </section>
   )
 }

@@ -321,7 +321,7 @@ export function CreateRecordForm() {
                 onClear={() => field.onChange("")}
                 type="clear"
                 state={errors.memberName ? "error" : "default"}
-                placeholder="회원 이름을 입력해주세요."
+                placeholder="회원 이름을 입력해 주세요."
                 className="w-full max-w-none"
               />
             </FieldRow>

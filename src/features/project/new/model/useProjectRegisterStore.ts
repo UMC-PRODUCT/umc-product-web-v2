@@ -29,7 +29,6 @@ interface UploadedFileIds {
 interface BasicDraftFields {
   title: string
   description: string
-  planningLink: string
 }
 
 interface ProjectRegisterState {

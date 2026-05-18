@@ -46,15 +46,15 @@ export function RecruitQuestionsViewModal({
   }, [sections])
 
   return (
-    <div className="relative">
-      <div className="absolute -top-14.5 flex w-full flex-col">
+    <div className="flex w-232 flex-col">
+      <div className="flex w-full">
         <ProjectTitleCard
           size="sm"
           projectName={data.title}
           subtitle={data.authorSchoolLine}
         />
       </div>
-      <div className="flex w-232 flex-col rounded-b-2xl bg-white">
+      <div className="flex w-full flex-col rounded-b-2xl bg-white">
         <div className="scrollbar-none max-h-[75vh] overflow-y-auto px-11.5 py-9">
           <div className="flex items-start gap-6 self-stretch px-1 py-5">
             <p className="text-body-1-regular text-teal-gray-600 flex-1">

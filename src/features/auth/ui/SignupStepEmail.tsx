@@ -131,7 +131,7 @@ export function SignupStepEmail() {
           <input
             {...emailForm.register("email")}
             type="email"
-            placeholder="이메일을 입력해주세요."
+            placeholder="이메일을 입력해 주세요."
             disabled={verificationIdNum !== null}
             className="border-teal-gray-200 text-body-2-medium disabled:bg-teal-gray-50 w-full rounded-lg border px-4 py-3 outline-none focus:border-teal-600"
           />
@@ -166,7 +166,7 @@ export function SignupStepEmail() {
               type="text"
               inputMode="numeric"
               maxLength={6}
-              placeholder="6자리 코드를 입력해주세요."
+              placeholder="6자리 코드를 입력해 주세요."
               className="border-teal-gray-200 text-body-2-medium w-full rounded-lg border px-4 py-3 outline-none focus:border-teal-600"
             />
             {codeForm.formState.errors.verificationCode && (

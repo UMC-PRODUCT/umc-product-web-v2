@@ -34,14 +34,14 @@ export const grantPointSchema = z
       message: "상벌점 유형을 선택해주세요.",
     }),
     pointValue: z
-      .number({ message: "점수를 숫자로 입력해주세요." })
+      .number({ message: "점수를 숫자로 입력해 주세요." })
       .int("정수만 입력할 수 있습니다.")
       .optional(),
     description: z
-      .string({ message: "부여 사유를 입력해주세요." })
+      .string({ message: "부여 사유를 입력해 주세요." })
       .trim()
-      .min(1, "부여 사유를 입력해주세요.")
-      .max(200, "사유는 200자 이하로 입력해주세요."),
+      .min(1, "부여 사유를 입력해 주세요.")
+      .max(200, "사유는 200자 이하로 입력해 주세요."),
   })
   .superRefine((data, ctx) => {
     if (data.pointType === "CUSTOM" && data.pointValue === undefined) {
