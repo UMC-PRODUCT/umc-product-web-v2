@@ -5,7 +5,7 @@ const LOGO_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/svg+xml"]
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 export const basicInfoSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1).max(16),
   description: z.string().min(1).max(200),
   thumbnail: z.instanceof(File).superRefine((v, ctx) => {
     if (!THUMBNAIL_ACCEPTED_TYPES.includes(v.type)) {
