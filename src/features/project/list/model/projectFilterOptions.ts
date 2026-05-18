@@ -12,7 +12,9 @@ export const BRANCH_OPTIONS: ProjectFilterOption[] = [
   { value: "Xenon", label: "Xenon" },
 ]
 
-export { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
+import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
+
+export { SCHOOLS_BY_BRANCH }
 
 export const PART_OPTIONS: ProjectFilterOption[] = [
   { value: "Web", label: "Web" },
