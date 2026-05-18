@@ -258,7 +258,7 @@ export function BasicInfoForm({ onNext }: BasicInfoFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     } finally {
       setIsSaving(false)
