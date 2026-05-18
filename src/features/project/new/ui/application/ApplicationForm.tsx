@@ -8,7 +8,7 @@ import {
 } from "@/features/project/new/api"
 import {
   getFieldTypePatch,
-  validateQuestion,
+  validateApplicationForm,
 } from "@/features/project/new/model/applicationQuestion"
 import { useApplicationForm } from "@/features/project/new/model/useApplicationForm"
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
@@ -89,37 +89,25 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
   }
 
   const handleNext = () => {
-    for (const section of form.sections) {
-      if (!section.isEnabled) continue
-      if (section.questions.length === 0) {
-        addToast({
-          message: `${section.name} 섹션에 질문을 추가해주세요!`,
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3,
-        })
-        return
-      }
+    const { sectionEmptyName, errors } = validateApplicationForm(
+      form.commonQuestions,
+      form.sections,
+    )
+
+    if (sectionEmptyName) {
+      addToast({
+        message: `${sectionEmptyName} 섹션에 질문을 추가해주세요!`,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+      return
     }
 
-    const errors: { questionId: string; message: string }[] = []
-    for (const [i, q] of form.commonQuestions.entries()) {
-      const err = validateQuestion(q, "공통 질문", i + 1)
-      if (err) errors.push(err)
-    }
-    for (const section of form.sections) {
-      if (!section.isEnabled) continue
-      for (const [i, q] of section.questions.entries()) {
-        const err = validateQuestion(q, section.name, i + 1)
-        if (err) errors.push(err)
-      }
-    }
-
-    const firstError = errors[0]
-    if (firstError) {
+    if (errors.length > 0) {
       setErrorQuestionIds(errors.map((e) => e.questionId))
-      form.setFocusedId(firstError.questionId)
+      form.setFocusedId(errors[0].questionId)
       addToast({
         message: "질문 입력을 완료해 주세요.",
         color: "red",
@@ -176,7 +164,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
               onChange={(fieldType) =>
                 form.updateCommonQuestion(
                   focusedCommon.id,
-                  getFieldTypePatch(fieldType),
+                  getFieldTypePatch(fieldType, focusedCommon.fieldType),
                 )
               }
               onAddAfter={() => form.addCommonQuestion(focusedCommon.id)}
@@ -240,7 +228,10 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
                       form.updateSectionQuestion(
                         section.id,
                         focusedSectionEntry.question.id,
-                        getFieldTypePatch(fieldType),
+                        getFieldTypePatch(
+                          fieldType,
+                          focusedSectionEntry.question.fieldType,
+                        ),
                       )
                     }
                     onAddAfter={() =>

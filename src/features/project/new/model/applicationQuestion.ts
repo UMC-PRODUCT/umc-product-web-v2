@@ -25,9 +25,16 @@ export function genId(): string {
 export const PORTFOLIO_FIXED_TITLE =
   "포트폴리오를 링크 혹은 PDF 파일의 형태로 제출하세요."
 
-export function getFieldTypePatch(fieldType: FieldType): Partial<Question> {
+export function getFieldTypePatch(
+  fieldType: FieldType,
+  prevFieldType: FieldType,
+): Partial<Question> {
   const base: Partial<Question> = { fieldType, options: [] }
-  if (fieldType === "portfolio") base.title = PORTFOLIO_FIXED_TITLE
+  if (fieldType === "portfolio") {
+    base.title = PORTFOLIO_FIXED_TITLE
+  } else if (prevFieldType === "portfolio") {
+    base.title = ""
+  }
   return base
 }
 
@@ -62,6 +69,32 @@ export function validateQuestion(
     }
   }
   return null
+}
+
+export function validateApplicationForm(
+  commonQuestions: Question[],
+  sections: Section[],
+): { sectionEmptyName?: string; errors: ValidationError[] } {
+  for (const section of sections) {
+    if (!section.isEnabled) continue
+    if (section.questions.length === 0) {
+      return { sectionEmptyName: section.name, errors: [] }
+    }
+  }
+
+  const errors: ValidationError[] = []
+  for (const [i, q] of commonQuestions.entries()) {
+    const err = validateQuestion(q, "공통 질문", i + 1)
+    if (err) errors.push(err)
+  }
+  for (const section of sections) {
+    if (!section.isEnabled) continue
+    for (const [i, q] of section.questions.entries()) {
+      const err = validateQuestion(q, section.name, i + 1)
+      if (err) errors.push(err)
+    }
+  }
+  return { errors }
 }
 
 export function makeQuestion(
