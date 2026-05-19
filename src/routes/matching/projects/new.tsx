@@ -266,6 +266,8 @@ function ProjectRegisterPage() {
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
 
+  if (isPm && !isEditMode && managedCheckQuery.isPending) return null
+
   const handleRegister = () => {
     submitMutation.mutate()
   }
