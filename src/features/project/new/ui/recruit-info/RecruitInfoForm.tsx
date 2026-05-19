@@ -1,16 +1,16 @@
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { isOperator } from "@/features/auth/model/identity"
 import {
   buildPartQuotasEntries,
-  canPerform,
   updatePartQuotas,
 } from "@/features/project/new/api"
 import { Button } from "@/shared/ui/Button"
 import { Counter } from "@/shared/ui/Counter"
 import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import {
   type RoleKey,
@@ -54,7 +54,8 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
   const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
   const projectId = useProjectRegisterStore((s) => s.projectId)
-  const viewMode = useViewModeStore((s) => s.mode)
+  const { data: me } = useMe()
+  const canUpdatePartQuotas = isOperator(me)
 
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
@@ -75,7 +76,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
     hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
 
   const savePartQuotas = async (silent = false): Promise<boolean> => {
-    if (!canPerform("updatePartQuotas", viewMode)) {
+    if (!canUpdatePartQuotas) {
       setRecruitInfo(roleStates)
       return true
     }

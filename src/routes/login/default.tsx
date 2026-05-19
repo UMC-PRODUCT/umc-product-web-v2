@@ -3,7 +3,7 @@ import axios from "axios"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { loginWithIdPw } from "@/features/auth/api/credentials"
+import { loginWithEmail } from "@/features/auth/api/credentials"
 import {
   loginWithApple,
   loginWithGoogle,
@@ -18,6 +18,7 @@ import {
 } from "@/features/auth/lib/googleSignIn"
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
+import { useAuthStore } from "@/features/auth/store/authStore"
 import {
   Divider,
   Input,
@@ -35,14 +36,14 @@ export const Route = createFileRoute("/login/default")({
 function DefaultLoginPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((s) => s.addToast)
-  const [id, setId] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isKeepLoggedIn, setIsKeepLoggedIn] = useState(false)
 
   const [loginError, setLoginError] = useState("")
 
-  const isDisabled = id.trim() === "" || password.trim() === ""
+  const isDisabled = email.trim() === "" || password.trim() === ""
 
   const showToast = (message: string, color: "primary" | "red" = "primary") => {
     addToast({
@@ -102,13 +103,16 @@ function DefaultLoginPage() {
     setLoginError("")
 
     try {
-      const res = await loginWithIdPw({ loginId: id, password })
-      localStorage.setItem("access_token", res.accessToken)
-      localStorage.setItem("refresh_token", res.refreshToken)
+      const res = await loginWithEmail({ email, password, clientType: "WEB" })
+      useAuthStore.getState().setTokens({
+        accessToken: res.accessToken,
+        refreshToken: res.refreshToken,
+        memberId: res.memberId,
+      })
       void navigate({ to: "/" })
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setLoginError("아이디 또는 비밀번호가 올바르지 않습니다.")
+        setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.")
       } else {
         showToast("로그인 중 오류가 발생했습니다.", "red")
       }
@@ -132,10 +136,10 @@ function DefaultLoginPage() {
               <div className="flex flex-col gap-3">
                 <Input
                   variant={"id"}
-                  placeholder={"ID"}
-                  value={id}
+                  placeholder={"이메일"}
+                  value={email}
                   onChange={(e) => {
-                    setId(e.target.value)
+                    setEmail(e.target.value)
                     if (loginError) setLoginError("")
                   }}
                 />

@@ -11,6 +11,8 @@ import {
 import { useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { isCurrentTermPm } from "@/features/auth/model/identity"
 import { searchMembers } from "@/features/challenger/api/member"
 import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
@@ -21,12 +23,10 @@ import {
 } from "@/features/project/new/api"
 import { toMemberItem } from "@/features/project/new/api/memberAdapter"
 import { getActiveGisu } from "@/shared/api/gisu"
-import { getMe } from "@/shared/api/me"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import {
   type BasicInfoFormData,
@@ -50,10 +50,8 @@ export const BasicInfoForm = forwardRef<
   BasicInfoFormHandle,
   BasicInfoFormProps
 >(function BasicInfoForm({ onNext }, ref) {
-  const meQuery = useQuery({ queryKey: ["me"], queryFn: getMe })
-  const me = meQuery.data
-
-  const viewMode = useViewModeStore((s) => s.mode)
+  const { data: meData } = useMe()
+  const isPm = isCurrentTermPm(meData)
   const activeGisuQuery = useQuery({
     queryKey: ["gisu", "active"],
     queryFn: getActiveGisu,
@@ -105,18 +103,18 @@ export const BasicInfoForm = forwardRef<
 
   const pm1Options = useMemo(() => {
     const filtered =
-      viewMode === "pm" && me
-        ? allPmMembers.filter((m) => m.id === me.id)
+      isPm && meData
+        ? allPmMembers.filter((m) => m.id === String(meData.id))
         : allPmMembers
     return filtered.map((m) => ({
       value: m.id,
       label: `${m.nickname}/${m.name} · ${m.university}`,
     }))
-  }, [allPmMembers, viewMode, me])
+  }, [allPmMembers, isPm, meData])
 
   const pm2Options = useMemo(() => {
     const excludeIds = new Set(
-      [pm1Member?.id, viewMode === "pm" && me ? me.id : undefined].filter(
+      [pm1Member?.id, isPm && meData ? String(meData.id) : undefined].filter(
         Boolean,
       ),
     )
@@ -126,7 +124,7 @@ export const BasicInfoForm = forwardRef<
         value: m.id,
         label: `${m.nickname}/${m.name} · ${m.university}`,
       }))
-  }, [allPmMembers, pm1Member, viewMode, me])
+  }, [allPmMembers, pm1Member, isPm, meData])
 
   const thumbnailRef = useRef<HTMLButtonElement>(null)
   const logoRef = useRef<HTMLButtonElement>(null)
@@ -372,10 +370,10 @@ export const BasicInfoForm = forwardRef<
     void handleSubmit(onSubmit, onInvalid)(e)
   }
 
-  const displayNickname = pm1Member?.nickname ?? me?.nickname ?? "-"
-  const displayName = pm1Member?.name ?? me?.name ?? "-"
+  const displayNickname = pm1Member?.nickname ?? meData?.nickname ?? "-"
+  const displayName = pm1Member?.name ?? meData?.name ?? "-"
   const displayUniversity =
-    formatSchoolName(pm1Member?.university ?? me?.schoolName) || "-"
+    formatSchoolName(pm1Member?.university ?? meData?.schoolName) || "-"
 
   const pmDropdownDisabled = activeGisuId == null || pmListQuery.isLoading
 

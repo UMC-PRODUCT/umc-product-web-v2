@@ -1,9 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import {
+  getViewerBranch,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllGisu,
@@ -20,7 +27,6 @@ import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { Pagination } from "@/shared/ui/Pagination"
-import { useViewModeStore } from "@/shared/view-mode"
 
 interface AnnounceSearch {
   chapter: Chapter
@@ -77,11 +83,20 @@ function readPendingNotice() {
 /** 팀 매칭 공지 페이지 (/matching) */
 export const Route = createFileRoute("/matching/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
-    // TODO: 사용자 지부 불러오기. 아래는 임시 상태.
-    const userChapter = useViewModeStore.getState().viewerBranch as Chapter
     return {
-      chapter: isChapter(search.chapter) ? search.chapter : userChapter,
+      chapter: isChapter(search.chapter) ? search.chapter : CHAPTERS[0],
       page: parsePage(search.page),
+    }
+  },
+  beforeLoad: async ({ search, context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (isOperator(me)) return
+    const userChapter = getViewerBranch(me)
+    if (isChapter(userChapter) && search.chapter !== userChapter) {
+      throw redirect({
+        to: "/matching",
+        search: { ...search, chapter: userChapter },
+      })
     }
   },
   component: TeamMatchingAnnouncePage,
@@ -92,6 +107,11 @@ function TeamMatchingAnnouncePage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
   const [pendingNotice] = useState(readPendingNotice)
+
+  const { data: me } = useMe()
+  const canManage = isOperator(me)
+  const isPm = isCurrentTermPm(me)
+  const userChapter = getViewerBranch(me) as Chapter | undefined
 
   // 기수 정보 조회
   const { data: gisuData } = useQuery({
@@ -116,8 +136,6 @@ function TeamMatchingAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
-  // 공지사항 조회 (전체 챌린저 대상: CHALLENGER)
-  // TODO: 공지사항 조회 실패 / 로딩 중 처리 로직 추가
   const { data: noticesData } = useQuery({
     queryKey: [
       "notices",
@@ -148,7 +166,6 @@ function TeamMatchingAnnouncePage() {
       chip: item.mustRead ? "필독" : undefined,
     }))
 
-    // 필독 공지 상단 정렬
     return [...mappedNotices].sort((a, b) => {
       if (a.chip === "필독" && b.chip !== "필독") return -1
       if (a.chip !== "필독" && b.chip === "필독") return 1
@@ -161,10 +178,6 @@ function TeamMatchingAnnouncePage() {
   const focusedNoticeId = pendingNotice?.id ?? null
 
   const queryClient = useQueryClient()
-  // TODO: 사용자 권한 및 지부 불러오기. 아래는 임시 상태.
-  const mode = useViewModeStore((s) => s.mode)
-  const userChapter = useViewModeStore((s) => s.viewerBranch) as Chapter
-  const canManage = mode === "admin"
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteNotice(Number(id)),
@@ -184,7 +197,7 @@ function TeamMatchingAnnouncePage() {
   })
 
   const handleChapterChange = (nextChapter: Chapter) => {
-    if (mode !== "admin" && nextChapter !== userChapter) {
+    if (!canManage && userChapter && nextChapter !== userChapter) {
       addToast({
         message: "소속된 지부의 공지만 확인할 수 있습니다.",
         color: "red",
@@ -253,9 +266,9 @@ function TeamMatchingAnnouncePage() {
               공지
             </span>
             <p className="text-body-2-regular text-teal-gray-600">
-              {mode === "admin"
+              {canManage
                 ? "팀 매칭에 대한 지부별 공지를 모든 챌린저에게 안내합니다."
-                : mode === "pm"
+                : isPm
                   ? "팀 매칭에 대한 우리 지부의 모든 공지를 한눈에 조회합니다."
                   : "팀 매칭에 대한 우리 지부의 공지를 한눈에 조회합니다."}
             </p>

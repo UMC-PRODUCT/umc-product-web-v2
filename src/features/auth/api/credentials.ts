@@ -2,18 +2,18 @@ import { api } from "@/shared/lib/axios"
 
 import type {
   ChangePasswordRequest,
-  IdPwLoginRequest,
-  IdPwLoginResponse,
+  EmailLoginRequest,
+  EmailLoginResponse,
   LoginIdAvailabilityResponse,
   RegisterCredentialsRequest,
 } from "@/features/auth/model/types"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
-export async function loginWithIdPw(
-  payload: IdPwLoginRequest,
-): Promise<IdPwLoginResponse> {
-  const { data } = await api.post<ApiResponse<IdPwLoginResponse>>(
-    "/v1/auth/login/id-pw",
+export async function loginWithEmail(
+  payload: EmailLoginRequest,
+): Promise<EmailLoginResponse> {
+  const { data } = await api.post<ApiResponse<EmailLoginResponse>>(
+    "/v1/auth/login/email",
     payload,
   )
   return data.result

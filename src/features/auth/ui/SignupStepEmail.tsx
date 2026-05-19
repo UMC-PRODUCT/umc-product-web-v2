@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import axios from "axios"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -27,6 +28,13 @@ export function SignupStepEmail() {
   const [isSending, setIsSending] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
   const [isResending, setIsResending] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const timer = setTimeout(() => setCooldown((prev) => prev - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [cooldown])
 
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
@@ -41,10 +49,14 @@ export function SignupStepEmail() {
   const handleSendEmail = async (data: EmailFormData) => {
     setIsSending(true)
     try {
-      const res = await sendEmailVerification({ email: data.email })
+      const res = await sendEmailVerification({
+        email: data.email,
+        purpose: "REGISTER",
+      })
       const id = Number(res.emailVerificationId)
       setVerificationIdNum(id)
       setEmailVerificationId(id)
+      setCooldown(60)
       addToast({
         message: "인증 코드가 발송되었습니다.",
         color: "primary",
@@ -52,24 +64,44 @@ export function SignupStepEmail() {
         type: "default",
         duration: 3000,
       })
-    } catch {
-      addToast({
-        message: "이메일 발송에 실패했습니다. 다시 시도해주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
+    } catch (error) {
+      const status = axios.isAxiosError(error) ? error.response?.status : null
+      if (status === 409) {
+        addToast({
+          message: "이미 가입된 이메일이에요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      } else if (status === 429) {
+        addToast({
+          message: "잠시 후 다시 시도해주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      } else {
+        addToast({
+          message: "이메일 발송에 실패했습니다. 다시 시도해주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
     } finally {
       setIsSending(false)
     }
   }
 
   const handleResend = async () => {
-    if (verificationIdNum === null) return
+    if (verificationIdNum === null || cooldown > 0) return
     setIsResending(true)
     try {
       await resendEmailVerification({ emailVerificationId: verificationIdNum })
+      setCooldown(60)
       addToast({
         message: "인증 코드가 재발송되었습니다.",
         color: "primary",
@@ -77,14 +109,24 @@ export function SignupStepEmail() {
         type: "default",
         duration: 3000,
       })
-    } catch {
-      addToast({
-        message: "재발송에 실패했습니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 429) {
+        addToast({
+          message: "잠시 후 다시 시도해주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      } else {
+        addToast({
+          message: "재발송에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
     } finally {
       setIsResending(false)
     }
@@ -102,7 +144,8 @@ export function SignupStepEmail() {
       setStep("basic-info")
     } catch {
       addToast({
-        message: "인증 코드가 올바르지 않습니다.",
+        message:
+          "인증 코드가 올바르지 않거나 만료되었습니다. 재발송을 요청해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
@@ -182,9 +225,10 @@ export function SignupStepEmail() {
               color="neutral"
               className="flex-1"
               isLoading={isResending}
+              disabled={cooldown > 0 || isResending}
               onClick={handleResend}
             >
-              재발송
+              {cooldown > 0 ? `${cooldown}초 후 재전송` : "재발송"}
             </Button>
             <Button
               type="submit"

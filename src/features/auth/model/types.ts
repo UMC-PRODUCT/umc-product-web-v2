@@ -32,8 +32,11 @@ export interface AppleLoginRequest {
   clientType: ClientType
 }
 
+export type EmailVerificationPurpose = "REGISTER" | "PASSWORD_RESET"
+
 export interface SendEmailVerificationRequest {
   email: string
+  purpose: EmailVerificationPurpose
 }
 
 export interface SendEmailVerificationResponse {
@@ -91,12 +94,13 @@ export interface SchoolNameListResponse {
   schools: SchoolNameItem[]
 }
 
-export interface IdPwLoginRequest {
-  loginId: string
+export interface EmailLoginRequest {
+  email: string
   password: string
+  clientType: ClientType
 }
 
-export interface IdPwLoginResponse {
+export interface EmailLoginResponse {
   memberId: number
   accessToken: string
   refreshToken: string
