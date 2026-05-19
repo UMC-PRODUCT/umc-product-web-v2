@@ -65,7 +65,8 @@ export function SignupStepEmail() {
         duration: 3000,
       })
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 409) {
+      const status = axios.isAxiosError(error) ? error.response?.status : null
+      if (status === 409) {
         addToast({
           message: "이미 가입된 이메일이에요.",
           color: "red",
@@ -73,7 +74,7 @@ export function SignupStepEmail() {
           type: "default",
           duration: 3000,
         })
-      } else if (axios.isAxiosError(error) && error.response?.status === 429) {
+      } else if (status === 429) {
         addToast({
           message: "잠시 후 다시 시도해주세요.",
           color: "red",
