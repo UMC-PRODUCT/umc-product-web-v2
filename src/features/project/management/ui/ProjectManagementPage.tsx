@@ -1,28 +1,38 @@
 import { useMemo, useState } from "react"
 
 import { MOCK_PROJECTS } from "@/features/application/model/applicationMock"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import {
+  getViewerBranch,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
 import { MOCK_MATCHING_PROJECTS } from "@/features/project/list/model/matchingProject.mock"
 import {
   type Chapter,
   ChapterSelector,
 } from "@/shared/ui/segment/ChapterSelector"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import { ProjectManagementCard } from "./ProjectManagementCard"
 import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
 export function ProjectManagementPage() {
-  const mode = useViewModeStore((s) => s.mode)
-  const viewerBranch = useViewModeStore((s) => s.viewerBranch)
+  const { data: me } = useMe()
+  const { hasPermission } = useResourcePermission("PROJECT")
+  const canManage = hasPermission("MANAGE")
+  const isPm = isCurrentTermPm(me)
+  const isOp = isOperator(me)
+  const viewerBranch = getViewerBranch(me)
 
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
 
   const projects = useMemo(() => {
-    if (mode === "pm") {
+    if (isPm && viewerBranch) {
       return MOCK_MATCHING_PROJECTS.filter((p) => p.branch === viewerBranch)
     }
     return MOCK_MATCHING_PROJECTS.filter((p) => p.branch === selectedChapter)
-  }, [mode, viewerBranch, selectedChapter])
+  }, [isPm, viewerBranch, selectedChapter])
 
   const partGroups = useMemo(() => {
     const map = new Map<string, typeof projects>()
@@ -35,7 +45,7 @@ export function ProjectManagementPage() {
     return map
   }, [projects])
 
-  if (mode === "others") return null
+  if (!isOp && !isPm) return null
 
   return (
     <section className="relative flex w-full flex-col items-start justify-start pt-8">
@@ -51,7 +61,7 @@ export function ProjectManagementPage() {
           </span>
         </div>
 
-        {mode === "admin" && (
+        {canManage && (
           <ChapterSelector
             selectedChapter={selectedChapter}
             onChapterChange={setSelectedChapter}
@@ -60,7 +70,7 @@ export function ProjectManagementPage() {
         )}
 
         <div className="flex flex-col gap-10">
-          {mode === "admin" ? (
+          {canManage ? (
             partGroups.size > 0 ? (
               Array.from(partGroups.entries()).map(([part, partProjects]) => (
                 <div key={part} className="flex flex-col">

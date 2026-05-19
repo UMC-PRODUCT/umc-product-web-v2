@@ -3,6 +3,12 @@ import { useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import {
+  getViewerBranch,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
 import {
   getApplicationForm,
   mapApplicationFormToSections,
@@ -14,7 +20,6 @@ import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import { isRecruitDone } from "../model/matchingProject"
 import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
@@ -40,11 +45,9 @@ export function ProjectDetailCard({
   viewerBranch: viewerBranchProp,
   showEditCta = false,
 }: ProjectDetailCardProps) {
-  const mode = useViewModeStore((s) => s.mode)
-  const previewMode = useViewModeStore((s) => s.previewMode)
-  const effectiveMode = mode === "admin" ? previewMode : mode
-  const storeBranch = useViewModeStore((s) => s.viewerBranch)
-  const viewerBranch = viewerBranchProp ?? storeBranch
+  const { data: me } = useMe()
+  const userBranch = getViewerBranch(me)
+  const viewerBranch = viewerBranchProp ?? userBranch
   const addToast = useToastStore((s) => s.addToast)
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
@@ -82,10 +85,12 @@ export function ProjectDetailCard({
     setIsApplyModalOpen(false)
     setIsRecruitQuestionsModalOpen(false)
   }, [formError, addToast])
-  // admin 드롭다운 프리뷰는 실제 지부 비교 없이 항상 "같은 지부"로 간주 (임시)
-  const isSameBranch = mode === "admin" || viewerBranch === data.branch
+  const userIsOperator = isOperator(me)
+  const userIsPm = isCurrentTermPm(me)
+  const isSameBranch = userIsOperator || viewerBranch === data.branch
   const ctaMode = resolveProjectDetailCtaMode(
-    effectiveMode,
+    userIsOperator,
+    userIsPm,
     isSameBranch,
     data.isApplied ?? false,
   )
@@ -257,7 +262,7 @@ export function ProjectDetailCard({
               <ProjectApplyModal
                 data={data}
                 sections={sections}
-                canToggleSection={effectiveMode !== "others"}
+                canToggleSection={userIsOperator || userIsPm}
                 onBack={() => setIsApplyModalOpen(false)}
                 onSubmit={(answers) => {
                   console.log("[apply submit]", data.id, answers)
