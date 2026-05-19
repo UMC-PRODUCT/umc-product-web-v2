@@ -5,6 +5,7 @@ import type { ApiResponse } from "@/shared/lib/apiResponse"
 import type {
   CreateDraftProjectRequest,
   DraftProjectResponse,
+  ProjectDetailResponse,
   ProjectStatusResponse,
   UpdateProjectRequest,
 } from "./types"
@@ -45,6 +46,15 @@ export async function submitProject(
 ): Promise<ProjectStatusResponse> {
   const { data } = await api.post<ApiResponse<ProjectStatusResponse>>(
     `/v1/projects/${projectId}/submit`,
+  )
+  return data.result
+}
+
+export async function getProjectDetail(
+  projectId: number,
+): Promise<ProjectDetailResponse> {
+  const { data } = await api.get<ApiResponse<ProjectDetailResponse>>(
+    `/v1/projects/${projectId}`,
   )
   return data.result
 }

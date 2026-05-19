@@ -34,3 +34,6 @@ export type AddProjectMemberRequest =
   components["schemas"]["AddProjectMemberRequest"]
 export type TransferProjectOwnershipRequest =
   components["schemas"]["TransferProjectOwnershipRequest"]
+
+export type ProjectDetailResponse =
+  components["schemas"]["ProjectDetailResponse"]

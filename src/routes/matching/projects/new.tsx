@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import { getManagedProjects } from "@/features/project/management/api"
 import {
   ApplicationForm,
   BasicInfoForm,
@@ -20,6 +21,7 @@ import {
   buildUpsertApplicationFormBody,
   getApplicationForm,
   getMyDraft,
+  getProjectDetail,
   gisuKeys,
   projectKeys,
   submitProject,
@@ -28,6 +30,7 @@ import {
 } from "@/features/project/new/api"
 import { hydrateApplicationFormIntoStore } from "@/features/project/new/model/applicationFormHydrator"
 import { hydrateDraftIntoStore } from "@/features/project/new/model/draftHydrator"
+import { hydrateProjectDetailIntoStore } from "@/features/project/new/model/projectDetailHydrator"
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
@@ -42,10 +45,20 @@ export const Route = createFileRoute("/matching/projects/new")({
       throw redirect({ to: "/login" })
     }
   },
+  validateSearch: (search: Record<string, unknown>) => ({
+    projectId:
+      typeof search.projectId === "number"
+        ? search.projectId
+        : typeof search.projectId === "string" && /^\d+$/.test(search.projectId)
+          ? Number(search.projectId)
+          : undefined,
+  }),
   component: ProjectRegisterPage,
 })
 
 function ProjectRegisterPage() {
+  const { projectId: editProjectId } = Route.useSearch()
+  const isEditMode = editProjectId !== undefined
   const [step, setStep] = useState(1)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const navigate = useNavigate()
@@ -68,6 +81,7 @@ function ProjectRegisterPage() {
   const recruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const pmInfo = useProjectRegisterStore((s) => s.pmInfo)
   const reset = useProjectRegisterStore((s) => s.reset)
+  const setProjectId = useProjectRegisterStore((s) => s.setProjectId)
   const setGisuId = useProjectRegisterStore((s) => s.setGisuId)
   const setApplication = useProjectRegisterStore((s) => s.setApplication)
 
@@ -101,13 +115,51 @@ function ProjectRegisterPage() {
   const gisuId = gisuQuery.data?.gisuId
 
   useEffect(() => {
-    if (gisuId) setGisuId(gisuId)
+    if (gisuId) setGisuId(Number(gisuId))
   }, [gisuId, setGisuId])
+
+  const managedCheckQuery = useQuery({
+    queryKey: ["project", "managed", "me", gisuId, "check"],
+    queryFn: () => getManagedProjects(Number(gisuId)),
+    enabled: isPm && !isEditMode && !!gisuId,
+  })
+
+  useEffect(() => {
+    if (!isPm || isEditMode) return
+    if (managedCheckQuery.data && managedCheckQuery.data.length > 0) {
+      addToast({
+        message: "등록된 프로젝트가 이미 존재 합니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      navigate({ to: "/matching/projects/management", replace: true })
+    }
+  }, [isPm, isEditMode, managedCheckQuery.data, addToast, navigate])
+
+  useEffect(() => {
+    if (isEditMode && editProjectId && projectId !== editProjectId) {
+      setProjectId(editProjectId)
+    }
+  }, [isEditMode, editProjectId, projectId, setProjectId])
+
+  const detailQuery = useQuery({
+    queryKey: projectKeys.detail(editProjectId ?? 0),
+    queryFn: () => getProjectDetail(editProjectId!),
+    enabled: isEditMode,
+  })
+
+  useEffect(() => {
+    if (detailQuery.data) {
+      hydrateProjectDetailIntoStore(detailQuery.data)
+    }
+  }, [detailQuery.data])
 
   const draftQuery = useQuery({
     queryKey: projectKeys.draft(gisuId ?? 0),
     queryFn: () => getMyDraft(gisuId!),
-    enabled: !!gisuId,
+    enabled: !isEditMode && !!gisuId,
   })
 
   useEffect(() => {
@@ -138,6 +190,7 @@ function ProjectRegisterPage() {
         application.sections,
       )
       await upsertApplicationForm(projectId, body)
+      if (isEditMode) return
       const result = await submitProject(projectId)
       if (pmInfo.pm1) {
         await transferOwnership(projectId, {
@@ -152,7 +205,9 @@ function ProjectRegisterPage() {
     },
     onError: () => {
       addToast({
-        message: "프로젝트 등록에 실패했습니다. 다시 시도해주세요.",
+        message: isEditMode
+          ? "프로젝트 수정에 실패했습니다. 다시 시도해주세요."
+          : "프로젝트 등록에 실패했습니다. 다시 시도해주세요.",
         color: "red",
         variant: "deep",
         type: "default",
@@ -217,7 +272,10 @@ function ProjectRegisterPage() {
 
   const handleSuccessConfirm = async () => {
     setShowSuccessModal(false)
-    await navigate({ to: "/matching/projects", replace: true })
+    await navigate({
+      to: isEditMode ? "/matching/projects/management" : "/matching/projects",
+      replace: true,
+    })
   }
 
   return (
@@ -259,8 +317,12 @@ function ProjectRegisterPage() {
       <CtaModal
         open={showSuccessModal}
         variant="success"
-        title="등록 완료"
-        content="프로젝트 등록이 완료되었습니다."
+        title={isEditMode ? "수정 완료" : "등록 완료"}
+        content={
+          isEditMode
+            ? "프로젝트 수정이 완료되었습니다."
+            : "프로젝트 등록이 완료되었습니다."
+        }
         confirmText="확인"
         onOpenChange={setShowSuccessModal}
         onConfirm={handleSuccessConfirm}

@@ -1,5 +1,6 @@
 /** 피그마 기준 Project Card Lg입니다. */
 import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -45,6 +46,7 @@ export function ProjectDetailCard({
   viewerBranch: viewerBranchProp,
   showEditCta = false,
 }: ProjectDetailCardProps) {
+  const navigate = useNavigate()
   const { data: me } = useMe()
   const userBranch = getViewerBranch(me)
   const viewerBranch = viewerBranchProp ?? userBranch
@@ -179,7 +181,17 @@ export function ProjectDetailCard({
               기획 보기
             </Button>
             {showEditCta ? (
-              <Button className="flex-1">프로젝트 수정하기</Button>
+              <Button
+                className="flex-1"
+                onClick={() =>
+                  navigate({
+                    to: "/matching/projects/new",
+                    search: { projectId: Number(data.id) },
+                  })
+                }
+              >
+                프로젝트 수정하기
+              </Button>
             ) : (
               <>
                 {ctaMode === "recruit-questions" && (

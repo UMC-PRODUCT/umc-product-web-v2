@@ -12,6 +12,7 @@ export { updatePartQuotas } from "./partQuotas"
 export {
   createProjectDraft,
   getMyDraft,
+  getProjectDetail,
   submitProject,
   updateProjectDraft,
 } from "./projectDraft"
@@ -40,6 +41,7 @@ export type {
   PartQuotaEntry,
   PrepareUploadRequest,
   PrepareUploadResponse,
+  ProjectDetailResponse,
   ProjectStatusResponse,
   TransferProjectOwnershipRequest,
   UpdatePartQuotasRequest,
