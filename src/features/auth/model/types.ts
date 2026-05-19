@@ -91,12 +91,13 @@ export interface SchoolNameListResponse {
   schools: SchoolNameItem[]
 }
 
-export interface IdPwLoginRequest {
-  loginId: string
+export interface EmailLoginRequest {
+  email: string
   password: string
+  clientType: ClientType
 }
 
-export interface IdPwLoginResponse {
+export interface EmailLoginResponse {
   memberId: number
   accessToken: string
   refreshToken: string
