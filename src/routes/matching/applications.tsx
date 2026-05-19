@@ -29,7 +29,7 @@ function MatchingApplicationsPage() {
 
   const canApprove = isOperator(me)
   const isPm = isCurrentTermPm(me)
-  const isOthers = !isOperator(me) && !isPm
+  const isOthers = !canApprove && !isPm
 
   // Admin 뷰 데이터 (API 데이터가 비어있으면 mock fallback)
   const admin = useAdminPageData(selectedChapter)
