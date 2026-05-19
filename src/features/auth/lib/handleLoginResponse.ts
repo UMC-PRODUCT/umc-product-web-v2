@@ -6,8 +6,11 @@ export function handleLoginResponse(
   res: OAuthLoginResponse,
 ): "LOGIN_SUCCESS" | "REGISTER_REQUIRED" {
   if (res.code === "LOGIN_SUCCESS") {
-    localStorage.setItem("access_token", res.accessToken ?? "")
-    localStorage.setItem("refresh_token", res.refreshToken ?? "")
+    if (!res.accessToken || !res.refreshToken) {
+      throw new Error("로그인 응답에 토큰이 없습니다.")
+    }
+    localStorage.setItem("access_token", res.accessToken)
+    localStorage.setItem("refresh_token", res.refreshToken)
     return "LOGIN_SUCCESS"
   }
 
