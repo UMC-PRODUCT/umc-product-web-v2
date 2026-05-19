@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 
-import { getMyInfo } from "@/features/auth/api/me"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
 import { type Chapter, CHAPTERS } from "@/features/notice"
 
@@ -12,23 +12,7 @@ function isChapter(value: unknown): value is Chapter {
 
 export const Route = createFileRoute("/")({
   beforeLoad: async ({ context }) => {
-    if (
-      typeof window === "undefined" ||
-      !localStorage.getItem("access_token")
-    ) {
-      throw redirect({ to: "/login" })
-    }
-
-    let me: Awaited<ReturnType<typeof getMyInfo>>
-    try {
-      me = await context.queryClient.ensureQueryData({
-        queryKey: ["auth", "me"],
-        queryFn: getMyInfo,
-        staleTime: 1000 * 60 * 5,
-      })
-    } catch {
-      throw redirect({ to: "/login" })
-    }
+    const me = await ensureMe(context.queryClient)
 
     if (isOperator(me)) {
       throw redirect({ to: "/matching/projects" })

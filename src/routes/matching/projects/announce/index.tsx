@@ -4,8 +4,8 @@ import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { getMyInfo } from "@/features/auth/api/me"
 import { useMe } from "@/features/auth/hooks/useMe"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
 import {
   getAllChapters,
@@ -85,19 +85,7 @@ export const Route = createFileRoute("/matching/projects/announce/")({
     }
   },
   beforeLoad: async ({ search, context }) => {
-    if (!localStorage.getItem("access_token")) {
-      throw redirect({ to: "/login" })
-    }
-    let me: Awaited<ReturnType<typeof getMyInfo>>
-    try {
-      me = await context.queryClient.ensureQueryData({
-        queryKey: ["auth", "me"],
-        queryFn: getMyInfo,
-        staleTime: 1000 * 60 * 5,
-      })
-    } catch {
-      throw redirect({ to: "/login" })
-    }
+    const me = await ensureMe(context.queryClient)
     if (isOperator(me)) return
     const userChapter = getViewerBranch(me)
     if (isChapter(userChapter) && search.chapter !== userChapter) {
