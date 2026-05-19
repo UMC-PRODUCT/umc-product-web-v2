@@ -1,13 +1,14 @@
 import { redirect } from "@tanstack/react-router"
 
 import { getMyInfo, type MemberInfoResponse } from "@/features/auth/api/me"
+import { useAuthStore } from "@/features/auth/store/authStore"
 
 import type { QueryClient } from "@tanstack/react-query"
 
 export async function ensureMe(
   queryClient: QueryClient,
 ): Promise<MemberInfoResponse> {
-  if (typeof window === "undefined" || !localStorage.getItem("access_token")) {
+  if (!useAuthStore.getState().isAuthed) {
     throw redirect({ to: "/login" })
   }
 

@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import { useAuthStore } from "@/features/auth/store/authStore"
 import { getManagedProjects } from "@/features/project/management/api"
 import {
   ApplicationForm,
@@ -40,8 +41,7 @@ import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/B
 
 export const Route = createFileRoute("/matching/projects/new")({
   beforeLoad: () => {
-    const token = localStorage.getItem("access_token")
-    if (!token) {
+    if (!useAuthStore.getState().isAuthed) {
       throw redirect({ to: "/login" })
     }
   },

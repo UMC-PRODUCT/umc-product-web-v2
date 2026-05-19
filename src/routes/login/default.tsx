@@ -18,6 +18,7 @@ import {
 } from "@/features/auth/lib/googleSignIn"
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
+import { useAuthStore } from "@/features/auth/store/authStore"
 import {
   Divider,
   Input,
@@ -103,8 +104,11 @@ function DefaultLoginPage() {
 
     try {
       const res = await loginWithEmail({ email, password, clientType: "WEB" })
-      localStorage.setItem("access_token", res.accessToken)
-      localStorage.setItem("refresh_token", res.refreshToken)
+      useAuthStore.getState().setTokens({
+        accessToken: res.accessToken,
+        refreshToken: res.refreshToken,
+        memberId: res.memberId,
+      })
       void navigate({ to: "/" })
     } catch (error) {
       if (axios.isAxiosError(error)) {

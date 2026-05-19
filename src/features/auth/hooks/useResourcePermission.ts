@@ -5,11 +5,13 @@ import {
   type PermissionType,
   type ResourceType,
 } from "@/features/auth/api/permissions"
+import { useAuthStore } from "@/features/auth/store/authStore"
 
 export function useResourcePermission(
   resourceType: ResourceType,
   resourceId?: number,
 ) {
+  const isAuthed = useAuthStore((s) => s.isAuthed)
   const query = useQuery({
     queryKey: [
       "authorization",
@@ -18,8 +20,7 @@ export function useResourcePermission(
       resourceId,
     ],
     queryFn: () => getResourcePermission({ resourceType, resourceId }),
-    enabled:
-      typeof window !== "undefined" && !!localStorage.getItem("access_token"),
+    enabled: isAuthed,
     staleTime: 0,
   })
 
