@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { getMyInfo } from "@/features/auth/api/me"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
-import { getViewerBranch } from "@/features/auth/model/identity"
+import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllGisu,
@@ -82,6 +83,24 @@ export const Route = createFileRoute("/matching/")({
     return {
       chapter: isChapter(search.chapter) ? search.chapter : CHAPTERS[0],
       page: parsePage(search.page),
+    }
+  },
+  beforeLoad: async ({ search, context }) => {
+    if (!localStorage.getItem("access_token")) {
+      throw redirect({ to: "/login" })
+    }
+    const me = await context.queryClient.ensureQueryData({
+      queryKey: ["auth", "me"],
+      queryFn: getMyInfo,
+      staleTime: 1000 * 60 * 5,
+    })
+    if (isOperator(me)) return
+    const userChapter = getViewerBranch(me)
+    if (isChapter(userChapter) && search.chapter !== userChapter) {
+      throw redirect({
+        to: "/matching",
+        search: { ...search, chapter: userChapter },
+      })
     }
   },
   component: TeamMatchingAnnouncePage,

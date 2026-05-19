@@ -134,10 +134,7 @@ export function SignupStepTerms() {
       sessionStorage.removeItem(OAUTH_VERIFICATION_TOKEN_KEY)
       sessionStorage.removeItem("oauth_provider")
       reset()
-      void navigate({
-        to: "/matching",
-        search: { chapter: "Chromium", page: 1 },
-      })
+      void navigate({ to: "/" })
     } catch {
       addToast({
         message: "회원가입에 실패했습니다. 다시 시도해주세요.",
