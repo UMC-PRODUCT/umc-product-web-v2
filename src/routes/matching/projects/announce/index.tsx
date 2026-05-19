@@ -88,11 +88,16 @@ export const Route = createFileRoute("/matching/projects/announce/")({
     if (!localStorage.getItem("access_token")) {
       throw redirect({ to: "/login" })
     }
-    const me = await context.queryClient.ensureQueryData({
-      queryKey: ["auth", "me"],
-      queryFn: getMyInfo,
-      staleTime: 1000 * 60 * 5,
-    })
+    let me: Awaited<ReturnType<typeof getMyInfo>>
+    try {
+      me = await context.queryClient.ensureQueryData({
+        queryKey: ["auth", "me"],
+        queryFn: getMyInfo,
+        staleTime: 1000 * 60 * 5,
+      })
+    } catch {
+      throw redirect({ to: "/login" })
+    }
     if (isOperator(me)) return
     const userChapter = getViewerBranch(me)
     if (isChapter(userChapter) && search.chapter !== userChapter) {
