@@ -4,6 +4,9 @@ import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { getViewerBranch } from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllGisu,
@@ -20,7 +23,6 @@ import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { Pagination } from "@/shared/ui/Pagination"
-import { useViewModeStore } from "@/shared/view-mode"
 
 interface AnnounceSearch {
   chapter: Chapter
@@ -77,10 +79,8 @@ function readPendingNotice() {
 /** 프로젝트 설정 공지 페이지 (/matching/projects/announce) */
 export const Route = createFileRoute("/matching/projects/announce/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
-    // TODO: 사용자 지부 불러오기. 아래는 임시 상태.
-    const userChapter = useViewModeStore.getState().viewerBranch as Chapter
     return {
-      chapter: isChapter(search.chapter) ? search.chapter : userChapter,
+      chapter: isChapter(search.chapter) ? search.chapter : CHAPTERS[0],
       page: parsePage(search.page),
     }
   },
@@ -92,6 +92,11 @@ function ProjectSettingsAnnouncePage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
   const [pendingNotice] = useState(readPendingNotice)
+
+  const { data: me } = useMe()
+  const { hasPermission } = useResourcePermission("PROJECT")
+  const canManage = hasPermission("MANAGE")
+  const userChapter = getViewerBranch(me) as Chapter | undefined
 
   // 기수 정보 조회
   const { data: gisuData } = useQuery({
@@ -116,8 +121,6 @@ function ProjectSettingsAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
-  // 공지사항 조회: PM(PLAN CHALLENGER) 대상
-  // TODO: 공지사항 조회 실패 / 로딩 중 처리 로직 추가
   const { data: noticesData } = useQuery({
     queryKey: [
       "notices",
@@ -149,7 +152,6 @@ function ProjectSettingsAnnouncePage() {
       chip: item.mustRead ? "필독" : undefined,
     }))
 
-    // 필독 공지 상단 정렬
     return [...mappedNotices].sort((a, b) => {
       if (a.chip === "필독" && b.chip !== "필독") return -1
       if (a.chip !== "필독" && b.chip === "필독") return 1
@@ -162,10 +164,6 @@ function ProjectSettingsAnnouncePage() {
   const focusedNoticeId = pendingNotice?.id ?? null
 
   const queryClient = useQueryClient()
-  // TODO: 사용자 권한 및 지부 불러오기. 아래는 임시 상태.
-  const mode = useViewModeStore((s) => s.mode)
-  const userChapter = useViewModeStore((s) => s.viewerBranch) as Chapter
-  const canManage = mode === "admin"
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteNotice(Number(id)),
@@ -185,7 +183,7 @@ function ProjectSettingsAnnouncePage() {
   })
 
   const handleChapterChange = (nextChapter: Chapter) => {
-    if (mode !== "admin" && nextChapter !== userChapter) {
+    if (!canManage && userChapter && nextChapter !== userChapter) {
       addToast({
         message: "소속된 지부의 공지만 확인할 수 있습니다.",
         color: "red",
