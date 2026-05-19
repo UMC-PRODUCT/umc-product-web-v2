@@ -9,7 +9,6 @@ export { getApplicationForm, upsertApplicationForm } from "./applicationForm"
 
 export { memberBriefToItem, toMemberItem } from "./memberAdapter"
 export { updatePartQuotas } from "./partQuotas"
-export { canPerform, ClientPermissionError } from "./permissions"
 export {
   createProjectDraft,
   getMyDraft,
