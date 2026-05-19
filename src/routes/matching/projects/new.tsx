@@ -54,16 +54,19 @@ function ProjectRegisterPage() {
   const basicInfoRef = useRef<BasicInfoFormHandle>(null)
 
   const { data: me } = useMe()
-  const { hasPermission, isLoading: isPermLoading } =
-    useResourcePermission("PROJECT")
+  const {
+    hasPermission,
+    isLoading: isPermLoading,
+    isError: isPermError,
+  } = useResourcePermission("PROJECT")
   const isPm = isCurrentTermPm(me)
 
   useEffect(() => {
-    if (isPermLoading) return
+    if (isPermLoading || isPermError) return
     if (!hasPermission("WRITE")) {
       navigate({ to: "/matching/projects" })
     }
-  }, [isPermLoading, hasPermission, navigate])
+  }, [isPermLoading, isPermError, hasPermission, navigate])
 
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
