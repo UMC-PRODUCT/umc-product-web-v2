@@ -1,47 +1,93 @@
+import { useQuery } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 
 import { MOCK_PROJECTS } from "@/features/application/model/applicationMock"
 import { useMe } from "@/features/auth/hooks/useMe"
-import {
-  getViewerBranch,
-  isCurrentTermPm,
-  isOperator,
-} from "@/features/auth/model/identity"
+import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
 import { MOCK_MATCHING_PROJECTS } from "@/features/project/list/model/matchingProject.mock"
+import { gisuKeys } from "@/features/project/new/api/queryKeys"
+import { getActiveGisu } from "@/shared/api/gisu"
 import {
   type Chapter,
   ChapterSelector,
 } from "@/shared/ui/segment/ChapterSelector"
 
+import { getManagedProjects, type ManagedProjectSummaryResponse } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"
 import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
+
+import type { MatchingProject } from "@/features/project/list/model/matchingProject"
+
+function toMatchingProject(
+  item: ManagedProjectSummaryResponse,
+): MatchingProject {
+  const owner = item.productOwner
+  const ownerLine = [
+    owner?.nickname && owner?.name
+      ? `${owner.nickname}/${owner.name}`
+      : (owner?.name ?? ""),
+    owner?.schoolName,
+  ]
+    .filter(Boolean)
+    .join(" · ")
+
+  return {
+    id: String(item.id ?? ""),
+    branch: "",
+    school: owner?.schoolName ?? "",
+    title: item.name ?? "",
+    description: item.description ?? "",
+    authorSchoolLine: ownerLine,
+    coverImage: item.thumbnailImageUrl ? { src: item.thumbnailImageUrl } : null,
+    recruitRows: (item.partQuotas ?? []).map((q) => ({
+      part: q.part ?? "",
+      current: q.currentCount ?? 0,
+      total: q.quota ?? 0,
+    })),
+  }
+}
 
 export function ProjectManagementPage() {
   const { data: me } = useMe()
   const isPm = isCurrentTermPm(me)
   const isOp = isOperator(me)
   const canManage = isOp
-  const viewerBranch = getViewerBranch(me)
-
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
 
-  const projects = useMemo(() => {
-    if (isPm && viewerBranch) {
-      return MOCK_MATCHING_PROJECTS.filter((p) => p.branch === viewerBranch)
-    }
+  const gisuQuery = useQuery({
+    queryKey: gisuKeys.active,
+    queryFn: getActiveGisu,
+    enabled: isPm,
+  })
+  const gisuId = gisuQuery.data?.gisuId
+    ? Number(gisuQuery.data.gisuId)
+    : undefined
+
+  const managedQuery = useQuery({
+    queryKey: ["project", "managed", "me", gisuId],
+    queryFn: () => getManagedProjects(gisuId!),
+    enabled: isPm && !!gisuId,
+  })
+
+  const pmProjects: MatchingProject[] = useMemo(
+    () => (managedQuery.data ?? []).map(toMatchingProject),
+    [managedQuery.data],
+  )
+
+  const opProjects = useMemo(() => {
     return MOCK_MATCHING_PROJECTS.filter((p) => p.branch === selectedChapter)
-  }, [isPm, viewerBranch, selectedChapter])
+  }, [selectedChapter])
 
   const partGroups = useMemo(() => {
-    const map = new Map<string, typeof projects>()
-    for (const project of projects) {
+    const map = new Map<string, typeof opProjects>()
+    for (const project of opProjects) {
       for (const row of project.recruitRows) {
         if (!map.has(row.part)) map.set(row.part, [])
         map.get(row.part)!.push(project)
       }
     }
     return map
-  }, [projects])
+  }, [opProjects])
 
   if (!isOp && !isPm) return null
 
@@ -91,21 +137,29 @@ export function ProjectManagementPage() {
                 해당 챕터에 등록된 프로젝트가 없습니다.
               </p>
             )
-          ) : projects.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              {projects.map((project, i) => (
-                <ProjectManagementCard
-                  key={project.id}
-                  data={project}
-                  projectApplication={MOCK_PROJECTS[i % MOCK_PROJECTS.length]!}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-body-2-medium text-teal-gray-400 py-10 text-center">
-              등록된 프로젝트가 없습니다.
-            </p>
-          )}
+          ) : isPm ? (
+            managedQuery.isLoading ? (
+              <p className="text-body-2-regular text-teal-gray-400 py-10 text-center">
+                데이터를 불러오는 중...
+              </p>
+            ) : pmProjects.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {pmProjects.map((project, i) => (
+                  <ProjectManagementCard
+                    key={project.id}
+                    data={project}
+                    projectApplication={
+                      MOCK_PROJECTS[i % MOCK_PROJECTS.length]!
+                    }
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-body-2-medium text-teal-gray-400 py-10 text-center">
+                등록된 프로젝트가 없습니다.
+              </p>
+            )
+          ) : null}
         </div>
       </div>
     </section>

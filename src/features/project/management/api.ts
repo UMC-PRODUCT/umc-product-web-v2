@@ -1,0 +1,20 @@
+import { api } from "@/shared/lib/axios"
+
+import type { ApiResponse } from "@/shared/lib/apiResponse"
+import type { components } from "@/types/api"
+
+type ManagedProjectSummaryResponse =
+  components["schemas"]["ManagedProjectSummaryResponse"]
+type PageResponseManagedProjectSummaryResponse =
+  components["schemas"]["PageResponseManagedProjectSummaryResponse"]
+
+export type { ManagedProjectSummaryResponse }
+
+export async function getManagedProjects(
+  gisuId: number,
+): Promise<ManagedProjectSummaryResponse[]> {
+  const { data } = await api.get<
+    ApiResponse<PageResponseManagedProjectSummaryResponse>
+  >("/v1/projects/me/managed", { params: { gisuId } })
+  return data.result.content ?? []
+}
