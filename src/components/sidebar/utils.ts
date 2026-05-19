@@ -1,12 +1,10 @@
 import { SIDEBAR_ID, type SideBarSection } from "@/shared/config/navigation"
 
-import type { ViewMode } from "@/shared/view-mode"
-
-export function getVisibleSectionsByViewMode(
+export function filterSectionsByPermission(
   sections: readonly SideBarSection[],
-  mode: ViewMode,
+  canManageRecruitment: boolean,
 ): SideBarSection[] {
-  if (mode === "admin") return [...sections]
+  if (canManageRecruitment) return [...sections]
 
   return sections.map((section) => {
     if (section.id !== SIDEBAR_ID.section.teamMatching) return section

@@ -1,19 +1,21 @@
 import { useRouterState } from "@tanstack/react-router"
 import { useMemo } from "react"
 
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { Segment, type SegmentItem } from "@/shared/ui/segment/Segment"
-import { useViewModeStore } from "@/shared/view-mode"
 
-import { getVisibleSectionsByViewMode } from "./utils"
+import { filterSectionsByPermission } from "./utils"
 
 export function MatchingSegmentRegion() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
-  const mode = useViewModeStore((s) => s.mode)
+  const { hasPermission } = useResourcePermission("RECRUITMENT")
+  const canManageRecruitment = hasPermission("MANAGE")
+
   const visibleSections = useMemo(
-    () => getVisibleSectionsByViewMode(SIDEBAR_ITEMS, mode),
-    [mode],
+    () => filterSectionsByPermission(SIDEBAR_ITEMS, canManageRecruitment),
+    [canManageRecruitment],
   )
 
   const resolved = resolveNavigationFromPathname(pathname, visibleSections)
