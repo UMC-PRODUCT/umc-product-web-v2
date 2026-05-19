@@ -11,6 +11,8 @@ import {
 import { useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { isCurrentTermPm } from "@/features/auth/model/identity"
 import { searchMembers } from "@/features/challenger/api/member"
 import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
@@ -26,7 +28,6 @@ import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import {
   type BasicInfoFormData,
@@ -52,8 +53,8 @@ export const BasicInfoForm = forwardRef<
 >(function BasicInfoForm({ onNext }, ref) {
   const meQuery = useQuery({ queryKey: ["me"], queryFn: getMe })
   const me = meQuery.data
-
-  const viewMode = useViewModeStore((s) => s.mode)
+  const { data: meData } = useMe()
+  const isPm = isCurrentTermPm(meData)
   const activeGisuQuery = useQuery({
     queryKey: ["gisu", "active"],
     queryFn: getActiveGisu,
@@ -105,20 +106,16 @@ export const BasicInfoForm = forwardRef<
 
   const pm1Options = useMemo(() => {
     const filtered =
-      viewMode === "pm" && me
-        ? allPmMembers.filter((m) => m.id === me.id)
-        : allPmMembers
+      isPm && me ? allPmMembers.filter((m) => m.id === me.id) : allPmMembers
     return filtered.map((m) => ({
       value: m.id,
       label: `${m.nickname}/${m.name} · ${m.university}`,
     }))
-  }, [allPmMembers, viewMode, me])
+  }, [allPmMembers, isPm, me])
 
   const pm2Options = useMemo(() => {
     const excludeIds = new Set(
-      [pm1Member?.id, viewMode === "pm" && me ? me.id : undefined].filter(
-        Boolean,
-      ),
+      [pm1Member?.id, isPm && me ? me.id : undefined].filter(Boolean),
     )
     return allPmMembers
       .filter((m) => !excludeIds.has(m.id))
@@ -126,7 +123,7 @@ export const BasicInfoForm = forwardRef<
         value: m.id,
         label: `${m.nickname}/${m.name} · ${m.university}`,
       }))
-  }, [allPmMembers, pm1Member, viewMode, me])
+  }, [allPmMembers, pm1Member, isPm, me])
 
   const thumbnailRef = useRef<HTMLButtonElement>(null)
   const logoRef = useRef<HTMLButtonElement>(null)

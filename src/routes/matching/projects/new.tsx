@@ -8,6 +8,9 @@ import {
 import { useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { isCurrentTermPm } from "@/features/auth/model/identity"
 import {
   ApplicationForm,
   BasicInfoForm,
@@ -24,14 +27,12 @@ import {
   transferOwnership,
   upsertApplicationForm,
 } from "@/features/project/new/api"
-import { canAccessProjectNew } from "@/features/project/new/api/permissions"
 import { hydrateApplicationFormIntoStore } from "@/features/project/new/model/applicationFormHydrator"
 import { hydrateDraftIntoStore } from "@/features/project/new/model/draftHydrator"
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
@@ -49,15 +50,20 @@ function ProjectRegisterPage() {
   const [step, setStep] = useState(1)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const navigate = useNavigate()
-  const viewMode = useViewModeStore((s) => s.mode)
   const addToast = useToastStore((s) => s.addToast)
   const basicInfoRef = useRef<BasicInfoFormHandle>(null)
 
+  const { data: me } = useMe()
+  const { hasPermission, isLoading: isPermLoading } =
+    useResourcePermission("PROJECT")
+  const isPm = isCurrentTermPm(me)
+
   useEffect(() => {
-    if (!canAccessProjectNew(viewMode)) {
+    if (isPermLoading) return
+    if (!hasPermission("WRITE")) {
       navigate({ to: "/matching/projects" })
     }
-  }, [viewMode, navigate])
+  }, [isPermLoading, hasPermission, navigate])
 
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
@@ -158,17 +164,17 @@ function ProjectRegisterPage() {
   })
 
   const handleBasicInfoNext = () => {
-    setStep(viewMode === "pm" ? 3 : 2)
+    setStep(isPm ? 3 : 2)
   }
 
   const handleApplicationFormPrev = () => {
-    setStep(viewMode === "pm" ? 1 : 2)
+    setStep(isPm ? 1 : 2)
   }
 
   const isStep3Locked = false
 
   const handleStepChange = async (idx: number) => {
-    if (viewMode === "pm" && idx === 2) return
+    if (isPm && idx === 2) return
     if (idx <= step) {
       setStep(idx)
       return
@@ -230,10 +236,7 @@ function ProjectRegisterPage() {
         <Stepper
           step={step}
           onStepChange={handleStepChange}
-          disabledSteps={[
-            ...(viewMode === "pm" ? [2] : []),
-            ...(isStep3Locked ? [3] : []),
-          ]}
+          disabledSteps={[...(isPm ? [2] : []), ...(isStep3Locked ? [3] : [])]}
           disabledTooltips={{
             2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
             3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
