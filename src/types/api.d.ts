@@ -155,6 +155,127 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/test/seed/projects": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * [SEED-003] 프로젝트 시딩
+     * @description 활성 기수(또는 지정 기수)의 같은 school 멤버 풀에서 PLAN 1 + 프론트엔드 5~6 +
+     *     백엔드 5~6 의 멤버 슬롯을 추출해 프로젝트를 N 개 생성합니다.
+     *     School 단위 round-robin 으로 채우며, 풀이 부족한 셀은 skip 합니다.
+     *     PO 후보가 PLAN 챌린저로 등록되지 않은 경우 시딩 측에서 PLAN 챌린저로 등록한 뒤
+     *     createDraft 를 호출합니다.
+     */
+    post: operations["seedProjects"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/test/seed/notice": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * [SEED-005] Notice 시딩 (지부 · 학교 · 파트 분포)
+     * @description 활성 기수(또는 지정 기수)에 대해 다음 4 가지 scope 로 공지를 분포 시딩합니다.
+     *       GLOBAL  : 기수 전체 대상 (작성자에게 중앙 총괄단 권한 필요)
+     *       CHAPTER : 각 지부별        (작성자에게 해당 지부 회장 권한 필요)
+     *       SCHOOL  : 각 학교별        (작성자에게 해당 학교 회장단 권한 필요)
+     *       PART    : 각 파트별        (작성자에게 중앙 운영진 권한 필요)
+     *     각 공지의 제목과 내용에는 대상 범위 정보 ([전체]/[지부]/[학교]/[파트] + 식별자) 가
+     *     포함되어 운영 화면에서 시딩 데이터 식별이 쉬워집니다.
+     *     authorMemberId 의 권한이 부족한 scope 는 scopeBreakdown 의 failed 카운트에 잡힙니다.
+     */
+    post: operations["seedNotice"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/test/seed/members": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * [SEED-001] 더미 멤버 시딩
+     * @description ID/PW 더미 멤버를 N 명 즉시 생성합니다. 모든 더미 회원은 동일한 비밀번호
+     *     (app.seed.default-password)를 사용합니다.
+     *     force=false (기본) 이면 현재 회원 수가 임계값을 초과한 경우 시딩을 스킵합니다.
+     *     force=true 이면 임계값 체크를 무시하고 무조건 시딩합니다.
+     *     챌린저/프로젝트 시딩 전 호출이 필요합니다.
+     */
+    post: operations["seedMembers"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/test/seed/curriculum": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * [SEED-004] Curriculum 시딩 (Curriculum · WeeklyCurriculum · OriginalWorkbook · Mission)
+     * @description 활성 기수(또는 지정 기수)에 대해 ADMIN 제외 파트별로 다음 골격을 시딩합니다.
+     *     Curriculum (1/파트) → WeeklyCurriculum (1~N 주차) → OriginalWorkbook (MAIN, READY) → Mission (M개).
+     *     releaseRequesterMemberId 가 지정되면 모든 워크북을 READY → RELEASED 로 전환합니다.
+     *     각 단계별로 실패 격리되며, 단계별 실패 카운트가 응답에 포함됩니다.
+     */
+    post: operations["seedCurriculum"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/test/seed/challengers": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * [SEED-002] 챌린저 분포 시딩
+     * @description 특정 기수에 대해 (Chapter, School, Part) 셀마다 countPerPartPerSchool 명의 더미 회원 +
+     *     챌린저를 함께 생성합니다.
+     *     gisuId 가 null 이면 활성 기수, parts 가 null/empty 면 ADMIN 제외 전 파트,
+     *     chapterIds 가 null/empty 면 해당 기수의 모든 Chapter 가 대상입니다.
+     */
+    post: operations["seedChallengers"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/test/fcm/test-send": {
     parameters: {
       query?: never
@@ -757,7 +878,7 @@ export interface paths {
     put?: never
     /**
      * [PROJECT-104] 프로젝트 소유권 양도
-     * @description 메인 PM을 다른 PLAN 파트 챌린저에게 양도합니다. 현재 PM만 호출 가능. 종료 상태에서는 호출 불가.
+     * @description 메인 PM을 다른 PLAN 파트 챌린저에게 양도합니다. 현재 PM 또는 운영진이 호출 가능. 종료 상태에서는 호출 불가.
      */
     post: operations["transferOwnership"]
     delete?: never
@@ -777,7 +898,7 @@ export interface paths {
     put?: never
     /**
      * [PROJECT-107] 프로젝트 제출
-     * @description DRAFT 상태의 프로젝트를 제출하여 PENDING_REVIEW로 전이합니다. 작성자 PM만 호출 가능.
+     * @description DRAFT 상태의 프로젝트를 제출하여 PENDING_REVIEW로 전이합니다. 작성자(creator)만 호출 가능.
      */
     post: operations["submit"]
     delete?: never
@@ -850,7 +971,15 @@ export interface paths {
      *       <li>status -- 지원 상태 (SUBMITTED / APPROVED / REJECTED). 미지정 시 전체. DRAFT 입력 시 도메인 예외(APPLICATION_DRAFT_FILTER_NOT_ALLOWED) 발생.</li>
      *     </ul>
      *     <p>
-     *     TODO: 권한 검사 (@CheckAccess) 미적용. 운영 배포 전 PM/Sub-PO/지부장/학교장/Central Core 분기 추가 필요.
+     *     권한: 다음 호출자만 통과한다. 그 외에는 권한 부재를 '지원자 0건' 으로 위장하여 빈 리스트를 반환한다.
+     *     <ul>
+     *       <li>해당 프로젝트의 PO</li>
+     *       <li>해당 프로젝트의 보조 PM (ACTIVE PLAN 멤버)</li>
+     *       <li>SUPER_ADMIN</li>
+     *       <li>해당 프로젝트 기수의 Central Core (총괄/부총괄)</li>
+     *       <li>해당 프로젝트 지부의 지부장 (같은 기수)</li>
+     *       <li>해당 프로젝트 학교의 회장 (SCHOOL_PRESIDENT, 같은 기수)</li>
+     *     </ul>
      */
     get: operations["getProjectApplicants"]
     put?: never
@@ -1316,7 +1445,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/member/register/id-pw": {
+  "/api/v1/member/register/email": {
     parameters: {
       query?: never
       header?: never
@@ -1326,13 +1455,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [REGISTER-002] ID/PW 이용 회원가입
-     * @description OAuth가 아닌, ID/PW를 이용해서 하는 회원가입 입니다.
+     * [REGISTER-003] 이메일/PW 이용 회원가입
+     * @description ADR-017 에 따라 도입된 이메일 기반 회원가입 엔드포인트입니다.
      *
-     *     OAuth Provider 및 Provider ID를 받지 않는 부분을 제외하면 동일하게 동작합니다.
-     *     회원가입 전 ID 중복 검사를 진행할 수 있도록 해주세요.
+     *     로그인 식별자를 별도로 받지 않으며, `emailVerificationToken` 으로 검증된 이메일이
+     *     그대로 로그인 식별자로 사용됩니다.
      */
-    post: operations["registerMemberByIdPw"]
+    post: operations["registerMemberByEmail"]
     delete?: never
     options?: never
     head?: never
@@ -1708,26 +1837,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/auth/login/id-pw": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * [LOGIN-004] ID/PW 로그인
-     * @description loginId/password 로 인증하여 AccessToken/RefreshToken 을 발급받습니다.
-     */
-    post: operations["loginByIdPw"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   "/api/v1/auth/login/google": {
     parameters: {
       query?: never
@@ -1752,6 +1861,26 @@ export interface paths {
      *     - `success=true, code=REGISTER_REQUIRED`: OAuth 인증 성공, 회원가입 필요. oAuthVerificationToken 발급됨.
      */
     post: operations["googleOAuthLogin"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/login/email": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * [LOGIN-006] 이메일/PW 로그인
+     * @description email/password 로 인증하여 AccessToken/RefreshToken 을 발급받습니다. clientType(ANDROID, IOS, WEB)을 함께 전달하면 AccessToken claim 으로 반영됩니다.
+     */
+    post: operations["loginByEmail"]
     delete?: never
     options?: never
     head?: never
@@ -1800,6 +1929,9 @@ export interface paths {
      * @description 인증을 요청하는 이메일로 인증 코드를 발송합니다.
      *
      *     이메일 인증코드는 6자리의 숫자로만 구성되어 있습니다.
+     *
+     *     purpose 는 회원가입(REGISTER) 또는 비밀번호 초기화(PASSWORD_RESET) 중 하나여야 하며,
+     *     cross-purpose 공격 방어를 위해 세션 단위로 고정됩니다.
      */
     post: operations["sendEmailVerification"]
     delete?: never
@@ -1863,10 +1995,34 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CREDENTIAL-002] ID/PW 최초 등록
-     * @description OAuth 로 가입한 회원이 ID/PW로 로그인할 수 있도록 새롭게 추가할 수 있습니다. 기본적으로 ID는 한 번 등록하면 변경할 수 없으며, 향후 서비스 내에서 친구 추가 등 범용적으로 사용되므로 신중하게 결정하여야 합니다.
+     * [CREDENTIAL-002] 비밀번호 자격증명 최초 등록
+     * @description OAuth 로 가입한 회원이 이메일/비밀번호로 로그인할 수 있도록 비밀번호를 추가 등록합니다. 이메일은 회원의 기존 Member.email 을 그대로 사용합니다.
      */
     post: operations["registerCredential"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/admin/maintenance": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * [MAINT-003] 점검 윈도우 전체 목록
+     * @description 활성/예약/종료 모든 점검 윈도우를 최신순으로 조회합니다.
+     */
+    get: operations["listAll"]
+    put?: never
+    /**
+     * [MAINT-001] 점검 윈도우 생성
+     * @description 즉시 또는 예약 점검 윈도우를 생성합니다. SUPER_ADMIN 만 호출할 수 있습니다.
+     */
+    post: operations["start"]
     delete?: never
     options?: never
     head?: never
@@ -2743,6 +2899,46 @@ export interface paths {
     patch: operations["changePassword"]
     trace?: never
   }
+  "/api/v1/auth/password/reset": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * [CREDENTIAL-007] 비밀번호 초기화
+     * @description 비밀번호를 잊은 회원이 이메일 인증으로 발급받은 emailVerificationToken 을 사용해 현재 비밀번호 없이 새 비밀번호로 교체합니다. 사용자 열거 방지를 위해 회원 없음/자격증명 미등록 등의 사유는 모두 동일한 메시지로 응답합니다.
+     */
+    patch: operations["resetPasswordByEmail"]
+    trace?: never
+  }
+  "/api/v1/admin/maintenance/{windowId}/end": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * [MAINT-002] 점검 윈도우 강제 종료
+     * @description 지정한 점검 윈도우를 즉시 종료합니다. SUPER_ADMIN 만 호출할 수 있습니다.
+     */
+    patch: operations["forceEnd"]
+    trace?: never
+  }
   "/api/v1/admin/figma/routing-domains/{domainId}": {
     parameters: {
       query?: never
@@ -3191,6 +3387,26 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/system/status": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * [SYSTEM-001] 시스템 점검 상태 조회
+     * @description 현재 점검 활성 여부와 다음 예약 점검 정보를 반환합니다. 점검 중에도 항상 통과합니다.
+     */
+    get: operations["getStatus"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/study-groups/managed": {
     parameters: {
       query?: never
@@ -3300,15 +3516,22 @@ export interface paths {
      * [APPLY-102] 지원서 단건 상세 조회
      * @description 지원서 단건의 메타(지원자/매칭 차수/상태/시각) + 폼 구조(지원자 파트 기준 마스킹) + 제출된 답변 본문 + 첨부 파일 메타까지 한 번에 반환한다.
      *     <p>
-     *     노출 규칙:
+     *     권한 (L2 @CheckAccess READ):
      *     <ul>
-     *       <li>SUBMITTED/APPROVED/REJECTED -- 4종 호출자(PO/Sub-PO/지부장/CC/지원자 본인) 모두 동일 응답</li>
-     *       <li>DRAFT(임시저장) -- 지원자 본인만 조회 가능. 그 외 호출자에게는 404(PROJECT-0021) 로 위장하여 임시저장본의 존재 자체를 은닉</li>
+     *       <li>SUBMITTED/APPROVED/REJECTED -- 다음 호출자만 통과:
+     *         <ul>
+     *           <li>지원자 본인</li>
+     *           <li>해당 프로젝트의 PO</li>
+     *           <li>해당 프로젝트의 Sub-PO (ACTIVE PLAN 멤버)</li>
+     *           <li>해당 프로젝트 기수의 Central Core (총괄/부총괄/SUPER_ADMIN)</li>
+     *           <li>해당 프로젝트 지부의 지부장 (같은 기수)</li>
+     *         </ul>
+     *       </li>
+     *       <li>DRAFT(임시저장) -- 지원자 본인만 통과</li>
      *     </ul>
+     *     권한 부재 시 403(AUTHORIZATION-0002) 반환.
      *     <p>
      *     정합성: path 의 projectId 와 application 의 form.project.id 가 다르면 404(PROJECT-0021) 로 위장하여 다른 프로젝트의 지원서 존재 여부를 은닉한다.
-     *     <p>
-     *     TODO: 4종 호출자(@CheckAccess) 자격 검증은 추후에 추가된다 -- 현재 이 엔드포인트는 인증된 사용자라면 누구나 호출 가능.
      */
     get: operations["getApplicationDetail"]
     put?: never
@@ -3327,6 +3550,26 @@ export interface paths {
      *     Survey 응답 본문은 보존됨.
      */
     delete: operations["cancel"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/projects/members": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * [PROJECT-004] 프로젝트 팀원 구성 일괄 조회
+     * @description 복수의 projectId에 대한 팀원 구성을 조회합니다. 권한이 없거나 조회에 실패한 프로젝트는 결과에서 제외됩니다.
+     */
+    get: operations["getBatchMembers"]
+    put?: never
+    post?: never
+    delete?: never
     options?: never
     head?: never
     patch?: never
@@ -3896,7 +4139,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/auth/login-id/availability": {
+  "/api/v1/auth/email/availability": {
     parameters: {
       query?: never
       header?: never
@@ -3904,10 +4147,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CREDENTIAL-001] 로그인 ID 사용 가능 여부 조회
-     * @description loginId 가 형식에 맞고 아직 사용되지 않았는지 확인합니다. 형식이 잘못되면 400 응답입니다.
+     * [CREDENTIAL-005] 이메일 사용 가능 여부 조회
+     * @description email 형식이 유효하고 아직 사용되지 않았는지 확인합니다. 형식이 잘못되면 400 응답입니다.
      */
-    get: operations["checkLoginIdAvailability"]
+    get: operations["checkEmailAvailability"]
     put?: never
     post?: never
     delete?: never
@@ -3925,6 +4168,23 @@ export interface paths {
     }
     /** [DASHBOARD-100] 학교별 현황 조회 */
     get: operations["getSchoolSummaries"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/admin/maintenance/{windowId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** [MAINT-004] 점검 윈도우 단건 조회 */
+    get: operations["getOne"]
     put?: never
     post?: never
     delete?: never
@@ -3985,7 +4245,7 @@ export interface paths {
       cookie?: never
     }
     /** [FIGMA-001] Figma OAuth authorize URL 발급 */
-    get: operations["start"]
+    get: operations["start_1"]
     put?: never
     post?: never
     delete?: never
@@ -4384,6 +4644,184 @@ export interface components {
       /** @description 선택한 옵션 ID 목록. 빈 배열로 보내면 기존 응답이 취소됩니다. */
       optionIds?: number[]
     }
+    SeedProjectsRequest: {
+      /** Format: int32 */
+      projectCount?: number
+      /** Format: int64 */
+      gisuId?: number
+    }
+    PartialProject: {
+      /** Format: int64 */
+      projectId?: number
+      /** Format: int64 */
+      chapterId?: number
+      /** Format: int64 */
+      schoolId?: number
+      /** Format: int32 */
+      addedMemberCount?: number
+      /** Format: int32 */
+      expectedMemberCount?: number
+      reason?: string
+    }
+    SeedProjectsResponse: {
+      createdProjectIds?: number[]
+      partialProjects?: components["schemas"]["PartialProject"][]
+      skippedChapters?: components["schemas"]["SkippedCell"][]
+      /** Format: int32 */
+      failedCount?: number
+    }
+    SkippedCell: {
+      /** Format: int64 */
+      chapterId?: number
+      /** Format: int64 */
+      schoolId?: number
+      reason?: string
+    }
+    SeedNoticeRequest: {
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      authorMemberId: number
+      /** Format: int32 */
+      globalCount?: number
+      /** Format: int32 */
+      perChapterCount?: number
+      /** Format: int32 */
+      perSchoolCount?: number
+      /** Format: int32 */
+      perPartCount?: number
+      parts?: (
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      )[]
+    }
+    ScopeSummary: {
+      scope?: string
+      /** Format: int32 */
+      attempted?: number
+      /** Format: int32 */
+      created?: number
+      /** Format: int32 */
+      failed?: number
+    }
+    SeedNoticeResponse: {
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      authorMemberId?: number
+      createdNoticeIds?: number[]
+      scopeBreakdown?: components["schemas"]["ScopeSummary"][]
+      /** Format: int32 */
+      totalCreated?: number
+      /** Format: int32 */
+      totalFailed?: number
+      skipped?: boolean
+      reason?: string
+    }
+    SeedMembersRequest: {
+      /** Format: int32 */
+      count?: number
+      force?: boolean
+    }
+    SeedMembersResponse: {
+      /** Format: int32 */
+      registered?: number
+      skipped?: boolean
+      reason?: string
+    }
+    SeedCurriculumRequest: {
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int32 */
+      weeksPerCurriculum?: number
+      /** Format: int32 */
+      missionsPerWorkbook?: number
+      parts?: (
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      )[]
+      /** Format: int64 */
+      releaseRequesterMemberId?: number
+    }
+    SeedCurriculumResponse: {
+      /** Format: int64 */
+      gisuId?: number
+      createdCurriculumIds?: number[]
+      createdWeeklyCurriculumIds?: number[]
+      createdOriginalWorkbookIds?: number[]
+      createdMissionIds?: number[]
+      released?: boolean
+      /** Format: int32 */
+      curriculumFailed?: number
+      /** Format: int32 */
+      weeklyCurriculumFailed?: number
+      /** Format: int32 */
+      originalWorkbookFailed?: number
+      /** Format: int32 */
+      missionFailed?: number
+      /** Format: int32 */
+      releaseFailed?: number
+    }
+    SeedChallengersRequest: {
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int32 */
+      countPerPartPerSchool?: number
+      parts?: (
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      )[]
+      chapterIds?: number[]
+    }
+    PerCellSummary: {
+      /** Format: int64 */
+      chapterId?: number
+      /** Format: int64 */
+      schoolId?: number
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** Format: int32 */
+      created?: number
+      /** Format: int32 */
+      memberFailed?: number
+      /** Format: int32 */
+      challengerFailed?: number
+    }
+    SeedChallengersResponse: {
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int32 */
+      totalCreated?: number
+      /** Format: int32 */
+      totalFailed?: number
+      perCellSummary?: components["schemas"]["PerCellSummary"][]
+    }
     FcmTestSendRequest: {
       /** Format: int64 */
       memberId?: number
@@ -4393,7 +4831,6 @@ export interface components {
     SendVerificationEmailCommand: {
       to?: string
       verificationCode?: string
-      verificationLink?: string
     }
     CreateScheduleRequest: {
       /**
@@ -5419,8 +5856,7 @@ export interface components {
       accessToken?: string
       refreshToken?: string
     }
-    IdPwRegisterMemberRequest: {
-      loginId: string
+    EmailRegisterMemberRequest: {
       rawPassword: string
       /**
        * @description 이름
@@ -5759,6 +6195,8 @@ export interface components {
     }
     KakaoLoginRequest: {
       accessToken?: string
+      /** @enum {string} */
+      clientType?: "ANDROID" | "IOS" | "WEB"
     }
     OAuthLoginResponse: {
       /** @enum {string} */
@@ -5772,19 +6210,25 @@ export interface components {
     KakaoCodeLoginRequest: {
       authorizationCode: string
       redirectUri: string
+      /** @enum {string} */
+      clientType?: "ANDROID" | "IOS" | "WEB"
     }
-    LoginByIdPwRequest: {
-      loginId: string
+    GoogleLoginRequest: {
+      accessToken?: string
+      /** @enum {string} */
+      clientType?: "ANDROID" | "IOS" | "WEB"
+    }
+    LoginByEmailRequest: {
+      email: string
       password: string
+      /** @enum {string} */
+      clientType?: "ANDROID" | "IOS" | "WEB"
     }
-    IdPwLoginResponse: {
+    LocalLoginResponse: {
       /** Format: int64 */
       memberId?: number
       accessToken?: string
       refreshToken?: string
-    }
-    GoogleLoginRequest: {
-      accessToken?: string
     }
     AppleLoginRequest: {
       authorizationCode: string
@@ -5792,10 +6236,14 @@ export interface components {
       clientType: "ANDROID" | "IOS" | "WEB"
     }
     SendEmailVerificationRequest: {
-      email?: string
+      /** Format: email */
+      email: string
+      /** @enum {string} */
+      purpose: "REGISTER" | "PASSWORD_RESET"
     }
     SendEmailVerificationResponse: {
-      emailVerificationId?: string
+      /** Format: int64 */
+      emailVerificationId?: number
     }
     ResendEmailVerificationRequest: {
       /** Format: int64 */
@@ -5810,8 +6258,110 @@ export interface components {
       emailVerificationToken?: string
     }
     RegisterCredentialRequest: {
-      loginId: string
-      password: string
+      rawPassword: string
+    }
+    /** @description 점검 시작 요청 */
+    StartMaintenanceRequest: {
+      /**
+       * @description 점검 범위. FULL 또는 PER_DOMAIN
+       * @example FULL
+       * @enum {string}
+       */
+      scope: "FULL" | "PER_DOMAIN"
+      /** @description PER_DOMAIN 점검 시 대상 도메인 (FULL 이면 null/empty 허용) */
+      targetDomains?: (
+        | "CHALLENGER"
+        | "PROJECT"
+        | "SCHEDULE"
+        | "NOTICE"
+        | "COMMUNITY"
+        | "ORGANIZATION"
+        | "NOTIFICATION"
+        | "MEMBER"
+        | "STORAGE"
+        | "AUTHORIZATION"
+      )[]
+      /**
+       * Format: date-time
+       * @description 점검 시작 시각 (UTC). 즉시 시작이면 현재 시각
+       */
+      startAt: string
+      /**
+       * Format: date-time
+       * @description 점검 종료 시각 (UTC). 필수
+       */
+      endAt: string
+      /**
+       * @description 점검 제목
+       * @example 정기 점검
+       */
+      title: string
+      /** @description 점검 안내 메시지 */
+      message: string
+    }
+    /** @description 점검 윈도우 정보 */
+    MaintenanceWindowResponse: {
+      /**
+       * Format: int64
+       * @description 점검 윈도우 ID
+       */
+      id?: number
+      /**
+       * @description 점검 범위
+       * @example FULL
+       * @enum {string}
+       */
+      scope?: "FULL" | "PER_DOMAIN"
+      /** @description PER_DOMAIN 점검 대상 도메인 (FULL 이면 빈 집합) */
+      targetDomains?: (
+        | "CHALLENGER"
+        | "PROJECT"
+        | "SCHEDULE"
+        | "NOTICE"
+        | "COMMUNITY"
+        | "ORGANIZATION"
+        | "NOTIFICATION"
+        | "MEMBER"
+        | "STORAGE"
+        | "AUTHORIZATION"
+      )[]
+      /**
+       * Format: date-time
+       * @description 점검 시작 시각 (UTC)
+       */
+      startAt?: string
+      /**
+       * Format: date-time
+       * @description 점검 종료 시각 (UTC)
+       */
+      endAt?: string
+      /**
+       * @description 점검 제목
+       * @example 정기 점검
+       */
+      title?: string
+      /** @description 점검 안내 메시지 */
+      message?: string
+      /**
+       * Format: date-time
+       * @description 강제 종료 시각. 종료되지 않았으면 null
+       */
+      forcedEndedAt?: string
+      /**
+       * Format: int64
+       * @description 강제 종료를 수행한 운영자 memberId. 강제 종료되지 않았으면 null
+       */
+      forcedEndedBy?: number
+      /**
+       * Format: int64
+       * @description 생성자 memberId
+       */
+      createdBy?: number
+      /**
+       * Format: date-time
+       * @description 생성 시각
+       */
+      createdAt?: string
     }
     RegisterFigmaWatchedFileRequest: {
       fileKey: string
@@ -5928,6 +6478,12 @@ export interface components {
       startsAt?: string
       /** Format: date-time */
       endsAt?: string
+    }
+    EditOriginalWorkbookRequest: {
+      title?: string
+      description?: string
+      url?: string
+      content?: string
     }
     ChangeOriginalWorkbookStatusRequest: {
       /** Format: int64 */
@@ -6181,6 +6737,10 @@ export interface components {
     }
     ChangePasswordRequest: {
       currentPassword: string
+      newPassword: string
+    }
+    ResetPasswordByEmailRequest: {
+      emailVerificationToken: string
       newPassword: string
     }
     UpdateFigmaRoutingDomainRequest: {
@@ -6483,6 +7043,13 @@ export interface components {
       id?: number
       link?: string
       isMandatory?: boolean
+    }
+    /** @description 시스템 점검 상태 */
+    SystemStatusResponse: {
+      /** @description 현재 점검 중 여부 */
+      inMaintenance?: boolean
+      current?: components["schemas"]["MaintenanceWindowResponse"]
+      upcoming?: components["schemas"]["MaintenanceWindowResponse"]
     }
     /** @description 스터디 그룹 스터디원 응답 */
     StudyGroupMemberResponse: {
@@ -7634,8 +8201,8 @@ export interface components {
       resourceId?: number
       permissions?: components["schemas"]["PermissionInfo"][]
     }
-    LoginIdAvailabilityResponse: {
-      loginId?: string
+    EmailAvailabilityResponse: {
+      email?: string
       available?: boolean
     }
     AdminSchoolSummaryResponse: {
@@ -7974,6 +8541,7 @@ export interface components {
         | "FIGMA"
         | "LLM"
         | "ANALYTICS"
+        | "MAINTENANCE"
       /** @enum {string} */
       action?:
         | "CREATE"
@@ -8286,6 +8854,126 @@ export interface operations {
           [name: string]: unknown
         }
         content?: never
+      }
+    }
+  }
+  seedProjects: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SeedProjectsRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SeedProjectsResponse"]
+        }
+      }
+    }
+  }
+  seedNotice: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SeedNoticeRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SeedNoticeResponse"]
+        }
+      }
+    }
+  }
+  seedMembers: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SeedMembersRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SeedMembersResponse"]
+        }
+      }
+    }
+  }
+  seedCurriculum: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SeedCurriculumRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SeedCurriculumResponse"]
+        }
+      }
+    }
+  }
+  seedChallengers: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SeedChallengersRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SeedChallengersResponse"]
+        }
       }
     }
   }
@@ -9943,7 +10631,7 @@ export interface operations {
       }
     }
   }
-  registerMemberByIdPw: {
+  registerMemberByEmail: {
     parameters: {
       query?: never
       header?: never
@@ -9952,7 +10640,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["IdPwRegisterMemberRequest"]
+        "application/json": components["schemas"]["EmailRegisterMemberRequest"]
       }
     }
     responses: {
@@ -10453,30 +11141,6 @@ export interface operations {
       }
     }
   }
-  loginByIdPw: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LoginByIdPwRequest"]
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["IdPwLoginResponse"]
-        }
-      }
-    }
-  }
   googleOAuthLogin: {
     parameters: {
       query?: never
@@ -10497,6 +11161,30 @@ export interface operations {
         }
         content: {
           "*/*": components["schemas"]["OAuthLoginResponse"]
+        }
+      }
+    }
+  }
+  loginByEmail: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginByEmailRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["LocalLoginResponse"]
         }
       }
     }
@@ -10614,6 +11302,50 @@ export interface operations {
           [name: string]: unknown
         }
         content?: never
+      }
+    }
+  }
+  listAll: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["MaintenanceWindowResponse"][]
+        }
+      }
+    }
+  }
+  start: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StartMaintenanceRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["MaintenanceWindowResponse"]
+        }
       }
     }
   }
@@ -11111,7 +11843,11 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: never
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EditOriginalWorkbookRequest"]
+      }
+    }
     responses: {
       /** @description OK */
       200: {
@@ -12182,6 +12918,50 @@ export interface operations {
       }
     }
   }
+  resetPasswordByEmail: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetPasswordByEmailRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  forceEnd: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        windowId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["MaintenanceWindowResponse"]
+        }
+      }
+    }
+  }
   getDomain: {
     parameters: {
       query?: never
@@ -12365,6 +13145,7 @@ export interface operations {
     parameters: {
       query: {
         email: string
+        purpose?: "REGISTER" | "PASSWORD_RESET"
       }
       header?: never
       path?: never
@@ -12803,6 +13584,26 @@ export interface operations {
       }
     }
   }
+  getStatus: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SystemStatusResponse"]
+        }
+      }
+    }
+  }
   getStudyGroups: {
     parameters: {
       query?: {
@@ -12971,6 +13772,30 @@ export interface operations {
         }
         content: {
           "*/*": components["schemas"]["ProjectApplicationStatusResponse"]
+        }
+      }
+    }
+  }
+  getBatchMembers: {
+    parameters: {
+      query: {
+        projectIds: number[]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": {
+            [key: string]: components["schemas"]["ProjectMembersResponse"]
+          }
         }
       }
     }
@@ -13888,10 +14713,10 @@ export interface operations {
       }
     }
   }
-  checkLoginIdAvailability: {
+  checkEmailAvailability: {
     parameters: {
       query: {
-        loginId: string
+        email: string
       }
       header?: never
       path?: never
@@ -13905,7 +14730,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "*/*": components["schemas"]["LoginIdAvailabilityResponse"]
+          "*/*": components["schemas"]["EmailAvailabilityResponse"]
         }
       }
     }
@@ -13937,6 +14762,28 @@ export interface operations {
         }
         content: {
           "*/*": components["schemas"]["PageResponseAdminSchoolSummaryResponse"]
+        }
+      }
+    }
+  }
+  getOne: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        windowId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["MaintenanceWindowResponse"]
         }
       }
     }
@@ -14007,7 +14854,7 @@ export interface operations {
       }
     }
   }
-  start: {
+  start_1: {
     parameters: {
       query?: never
       header?: never
@@ -14198,6 +15045,7 @@ export interface operations {
           | "FIGMA"
           | "LLM"
           | "ANALYTICS"
+          | "MAINTENANCE"
         action?:
           | "CREATE"
           | "UPDATE"
