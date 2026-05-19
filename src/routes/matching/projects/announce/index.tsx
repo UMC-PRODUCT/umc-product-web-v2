@@ -269,7 +269,7 @@ function ProjectSettingsAnnouncePage() {
               공지
             </span>
             <p className="text-body-2-regular text-teal-gray-600">
-              {mode === "admin"
+              {canManage
                 ? "프로젝트 설정에 대한 지부별 공지를 PM 챌린저에게 안내합니다."
                 : "프로젝트 설정에 대한 우리 지부의 PM 챌린저 공지를 한눈에 조회합니다."}
             </p>

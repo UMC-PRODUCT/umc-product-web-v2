@@ -6,7 +6,11 @@ import { useEffect, useMemo, useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { getMyInfo } from "@/features/auth/api/me"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
+import {
+  getViewerBranch,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllGisu,
@@ -113,6 +117,7 @@ function TeamMatchingAnnouncePage() {
 
   const { data: me } = useMe()
   const canManage = isOperator(me)
+  const isPm = isCurrentTermPm(me)
   const userChapter = getViewerBranch(me) as Chapter | undefined
 
   // 기수 정보 조회
@@ -268,9 +273,9 @@ function TeamMatchingAnnouncePage() {
               공지
             </span>
             <p className="text-body-2-regular text-teal-gray-600">
-              {mode === "admin"
+              {canManage
                 ? "팀 매칭에 대한 지부별 공지를 모든 챌린저에게 안내합니다."
-                : mode === "pm"
+                : isPm
                   ? "팀 매칭에 대한 우리 지부의 모든 공지를 한눈에 조회합니다."
                   : "팀 매칭에 대한 우리 지부의 공지를 한눈에 조회합니다."}
             </p>
