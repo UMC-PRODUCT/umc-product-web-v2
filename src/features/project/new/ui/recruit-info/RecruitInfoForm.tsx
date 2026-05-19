@@ -1,7 +1,8 @@
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { isOperator } from "@/features/auth/model/identity"
 import {
   buildPartQuotasEntries,
   updatePartQuotas,
@@ -53,8 +54,8 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
   const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
   const projectId = useProjectRegisterStore((s) => s.projectId)
-  const { hasPermission } = useResourcePermission("RECRUITMENT")
-  const canUpdatePartQuotas = hasPermission("EDIT")
+  const { data: me } = useMe()
+  const canUpdatePartQuotas = isOperator(me)
 
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)

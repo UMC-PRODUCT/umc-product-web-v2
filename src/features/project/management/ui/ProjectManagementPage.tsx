@@ -2,7 +2,6 @@ import { useMemo, useState } from "react"
 
 import { MOCK_PROJECTS } from "@/features/application/model/applicationMock"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import {
   getViewerBranch,
   isCurrentTermPm,
@@ -19,10 +18,9 @@ import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
 export function ProjectManagementPage() {
   const { data: me } = useMe()
-  const { hasPermission } = useResourcePermission("PROJECT")
-  const canManage = hasPermission("MANAGE")
   const isPm = isCurrentTermPm(me)
   const isOp = isOperator(me)
+  const canManage = isOp
   const viewerBranch = getViewerBranch(me)
 
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")

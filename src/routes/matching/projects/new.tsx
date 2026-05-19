@@ -9,8 +9,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
-import { isCurrentTermPm } from "@/features/auth/model/identity"
+import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
 import {
   ApplicationForm,
   BasicInfoForm,
@@ -54,19 +53,15 @@ function ProjectRegisterPage() {
   const basicInfoRef = useRef<BasicInfoFormHandle>(null)
 
   const { data: me } = useMe()
-  const {
-    hasPermission,
-    isLoading: isPermLoading,
-    isError: isPermError,
-  } = useResourcePermission("PROJECT")
   const isPm = isCurrentTermPm(me)
+  const canWrite = isOperator(me) || isPm
 
   useEffect(() => {
-    if (isPermLoading || isPermError) return
-    if (!hasPermission("WRITE")) {
+    if (me === undefined) return
+    if (!canWrite) {
       navigate({ to: "/matching/projects" })
     }
-  }, [isPermLoading, isPermError, hasPermission, navigate])
+  }, [me, canWrite, navigate])
 
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)

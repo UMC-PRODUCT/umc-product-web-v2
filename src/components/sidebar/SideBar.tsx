@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 
 import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { isOperator } from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { cn } from "@/shared/lib/utils"
 
@@ -16,11 +16,8 @@ interface SideBarProps {
 const DEMO_DAY_EDITION = 10
 
 export default function SideBar({ className }: SideBarProps) {
-  const { isLoading: isMeLoading } = useMe()
-  const { hasPermission, isLoading: isPermLoading } =
-    useResourcePermission("RECRUITMENT")
-
-  const canManageRecruitment = hasPermission("MANAGE")
+  const { data: me, isLoading: isMeLoading } = useMe()
+  const canManageRecruitment = isOperator(me)
 
   const visibleSections = useMemo(
     () => filterSectionsByPermission(SIDEBAR_ITEMS, canManageRecruitment),
@@ -38,7 +35,7 @@ export default function SideBar({ className }: SideBarProps) {
     )
   }, [visibleSections])
 
-  const isLoading = isMeLoading || isPermLoading
+  const isLoading = isMeLoading
 
   return (
     <nav

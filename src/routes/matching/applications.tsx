@@ -14,7 +14,6 @@ import { ApplicationStatsSection } from "@/features/application/ui/ApplicationSt
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
@@ -26,10 +25,9 @@ export const Route = createFileRoute("/matching/applications")({
 
 function MatchingApplicationsPage() {
   const { data: me } = useMe()
-  const { hasPermission } = useResourcePermission("PROJECT_APPLICATION")
   const [selectedChapter, setSelectedChapter] = useState("Chromium")
 
-  const canApprove = hasPermission("APPROVE")
+  const canApprove = isOperator(me)
   const isPm = isCurrentTermPm(me)
   const isOthers = !isOperator(me) && !isPm
 

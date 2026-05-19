@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { getMyInfo } from "@/features/auth/api/me"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
 import {
   getAllChapters,
@@ -113,8 +112,7 @@ function ProjectSettingsAnnouncePage() {
   const [pendingNotice] = useState(readPendingNotice)
 
   const { data: me } = useMe()
-  const { hasPermission } = useResourcePermission("PROJECT")
-  const canManage = hasPermission("MANAGE")
+  const canManage = isOperator(me)
   const userChapter = getViewerBranch(me) as Chapter | undefined
 
   // 기수 정보 조회
