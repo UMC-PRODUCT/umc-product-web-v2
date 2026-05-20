@@ -68,12 +68,12 @@ export function NoticeCardList({
   if (isLoading) {
     return (
       <div className="flex w-full flex-col">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <div key={`skeleton-${index}`} className="w-full">
-            <NoticeCardSkeleton />
-            {index < 4 ? <Border /> : null}
-          </div>
-        ))}
+{Array.from({ length: 3 }).map((_, index, array) => (
+  <div key={"skeleton-" + index} className="w-full">
+    <NoticeCardSkeleton />
+    {index < array.length - 1 ? <Border /> : null}
+  </div>
+))}
       </div>
     )
   }
