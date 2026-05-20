@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useState } from "react"
 
 import { Border } from "./Border"
 import { NoticeCard } from "./NoticeCard"
+import { NoticeCardSkeleton } from "./NoticeCardSkeleton"
 
 // TODO: 공지 API 응답 형식에 맞추어 수정
 export type NoticeItem = {
@@ -15,6 +16,7 @@ export type NoticeItem = {
 interface NoticeCardListProps {
   notices: NoticeItem[]
   page: number
+  isLoading?: boolean
   canManage?: boolean
   focusedNoticeId?: string | null
   onDeleteNotice?: (noticeId: string) => void
@@ -25,6 +27,7 @@ interface NoticeCardListProps {
 export function NoticeCardList({
   notices,
   page,
+  isLoading = false,
   canManage = false,
   focusedNoticeId,
   onDeleteNotice,
@@ -61,6 +64,19 @@ export function NoticeCardList({
     targetButton.focus()
     targetButton.scrollIntoView({ block: "center", behavior: "smooth" })
   }, [expandedIndex, focusedNoticeId, notices])
+
+  if (isLoading) {
+    return (
+      <div className="flex w-full flex-col">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={`skeleton-${index}`} className="w-full">
+            <NoticeCardSkeleton />
+            {index < 4 ? <Border /> : null}
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="flex w-full flex-col">
