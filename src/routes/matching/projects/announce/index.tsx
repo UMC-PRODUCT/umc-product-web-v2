@@ -131,7 +131,7 @@ function ProjectSettingsAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
-  const { data: noticesData } = useQuery({
+  const { data: noticesData, isLoading: isNoticesLoading } = useQuery({
     queryKey: [
       "notices",
       "project-settings",
@@ -295,6 +295,7 @@ function ProjectSettingsAnnouncePage() {
             <NoticeCardList
               notices={notices}
               page={safePage}
+              isLoading={isNoticesLoading}
               canManage={canManage}
               focusedNoticeId={focusedNoticeId}
               onDeleteNotice={handleNoticeDeleteClick}

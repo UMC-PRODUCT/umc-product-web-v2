@@ -136,7 +136,7 @@ function TeamMatchingAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
-  const { data: noticesData } = useQuery({
+  const { data: noticesData, isLoading: isNoticesLoading } = useQuery({
     queryKey: [
       "notices",
       "team-matching",
@@ -301,6 +301,7 @@ function TeamMatchingAnnouncePage() {
             <NoticeCardList
               notices={notices}
               page={safePage}
+              isLoading={isNoticesLoading}
               canManage={canManage}
               focusedNoticeId={focusedNoticeId}
               onDeleteNotice={handleNoticeDeleteClick}
