@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import GenerationListItem from "@/components/header/GenerationListItem"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { logout } from "@/features/auth/lib/logout"
-import { isOperator } from "@/features/auth/model/identity"
+import { isCentralStaff, isSuperAdmin } from "@/features/auth/model/identity"
 import { toRoleTag } from "@/features/auth/model/mappers"
 import { cn } from "@/shared/lib/utils"
 
@@ -31,7 +31,7 @@ export function ProfileDropdown({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const { data: me } = useMe()
-  const canManageMembers = isOperator(me)
+  const canManageMembers = isSuperAdmin(me) || isCentralStaff(me)
 
   useEffect(() => {
     if (!isOpen) return
