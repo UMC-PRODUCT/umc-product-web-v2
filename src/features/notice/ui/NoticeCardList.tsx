@@ -24,6 +24,8 @@ interface NoticeCardListProps {
   renderContent?: (noticeId: string) => ReactNode
 }
 
+const SKELETON_COUNT = 3
+
 export function NoticeCardList({
   notices,
   page,
@@ -68,7 +70,7 @@ export function NoticeCardList({
   if (isLoading) {
     return (
       <div className="flex w-full flex-col">
-        {Array.from({ length: 3 }).map((_, index) => (
+        {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
           <div key={`skeleton-${index}`} className="w-full">
             <NoticeCardSkeleton />
             {index < 4 ? <Border /> : null}
