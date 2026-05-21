@@ -3,8 +3,12 @@ import { createFileRoute, Outlet } from "@tanstack/react-router"
 import Header from "@/components/header/Header"
 import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
 import SideBar from "@/components/sidebar/SideBar"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 
 export const Route = createFileRoute("/matching")({
+  beforeLoad: async ({ context }) => {
+    await ensureMe(context.queryClient)
+  },
   component: MatchingLayout,
 })
 
