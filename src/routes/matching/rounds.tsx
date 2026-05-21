@@ -1,6 +1,8 @@
-import { createFileRoute, useBlocker } from "@tanstack/react-router"
+import { createFileRoute, redirect, useBlocker } from "@tanstack/react-router"
 import { useState } from "react"
 
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { isOperator } from "@/features/auth/model/identity"
 import {
   type Branch,
   MATCHING_TYPES,
@@ -17,6 +19,10 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 
 export const Route = createFileRoute("/matching/rounds")({
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (!isOperator(me)) throw redirect({ to: "/" })
+  },
   component: MatchingRoundsPage,
 })
 

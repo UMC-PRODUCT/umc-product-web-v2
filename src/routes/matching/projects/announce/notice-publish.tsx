@@ -1,5 +1,12 @@
-import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router"
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useMatchRoute,
+} from "@tanstack/react-router"
 
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { isOperator } from "@/features/auth/model/identity"
 import { NoticePublishForm } from "@/features/notice"
 
 import type { PartEnum } from "@/features/notice/model/apiTypes"
@@ -11,6 +18,10 @@ interface NoticePublishSearch {
 export const Route = createFileRoute(
   "/matching/projects/announce/notice-publish",
 )({
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (!isOperator(me)) throw redirect({ to: "/" })
+  },
   validateSearch: (search: Record<string, unknown>): NoticePublishSearch => {
     return {
       chapter: typeof search.chapter === "string" ? search.chapter : undefined,

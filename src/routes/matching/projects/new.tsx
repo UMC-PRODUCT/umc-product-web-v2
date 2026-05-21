@@ -9,8 +9,8 @@ import { useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
-import { useAuthStore } from "@/features/auth/store/authStore"
 import { getManagedProjects } from "@/features/project/management/api"
 import {
   ApplicationForm,
@@ -40,9 +40,10 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
 export const Route = createFileRoute("/matching/projects/new")({
-  beforeLoad: () => {
-    if (!useAuthStore.getState().isAuthed) {
-      throw redirect({ to: "/login" })
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (!isOperator(me) && !isCurrentTermPm(me)) {
+      throw redirect({ to: "/matching/projects" })
     }
   },
   validateSearch: (search: Record<string, unknown>) => ({
@@ -67,14 +68,6 @@ function ProjectRegisterPage() {
 
   const { data: me } = useMe()
   const isPm = isCurrentTermPm(me)
-  const canWrite = isOperator(me) || isPm
-
-  useEffect(() => {
-    if (me === undefined) return
-    if (!canWrite) {
-      navigate({ to: "/matching/projects" })
-    }
-  }, [me, canWrite, navigate])
 
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
