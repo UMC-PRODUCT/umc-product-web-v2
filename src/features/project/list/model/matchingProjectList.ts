@@ -134,6 +134,16 @@ export function useMatchingProjectListFilters() {
     enabled: activeGisuId !== undefined,
   })
 
+  const selectedBranchLabel = useMemo(
+    () => branchOptions.find((o) => o.value === selectedBranch)?.label,
+    [branchOptions, selectedBranch],
+  )
+
+  const selectedSchoolLabel = useMemo(
+    () => schoolOptions.find((o) => o.value === selectedSchool)?.label,
+    [schoolOptions, selectedSchool],
+  )
+
   const selectedPartLabel = useMemo(() => {
     if (selectedParts.length === 0) return undefined
     if (selectedParts.length === 1)
@@ -171,6 +181,7 @@ export function useMatchingProjectListFilters() {
       label: "지부",
       options: branchOptions,
       selectedValue: selectedBranch,
+      selectedLabel: selectedBranchLabel,
       onSelect: (value) => {
         setSelectedBranch((prev) => (prev === value ? undefined : value))
         setSelectedSchool(undefined)
@@ -182,6 +193,7 @@ export function useMatchingProjectListFilters() {
       label: "PM 학교",
       options: schoolOptions,
       selectedValue: selectedSchool,
+      selectedLabel: selectedSchoolLabel,
       onSelect: (value) =>
         setSelectedSchool((prev) => (prev === value ? undefined : value)),
       ...FILTER_LAYOUT.school,
