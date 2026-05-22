@@ -3,6 +3,7 @@ import { api } from "@/shared/lib/axios"
 import type {
   AppleLoginRequest,
   GoogleLoginRequest,
+  KakaoCodeLoginRequest,
   KakaoLoginRequest,
   OAuthLoginResponse,
 } from "@/features/auth/model/types"
@@ -22,7 +23,17 @@ export async function loginWithKakao(
   payload: KakaoLoginRequest,
 ): Promise<OAuthLoginResponse> {
   const { data } = await api.post<ApiResponse<OAuthLoginResponse>>(
-    "/v1/auth/login/kakao",
+    "/v1/auth/login/kakao/code",
+    payload,
+  )
+  return data.result
+}
+
+export async function loginWithKakaoCode(
+  payload: KakaoCodeLoginRequest,
+): Promise<OAuthLoginResponse> {
+  const { data } = await api.post<ApiResponse<OAuthLoginResponse>>(
+    "/v1/auth/login/kakao/code",
     payload,
   )
   return data.result

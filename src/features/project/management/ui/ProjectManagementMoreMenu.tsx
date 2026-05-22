@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { Popover } from "radix-ui"
 import { useState } from "react"
 
@@ -10,6 +11,7 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import type { ProjectApplication } from "@/features/application/model/types"
 
 interface ProjectManagementMoreMenuProps {
+  projectId: string
   projectName: string
   projectApplication: ProjectApplication
   chapterName: string
@@ -17,11 +19,13 @@ interface ProjectManagementMoreMenuProps {
 }
 
 export function ProjectManagementMoreMenu({
+  projectId,
   projectName,
   projectApplication,
   chapterName,
   onDelete,
 }: ProjectManagementMoreMenuProps) {
+  const navigate = useNavigate()
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [applicationOpen, setApplicationOpen] = useState(false)
@@ -37,10 +41,18 @@ export function ProjectManagementMoreMenu({
     setApplicationOpen(true)
   }
 
+  const handleEditClick = () => {
+    setPopoverOpen(false)
+    navigate({
+      to: "/matching/projects/new",
+      search: { projectId: Number(projectId) },
+    })
+  }
+
   const MENU_ITEMS = [
     { label: "지원 현황 확인하기", onClick: handleApplicationClick },
     { label: "기획 보기", onClick: () => {} },
-    { label: "프로젝트 수정하기", onClick: () => {} },
+    { label: "프로젝트 수정하기", onClick: handleEditClick },
     { label: "팀원 구성 보기", onClick: () => {} },
   ]
 
@@ -107,7 +119,7 @@ export function ProjectManagementMoreMenu({
             color: "primary",
             variant: "deep",
             type: "default",
-            duration: 3,
+            duration: 3000,
           })
         }}
       />

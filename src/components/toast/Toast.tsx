@@ -92,7 +92,7 @@ export function Toast({
             countdownColorMap[resolvedColor],
           )}
         >
-          {remaining}s
+          {Math.ceil(remaining / 1000)}s
         </span>
       ) : (
         <button

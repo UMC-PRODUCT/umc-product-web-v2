@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
 
+import { useProjectRegisterStore } from "../../model/useProjectRegisterStore"
+
 import type { Ref } from "react"
 import type {
   FieldErrors,
@@ -26,6 +28,8 @@ interface ProjectCardFormProps {
   watch: UseFormWatch<BasicInfoFormData>
   errors: FieldErrors<BasicInfoFormData>
   thumbnailRef?: Ref<HTMLButtonElement>
+  thumbnailUrl?: string
+  logoUrl?: string
 }
 
 export function ProjectCardForm({
@@ -38,30 +42,38 @@ export function ProjectCardForm({
   watch,
   errors,
   thumbnailRef,
+  thumbnailUrl,
+  logoUrl,
 }: ProjectCardFormProps) {
+  const setUploaded = useProjectRegisterStore((s) => s.setUploaded)
   const description = watch("description") ?? ""
   const logo = watch("logo")
-  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null)
+  const [localLogoPreviewUrl, setLocalLogoPreviewUrl] = useState<string | null>(
+    null,
+  )
+  const logoPreviewUrl = localLogoPreviewUrl ?? logoUrl ?? null
 
   useEffect(() => {
     if (!(logo instanceof File)) {
-      setLogoPreviewUrl(null)
+      setLocalLogoPreviewUrl(null)
       return
     }
     const url = URL.createObjectURL(logo)
-    setLogoPreviewUrl(url)
+    setLocalLogoPreviewUrl(url)
     return () => URL.revokeObjectURL(url)
   }, [logo])
 
   return (
-    <div className="border-teal-gray-100 flex h-116.5 w-135 flex-col rounded-[12px] border">
+    <div className="border-teal-gray-100 shadow-drop-neutral-2 flex h-fit w-135 flex-col rounded-[12px] border bg-white">
       <ImageUploader
         ref={thumbnailRef}
         focusTarget="thumbnail"
         variant="thumbnail"
-        onChange={(file) =>
+        initialUrl={thumbnailUrl}
+        onChange={(file) => {
           setValue("thumbnail", file, { shouldValidate: true })
-        }
+          setUploaded({ thumbnailFileId: null, thumbnailUrl: null })
+        }}
       />
       <div className="h-fit w-full rounded-[12px] p-5">
         <div className="mb-2.5 flex items-center justify-between">
@@ -80,13 +92,14 @@ export function ProjectCardForm({
           <input
             id="service-title"
             type="text"
-            placeholder="서비스 제목을 입력해주세요"
+            placeholder="서비스 제목을 입력해 주세요"
             aria-invalid={!!errors.title}
             {...register("title")}
+            maxLength={16}
             className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 aria-invalid:focus:ring-error-500 w-4/7 bg-transparent px-1 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
           />
           <div className="text-body-2-regular text-teal-gray-500 flex flex-col items-end gap-0.5">
-            <div className="flex items-center gap-2">
+            <div className="flex w-fit items-center gap-2 whitespace-nowrap">
               <span>
                 {nickname}/{name}
               </span>
@@ -94,7 +107,7 @@ export function ProjectCardForm({
               <span>{university}</span>
             </div>
             {subPm && (
-              <div className="flex items-center gap-2">
+              <div className="flex w-fit items-center gap-2 whitespace-nowrap">
                 <span>
                   {subPm.nickname}/{subPm.name}
                 </span>
@@ -111,8 +124,8 @@ export function ProjectCardForm({
           id="project-description"
           aria-invalid={!!errors.description}
           aria-describedby="description-count"
-          className="placeholder:text-teal-gray-600 text-body-2-regular aria-invalid:focus:ring-error-500 h-25 w-full resize-none p-2 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
-          placeholder={`프로젝트 한 줄 소개를 적어주세요.\n최대 10줄 및 공백 포함 최대 200까지 입력 가능합니다.`}
+          className="placeholder:text-teal-gray-400 text-body-2-regular aria-invalid:focus:ring-error-500 h-25 w-full resize-none p-2 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
+          placeholder={`프로젝트 한 줄 소개를 적어주세요.`}
           maxLength={MAX_LENGTH}
           onKeyDown={(e) => {
             if (

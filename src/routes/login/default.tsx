@@ -3,14 +3,22 @@ import axios from "axios"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { loginWithIdPw } from "@/features/auth/api/credentials"
-import { loginWithApple } from "@/features/auth/api/socialLogin"
+import { loginWithEmail } from "@/features/auth/api/credentials"
+import {
+  loginWithApple,
+  loginWithGoogle,
+} from "@/features/auth/api/socialLogin"
 import {
   isApplePopupCancelled,
   signInWithApple,
 } from "@/features/auth/lib/appleSignIn"
+import {
+  isGooglePopupCancelled,
+  signInWithGoogle,
+} from "@/features/auth/lib/googleSignIn"
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
-import { redirectToOAuth } from "@/features/auth/lib/oauthRedirect"
+import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
+import { useAuthStore } from "@/features/auth/store/authStore"
 import {
   Divider,
   Input,
@@ -28,14 +36,14 @@ export const Route = createFileRoute("/login/default")({
 function DefaultLoginPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((s) => s.addToast)
-  const [id, setId] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isKeepLoggedIn, setIsKeepLoggedIn] = useState(false)
 
   const [loginError, setLoginError] = useState("")
 
-  const isDisabled = id.trim() === "" || password.trim() === ""
+  const isDisabled = email.trim() === "" || password.trim() === ""
 
   const showToast = (message: string, color: "primary" | "red" = "primary") => {
     addToast({
@@ -43,7 +51,7 @@ function DefaultLoginPage() {
       color,
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
   }
 
@@ -55,11 +63,36 @@ function DefaultLoginPage() {
       if (result === "LOGIN_SUCCESS") {
         void navigate({ to: "/" })
       } else {
-        void navigate({ to: "/" })
+        void navigate({ to: "/signup/oauth" })
       }
     } catch (error) {
       if (isApplePopupCancelled(error)) return
       showToast("Apple 로그인에 실패했습니다. 다시 시도해주세요.", "red")
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const { accessToken } = await signInWithGoogle()
+      const res = await loginWithGoogle({ accessToken })
+      const result = handleLoginResponse(res)
+      if (result === "LOGIN_SUCCESS") {
+        void navigate({ to: "/" })
+      } else {
+        void navigate({ to: "/signup/oauth" })
+      }
+    } catch (error) {
+      if (isGooglePopupCancelled(error)) return
+      showToast("Google 로그인에 실패했습니다. 다시 시도해주세요.", "red")
+    }
+  }
+
+  const handleKakaoSignIn = () => {
+    try {
+      startKakaoSignIn()
+    } catch (error) {
+      console.error("[Kakao Sign-In]", error)
+      showToast("Kakao 로그인에 실패했습니다. 다시 시도해주세요.", "red")
     }
   }
 
@@ -70,13 +103,16 @@ function DefaultLoginPage() {
     setLoginError("")
 
     try {
-      const res = await loginWithIdPw({ loginId: id, password })
-      localStorage.setItem("access_token", res.accessToken)
-      localStorage.setItem("refresh_token", res.refreshToken)
+      const res = await loginWithEmail({ email, password, clientType: "WEB" })
+      useAuthStore.getState().setTokens({
+        accessToken: res.accessToken,
+        refreshToken: res.refreshToken,
+        memberId: res.memberId,
+      })
       void navigate({ to: "/" })
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setLoginError("아이디 또는 비밀번호가 올바르지 않습니다.")
+        setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.")
       } else {
         showToast("로그인 중 오류가 발생했습니다.", "red")
       }
@@ -100,10 +136,10 @@ function DefaultLoginPage() {
               <div className="flex flex-col gap-3">
                 <Input
                   variant={"id"}
-                  placeholder={"ID"}
-                  value={id}
+                  placeholder={"이메일"}
+                  value={email}
                   onChange={(e) => {
-                    setId(e.target.value)
+                    setEmail(e.target.value)
                     if (loginError) setLoginError("")
                   }}
                 />
@@ -170,10 +206,7 @@ function DefaultLoginPage() {
             <Divider />
 
             <div className="flex items-center gap-8">
-              <LoginCircleButton
-                social={"kakao"}
-                onClick={() => redirectToOAuth("KAKAO")}
-              />
+              <LoginCircleButton social={"kakao"} onClick={handleKakaoSignIn} />
 
               <LoginCircleButton
                 social={"apple"}
@@ -182,7 +215,7 @@ function DefaultLoginPage() {
 
               <LoginCircleButton
                 social={"google"}
-                onClick={() => redirectToOAuth("GOOGLE")}
+                onClick={() => void handleGoogleSignIn()}
               />
             </div>
           </div>

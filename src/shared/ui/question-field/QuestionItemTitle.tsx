@@ -21,8 +21,12 @@ export function QuestionItemTitle({
         {index}
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="text-heading-7-semibold text-teal-gray-900 break-keep whitespace-pre-wrap">
-          {title}
+        <span className="text-heading-7-semibold break-keep whitespace-pre-wrap">
+          {title ? (
+            <span className="text-teal-gray-900">{title}</span>
+          ) : (
+            <span className="text-teal-gray-400">질문을 작성하세요</span>
+          )}
           {required && <span className="text-error-600 ml-1">*</span>}
         </span>
         {caption !== undefined && caption !== "" && (

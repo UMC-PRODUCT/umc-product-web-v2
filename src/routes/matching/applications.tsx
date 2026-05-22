@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useState } from "react"
 
 import {
@@ -13,18 +13,28 @@ import { MOCK_CHALLENGER_PROJECT } from "@/features/application/model/challenger
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
-import { useViewModeStore } from "@/shared/view-mode"
 
 export const Route = createFileRoute("/matching/applications")({
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (!isOperator(me) && !isCurrentTermPm(me)) throw redirect({ to: "/" })
+  },
   component: MatchingApplicationsPage,
 })
 
 function MatchingApplicationsPage() {
-  const mode = useViewModeStore((s) => s.mode)
+  const { data: me } = useMe()
   const [selectedChapter, setSelectedChapter] = useState("Chromium")
+
+  const canApprove = isOperator(me)
+  const isPm = isCurrentTermPm(me)
+  const isOthers = !canApprove && !isPm
 
   // Admin 뷰 데이터 (API 데이터가 비어있으면 mock fallback)
   const admin = useAdminPageData(selectedChapter)
@@ -43,7 +53,6 @@ function MatchingApplicationsPage() {
   return (
     <section className="flex w-full flex-col pt-10">
       <div className="border-teal-gray-100 flex w-6xl flex-col rounded-xl border bg-white px-8.5 py-8">
-        {/* 페이지 헤더 */}
         <div className="flex flex-col gap-1.5">
           <h1 className="text-heading-6-semibold text-teal-gray-900">
             지원 현황
@@ -53,8 +62,7 @@ function MatchingApplicationsPage() {
           </p>
         </div>
 
-        {/* PM 챌린저: 프로젝트 카드 */}
-        {mode === "pm" && (
+        {isPm && (
           <ProjectTitleCard
             className="mt-6"
             projectName={pmProjectInfo.projectName}
@@ -64,10 +72,8 @@ function MatchingApplicationsPage() {
           />
         )}
 
-        {/* 콘텐츠 */}
         <div className="mt-6 flex flex-col gap-24.75">
-          {/* admin: 지부 선택 + 통계 + 테이블 */}
-          {mode === "admin" && (
+          {canApprove && (
             <>
               <SegmentButton
                 items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
@@ -90,8 +96,7 @@ function MatchingApplicationsPage() {
             </>
           )}
 
-          {/* pm: PM 챌린저 뷰 */}
-          {mode === "pm" && (
+          {isPm && (
             <>
               {challenger.isLoading ? (
                 <div className="flex items-center justify-center py-20">
@@ -105,8 +110,7 @@ function MatchingApplicationsPage() {
             </>
           )}
 
-          {/* others: 준비 중 */}
-          {mode === "others" && (
+          {isOthers && (
             <div className="border-teal-gray-150 flex items-center justify-center rounded-xl border bg-white px-8.5 py-20">
               <p className="text-body-2-regular text-teal-gray-400">
                 해당 역할의 지원 현황 뷰는 준비 중입니다.

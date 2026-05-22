@@ -1,6 +1,15 @@
-import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router"
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useMatchRoute,
+} from "@tanstack/react-router"
 
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { isOperator } from "@/features/auth/model/identity"
 import { NoticePublishForm } from "@/features/notice"
+
+import type { PartEnum } from "@/features/notice/model/apiTypes"
 
 interface NoticePublishSearch {
   chapter?: string
@@ -9,6 +18,10 @@ interface NoticePublishSearch {
 export const Route = createFileRoute(
   "/matching/projects/announce/notice-publish",
 )({
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (!isOperator(me)) throw redirect({ to: "/" })
+  },
   validateSearch: (search: Record<string, unknown>): NoticePublishSearch => {
     return {
       chapter: typeof search.chapter === "string" ? search.chapter : undefined,
@@ -16,6 +29,9 @@ export const Route = createFileRoute(
   },
   component: ProjectSettingsNoticePublishPage,
 })
+
+// PM 챌린저
+const TEMP_TARGET_PARTS: PartEnum[] = ["PLAN"]
 
 function ProjectSettingsNoticePublishPage() {
   const { chapter } = Route.useSearch()
@@ -31,7 +47,8 @@ function ProjectSettingsNoticePublishPage() {
   return (
     <NoticePublishForm
       variant="publish"
-      noticeTab="SCHOOL_CORE"
+      noticeTab="CHALLENGER"
+      targetParts={TEMP_TARGET_PARTS}
       chapter={chapter}
     />
   )

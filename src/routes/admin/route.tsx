@@ -2,13 +2,20 @@ import {
   createFileRoute,
   Link,
   Outlet,
+  redirect,
   useLocation,
 } from "@tanstack/react-router"
 
 import Header from "@/components/header/Header"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { isOperator } from "@/features/auth/model/identity"
 import { cn } from "@/shared/lib/utils"
 
 export const Route = createFileRoute("/admin")({
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (!isOperator(me)) throw redirect({ to: "/" })
+  },
   component: AdminLayout,
 })
 

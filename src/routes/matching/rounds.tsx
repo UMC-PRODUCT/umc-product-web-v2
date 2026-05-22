@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createFileRoute, useBlocker } from "@tanstack/react-router"
+import { createFileRoute, redirect, useBlocker } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import {
@@ -9,6 +9,8 @@ import {
 } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { isOperator } from "@/features/auth/model/identity"
 import {
   type Branch,
   emptyRoundSchedules,
@@ -29,6 +31,10 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 
 export const Route = createFileRoute("/matching/rounds")({
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (!isOperator(me)) throw redirect({ to: "/" })
+  },
   component: MatchingRoundsPage,
 })
 

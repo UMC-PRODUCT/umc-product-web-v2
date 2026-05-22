@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { getNoticeDetail } from "../api/noticeApi"
+import { NoticeDetailSkeleton } from "./NoticeDetailSkeleton"
 
 interface NoticeDetailContentProps {
   noticeId: string
@@ -14,13 +15,7 @@ export function NoticeDetailContent({ noticeId }: NoticeDetailContentProps) {
   })
 
   if (isLoading) {
-    return (
-      <div className="flex w-full items-center justify-center py-10">
-        <span className="text-body-2-medium text-teal-gray-500 italic">
-          로딩 중...
-        </span>
-      </div>
-    )
+    return <NoticeDetailSkeleton />
   }
 
   if (isError || !data) {

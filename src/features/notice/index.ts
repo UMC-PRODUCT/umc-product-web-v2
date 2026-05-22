@@ -1,7 +1,9 @@
 export { Border } from "./ui/Border"
 export { NoticeCard } from "./ui/NoticeCard"
 export { NoticeCardList, type NoticeItem } from "./ui/NoticeCardList"
+export { NoticeCardSkeleton } from "./ui/NoticeCardSkeleton"
 export { NoticeDetailContent } from "./ui/NoticeDetailContent"
+export { NoticeDetailSkeleton } from "./ui/NoticeDetailSkeleton"
 export { NoticePublishForm } from "./ui/NoticePublishForm"
 export { NoticeSubmitButton } from "./ui/NoticeSubmitButton"
 export {

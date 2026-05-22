@@ -13,11 +13,14 @@ interface AuthState {
   clear: () => void
 }
 
+const readToken = (key: string) =>
+  typeof window === "undefined" ? null : localStorage.getItem(key)
+
 export const useAuthStore = create<AuthState>((set) => ({
-  accessToken: localStorage.getItem("access_token"),
-  refreshToken: localStorage.getItem("refresh_token"),
+  accessToken: readToken("access_token"),
+  refreshToken: readToken("refresh_token"),
   memberId: null,
-  isAuthed: !!localStorage.getItem("access_token"),
+  isAuthed: !!readToken("access_token"),
   setTokens: ({ accessToken, refreshToken, memberId }) => {
     localStorage.setItem("access_token", accessToken)
     localStorage.setItem("refresh_token", refreshToken)

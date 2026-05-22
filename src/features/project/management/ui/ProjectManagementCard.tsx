@@ -61,6 +61,7 @@ export function ProjectManagementCard({
               </div>
               <div onClick={(e) => e.stopPropagation()}>
                 <ProjectManagementMoreMenu
+                  projectId={data.id}
                   projectName={data.title}
                   projectApplication={projectApplication}
                   chapterName={data.branch}

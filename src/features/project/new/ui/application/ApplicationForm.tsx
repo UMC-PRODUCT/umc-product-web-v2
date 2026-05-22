@@ -1,11 +1,17 @@
-import { useMemo, useState } from "react"
+import { useMutation } from "@tanstack/react-query"
+import { useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
+  buildUpsertApplicationFormBody,
+  upsertApplicationForm,
+} from "@/features/project/new/api"
+import {
   getFieldTypePatch,
-  validateQuestion,
+  validateApplicationForm,
 } from "@/features/project/new/model/applicationQuestion"
 import { useApplicationForm } from "@/features/project/new/model/useApplicationForm"
+import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
 import { FloatingActionButton } from "@/shared/ui/button/FloatingActionButton"
@@ -23,43 +29,74 @@ interface ApplicationFormProps {
 export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
   const addToast = useToastStore((s) => s.addToast)
   const form = useApplicationForm()
-  const [savedSnapshot, setSavedSnapshot] = useState<string | null>(null)
+  const projectId = useProjectRegisterStore((s) => s.projectId)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
   const [errorQuestionIds, setErrorQuestionIds] = useState<string[]>([])
 
+  const lastSavedSnapshotRef = useRef<string | null>(null)
   const currentSnapshot = useMemo(
-    () =>
-      JSON.stringify({
-        commonQuestions: form.commonQuestions,
-        sections: form.sections,
-      }),
+    () => JSON.stringify({ c: form.commonQuestions, s: form.sections }),
     [form.commonQuestions, form.sections],
   )
+  const isDirty = lastSavedSnapshotRef.current !== currentSnapshot
 
-  const hasUnsavedChanges = savedSnapshot
-    ? currentSnapshot !== savedSnapshot
-    : true
+  const saveAppMutation = useMutation({
+    mutationFn: async () => {
+      if (!projectId)
+        throw new Error(
+          "프로젝트 ID가 없습니다. Step 1 임시저장을 먼저 진행해주세요.",
+        )
+      const body = buildUpsertApplicationFormBody(
+        form.commonQuestions,
+        form.sections,
+      )
+      return upsertApplicationForm(projectId, body)
+    },
+    onSuccess: () => {
+      lastSavedSnapshotRef.current = currentSnapshot
+      setHasSavedOnce(true)
+      addToast({
+        message: "작성한 내용이 임시 저장되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+    },
+    onError: () => {
+      addToast({
+        message: "임시 저장에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3,
+      })
+    },
+  })
 
-  const canTempSave = hasUnsavedChanges
+  const canTempSave = !saveAppMutation.isPending && (isDirty || !hasSavedOnce)
   const tempSaveLabel =
-    hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
+    hasSavedOnce && !isDirty && !saveAppMutation.isPending
+      ? "저장 완료"
+      : "임시 저장"
 
   const handleTempSave = () => {
-    setSavedSnapshot(currentSnapshot)
-    setHasSavedOnce(true)
-    addToast({
-      message: "작성한 내용이 임시 저장되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3,
-    })
+    saveAppMutation.mutate()
   }
 
   const handlePrev = () => {
-    if (hasUnsavedChanges) {
+    onPrev?.()
+  }
+
+  const handleNext = () => {
+    const { sectionEmptyName, errors } = validateApplicationForm(
+      form.commonQuestions,
+      form.sections,
+    )
+
+    if (sectionEmptyName) {
       addToast({
-        message: "저장되지 않은 내용이 있습니다. 임시 저장 후 이동해주세요.",
+        message: `${sectionEmptyName} 섹션에 질문을 추가해주세요!`,
         color: "red",
         variant: "deep",
         type: "default",
@@ -67,43 +104,13 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
       })
       return
     }
-    onPrev?.()
-  }
-
-  const handleNext = () => {
-    for (const section of form.sections) {
-      if (!section.isEnabled) continue
-      if (section.questions.length === 0) {
-        addToast({
-          message: `${section.name} 섹션에 질문을 추가해주세요!`,
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3,
-        })
-        return
-      }
-    }
-
-    const errors: { questionId: string; message: string }[] = []
-    for (const [i, q] of form.commonQuestions.entries()) {
-      const err = validateQuestion(q, "공통 질문", i + 1)
-      if (err) errors.push(err)
-    }
-    for (const section of form.sections) {
-      if (!section.isEnabled) continue
-      for (const [i, q] of section.questions.entries()) {
-        const err = validateQuestion(q, section.name, i + 1)
-        if (err) errors.push(err)
-      }
-    }
 
     const firstError = errors[0]
     if (firstError) {
       setErrorQuestionIds(errors.map((e) => e.questionId))
       form.setFocusedId(firstError.questionId)
       addToast({
-        message: firstError.message,
+        message: "질문 입력을 완료해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
@@ -140,6 +147,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
                 index={i}
                 focused={form.focusedId === q.id}
                 isError={errorQuestionIds.includes(q.id)}
+                canDelete={form.commonQuestions.length > 1}
                 onFocus={() => form.setFocusedId(q.id)}
                 onUpdate={(patch) => {
                   form.updateCommonQuestion(q.id, patch)
@@ -157,7 +165,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
               onChange={(fieldType) =>
                 form.updateCommonQuestion(
                   focusedCommon.id,
-                  getFieldTypePatch(fieldType),
+                  getFieldTypePatch(fieldType, focusedCommon.fieldType),
                 )
               }
               onAddAfter={() => form.addCommonQuestion(focusedCommon.id)}
@@ -221,7 +229,10 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
                       form.updateSectionQuestion(
                         section.id,
                         focusedSectionEntry.question.id,
-                        getFieldTypePatch(fieldType),
+                        getFieldTypePatch(
+                          fieldType,
+                          focusedSectionEntry.question.fieldType,
+                        ),
                       )
                     }
                     onAddAfter={() =>

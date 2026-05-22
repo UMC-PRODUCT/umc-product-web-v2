@@ -7,6 +7,8 @@ import {
   registerMemberByOAuth,
 } from "@/features/auth/api/register"
 import { getTermsByType } from "@/features/auth/api/terms"
+import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
+import { useAuthStore } from "@/features/auth/store/authStore"
 import { useSignupStore } from "@/features/auth/store/signupStore"
 import { Button } from "@/shared/ui/Button"
 
@@ -128,15 +130,15 @@ export function SignupStepTerms() {
               schoolId,
               termsAgreements,
             })
-      localStorage.setItem("access_token", res.accessToken)
-      localStorage.setItem("refresh_token", res.refreshToken)
-      sessionStorage.removeItem("oauth_verification_token")
+      useAuthStore.getState().setTokens({
+        accessToken: res.accessToken,
+        refreshToken: res.refreshToken,
+        memberId: res.memberId,
+      })
+      sessionStorage.removeItem(OAUTH_VERIFICATION_TOKEN_KEY)
       sessionStorage.removeItem("oauth_provider")
       reset()
-      void navigate({
-        to: "/matching",
-        search: { chapter: "Chromium", page: 1 },
-      })
+      void navigate({ to: "/" })
     } catch {
       addToast({
         message: "회원가입에 실패했습니다. 다시 시도해주세요.",
