@@ -229,10 +229,7 @@ export function MatchingResultRow({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            <ProjectDetailCard
-              data={projectData}
-              modeOverride={isEditable ? undefined : "others"}
-            />
+            <ProjectDetailCard data={projectData} />
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
