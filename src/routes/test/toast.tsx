@@ -33,7 +33,7 @@ function ToastTestPage() {
                 color,
                 variant,
                 type,
-                duration: 3,
+                duration: 3000,
               })
             }
             className="bg-teal-gray-100 text-teal-gray-700 text-label-1-medium w-fit rounded-[8px] px-4 py-2"

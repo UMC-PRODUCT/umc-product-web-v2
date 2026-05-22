@@ -1,14 +1,29 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
+import dayjs from "dayjs"
+import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import {
+  getViewerBranch,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
+import {
+  getAllChapters,
+  getAllGisu,
+} from "@/features/challenger/api/organization"
 import {
   type Chapter,
   CHAPTERS,
   ChapterSelector,
   NoticeCardList,
+  NoticeDetailContent,
   type NoticeItem,
 } from "@/features/notice"
+import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { Pagination } from "@/shared/ui/Pagination"
@@ -18,7 +33,6 @@ interface AnnounceSearch {
   page: number
 }
 
-const DEFAULT_CHAPTER: Chapter = "Chromium"
 const DEFAULT_PAGE = 1
 const NOTICE_PAGE_SIZE = 10
 const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
@@ -66,72 +80,23 @@ function readPendingNotice() {
   }
 }
 
-// TODO: 공지 API 응답 형식에 맞추어 수정
-const INITIAL_NOTICES: NoticeItem[] = [
-  {
-    id: "1",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "2",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "3",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "4",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "5",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "6",
-    title: "임시 공지",
-    date: "0000.00.00",
-    chip: "필독",
-  },
-  {
-    id: "7",
-    title: "임시 공지",
-    date: "0000.00.00",
-  },
-  {
-    id: "8",
-    title: "임시 공지",
-    date: "0000.00.00",
-  },
-  {
-    id: "9",
-    title: "임시 공지",
-    date: "0000.00.00",
-  },
-  {
-    id: "10",
-    title: "임시 공지",
-    date: "0000.00.00",
-  },
-]
-
-/** 팀 매칭 · 공지 — 레이아웃 하위 인덱스 (/matching) */
+/** 팀 매칭 공지 페이지 (/matching) */
 export const Route = createFileRoute("/matching/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
     return {
-      chapter: isChapter(search.chapter) ? search.chapter : DEFAULT_CHAPTER,
+      chapter: isChapter(search.chapter) ? search.chapter : CHAPTERS[0],
       page: parsePage(search.page),
+    }
+  },
+  beforeLoad: async ({ search, context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (isOperator(me)) return
+    const userChapter = getViewerBranch(me)
+    if (isChapter(userChapter) && search.chapter !== userChapter) {
+      throw redirect({
+        to: "/matching",
+        search: { ...search, chapter: userChapter },
+      })
     }
   },
   component: TeamMatchingAnnouncePage,
@@ -142,38 +107,107 @@ function TeamMatchingAnnouncePage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
   const [pendingNotice] = useState(readPendingNotice)
-  const [notices, setNotices] = useState(() => {
-    if (!pendingNotice) return INITIAL_NOTICES
 
-    if (pendingNotice.mode === "edit") {
-      return INITIAL_NOTICES.map((notice) =>
-        notice.id === pendingNotice.id
-          ? { ...notice, title: pendingNotice.title, chip: pendingNotice.chip }
-          : notice,
-      )
-    }
+  const { data: me } = useMe()
+  const canManage = isOperator(me)
+  const isPm = isCurrentTermPm(me)
+  const userChapter = getViewerBranch(me) as Chapter | undefined
 
-    return [
-      {
-        id: pendingNotice.id,
-        title: pendingNotice.title,
-        date: "0000.00.00",
-        chip: pendingNotice.chip,
-      },
-      ...INITIAL_NOTICES,
-    ]
+  // 기수 정보 조회
+  const { data: gisuData } = useQuery({
+    queryKey: ["gisu", "all"],
+    queryFn: getAllGisu,
   })
-  const totalPages = Math.max(1, Math.ceil(notices.length / NOTICE_PAGE_SIZE))
+
+  // 지부 정보 조회
+  const { data: chaptersData } = useQuery({
+    queryKey: ["chapters", "all"],
+    queryFn: getAllChapters,
+  })
+
+  const activeGisuId = useMemo(() => {
+    if (!gisuData) return null
+    const active = gisuData.gisuList.find((g) => g.isActive)
+    return active ? active.gisuId : gisuData.gisuList[0]?.gisuId || null
+  }, [gisuData])
+
+  const selectedChapterId = useMemo(() => {
+    if (!chaptersData) return null
+    return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
+  }, [chaptersData, chapter])
+
+  const { data: noticesData, isLoading: isNoticesLoading } = useQuery({
+    queryKey: [
+      "notices",
+      "team-matching",
+      activeGisuId,
+      selectedChapterId,
+      page,
+    ],
+    queryFn: () =>
+      getNotices({
+        gisuId: Number(activeGisuId),
+        chapterId: selectedChapterId ? Number(selectedChapterId) : undefined,
+        noticeTab: "CHALLENGER",
+        page: page - 1,
+        size: NOTICE_PAGE_SIZE,
+        sort: "createdAt,DESC",
+      }),
+    enabled: !!activeGisuId,
+  })
+
+  const notices = useMemo(() => {
+    if (!noticesData) return []
+
+    const mappedNotices: NoticeItem[] = noticesData.content.map((item) => ({
+      id: String(item.id),
+      title: item.title,
+      date: dayjs(item.createdAt).format("YYYY.MM.DD"),
+      chip: item.mustRead ? "필독" : undefined,
+    }))
+
+    return [...mappedNotices].sort((a, b) => {
+      if (a.chip === "필독" && b.chip !== "필독") return -1
+      if (a.chip !== "필독" && b.chip === "필독") return 1
+      return 0
+    })
+  }, [noticesData])
+
+  const totalPages = noticesData?.totalPages || 1
   const safePage = Math.min(Math.max(1, page), totalPages)
   const focusedNoticeId = pendingNotice?.id ?? null
-  const paginatedNotices = notices.slice(
-    (safePage - 1) * NOTICE_PAGE_SIZE,
-    safePage * NOTICE_PAGE_SIZE,
-  )
-  // TODO: 사용자 권한 API 연동 후 실제 권한 값으로 교체
-  const canManage = true
+
+  const queryClient = useQueryClient()
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteNotice(Number(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] })
+      addToast({
+        message: "공지가 삭제되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+    onError: () => {
+      // TODO: 삭제 실패 시 동작 추가
+    },
+  })
 
   const handleChapterChange = (nextChapter: Chapter) => {
+    if (!canManage && userChapter && nextChapter !== userChapter) {
+      addToast({
+        message: "소속된 지부의 공지만 확인할 수 있습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
     navigate({
       search: (prev) => ({ ...prev, chapter: nextChapter }),
       replace: true,
@@ -181,7 +215,10 @@ function TeamMatchingAnnouncePage() {
   }
 
   const handleNoticePublishClick = () => {
-    navigate({ to: "/matching/notice-publish" })
+    navigate({
+      to: "/matching/notice-publish",
+      search: { chapter },
+    })
   }
 
   const handleNoticeEditClick = (noticeId: string) => {
@@ -191,16 +228,8 @@ function TeamMatchingAnnouncePage() {
     })
   }
 
-  // TODO: API 연동 후 실제 삭제 API 호출로 교체
   const handleNoticeDeleteClick = (noticeId: string) => {
-    setNotices((prev) => prev.filter((notice) => notice.id !== noticeId))
-    addToast({
-      message: "공지가 삭제되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3,
-    })
+    deleteMutation.mutate(noticeId)
   }
 
   const handlePageChange = (nextPage: number) => {
@@ -237,7 +266,11 @@ function TeamMatchingAnnouncePage() {
               공지
             </span>
             <p className="text-body-2-regular text-teal-gray-600">
-              팀 매칭에 대한 지부별 공지를 모든 챌린저에게 안내합니다.
+              {canManage
+                ? "팀 매칭에 대한 지부별 공지를 모든 챌린저에게 안내합니다."
+                : isPm
+                  ? "팀 매칭에 대한 우리 지부의 모든 공지를 한눈에 조회합니다."
+                  : "팀 매칭에 대한 우리 지부의 공지를 한눈에 조회합니다."}
             </p>
           </div>
 
@@ -266,12 +299,16 @@ function TeamMatchingAnnouncePage() {
             </div>
 
             <NoticeCardList
-              notices={paginatedNotices}
+              notices={notices}
               page={safePage}
+              isLoading={isNoticesLoading}
               canManage={canManage}
               focusedNoticeId={focusedNoticeId}
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
+              renderContent={(noticeId) => (
+                <NoticeDetailContent noticeId={noticeId} />
+              )}
             />
           </div>
         </div>

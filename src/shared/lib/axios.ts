@@ -1,4 +1,6 @@
-import axios from "axios"
+import axios, { AxiosError } from "axios"
+
+import { useAuthStore } from "@/features/auth/store/authStore"
 
 import type { AxiosRequestConfig } from "axios"
 
@@ -13,7 +15,8 @@ export const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token")
+  if (config.url?.includes("/v1/auth/token/renew")) return config
+  const token = useAuthStore.getState().accessToken
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -37,19 +40,37 @@ function rejectQueue(err: unknown) {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const body = response.data as { success?: boolean; message?: string }
+    if (body && typeof body === "object" && body.success === false) {
+      return Promise.reject(
+        new AxiosError(
+          body.message ?? "요청에 실패했습니다.",
+          AxiosError.ERR_BAD_RESPONSE,
+          response.config,
+          response.request,
+          response,
+        ),
+      )
+    }
+    return response
+  },
   async (error) => {
     const originalRequest = error.config as AxiosRequestConfig & {
       _retry?: boolean
     }
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    if (
+      error.response?.status !== 401 ||
+      originalRequest._retry ||
+      originalRequest.url?.includes("/v1/auth/login")
+    ) {
       return Promise.reject(error)
     }
 
-    const refreshToken = localStorage.getItem("refresh_token")
+    const refreshToken = useAuthStore.getState().refreshToken
     if (!refreshToken) {
-      localStorage.removeItem("access_token")
+      useAuthStore.getState().clear()
       window.location.href = "/login"
       return Promise.reject(error)
     }
@@ -80,8 +101,10 @@ api.interceptors.response.use(
         }>
       >("/v1/auth/token/renew", { refreshToken })
       const { accessToken, refreshToken: newRefreshToken } = data.result
-      localStorage.setItem("access_token", accessToken)
-      localStorage.setItem("refresh_token", newRefreshToken)
+      useAuthStore.getState().setTokens({
+        accessToken,
+        refreshToken: newRefreshToken,
+      })
       api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
       drainQueue(accessToken)
       originalRequest.headers = {
@@ -91,8 +114,7 @@ api.interceptors.response.use(
       return api(originalRequest)
     } catch (refreshError) {
       rejectQueue(refreshError)
-      localStorage.removeItem("access_token")
-      localStorage.removeItem("refresh_token")
+      useAuthStore.getState().clear()
       window.location.href = "/login"
       return Promise.reject(refreshError)
     } finally {

@@ -1,26 +1,34 @@
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { isOperator } from "@/features/auth/model/identity"
+import {
+  buildPartQuotasEntries,
+  updatePartQuotas,
+} from "@/features/project/new/api"
 import { Button } from "@/shared/ui/Button"
 import { Counter } from "@/shared/ui/Counter"
 import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
 
+import {
+  type RoleKey,
+  type RoleStack,
+  type RoleState,
+  useProjectRegisterStore,
+} from "../../model/useProjectRegisterStore"
 import { SectionHeader } from "../shared/SectionHeader"
 
-const ROLES = [
+const ROLES: {
+  key: RoleKey
+  label: string
+  stacks: RoleStack[]
+}[] = [
   { key: "design", label: "Design", stacks: [] },
   { key: "frontend", label: "Frontend", stacks: ["Web", "iOS", "Android"] },
   { key: "backend", label: "Backend", stacks: ["SpringBoot", "Node.js"] },
-] as const
-
-type RoleKey = (typeof ROLES)[number]["key"]
-type Stack = (typeof ROLES)[number]["stacks"][number]
-
-interface RoleState {
-  count: number
-  stack: Stack | undefined
-}
+]
 
 interface RecruitInfoFormProps {
   onPrev: () => void
@@ -43,17 +51,17 @@ function buildSummaryText(
 
 export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
   const addToast = useToastStore((s) => s.addToast)
+  const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
+  const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
+  const projectId = useProjectRegisterStore((s) => s.projectId)
+  const { data: me } = useMe()
+  const canUpdatePartQuotas = isOperator(me)
 
-  const [roleStates, setRoleStates] = useState<Record<RoleKey, RoleState>>({
-    design: { count: 0, stack: undefined },
-    frontend: { count: 0, stack: undefined },
-    backend: { count: 0, stack: undefined },
-  })
-  const [savedSnapshot, setSavedSnapshot] = useState<Record<
-    RoleKey,
-    RoleState
-  > | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
+  const [savedTotalCount, setSavedTotalCount] = useState<number | null>(null)
+
+  const roleStates = storeRecruitInfo
 
   const totalCount = Object.values(roleStates).reduce(
     (sum, { count }) => sum + count,
@@ -62,68 +70,101 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
 
   const summaryText = buildSummaryText(ROLES, roleStates)
 
-  const hasUnsavedChanges = savedSnapshot
-    ? (Object.keys(roleStates) as RoleKey[]).some(
-        (key) =>
-          roleStates[key].count !== savedSnapshot[key].count ||
-          roleStates[key].stack !== savedSnapshot[key].stack,
-      )
-    : totalCount > 0
-
-  const canTempSave = hasUnsavedChanges
+  const hasUnsavedChanges = savedTotalCount !== totalCount
+  const canTempSave = totalCount > 0 && hasUnsavedChanges && !isSaving
   const tempSaveLabel =
     hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
 
-  const handleNext = () => {
-    if (totalCount === 0) {
+  const savePartQuotas = async (silent = false): Promise<boolean> => {
+    if (!canUpdatePartQuotas) {
+      setRecruitInfo(roleStates)
+      return true
+    }
+    if (!projectId) {
       addToast({
-        message: "모집 인원을 1명 이상 입력해주세요.",
+        message: "기본 정보를 먼저 임시 저장해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
+      })
+      return false
+    }
+    setIsSaving(true)
+    try {
+      await updatePartQuotas(projectId, {
+        entries: buildPartQuotasEntries(roleStates),
+      })
+      setRecruitInfo(roleStates)
+      setSavedTotalCount(totalCount)
+      setHasSavedOnce(true)
+      if (!silent) {
+        addToast({
+          message: "작성한 내용이 임시 저장되었습니다.",
+          color: "primary",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+      return true
+    } catch {
+      addToast({
+        message: "임시 저장에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleNext = async () => {
+    if (totalCount === 0) {
+      addToast({
+        message: "모집 인원을 1명 이상 입력해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
       })
       return
     }
+    const ok = await savePartQuotas(true)
+    if (!ok) return
     addToast({
       message: "작성한 내용이 저장되었습니다.",
       color: "primary",
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
     onNext()
   }
 
   const handleTempSave = () => {
-    // TODO: API 연결 후 async/await + isSaving으로 전환
-    setSavedSnapshot(roleStates)
-    setHasSavedOnce(true)
-    addToast({
-      message: "작성한 내용이 임시 저장되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3,
-    })
+    void savePartQuotas(false)
   }
 
   const updateCount = (key: RoleKey, count: number) => {
-    setRoleStates((prev) => ({
-      ...prev,
+    setRecruitInfo({
+      ...roleStates,
       [key]: {
-        ...prev[key],
+        ...roleStates[key],
         count,
-        stack: count === 0 ? undefined : prev[key].stack,
+        stack: count === 0 ? undefined : roleStates[key].stack,
       },
-    }))
+    })
   }
 
-  const updateStack = (key: RoleKey, stack: Stack | undefined) => {
-    setRoleStates((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], stack },
-    }))
+  const updateStack = (key: RoleKey, stack: RoleStack | undefined) => {
+    setRecruitInfo({
+      ...roleStates,
+      [key]: { ...roleStates[key], stack },
+    })
   }
 
   return (
@@ -147,7 +188,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
                   allowDeselect
                   value={roleStates[key].stack}
                   onValueChange={(v) =>
-                    updateStack(key, v as Stack | undefined)
+                    updateStack(key, v as RoleStack | undefined)
                   }
                 >
                   {stacks.map((stack) => (
@@ -171,7 +212,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
             <span>명</span>
           </div>
           <span className="text-teal-gray-700 text-body-1-regular ml-7.5">
-            {summaryText || "직군별 인원을 선택해주세요"}
+            {summaryText || "직군별 인원을 선택해 주세요"}
           </span>
         </div>
       </div>
@@ -181,6 +222,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
           variant="weak"
           color="primary"
           disabled={!canTempSave}
+          isLoading={isSaving}
           onClick={handleTempSave}
         >
           {tempSaveLabel}
@@ -193,7 +235,8 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
             type="button"
             variant="fill"
             color="primary"
-            onClick={handleNext}
+            disabled={isSaving}
+            onClick={() => void handleNext()}
           >
             다음
           </Button>

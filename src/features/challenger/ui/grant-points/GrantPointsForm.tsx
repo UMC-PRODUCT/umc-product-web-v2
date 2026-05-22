@@ -66,7 +66,7 @@ export function GrantPointsForm({ challengerId }: GrantPointsFormProps) {
         color: "primary",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       reset({ description: "" })
       void queryClient.invalidateQueries({
@@ -82,7 +82,7 @@ export function GrantPointsForm({ challengerId }: GrantPointsFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
   })
@@ -233,7 +233,7 @@ export function GrantPointsForm({ challengerId }: GrantPointsFormProps) {
               value={field.value ?? ""}
               onChange={(event) => field.onChange(event.target.value)}
               onBlur={field.onBlur}
-              placeholder="상벌점 부여 사유를 입력해주세요."
+              placeholder="상벌점 부여 사유를 입력해 주세요."
               className={cn(
                 "border-teal-gray-300 shadow-inner-neutral-2 text-body-1-regular text-teal-gray-900 placeholder:text-teal-gray-400 hover:bg-teal-gray-50 w-full resize-none rounded-[12px] border bg-white px-4 py-3 transition-colors outline-none focus-within:border-teal-400 focus-within:bg-teal-50",
                 errors.description &&

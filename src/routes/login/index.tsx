@@ -2,14 +2,26 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useNavigate } from "@tanstack/react-router"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { loginWithApple } from "@/features/auth/api/socialLogin"
+import {
+  loginWithApple,
+  loginWithGoogle,
+} from "@/features/auth/api/socialLogin"
 import {
   isApplePopupCancelled,
   signInWithApple,
 } from "@/features/auth/lib/appleSignIn"
+import {
+  isGooglePopupCancelled,
+  signInWithGoogle,
+} from "@/features/auth/lib/googleSignIn"
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
-import { redirectToOAuth } from "@/features/auth/lib/oauthRedirect"
-import { Divider, LoginButton, UmcLogoButton } from "@/features/login"
+import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
+import {
+  Divider,
+  LoginButton,
+  SmallDivider,
+  UmcLogoButton,
+} from "@/features/login"
 import { Button } from "@/shared/ui/Button"
 
 export const Route = createFileRoute("/login/")({
@@ -26,7 +38,7 @@ function SocialLoginPage() {
       color,
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
   }
 
@@ -38,11 +50,36 @@ function SocialLoginPage() {
       if (result === "LOGIN_SUCCESS") {
         void navigate({ to: "/" })
       } else {
-        void navigate({ to: "/" })
+        void navigate({ to: "/signup/oauth" })
       }
     } catch (error) {
       if (isApplePopupCancelled(error)) return
       showToast("Apple 로그인에 실패했습니다. 다시 시도해주세요.", "red")
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const { accessToken } = await signInWithGoogle()
+      const res = await loginWithGoogle({ accessToken })
+      const result = handleLoginResponse(res)
+      if (result === "LOGIN_SUCCESS") {
+        void navigate({ to: "/" })
+      } else {
+        void navigate({ to: "/signup/oauth" })
+      }
+    } catch (error) {
+      if (isGooglePopupCancelled(error)) return
+      showToast("Google 로그인에 실패했습니다. 다시 시도해주세요.", "red")
+    }
+  }
+
+  const handleKakaoSignIn = () => {
+    try {
+      startKakaoSignIn()
+    } catch (error) {
+      console.error("[Kakao Sign-In]", error)
+      showToast("Kakao 로그인에 실패했습니다. 다시 시도해주세요.", "red")
     }
   }
 
@@ -60,12 +97,9 @@ function SocialLoginPage() {
             />
             <LoginButton
               social={"google"}
-              onClick={() => redirectToOAuth("GOOGLE")}
+              onClick={() => void handleGoogleSignIn()}
             />
-            <LoginButton
-              social={"kakao"}
-              onClick={() => redirectToOAuth("KAKAO")}
-            />
+            <LoginButton social={"kakao"} onClick={handleKakaoSignIn} />
           </div>
 
           <Divider />
@@ -79,10 +113,22 @@ function SocialLoginPage() {
             >
               UMC 계정 로그인
             </Button>
-            {/* TODO: 아이디/비밀번호 찾기 연동 */}
-            <button className="text-body-1-regular text-teal-gray-500 flex h-7 items-center justify-center px-1 py-0.5">
-              아이디/비밀번호 찾기
-            </button>
+
+            <div className="flex h-7 items-center gap-3">
+              {/* TODO: 아이디/비밀번호 찾기 연동 */}
+              <button className="text-body-1-regular text-teal-gray-500 flex items-center justify-center px-1 py-0.5">
+                아이디/비밀번호 찾기
+              </button>
+
+              <SmallDivider />
+
+              <button
+                onClick={() => navigate({ to: "/signup" })}
+                className="text-body-1-regular flex items-center justify-center px-1 py-0.5 text-teal-500"
+              >
+                회원가입
+              </button>
+            </div>
           </div>
         </div>
       </div>

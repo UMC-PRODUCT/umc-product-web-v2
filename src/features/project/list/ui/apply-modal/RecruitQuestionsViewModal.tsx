@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import { FormHeader } from "@/shared/ui/FormHeader"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
 import MemberCount from "@/shared/ui/MemberCount"
+import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import { PortfolioField } from "@/shared/ui/question-field/PortfolioField"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
@@ -32,97 +33,97 @@ export function RecruitQuestionsViewModal({
   data,
   sections,
 }: RecruitQuestionsViewModalProps) {
-  const [sectionEnabled, setSectionEnabled] = useState<Record<string, boolean>>(
-    () => Object.fromEntries(sections.map((s) => [s.id, s.isEnabled])),
-  )
-
   const questionIndexMap = useMemo(() => {
     const map: Record<string, number> = {}
     sections.forEach((section) => {
-      const enabled = sectionEnabled[section.id] ?? section.isEnabled
-      if (enabled) {
+      if (section.isEnabled) {
         section.questions.forEach((q, i) => {
           map[q.id] = i + 1
         })
       }
     })
     return map
-  }, [sections, sectionEnabled])
+  }, [sections])
 
   return (
-    <div className="flex w-232 flex-col overflow-hidden rounded-2xl bg-white px-11.5 py-9">
-      <div className="scrollbar-none max-h-[75vh] overflow-y-auto">
-        <div className="flex items-start gap-6 self-stretch px-1 py-5">
-          <p className="text-body-1-regular text-teal-gray-600 flex-1">
-            {data.description}
-          </p>
-          <div className="flex w-74.5 shrink-0 flex-col gap-1.25">
-            {data.recruitRows.map((row) => {
-              const done = isRecruitDone(row)
-              return (
-                <div
-                  key={row.part}
-                  className="flex w-full items-center justify-between pr-1"
-                >
-                  <div className="flex w-30.5 items-center justify-between">
-                    <span className="text-body-2-medium text-teal-gray-700">
-                      {row.part}
-                    </span>
-                    <MemberCount
-                      size="sm"
-                      current={row.current}
-                      total={row.total}
-                    />
+    <div className="flex w-232 flex-col">
+      <div className="flex w-full">
+        <ProjectTitleCard
+          size="sm"
+          projectName={data.title}
+          subtitle={data.authorSchoolLine}
+        />
+      </div>
+      <div className="flex w-full flex-col rounded-b-2xl bg-white">
+        <div className="scrollbar-none max-h-[75vh] overflow-y-auto px-11.5 py-9">
+          <div className="flex items-start gap-6 self-stretch px-1 py-5">
+            <p className="text-body-1-regular text-teal-gray-600 flex-1">
+              {data.description}
+            </p>
+            <div className="flex w-74.5 shrink-0 flex-col gap-1.25">
+              {data.recruitRows.map((row) => {
+                const done = isRecruitDone(row)
+                return (
+                  <div
+                    key={row.part}
+                    className="flex w-full items-center justify-between pr-1"
+                  >
+                    <div className="flex w-30.5 items-center justify-between">
+                      <span className="text-body-2-medium text-teal-gray-700">
+                        {row.part}
+                      </span>
+                      <MemberCount
+                        size="sm"
+                        current={row.current}
+                        total={row.total}
+                      />
+                    </div>
+                    <RecruitStatusChip done={done} />
                   </div>
-                  <RecruitStatusChip done={done} />
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col gap-5 pb-6">
+            {sections.map((section) => {
+              const isCommon = section.id === COMMON_SECTION_ID
+              const enabled = section.isEnabled
+
+              return (
+                <div key={section.id}>
+                  {isCommon ? (
+                    <FormHeader variant="common" />
+                  ) : (
+                    <FormHeader
+                      variant="part"
+                      partName={section.name}
+                      toggleChecked={enabled}
+                      showToggle
+                      toggleDisabled
+                      onToggleChange={() => {}}
+                    />
+                  )}
+                  {enabled && section.questions.length > 0 && (
+                    <div className="flex flex-col items-start gap-10 self-stretch rounded-b-[12px] border border-teal-200 bg-white pt-8.5 pr-5 pb-9.5 pl-5">
+                      {section.questions.map((q) => (
+                        <div key={q.id} className="flex w-full flex-col gap-3">
+                          <QuestionItemTitle
+                            index={`Q${questionIndexMap[q.id]}`}
+                            title={q.title}
+                            required={q.required}
+                          />
+                          <div className="pointer-events-none w-full">
+                            {renderPreviewField(q)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )
             })}
           </div>
-        </div>
-
-        <div className="flex w-full flex-col gap-5 pb-6">
-          {sections.map((section) => {
-            const isCommon = section.id === COMMON_SECTION_ID
-            const enabled = sectionEnabled[section.id] ?? section.isEnabled
-
-            return (
-              <div key={section.id}>
-                {isCommon ? (
-                  <FormHeader variant="common" />
-                ) : (
-                  <FormHeader
-                    variant="part"
-                    partName={section.name}
-                    toggleChecked={enabled}
-                    showToggle
-                    onToggleChange={(checked) =>
-                      setSectionEnabled((prev) => ({
-                        ...prev,
-                        [section.id]: checked,
-                      }))
-                    }
-                  />
-                )}
-                {enabled && section.questions.length > 0 && (
-                  <div className="flex flex-col items-start gap-10 self-stretch rounded-b-[12px] border border-teal-200 bg-white pt-8.5 pr-5 pb-9.5 pl-5">
-                    {section.questions.map((q) => (
-                      <div key={q.id} className="flex w-full flex-col gap-3">
-                        <QuestionItemTitle
-                          index={`Q${questionIndexMap[q.id]}`}
-                          title={q.title}
-                          required={q.required}
-                        />
-                        <div className="pointer-events-none w-full">
-                          {renderPreviewField(q)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
         </div>
       </div>
     </div>

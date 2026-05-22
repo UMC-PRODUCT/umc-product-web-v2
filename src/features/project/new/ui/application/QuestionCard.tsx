@@ -1,6 +1,5 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { useRef, useState } from "react"
 
 import { CheckboxFieldList } from "@/shared/ui/question-field/CheckboxFieldList"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
@@ -11,8 +10,6 @@ import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 import type { Question } from "@/features/project/new/model/applicationQuestion"
 
-const MAX_FILE_BYTES = 100 * 1024 * 1024
-
 interface QuestionFieldRendererProps {
   question: Question
   onOptionsChange: (opts: string[]) => void
@@ -22,28 +19,13 @@ function QuestionFieldRenderer({
   question,
   onOptionsChange,
 }: QuestionFieldRendererProps) {
-  const [textValue, setTextValue] = useState("")
-  const [fileName, setFileName] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (file.size > MAX_FILE_BYTES) {
-      if (fileInputRef.current) fileInputRef.current.value = ""
-      return
-    }
-    setFileName(file.name)
-  }
-
-  function handleFileDelete() {
-    setFileName(null)
-    if (fileInputRef.current) fileInputRef.current.value = ""
-  }
-
   switch (question.fieldType) {
     case "text":
-      return <TextQuestionField value={textValue} onChange={setTextValue} />
+      return (
+        <div className="pointer-events-none w-full">
+          <TextQuestionField value="" onChange={() => {}} />
+        </div>
+      )
     case "radio":
       return (
         <RadioFieldList
@@ -60,23 +42,21 @@ function QuestionFieldRenderer({
       )
     case "file":
       return (
-        <>
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            onChange={handleFileChange}
-          />
+        <div className="pointer-events-none w-full">
           <FileUploadField
-            fileName={fileName}
+            fileName={null}
             placeholder="100MB 이하의 파일만 업로드 가능합니다."
-            onUpload={() => fileInputRef.current?.click()}
-            onDelete={handleFileDelete}
+            onUpload={() => {}}
+            onDelete={() => {}}
           />
-        </>
+        </div>
       )
     case "portfolio":
-      return <PortfolioField />
+      return (
+        <div className="pointer-events-none w-full">
+          <PortfolioField />
+        </div>
+      )
   }
 }
 
@@ -85,6 +65,7 @@ interface QuestionCardProps {
   index: number
   focused: boolean
   isError?: boolean
+  canDelete?: boolean
   onFocus: () => void
   onUpdate: (patch: Partial<Question>) => void
   onDelete: () => void
@@ -95,6 +76,7 @@ export function QuestionCard({
   index,
   focused,
   isError = false,
+  canDelete = true,
   onFocus,
   onUpdate,
   onDelete,
@@ -132,6 +114,7 @@ export function QuestionCard({
           readonlyTitle={question.fieldType === "portfolio"}
           required={question.required}
           onRequiredChange={(required) => onUpdate({ required })}
+          canDelete={canDelete}
           onDelete={onDelete}
           dragHandleProps={{ ...attributes, ...listeners }}
         >

@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 
 import GenerationListItem from "@/components/header/GenerationListItem"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { logout } from "@/features/auth/lib/logout"
+import { isCentralStaff, isSuperAdmin } from "@/features/auth/model/identity"
+import { toRoleTag } from "@/features/auth/model/mappers"
 import { cn } from "@/shared/lib/utils"
 
 import ProfileIcon from "../assets/icon/people/ProfileIcon"
@@ -26,6 +30,9 @@ export function ProfileDropdown({
   const [isOpen, setIsOpen] = useState(open)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const { data: me } = useMe()
+  const canManageMembers = isSuperAdmin(me) || isCentralStaff(me)
+
   useEffect(() => {
     if (!isOpen) return
     const handler = (event: MouseEvent) => {
@@ -42,6 +49,8 @@ export function ProfileDropdown({
     setIsOpen(newOpen)
     onOpenChange?.(newOpen)
   }
+
+  const role = me?.roles?.[0] ? toRoleTag(me.roles[0].roleType) : "challenger"
 
   return (
     <div ref={containerRef} className="relative">
@@ -60,27 +69,34 @@ export function ProfileDropdown({
         <div
           role="menu"
           className={cn(
-            "shadow-drop-neutral-1 fixed top-15 right-8.5 flex min-w-50 flex-col gap-3 rounded-[6px] bg-white px-3 pt-4.5 pb-3.5",
+            "shadow-drop-neutral-1 absolute top-10 right-0 flex w-max min-w-50 flex-col gap-3 rounded-[6px] bg-white px-3 pt-4.5 pb-3.5",
             dropdownClassName,
           )}
         >
-          {/* TODO: 사용자 정보 API 연동 */}
           <div className="flex flex-col gap-2.5 px-2.5">
             <div className="h-11.5 w-11.5 shrink-0 overflow-hidden rounded-full">
-              <ProfileIcon className="size-full" />
+              {me?.profileImageLink ? (
+                <img
+                  src={me.profileImageLink}
+                  alt={me.name}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <ProfileIcon className="size-full" />
+              )}
             </div>
 
             <div className="flex flex-col gap-0.5">
-              <div className="flex items-center justify-between">
-                <span className="text-teal-gray-900 text-subtitle-3-semibold">
-                  이방토/이예원
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-teal-gray-900 text-subtitle-3-semibold whitespace-nowrap">
+                  {me ? `${me.nickname}/${me.name}` : ""}
                 </span>
 
-                <RoleTagChip role="challenger" />
+                <RoleTagChip role={role} className="shrink-0" />
               </div>
 
               <span className="text-caption-2-medium text-teal-gray-500">
-                한양대 ERICA
+                {me?.schoolName ?? ""}
               </span>
             </div>
           </div>
@@ -99,27 +115,21 @@ export function ProfileDropdown({
 
               <div className="border-teal-gray-100 flex w-full flex-col gap-0.5 rounded-[10px] border px-0.5 py-0.5">
                 {/* TODO: 기수 선택 시 글로벌 상태 변경 */}
-                <GenerationListItem
-                  generation={10}
-                  year={2026}
-                  active={true}
-                  className="w-full"
-                />
-                <GenerationListItem
-                  generation={9}
-                  year={2025}
-                  className="w-full"
-                />
-                <GenerationListItem
-                  generation={8}
-                  year={2025}
-                  className="w-full"
-                />
-                <GenerationListItem
-                  generation={7}
-                  year={2024}
-                  className="w-full"
-                />
+                {me?.challengerRecords && me.challengerRecords.length > 0 ? (
+                  me.challengerRecords.map((record, index) => (
+                    <GenerationListItem
+                      key={record.challengerId}
+                      generation={Number(record.gisu)}
+                      year={2026} // API에서 연도 정보를 제공하지 않으므로 임시값 사용
+                      active={index === 0} // 현재는 첫 번째 항목을 활성 상태로 표시
+                      className="w-full"
+                    />
+                  ))
+                ) : (
+                  <div className="text-caption-3-medium text-teal-gray-400 py-2 text-center">
+                    참여 기록이 없습니다.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -129,20 +139,22 @@ export function ProfileDropdown({
             className="bg-teal-gray-100 h-px w-full rounded-[0.5px]"
           />
 
-          {/* TODO: 계정 연동/계정 삭제/로그아웃 기능 추가 */}
-          <div className="flex flex-col gap-0.5 px-2.5">
+          {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결/로그아웃 API 연동 */}
+          <div className="flex flex-col gap-1 px-2.5">
+            {canManageMembers && (
+              <button type="button" className="h-6 w-15">
+                <span className="text-body-2-medium text-teal-gray-700">
+                  기수 관리
+                </span>
+              </button>
+            )}
             <button type="button" className="h-6 w-15">
               <span className="text-body-2-medium text-teal-gray-700">
-                계정 연동
+                계정 설정
               </span>
             </button>
-            <button type="button" className="h-6 w-15">
-              <span className="text-body-2-medium text-teal-gray-700">
-                계정 삭제
-              </span>
-            </button>
-            <button type="button" className="h-6 w-15">
-              <span className="text-body-2-medium text-teal-gray-700">
+            <button type="button" onClick={logout} className="h-6 w-15">
+              <span className="text-body-2-medium text-error-500">
                 로그아웃
               </span>
             </button>

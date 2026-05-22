@@ -2,8 +2,10 @@ import { z } from "zod"
 
 export const emailSchema = z
   .string()
-  .email("올바른 이메일 형식을 입력해주세요.")
-export const codeSchema = z.string().length(6, "인증번호 6자리를 입력해주세요.")
+  .email("올바른 이메일 형식을 입력해 주세요.")
+export const codeSchema = z
+  .string()
+  .length(6, "인증번호 6자리를 입력해 주세요.")
 
 export const idSchema = z
   .string()
@@ -41,7 +43,7 @@ export const signUpSchema = z
     password: passwordSchema,
     confirmPassword: z.string(),
     school: z.string().min(1, "학교를 선택해주세요."),
-    name: z.string().min(1, "이름을 입력해주세요."),
+    name: z.string().min(1, "이름을 입력해 주세요."),
     nickname: nicknameSchema,
   })
   .refine((data) => data.password === data.confirmPassword, {

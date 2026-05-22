@@ -1,8 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { MOCK_STATS } from "@/features/application/model/applicationMock"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { isOperator } from "@/features/auth/model/identity"
 import { useMatchingStatusData } from "@/features/matching/hooks/useMatchingStatusData"
 import { MOCK_MATCHING_PARTS } from "@/features/matching/model/matchingStatusMock"
 import { MatchingPartSection } from "@/features/matching/ui/MatchingPartSection"
@@ -10,15 +13,18 @@ import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"
 import { MatchingTableHead } from "@/features/matching/ui/MatchingTableHead"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
-import { useViewModeStore } from "@/shared/view-mode"
 
 export const Route = createFileRoute("/matching/status")({
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
+    if (!isOperator(me)) throw redirect({ to: "/" })
+  },
   component: MatchingStatusPage,
 })
 
 function MatchingStatusPage() {
-  const mode = useViewModeStore((s) => s.mode)
-  const isAdmin = mode === "admin"
+  const { data: me } = useMe()
+  const isAdmin = isOperator(me)
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
 
   const {

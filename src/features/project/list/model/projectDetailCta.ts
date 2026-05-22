@@ -1,5 +1,3 @@
-import type { ViewMode } from "@/shared/view-mode"
-
 export type ProjectDetailCtaMode =
   | "recruit-questions"
   | "my-application"
@@ -7,12 +5,13 @@ export type ProjectDetailCtaMode =
   | "plan-only"
 
 export function resolveProjectDetailCtaMode(
-  mode: ViewMode,
+  isOperator: boolean,
+  isPm: boolean,
   isSameBranch: boolean,
   isApplied: boolean,
 ): ProjectDetailCtaMode {
-  if (mode === "admin") return "recruit-questions"
+  if (isOperator) return "recruit-questions"
   if (!isSameBranch) return "plan-only"
-  if (mode === "pm") return "recruit-questions"
+  if (isPm) return "recruit-questions"
   return isApplied ? "my-application" : "apply"
 }

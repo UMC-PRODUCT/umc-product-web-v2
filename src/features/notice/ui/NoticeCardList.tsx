@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 
 import { Border } from "./Border"
 import { NoticeCard } from "./NoticeCard"
+import { NoticeCardSkeleton } from "./NoticeCardSkeleton"
 
 // TODO: 공지 API 응답 형식에 맞추어 수정
 export type NoticeItem = {
@@ -15,19 +16,25 @@ export type NoticeItem = {
 interface NoticeCardListProps {
   notices: NoticeItem[]
   page: number
+  isLoading?: boolean
   canManage?: boolean
   focusedNoticeId?: string | null
   onDeleteNotice?: (noticeId: string) => void
   onEditNotice?: (noticeId: string) => void
+  renderContent?: (noticeId: string) => ReactNode
 }
+
+const SKELETON_COUNT = 3
 
 export function NoticeCardList({
   notices,
   page,
+  isLoading = false,
   canManage = false,
   focusedNoticeId,
   onDeleteNotice,
   onEditNotice,
+  renderContent,
 }: NoticeCardListProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
@@ -60,6 +67,19 @@ export function NoticeCardList({
     targetButton.scrollIntoView({ block: "center", behavior: "smooth" })
   }, [expandedIndex, focusedNoticeId, notices])
 
+  if (isLoading) {
+    return (
+      <div className="flex w-full flex-col">
+        {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+          <div key={`skeleton-${index}`} className="w-full">
+            <NoticeCardSkeleton />
+            {index < 4 ? <Border /> : null}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="flex w-full flex-col">
       {notices.map((notice, index) => {
@@ -90,7 +110,7 @@ export function NoticeCardList({
                 onDeleteNotice?.(notice.id)
               }}
             >
-              임시 내용
+              {renderContent ? renderContent(notice.id) : "임시 내용"}
             </NoticeCard>
 
             {!isExpanded && index < notices.length - 1 ? <Border /> : null}

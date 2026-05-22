@@ -24,7 +24,7 @@ export default function Header() {
   const location = useLocation()
 
   return (
-    <header className="bg-teal-gray-50 shadow-drop-neutral-3 flex h-20 w-full items-center justify-between overflow-clip">
+    <header className="bg-teal-gray-50 shadow-drop-neutral-3 flex h-20 w-full items-center justify-between overflow-visible">
       <Link to="/" className="flex w-55 items-center pl-10">
         <UmcLogo className="text-teal-gray-700 h-5.5 w-17.5" />
       </Link>

@@ -24,7 +24,7 @@ export function GeneratedCodeCard({ record }: GeneratedCodeCardProps) {
         color: "primary",
         variant: "deep",
         type: "default",
-        duration: 2,
+        duration: 2000,
       })
       window.setTimeout(() => setCopied(false), 1500)
     } catch {
@@ -33,7 +33,7 @@ export function GeneratedCodeCard({ record }: GeneratedCodeCardProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     }
   }

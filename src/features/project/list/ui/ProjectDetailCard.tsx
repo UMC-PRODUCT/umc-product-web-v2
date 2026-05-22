@@ -1,23 +1,33 @@
 /** 피그마 기준 Project Card Lg입니다. */
-import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
+import { useEffect, useMemo, useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/features/auth/hooks/useMe"
+import {
+  getViewerBranch,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
+import {
+  getApplicationForm,
+  mapApplicationFormToSections,
+  projectKeys,
+} from "@/features/project/new/api"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { Button } from "@/shared/ui/Button"
 import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
-import { useViewModeStore } from "@/shared/view-mode"
 
-import { getApplicationSections } from "../model/applicationQuestions.mock"
 import { isRecruitDone } from "../model/matchingProject"
 import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import { resolveProjectDetailCtaMode } from "../model/projectDetailCta"
 import { ProjectApplyModal } from "./apply-modal/ProjectApplyModal"
 import { RecruitQuestionsViewModal } from "./apply-modal/RecruitQuestionsViewModal"
 import { TeamMemberModal } from "./team-member-modal/TeamMemberModal"
-
-import type { ViewMode } from "@/shared/view-mode"
 
 import type { MatchingProject } from "../model/matchingProject"
 
@@ -28,7 +38,6 @@ interface ProjectDetailCardProps {
   logo?: ProjectDetailCardLogo
   viewerBranch?: string
   showEditCta?: boolean
-  modeOverride?: ViewMode
 }
 
 export function ProjectDetailCard({
@@ -36,22 +45,54 @@ export function ProjectDetailCard({
   logo = "on",
   viewerBranch: viewerBranchProp,
   showEditCta = false,
-  modeOverride,
 }: ProjectDetailCardProps) {
-  const mode = useViewModeStore((s) => s.mode)
-  const previewMode = useViewModeStore((s) => s.previewMode)
-  const effectiveMode = modeOverride ?? (mode === "admin" ? previewMode : mode)
-  const storeBranch = useViewModeStore((s) => s.viewerBranch)
-  const viewerBranch = viewerBranchProp ?? storeBranch
+  const navigate = useNavigate()
+  const { data: me } = useMe()
+  const userBranch = getViewerBranch(me)
+  const viewerBranch = viewerBranchProp ?? userBranch
+  const addToast = useToastStore((s) => s.addToast)
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
   const [isRecruitQuestionsModalOpen, setIsRecruitQuestionsModalOpen] =
     useState(false)
   const data = dataProp ?? DEFAULT_MATCHING_PROJECT_MOCK
-  // admin 드롭다운 프리뷰는 실제 지부 비교 없이 항상 "같은 지부"로 간주 (임시)
-  const isSameBranch = mode === "admin" || viewerBranch === data.branch
+
+  const projectIdNum = /^\d+$/.test(data.id) ? Number(data.id) : NaN
+  const isShowingFormModal = isApplyModalOpen || isRecruitQuestionsModalOpen
+  const {
+    data: applicationForm,
+    isLoading: isFormLoading,
+    error: formError,
+  } = useQuery({
+    queryKey: projectKeys.applicationForm(projectIdNum),
+    queryFn: () => getApplicationForm(projectIdNum),
+    enabled: isShowingFormModal && Number.isFinite(projectIdNum),
+    staleTime: 5 * 60 * 1000,
+  })
+  const sections = useMemo(
+    () =>
+      applicationForm ? mapApplicationFormToSections(applicationForm) : [],
+    [applicationForm],
+  )
+
+  useEffect(() => {
+    if (!formError) return
+    addToast({
+      message: "모집 문항을 불러오지 못했습니다.",
+      color: "red",
+      variant: "deep",
+      type: "default",
+      duration: 3,
+    })
+    setIsApplyModalOpen(false)
+    setIsRecruitQuestionsModalOpen(false)
+  }, [formError, addToast])
+  const userIsOperator = isOperator(me)
+  const userIsPm = isCurrentTermPm(me)
+  const isSameBranch = userIsOperator || viewerBranch === data.branch
   const ctaMode = resolveProjectDetailCtaMode(
-    effectiveMode,
+    userIsOperator,
+    userIsPm,
     isSameBranch,
     data.isApplied ?? false,
   )
@@ -60,8 +101,8 @@ export function ProjectDetailCard({
 
   return (
     <>
-      <div className="flex w-[33.75rem] flex-col items-start overflow-hidden rounded-2xl bg-white">
-        <div className="bg-teal-gray-200 flex h-[17.875rem] w-[33.75rem] items-center justify-center overflow-hidden">
+      <div className="flex w-135 flex-col items-start overflow-hidden rounded-2xl bg-white">
+        <div className="bg-teal-gray-200 flex h-71.5 w-135 items-center justify-center overflow-hidden">
           {cover?.src ? (
             <img
               src={cover.src}
@@ -101,7 +142,7 @@ export function ProjectDetailCard({
                 </p>
               </div>
 
-              <p className="text-body-2-regular text-teal-gray-600 w-full break-words whitespace-pre-wrap">
+              <p className="text-body-2-regular text-teal-gray-600 w-full wrap-break-word whitespace-pre-wrap">
                 {data.description}
               </p>
             </div>
@@ -140,7 +181,17 @@ export function ProjectDetailCard({
               기획 보기
             </Button>
             {showEditCta ? (
-              <Button className="flex-1">프로젝트 수정하기</Button>
+              <Button
+                className="flex-1"
+                onClick={() =>
+                  navigate({
+                    to: "/matching/projects/new",
+                    search: { projectId: Number(data.id) },
+                  })
+                }
+              >
+                프로젝트 수정하기
+              </Button>
             ) : (
               <>
                 {ctaMode === "recruit-questions" && (
@@ -184,10 +235,21 @@ export function ProjectDetailCard({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            <RecruitQuestionsViewModal
-              data={data}
-              sections={getApplicationSections(data.id)}
-            />
+            {isFormLoading ? (
+              <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
+                <span className="text-body-2-regular text-teal-gray-500">
+                  불러오는 중...
+                </span>
+              </div>
+            ) : applicationForm == null ? (
+              <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
+                <span className="text-body-2-regular text-teal-gray-500">
+                  등록된 모집 문항이 없습니다.
+                </span>
+              </div>
+            ) : (
+              <RecruitQuestionsViewModal data={data} sections={sections} />
+            )}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
@@ -196,16 +258,30 @@ export function ProjectDetailCard({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            <ProjectApplyModal
-              data={data}
-              sections={getApplicationSections(data.id)}
-              canToggleSection={effectiveMode !== "others"}
-              onBack={() => setIsApplyModalOpen(false)}
-              onSubmit={(answers) => {
-                console.log("[apply submit]", data.id, answers)
-                setIsApplyModalOpen(false)
-              }}
-            />
+            {isFormLoading ? (
+              <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
+                <span className="text-body-2-regular text-teal-gray-500">
+                  불러오는 중...
+                </span>
+              </div>
+            ) : applicationForm == null ? (
+              <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
+                <span className="text-body-2-regular text-teal-gray-500">
+                  등록된 지원 양식이 없습니다.
+                </span>
+              </div>
+            ) : (
+              <ProjectApplyModal
+                data={data}
+                sections={sections}
+                canToggleSection={userIsOperator || userIsPm}
+                onBack={() => setIsApplyModalOpen(false)}
+                onSubmit={(answers) => {
+                  console.log("[apply submit]", data.id, answers)
+                  setIsApplyModalOpen(false)
+                }}
+              />
+            )}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
