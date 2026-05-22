@@ -46,12 +46,8 @@ export function MatchingProjectsListPage() {
     filterDescriptors,
   } = useMatchingProjectListFilters()
 
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
-    null,
-  )
-  const [selectedProjectChapterId, setSelectedProjectChapterId] = useState<
-    number | null
-  >(null)
+  const [selectedProject, setSelectedProject] =
+    useState<MatchingProject | null>(null)
 
   return (
     <section className="relative flex w-full flex-col items-start justify-start pt-8">
@@ -120,8 +116,7 @@ export function MatchingProjectsListPage() {
                   type="button"
                   className="w-full text-left"
                   onClick={() => {
-                    setSelectedProjectId(item.id)
-                    setSelectedProjectChapterId(item.chapterId)
+                    setSelectedProject(project)
                   }}
                 >
                   <MatchingProjectCard variant="default" data={project} />
@@ -142,24 +137,16 @@ export function MatchingProjectsListPage() {
       </div>
 
       <Modal.Root
-        open={selectedProjectId !== null}
+        open={selectedProject !== null}
         onOpenChange={(open) => {
-          if (!open) {
-            setSelectedProjectId(null)
-            setSelectedProjectChapterId(null)
-          }
+          if (!open) setSelectedProject(null)
         }}
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
             <Modal.Title className="sr-only">프로젝트 상세</Modal.Title>
-            {selectedProjectId !== null && (
-              <ProjectDetailCard
-                projectId={selectedProjectId}
-                projectChapterId={selectedProjectChapterId ?? undefined}
-              />
-            )}
+            {selectedProject && <ProjectDetailCard data={selectedProject} />}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>

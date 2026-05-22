@@ -182,9 +182,7 @@ export function MatchingResultRow({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            {projectData && (
-              <ProjectDetailCard projectId={Number(projectData.id)} />
-            )}
+            {projectData && <ProjectDetailCard data={projectData} />}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
