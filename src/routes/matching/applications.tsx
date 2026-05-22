@@ -5,11 +5,6 @@ import {
   useAdminPageData,
   useChallengerPageData,
 } from "@/features/application/hooks/useApplicationPageData"
-import {
-  MOCK_PROJECTS,
-  MOCK_STATS,
-} from "@/features/application/model/applicationMock"
-import { MOCK_CHALLENGER_PROJECT } from "@/features/application/model/challengerMock"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
@@ -36,19 +31,13 @@ function MatchingApplicationsPage() {
   const isPm = isCurrentTermPm(me)
   const isOthers = !canApprove && !isPm
 
-  // Admin 뷰 데이터 (API 데이터가 비어있으면 mock fallback)
   const admin = useAdminPageData(selectedChapter)
-  const adminStats = admin.projects.length > 0 ? admin.stats : MOCK_STATS
-  const adminProjects =
-    admin.projects.length > 0 ? admin.projects : MOCK_PROJECTS
+  const adminStats = admin.stats
+  const adminProjects = admin.projects
 
-  // PM 뷰 데이터 (API 데이터가 비어있으면 mock fallback)
   const challenger = useChallengerPageData()
-  const pmProjects =
-    challenger.projects.length > 0
-      ? challenger.projects
-      : MOCK_PROJECTS.filter((p) => p.id === "3")
-  const pmProjectInfo = challenger.projectInfo ?? MOCK_CHALLENGER_PROJECT
+  const pmProjects = challenger.projects
+  const pmProjectInfo = challenger.projectInfo
 
   return (
     <section className="flex w-full flex-col pt-10">
@@ -62,7 +51,7 @@ function MatchingApplicationsPage() {
           </p>
         </div>
 
-        {isPm && (
+        {isPm && pmProjectInfo && (
           <ProjectTitleCard
             className="mt-6"
             projectName={pmProjectInfo.projectName}

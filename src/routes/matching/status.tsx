@@ -1,13 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useState } from "react"
 
-import { MOCK_STATS } from "@/features/application/model/applicationMock"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { isOperator } from "@/features/auth/model/identity"
 import { useMatchingStatusData } from "@/features/matching/hooks/useMatchingStatusData"
-import { MOCK_MATCHING_PARTS } from "@/features/matching/model/matchingStatusMock"
 import { MatchingPartSection } from "@/features/matching/ui/MatchingPartSection"
 import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"
 import { MatchingTableHead } from "@/features/matching/ui/MatchingTableHead"
@@ -38,10 +36,8 @@ function MatchingStatusPage() {
     isLoading,
   } = useMatchingStatusData(selectedChapter)
 
-  // API 데이터 없으면 mock fallback
-  const displayParts =
-    matchingParts.length > 0 ? matchingParts : MOCK_MATCHING_PARTS
-  const displayStats = matchingParts.length > 0 ? stats : MOCK_STATS
+  const displayParts = matchingParts
+  const displayStats = stats
 
   return (
     <section className="flex w-full flex-col pt-10">
