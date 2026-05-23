@@ -56,6 +56,15 @@ export interface CompleteEmailVerificationResponse {
   emailVerificationToken: string
 }
 
+export interface GetEmailAvailabilityRequest {
+  email: string
+}
+
+export interface GetEmailAvailabilityResponse {
+  email: string
+  available: boolean
+}
+
 export interface TermConsentStatus {
   termsId: number
   isAgreed: boolean
