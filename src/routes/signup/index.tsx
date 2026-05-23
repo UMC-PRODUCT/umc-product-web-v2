@@ -10,7 +10,7 @@ import {
   sendEmailVerification,
 } from "@/features/auth/api/emailVerification"
 import {
-  registerMemberByIdPw,
+  registerMemberByEmail,
   registerMemberByOAuth,
 } from "@/features/auth/api/register"
 import { getAllSchools } from "@/features/auth/api/school"
@@ -277,7 +277,7 @@ function SignUpPage() {
           termsAgreements: [], // TODO: 약관 동의 기능 추가 시 연동
         })
       } else {
-        await registerMemberByIdPw({
+        await registerMemberByEmail({
           rawPassword: password,
           name,
           nickname,

@@ -17,7 +17,7 @@ export async function registerMemberByOAuth(
   return data.result
 }
 
-export async function registerMemberByIdPw(
+export async function registerMemberByEmail(
   payload: EmailRegisterMemberRequest,
 ): Promise<RegisterResponse> {
   const { data } = await api.post<ApiResponse<RegisterResponse>>(
