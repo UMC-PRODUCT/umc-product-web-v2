@@ -15,6 +15,7 @@ interface VerificationStepProps {
   isCodeExpired: boolean
   verificationButtonDisabled: boolean
   verificationButtonText: string
+  isVerificationLoading?: boolean
   onVerificationClick: () => void
   onSpamGuideClick: () => void
 }
@@ -27,6 +28,7 @@ export function VerificationStep({
   isCodeExpired,
   verificationButtonDisabled,
   verificationButtonText,
+  isVerificationLoading = false,
   onVerificationClick,
   onSpamGuideClick,
 }: VerificationStepProps) {
@@ -49,6 +51,7 @@ export function VerificationStep({
             color={"primary"}
             variant={"weak"}
             disabled={verificationButtonDisabled}
+            isLoading={isVerificationLoading}
             onClick={onVerificationClick}
           >
             {verificationButtonText}
@@ -68,6 +71,12 @@ export function VerificationStep({
               </p>
             </button>
           )}
+          {/* <>
+            <CheckIcon className="text-error-500 h-4 w-4" />
+            <p className="text-error-500 text-body-2-medium">
+              이미 가입된 이메일 입니다
+            </p>
+          </> */}
         </div>
       </div>
 
