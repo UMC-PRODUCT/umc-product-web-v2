@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
 import {
@@ -105,8 +106,14 @@ function ProjectSettingsAnnouncePage() {
   const [pendingNotice] = useState(readPendingNotice)
 
   const { data: me } = useMe()
-  const canManage = isOperator(me)
+  const { hasPermission } = useResourcePermission("NOTICE")
+
+  const isOp = isOperator(me)
   const userChapter = getViewerBranch(me) as Chapter | undefined
+
+  const canWrite = hasPermission("WRITE")
+  const canEdit = hasPermission("EDIT")
+  const canDelete = hasPermission("DELETE")
 
   // 기수 정보 조회
   const { data: gisuData } = useQuery({
@@ -193,7 +200,7 @@ function ProjectSettingsAnnouncePage() {
   })
 
   const handleChapterChange = (nextChapter: Chapter) => {
-    if (!canManage && userChapter && nextChapter !== userChapter) {
+    if (!isOp && userChapter && nextChapter !== userChapter) {
       addToast({
         message: "소속된 지부의 공지만 확인할 수 있습니다.",
         color: "red",
@@ -262,7 +269,7 @@ function ProjectSettingsAnnouncePage() {
               공지
             </span>
             <p className="text-body-2-regular text-teal-gray-600">
-              {canManage
+              {isOp
                 ? "프로젝트 설정에 대한 지부별 공지를 PM 챌린저에게 안내합니다."
                 : "프로젝트 설정에 대한 우리 지부의 PM 챌린저 공지를 한눈에 조회합니다."}
             </p>
@@ -275,7 +282,7 @@ function ProjectSettingsAnnouncePage() {
                 onChapterChange={handleChapterChange}
               />
 
-              {canManage ? (
+              {canWrite ? (
                 <Button
                   type="button"
                   variant="fill"
@@ -296,7 +303,8 @@ function ProjectSettingsAnnouncePage() {
               notices={notices}
               page={safePage}
               isLoading={isNoticesLoading}
-              canManage={canManage}
+              canEdit={canEdit}
+              canDelete={canDelete}
               focusedNoticeId={focusedNoticeId}
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
