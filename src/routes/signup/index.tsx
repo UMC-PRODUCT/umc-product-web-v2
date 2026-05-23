@@ -6,6 +6,7 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
   completeEmailVerification,
+  getEmailAvailability,
   resendEmailVerification,
   sendEmailVerification,
 } from "@/features/auth/api/emailVerification"
@@ -86,6 +87,7 @@ function SignUpPage() {
   const [schoolList, setSchoolList] = useState<SchoolNameItem[]>([])
   const [isVerificationLoading, setIsVerificationLoading] = useState(false)
   const [isSignupLoading, setIsSignupLoading] = useState(false)
+  const [isEmailDuplicated, setIsEmailDuplicated] = useState(false)
   const isOAuth = !!oAuthVerificationToken
   const addToast = useToastStore((s) => s.addToast)
 
@@ -125,6 +127,7 @@ function SignUpPage() {
   useEffect(() => {
     setShowVerificationSent(false)
     setIsVerificationRequested(false)
+    setIsEmailDuplicated(false)
   }, [email])
 
   // 인증번호 변경 시 사이드 이펙트
@@ -175,6 +178,14 @@ function SignUpPage() {
   const handleVerificationClick = async () => {
     setIsVerificationLoading(true)
     try {
+      // 이메일 중복 체크 추가
+      const availability = await getEmailAvailability({ email })
+      if (!availability.available) {
+        setIsEmailDuplicated(true)
+        setIsVerificationLoading(false)
+        return
+      }
+
       const res = await sendEmailVerification({
         email,
         purpose: "REGISTER",
@@ -357,6 +368,7 @@ function SignUpPage() {
                 verificationButtonDisabled={verificationButtonDisabled}
                 verificationButtonText={verificationButtonText}
                 isVerificationLoading={isVerificationLoading}
+                isEmailDuplicated={isEmailDuplicated}
                 onVerificationClick={handleVerificationClick}
                 onSpamGuideClick={() => setShowSpamGuideModal(true)}
               />
