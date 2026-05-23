@@ -146,21 +146,25 @@ export function AccountCreationStep({
           className="w-full"
         />
 
-        {confirmPassword && !isPasswordMatch && (
-          <div className="flex h-5.5 items-center gap-1">
-            <CheckIcon className="text-error-500 h-4 w-4" />
-            <p className="text-error-500 text-body-2-medium">
-              비밀번호와 일치하지 않습니다.
-            </p>
-          </div>
-        )}
+        <div className="flex h-5.5 items-center gap-1">
+          {confirmPassword && !isPasswordMatch && (
+            <>
+              <CheckIcon className="text-error-500 h-4 w-4" />
+              <p className="text-error-500 text-body-2-medium">
+                비밀번호와 일치하지 않습니다.
+              </p>
+            </>
+          )}
 
-        {confirmPassword && isPasswordMatch && (
-          <div className="flex h-5.5 items-center gap-1">
-            <CheckIcon className="text-success-600 h-4 w-4" />
-            <p className="text-success-600 text-body-2-medium">비밀번호 일치</p>
-          </div>
-        )}
+          {confirmPassword && isPasswordMatch && (
+            <>
+              <CheckIcon className="text-success-600 h-4 w-4" />
+              <p className="text-success-600 text-body-2-medium">
+                비밀번호 일치
+              </p>
+            </>
+          )}
+        </div>
       </div>
     </>
   )
