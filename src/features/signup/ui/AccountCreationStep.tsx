@@ -1,7 +1,8 @@
+import { useEffect } from "react"
 import { useFormContext } from "react-hook-form"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
-import { Button } from "@/shared/ui/Button"
+// import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
 import {
@@ -10,33 +11,40 @@ import {
   type SignUpFormData,
 } from "../validation"
 
-interface AccountCreationStepProps {
-  isIdDuplicated: boolean
-  onIdDuplicateCheck: () => void
-}
+// interface AccountCreationStepProps {
+//   isIdDuplicated: boolean
+//   onIdDuplicateCheck: () => void
+// }
 
-export function AccountCreationStep({
-  isIdDuplicated,
-  onIdDuplicateCheck,
-}: AccountCreationStepProps) {
+// {
+//   isIdDuplicated,
+//   onIdDuplicateCheck,
+// }: AccountCreationStepProps
+export function AccountCreationStep() {
   const {
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext<SignUpFormData>()
 
+  const email = watch("email")
   const id = watch("id")
   const password = watch("password")
   const confirmPassword = watch("confirmPassword")
 
-  const isIdValid = !errors.id
+  useEffect(() => {
+    setValue("id", email)
+  }, [email, setValue])
+
+  // const isIdValid = !errors.id
   const isPasswordValid = !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
   const hasInvalidSpecialChar =
     !!errors.password?.message?.includes("사용 가능한 특수문자")
 
-  const idValidationState = getSimpleValidationState(id, isIdValid)
-  const idValidationColor = getValidationColor(idValidationState)
+  // const idValidationState = getSimpleValidationState(id, isIdValid)
+  // const idValidationColor = getValidationColor(idValidationState)
   const passwordValidationState = hasInvalidSpecialChar
     ? "invalid"
     : getSimpleValidationState(password, isPasswordValid)
@@ -44,22 +52,31 @@ export function AccountCreationStep({
 
   return (
     <>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex min-w-90 flex-col gap-1.5">
         <div>
-          <span className="text-body-1-medium text-teal-gray-600">아이디</span>
+          <span className="text-body-1-medium text-teal-gray-600">
+            이메일 아이디
+          </span>
           <span className="text-body-1-medium text-error-600">*</span>
         </div>
 
         <div className="flex items-center gap-1.5">
-          <InputBox
+          {/* <InputBox
             {...register("id")}
             value={id}
             state={
               isIdDuplicated || (id !== "" && !isIdValid) ? "error" : "default"
             }
             rightAdornment={<></>}
+          /> */}
+          <InputBox
+            {...register("id")}
+            value={id}
+            state="disabled"
+            rightAdornment={<></>}
+            className="w-full"
           />
-          <Button
+          {/* <Button
             size={"m"}
             color={"primary"}
             variant={"weak"}
@@ -67,10 +84,10 @@ export function AccountCreationStep({
             onClick={onIdDuplicateCheck}
           >
             중복 확인
-          </Button>
+          </Button> */}
         </div>
 
-        <div className="flex h-5.5 items-center gap-1">
+        {/* <div className="flex h-5.5 items-center gap-1">
           {!isIdDuplicated && (
             <>
               <CheckIcon className={`h-4 w-4 ${idValidationColor}`} />
@@ -88,7 +105,7 @@ export function AccountCreationStep({
               </p>
             </>
           )}
-        </div>
+        </div> */}
       </div>
 
       <div className="flex w-full flex-col gap-1.5">

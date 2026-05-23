@@ -7,11 +7,12 @@ export const codeSchema = z
   .string()
   .length(6, "인증번호 6자리를 입력해 주세요.")
 
-export const idSchema = z
-  .string()
-  .min(5, "아이디는 5자 이상이어야 합니다")
-  .max(20, "아이디는 20자 이하여야 합니다")
-  .regex(/^[a-z0-9_-]*$/, "5~20자의 영문, 숫자와 특수기호(_),(-) 사용 가능")
+// export const idSchema = z
+//   .string()
+//   .min(5, "아이디는 5자 이상이어야 합니다")
+//   .max(20, "아이디는 20자 이하여야 합니다")
+//   .regex(/^[a-z0-9_-]*$/, "5~20자의 영문, 숫자와 특수기호(_),(-) 사용 가능")
+export const idSchema = emailSchema
 
 export const passwordSchema = z
   .string()

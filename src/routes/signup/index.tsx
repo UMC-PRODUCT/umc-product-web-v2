@@ -156,9 +156,9 @@ function SignUpPage() {
     setIsAccountCreationComplete(true)
   }
 
-  const handleIdDuplicateCheck = () => {
-    // TODO: 아이디 중복 확인 API 연동
-  }
+  // const handleIdDuplicateCheck = () => {
+  //   // TODO: 아이디 중복 확인 API 연동
+  // }
 
   // 각종 버튼 상태
   const verificationButtonDisabled = isVerificationRequested
@@ -206,8 +206,8 @@ function SignUpPage() {
 
             {isVerificationComplete && !isAccountCreationComplete && (
               <AccountCreationStep
-                isIdDuplicated={isIdDuplicated}
-                onIdDuplicateCheck={handleIdDuplicateCheck}
+              // isIdDuplicated={isIdDuplicated}
+              // onIdDuplicateCheck={handleIdDuplicateCheck}
               />
             )}
 
