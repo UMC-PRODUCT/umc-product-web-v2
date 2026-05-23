@@ -121,8 +121,7 @@ export interface ChangePasswordRequest {
   newPassword: string
 }
 
-export interface IdPwRegisterMemberRequest {
-  loginId: string
+export interface EmailRegisterMemberRequest {
   rawPassword: string
   name: string
   nickname: string

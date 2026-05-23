@@ -1,7 +1,7 @@
 import { api } from "@/shared/lib/axios"
 
 import type {
-  IdPwRegisterMemberRequest,
+  EmailRegisterMemberRequest,
   RegisterMemberRequest,
   RegisterResponse,
 } from "@/features/auth/model/types"
@@ -18,10 +18,10 @@ export async function registerMemberByOAuth(
 }
 
 export async function registerMemberByIdPw(
-  payload: IdPwRegisterMemberRequest,
+  payload: EmailRegisterMemberRequest,
 ): Promise<RegisterResponse> {
   const { data } = await api.post<ApiResponse<RegisterResponse>>(
-    "/v1/member/register/id-pw",
+    "/v1/member/register/email",
     payload,
   )
   return data.result
