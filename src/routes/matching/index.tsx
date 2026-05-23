@@ -11,7 +11,6 @@ import {
   getViewerBranch,
   isCentralStaff,
   isCurrentTermPm,
-  isOperator,
 } from "@/features/auth/model/identity"
 import {
   getAllChapters,
@@ -92,7 +91,7 @@ export const Route = createFileRoute("/matching/")({
   },
   beforeLoad: async ({ search, context }) => {
     const me = await ensureMe(context.queryClient)
-    if (isOperator(me)) return
+    if (isCentralStaff(me)) return
     const userChapter = getViewerBranch(me)
     if (isChapter(userChapter) && search.chapter !== userChapter) {
       throw redirect({
