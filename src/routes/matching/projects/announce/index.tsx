@@ -7,7 +7,11 @@ import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
+import {
+  getViewerBranch,
+  isCentralStaff,
+  isOperator,
+} from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllGisu,
@@ -108,7 +112,7 @@ function ProjectSettingsAnnouncePage() {
   const { data: me } = useMe()
   const { hasPermission } = useResourcePermission("NOTICE")
 
-  const isOp = isOperator(me)
+  const isCentral = isCentralStaff(me)
   const userChapter = getViewerBranch(me) as Chapter | undefined
 
   const canWrite = hasPermission("WRITE")
@@ -200,7 +204,7 @@ function ProjectSettingsAnnouncePage() {
   })
 
   const handleChapterChange = (nextChapter: Chapter) => {
-    if (!isOp && userChapter && nextChapter !== userChapter) {
+    if (!isCentral && userChapter && nextChapter !== userChapter) {
       addToast({
         message: "소속된 지부의 공지만 확인할 수 있습니다.",
         color: "red",

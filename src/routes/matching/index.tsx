@@ -9,6 +9,7 @@ import { useResourcePermission } from "@/features/auth/hooks/useResourcePermissi
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   getViewerBranch,
+  isCentralStaff,
   isCurrentTermPm,
   isOperator,
 } from "@/features/auth/model/identity"
@@ -112,7 +113,7 @@ function TeamMatchingAnnouncePage() {
   const { data: me } = useMe()
   const { hasPermission } = useResourcePermission("NOTICE")
 
-  const isOp = isOperator(me)
+  const isCentral = isCentralStaff(me)
   const isPm = isCurrentTermPm(me)
   const userChapter = getViewerBranch(me) as Chapter | undefined
 
@@ -204,7 +205,7 @@ function TeamMatchingAnnouncePage() {
   })
 
   const handleChapterChange = (nextChapter: Chapter) => {
-    if (!isOp && userChapter && nextChapter !== userChapter) {
+    if (!isCentral && userChapter && nextChapter !== userChapter) {
       addToast({
         message: "소속된 지부의 공지만 확인할 수 있습니다.",
         color: "red",
