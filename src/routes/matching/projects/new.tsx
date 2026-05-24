@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createFileRoute,
   redirect,
@@ -75,6 +75,7 @@ function ProjectRegisterPage() {
   const recruitInfoRef = useRef<RecruitInfoFormHandle>(null)
   const applicationFormRef = useRef<ApplicationFormHandle>(null)
 
+  const queryClient = useQueryClient()
   const { data: me } = useMe()
   const isPm = isCurrentTermPm(me)
 
@@ -205,6 +206,7 @@ function ProjectRegisterPage() {
     },
     onSuccess: () => {
       reset()
+      void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
       setShowSuccessModal(true)
     },
     onError: () => {
@@ -244,6 +246,7 @@ function ProjectRegisterPage() {
   }
 
   const handleStepChange = async (idx: number) => {
+    if (isEditMode) return
     if (isPm && idx === 2) {
       setStep(2)
       triggerStepTooltip(2)
@@ -280,14 +283,19 @@ function ProjectRegisterPage() {
     setStep(idx)
   }
 
+  const isEditModeDirty = () =>
+    (basicInfoRef.current?.getIsDirty() ?? false) ||
+    (recruitInfoRef.current?.getIsDirty() ?? false) ||
+    (applicationFormRef.current?.getIsDirty() ?? false)
+
   const {
     proceed: proceedLeave,
     reset: resetLeave,
     status: leaveBlockStatus,
   } = useBlocker({
-    shouldBlockFn: () => isStoreDirty,
+    shouldBlockFn: () => (isEditMode ? isEditModeDirty() : isStoreDirty),
     withResolver: true,
-    enableBeforeUnload: isStoreDirty,
+    enableBeforeUnload: isEditMode ? isEditModeDirty : isStoreDirty,
   })
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
@@ -336,17 +344,25 @@ function ProjectRegisterPage() {
         <Stepper
           step={step}
           onStepChange={handleStepChange}
-          disabledSteps={isPm ? [2] : []}
+          disabledSteps={
+            isEditMode
+              ? [1, 2, 3].filter((idx) => idx !== step)
+              : isPm
+                ? [2]
+                : []
+          }
           disabledTooltips={
-            isPm
-              ? {
-                  2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
-                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                }
-              : {
-                  2: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                }
+            isEditMode
+              ? {}
+              : isPm
+                ? {
+                    2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
+                    3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                  }
+                : {
+                    2: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                    3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                  }
           }
           openTooltipStep={tooltipTriggerStep}
         />
@@ -364,6 +380,8 @@ function ProjectRegisterPage() {
         {step === 3 && (
           <ApplicationForm
             ref={applicationFormRef}
+            isEditMode={isEditMode}
+            isSubmitting={submitMutation.isPending}
             onPrev={handleApplicationFormPrev}
             onNext={handleRegister}
           />
