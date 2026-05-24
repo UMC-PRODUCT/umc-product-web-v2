@@ -63,6 +63,10 @@ function ProjectRegisterPage() {
   const [step, setStep] = useState(1)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isSavingAndLeaving, setIsSavingAndLeaving] = useState(false)
+  const [tooltipTriggerStep, setTooltipTriggerStep] = useState<number | null>(
+    null,
+  )
+  const tooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
   const basicInfoRef = useRef<BasicInfoFormHandle>(null)
@@ -210,6 +214,15 @@ function ProjectRegisterPage() {
     },
   })
 
+  const triggerStepTooltip = (stepIdx: number) => {
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current)
+    setTooltipTriggerStep(stepIdx)
+    tooltipTimerRef.current = setTimeout(
+      () => setTooltipTriggerStep(null),
+      3100,
+    )
+  }
+
   const handleBasicInfoNext = () => {
     setStep(isPm ? 3 : 2)
   }
@@ -218,18 +231,27 @@ function ProjectRegisterPage() {
     setStep(isPm ? 1 : 2)
   }
 
-  const isStep3Locked = false
-
   const handleStepChange = async (idx: number) => {
-    if (isPm && idx === 2) return
+    if (isPm && idx === 2) {
+      setStep(2)
+      triggerStepTooltip(2)
+      return
+    }
     if (idx <= step) {
       setStep(idx)
       return
     }
     if (step === 1) {
       const ok = await basicInfoRef.current?.validate()
-      if (!ok) return
-    } else if (step === 2) {
+      if (!ok) {
+        triggerStepTooltip(idx)
+        return
+      }
+      if (!projectId) {
+        const saved = await basicInfoRef.current?.save()
+        if (!saved) return
+      }
+    } else if (step === 2 && !isPm) {
       const total = Object.values(recruitInfo).reduce(
         (sum, { count }) => sum + count,
         0,
@@ -281,10 +303,7 @@ function ProjectRegisterPage() {
 
   const handleSuccessConfirm = async () => {
     setShowSuccessModal(false)
-    await navigate({
-      to: isEditMode ? "/matching/projects/management" : "/matching/projects",
-      replace: true,
-    })
+    await navigate({ to: "/matching/projects/management", replace: true })
   }
 
   return (
@@ -301,17 +320,20 @@ function ProjectRegisterPage() {
         <Stepper
           step={step}
           onStepChange={handleStepChange}
-          disabledSteps={[...(isPm ? [2] : []), ...(isStep3Locked ? [3] : [])]}
-          disabledTooltips={{
-            2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
-            3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-          }}
+          disabledSteps={isPm ? [2] : []}
+          disabledTooltips={
+            isPm
+              ? { 2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다." }
+              : { 3: "기본 정보를 입력한 뒤 작성할 수 있습니다." }
+          }
+          openTooltipStep={tooltipTriggerStep}
         />
         {step === 1 && (
           <BasicInfoForm ref={basicInfoRef} onNext={handleBasicInfoNext} />
         )}
         {step === 2 && (
           <RecruitInfoForm
+            readOnly={isPm}
             onPrev={() => setStep(1)}
             onNext={() => setStep(3)}
           />

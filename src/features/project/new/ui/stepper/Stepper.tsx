@@ -11,6 +11,7 @@ interface StepperProps {
   onStepChange: (idx: number) => void
   disabledSteps?: number[]
   disabledTooltips?: Partial<Record<number, string>>
+  openTooltipStep?: number | null
 }
 
 export function Stepper({
@@ -18,6 +19,7 @@ export function Stepper({
   onStepChange,
   disabledSteps = [],
   disabledTooltips = {},
+  openTooltipStep = null,
 }: StepperProps) {
   return (
     <section
@@ -31,6 +33,7 @@ export function Stepper({
           isSelected={item.idx === step}
           disabled={disabledSteps.includes(item.idx)}
           disabledTooltip={disabledTooltips[item.idx]}
+          tooltipOpen={openTooltipStep === item.idx}
           onClick={() => onStepChange(item.idx)}
           {...item}
         />

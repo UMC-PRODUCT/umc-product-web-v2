@@ -33,6 +33,7 @@ const ROLES: {
 interface RecruitInfoFormProps {
   onPrev: () => void
   onNext: () => void
+  readOnly?: boolean
 }
 
 function buildSummaryText(
@@ -49,7 +50,11 @@ function buildSummaryText(
     .join(", ")
 }
 
-export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
+export function RecruitInfoForm({
+  onPrev,
+  onNext,
+  readOnly = false,
+}: RecruitInfoFormProps) {
   const addToast = useToastStore((s) => s.addToast)
   const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
@@ -123,6 +128,10 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
   }
 
   const handleNext = async () => {
+    if (readOnly) {
+      onNext()
+      return
+    }
     if (totalCount === 0) {
       addToast({
         message: "모집 인원을 1명 이상 입력해 주세요.",
@@ -180,6 +189,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
               <Counter
                 value={roleStates[key].count}
                 onChange={(v) => updateCount(key, v)}
+                disabled={readOnly}
                 aria-label={`${label} 인원`}
               />
               {stacks.length > 0 && (
@@ -188,14 +198,16 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
                   allowDeselect
                   value={roleStates[key].stack}
                   onValueChange={(v) =>
-                    updateStack(key, v as RoleStack | undefined)
+                    readOnly
+                      ? undefined
+                      : updateStack(key, v as RoleStack | undefined)
                   }
                 >
                   {stacks.map((stack) => (
                     <OptionButton
                       key={stack}
                       value={stack}
-                      disabled={roleStates[key].count === 0}
+                      disabled={readOnly || roleStates[key].count === 0}
                     >
                       {stack}
                     </OptionButton>
@@ -217,16 +229,20 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
         </div>
       </div>
       <div className="flex justify-between">
-        <Button
-          type="button"
-          variant="weak"
-          color="primary"
-          disabled={!canTempSave}
-          isLoading={isSaving}
-          onClick={handleTempSave}
-        >
-          {tempSaveLabel}
-        </Button>
+        {!readOnly ? (
+          <Button
+            type="button"
+            variant="weak"
+            color="primary"
+            disabled={!canTempSave}
+            isLoading={isSaving}
+            onClick={handleTempSave}
+          >
+            {tempSaveLabel}
+          </Button>
+        ) : (
+          <span />
+        )}
         <div className="flex items-center gap-4">
           <Button type="button" variant="weak" color="neutral" onClick={onPrev}>
             이전
