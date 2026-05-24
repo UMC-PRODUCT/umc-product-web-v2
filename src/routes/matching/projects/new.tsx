@@ -259,10 +259,8 @@ function ProjectRegisterPage() {
         triggerStepTooltip(idx)
         return
       }
-      if (!projectId) {
-        const saved = await basicInfoRef.current?.save()
-        if (!saved) return
-      }
+      const saved = await basicInfoRef.current?.save()
+      if (!saved) return
     } else if (step === 2 && !isPm) {
       const total = Object.values(recruitInfo).reduce(
         (sum, { count }) => sum + count,
