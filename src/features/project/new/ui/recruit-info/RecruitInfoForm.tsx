@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState } from "react"
+import { forwardRef, useImperativeHandle, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
@@ -67,7 +67,7 @@ export const RecruitInfoForm = forwardRef<
 
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
-  const [savedTotalCount, setSavedTotalCount] = useState<number | null>(null)
+  const savedSnapshotRef = useRef(JSON.stringify(storeRecruitInfo))
 
   const roleStates = storeRecruitInfo
 
@@ -78,7 +78,8 @@ export const RecruitInfoForm = forwardRef<
 
   const summaryText = buildSummaryText(ROLES, roleStates)
 
-  const hasUnsavedChanges = savedTotalCount !== totalCount
+  const hasUnsavedChanges =
+    savedSnapshotRef.current !== JSON.stringify(roleStates)
   const canTempSave = totalCount > 0 && hasUnsavedChanges && !isSaving
   const tempSaveLabel =
     hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
@@ -98,13 +99,14 @@ export const RecruitInfoForm = forwardRef<
       })
       return false
     }
+    const snapshotToSave = JSON.stringify(roleStates)
     setIsSaving(true)
     try {
       await updatePartQuotas(projectId, {
         entries: buildPartQuotasEntries(roleStates),
       })
       setRecruitInfo(roleStates)
-      setSavedTotalCount(totalCount)
+      savedSnapshotRef.current = snapshotToSave
       setHasSavedOnce(true)
       if (!silent) {
         addToast({
@@ -147,6 +149,10 @@ export const RecruitInfoForm = forwardRef<
         type: "default",
         duration: 3000,
       })
+      return
+    }
+    if (!hasUnsavedChanges) {
+      onNext()
       return
     }
     const ok = await savePartQuotas(true)

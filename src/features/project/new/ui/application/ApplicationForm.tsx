@@ -29,6 +29,7 @@ import { QuestionTypeToolbar } from "./QuestionTypeToolbar"
 
 export interface ApplicationFormHandle {
   save: () => Promise<boolean>
+  getIsDirty: () => boolean
 }
 
 interface ApplicationFormProps {
@@ -52,6 +53,8 @@ export const ApplicationForm = forwardRef<
     [form.commonQuestions, form.sections],
   )
   const isDirty = lastSavedSnapshotRef.current !== currentSnapshot
+  const isDirtyRef = useRef(isDirty)
+  isDirtyRef.current = isDirty
 
   const saveAppMutation = useMutation({
     mutationFn: async () => {
@@ -96,6 +99,7 @@ export const ApplicationForm = forwardRef<
         return false
       }
     },
+    getIsDirty: () => isDirtyRef.current,
   }))
 
   const canTempSave = !saveAppMutation.isPending && (isDirty || !hasSavedOnce)

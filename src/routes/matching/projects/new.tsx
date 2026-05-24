@@ -187,11 +187,13 @@ function ProjectRegisterPage() {
   const submitMutation = useMutation({
     mutationFn: async () => {
       if (!projectId) throw new Error("프로젝트 ID가 없습니다.")
-      const body = buildUpsertApplicationFormBody(
-        application.commonQuestions,
-        application.sections,
-      )
-      await upsertApplicationForm(projectId, body)
+      if (applicationFormRef.current?.getIsDirty() ?? true) {
+        const body = buildUpsertApplicationFormBody(
+          application.commonQuestions,
+          application.sections,
+        )
+        await upsertApplicationForm(projectId, body)
+      }
       if (isEditMode) return
       const result = await submitProject(projectId)
       if (pmInfo.pm1) {

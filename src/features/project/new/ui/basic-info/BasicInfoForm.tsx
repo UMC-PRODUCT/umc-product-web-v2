@@ -372,15 +372,15 @@ export const BasicInfoForm = forwardRef<
     if (hasUnsavedChanges) {
       const ok = await handleTempSave({ silent: true })
       if (!ok) return
+      addToast({
+        message: "작성한 내용이 저장되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
     }
     setBasicInfo(data)
-    addToast({
-      message: "작성한 내용이 저장되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3000,
-    })
     onNext()
   }
 
