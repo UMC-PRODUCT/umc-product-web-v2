@@ -265,6 +265,14 @@ function ProjectRegisterPage() {
     submitMutation.mutate()
   }
 
+  const handleSaveAndLeave = async () => {
+    if (step === 1) {
+      const ok = await basicInfoRef.current?.save()
+      if (!ok) return
+    }
+    proceedLeave?.()
+  }
+
   const handleSuccessConfirm = async () => {
     setShowSuccessModal(false)
     await navigate({
@@ -329,17 +337,11 @@ function ProjectRegisterPage() {
         }}
         variant="warning"
         title="페이지 이탈"
-        content={
-          <>
-            작성 중인 내용이 저장되지 않습니다.
-            <br />
-            나가시겠습니까?
-          </>
-        }
+        content="저장되지 않았습니다. 저장 후 나가시겠습니까?"
         cancelText="돌아가기"
-        confirmText="나가기"
+        confirmText="저장 후 나가기"
         onCancel={() => resetLeave?.()}
-        onConfirm={() => proceedLeave?.()}
+        onConfirm={() => void handleSaveAndLeave()}
       />
     </section>
   )

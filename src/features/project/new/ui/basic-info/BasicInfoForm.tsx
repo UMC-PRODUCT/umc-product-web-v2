@@ -40,6 +40,7 @@ import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"
 
 export interface BasicInfoFormHandle {
   validate: () => Promise<boolean>
+  save: () => Promise<boolean>
 }
 
 interface BasicInfoFormProps {
@@ -200,6 +201,7 @@ export const BasicInfoForm = forwardRef<
       }
       return true
     },
+    save: () => handleTempSave({ silent: false }),
   }))
 
   useEffect(() => {
