@@ -214,6 +214,12 @@ function ProjectRegisterPage() {
     },
   })
 
+  useEffect(() => {
+    return () => {
+      if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current)
+    }
+  }, [])
+
   const triggerStepTooltip = (stepIdx: number) => {
     if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current)
     setTooltipTriggerStep(stepIdx)
@@ -323,8 +329,14 @@ function ProjectRegisterPage() {
           disabledSteps={isPm ? [2] : []}
           disabledTooltips={
             isPm
-              ? { 2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다." }
-              : { 3: "기본 정보를 입력한 뒤 작성할 수 있습니다." }
+              ? {
+                  2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
+                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                }
+              : {
+                  2: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                }
           }
           openTooltipStep={tooltipTriggerStep}
         />
