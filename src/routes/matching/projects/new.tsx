@@ -14,8 +14,10 @@ import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
 import { getManagedProjects } from "@/features/project/management/api"
 import {
   ApplicationForm,
+  type ApplicationFormHandle,
   BasicInfoForm,
   RecruitInfoForm,
+  type RecruitInfoFormHandle,
   Stepper,
 } from "@/features/project/new"
 import {
@@ -70,6 +72,8 @@ function ProjectRegisterPage() {
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
   const basicInfoRef = useRef<BasicInfoFormHandle>(null)
+  const recruitInfoRef = useRef<RecruitInfoFormHandle>(null)
+  const applicationFormRef = useRef<ApplicationFormHandle>(null)
 
   const { data: me } = useMe()
   const isPm = isCurrentTermPm(me)
@@ -300,6 +304,12 @@ function ProjectRegisterPage() {
       if (step === 1) {
         const ok = await basicInfoRef.current?.save()
         if (!ok) return
+      } else if (step === 2) {
+        const ok = await recruitInfoRef.current?.save()
+        if (!ok) return
+      } else if (step === 3) {
+        const ok = await applicationFormRef.current?.save()
+        if (!ok) return
       }
       proceedLeave?.()
     } finally {
@@ -345,6 +355,7 @@ function ProjectRegisterPage() {
         )}
         {step === 2 && (
           <RecruitInfoForm
+            ref={recruitInfoRef}
             readOnly={isPm}
             onPrev={() => setStep(1)}
             onNext={() => setStep(3)}
@@ -352,6 +363,7 @@ function ProjectRegisterPage() {
         )}
         {step === 3 && (
           <ApplicationForm
+            ref={applicationFormRef}
             onPrev={handleApplicationFormPrev}
             onNext={handleRegister}
           />

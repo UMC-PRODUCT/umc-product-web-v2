@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { forwardRef, useImperativeHandle, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
@@ -30,6 +30,10 @@ const ROLES: {
   { key: "backend", label: "Backend", stacks: ["SpringBoot", "Node.js"] },
 ]
 
+export interface RecruitInfoFormHandle {
+  save: () => Promise<boolean>
+}
+
 interface RecruitInfoFormProps {
   onPrev: () => void
   onNext: () => void
@@ -50,11 +54,10 @@ function buildSummaryText(
     .join(", ")
 }
 
-export function RecruitInfoForm({
-  onPrev,
-  onNext,
-  readOnly = false,
-}: RecruitInfoFormProps) {
+export const RecruitInfoForm = forwardRef<
+  RecruitInfoFormHandle,
+  RecruitInfoFormProps
+>(function RecruitInfoForm({ onPrev, onNext, readOnly = false }, ref) {
   const addToast = useToastStore((s) => s.addToast)
   const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
@@ -126,6 +129,10 @@ export function RecruitInfoForm({
       setIsSaving(false)
     }
   }
+
+  useImperativeHandle(ref, () => ({
+    save: () => savePartQuotas(false),
+  }))
 
   const handleNext = async () => {
     if (readOnly) {
@@ -260,4 +267,4 @@ export function RecruitInfoForm({
       </div>
     </div>
   )
-}
+})

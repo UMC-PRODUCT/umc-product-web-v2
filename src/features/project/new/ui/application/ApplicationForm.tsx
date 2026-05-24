@@ -1,5 +1,11 @@
 import { useMutation } from "@tanstack/react-query"
-import { useMemo, useRef, useState } from "react"
+import {
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
@@ -21,12 +27,19 @@ import { QuestionCard } from "./QuestionCard"
 import { QuestionListContainer } from "./QuestionListContainer"
 import { QuestionTypeToolbar } from "./QuestionTypeToolbar"
 
+export interface ApplicationFormHandle {
+  save: () => Promise<boolean>
+}
+
 interface ApplicationFormProps {
   onPrev?: () => void
   onNext?: () => void
 }
 
-export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
+export const ApplicationForm = forwardRef<
+  ApplicationFormHandle,
+  ApplicationFormProps
+>(function ApplicationForm({ onPrev, onNext }, ref) {
   const addToast = useToastStore((s) => s.addToast)
   const form = useApplicationForm()
   const projectId = useProjectRegisterStore((s) => s.projectId)
@@ -73,6 +86,17 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
       })
     },
   })
+
+  useImperativeHandle(ref, () => ({
+    save: async () => {
+      try {
+        await saveAppMutation.mutateAsync()
+        return true
+      } catch {
+        return false
+      }
+    },
+  }))
 
   const canTempSave = !saveAppMutation.isPending && (isDirty || !hasSavedOnce)
   const tempSaveLabel =
@@ -286,4 +310,4 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
       </div>
     </div>
   )
-}
+})
