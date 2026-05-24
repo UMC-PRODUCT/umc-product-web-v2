@@ -147,6 +147,32 @@ export const BasicInfoForm = forwardRef<
     shouldFocusError: false,
   })
 
+  const validateImages = (thumbnail: unknown, logo: unknown): boolean => {
+    if (!(thumbnail instanceof File) && !uploaded.thumbnailUrl) {
+      addToast({
+        message: "프로젝트 대표 이미지를 업로드해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setTimeout(() => thumbnailRef.current?.focus(), 0)
+      return false
+    }
+    if (!(logo instanceof File) && !uploaded.logoUrl) {
+      addToast({
+        message: "프로젝트 로고를 업로드해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setTimeout(() => logoRef.current?.focus(), 0)
+      return false
+    }
+    return true
+  }
+
   useImperativeHandle(ref, () => ({
     validate: async () => {
       if (!pm1Member) {
@@ -177,28 +203,7 @@ export const BasicInfoForm = forwardRef<
         return false
       }
       const values = getValues()
-      if (!(values.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
-        addToast({
-          message: "프로젝트 대표 이미지를 업로드해 주세요.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-        setTimeout(() => thumbnailRef.current?.focus(), 0)
-        return false
-      }
-      if (!(values.logo instanceof File) && !uploaded.logoUrl) {
-        addToast({
-          message: "프로젝트 로고를 업로드해 주세요.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-        setTimeout(() => logoRef.current?.focus(), 0)
-        return false
-      }
+      if (!validateImages(values.thumbnail, values.logo)) return false
       return true
     },
     save: () => handleTempSave({ silent: false }),
@@ -347,28 +352,7 @@ export const BasicInfoForm = forwardRef<
   }
 
   const onSubmit = async (data: BasicInfoFormData) => {
-    if (!(data.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
-      addToast({
-        message: "프로젝트 대표 이미지를 업로드해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      setTimeout(() => thumbnailRef.current?.focus(), 0)
-      return
-    }
-    if (!(data.logo instanceof File) && !uploaded.logoUrl) {
-      addToast({
-        message: "프로젝트 로고를 업로드해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      setTimeout(() => logoRef.current?.focus(), 0)
-      return
-    }
+    if (!validateImages(data.thumbnail, data.logo)) return
     if (hasUnsavedChanges) {
       const ok = await handleTempSave({ silent: true })
       if (!ok) return
