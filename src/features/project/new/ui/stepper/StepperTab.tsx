@@ -9,6 +9,7 @@ interface StepperTabProps {
   isSelected: boolean
   disabled?: boolean
   disabledTooltip?: string
+  tooltipOpen?: boolean
   onClick: () => void
 }
 
@@ -18,6 +19,7 @@ export function StepperTab({
   isSelected = false,
   disabled = false,
   disabledTooltip,
+  tooltipOpen = false,
   onClick,
 }: StepperTabProps) {
   const button = (
@@ -27,7 +29,7 @@ export function StepperTab({
       aria-selected={isSelected}
       aria-disabled={disabled}
       tabIndex={isSelected ? 0 : -1}
-      onClick={disabled ? undefined : onClick}
+      onClick={onClick}
       className={cn(
         "relative flex h-full w-full items-center gap-2 rounded-[12px] py-1 pr-5 pl-3",
         disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
@@ -64,6 +66,8 @@ export function StepperTab({
     </button>
   )
 
+  const tooltipOpenProp = tooltipOpen ? true : disabled ? undefined : false
+
   return (
     <div
       className={cn(
@@ -71,13 +75,14 @@ export function StepperTab({
         disabled && "cursor-not-allowed",
       )}
     >
-      {disabled && disabledTooltip ? (
+      {disabledTooltip ? (
         <Tooltip
           content={disabledTooltip}
           size="small"
           dark={true}
           side="bottom"
           hoverOnly
+          open={tooltipOpenProp}
           triggerClassName="block w-full h-full"
         >
           {button}

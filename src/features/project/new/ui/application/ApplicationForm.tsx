@@ -1,5 +1,11 @@
 import { useMutation } from "@tanstack/react-query"
-import { useMemo, useRef, useState } from "react"
+import {
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
@@ -21,12 +27,20 @@ import { QuestionCard } from "./QuestionCard"
 import { QuestionListContainer } from "./QuestionListContainer"
 import { QuestionTypeToolbar } from "./QuestionTypeToolbar"
 
+export interface ApplicationFormHandle {
+  save: () => Promise<boolean>
+  getIsDirty: () => boolean
+}
+
 interface ApplicationFormProps {
   onPrev?: () => void
   onNext?: () => void
 }
 
-export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
+export const ApplicationForm = forwardRef<
+  ApplicationFormHandle,
+  ApplicationFormProps
+>(function ApplicationForm({ onPrev, onNext }, ref) {
   const addToast = useToastStore((s) => s.addToast)
   const form = useApplicationForm()
   const projectId = useProjectRegisterStore((s) => s.projectId)
@@ -39,6 +53,8 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
     [form.commonQuestions, form.sections],
   )
   const isDirty = lastSavedSnapshotRef.current !== currentSnapshot
+  const isDirtyRef = useRef(isDirty)
+  isDirtyRef.current = isDirty
 
   const saveAppMutation = useMutation({
     mutationFn: async () => {
@@ -60,7 +76,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "primary",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
     onError: () => {
@@ -69,10 +85,22 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
   })
+
+  useImperativeHandle(ref, () => ({
+    save: async () => {
+      try {
+        await saveAppMutation.mutateAsync()
+        return true
+      } catch {
+        return false
+      }
+    },
+    getIsDirty: () => isDirtyRef.current,
+  }))
 
   const canTempSave = !saveAppMutation.isPending && (isDirty || !hasSavedOnce)
   const tempSaveLabel =
@@ -100,7 +128,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       return
     }
@@ -114,7 +142,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
       return
     }
@@ -286,4 +314,4 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
       </div>
     </div>
   )
-}
+})

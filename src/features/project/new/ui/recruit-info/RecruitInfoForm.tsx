@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { forwardRef, useImperativeHandle, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
@@ -30,9 +30,14 @@ const ROLES: {
   { key: "backend", label: "Backend", stacks: ["SpringBoot", "Node.js"] },
 ]
 
+export interface RecruitInfoFormHandle {
+  save: () => Promise<boolean>
+}
+
 interface RecruitInfoFormProps {
   onPrev: () => void
   onNext: () => void
+  readOnly?: boolean
 }
 
 function buildSummaryText(
@@ -49,7 +54,10 @@ function buildSummaryText(
     .join(", ")
 }
 
-export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
+export const RecruitInfoForm = forwardRef<
+  RecruitInfoFormHandle,
+  RecruitInfoFormProps
+>(function RecruitInfoForm({ onPrev, onNext, readOnly = false }, ref) {
   const addToast = useToastStore((s) => s.addToast)
   const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
@@ -59,7 +67,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
 
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
-  const [savedTotalCount, setSavedTotalCount] = useState<number | null>(null)
+  const savedSnapshotRef = useRef(JSON.stringify(storeRecruitInfo))
 
   const roleStates = storeRecruitInfo
 
@@ -70,7 +78,8 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
 
   const summaryText = buildSummaryText(ROLES, roleStates)
 
-  const hasUnsavedChanges = savedTotalCount !== totalCount
+  const hasUnsavedChanges =
+    savedSnapshotRef.current !== JSON.stringify(roleStates)
   const canTempSave = totalCount > 0 && hasUnsavedChanges && !isSaving
   const tempSaveLabel =
     hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
@@ -90,13 +99,14 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
       })
       return false
     }
+    const snapshotToSave = JSON.stringify(roleStates)
     setIsSaving(true)
     try {
       await updatePartQuotas(projectId, {
         entries: buildPartQuotasEntries(roleStates),
       })
       setRecruitInfo(roleStates)
-      setSavedTotalCount(totalCount)
+      savedSnapshotRef.current = snapshotToSave
       setHasSavedOnce(true)
       if (!silent) {
         addToast({
@@ -122,7 +132,15 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
     }
   }
 
+  useImperativeHandle(ref, () => ({
+    save: () => savePartQuotas(false),
+  }))
+
   const handleNext = async () => {
+    if (readOnly) {
+      onNext()
+      return
+    }
     if (totalCount === 0) {
       addToast({
         message: "모집 인원을 1명 이상 입력해 주세요.",
@@ -131,6 +149,10 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
         type: "default",
         duration: 3000,
       })
+      return
+    }
+    if (!hasUnsavedChanges) {
+      onNext()
       return
     }
     const ok = await savePartQuotas(true)
@@ -180,6 +202,7 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
               <Counter
                 value={roleStates[key].count}
                 onChange={(v) => updateCount(key, v)}
+                disabled={readOnly}
                 aria-label={`${label} 인원`}
               />
               {stacks.length > 0 && (
@@ -188,14 +211,16 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
                   allowDeselect
                   value={roleStates[key].stack}
                   onValueChange={(v) =>
-                    updateStack(key, v as RoleStack | undefined)
+                    readOnly
+                      ? undefined
+                      : updateStack(key, v as RoleStack | undefined)
                   }
                 >
                   {stacks.map((stack) => (
                     <OptionButton
                       key={stack}
                       value={stack}
-                      disabled={roleStates[key].count === 0}
+                      disabled={readOnly || roleStates[key].count === 0}
                     >
                       {stack}
                     </OptionButton>
@@ -217,16 +242,20 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
         </div>
       </div>
       <div className="flex justify-between">
-        <Button
-          type="button"
-          variant="weak"
-          color="primary"
-          disabled={!canTempSave}
-          isLoading={isSaving}
-          onClick={handleTempSave}
-        >
-          {tempSaveLabel}
-        </Button>
+        {!readOnly ? (
+          <Button
+            type="button"
+            variant="weak"
+            color="primary"
+            disabled={!canTempSave}
+            isLoading={isSaving}
+            onClick={handleTempSave}
+          >
+            {tempSaveLabel}
+          </Button>
+        ) : (
+          <span />
+        )}
         <div className="flex items-center gap-4">
           <Button type="button" variant="weak" color="neutral" onClick={onPrev}>
             이전
@@ -244,4 +273,4 @@ export function RecruitInfoForm({ onPrev, onNext }: RecruitInfoFormProps) {
       </div>
     </div>
   )
-}
+})

@@ -40,6 +40,7 @@ import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"
 
 export interface BasicInfoFormHandle {
   validate: () => Promise<boolean>
+  save: () => Promise<boolean>
 }
 
 interface BasicInfoFormProps {
@@ -146,6 +147,32 @@ export const BasicInfoForm = forwardRef<
     shouldFocusError: false,
   })
 
+  const validateImages = (thumbnail: unknown, logo: unknown): boolean => {
+    if (!(thumbnail instanceof File) && !uploaded.thumbnailUrl) {
+      addToast({
+        message: "프로젝트 대표 이미지를 업로드해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setTimeout(() => thumbnailRef.current?.focus(), 0)
+      return false
+    }
+    if (!(logo instanceof File) && !uploaded.logoUrl) {
+      addToast({
+        message: "프로젝트 로고를 업로드해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setTimeout(() => logoRef.current?.focus(), 0)
+      return false
+    }
+    return true
+  }
+
   useImperativeHandle(ref, () => ({
     validate: async () => {
       if (!pm1Member) {
@@ -175,8 +202,11 @@ export const BasicInfoForm = forwardRef<
         onInvalid(formState.errors)
         return false
       }
+      const values = getValues()
+      if (!validateImages(values.thumbnail, values.logo)) return false
       return true
     },
+    save: () => handleTempSave({ silent: false }),
   }))
 
   useEffect(() => {
@@ -199,8 +229,6 @@ export const BasicInfoForm = forwardRef<
   }, [storePmInfo])
 
   const onInvalid = (fieldErrors: typeof errors) => {
-    const values = getValues()
-
     let message = "모든 항목을 입력해 주세요."
     let focusFn: (() => void) | null = null
 
@@ -210,12 +238,6 @@ export const BasicInfoForm = forwardRef<
     } else if (fieldErrors.description) {
       message = "프로젝트 한 줄 소개를 입력해 주세요."
       focusFn = () => setFocus("description")
-    } else if (!(values.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
-      message = "프로젝트 대표 이미지를 업로드해 주세요."
-      focusFn = () => thumbnailRef.current?.focus()
-    } else if (!(values.logo instanceof File) && !uploaded.logoUrl) {
-      message = "프로젝트 로고를 업로드해 주세요."
-      focusFn = () => logoRef.current?.focus()
     }
 
     addToast({
@@ -330,16 +352,19 @@ export const BasicInfoForm = forwardRef<
   }
 
   const onSubmit = async (data: BasicInfoFormData) => {
-    const ok = await handleTempSave({ silent: true })
-    if (!ok) return
+    if (!validateImages(data.thumbnail, data.logo)) return
+    if (hasUnsavedChanges) {
+      const ok = await handleTempSave({ silent: true })
+      if (!ok) return
+      addToast({
+        message: "작성한 내용이 저장되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
     setBasicInfo(data)
-    addToast({
-      message: "작성한 내용이 저장되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3000,
-    })
     onNext()
   }
 
