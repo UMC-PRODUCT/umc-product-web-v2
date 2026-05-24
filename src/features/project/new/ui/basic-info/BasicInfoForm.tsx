@@ -347,6 +347,28 @@ export const BasicInfoForm = forwardRef<
   }
 
   const onSubmit = async (data: BasicInfoFormData) => {
+    if (!(data.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
+      addToast({
+        message: "프로젝트 대표 이미지를 업로드해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setTimeout(() => thumbnailRef.current?.focus(), 0)
+      return
+    }
+    if (!(data.logo instanceof File) && !uploaded.logoUrl) {
+      addToast({
+        message: "프로젝트 로고를 업로드해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setTimeout(() => logoRef.current?.focus(), 0)
+      return
+    }
     if (hasUnsavedChanges) {
       const ok = await handleTempSave({ silent: true })
       if (!ok) return
@@ -384,29 +406,6 @@ export const BasicInfoForm = forwardRef<
         type: "default",
         duration: 3000,
       })
-      return
-    }
-    const values = getValues()
-    if (!(values.thumbnail instanceof File) && !uploaded.thumbnailUrl) {
-      addToast({
-        message: "프로젝트 대표 이미지를 업로드해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      setTimeout(() => thumbnailRef.current?.focus(), 0)
-      return
-    }
-    if (!(values.logo instanceof File) && !uploaded.logoUrl) {
-      addToast({
-        message: "프로젝트 로고를 업로드해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      setTimeout(() => logoRef.current?.focus(), 0)
       return
     }
     void handleSubmit(onSubmit, onInvalid)(e)
