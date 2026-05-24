@@ -62,6 +62,7 @@ function ProjectRegisterPage() {
   const isEditMode = editProjectId !== undefined
   const [step, setStep] = useState(1)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [isSavingAndLeaving, setIsSavingAndLeaving] = useState(false)
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
   const basicInfoRef = useRef<BasicInfoFormHandle>(null)
@@ -266,11 +267,16 @@ function ProjectRegisterPage() {
   }
 
   const handleSaveAndLeave = async () => {
-    if (step === 1) {
-      const ok = await basicInfoRef.current?.save()
-      if (!ok) return
+    setIsSavingAndLeaving(true)
+    try {
+      if (step === 1) {
+        const ok = await basicInfoRef.current?.save()
+        if (!ok) return
+      }
+      proceedLeave?.()
+    } finally {
+      setIsSavingAndLeaving(false)
     }
-    proceedLeave?.()
   }
 
   const handleSuccessConfirm = async () => {
@@ -340,6 +346,7 @@ function ProjectRegisterPage() {
         content="저장되지 않았습니다. 저장 후 나가시겠습니까?"
         cancelText="돌아가기"
         confirmText="저장 후 나가기"
+        confirmLoading={isSavingAndLeaving}
         onCancel={() => resetLeave?.()}
         onConfirm={() => void handleSaveAndLeave()}
       />
