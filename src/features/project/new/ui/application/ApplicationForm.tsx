@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query"
 import {
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -36,6 +37,7 @@ interface ApplicationFormProps {
   onPrev?: () => void
   onNext?: () => void
   isEditMode?: boolean
+  isHydrated?: boolean
   isSubmitting?: boolean
 }
 
@@ -43,7 +45,13 @@ export const ApplicationForm = forwardRef<
   ApplicationFormHandle,
   ApplicationFormProps
 >(function ApplicationForm(
-  { onPrev, onNext, isEditMode = false, isSubmitting = false },
+  {
+    onPrev,
+    onNext,
+    isEditMode = false,
+    isHydrated = true,
+    isSubmitting = false,
+  },
   ref,
 ) {
   const addToast = useToastStore((s) => s.addToast)
@@ -56,12 +64,16 @@ export const ApplicationForm = forwardRef<
     () => JSON.stringify({ c: form.commonQuestions, s: form.sections }),
     [form.commonQuestions, form.sections],
   )
-  const lastSavedSnapshotRef = useRef<string | null>(
-    isEditMode ? currentSnapshot : null,
-  )
+  const lastSavedSnapshotRef = useRef<string | null>(null)
   const isDirty = lastSavedSnapshotRef.current !== currentSnapshot
   const isDirtyRef = useRef(isDirty)
   isDirtyRef.current = isDirty
+
+  useEffect(() => {
+    if (isEditMode && isHydrated && lastSavedSnapshotRef.current === null) {
+      lastSavedSnapshotRef.current = currentSnapshot
+    }
+  }, [isEditMode, isHydrated, currentSnapshot])
 
   const saveAppMutation = useMutation({
     mutationFn: async () => {

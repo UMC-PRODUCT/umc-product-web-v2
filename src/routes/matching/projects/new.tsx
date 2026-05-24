@@ -65,6 +65,7 @@ function ProjectRegisterPage() {
   const [step, setStep] = useState(1)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isSavingAndLeaving, setIsSavingAndLeaving] = useState(false)
+  const [applicationFormHydrated, setApplicationFormHydrated] = useState(false)
   const [tooltipTriggerStep, setTooltipTriggerStep] = useState<number | null>(
     null,
   )
@@ -180,8 +181,10 @@ function ProjectRegisterPage() {
   useEffect(() => {
     if (applicationFormQuery.data) {
       hydrateApplicationFormIntoStore(applicationFormQuery.data)
+      setApplicationFormHydrated(true)
     } else if (applicationFormQuery.data === null) {
       setApplication({ commonQuestions: [], sections: [] })
+      setApplicationFormHydrated(true)
     }
   }, [applicationFormQuery.data, setApplication])
 
@@ -381,6 +384,7 @@ function ProjectRegisterPage() {
           <ApplicationForm
             ref={applicationFormRef}
             isEditMode={isEditMode}
+            isHydrated={isEditMode ? applicationFormHydrated : true}
             isSubmitting={submitMutation.isPending}
             onPrev={handleApplicationFormPrev}
             onNext={handleRegister}
