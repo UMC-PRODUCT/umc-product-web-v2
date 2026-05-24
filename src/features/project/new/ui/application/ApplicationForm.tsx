@@ -35,22 +35,29 @@ export interface ApplicationFormHandle {
 interface ApplicationFormProps {
   onPrev?: () => void
   onNext?: () => void
+  isEditMode?: boolean
+  isSubmitting?: boolean
 }
 
 export const ApplicationForm = forwardRef<
   ApplicationFormHandle,
   ApplicationFormProps
->(function ApplicationForm({ onPrev, onNext }, ref) {
+>(function ApplicationForm(
+  { onPrev, onNext, isEditMode = false, isSubmitting = false },
+  ref,
+) {
   const addToast = useToastStore((s) => s.addToast)
   const form = useApplicationForm()
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
   const [errorQuestionIds, setErrorQuestionIds] = useState<string[]>([])
 
-  const lastSavedSnapshotRef = useRef<string | null>(null)
   const currentSnapshot = useMemo(
     () => JSON.stringify({ c: form.commonQuestions, s: form.sections }),
     [form.commonQuestions, form.sections],
+  )
+  const lastSavedSnapshotRef = useRef<string | null>(
+    isEditMode ? currentSnapshot : null,
   )
   const isDirty = lastSavedSnapshotRef.current !== currentSnapshot
   const isDirtyRef = useRef(isDirty)
@@ -92,6 +99,7 @@ export const ApplicationForm = forwardRef<
 
   useImperativeHandle(ref, () => ({
     save: async () => {
+      if (!isDirtyRef.current) return true
       try {
         await saveAppMutation.mutateAsync()
         return true
@@ -108,15 +116,7 @@ export const ApplicationForm = forwardRef<
       ? "저장 완료"
       : "임시 저장"
 
-  const handleTempSave = () => {
-    saveAppMutation.mutate()
-  }
-
-  const handlePrev = () => {
-    onPrev?.()
-  }
-
-  const handleNext = () => {
+  const runValidation = (): boolean => {
     const { sectionEmptyName, errors } = validateApplicationForm(
       form.commonQuestions,
       form.sections,
@@ -130,7 +130,7 @@ export const ApplicationForm = forwardRef<
         type: "default",
         duration: 3000,
       })
-      return
+      return false
     }
 
     const firstError = errors[0]
@@ -144,10 +144,24 @@ export const ApplicationForm = forwardRef<
         type: "default",
         duration: 3000,
       })
-      return
+      return false
     }
 
     setErrorQuestionIds([])
+    return true
+  }
+
+  const handleTempSave = () => {
+    if (!runValidation()) return
+    saveAppMutation.mutate()
+  }
+
+  const handlePrev = () => {
+    onPrev?.()
+  }
+
+  const handleNext = () => {
+    if (!runValidation()) return
     onNext?.()
   }
 
@@ -306,9 +320,11 @@ export const ApplicationForm = forwardRef<
             type="button"
             variant="fill"
             color="primary"
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
             onClick={handleNext}
           >
-            등록하기
+            {isEditMode ? "수정 완료" : "등록하기"}
           </Button>
         </div>
       </div>
