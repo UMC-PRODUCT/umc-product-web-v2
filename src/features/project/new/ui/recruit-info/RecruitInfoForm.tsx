@@ -32,6 +32,7 @@ const ROLES: {
 
 export interface RecruitInfoFormHandle {
   save: () => Promise<boolean>
+  getIsDirty: () => boolean
 }
 
 interface RecruitInfoFormProps {
@@ -89,6 +90,7 @@ export const RecruitInfoForm = forwardRef<
       setRecruitInfo(roleStates)
       return true
     }
+    if (!hasUnsavedChanges) return true
     if (!projectId) {
       addToast({
         message: "기본 정보를 먼저 임시 저장해 주세요.",
@@ -134,6 +136,7 @@ export const RecruitInfoForm = forwardRef<
 
   useImperativeHandle(ref, () => ({
     save: () => savePartQuotas(false),
+    getIsDirty: () => hasUnsavedChanges,
   }))
 
   const handleNext = async () => {
