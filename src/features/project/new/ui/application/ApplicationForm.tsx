@@ -49,7 +49,7 @@ export const ApplicationForm = forwardRef<
   const addToast = useToastStore((s) => s.addToast)
   const form = useApplicationForm()
   const projectId = useProjectRegisterStore((s) => s.projectId)
-  const [hasSavedOnce, setHasSavedOnce] = useState(false)
+  const [hasSavedOnce, setHasSavedOnce] = useState(isEditMode)
   const [errorQuestionIds, setErrorQuestionIds] = useState<string[]>([])
 
   const currentSnapshot = useMemo(
