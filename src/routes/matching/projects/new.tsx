@@ -298,9 +298,15 @@ function ProjectRegisterPage() {
     reset: resetLeave,
     status: leaveBlockStatus,
   } = useBlocker({
-    shouldBlockFn: () => (isEditMode ? isEditModeDirty() : isStoreDirty),
+    shouldBlockFn: () => {
+      if (showSuccessModal) return false
+      return isEditMode ? isEditModeDirty() : isStoreDirty
+    },
     withResolver: true,
-    enableBeforeUnload: isEditMode ? isEditModeDirty : isStoreDirty,
+    enableBeforeUnload: () => {
+      if (showSuccessModal) return false
+      return isEditMode ? isEditModeDirty() : isStoreDirty
+    },
   })
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
