@@ -130,6 +130,7 @@ export const ApplicationForm = forwardRef<
     },
     resetDirty: () => {
       lastSavedSnapshotRef.current = currentSnapshot
+      isDirtyRef.current = false
     },
   }))
 
