@@ -124,7 +124,10 @@ export const ApplicationForm = forwardRef<
         return false
       }
     },
-    getIsDirty: () => isDirtyRef.current,
+    getIsDirty: () => {
+      if (isEditMode && !isHydrated) return false
+      return isDirtyRef.current
+    },
     resetDirty: () => {
       lastSavedSnapshotRef.current = currentSnapshot
     },
