@@ -183,7 +183,11 @@ function ProjectRegisterPage() {
       hydrateApplicationFormIntoStore(applicationFormQuery.data)
       setApplicationFormHydrated(true)
     } else if (applicationFormQuery.data === null) {
-      setApplication({ commonQuestions: [], sections: [] })
+      setApplication({
+        commonSectionId: undefined,
+        commonQuestions: [],
+        sections: [],
+      })
       setApplicationFormHydrated(true)
     }
   }, [applicationFormQuery.data, setApplication])
