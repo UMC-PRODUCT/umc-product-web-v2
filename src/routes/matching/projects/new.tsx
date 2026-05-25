@@ -5,7 +5,7 @@ import {
   useBlocker,
   useNavigate,
 } from "@tanstack/react-router"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
@@ -291,10 +291,13 @@ function ProjectRegisterPage() {
     setStep(idx)
   }
 
-  const isEditModeDirty = () =>
-    (basicInfoRef.current?.getIsDirty() ?? false) ||
-    (recruitInfoRef.current?.getIsDirty() ?? false) ||
-    (applicationFormRef.current?.getIsDirty() ?? false)
+  const isEditModeDirty = useCallback(
+    () =>
+      (basicInfoRef.current?.getIsDirty() ?? false) ||
+      (recruitInfoRef.current?.getIsDirty() ?? false) ||
+      (applicationFormRef.current?.getIsDirty() ?? false),
+    [],
+  )
 
   const {
     proceed: proceedLeave,
