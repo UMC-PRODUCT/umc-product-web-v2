@@ -195,6 +195,7 @@ function ProjectRegisterPage() {
         const body = buildUpsertApplicationFormBody(
           application.commonQuestions,
           application.sections,
+          application.commonSectionId,
         )
         await upsertApplicationForm(projectId, body)
       }
@@ -208,6 +209,7 @@ function ProjectRegisterPage() {
       return result
     },
     onSuccess: () => {
+      applicationFormRef.current?.resetDirty()
       reset()
       void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
       setShowSuccessModal(true)

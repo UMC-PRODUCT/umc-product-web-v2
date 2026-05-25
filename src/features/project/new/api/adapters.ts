@@ -134,8 +134,10 @@ export function mapApplicationFormToSections(
 export function buildUpsertApplicationFormBody(
   commonQuestions: Question[],
   sections: Section[],
+  commonSectionId?: number,
 ): UpsertApplicationFormRequest {
   const commonSection = {
+    ...(commonSectionId !== undefined && { sectionId: commonSectionId }),
     type: "COMMON" as const,
     title: "공통 질문",
     orderNo: 0,
@@ -145,6 +147,7 @@ export function buildUpsertApplicationFormBody(
   const partSections = sections
     .filter((s) => s.isEnabled)
     .map((s, idx) => ({
+      ...(s.sectionId !== undefined && { sectionId: s.sectionId }),
       type: "PART" as const,
       allowedParts: SECTION_TO_ALLOWED_PARTS[s.id as UiRoleKey],
       title: s.name,

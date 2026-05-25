@@ -40,6 +40,7 @@ interface ProjectRegisterState {
   uploaded: UploadedFileIds
   recruitInfo: Record<RoleKey, RoleState>
   application: {
+    commonSectionId?: number
     commonQuestions: Question[]
     sections: Section[]
   }
@@ -52,7 +53,11 @@ interface ProjectRegisterState {
   setUploaded: (patch: Partial<UploadedFileIds>) => void
   setRecruitInfo: (state: Record<RoleKey, RoleState>) => void
   setApplication: (
-    patch: Partial<{ commonQuestions: Question[]; sections: Section[] }>,
+    patch: Partial<{
+      commonSectionId?: number
+      commonQuestions: Question[]
+      sections: Section[]
+    }>,
   ) => void
   reset: () => void
 }

@@ -31,6 +31,7 @@ import { QuestionTypeToolbar } from "./QuestionTypeToolbar"
 export interface ApplicationFormHandle {
   save: () => Promise<boolean>
   getIsDirty: () => boolean
+  resetDirty: () => void
 }
 
 interface ApplicationFormProps {
@@ -57,6 +58,9 @@ export const ApplicationForm = forwardRef<
   const addToast = useToastStore((s) => s.addToast)
   const form = useApplicationForm()
   const projectId = useProjectRegisterStore((s) => s.projectId)
+  const commonSectionId = useProjectRegisterStore(
+    (s) => s.application.commonSectionId,
+  )
   const [hasSavedOnce, setHasSavedOnce] = useState(isEditMode)
   const [errorQuestionIds, setErrorQuestionIds] = useState<string[]>([])
 
@@ -84,6 +88,7 @@ export const ApplicationForm = forwardRef<
       const body = buildUpsertApplicationFormBody(
         form.commonQuestions,
         form.sections,
+        commonSectionId,
       )
       return upsertApplicationForm(projectId, body)
     },
@@ -121,6 +126,9 @@ export const ApplicationForm = forwardRef<
       }
     },
     getIsDirty: () => isDirtyRef.current,
+    resetDirty: () => {
+      lastSavedSnapshotRef.current = currentSnapshot
+    },
   }))
 
   const canTempSave = !saveAppMutation.isPending && (isDirty || !hasSavedOnce)
