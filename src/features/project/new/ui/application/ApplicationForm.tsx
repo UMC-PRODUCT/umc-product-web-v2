@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query"
 import {
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -30,31 +31,53 @@ import { QuestionTypeToolbar } from "./QuestionTypeToolbar"
 export interface ApplicationFormHandle {
   save: () => Promise<boolean>
   getIsDirty: () => boolean
+  resetDirty: () => void
 }
 
 interface ApplicationFormProps {
   onPrev?: () => void
   onNext?: () => void
+  isEditMode?: boolean
+  isHydrated?: boolean
+  isSubmitting?: boolean
 }
 
 export const ApplicationForm = forwardRef<
   ApplicationFormHandle,
   ApplicationFormProps
->(function ApplicationForm({ onPrev, onNext }, ref) {
+>(function ApplicationForm(
+  {
+    onPrev,
+    onNext,
+    isEditMode = false,
+    isHydrated = true,
+    isSubmitting = false,
+  },
+  ref,
+) {
   const addToast = useToastStore((s) => s.addToast)
   const form = useApplicationForm()
   const projectId = useProjectRegisterStore((s) => s.projectId)
-  const [hasSavedOnce, setHasSavedOnce] = useState(false)
+  const commonSectionId = useProjectRegisterStore(
+    (s) => s.application.commonSectionId,
+  )
+  const [hasSavedOnce, setHasSavedOnce] = useState(isEditMode)
   const [errorQuestionIds, setErrorQuestionIds] = useState<string[]>([])
 
-  const lastSavedSnapshotRef = useRef<string | null>(null)
   const currentSnapshot = useMemo(
     () => JSON.stringify({ c: form.commonQuestions, s: form.sections }),
     [form.commonQuestions, form.sections],
   )
+  const lastSavedSnapshotRef = useRef<string | null>(null)
   const isDirty = lastSavedSnapshotRef.current !== currentSnapshot
   const isDirtyRef = useRef(isDirty)
   isDirtyRef.current = isDirty
+
+  useEffect(() => {
+    if (isEditMode && isHydrated && lastSavedSnapshotRef.current === null) {
+      lastSavedSnapshotRef.current = currentSnapshot
+    }
+  }, [isEditMode, isHydrated, currentSnapshot])
 
   const saveAppMutation = useMutation({
     mutationFn: async () => {
@@ -65,6 +88,7 @@ export const ApplicationForm = forwardRef<
       const body = buildUpsertApplicationFormBody(
         form.commonQuestions,
         form.sections,
+        commonSectionId,
       )
       return upsertApplicationForm(projectId, body)
     },
@@ -92,6 +116,7 @@ export const ApplicationForm = forwardRef<
 
   useImperativeHandle(ref, () => ({
     save: async () => {
+      if (!isDirtyRef.current) return true
       try {
         await saveAppMutation.mutateAsync()
         return true
@@ -99,7 +124,14 @@ export const ApplicationForm = forwardRef<
         return false
       }
     },
-    getIsDirty: () => isDirtyRef.current,
+    getIsDirty: () => {
+      if (isEditMode && !isHydrated) return false
+      return isDirtyRef.current
+    },
+    resetDirty: () => {
+      lastSavedSnapshotRef.current = currentSnapshot
+      isDirtyRef.current = false
+    },
   }))
 
   const canTempSave = !saveAppMutation.isPending && (isDirty || !hasSavedOnce)
@@ -108,15 +140,7 @@ export const ApplicationForm = forwardRef<
       ? "저장 완료"
       : "임시 저장"
 
-  const handleTempSave = () => {
-    saveAppMutation.mutate()
-  }
-
-  const handlePrev = () => {
-    onPrev?.()
-  }
-
-  const handleNext = () => {
+  const runValidation = (): boolean => {
     const { sectionEmptyName, errors } = validateApplicationForm(
       form.commonQuestions,
       form.sections,
@@ -130,7 +154,7 @@ export const ApplicationForm = forwardRef<
         type: "default",
         duration: 3000,
       })
-      return
+      return false
     }
 
     const firstError = errors[0]
@@ -144,10 +168,23 @@ export const ApplicationForm = forwardRef<
         type: "default",
         duration: 3000,
       })
-      return
+      return false
     }
 
     setErrorQuestionIds([])
+    return true
+  }
+
+  const handleTempSave = () => {
+    saveAppMutation.mutate()
+  }
+
+  const handlePrev = () => {
+    onPrev?.()
+  }
+
+  const handleNext = () => {
+    if (!runValidation()) return
     onNext?.()
   }
 
@@ -306,9 +343,11 @@ export const ApplicationForm = forwardRef<
             type="button"
             variant="fill"
             color="primary"
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
             onClick={handleNext}
           >
-            등록하기
+            {isEditMode ? "수정 완료" : "등록하기"}
           </Button>
         </div>
       </div>

@@ -11,6 +11,7 @@ export interface Question {
 
 export interface Section {
   id: string
+  sectionId?: number
   name: string
   isEnabled: boolean
   questions: Question[]

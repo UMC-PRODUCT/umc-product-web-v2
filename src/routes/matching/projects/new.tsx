@@ -1,11 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createFileRoute,
   redirect,
   useBlocker,
   useNavigate,
 } from "@tanstack/react-router"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
@@ -65,6 +65,7 @@ function ProjectRegisterPage() {
   const [step, setStep] = useState(1)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isSavingAndLeaving, setIsSavingAndLeaving] = useState(false)
+  const [applicationFormHydrated, setApplicationFormHydrated] = useState(false)
   const [tooltipTriggerStep, setTooltipTriggerStep] = useState<number | null>(
     null,
   )
@@ -75,6 +76,7 @@ function ProjectRegisterPage() {
   const recruitInfoRef = useRef<RecruitInfoFormHandle>(null)
   const applicationFormRef = useRef<ApplicationFormHandle>(null)
 
+  const queryClient = useQueryClient()
   const { data: me } = useMe()
   const isPm = isCurrentTermPm(me)
 
@@ -179,8 +181,14 @@ function ProjectRegisterPage() {
   useEffect(() => {
     if (applicationFormQuery.data) {
       hydrateApplicationFormIntoStore(applicationFormQuery.data)
+      setApplicationFormHydrated(true)
     } else if (applicationFormQuery.data === null) {
-      setApplication({ commonQuestions: [], sections: [] })
+      setApplication({
+        commonSectionId: undefined,
+        commonQuestions: [],
+        sections: [],
+      })
+      setApplicationFormHydrated(true)
     }
   }, [applicationFormQuery.data, setApplication])
 
@@ -191,6 +199,7 @@ function ProjectRegisterPage() {
         const body = buildUpsertApplicationFormBody(
           application.commonQuestions,
           application.sections,
+          application.commonSectionId,
         )
         await upsertApplicationForm(projectId, body)
       }
@@ -204,7 +213,8 @@ function ProjectRegisterPage() {
       return result
     },
     onSuccess: () => {
-      reset()
+      applicationFormRef.current?.resetDirty()
+      void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
       setShowSuccessModal(true)
     },
     onError: () => {
@@ -244,6 +254,7 @@ function ProjectRegisterPage() {
   }
 
   const handleStepChange = async (idx: number) => {
+    if (isEditMode) return
     if (isPm && idx === 2) {
       setStep(2)
       triggerStepTooltip(2)
@@ -280,14 +291,28 @@ function ProjectRegisterPage() {
     setStep(idx)
   }
 
+  const isEditModeDirty = useCallback(
+    () =>
+      (basicInfoRef.current?.getIsDirty() ?? false) ||
+      (recruitInfoRef.current?.getIsDirty() ?? false) ||
+      (applicationFormRef.current?.getIsDirty() ?? false),
+    [],
+  )
+
   const {
     proceed: proceedLeave,
     reset: resetLeave,
     status: leaveBlockStatus,
   } = useBlocker({
-    shouldBlockFn: () => isStoreDirty,
+    shouldBlockFn: () => {
+      if (showSuccessModal) return false
+      return isEditMode ? isEditModeDirty() : isStoreDirty
+    },
     withResolver: true,
-    enableBeforeUnload: isStoreDirty,
+    enableBeforeUnload: () => {
+      if (showSuccessModal) return false
+      return isEditMode ? isEditModeDirty() : isStoreDirty
+    },
   })
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
@@ -319,6 +344,7 @@ function ProjectRegisterPage() {
 
   const handleSuccessConfirm = async () => {
     setShowSuccessModal(false)
+    reset()
     await navigate({ to: "/matching/projects/management", replace: true })
   }
 
@@ -336,17 +362,25 @@ function ProjectRegisterPage() {
         <Stepper
           step={step}
           onStepChange={handleStepChange}
-          disabledSteps={isPm ? [2] : []}
+          disabledSteps={
+            isEditMode
+              ? [1, 2, 3].filter((idx) => idx !== step)
+              : isPm
+                ? [2]
+                : []
+          }
           disabledTooltips={
-            isPm
-              ? {
-                  2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
-                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                }
-              : {
-                  2: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                }
+            isEditMode
+              ? {}
+              : isPm
+                ? {
+                    2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
+                    3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                  }
+                : {
+                    2: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                    3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                  }
           }
           openTooltipStep={tooltipTriggerStep}
         />
@@ -357,6 +391,7 @@ function ProjectRegisterPage() {
           <RecruitInfoForm
             ref={recruitInfoRef}
             readOnly={isPm}
+            isHydrated={isEditMode ? detailQuery.isSuccess : true}
             onPrev={() => setStep(1)}
             onNext={() => setStep(3)}
           />
@@ -364,6 +399,9 @@ function ProjectRegisterPage() {
         {step === 3 && (
           <ApplicationForm
             ref={applicationFormRef}
+            isEditMode={isEditMode}
+            isHydrated={isEditMode ? applicationFormHydrated : true}
+            isSubmitting={submitMutation.isPending}
             onPrev={handleApplicationFormPrev}
             onNext={handleRegister}
           />

@@ -41,6 +41,7 @@ import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"
 export interface BasicInfoFormHandle {
   validate: () => Promise<boolean>
   save: () => Promise<boolean>
+  getIsDirty: () => boolean
 }
 
 interface BasicInfoFormProps {
@@ -207,6 +208,7 @@ export const BasicInfoForm = forwardRef<
       return true
     },
     save: () => handleTempSave({ silent: false }),
+    getIsDirty: () => hasUnsavedChanges,
   }))
 
   useEffect(() => {
@@ -267,6 +269,7 @@ export const BasicInfoForm = forwardRef<
     silent?: boolean
   }): Promise<boolean> => {
     const silent = options?.silent ?? false
+    if (!hasUnsavedChanges) return true
     const values = getValues()
     if (!projectId && !pm1Member) {
       addToast({

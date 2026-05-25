@@ -75,12 +75,15 @@ export function hydrateApplicationFormIntoStore(
     if (!apiSec) return defaultSec
     return {
       ...defaultSec,
+      sectionId: apiSec.sectionId ?? undefined,
       isEnabled: true,
       questions: apiSec.questions.map(toQuestion),
     }
   })
 
+  const commonSectionId = commonApiSection?.sectionId ?? undefined
+
   useProjectRegisterStore
     .getState()
-    .setApplication({ commonQuestions, sections })
+    .setApplication({ commonSectionId, commonQuestions, sections })
 }

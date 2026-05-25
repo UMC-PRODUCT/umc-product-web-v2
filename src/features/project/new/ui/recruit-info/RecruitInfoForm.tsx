@@ -1,4 +1,10 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from "react"
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
@@ -32,12 +38,14 @@ const ROLES: {
 
 export interface RecruitInfoFormHandle {
   save: () => Promise<boolean>
+  getIsDirty: () => boolean
 }
 
 interface RecruitInfoFormProps {
   onPrev: () => void
   onNext: () => void
   readOnly?: boolean
+  isHydrated?: boolean
 }
 
 function buildSummaryText(
@@ -57,7 +65,10 @@ function buildSummaryText(
 export const RecruitInfoForm = forwardRef<
   RecruitInfoFormHandle,
   RecruitInfoFormProps
->(function RecruitInfoForm({ onPrev, onNext, readOnly = false }, ref) {
+>(function RecruitInfoForm(
+  { onPrev, onNext, readOnly = false, isHydrated = true },
+  ref,
+) {
   const addToast = useToastStore((s) => s.addToast)
   const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
@@ -68,6 +79,13 @@ export const RecruitInfoForm = forwardRef<
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
   const savedSnapshotRef = useRef(JSON.stringify(storeRecruitInfo))
+
+  useEffect(() => {
+    if (isHydrated) {
+      savedSnapshotRef.current = JSON.stringify(storeRecruitInfo)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHydrated])
 
   const roleStates = storeRecruitInfo
 
@@ -89,6 +107,7 @@ export const RecruitInfoForm = forwardRef<
       setRecruitInfo(roleStates)
       return true
     }
+    if (!hasUnsavedChanges) return true
     if (!projectId) {
       addToast({
         message: "기본 정보를 먼저 임시 저장해 주세요.",
@@ -134,6 +153,7 @@ export const RecruitInfoForm = forwardRef<
 
   useImperativeHandle(ref, () => ({
     save: () => savePartQuotas(false),
+    getIsDirty: () => hasUnsavedChanges,
   }))
 
   const handleNext = async () => {
