@@ -117,7 +117,6 @@ export const ApplicationForm = forwardRef<
   useImperativeHandle(ref, () => ({
     save: async () => {
       if (!isDirtyRef.current) return true
-      if (!runValidation()) return false
       try {
         await saveAppMutation.mutateAsync()
         return true
@@ -173,7 +172,6 @@ export const ApplicationForm = forwardRef<
   }
 
   const handleTempSave = () => {
-    if (!runValidation()) return
     saveAppMutation.mutate()
   }
 
