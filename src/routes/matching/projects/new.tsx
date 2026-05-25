@@ -210,7 +210,6 @@ function ProjectRegisterPage() {
     },
     onSuccess: () => {
       applicationFormRef.current?.resetDirty()
-      reset()
       void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
       setShowSuccessModal(true)
     },
@@ -338,6 +337,7 @@ function ProjectRegisterPage() {
 
   const handleSuccessConfirm = async () => {
     setShowSuccessModal(false)
+    reset()
     await navigate({ to: "/matching/projects/management", replace: true })
   }
 
