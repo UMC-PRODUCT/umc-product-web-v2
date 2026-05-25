@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 
 import { useMe } from "@/features/auth/hooks/useMe"
-import { isOperator } from "@/features/auth/model/identity"
+import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { cn } from "@/shared/lib/utils"
 
@@ -17,7 +17,7 @@ const DEMO_DAY_EDITION = 10
 
 export default function SideBar({ className }: SideBarProps) {
   const { data: me, isLoading: isMeLoading } = useMe()
-  const canManageRecruitment = isOperator(me)
+  const canManageRecruitment = isOperator(me) || isCurrentTermPm(me)
 
   const visibleSections = useMemo(
     () => filterSectionsByPermission(SIDEBAR_ITEMS, canManageRecruitment),
