@@ -1,4 +1,10 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from "react"
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
@@ -39,6 +45,7 @@ interface RecruitInfoFormProps {
   onPrev: () => void
   onNext: () => void
   readOnly?: boolean
+  isHydrated?: boolean
 }
 
 function buildSummaryText(
@@ -58,7 +65,10 @@ function buildSummaryText(
 export const RecruitInfoForm = forwardRef<
   RecruitInfoFormHandle,
   RecruitInfoFormProps
->(function RecruitInfoForm({ onPrev, onNext, readOnly = false }, ref) {
+>(function RecruitInfoForm(
+  { onPrev, onNext, readOnly = false, isHydrated = true },
+  ref,
+) {
   const addToast = useToastStore((s) => s.addToast)
   const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
@@ -69,6 +79,13 @@ export const RecruitInfoForm = forwardRef<
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
   const savedSnapshotRef = useRef(JSON.stringify(storeRecruitInfo))
+
+  useEffect(() => {
+    if (isHydrated) {
+      savedSnapshotRef.current = JSON.stringify(storeRecruitInfo)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHydrated])
 
   const roleStates = storeRecruitInfo
 

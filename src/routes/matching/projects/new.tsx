@@ -391,6 +391,7 @@ function ProjectRegisterPage() {
           <RecruitInfoForm
             ref={recruitInfoRef}
             readOnly={isPm}
+            isHydrated={isEditMode ? detailQuery.isSuccess : true}
             onPrev={() => setStep(1)}
             onNext={() => setStep(3)}
           />
