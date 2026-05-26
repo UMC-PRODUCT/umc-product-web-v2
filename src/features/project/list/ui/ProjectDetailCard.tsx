@@ -223,6 +223,7 @@ export function ProjectDetailCard({
         <Modal.Portal>
           <Modal.Overlay tone="light" />
           <Modal.Content>
+            <Modal.Title className="sr-only">팀원 구성</Modal.Title>
             <TeamMemberModal onClose={() => setIsTeamModalOpen(false)} />
           </Modal.Content>
         </Modal.Portal>
