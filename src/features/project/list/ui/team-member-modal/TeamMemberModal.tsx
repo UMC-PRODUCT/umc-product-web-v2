@@ -24,7 +24,7 @@ export function TeamMemberModal({
   const { data, isLoading, isError } = useQuery({
     queryKey: projectKeys.members(projectId),
     queryFn: () => getProjectMembers(projectId),
-    enabled: Number.isFinite(projectId),
+    enabled: Number.isFinite(Number(projectId)),
     staleTime: 5 * 60 * 1000,
   })
 
