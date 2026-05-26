@@ -8,6 +8,8 @@ export const projectKeys = {
     [...projectKeys.all, "application-form", projectId] as const,
   partQuotas: (projectId: number) =>
     [...projectKeys.all, "part-quotas", projectId] as const,
+  members: (projectId: number) =>
+    [...projectKeys.all, "members", projectId] as const,
 } as const
 
 export const gisuKeys = {

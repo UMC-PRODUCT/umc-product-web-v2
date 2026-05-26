@@ -1,22 +1,25 @@
+import type { PartQuotaStatus, ProjectPart } from "../api/matchingProject"
+
 export type ProjectFilterOption = {
   value: string
   label: string
 }
 
-export const BRANCH_OPTIONS: ProjectFilterOption[] = [
-  { value: "Chromium", label: "Chromium" },
-  { value: "Ferrum", label: "Ferrum" },
-  { value: "Neon", label: "Neon" },
-  { value: "Platinum", label: "Platinum" },
-  { value: "Selenium", label: "Selenium" },
-  { value: "Xenon", label: "Xenon" },
-]
+export type PartFilterOption = {
+  value: ProjectPart
+  label: string
+}
+
+export type RecruitStatusFilterOption = {
+  value: PartQuotaStatus
+  label: string
+}
 
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 export { SCHOOLS_BY_BRANCH }
 
-export const PART_OPTIONS: ProjectFilterOption[] = [
+export const PART_OPTIONS: PartFilterOption[] = [
   { value: "WEB", label: "Web" },
   { value: "IOS", label: "iOS" },
   { value: "ANDROID", label: "Android" },
@@ -24,7 +27,7 @@ export const PART_OPTIONS: ProjectFilterOption[] = [
   { value: "NODEJS", label: "Node.js" },
 ]
 
-export const RECRUIT_STATUS_OPTIONS: ProjectFilterOption[] = [
+export const RECRUIT_STATUS_OPTIONS: RecruitStatusFilterOption[] = [
   { value: "RECRUITING", label: "모집 중" },
   { value: "COMPLETED", label: "모집 완료" },
 ]

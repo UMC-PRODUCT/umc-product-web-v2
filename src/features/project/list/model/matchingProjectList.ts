@@ -109,7 +109,7 @@ export function useMatchingProjectListFilters() {
     [chaptersData, selectedBranch],
   )
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: [
       "matchingProjects",
       activeGisuId,
@@ -227,6 +227,7 @@ export function useMatchingProjectListFilters() {
     page,
     setPage,
     isLoading,
+    isError,
     searchQuery,
     setSearchQuery,
     filterDescriptors,
