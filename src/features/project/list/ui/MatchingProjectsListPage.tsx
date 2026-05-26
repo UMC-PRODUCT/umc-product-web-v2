@@ -1,5 +1,6 @@
 import { useState } from "react"
 
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { cn } from "@/shared/lib/utils"
 import { Modal } from "@/shared/ui/Modal"
 import { Pagination } from "@/shared/ui/Pagination"
@@ -14,22 +15,28 @@ import type { ProjectItem } from "../api/matchingProject"
 import type { MatchingProject } from "../model/matchingProject"
 
 function toMatchingProject(project: ProjectItem): MatchingProject {
+  const owner = project.productOwner
+  const ownerLine = [
+    owner?.nickname && owner?.name
+      ? `${owner.nickname}/${owner.name}`
+      : (owner?.name ?? ""),
+    formatSchoolName(owner?.schoolName),
+  ]
+    .filter(Boolean)
+    .join(" · ")
+
   return {
     id: String(project.id),
     branch: "",
-    school: project.productOwner.schoolName,
+    school: owner?.schoolName ?? "",
     title: project.name,
     description: project.description,
-    authorSchoolLine: project.productOwner.name,
+    authorSchoolLine: ownerLine,
     coverImage: project.thumbnailImageUrl
       ? { src: project.thumbnailImageUrl }
       : null,
-    recruitRows: project.partQuotas.map((q) => ({
-      part: q.part,
-      current: q.currentCount,
-      total: q.quota,
-      done: q.status === "COMPLETED",
-    })),
+    recruitRows: [],
+    partQuotaStatus: project.partQuotaStatus,
   }
 }
 
