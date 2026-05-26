@@ -252,7 +252,11 @@ export function ProjectDetailCard({
               disabled={!detail?.externalLink}
               onClick={() => {
                 if (detail?.externalLink)
-                  window.open(detail.externalLink, "_blank")
+                  window.open(
+                    detail.externalLink,
+                    "_blank",
+                    "noopener,noreferrer",
+                  )
               }}
             >
               기획 보기
@@ -358,8 +362,8 @@ export function ProjectDetailCard({
                 sections={sections}
                 canToggleSection={userIsOperator || userIsPm}
                 onBack={() => setIsApplyModalOpen(false)}
-                onSubmit={(answers) => {
-                  console.log("[apply submit]", projectId, answers)
+                onSubmit={(_answers) => {
+                  // TODO: 지원서 제출 API 연동
                   setIsApplyModalOpen(false)
                 }}
               />

@@ -99,7 +99,7 @@ export function useMatchingProjectListFilters() {
   const { data: chaptersData } = useQuery({
     queryKey: ["chaptersWithSchools", activeGisuId],
     queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
-    enabled: activeGisuId !== undefined,
+    enabled: activeGisuId != null,
   })
 
   const branchOptions: ProjectFilterOption[] = useMemo(
@@ -144,7 +144,7 @@ export function useMatchingProjectListFilters() {
         page: page - 1,
         size: MATCHING_PROJECT_PAGE_SIZE,
       }),
-    enabled: effectiveGisuId !== undefined,
+    enabled: effectiveGisuId != null,
   })
 
   const selectedBranchLabel = useMemo(
