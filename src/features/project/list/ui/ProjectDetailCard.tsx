@@ -5,23 +5,22 @@ import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
-import {
-  getViewerBranch,
-  isCurrentTermPm,
-  isOperator,
-} from "@/features/auth/model/identity"
+import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
 import {
   getApplicationForm,
   mapApplicationFormToSections,
   projectKeys,
 } from "@/features/project/new/api"
+import { getActiveGisu } from "@/shared/api/gisu"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 
+import { getMyApplications, getProjectDetail } from "../api/matchingProject"
 import { isRecruitDone } from "../model/matchingProject"
 import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import { resolveProjectDetailCtaMode } from "../model/projectDetailCta"
@@ -29,44 +28,110 @@ import { ProjectApplyModal } from "./apply-modal/ProjectApplyModal"
 import { RecruitQuestionsViewModal } from "./apply-modal/RecruitQuestionsViewModal"
 import { TeamMemberModal } from "./team-member-modal/TeamMemberModal"
 
+import type { ProjectDetail } from "../api/matchingProject"
 import type { MatchingProject } from "../model/matchingProject"
 
 type ProjectDetailCardLogo = "on" | "off"
 
 interface ProjectDetailCardProps {
-  data?: MatchingProject
+  projectId: number
+  projectChapterId?: number
   logo?: ProjectDetailCardLogo
-  viewerBranch?: string
   showEditCta?: boolean
 }
 
+function toMatchingProject(detail: ProjectDetail): MatchingProject {
+  const owner = detail.productOwner
+  const authorSchoolLine = [
+    owner.nickname && owner.name
+      ? `${owner.nickname}/${owner.name}`
+      : (owner.name ?? ""),
+    formatSchoolName(owner.schoolName),
+  ]
+    .filter(Boolean)
+    .join(" · ")
+
+  return {
+    id: String(detail.id),
+    branch: "",
+    school: owner.schoolName,
+    title: detail.name,
+    description: detail.description,
+    authorSchoolLine,
+    coverImage: detail.thumbnailImageUrl
+      ? { src: detail.thumbnailImageUrl }
+      : null,
+    recruitRows: detail.partQuotas.map((q) => ({
+      part: q.part,
+      current: q.currentCount,
+      total: q.quota,
+      done: q.status === "COMPLETED",
+    })),
+  }
+}
+
 export function ProjectDetailCard({
-  data: dataProp,
+  projectId,
+  projectChapterId,
   logo = "on",
-  viewerBranch: viewerBranchProp,
   showEditCta = false,
 }: ProjectDetailCardProps) {
   const navigate = useNavigate()
   const { data: me } = useMe()
-  const userBranch = getViewerBranch(me)
-  const viewerBranch = viewerBranchProp ?? userBranch
   const addToast = useToastStore((s) => s.addToast)
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
   const [isRecruitQuestionsModalOpen, setIsRecruitQuestionsModalOpen] =
     useState(false)
-  const data = dataProp ?? DEFAULT_MATCHING_PROJECT_MOCK
 
-  const projectIdNum = /^\d+$/.test(data.id) ? Number(data.id) : NaN
+  const { data: detail } = useQuery({
+    queryKey: ["projectDetail", projectId],
+    queryFn: () => getProjectDetail(projectId),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { data: activeGisuId } = useQuery({
+    queryKey: ["gisu", "active"],
+    queryFn: async () => {
+      const res = await getActiveGisu()
+      return res.gisuId ?? null
+    },
+  })
+
+  const userIsOperator = isOperator(me)
+  const userIsPm = isCurrentTermPm(me)
+
+  const { data: myApplications } = useQuery({
+    queryKey: ["myApplications", activeGisuId],
+    queryFn: () => getMyApplications(activeGisuId!),
+    enabled: activeGisuId != null && !userIsOperator && !userIsPm,
+  })
+
+  const myChapterId = useMemo(() => {
+    const records = me?.challengerRecords
+    if (!records?.length) return null
+    const id = [...records].sort(
+      (a, b) => Number(b.gisuId) - Number(a.gisuId),
+    )[0]?.chapterId
+    return id != null ? Number(id) : null
+  }, [me])
+
+  const isApplied =
+    myApplications?.some((a) => a.projectId === projectId) ?? false
+
+  const data = detail
+    ? toMatchingProject(detail)
+    : DEFAULT_MATCHING_PROJECT_MOCK
+
   const isShowingFormModal = isApplyModalOpen || isRecruitQuestionsModalOpen
   const {
     data: applicationForm,
     isLoading: isFormLoading,
     error: formError,
   } = useQuery({
-    queryKey: projectKeys.applicationForm(projectIdNum),
-    queryFn: () => getApplicationForm(projectIdNum),
-    enabled: isShowingFormModal && Number.isFinite(projectIdNum),
+    queryKey: projectKeys.applicationForm(projectId),
+    queryFn: () => getApplicationForm(projectId),
+    enabled: isShowingFormModal,
     staleTime: 5 * 60 * 1000,
   })
   const sections = useMemo(
@@ -87,14 +152,17 @@ export function ProjectDetailCard({
     setIsApplyModalOpen(false)
     setIsRecruitQuestionsModalOpen(false)
   }, [formError, addToast])
-  const userIsOperator = isOperator(me)
-  const userIsPm = isCurrentTermPm(me)
-  const isSameBranch = userIsOperator || viewerBranch === data.branch
+
+  const isSameBranch =
+    userIsOperator ||
+    (projectChapterId !== undefined &&
+      myChapterId !== null &&
+      myChapterId === projectChapterId)
   const ctaMode = resolveProjectDetailCtaMode(
     userIsOperator,
     userIsPm,
     isSameBranch,
-    data.isApplied ?? false,
+    isApplied,
   )
   const cover = data.coverImage
   const showLogo = logo === "on"
@@ -177,7 +245,16 @@ export function ProjectDetailCard({
               variant="weak"
               onClick={() => setIsTeamModalOpen(true)}
             />
-            <Button variant="weak" color="primary" className="flex-1">
+            <Button
+              variant="weak"
+              color="primary"
+              className="flex-1"
+              disabled={!detail?.externalLink}
+              onClick={() => {
+                if (detail?.externalLink)
+                  window.open(detail.externalLink, "_blank")
+              }}
+            >
               기획 보기
             </Button>
             {showEditCta ? (
@@ -186,7 +263,7 @@ export function ProjectDetailCard({
                 onClick={() =>
                   navigate({
                     to: "/matching/projects/new",
-                    search: { projectId: Number(data.id) },
+                    search: { projectId },
                   })
                 }
               >
@@ -224,7 +301,11 @@ export function ProjectDetailCard({
           <Modal.Overlay tone="light" />
           <Modal.Content>
             <Modal.Title className="sr-only">팀원 구성</Modal.Title>
-            <TeamMemberModal onClose={() => setIsTeamModalOpen(false)} />
+            <TeamMemberModal
+              projectId={projectId}
+              recruitRows={data.recruitRows}
+              onClose={() => setIsTeamModalOpen(false)}
+            />
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
@@ -278,7 +359,7 @@ export function ProjectDetailCard({
                 canToggleSection={userIsOperator || userIsPm}
                 onBack={() => setIsApplyModalOpen(false)}
                 onSubmit={(answers) => {
-                  console.log("[apply submit]", data.id, answers)
+                  console.log("[apply submit]", projectId, answers)
                   setIsApplyModalOpen(false)
                 }}
               />

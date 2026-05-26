@@ -35,7 +35,11 @@ function toMatchingProject(project: ProjectItem): MatchingProject {
     coverImage: project.thumbnailImageUrl
       ? { src: project.thumbnailImageUrl }
       : null,
-    recruitRows: [],
+    recruitRows: project.partQuotas.map((q) => ({
+      part: q.part,
+      current: q.currentCount,
+      total: q.quota,
+    })),
     partQuotaStatus: project.partQuotaStatus,
   }
 }
@@ -53,8 +57,12 @@ export function MatchingProjectsListPage() {
     filterDescriptors,
   } = useMatchingProjectListFilters()
 
-  const [selectedProject, setSelectedProject] =
-    useState<MatchingProject | null>(null)
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
+    null,
+  )
+  const [selectedProjectChapterId, setSelectedProjectChapterId] = useState<
+    number | null
+  >(null)
 
   return (
     <section className="relative flex w-full flex-col items-start justify-start pt-8">
@@ -123,7 +131,8 @@ export function MatchingProjectsListPage() {
                   type="button"
                   className="w-full text-left"
                   onClick={() => {
-                    setSelectedProject(project)
+                    setSelectedProjectId(item.id)
+                    setSelectedProjectChapterId(item.chapterId)
                   }}
                 >
                   <MatchingProjectCard variant="default" data={project} />
@@ -144,16 +153,24 @@ export function MatchingProjectsListPage() {
       </div>
 
       <Modal.Root
-        open={selectedProject !== null}
+        open={selectedProjectId !== null}
         onOpenChange={(open) => {
-          if (!open) setSelectedProject(null)
+          if (!open) {
+            setSelectedProjectId(null)
+            setSelectedProjectChapterId(null)
+          }
         }}
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
             <Modal.Title className="sr-only">프로젝트 상세</Modal.Title>
-            {selectedProject && <ProjectDetailCard data={selectedProject} />}
+            {selectedProjectId !== null && (
+              <ProjectDetailCard
+                projectId={selectedProjectId}
+                projectChapterId={selectedProjectChapterId ?? undefined}
+              />
+            )}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>

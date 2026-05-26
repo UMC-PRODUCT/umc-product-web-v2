@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import {
-  getAllGisu,
-  getChaptersWithSchools,
-} from "@/features/challenger/api/organization"
+import { useMe } from "@/features/auth/hooks/useMe"
+import { isOperator } from "@/features/auth/model/identity"
+import { getChaptersWithSchools } from "@/features/challenger/api/organization"
+import { getActiveGisu } from "@/shared/api/gisu"
 
 import { getMatchingProjects, type ProjectItem } from "../api/matchingProject"
 import {
@@ -72,16 +72,29 @@ export function useMatchingProjectListFilters() {
     debouncedSearchQuery,
   ])
 
+  const { data: me } = useMe()
+  const userIsOperator = isOperator(me)
+
   const { data: gisuData } = useQuery({
     queryKey: ["gisu", "active"],
     queryFn: async () => {
-      const res = await getAllGisu()
-      const active = res.gisuList.find((g) => g.isActive)
-      return active ? Number(active.gisuId) : null
+      const res = await getActiveGisu()
+      return res.gisuId ?? null
     },
   })
 
   const activeGisuId = gisuData ?? undefined
+
+  const userGisuId = useMemo(() => {
+    const records = me?.challengerRecords
+    if (!records?.length) return undefined
+    const latest = [...records].sort(
+      (a, b) => Number(b.gisuId) - Number(a.gisuId),
+    )[0]
+    return latest ? Number(latest.gisuId) : undefined
+  }, [me])
+
+  const effectiveGisuId = userIsOperator ? activeGisuId : userGisuId
 
   const { data: chaptersData } = useQuery({
     queryKey: ["chaptersWithSchools", activeGisuId],
@@ -112,7 +125,7 @@ export function useMatchingProjectListFilters() {
   const { data, isLoading, isError } = useQuery({
     queryKey: [
       "matchingProjects",
-      activeGisuId,
+      effectiveGisuId,
       page,
       debouncedSearchQuery,
       selectedBranch,
@@ -122,7 +135,7 @@ export function useMatchingProjectListFilters() {
     ],
     queryFn: () =>
       getMatchingProjects({
-        gisuId: activeGisuId!,
+        gisuId: effectiveGisuId!,
         keyword: debouncedSearchQuery || undefined,
         chapterId: selectedBranch ? Number(selectedBranch) : undefined,
         schoolIds: selectedSchool ? [Number(selectedSchool)] : undefined,
@@ -131,7 +144,7 @@ export function useMatchingProjectListFilters() {
         page: page - 1,
         size: MATCHING_PROJECT_PAGE_SIZE,
       }),
-    enabled: activeGisuId !== undefined,
+    enabled: effectiveGisuId !== undefined,
   })
 
   const selectedBranchLabel = useMemo(
