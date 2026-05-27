@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react"
+import { useState } from "react"
 
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { cn } from "@/shared/lib/utils"
 import { Modal } from "@/shared/ui/Modal"
 import { Pagination } from "@/shared/ui/Pagination"
@@ -10,39 +11,58 @@ import { MatchingProjectCard } from "./MatchingProjectCard"
 import { ProjectDetailCard } from "./ProjectDetailCard"
 import { ProjectSearchField } from "./ProjectSearchField"
 
+import type { ProjectItem } from "../api/matchingProject"
 import type { MatchingProject } from "../model/matchingProject"
 
-const PROJECT_LIST_PAGE_SIZE = 15
+function toMatchingProject(project: ProjectItem): MatchingProject {
+  const owner = project.productOwner
+  const ownerLine = [
+    owner?.nickname && owner?.name
+      ? `${owner.nickname}/${owner.name}`
+      : (owner?.name ?? ""),
+    formatSchoolName(owner?.schoolName),
+  ]
+    .filter(Boolean)
+    .join(" · ")
+
+  return {
+    id: String(project.id),
+    branch: "",
+    school: owner?.schoolName ?? "",
+    title: project.name,
+    description: project.description,
+    authorSchoolLine: ownerLine,
+    coverImage: project.thumbnailImageUrl
+      ? { src: project.thumbnailImageUrl }
+      : null,
+    recruitRows: project.partQuotas.map((q) => ({
+      part: q.part,
+      current: q.currentCount,
+      total: q.quota,
+    })),
+    partQuotaStatus: project.partQuotaStatus,
+  }
+}
 
 export function MatchingProjectsListPage() {
   const {
     openFilterId,
     setOpenFilterId,
-    filteredProjects,
+    projects,
+    totalPages,
+    page,
+    setPage,
+    searchQuery,
+    setSearchQuery,
     filterDescriptors,
-    filterKey,
   } = useMatchingProjectListFilters()
 
-  const [searchQuery, setSearchQuery] = useState("")
-  const [page, setPage] = useState(1)
-  const [selectedProject, setSelectedProject] =
-    useState<MatchingProject | null>(null)
-
-  useEffect(() => {
-    setPage(1)
-  }, [filterKey])
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredProjects.length / PROJECT_LIST_PAGE_SIZE),
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
+    null,
   )
-
-  const displayPage = Math.min(Math.max(1, page), totalPages)
-
-  const paginatedProjects = useMemo(() => {
-    const start = (displayPage - 1) * PROJECT_LIST_PAGE_SIZE
-    return filteredProjects.slice(start, start + PROJECT_LIST_PAGE_SIZE)
-  }, [filteredProjects, displayPage])
+  const [selectedProjectChapterId, setSelectedProjectChapterId] = useState<
+    number | null
+  >(null)
 
   return (
     <section className="relative flex w-full flex-col items-start justify-start pt-8">
@@ -54,7 +74,7 @@ export function MatchingProjectsListPage() {
           onClick={() => setOpenFilterId(null)}
         />
       )}
-      <div className="border-teal-gray-150 relative z-30 flex h-full min-w-242 flex-col gap-5 rounded-xl border bg-white px-8.5 pt-8 pb-10">
+      <div className="border-teal-gray-150 relative z-30 flex h-full w-288 flex-col gap-5 rounded-xl border bg-white px-8.5 pt-8 pb-10">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 목록
@@ -103,41 +123,54 @@ export function MatchingProjectsListPage() {
             openFilterId && "pointer-events-none",
           )}
         >
-          {paginatedProjects.map((project) => (
-            <div key={project.id} className="min-w-0">
-              <button
-                type="button"
-                className="w-full text-left"
-                onClick={() => setSelectedProject(project)}
-              >
-                <MatchingProjectCard variant="default" data={project} />
-              </button>
-            </div>
-          ))}
+          {projects.map((item) => {
+            const project = toMatchingProject(item)
+            return (
+              <div key={project.id} className="min-w-0">
+                <button
+                  type="button"
+                  className="w-full text-left"
+                  onClick={() => {
+                    setSelectedProjectId(item.id)
+                    setSelectedProjectChapterId(item.chapterId)
+                  }}
+                >
+                  <MatchingProjectCard variant="default" data={project} />
+                </button>
+              </div>
+            )
+          })}
         </div>
 
-        {filteredProjects.length > 0 ? (
+        {projects.length > 0 && (
           <Pagination
             className="mt-5 self-center"
-            currentPage={displayPage}
+            currentPage={page}
             totalPages={totalPages}
             onPageChange={setPage}
           />
-        ) : null}
+        )}
       </div>
 
       <Modal.Root
-        open={Boolean(selectedProject)}
+        open={selectedProjectId !== null}
         onOpenChange={(open) => {
-          if (!open) setSelectedProject(null)
+          if (!open) {
+            setSelectedProjectId(null)
+            setSelectedProjectChapterId(null)
+          }
         }}
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            {selectedProject ? (
-              <ProjectDetailCard data={selectedProject} />
-            ) : null}
+            <Modal.Title className="sr-only">프로젝트 상세</Modal.Title>
+            {selectedProjectId !== null && (
+              <ProjectDetailCard
+                projectId={selectedProjectId}
+                projectChapterId={selectedProjectChapterId ?? undefined}
+              />
+            )}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
