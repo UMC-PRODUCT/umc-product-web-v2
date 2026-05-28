@@ -18,3 +18,7 @@ export async function getManagedProjects(
   >("/v1/projects/me/managed", { params: { gisuId } })
   return data.result.content ?? []
 }
+
+export async function deleteProject(projectId: number): Promise<void> {
+  await api.delete(`/v1/projects/${projectId}`)
+}

@@ -14,6 +14,7 @@ interface CtaModalProps {
   content: ReactNode
   cancelText?: string
   confirmText: string
+  confirmLoading?: boolean
   variant?: CtaModalVariant
   overlayTone?: "light" | "deep"
   onOpenChange: (open: boolean) => void
@@ -27,6 +28,7 @@ export function CtaModal({
   content,
   cancelText,
   confirmText,
+  confirmLoading = false,
   variant = "warning",
   overlayTone = "light",
   onOpenChange,
@@ -52,7 +54,7 @@ export function CtaModal({
     >
       <Modal.Portal>
         <Modal.Overlay tone={overlayTone} />
-        <Modal.Content className="shadow-drop-neutral-1 flex w-115 max-w-[calc(100vw-32px)] flex-col gap-8 rounded-[9.2px] border border-neutral-200 bg-white px-6 py-6 focus:outline-none">
+        <Modal.Content className="shadow-drop-neutral-1 flex w-115 max-w-[calc(100vw-32px)] flex-col gap-8 rounded-[10px] border border-neutral-200 bg-white px-6 py-6 focus:outline-none">
           <div className="flex flex-col items-start gap-4">
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <Icon className={cn("h-6 w-6", toneClassName)} />
@@ -86,6 +88,7 @@ export function CtaModal({
               color="primary"
               size="s"
               className="rounded-[10px]"
+              isLoading={confirmLoading}
               onClick={onConfirm}
             >
               {confirmText}

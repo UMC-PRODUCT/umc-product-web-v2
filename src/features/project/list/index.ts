@@ -8,16 +8,10 @@ export {
   DEFAULT_MATCHING_PROJECT_MOCK,
   MOCK_MATCHING_PROJECTS,
 } from "./model/matchingProject.mock"
-export {
-  filterMatchingProjects,
-  getProjectRecruitStatus,
-  useMatchingProjectListFilters,
-} from "./model/matchingProjectList"
+export { useMatchingProjectListFilters } from "./model/matchingProjectList"
 export type {
-  MatchingProjectListFilterCriteria,
   MatchingProjectListFilterDescriptor,
   MatchingProjectListFilterId,
-  MatchingProjectRecruitStatusKey,
 } from "./model/matchingProjectList"
 export { FilterDropdown } from "./ui/FilterDropDown"
 export { MatchingProjectCard } from "./ui/MatchingProjectCard"
