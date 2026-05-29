@@ -1,4 +1,5 @@
 export { AccountCreationStep } from "./ui/AccountCreationStep"
+export { PhoneVerificationStep } from "./ui/PhoneVerificationStep"
 export { ProfileInfoStep } from "./ui/ProfileInfoStep"
 export { type School, SchoolDropdown } from "./ui/SchoolDropdown"
 export { VerificationStep } from "./ui/VerificationStep"

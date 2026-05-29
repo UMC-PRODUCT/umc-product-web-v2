@@ -18,6 +18,7 @@ import { getAllSchools } from "@/features/auth/api/school"
 import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
 import {
   AccountCreationStep,
+  PhoneVerificationStep,
   ProfileInfoStep,
   VerificationStep,
 } from "@/features/signup"
@@ -40,6 +41,8 @@ function SignUpPage() {
     defaultValues: {
       email: "",
       code: "",
+      phoneNumber: "",
+      phoneCode: "",
       id: "",
       password: "",
       confirmPassword: "",
@@ -56,6 +59,8 @@ function SignUpPage() {
   } = methods
   const email = watch("email")
   const code = watch("code")
+  const phoneNumber = watch("phoneNumber")
+  const phoneCode = watch("phoneCode")
   const id = watch("id")
   const password = watch("password")
   const confirmPassword = watch("confirmPassword")
@@ -76,6 +81,22 @@ function SignUpPage() {
   const [isVerificationRequested, setIsVerificationRequested] = useState(false)
   const [isVerificationComplete, setIsVerificationComplete] = useState(false)
 
+  // 전화번호 인증 상태
+  const [verifiedPhoneNumber, setVerifiedPhoneNumber] = useState("")
+  const [isPhoneChanged, setIsPhoneChanged] = useState(false)
+  const [isPhoneCodeVisible, setIsPhoneCodeVisible] = useState(false)
+  const [phoneRemainingSeconds, setPhoneRemainingSeconds] = useState(0)
+  const [showPhoneVerificationSent, setShowPhoneVerificationSent] =
+    useState(false)
+  const [showPhoneSpamGuideModal, setShowPhoneSpamGuideModal] = useState(false)
+  const [isPhoneCodeInvalid, setIsPhoneCodeInvalid] = useState(false)
+  const [isPhoneCodeExpired, setIsPhoneCodeExpired] = useState(false)
+  const [hasPhoneExpiredBefore, setHasPhoneExpiredBefore] = useState(false)
+  const [isPhoneVerificationRequested, setIsPhoneVerificationRequested] =
+    useState(false)
+  const [isPhoneVerificationComplete, setIsPhoneVerificationComplete] =
+    useState(false)
+
   // API 연동을 위한 추가 상태
   const [emailVerificationId, setEmailVerificationId] = useState<number | null>(
     null,
@@ -86,8 +107,11 @@ function SignUpPage() {
   >(null)
   const [schoolList, setSchoolList] = useState<SchoolNameItem[]>([])
   const [isVerificationLoading, setIsVerificationLoading] = useState(false)
+  const [isPhoneVerificationLoading, setIsPhoneVerificationLoading] =
+    useState(false)
   const [isSignupLoading, setIsSignupLoading] = useState(false)
   const [isEmailDuplicated, setIsEmailDuplicated] = useState(false)
+  const [isPhoneDuplicated, setIsPhoneDuplicated] = useState(false)
   const isOAuth = !!oAuthVerificationToken
   const addToast = useToastStore((s) => s.addToast)
 
@@ -97,8 +121,10 @@ function SignUpPage() {
     useState(false)
 
   const isEmailValid = email !== "" && !errors.email
+  const isPhoneValid = phoneNumber !== "" && !errors.phoneNumber
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const phoneIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate({ from: Route.fullPath })
 
   // 초기 로드: OAuth 토큰 및 학교 목록 가져오기
@@ -135,6 +161,18 @@ function SignUpPage() {
     setIsCodeInvalid(false)
   }, [code])
 
+  // 전화번호 변경 시 사이드 이펙트
+  useEffect(() => {
+    setShowPhoneVerificationSent(false)
+    setIsPhoneVerificationRequested(false)
+    setIsPhoneDuplicated(false)
+  }, [phoneNumber])
+
+  // 전화번호 인증번호 변경 시 사이드 이펙트
+  useEffect(() => {
+    setIsPhoneCodeInvalid(false)
+  }, [phoneCode])
+
   // 아이디 변경 시 사이드 이펙트
   useEffect(() => {
     setIsIdDuplicated(false)
@@ -149,6 +187,15 @@ function SignUpPage() {
     }
   }, [email, verifiedEmail, isCodeVisible])
 
+  // 전화번호 검증
+  useEffect(() => {
+    if (isPhoneCodeVisible && phoneNumber !== verifiedPhoneNumber) {
+      setIsPhoneChanged(true)
+    } else {
+      setIsPhoneChanged(false)
+    }
+  }, [phoneNumber, verifiedPhoneNumber, isPhoneCodeVisible])
+
   // 인증번호 타이머
   useEffect(() => {
     if (remainingSeconds <= 0 && intervalRef.current) {
@@ -162,12 +209,38 @@ function SignUpPage() {
     }
   }, [remainingSeconds, isCodeVisible])
 
+  // 전화번호 인증번호 타이머
+  useEffect(() => {
+    if (phoneRemainingSeconds <= 0 && phoneIntervalRef.current) {
+      clearInterval(phoneIntervalRef.current)
+      phoneIntervalRef.current = null
+      if (isPhoneCodeVisible && phoneRemainingSeconds === 0) {
+        setIsPhoneCodeExpired(true)
+        setHasPhoneExpiredBefore(true)
+        setIsPhoneVerificationRequested(false)
+      }
+    }
+  }, [phoneRemainingSeconds, isPhoneCodeVisible])
+
   const startVerificationTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     intervalRef.current = setInterval(() => {
       setRemainingSeconds((prev) => {
         if (prev <= 1) {
           if (intervalRef.current) clearInterval(intervalRef.current)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
+  const startPhoneVerificationTimer = () => {
+    if (phoneIntervalRef.current) clearInterval(phoneIntervalRef.current)
+    phoneIntervalRef.current = setInterval(() => {
+      setPhoneRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          if (phoneIntervalRef.current) clearInterval(phoneIntervalRef.current)
           return 0
         }
         return prev - 1
@@ -216,6 +289,35 @@ function SignUpPage() {
     }
   }
 
+  const handlePhoneVerificationClick = async () => {
+    setIsPhoneVerificationLoading(true)
+    try {
+      // TODO: 전화번호 인증번호 발송 API 연동 필요
+      setVerifiedPhoneNumber(phoneNumber)
+      setValue("phoneCode", "")
+      setIsPhoneCodeVisible(true)
+      setShowPhoneVerificationSent(true)
+      setIsPhoneCodeInvalid(false)
+      setIsPhoneCodeExpired(false)
+      setIsPhoneVerificationRequested(true)
+      setPhoneRemainingSeconds(REMAINING_SECONDS)
+      setIsPhoneChanged(false)
+      startPhoneVerificationTimer()
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "인증 문자 발송에 실패했습니다."
+      addToast({
+        message,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      setIsPhoneVerificationLoading(false)
+    }
+  }
+
   const handleSpamGuideConfirm = async () => {
     try {
       if (emailVerificationId) {
@@ -238,6 +340,12 @@ function SignUpPage() {
     }
   }
 
+  const handlePhoneSpamGuideConfirm = async () => {
+    // TODO: 전화번호 인증번호 재발송 API 연동 필요
+    void handlePhoneVerificationClick()
+    setShowPhoneSpamGuideModal(false)
+  }
+
   const handleCodeComplete = async () => {
     try {
       if (emailVerificationId) {
@@ -254,6 +362,15 @@ function SignUpPage() {
       }
     } catch {
       setIsCodeInvalid(true)
+    }
+  }
+
+  const handlePhoneCodeComplete = async () => {
+    try {
+      // TODO: 전화번호 인증 완료 API 연동 필요
+      setIsPhoneVerificationComplete(true)
+    } catch {
+      setIsPhoneCodeInvalid(true)
     }
   }
 
@@ -336,6 +453,15 @@ function SignUpPage() {
   const verificationButtonText =
     hasExpiredBefore || isCodeExpired ? "다시 받기" : "인증하기"
 
+  const phoneVerificationButtonDisabled = isPhoneVerificationRequested
+    ? true
+    : hasPhoneExpiredBefore || isPhoneCodeExpired
+      ? false
+      : !isPhoneValid || (isPhoneCodeVisible && !isPhoneChanged)
+
+  const phoneVerificationButtonText =
+    hasPhoneExpiredBefore || isPhoneCodeExpired ? "다시 받기" : "인증하기"
+
   const isIdValid = id !== "" && !errors.id
   const isPasswordValid = password !== "" && !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
@@ -345,6 +471,10 @@ function SignUpPage() {
     : isOAuth
       ? false // OAuth는 이 단계를 스킵하므로 버튼 활성화 여부가 중요하지 않음
       : !isIdValid || isIdDuplicated || !isPasswordValid || !isPasswordMatch
+
+  const phoneVerificationNextButtonDisabled =
+    !isPhoneVerificationComplete &&
+    (phoneCode.length !== 6 || isPhoneCodeInvalid || isPhoneCodeExpired)
 
   const isNicknameValid = nickname !== "" && !errors.nickname
   const profileInfoNextButtonDisabled = !school || !name || !isNicknameValid
@@ -381,7 +511,23 @@ function SignUpPage() {
               />
             )}
 
-            {isAccountCreationComplete && <ProfileInfoStep />}
+            {isAccountCreationComplete && !isPhoneVerificationComplete && (
+              <PhoneVerificationStep
+                remainingSeconds={phoneRemainingSeconds}
+                showVerificationSent={showPhoneVerificationSent}
+                isCodeVisible={isPhoneCodeVisible}
+                isCodeInvalid={isPhoneCodeInvalid}
+                isCodeExpired={isPhoneCodeExpired}
+                verificationButtonDisabled={phoneVerificationButtonDisabled}
+                verificationButtonText={phoneVerificationButtonText}
+                isVerificationLoading={isPhoneVerificationLoading}
+                isPhoneDuplicated={isPhoneDuplicated}
+                onVerificationClick={handlePhoneVerificationClick}
+                onSpamGuideClick={() => setShowPhoneSpamGuideModal(true)}
+              />
+            )}
+
+            {isPhoneVerificationComplete && <ProfileInfoStep />}
 
             <div className="flex w-full flex-col items-center gap-4">
               <Button
@@ -389,9 +535,11 @@ function SignUpPage() {
                 color={"primary"}
                 variant={"fill"}
                 disabled={
-                  isAccountCreationComplete
+                  isPhoneVerificationComplete
                     ? profileInfoNextButtonDisabled
-                    : accountCreationNextButtonDisabled
+                    : isAccountCreationComplete
+                      ? phoneVerificationNextButtonDisabled
+                      : accountCreationNextButtonDisabled
                 }
                 isLoading={isSignupLoading}
                 className="w-full"
@@ -403,7 +551,13 @@ function SignUpPage() {
                     !isAccountCreationComplete
                   ) {
                     handleAccountCreationComplete()
-                  } else if (isAccountCreationComplete) {
+                  } else if (
+                    isAccountCreationComplete &&
+                    !isPhoneVerificationComplete &&
+                    phoneCode.length === 6
+                  ) {
+                    void handlePhoneCodeComplete()
+                  } else if (isPhoneVerificationComplete) {
                     void handleFinalSignup()
                   }
                 }}
@@ -441,6 +595,25 @@ function SignUpPage() {
         onOpenChange={setShowSpamGuideModal}
         onCancel={() => setShowSpamGuideModal(false)}
         onConfirm={handleSpamGuideConfirm}
+      />
+
+      <CtaModal
+        open={showPhoneSpamGuideModal}
+        title="인증 문자를 받지 못하셨나요?"
+        content={
+          <>
+            문자 수신까지 시간이 걸릴 수 있어요.
+            <br />
+            잠시 기다린 뒤에도 받지 못했다면 다시 요청해 주세요.
+          </>
+        }
+        cancelText="닫기"
+        confirmText="다시 보내기"
+        variant="success"
+        overlayTone="light"
+        onOpenChange={setShowPhoneSpamGuideModal}
+        onCancel={() => setShowPhoneSpamGuideModal(false)}
+        onConfirm={handlePhoneSpamGuideConfirm}
       />
     </FormProvider>
   )

@@ -7,6 +7,13 @@ export const codeSchema = z
   .string()
   .length(6, "인증번호 6자리를 입력해 주세요.")
 
+export const phoneNumberSchema = z
+  .string()
+  .regex(/^010\d{8}$/, "올바른 전화번호 형식을 입력해 주세요.")
+export const phoneCodeSchema = z
+  .string()
+  .length(6, "인증번호 6자리를 입력해 주세요.")
+
 // export const idSchema = z
 //   .string()
 //   .min(5, "아이디는 5자 이상이어야 합니다")
@@ -40,6 +47,8 @@ export const signUpSchema = z
   .object({
     email: emailSchema,
     code: codeSchema,
+    phoneNumber: phoneNumberSchema,
+    phoneCode: phoneCodeSchema,
     id: idSchema,
     password: passwordSchema,
     confirmPassword: z.string(),
