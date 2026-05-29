@@ -5,7 +5,11 @@ import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 
+import { ServiceUnavailablePage } from "@/features/error/ui/ServiceUnavailablePage"
+
 import { routeTree } from "./routeTree.gen"
+
+const isMaintenance = import.meta.env.VITE_MAINTENANCE === "true"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,9 +38,13 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+      {isMaintenance ? (
+        <ServiceUnavailablePage />
+      ) : (
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      )}
     </StrictMode>,
   )
 }
