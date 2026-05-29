@@ -14,6 +14,7 @@ import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignupIndexRouteImport } from './routes/signup/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -75,6 +76,11 @@ const IndexRoute = IndexRouteImport.update({
 const SignupIndexRoute = SignupIndexRouteImport.update({
   id: '/signup/',
   path: '/signup/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchingIndexRoute = MatchingIndexRouteImport.update({
@@ -301,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
@@ -343,6 +350,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/login': typeof LoginIndexRoute
   '/matching': typeof MatchingIndexRoute
+  '/settings': typeof SettingsIndexRoute
   '/signup': typeof SignupIndexRoute
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
@@ -387,6 +395,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
@@ -433,6 +442,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/login/'
     | '/matching/'
+    | '/settings/'
     | '/signup/'
     | '/matching/projects/announce'
     | '/admin/challenger/points'
@@ -475,6 +485,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/matching'
+    | '/settings'
     | '/signup'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
@@ -518,6 +529,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/login/'
     | '/matching/'
+    | '/settings/'
     | '/signup/'
     | '/matching/projects/announce'
     | '/admin/challenger/points'
@@ -557,6 +569,7 @@ export interface RootRouteChildren {
   TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
   LoginIndexRoute: typeof LoginIndexRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
   SignupIndexRoute: typeof SignupIndexRoute
   OauthKakaoCallbackRoute: typeof OauthKakaoCallbackRoute
 }
@@ -596,6 +609,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup/'
       preLoaderRoute: typeof SignupIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matching/': {
@@ -975,6 +995,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
   LoginIndexRoute: LoginIndexRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
   SignupIndexRoute: SignupIndexRoute,
   OauthKakaoCallbackRoute: OauthKakaoCallbackRoute,
 }
