@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useReducer, useRef } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -26,9 +26,278 @@ import { type SignUpFormData, signUpSchema } from "@/features/signup/validation"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
-import type { SchoolNameItem } from "@/features/auth/model/types"
+import type {
+  EmailRegisterMemberRequest,
+  SchoolNameItem,
+} from "@/features/auth/model/types"
 
 const REMAINING_SECONDS = 600 // 10분
+
+type SignUpState = {
+  signupData: Partial<EmailRegisterMemberRequest> & {
+    isPhoneVerified?: boolean
+  }
+  email: {
+    verifiedValue: string
+    isCodeVisible: boolean
+    remainingSeconds: number
+    showSent: boolean
+    showSpamModal: boolean
+    isCodeInvalid: boolean
+    isCodeExpired: boolean
+    hasExpiredBefore: boolean
+    isRequested: boolean
+    isLoading: boolean
+    isDuplicated: boolean
+    verificationId: number | null
+  }
+  phone: {
+    verifiedValue: string
+    isCodeVisible: boolean
+    remainingSeconds: number
+    showSent: boolean
+    showSpamModal: boolean
+    isCodeInvalid: boolean
+    isCodeExpired: boolean
+    hasExpiredBefore: boolean
+    isRequested: boolean
+    isLoading: boolean
+    isDuplicated: boolean
+  }
+  oAuthVerificationToken: string | null
+  schoolList: SchoolNameItem[]
+  isSignupLoading: boolean
+  isIdDuplicated: boolean
+}
+
+type SignUpAction =
+  | { type: "SET_OAUTH_TOKEN"; payload: string | null }
+  | { type: "SET_SCHOOL_LIST"; payload: SchoolNameItem[] }
+  | { type: "EMAIL_REQUEST_START" }
+  | { type: "EMAIL_REQUEST_SUCCESS"; payload: { id: number; value: string } }
+  | { type: "EMAIL_REQUEST_FAILURE"; payload: { isDuplicated: boolean } }
+  | { type: "EMAIL_CODE_CHANGE"; payload: boolean }
+  | { type: "EMAIL_INPUT_CHANGE" }
+  | { type: "EMAIL_TICK" }
+  | { type: "EMAIL_EXPIRED" }
+  | { type: "EMAIL_VERIFIED"; payload: string }
+  | { type: "EMAIL_SET_SPAM_MODAL"; payload: boolean }
+  | { type: "PHONE_REQUEST_START" }
+  | { type: "PHONE_REQUEST_SUCCESS"; payload: string }
+  | { type: "PHONE_REQUEST_FAILURE"; payload: { isDuplicated: boolean } }
+  | { type: "PHONE_CODE_CHANGE"; payload: boolean }
+  | { type: "PHONE_INPUT_CHANGE" }
+  | { type: "PHONE_TICK" }
+  | { type: "PHONE_EXPIRED" }
+  | { type: "PHONE_VERIFIED" }
+  | { type: "PHONE_SET_SPAM_MODAL"; payload: boolean }
+  | { type: "SET_ID_DUPLICATED"; payload: boolean }
+  | { type: "SET_PASSWORD"; payload: string }
+  | { type: "SIGNUP_START" }
+  | { type: "SIGNUP_FINISH" }
+
+const initialState: SignUpState = {
+  signupData: {
+    termsAgreements: [],
+  },
+  email: {
+    verifiedValue: "",
+    isCodeVisible: false,
+    remainingSeconds: 0,
+    showSent: false,
+    showSpamModal: false,
+    isCodeInvalid: false,
+    isCodeExpired: false,
+    hasExpiredBefore: false,
+    isRequested: false,
+    isLoading: false,
+    isDuplicated: false,
+    verificationId: null,
+  },
+  phone: {
+    verifiedValue: "",
+    isCodeVisible: false,
+    remainingSeconds: 0,
+    showSent: false,
+    showSpamModal: false,
+    isCodeInvalid: false,
+    isCodeExpired: false,
+    hasExpiredBefore: false,
+    isRequested: false,
+    isLoading: false,
+    isDuplicated: false,
+  },
+  oAuthVerificationToken: null,
+  schoolList: [],
+  isSignupLoading: false,
+  isIdDuplicated: false,
+}
+
+function signUpReducer(state: SignUpState, action: SignUpAction): SignUpState {
+  switch (action.type) {
+    case "SET_OAUTH_TOKEN":
+      return { ...state, oAuthVerificationToken: action.payload }
+    case "SET_SCHOOL_LIST":
+      return { ...state, schoolList: action.payload }
+    case "EMAIL_REQUEST_START":
+      return { ...state, email: { ...state.email, isLoading: true } }
+    case "EMAIL_REQUEST_SUCCESS":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          isLoading: false,
+          verificationId: action.payload.id,
+          verifiedValue: action.payload.value,
+          isCodeVisible: true,
+          showSent: true,
+          isCodeInvalid: false,
+          isCodeExpired: false,
+          isRequested: true,
+          remainingSeconds: REMAINING_SECONDS,
+        },
+      }
+    case "EMAIL_REQUEST_FAILURE":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          isLoading: false,
+          isDuplicated: action.payload.isDuplicated,
+        },
+      }
+    case "EMAIL_CODE_CHANGE":
+      return {
+        ...state,
+        email: { ...state.email, isCodeInvalid: action.payload },
+      }
+    case "EMAIL_INPUT_CHANGE":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          showSent: false,
+          isRequested: false,
+          isDuplicated: false,
+        },
+      }
+    case "EMAIL_TICK":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          remainingSeconds: Math.max(0, state.email.remainingSeconds - 1),
+        },
+      }
+    case "EMAIL_EXPIRED":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          isCodeExpired: true,
+          hasExpiredBefore: true,
+          isRequested: false,
+          remainingSeconds: 0,
+        },
+      }
+    case "EMAIL_VERIFIED":
+      return {
+        ...state,
+        signupData: {
+          ...state.signupData,
+          emailVerificationToken: action.payload,
+        },
+      }
+    case "EMAIL_SET_SPAM_MODAL":
+      return {
+        ...state,
+        email: { ...state.email, showSpamModal: action.payload },
+      }
+    case "PHONE_REQUEST_START":
+      return { ...state, phone: { ...state.phone, isLoading: true } }
+    case "PHONE_REQUEST_SUCCESS":
+      return {
+        ...state,
+        phone: {
+          ...state.phone,
+          isLoading: false,
+          verifiedValue: action.payload,
+          isCodeVisible: true,
+          showSent: true,
+          isCodeInvalid: false,
+          isCodeExpired: false,
+          isRequested: true,
+          remainingSeconds: REMAINING_SECONDS,
+        },
+      }
+    case "PHONE_REQUEST_FAILURE":
+      return {
+        ...state,
+        phone: {
+          ...state.phone,
+          isLoading: false,
+          isDuplicated: action.payload.isDuplicated,
+        },
+      }
+    case "PHONE_CODE_CHANGE":
+      return {
+        ...state,
+        phone: { ...state.phone, isCodeInvalid: action.payload },
+      }
+    case "PHONE_INPUT_CHANGE":
+      return {
+        ...state,
+        phone: {
+          ...state.phone,
+          showSent: false,
+          isRequested: false,
+          isDuplicated: false,
+        },
+      }
+    case "PHONE_TICK":
+      return {
+        ...state,
+        phone: {
+          ...state.phone,
+          remainingSeconds: Math.max(0, state.phone.remainingSeconds - 1),
+        },
+      }
+    case "PHONE_EXPIRED":
+      return {
+        ...state,
+        phone: {
+          ...state.phone,
+          isCodeExpired: true,
+          hasExpiredBefore: true,
+          isRequested: false,
+          remainingSeconds: 0,
+        },
+      }
+    case "PHONE_VERIFIED":
+      return {
+        ...state,
+        signupData: { ...state.signupData, isPhoneVerified: true },
+      }
+    case "PHONE_SET_SPAM_MODAL":
+      return {
+        ...state,
+        phone: { ...state.phone, showSpamModal: action.payload },
+      }
+    case "SET_ID_DUPLICATED":
+      return { ...state, isIdDuplicated: action.payload }
+    case "SET_PASSWORD":
+      return {
+        ...state,
+        signupData: { ...state.signupData, rawPassword: action.payload },
+      }
+    case "SIGNUP_START":
+      return { ...state, isSignupLoading: true }
+    case "SIGNUP_FINISH":
+      return { ...state, isSignupLoading: false }
+    default:
+      return state
+  }
+}
 
 export const Route = createFileRoute("/signup/")({
   component: SignUpPage,
@@ -68,74 +337,22 @@ function SignUpPage() {
   const name = watch("name")
   const nickname = watch("nickname")
 
-  // 인증 상태
-  const [verifiedEmail, setVerifiedEmail] = useState("")
-  const [isEmailChanged, setIsEmailChanged] = useState(false)
-  const [isCodeVisible, setIsCodeVisible] = useState(false)
-  const [remainingSeconds, setRemainingSeconds] = useState(0)
-  const [showVerificationSent, setShowVerificationSent] = useState(false)
-  const [showSpamGuideModal, setShowSpamGuideModal] = useState(false)
-  const [isCodeInvalid, setIsCodeInvalid] = useState(false)
-  const [isCodeExpired, setIsCodeExpired] = useState(false)
-  const [hasExpiredBefore, setHasExpiredBefore] = useState(false)
-  const [isVerificationRequested, setIsVerificationRequested] = useState(false)
-  const [isVerificationComplete, setIsVerificationComplete] = useState(false)
-
-  // 전화번호 인증 상태
-  const [verifiedPhoneNumber, setVerifiedPhoneNumber] = useState("")
-  const [isPhoneChanged, setIsPhoneChanged] = useState(false)
-  const [isPhoneCodeVisible, setIsPhoneCodeVisible] = useState(false)
-  const [phoneRemainingSeconds, setPhoneRemainingSeconds] = useState(0)
-  const [showPhoneVerificationSent, setShowPhoneVerificationSent] =
-    useState(false)
-  const [showPhoneSpamGuideModal, setShowPhoneSpamGuideModal] = useState(false)
-  const [isPhoneCodeInvalid, setIsPhoneCodeInvalid] = useState(false)
-  const [isPhoneCodeExpired, setIsPhoneCodeExpired] = useState(false)
-  const [hasPhoneExpiredBefore, setHasPhoneExpiredBefore] = useState(false)
-  const [isPhoneVerificationRequested, setIsPhoneVerificationRequested] =
-    useState(false)
-  const [isPhoneVerificationComplete, setIsPhoneVerificationComplete] =
-    useState(false)
-
-  // API 연동을 위한 추가 상태
-  const [emailVerificationId, setEmailVerificationId] = useState<number | null>(
-    null,
-  )
-  const [emailVerificationToken, setEmailVerificationToken] = useState("")
-  const [oAuthVerificationToken, setOAuthVerificationToken] = useState<
-    string | null
-  >(null)
-  const [schoolList, setSchoolList] = useState<SchoolNameItem[]>([])
-  const [isVerificationLoading, setIsVerificationLoading] = useState(false)
-  const [isPhoneVerificationLoading, setIsPhoneVerificationLoading] =
-    useState(false)
-  const [isSignupLoading, setIsSignupLoading] = useState(false)
-  const [isEmailDuplicated, setIsEmailDuplicated] = useState(false)
-  const [isPhoneDuplicated, setIsPhoneDuplicated] = useState(false)
-  const isOAuth = !!oAuthVerificationToken
-  const addToast = useToastStore((s) => s.addToast)
-
-  // 계정 생성 상태
-  const [isIdDuplicated, setIsIdDuplicated] = useState(false)
-  const [isAccountCreationComplete, setIsAccountCreationComplete] =
-    useState(false)
-
-  const isEmailValid = email !== "" && !errors.email
-  const isPhoneValid = phoneNumber !== "" && !errors.phoneNumber
+  const [state, dispatch] = useReducer(signUpReducer, initialState)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const phoneIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const navigate = useNavigate({ from: Route.fullPath })
+  const addToast = useToastStore((s) => s.addToast)
 
   // 초기 로드: OAuth 토큰 및 학교 목록 가져오기
   useEffect(() => {
     const token = sessionStorage.getItem(OAUTH_VERIFICATION_TOKEN_KEY)
-    setOAuthVerificationToken(token)
+    dispatch({ type: "SET_OAUTH_TOKEN", payload: token })
 
     const fetchSchools = async () => {
       try {
         const res = await getAllSchools()
-        setSchoolList(res.schools)
+        dispatch({ type: "SET_SCHOOL_LIST", payload: res.schools })
       } catch {
         addToast({
           message: "학교 목록을 불러오는데 실패했습니다.",
@@ -149,113 +366,84 @@ function SignUpPage() {
     void fetchSchools()
   }, [addToast])
 
+  // 타이머 정리 (언마운트 시)
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      if (phoneIntervalRef.current) clearInterval(phoneIntervalRef.current)
+    }
+  }, [])
+
   // 이메일 변경 시 사이드 이펙트
   useEffect(() => {
-    setShowVerificationSent(false)
-    setIsVerificationRequested(false)
-    setIsEmailDuplicated(false)
+    dispatch({ type: "EMAIL_INPUT_CHANGE" })
   }, [email])
 
   // 인증번호 변경 시 사이드 이펙트
   useEffect(() => {
-    setIsCodeInvalid(false)
+    dispatch({ type: "EMAIL_CODE_CHANGE", payload: false })
   }, [code])
 
   // 전화번호 변경 시 사이드 이펙트
   useEffect(() => {
-    setShowPhoneVerificationSent(false)
-    setIsPhoneVerificationRequested(false)
-    setIsPhoneDuplicated(false)
+    dispatch({ type: "PHONE_INPUT_CHANGE" })
   }, [phoneNumber])
 
   // 전화번호 인증번호 변경 시 사이드 이펙트
   useEffect(() => {
-    setIsPhoneCodeInvalid(false)
+    dispatch({ type: "PHONE_CODE_CHANGE", payload: false })
   }, [phoneCode])
 
   // 아이디 변경 시 사이드 이펙트
   useEffect(() => {
-    setIsIdDuplicated(false)
+    dispatch({ type: "SET_ID_DUPLICATED", payload: false })
   }, [id])
-
-  // 이메일 검증
-  useEffect(() => {
-    if (isCodeVisible && email !== verifiedEmail) {
-      setIsEmailChanged(true)
-    } else {
-      setIsEmailChanged(false)
-    }
-  }, [email, verifiedEmail, isCodeVisible])
-
-  // 전화번호 검증
-  useEffect(() => {
-    if (isPhoneCodeVisible && phoneNumber !== verifiedPhoneNumber) {
-      setIsPhoneChanged(true)
-    } else {
-      setIsPhoneChanged(false)
-    }
-  }, [phoneNumber, verifiedPhoneNumber, isPhoneCodeVisible])
 
   // 인증번호 타이머
   useEffect(() => {
-    if (remainingSeconds <= 0 && intervalRef.current) {
+    if (state.email.remainingSeconds <= 0 && intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
-      if (isCodeVisible && remainingSeconds === 0) {
-        setIsCodeExpired(true)
-        setHasExpiredBefore(true)
-        setIsVerificationRequested(false)
+      if (state.email.isCodeVisible && state.email.remainingSeconds === 0) {
+        dispatch({ type: "EMAIL_EXPIRED" })
       }
     }
-  }, [remainingSeconds, isCodeVisible])
+  }, [state.email.remainingSeconds, state.email.isCodeVisible])
 
   // 전화번호 인증번호 타이머
   useEffect(() => {
-    if (phoneRemainingSeconds <= 0 && phoneIntervalRef.current) {
+    if (state.phone.remainingSeconds <= 0 && phoneIntervalRef.current) {
       clearInterval(phoneIntervalRef.current)
       phoneIntervalRef.current = null
-      if (isPhoneCodeVisible && phoneRemainingSeconds === 0) {
-        setIsPhoneCodeExpired(true)
-        setHasPhoneExpiredBefore(true)
-        setIsPhoneVerificationRequested(false)
+      if (state.phone.isCodeVisible && state.phone.remainingSeconds === 0) {
+        dispatch({ type: "PHONE_EXPIRED" })
       }
     }
-  }, [phoneRemainingSeconds, isPhoneCodeVisible])
+  }, [state.phone.remainingSeconds, state.phone.isCodeVisible])
 
   const startVerificationTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     intervalRef.current = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          if (intervalRef.current) clearInterval(intervalRef.current)
-          return 0
-        }
-        return prev - 1
-      })
+      dispatch({ type: "EMAIL_TICK" })
     }, 1000)
   }
 
   const startPhoneVerificationTimer = () => {
     if (phoneIntervalRef.current) clearInterval(phoneIntervalRef.current)
     phoneIntervalRef.current = setInterval(() => {
-      setPhoneRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          if (phoneIntervalRef.current) clearInterval(phoneIntervalRef.current)
-          return 0
-        }
-        return prev - 1
-      })
+      dispatch({ type: "PHONE_TICK" })
     }, 1000)
   }
 
   const handleVerificationClick = async () => {
-    setIsVerificationLoading(true)
+    dispatch({ type: "EMAIL_REQUEST_START" })
     try {
-      // 이메일 중복 체크 추가
       const availability = await getEmailAvailability({ email })
       if (!availability.available) {
-        setIsEmailDuplicated(true)
-        setIsVerificationLoading(false)
+        dispatch({
+          type: "EMAIL_REQUEST_FAILURE",
+          payload: { isDuplicated: true },
+        })
         return
       }
 
@@ -263,16 +451,11 @@ function SignUpPage() {
         email,
         purpose: "REGISTER",
       })
-      setEmailVerificationId(Number(res.emailVerificationId))
-      setVerifiedEmail(email)
+      dispatch({
+        type: "EMAIL_REQUEST_SUCCESS",
+        payload: { id: Number(res.emailVerificationId), value: email },
+      })
       setValue("code", "")
-      setIsCodeVisible(true)
-      setShowVerificationSent(true)
-      setIsCodeInvalid(false)
-      setIsCodeExpired(false)
-      setIsVerificationRequested(true)
-      setRemainingSeconds(REMAINING_SECONDS)
-      setIsEmailChanged(false)
       startVerificationTimer()
     } catch (err) {
       const message =
@@ -284,24 +467,19 @@ function SignUpPage() {
         type: "default",
         duration: 3000,
       })
-    } finally {
-      setIsVerificationLoading(false)
+      dispatch({
+        type: "EMAIL_REQUEST_FAILURE",
+        payload: { isDuplicated: false },
+      })
     }
   }
 
   const handlePhoneVerificationClick = async () => {
-    setIsPhoneVerificationLoading(true)
+    dispatch({ type: "PHONE_REQUEST_START" })
     try {
       // TODO: 전화번호 인증번호 발송 API 연동 필요
-      setVerifiedPhoneNumber(phoneNumber)
+      dispatch({ type: "PHONE_REQUEST_SUCCESS", payload: phoneNumber })
       setValue("phoneCode", "")
-      setIsPhoneCodeVisible(true)
-      setShowPhoneVerificationSent(true)
-      setIsPhoneCodeInvalid(false)
-      setIsPhoneCodeExpired(false)
-      setIsPhoneVerificationRequested(true)
-      setPhoneRemainingSeconds(REMAINING_SECONDS)
-      setIsPhoneChanged(false)
       startPhoneVerificationTimer()
     } catch (err) {
       const message =
@@ -313,19 +491,21 @@ function SignUpPage() {
         type: "default",
         duration: 3000,
       })
-    } finally {
-      setIsPhoneVerificationLoading(false)
+      dispatch({
+        type: "PHONE_REQUEST_FAILURE",
+        payload: { isDuplicated: false },
+      })
     }
   }
 
   const handleSpamGuideConfirm = async () => {
     try {
-      if (emailVerificationId) {
+      if (state.email.verificationId) {
         await resendEmailVerification({
-          emailVerificationId,
+          emailVerificationId: state.email.verificationId,
         })
         handleVerificationClick()
-        setShowSpamGuideModal(false)
+        dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: false })
       }
     } catch (err) {
       const message =
@@ -343,45 +523,42 @@ function SignUpPage() {
   const handlePhoneSpamGuideConfirm = async () => {
     // TODO: 전화번호 인증번호 재발송 API 연동 필요
     void handlePhoneVerificationClick()
-    setShowPhoneSpamGuideModal(false)
+    dispatch({ type: "PHONE_SET_SPAM_MODAL", payload: false })
   }
 
   const handleCodeComplete = async () => {
     try {
-      if (emailVerificationId) {
+      if (state.email.verificationId) {
         const res = await completeEmailVerification({
-          emailVerificationId,
+          emailVerificationId: state.email.verificationId,
           verificationCode: code,
         })
-        setEmailVerificationToken(res.emailVerificationToken)
-        setIsVerificationComplete(true)
-        // OAuth의 경우 계정 생성 단계를 스킵함
-        if (isOAuth) {
-          setIsAccountCreationComplete(true)
-        }
+        dispatch({
+          type: "EMAIL_VERIFIED",
+          payload: res.emailVerificationToken,
+        })
       }
     } catch {
-      setIsCodeInvalid(true)
+      dispatch({ type: "EMAIL_CODE_CHANGE", payload: true })
     }
   }
 
   const handlePhoneCodeComplete = async () => {
     try {
       // TODO: 전화번호 인증 완료 API 연동 필요
-      setIsPhoneVerificationComplete(true)
+      dispatch({ type: "PHONE_VERIFIED" })
     } catch {
-      setIsPhoneCodeInvalid(true)
+      dispatch({ type: "PHONE_CODE_CHANGE", payload: true })
     }
   }
 
   const handleAccountCreationComplete = () => {
-    // TODO: 회원가입 정보 제출 API 연동 필요 (학교/이름/닉네임 입력 후)
-    setIsAccountCreationComplete(true)
+    dispatch({ type: "SET_PASSWORD", payload: password })
   }
 
   const handleFinalSignup = async () => {
-    setIsSignupLoading(true)
-    const selectedSchool = schoolList.find((s) => s.schoolName === school)
+    dispatch({ type: "SIGNUP_START" })
+    const selectedSchool = state.schoolList.find((s) => s.schoolName === school)
     if (!selectedSchool) {
       addToast({
         message: "유효한 학교를 선택해주세요.",
@@ -390,28 +567,28 @@ function SignUpPage() {
         type: "default",
         duration: 3000,
       })
-      setIsSignupLoading(false)
+      dispatch({ type: "SIGNUP_FINISH" })
       return
     }
 
     try {
-      if (isOAuth) {
+      if (state.oAuthVerificationToken) {
         await registerMemberByOAuth({
-          oAuthVerificationToken: oAuthVerificationToken!,
+          oAuthVerificationToken: state.oAuthVerificationToken,
           name,
           nickname,
-          emailVerificationToken,
+          emailVerificationToken: state.signupData.emailVerificationToken!,
           schoolId: selectedSchool.schoolId,
-          termsAgreements: [], // TODO: 약관 동의 기능 추가 시 연동
+          termsAgreements: state.signupData.termsAgreements || [],
         })
       } else {
         await registerMemberByEmail({
-          rawPassword: password,
+          rawPassword: state.signupData.rawPassword!,
           name,
           nickname,
-          emailVerificationToken,
+          emailVerificationToken: state.signupData.emailVerificationToken!,
           schoolId: selectedSchool.schoolId,
-          termsAgreements: [], // TODO: 약관 동의 기능 추가 시 연동
+          termsAgreements: state.signupData.termsAgreements || [],
         })
       }
 
@@ -435,7 +612,7 @@ function SignUpPage() {
         duration: 3000,
       })
     } finally {
-      setIsSignupLoading(false)
+      dispatch({ type: "SIGNUP_FINISH" })
     }
   }
 
@@ -444,40 +621,68 @@ function SignUpPage() {
   // }
 
   // 각종 버튼 상태
-  const verificationButtonDisabled = isVerificationRequested
+  const isEmailValid = email !== "" && !errors.email
+  const isPhoneValid = phoneNumber !== "" && !errors.phoneNumber
+
+  const isEmailChanged =
+    state.email.isCodeVisible && email !== state.email.verifiedValue
+  const isPhoneChanged =
+    state.phone.isCodeVisible && phoneNumber !== state.phone.verifiedValue
+
+  const verificationButtonDisabled = state.email.isRequested
     ? true
-    : hasExpiredBefore || isCodeExpired
+    : state.email.hasExpiredBefore || state.email.isCodeExpired
       ? false
-      : !isEmailValid || (isCodeVisible && !isEmailChanged)
+      : !isEmailValid || (state.email.isCodeVisible && !isEmailChanged)
 
   const verificationButtonText =
-    hasExpiredBefore || isCodeExpired ? "다시 받기" : "인증하기"
+    state.email.hasExpiredBefore || state.email.isCodeExpired
+      ? "다시 받기"
+      : "인증하기"
 
-  const phoneVerificationButtonDisabled = isPhoneVerificationRequested
+  const phoneVerificationButtonDisabled = state.phone.isRequested
     ? true
-    : hasPhoneExpiredBefore || isPhoneCodeExpired
+    : state.phone.hasExpiredBefore || state.phone.isCodeExpired
       ? false
-      : !isPhoneValid || (isPhoneCodeVisible && !isPhoneChanged)
+      : !isPhoneValid || (state.phone.isCodeVisible && !isPhoneChanged)
 
   const phoneVerificationButtonText =
-    hasPhoneExpiredBefore || isPhoneCodeExpired ? "다시 받기" : "인증하기"
+    state.phone.hasExpiredBefore || state.phone.isCodeExpired
+      ? "다시 받기"
+      : "인증하기"
 
-  const isIdValid = id !== "" && !errors.id
   const isPasswordValid = password !== "" && !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
 
-  const accountCreationNextButtonDisabled = !isVerificationComplete
-    ? code.length !== 6 || isCodeInvalid || isCodeExpired
-    : isOAuth
-      ? false // OAuth는 이 단계를 스킵하므로 버튼 활성화 여부가 중요하지 않음
-      : !isIdValid || isIdDuplicated || !isPasswordValid || !isPasswordMatch
-
-  const phoneVerificationNextButtonDisabled =
-    !isPhoneVerificationComplete &&
-    (phoneCode.length !== 6 || isPhoneCodeInvalid || isPhoneCodeExpired)
-
   const isNicknameValid = nickname !== "" && !errors.nickname
-  const profileInfoNextButtonDisabled = !school || !name || !isNicknameValid
+
+  // 단계별 완료 여부 (상태 A에서 유도)
+  const isEmailVerified = !!state.signupData.emailVerificationToken
+  const isAccountCreated =
+    !!state.oAuthVerificationToken || !!state.signupData.rawPassword
+  const isPhoneVerified = !!state.signupData.isPhoneVerified
+
+  // 현재 활성 단계 결정
+  const currentStep = !isEmailVerified
+    ? "EMAIL"
+    : !isAccountCreated
+      ? "PASSWORD"
+      : !isPhoneVerified
+        ? "PHONE"
+        : "PROFILE"
+
+  const nextButtonDisabled =
+    currentStep === "EMAIL"
+      ? code.length !== 6 ||
+        state.email.isCodeInvalid ||
+        state.email.isCodeExpired
+      : currentStep === "PASSWORD"
+        ? !isPasswordValid || !isPasswordMatch
+        : currentStep === "PHONE"
+          ? phoneCode.length !== 6 ||
+            state.phone.isCodeInvalid ||
+            state.phone.isCodeExpired
+          : !school || !name || !isNicknameValid
 
   return (
     <FormProvider {...methods}>
@@ -488,76 +693,62 @@ function SignUpPage() {
           </span>
 
           <div className="flex w-full flex-col items-center gap-8">
-            {!isVerificationComplete && (
+            {currentStep === "EMAIL" && (
               <VerificationStep
-                remainingSeconds={remainingSeconds}
-                showVerificationSent={showVerificationSent}
-                isCodeVisible={isCodeVisible}
-                isCodeInvalid={isCodeInvalid}
-                isCodeExpired={isCodeExpired}
+                remainingSeconds={state.email.remainingSeconds}
+                showVerificationSent={state.email.showSent}
+                isCodeVisible={state.email.isCodeVisible}
+                isCodeInvalid={state.email.isCodeInvalid}
+                isCodeExpired={state.email.isCodeExpired}
                 verificationButtonDisabled={verificationButtonDisabled}
                 verificationButtonText={verificationButtonText}
-                isVerificationLoading={isVerificationLoading}
-                isEmailDuplicated={isEmailDuplicated}
+                isVerificationLoading={state.email.isLoading}
+                isEmailDuplicated={state.email.isDuplicated}
                 onVerificationClick={handleVerificationClick}
-                onSpamGuideClick={() => setShowSpamGuideModal(true)}
+                onSpamGuideClick={() =>
+                  dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: true })
+                }
               />
             )}
 
-            {isVerificationComplete && !isAccountCreationComplete && (
-              <AccountCreationStep
-              // isIdDuplicated={isIdDuplicated}
-              // onIdDuplicateCheck={handleIdDuplicateCheck}
-              />
-            )}
+            {currentStep === "PASSWORD" && <AccountCreationStep />}
 
-            {isAccountCreationComplete && !isPhoneVerificationComplete && (
+            {currentStep === "PHONE" && (
               <PhoneVerificationStep
-                remainingSeconds={phoneRemainingSeconds}
-                showVerificationSent={showPhoneVerificationSent}
-                isCodeVisible={isPhoneCodeVisible}
-                isCodeInvalid={isPhoneCodeInvalid}
-                isCodeExpired={isPhoneCodeExpired}
+                remainingSeconds={state.phone.remainingSeconds}
+                showVerificationSent={state.phone.showSent}
+                isCodeVisible={state.phone.isCodeVisible}
+                isCodeInvalid={state.phone.isCodeInvalid}
+                isCodeExpired={state.phone.isCodeExpired}
                 verificationButtonDisabled={phoneVerificationButtonDisabled}
                 verificationButtonText={phoneVerificationButtonText}
-                isVerificationLoading={isPhoneVerificationLoading}
-                isPhoneDuplicated={isPhoneDuplicated}
+                isVerificationLoading={state.phone.isLoading}
+                isPhoneDuplicated={state.phone.isDuplicated}
                 onVerificationClick={handlePhoneVerificationClick}
-                onSpamGuideClick={() => setShowPhoneSpamGuideModal(true)}
+                onSpamGuideClick={() =>
+                  dispatch({ type: "PHONE_SET_SPAM_MODAL", payload: true })
+                }
               />
             )}
 
-            {isPhoneVerificationComplete && <ProfileInfoStep />}
+            {currentStep === "PROFILE" && <ProfileInfoStep />}
 
             <div className="flex w-full flex-col items-center gap-4">
               <Button
                 size={"m"}
                 color={"primary"}
                 variant={"fill"}
-                disabled={
-                  isPhoneVerificationComplete
-                    ? profileInfoNextButtonDisabled
-                    : isAccountCreationComplete
-                      ? phoneVerificationNextButtonDisabled
-                      : accountCreationNextButtonDisabled
-                }
-                isLoading={isSignupLoading}
+                disabled={nextButtonDisabled}
+                isLoading={state.isSignupLoading}
                 className="w-full"
                 onClick={() => {
-                  if (!isVerificationComplete && code.length === 6) {
+                  if (currentStep === "EMAIL") {
                     void handleCodeComplete()
-                  } else if (
-                    isVerificationComplete &&
-                    !isAccountCreationComplete
-                  ) {
+                  } else if (currentStep === "PASSWORD") {
                     handleAccountCreationComplete()
-                  } else if (
-                    isAccountCreationComplete &&
-                    !isPhoneVerificationComplete &&
-                    phoneCode.length === 6
-                  ) {
+                  } else if (currentStep === "PHONE") {
                     void handlePhoneCodeComplete()
-                  } else if (isPhoneVerificationComplete) {
+                  } else if (currentStep === "PROFILE") {
                     void handleFinalSignup()
                   }
                 }}
@@ -579,7 +770,7 @@ function SignUpPage() {
       </section>
 
       <CtaModal
-        open={showSpamGuideModal}
+        open={state.email.showSpamModal}
         title="인증 메일을 받지 못하셨나요?"
         content={
           <>
@@ -592,13 +783,17 @@ function SignUpPage() {
         confirmText="다시 보내기"
         variant="success"
         overlayTone="light"
-        onOpenChange={setShowSpamGuideModal}
-        onCancel={() => setShowSpamGuideModal(false)}
+        onOpenChange={(open) =>
+          dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: open })
+        }
+        onCancel={() =>
+          dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: false })
+        }
         onConfirm={handleSpamGuideConfirm}
       />
 
       <CtaModal
-        open={showPhoneSpamGuideModal}
+        open={state.phone.showSpamModal}
         title="인증 문자를 받지 못하셨나요?"
         content={
           <>
@@ -611,8 +806,12 @@ function SignUpPage() {
         confirmText="다시 보내기"
         variant="success"
         overlayTone="light"
-        onOpenChange={setShowPhoneSpamGuideModal}
-        onCancel={() => setShowPhoneSpamGuideModal(false)}
+        onOpenChange={(open) =>
+          dispatch({ type: "PHONE_SET_SPAM_MODAL", payload: open })
+        }
+        onCancel={() =>
+          dispatch({ type: "PHONE_SET_SPAM_MODAL", payload: false })
+        }
         onConfirm={handlePhoneSpamGuideConfirm}
       />
     </FormProvider>
