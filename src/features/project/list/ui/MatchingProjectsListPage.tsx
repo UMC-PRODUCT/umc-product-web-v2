@@ -57,11 +57,8 @@ export function MatchingProjectsListPage() {
     filterDescriptors,
   } = useMatchingProjectListFilters()
 
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
-    null,
-  )
-  const [selectedProjectChapterId, setSelectedProjectChapterId] = useState<
-    number | null
+  const [selectedProjectId, setSelectedProjectId] = useState<
+    number | string | null
   >(null)
 
   return (
@@ -132,7 +129,6 @@ export function MatchingProjectsListPage() {
                   className="w-full text-left"
                   onClick={() => {
                     setSelectedProjectId(item.id)
-                    setSelectedProjectChapterId(item.chapterId)
                   }}
                 >
                   <MatchingProjectCard variant="default" data={project} />
@@ -157,7 +153,6 @@ export function MatchingProjectsListPage() {
         onOpenChange={(open) => {
           if (!open) {
             setSelectedProjectId(null)
-            setSelectedProjectChapterId(null)
           }
         }}
       >
@@ -166,10 +161,7 @@ export function MatchingProjectsListPage() {
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
             <Modal.Title className="sr-only">프로젝트 상세</Modal.Title>
             {selectedProjectId !== null && (
-              <ProjectDetailCard
-                projectId={selectedProjectId}
-                projectChapterId={selectedProjectChapterId ?? undefined}
-              />
+              <ProjectDetailCard projectId={selectedProjectId} />
             )}
           </Modal.Content>
         </Modal.Portal>
