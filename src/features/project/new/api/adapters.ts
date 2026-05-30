@@ -110,17 +110,20 @@ export function mapApplicationFormToSections(
       const questions: Question[] = apiSection.questions
         .slice()
         .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
-        .map((apiQ) => ({
-          id: String(apiQ.questionId),
-          title: apiQ.title,
-          caption: apiQ.description ?? "",
-          fieldType: API_FIELD_TYPE_TO_UI[apiQ.type],
-          required: apiQ.isRequired ?? false,
-          options: apiQ.options
+        .map((apiQ) => {
+          const sortedOptions = apiQ.options
             .slice()
             .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
-            .map((o) => o.content),
-        }))
+          return {
+            id: String(apiQ.questionId),
+            title: apiQ.title,
+            caption: apiQ.description ?? "",
+            fieldType: API_FIELD_TYPE_TO_UI[apiQ.type],
+            required: apiQ.isRequired ?? false,
+            options: sortedOptions.map((o) => o.content),
+            optionIds: sortedOptions.map((o) => o.optionId ?? 0),
+          }
+        })
 
       return {
         id,
