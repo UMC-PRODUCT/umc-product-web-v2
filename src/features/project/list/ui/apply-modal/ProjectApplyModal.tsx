@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { AxiosError } from "axios"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
@@ -22,6 +23,12 @@ import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 import {
+  type ApplicationAnswerItem,
+  createApplicationDraft,
+  saveApplicationDraft,
+  submitApplication,
+} from "../../api/matchingProject"
+import {
   buildApplyAnswersSchema,
   defaultByFieldType,
 } from "../../model/applyValidation"
@@ -44,6 +51,49 @@ const COMMON_SECTION_ID = "common"
 
 function isPortfolioValue(v: ApplyAnswerValue): v is PortfolioValue {
   return v !== null && typeof v === "object" && !Array.isArray(v)
+}
+
+function buildAnswerPayload(
+  formValues: Record<string, ApplyAnswerValue>,
+  sections: Section[],
+): ApplicationAnswerItem[] {
+  const questionMap = new Map<string, Question>()
+  sections.forEach((s) => s.questions.forEach((q) => questionMap.set(q.id, q)))
+
+  return Object.entries(formValues).flatMap(([questionId, value]) => {
+    const question = questionMap.get(questionId)
+    if (!question) return []
+
+    const base = { questionId: Number(questionId) }
+
+    if (question.fieldType === "text") {
+      return [{ ...base, textValue: typeof value === "string" ? value : "" }]
+    }
+
+    if (question.fieldType === "radio") {
+      if (typeof value !== "string" || !value) return [base]
+      const idx = question.options.indexOf(value)
+      const optionId = idx !== -1 ? (question.optionIds?.[idx] ?? 0) : 0
+      return [{ ...base, selectedOptionIds: [optionId] }]
+    }
+
+    if (question.fieldType === "checkbox") {
+      if (!Array.isArray(value) || value.length === 0) return [base]
+      const selectedIds = value.flatMap((content) => {
+        const idx = question.options.indexOf(content)
+        return idx !== -1 ? [question.optionIds?.[idx] ?? 0] : []
+      })
+      return [{ ...base, selectedOptionIds: selectedIds }]
+    }
+
+    if (question.fieldType === "portfolio") {
+      if (!isPortfolioValue(value)) return [base]
+      if (value.kind === "link") return [{ ...base, textValue: value.url }]
+      return [base]
+    }
+
+    return [base]
+  })
 }
 
 function FileAnswerField({
@@ -79,23 +129,55 @@ function FileAnswerField({
 
 interface ProjectApplyModalProps {
   data: MatchingProject
+  projectId: number
+  matchingRoundId: number
   sections: Section[]
   canToggleSection?: boolean
   onBack: () => void
-  onSubmit: (answers: Record<string, ApplyAnswerValue>) => void
+  onSubmitSuccess: () => void
 }
 
 export function ProjectApplyModal({
   data,
+  projectId,
+  matchingRoundId,
   sections,
   canToggleSection = false,
   onBack,
-  onSubmit,
+  onSubmitSuccess,
 }: ProjectApplyModalProps) {
   const addToast = useToastStore((s) => s.addToast)
   const [sectionEnabled, setSectionEnabled] = useState<Record<string, boolean>>(
     () => Object.fromEntries(sections.map((s) => [s.id, s.isEnabled])),
   )
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false)
+  const draftInitializedRef = useRef(false)
+
+  useEffect(() => {
+    if (draftInitializedRef.current) return
+    draftInitializedRef.current = true
+    async function initDraft() {
+      try {
+        await createApplicationDraft(projectId, matchingRoundId)
+      } catch (err) {
+        if (err instanceof AxiosError && err.response?.status === 409) {
+          return
+        }
+        addToast({
+          message: "지원서 생성에 실패했습니다. 다시 시도해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        onBack()
+      }
+    }
+    void initDraft()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const schema = useMemo(
     () => buildApplyAnswersSchema(sections, sectionEnabled),
@@ -115,6 +197,7 @@ export function ProjectApplyModal({
   const {
     control,
     handleSubmit,
+    getValues,
     clearErrors,
     formState: { isDirty },
   } = useForm<Record<string, ApplyAnswerValue>>({
@@ -122,9 +205,6 @@ export function ProjectApplyModal({
     mode: "onChange",
     defaultValues,
   })
-
-  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
-  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false)
 
   useEffect(() => {
     clearErrors()
@@ -143,6 +223,17 @@ export function ProjectApplyModal({
     return map
   }, [sections, sectionEnabled])
 
+  async function handleLeaveConfirm() {
+    try {
+      const answers = buildAnswerPayload(getValues(), sections)
+      await saveApplicationDraft(projectId, answers)
+    } catch {
+      // 임시저장 실패 시에도 이탈은 허용
+    }
+    setIsLeaveModalOpen(false)
+    onBack()
+  }
+
   function handleBackClick() {
     if (isDirty) {
       setIsLeaveModalOpen(true)
@@ -151,9 +242,24 @@ export function ProjectApplyModal({
     }
   }
 
-  function onValid(data: Record<string, ApplyAnswerValue>) {
-    onSubmit(data)
-    setIsCompleteModalOpen(true)
+  async function onValid(formValues: Record<string, ApplyAnswerValue>) {
+    setIsSubmitting(true)
+    try {
+      const answers = buildAnswerPayload(formValues, sections)
+      await saveApplicationDraft(projectId, answers)
+      await submitApplication(projectId)
+      setIsCompleteModalOpen(true)
+    } catch {
+      addToast({
+        message: "지원서 제출에 실패했습니다. 다시 시도해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   function onInvalid(errs: FieldErrors<Record<string, ApplyAnswerValue>>) {
@@ -382,11 +488,13 @@ export function ProjectApplyModal({
               color="neutral"
               size="xl"
               onClick={handleBackClick}
+              disabled={isSubmitting}
             >
               돌아가기
             </Button>
             <Button
               size="xl"
+              disabled={isSubmitting}
               onClick={() => {
                 void handleSubmit(onValid, onInvalid)()
               }}
@@ -411,7 +519,7 @@ export function ProjectApplyModal({
               <Modal.Description className="text-subtitle-3-semibold text-teal-gray-800">
                 작성 중인 지원서가 있습니다.
                 <br />
-                나가시겠습니까?
+                임시저장 후 나가시겠습니까?
               </Modal.Description>
             </div>
             <div className="flex justify-end gap-3">
@@ -423,8 +531,8 @@ export function ProjectApplyModal({
               >
                 돌아가기
               </Button>
-              <Button size="s" onClick={onBack}>
-                나가기
+              <Button size="s" onClick={() => void handleLeaveConfirm()}>
+                임시저장 후 나가기
               </Button>
             </div>
           </Modal.Content>
@@ -450,7 +558,7 @@ export function ProjectApplyModal({
               </Modal.Description>
             </div>
             <div className="flex justify-end">
-              <Button size="s" onClick={onBack}>
+              <Button size="s" onClick={onSubmitSuccess}>
                 확인
               </Button>
             </div>
