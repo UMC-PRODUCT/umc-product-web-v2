@@ -37,8 +37,8 @@ function toMatchingProject(project: ProjectItem): MatchingProject {
       : null,
     recruitRows: project.partQuotas.map((q) => ({
       part: q.part,
-      current: q.currentCount,
-      total: q.quota,
+      current: Number(q.currentCount),
+      total: Number(q.quota),
     })),
     partQuotaStatus: project.partQuotaStatus,
   }
