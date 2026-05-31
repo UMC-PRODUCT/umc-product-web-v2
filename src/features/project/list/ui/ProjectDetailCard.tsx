@@ -210,7 +210,7 @@ export function ProjectDetailCard({
       color: "red",
       variant: "deep",
       type: "default",
-      duration: 3,
+      duration: 3000,
     })
     setIsApplyModalOpen(false)
     setIsRecruitQuestionsModalOpen(false)
@@ -531,11 +531,11 @@ export function ProjectDetailCard({
                   등록된 지원 양식이 없습니다.
                 </span>
               </div>
-            ) : (
+            ) : activeMatchingRound == null ? null : (
               <ProjectApplyModal
                 data={data}
                 projectId={projectId}
-                matchingRoundId={Number(activeMatchingRound!.id)}
+                matchingRoundId={Number(activeMatchingRound.id)}
                 sections={sections}
                 canToggleSection={userIsOperator || userIsPm}
                 onBack={() => setIsApplyModalOpen(false)}

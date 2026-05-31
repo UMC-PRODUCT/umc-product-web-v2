@@ -46,7 +46,7 @@ export function RecruitQuestionsViewModal({
   }, [sections])
 
   return (
-    <div className="w-232 flex-col">
+    <div className="flex w-232 flex-col">
       <div className="flex w-full">
         <ApplyProjectTitleCard
           projectName={data.title}

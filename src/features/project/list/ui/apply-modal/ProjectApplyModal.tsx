@@ -237,6 +237,7 @@ export function ProjectApplyModal({
     () => Object.fromEntries(sections.map((s) => [s.id, s.isEnabled])),
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPortfolioUploading, setIsPortfolioUploading] = useState(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false)
   const [isSubmitConfirmModalOpen, setIsSubmitConfirmModalOpen] =
@@ -493,6 +494,7 @@ export function ProjectApplyModal({
                 return
               }
               if (val.file) {
+                setIsPortfolioUploading(true)
                 void uploadPortfolioFile(val.file)
                   .then((uploaded) =>
                     onChange({
@@ -514,6 +516,7 @@ export function ProjectApplyModal({
                       duration: 3000,
                     }),
                   )
+                  .finally(() => setIsPortfolioUploading(false))
               }
             }}
             error={error}
@@ -636,7 +639,7 @@ export function ProjectApplyModal({
             </Button>
             <Button
               size="xl"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isPortfolioUploading}
               onClick={() => {
                 void handleSubmit(onValid, onInvalid)()
               }}
