@@ -104,7 +104,8 @@ function buildAnswerPayload(
     if (question.fieldType === "radio") {
       if (typeof value !== "string" || !value) return [base]
       const idx = question.options.indexOf(value)
-      const optionId = idx !== -1 ? (question.optionIds?.[idx] ?? 0) : 0
+      const optionId = idx !== -1 ? question.optionIds?.[idx] : undefined
+      if (optionId == null) return [base]
       return [{ ...base, selectedOptionIds: [optionId] }]
     }
 
@@ -112,8 +113,10 @@ function buildAnswerPayload(
       if (!Array.isArray(value) || value.length === 0) return [base]
       const selectedIds = value.flatMap((content) => {
         const idx = question.options.indexOf(content)
-        return idx !== -1 ? [question.optionIds?.[idx] ?? 0] : []
+        const optionId = idx !== -1 ? question.optionIds?.[idx] : undefined
+        return optionId != null ? [optionId] : []
       })
+      if (selectedIds.length === 0) return [base]
       return [{ ...base, selectedOptionIds: selectedIds }]
     }
 

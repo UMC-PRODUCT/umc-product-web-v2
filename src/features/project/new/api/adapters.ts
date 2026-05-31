@@ -121,7 +121,9 @@ export function mapApplicationFormToSections(
             fieldType: API_FIELD_TYPE_TO_UI[apiQ.type],
             required: apiQ.isRequired ?? false,
             options: sortedOptions.map((o) => o.content),
-            optionIds: sortedOptions.map((o) => o.optionId ?? 0),
+            optionIds: sortedOptions
+              .map((o) => o.optionId)
+              .filter((id): id is number => id != null),
           }
         })
 
