@@ -179,10 +179,10 @@ export type ApplicationAnswerItem = {
 }
 
 export type ActiveMatchingRound = {
-  id: number
+  id: number | string
   type: string
   phase: string
-  chapterId: number
+  chapterId: number | string
   startsAt: string
   endsAt: string
 }
@@ -224,6 +224,96 @@ export async function submitApplication(
 ): Promise<ApplicationStatusResponse> {
   const { data } = await api.post<ApiResponse<ApplicationStatusResponse>>(
     `/v1/projects/${projectId}/applications/me/submit`,
+  )
+  return data.result
+}
+
+export type AnswerView = {
+  answerId: number
+  answeredAsType:
+    | "SHORT_TEXT"
+    | "LONG_TEXT"
+    | "RADIO"
+    | "CHECKBOX"
+    | "DROPDOWN"
+    | "SCHEDULE"
+    | "FILE"
+    | "PORTFOLIO"
+  textValue?: string
+  selectedOptions?: { questionOptionId: number; answeredAsContent: string }[]
+  files?: { fileId: string; originalFileName: string; url: string }[]
+  times?: string[]
+}
+
+export type QuestionView = {
+  questionId: number
+  type: AnswerView["answeredAsType"]
+  title: string
+  description?: string
+  isRequired: boolean
+  orderNo: number
+  options: {
+    optionId: number
+    content: string
+    orderNo: number
+    isOther?: boolean
+  }[]
+  answer?: AnswerView
+}
+
+export type ApplicationDetailSectionView = {
+  sectionId: number
+  type: "COMMON" | "PART"
+  allowedParts: ProjectPart[]
+  title: string
+  description?: string
+  orderNo: number
+  questions: QuestionView[]
+}
+
+export type FormResponseView = {
+  formResponseId: number
+  formId: number
+  status: "DRAFT" | "SUBMITTED"
+  submittedAt?: string
+  lastSavedAt?: string
+  sections: ApplicationDetailSectionView[]
+}
+
+export type ApplicationDetail = {
+  applicationId: number
+  applicant: {
+    memberId: number
+    nickname: string
+    name: string
+    schoolName: string
+    part: ProjectPart
+  }
+  matchingRound: { id: number; type: string; phase: string }
+  status: MyApplicationStatus
+  submittedAt?: string
+  statusChangedAt?: string
+  formResponse: FormResponseView
+}
+
+export async function getApplicationDetail(
+  projectId: number,
+  applicationId: number,
+): Promise<ApplicationDetail> {
+  const { data } = await api.get<ApiResponse<ApplicationDetail>>(
+    `/v1/projects/${projectId}/applications/${applicationId}`,
+  )
+  return data.result
+}
+
+export async function cancelApplication(
+  projectId: number,
+  applicationId: number,
+  reason?: string,
+): Promise<ApplicationStatusResponse> {
+  const { data } = await api.delete<ApiResponse<ApplicationStatusResponse>>(
+    `/v1/projects/${projectId}/applications/${applicationId}`,
+    { params: reason ? { reason } : undefined },
   )
   return data.result
 }
