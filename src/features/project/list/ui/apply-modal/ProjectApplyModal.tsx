@@ -157,11 +157,13 @@ function FileAnswerField({
   value,
   onChange,
   onUploadError,
+  onUploadingChange,
   error,
 }: {
   value: UploadedFileValue | null
   onChange: (v: UploadedFileValue | null) => void
   onUploadError: (message: string) => void
+  onUploadingChange?: (uploading: boolean) => void
   error?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -169,6 +171,7 @@ function FileAnswerField({
 
   async function handleSelect(file: File) {
     setIsUploading(true)
+    onUploadingChange?.(true)
     try {
       const { fileId } = await uploadFileFlow(file, FILE_UPLOAD_CATEGORY)
       onChange({ fileId, fileName: file.name })
@@ -182,6 +185,7 @@ function FileAnswerField({
       )
     } finally {
       setIsUploading(false)
+      onUploadingChange?.(false)
     }
   }
 
@@ -240,6 +244,7 @@ export function ProjectApplyModal({
     () => Object.fromEntries(sections.map((s) => [s.id, s.isEnabled])),
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isFileUploading, setIsFileUploading] = useState(false)
   const [isPortfolioUploading, setIsPortfolioUploading] = useState(false)
   const portfolioUploadTokenRef = useRef(0)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
@@ -476,6 +481,7 @@ export function ProjectApplyModal({
                 duration: 3000,
               })
             }
+            onUploadingChange={setIsFileUploading}
             error={error}
           />
         )
@@ -651,7 +657,7 @@ export function ProjectApplyModal({
             </Button>
             <Button
               size="xl"
-              disabled={isSubmitting || isPortfolioUploading}
+              disabled={isSubmitting || isFileUploading || isPortfolioUploading}
               onClick={() => {
                 void handleSubmit(onValid, onInvalid)()
               }}
