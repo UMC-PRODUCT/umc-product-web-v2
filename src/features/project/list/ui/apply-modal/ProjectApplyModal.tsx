@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { uploadFileFlow } from "@/features/project/new/api/storage"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { Button } from "@/shared/ui/Button"
@@ -13,7 +14,6 @@ import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
-import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import {
   PortfolioField,
@@ -29,10 +29,13 @@ import {
   submitApplication,
 } from "../../api/matchingProject"
 import {
+  type ApplyPortfolioValue,
   buildApplyAnswersSchema,
   defaultByFieldType,
+  type UploadedFileValue,
 } from "../../model/applyValidation"
 import { isRecruitDone } from "../../model/matchingProject"
+import { ApplyProjectTitleCard } from "./ApplyProjectTitleCard"
 
 import type { FieldErrors, Resolver } from "react-hook-form"
 
@@ -43,14 +46,42 @@ import type {
 
 import type { MatchingProject } from "../../model/matchingProject"
 
-type ApplyAnswerValue = string | string[] | PortfolioValue | null
+const FILE_UPLOAD_CATEGORY = "POST_ATTACHMENT" as const
+const PORTFOLIO_UPLOAD_CATEGORY = "PORTFOLIO" as const
+
+const FILE_ACCEPT = ".pdf,.docx,.zip"
+const FILE_ALLOWED_LABEL = "PDF, DOCX, ZIP"
+const PORTFOLIO_ALLOWED_LABEL = "PDF"
+
+type ApplyAnswerValue =
+  | string
+  | string[]
+  | UploadedFileValue
+  | ApplyPortfolioValue
+  | null
 
 const OPTION_LIST_CLASS =
   "border-teal-gray-150 flex flex-col gap-0.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] p-1"
 const COMMON_SECTION_ID = "common"
 
-function isPortfolioValue(v: ApplyAnswerValue): v is PortfolioValue {
-  return v !== null && typeof v === "object" && !Array.isArray(v)
+function isUploadedFileValue(v: ApplyAnswerValue): v is UploadedFileValue {
+  return (
+    v !== null &&
+    typeof v === "object" &&
+    !Array.isArray(v) &&
+    "fileId" in v &&
+    !("kind" in v)
+  )
+}
+
+function isApplyPortfolioValue(v: ApplyAnswerValue): v is ApplyPortfolioValue {
+  return (
+    v !== null &&
+    typeof v === "object" &&
+    !Array.isArray(v) &&
+    "kind" in v &&
+    (v.kind === "link" || v.kind === "file")
+  )
 }
 
 function buildAnswerPayload(
@@ -86,45 +117,100 @@ function buildAnswerPayload(
       return [{ ...base, selectedOptionIds: selectedIds }]
     }
 
+    if (question.fieldType === "file") {
+      if (!isUploadedFileValue(value)) return [base]
+      return [{ ...base, fileIds: [value.fileId] }]
+    }
+
     if (question.fieldType === "portfolio") {
-      if (!isPortfolioValue(value)) return [base]
+      if (!isApplyPortfolioValue(value)) return [base]
       if (value.kind === "link") return [{ ...base, textValue: value.url }]
-      return [base]
+      return [{ ...base, fileIds: [value.fileId] }]
     }
 
     return [base]
   })
 }
 
+function extractUploadErrorMessage(
+  err: unknown,
+  fallback: string,
+  allowedLabel: string,
+): string {
+  if (err instanceof AxiosError) {
+    const data = err.response?.data as
+      | { code?: string; message?: string }
+      | undefined
+    if (data?.code === "STORAGE-0004") {
+      const base = data.message ?? "허용되지 않는 파일 확장자입니다."
+      return `${base} (허용 확장자: ${allowedLabel})`
+    }
+    if (data?.message) return data.message
+  }
+  return fallback
+}
+
 function FileAnswerField({
   value,
   onChange,
+  onUploadError,
   error,
 }: {
-  value: string | null
-  onChange: (name: string | null) => void
+  value: UploadedFileValue | null
+  onChange: (v: UploadedFileValue | null) => void
+  onUploadError: (message: string) => void
   error?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState(false)
+
+  async function handleSelect(file: File) {
+    setIsUploading(true)
+    try {
+      const { fileId } = await uploadFileFlow(file, FILE_UPLOAD_CATEGORY)
+      onChange({ fileId, fileName: file.name })
+    } catch (err) {
+      onUploadError(
+        extractUploadErrorMessage(
+          err,
+          "파일 업로드에 실패했습니다. 다시 시도해 주세요.",
+          FILE_ALLOWED_LABEL,
+        ),
+      )
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   return (
     <>
       <input
         type="file"
         ref={inputRef}
         className="hidden"
+        accept={FILE_ACCEPT}
         onChange={(e) => {
           const file = e.target.files?.[0]
-          onChange(file?.name ?? null)
+          if (!file) return
+          void handleSelect(file)
+          e.target.value = ""
         }}
       />
       <FileUploadField
-        fileName={value}
+        fileName={isUploading ? "업로드 중..." : (value?.fileName ?? null)}
         onUpload={() => inputRef.current?.click()}
         onDelete={() => onChange(null)}
         error={error}
       />
     </>
   )
+}
+
+async function uploadPortfolioFile(
+  file: File,
+): Promise<{ fileId: string; fileName: string }> {
+  const { fileId } = await uploadFileFlow(file, PORTFOLIO_UPLOAD_CATEGORY)
+  return { fileId, fileName: file.name }
 }
 
 interface ProjectApplyModalProps {
@@ -153,12 +239,18 @@ export function ProjectApplyModal({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false)
+  const [isSubmitConfirmModalOpen, setIsSubmitConfirmModalOpen] =
+    useState(false)
+  const pendingFormValuesRef = useRef<Record<string, ApplyAnswerValue> | null>(
+    null,
+  )
   const draftInitializedRef = useRef(false)
 
   useEffect(() => {
     if (draftInitializedRef.current) return
     draftInitializedRef.current = true
     async function initDraft() {
+      if (import.meta.env.VITE_DEV_MATCHING_ROUND_ID) return
       try {
         await createApplicationDraft(projectId, matchingRoundId)
       } catch (err) {
@@ -197,7 +289,6 @@ export function ProjectApplyModal({
   const {
     control,
     handleSubmit,
-    getValues,
     clearErrors,
     formState: { isDirty },
   } = useForm<Record<string, ApplyAnswerValue>>({
@@ -223,13 +314,7 @@ export function ProjectApplyModal({
     return map
   }, [sections, sectionEnabled])
 
-  async function handleLeaveConfirm() {
-    try {
-      const answers = buildAnswerPayload(getValues(), sections)
-      await saveApplicationDraft(projectId, answers)
-    } catch {
-      // 임시저장 실패 시에도 이탈은 허용
-    }
+  function handleLeaveConfirm() {
     setIsLeaveModalOpen(false)
     onBack()
   }
@@ -242,12 +327,22 @@ export function ProjectApplyModal({
     }
   }
 
-  async function onValid(formValues: Record<string, ApplyAnswerValue>) {
+  function onValid(formValues: Record<string, ApplyAnswerValue>) {
+    pendingFormValuesRef.current = formValues
+    setIsSubmitConfirmModalOpen(true)
+  }
+
+  async function handleSubmitConfirm() {
+    const formValues = pendingFormValuesRef.current
+    if (!formValues) return
+    setIsSubmitConfirmModalOpen(false)
     setIsSubmitting(true)
     try {
-      const answers = buildAnswerPayload(formValues, sections)
-      await saveApplicationDraft(projectId, answers)
-      await submitApplication(projectId)
+      if (!import.meta.env.VITE_DEV_MATCHING_ROUND_ID) {
+        const answers = buildAnswerPayload(formValues, sections)
+        await saveApplicationDraft(projectId, answers)
+        await submitApplication(projectId)
+      }
       setIsCompleteModalOpen(true)
     } catch {
       addToast({
@@ -259,6 +354,7 @@ export function ProjectApplyModal({
       })
     } finally {
       setIsSubmitting(false)
+      pendingFormValuesRef.current = null
     }
   }
 
@@ -364,19 +460,66 @@ export function ProjectApplyModal({
       case "file":
         return (
           <FileAnswerField
-            value={typeof value === "string" ? value : null}
-            onChange={(name) => onChange(name)}
+            value={isUploadedFileValue(value) ? value : null}
+            onChange={onChange}
+            onUploadError={(message) =>
+              addToast({
+                message,
+                color: "red",
+                variant: "deep",
+                type: "default",
+                duration: 3000,
+              })
+            }
             error={error}
           />
         )
-      case "portfolio":
+      case "portfolio": {
+        const portfolio = isApplyPortfolioValue(value) ? value : null
+        const fieldValue: PortfolioValue | null =
+          portfolio?.kind === "file"
+            ? { kind: "file", name: portfolio.fileName }
+            : portfolio
         return (
           <PortfolioField
-            value={isPortfolioValue(value) ? value : null}
-            onChange={(val: PortfolioValue | null) => onChange(val)}
+            value={fieldValue}
+            onChange={(val: PortfolioValue | null) => {
+              if (val == null) {
+                onChange(null)
+                return
+              }
+              if (val.kind === "link") {
+                onChange({ kind: "link", url: val.url })
+                return
+              }
+              if (val.file) {
+                void uploadPortfolioFile(val.file)
+                  .then((uploaded) =>
+                    onChange({
+                      kind: "file",
+                      fileId: uploaded.fileId,
+                      fileName: uploaded.fileName,
+                    }),
+                  )
+                  .catch((err) =>
+                    addToast({
+                      message: extractUploadErrorMessage(
+                        err,
+                        "포트폴리오 업로드에 실패했습니다. 다시 시도해 주세요.",
+                        PORTFOLIO_ALLOWED_LABEL,
+                      ),
+                      color: "red",
+                      variant: "deep",
+                      type: "default",
+                      duration: 3000,
+                    }),
+                  )
+              }
+            }}
             error={error}
           />
         )
+      }
     }
   }
 
@@ -387,13 +530,12 @@ export function ProjectApplyModal({
     <>
       <div className="flex w-232 flex-col">
         <div className="flex w-full">
-          <ProjectTitleCard
-            size="sm"
+          <ApplyProjectTitleCard
             projectName={data.title}
             subtitle={data.authorSchoolLine}
           />
         </div>
-        <div className="flex w-full flex-col rounded-b-2xl bg-white">
+        <div className="shadow-drop-neutral-3 flex w-full flex-col rounded-2xl bg-white">
           <div className="scrollbar-none max-h-[75vh] overflow-y-auto px-11.5 py-9">
             <div className="flex items-start gap-6 self-stretch px-1 py-5">
               <p className="text-body-1-regular text-teal-gray-600 flex-1">
@@ -517,9 +659,9 @@ export function ProjectApplyModal({
                 </Modal.Title>
               </div>
               <Modal.Description className="text-subtitle-3-semibold text-teal-gray-800">
-                작성 중인 지원서가 있습니다.
+                작성 중인 내용이 저장되지 않습니다.
                 <br />
-                임시저장 후 나가시겠습니까?
+                정말 나가시겠습니까?
               </Modal.Description>
             </div>
             <div className="flex justify-end gap-3">
@@ -531,8 +673,8 @@ export function ProjectApplyModal({
               >
                 돌아가기
               </Button>
-              <Button size="s" onClick={() => void handleLeaveConfirm()}>
-                임시저장 후 나가기
+              <Button size="s" onClick={handleLeaveConfirm}>
+                나가기
               </Button>
             </div>
           </Modal.Content>
@@ -560,6 +702,48 @@ export function ProjectApplyModal({
             <div className="flex justify-end">
               <Button size="s" onClick={onSubmitSuccess}>
                 확인
+              </Button>
+            </div>
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
+
+      <Modal.Root
+        open={isSubmitConfirmModalOpen}
+        onOpenChange={setIsSubmitConfirmModalOpen}
+      >
+        <Modal.Portal>
+          <Modal.Overlay tone="light" />
+          <Modal.Content className={SUB_MODAL_CLASS}>
+            <div className="flex flex-col items-start gap-4">
+              <div className="flex items-center gap-2">
+                <WarningTriangleIcon className="h-6 w-6 text-teal-500" />
+                <Modal.Title className="text-subtitle-1-semibold text-teal-500">
+                  최종 제출
+                </Modal.Title>
+              </div>
+              <Modal.Description className="text-subtitle-3-semibold text-teal-gray-800">
+                제출 후에는 답변을 수정할 수 없습니다.
+                <br />
+                이대로 제출하시겠어요?
+              </Modal.Description>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="weak"
+                color="neutral"
+                size="s"
+                onClick={() => setIsSubmitConfirmModalOpen(false)}
+                disabled={isSubmitting}
+              >
+                돌아가기
+              </Button>
+              <Button
+                size="s"
+                onClick={() => void handleSubmitConfirm()}
+                disabled={isSubmitting}
+              >
+                제출하기
               </Button>
             </div>
           </Modal.Content>

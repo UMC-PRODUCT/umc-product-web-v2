@@ -5,13 +5,13 @@ import { FormHeader } from "@/shared/ui/FormHeader"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
 import MemberCount from "@/shared/ui/MemberCount"
-import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import { PortfolioField } from "@/shared/ui/question-field/PortfolioField"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 import { isRecruitDone } from "../../model/matchingProject"
+import { ApplyProjectTitleCard } from "./ApplyProjectTitleCard"
 
 import type {
   Question,
@@ -46,15 +46,14 @@ export function RecruitQuestionsViewModal({
   }, [sections])
 
   return (
-    <div className="flex w-232 flex-col">
+    <div className="w-232 flex-col">
       <div className="flex w-full">
-        <ProjectTitleCard
-          size="sm"
+        <ApplyProjectTitleCard
           projectName={data.title}
           subtitle={data.authorSchoolLine}
         />
       </div>
-      <div className="flex w-full flex-col rounded-b-2xl bg-white">
+      <div className="shadow-drop-neutral-3 flex w-full flex-col rounded-2xl bg-white">
         <div className="scrollbar-none max-h-[75vh] overflow-y-auto px-11.5 py-9">
           <div className="flex items-start gap-6 self-stretch px-1 py-5">
             <p className="text-body-1-regular text-teal-gray-600 flex-1">

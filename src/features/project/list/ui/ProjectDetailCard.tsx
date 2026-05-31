@@ -28,11 +28,13 @@ import {
 import { isRecruitDone } from "../model/matchingProject"
 import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import { resolveProjectDetailCtaMode } from "../model/projectDetailCta"
+import { ApplyFormSkeleton } from "./apply-modal/ApplyFormSkeleton"
+import { MyApplicationModal } from "./apply-modal/MyApplicationModal"
 import { ProjectApplyModal } from "./apply-modal/ProjectApplyModal"
 import { RecruitQuestionsViewModal } from "./apply-modal/RecruitQuestionsViewModal"
 import { TeamMemberModal } from "./team-member-modal/TeamMemberModal"
 
-import type { ProjectDetail } from "../api/matchingProject"
+import type { ActiveMatchingRound, ProjectDetail } from "../api/matchingProject"
 import type {
   MatchingProject,
   ProjectCoverImage,
@@ -124,6 +126,8 @@ export function ProjectDetailCard({
   const addToast = useToastStore((s) => s.addToast)
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
+  const [isMyApplicationModalOpen, setIsMyApplicationModalOpen] =
+    useState(false)
   const [isRecruitQuestionsModalOpen, setIsRecruitQuestionsModalOpen] =
     useState(false)
   const { data: detail, isLoading: isDetailLoading } = useQuery({
@@ -158,8 +162,13 @@ export function ProjectDetailCard({
     return id != null ? Number(id) : null
   }, [me])
 
-  const isApplied =
-    myApplications?.some((a) => Number(a.projectId) === projectId) ?? false
+  const myApplicationForProject = myApplications?.find(
+    (a) => Number(a.projectId) === projectId && a.status !== "CANCELLED",
+  )
+  const isApplied = myApplicationForProject != null
+
+  const isAlreadyApproved =
+    myApplications?.some((a) => a.status === "APPROVED") ?? false
 
   const data = detail
     ? toMatchingProject(detail)
@@ -176,6 +185,18 @@ export function ProjectDetailCard({
     enabled: isShowingFormModal,
     staleTime: 5 * 60 * 1000,
   })
+
+  const [minSkeletonElapsed, setMinSkeletonElapsed] = useState(false)
+  useEffect(() => {
+    if (!isShowingFormModal) {
+      setMinSkeletonElapsed(false)
+      return
+    }
+    const timer = setTimeout(() => setMinSkeletonElapsed(true), 1000)
+    return () => clearTimeout(timer)
+  }, [isShowingFormModal])
+
+  const showFormSkeleton = isFormLoading || !minSkeletonElapsed
   const sections = useMemo(
     () =>
       applicationForm ? mapApplicationFormToSections(applicationForm) : [],
@@ -195,19 +216,69 @@ export function ProjectDetailCard({
     setIsRecruitQuestionsModalOpen(false)
   }, [formError, addToast])
 
+  useEffect(() => {
+    if (
+      !isShowingFormModal ||
+      isFormLoading ||
+      applicationForm ||
+      !minSkeletonElapsed
+    )
+      return
+    addToast({
+      message: "등록된 지원 양식이 없습니다.",
+      color: "red",
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
+    setIsApplyModalOpen(false)
+    setIsRecruitQuestionsModalOpen(false)
+  }, [
+    isShowingFormModal,
+    isFormLoading,
+    applicationForm,
+    minSkeletonElapsed,
+    addToast,
+  ])
+
   const isSameBranch = !userIsOperator
-  const ctaMode = resolveProjectDetailCtaMode(
-    userIsOperator,
-    userIsPm,
-    isSameBranch,
-    isApplied,
-  )
+  const isChallengerView = !userIsOperator && !userIsPm
+
+  const devMatchingRoundId =
+    Number(import.meta.env.VITE_DEV_MATCHING_ROUND_ID) || null
 
   const { data: activeMatchingRound } = useQuery({
     queryKey: ["activeMatchingRound", myChapterId],
-    queryFn: () => getActiveMatchingRound(myChapterId!),
-    enabled: myChapterId != null && ctaMode === "apply",
+    queryFn: (): Promise<ActiveMatchingRound | null> => {
+      if (devMatchingRoundId)
+        return Promise.resolve({
+          id: devMatchingRoundId,
+        } as ActiveMatchingRound)
+      return getActiveMatchingRound(myChapterId!)
+    },
+    enabled:
+      isChallengerView && (myChapterId != null || devMatchingRoundId != null),
     staleTime: 60 * 1000,
+  })
+
+  const hasOtherActiveApplication = useMemo(() => {
+    if (!myApplications || !activeMatchingRound) return false
+    return myApplications.some(
+      (a) =>
+        Number(a.matchingRound?.id) === Number(activeMatchingRound.id) &&
+        Number(a.projectId) !== projectId &&
+        a.status !== "CANCELLED" &&
+        a.status !== "REJECTED",
+    )
+  }, [myApplications, activeMatchingRound, projectId])
+
+  const ctaMode = resolveProjectDetailCtaMode({
+    isOperator: userIsOperator,
+    isPm: userIsPm,
+    isSameBranch,
+    isApplied,
+    hasOtherActiveApplication,
+    isAlreadyApproved,
   })
 
   const cover: ProjectCoverImage | null = detail?.thumbnailImageUrl
@@ -338,12 +409,30 @@ export function ProjectDetailCard({
                   </Button>
                 )}
                 {ctaMode === "my-application" && (
-                  <Button className="flex-1">내 지원서 확인하기</Button>
+                  <Button
+                    className="flex-1"
+                    disabled={myApplicationForProject == null}
+                    onClick={() => setIsMyApplicationModalOpen(true)}
+                  >
+                    내 지원서 확인하기
+                  </Button>
                 )}
                 {ctaMode === "apply" && (
                   <Button
                     className="flex-1"
+                    isLoading={isDetailLoading}
+                    disabled={!isDetailLoading && !detail?.applicationFormId}
                     onClick={() => {
+                      if (!detail?.applicationFormId) {
+                        addToast({
+                          message: "지원 양식이 등록되지 않은 프로젝트입니다.",
+                          color: "red",
+                          variant: "deep",
+                          type: "default",
+                          duration: 3000,
+                        })
+                        return
+                      }
                       if (!activeMatchingRound) {
                         addToast({
                           message: "매칭 기간이 아닙니다!",
@@ -360,9 +449,37 @@ export function ProjectDetailCard({
                     지원하기
                   </Button>
                 )}
+                {(ctaMode === "apply-blocked-other" ||
+                  ctaMode === "apply-blocked-approved") && (
+                  <>
+                    <Button
+                      variant="weak"
+                      color="primary"
+                      className="flex-1"
+                      isLoading={isDetailLoading}
+                      disabled={!isDetailLoading && !detail?.applicationFormId}
+                      onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                    >
+                      모집 문항 보기
+                    </Button>
+                    <Button className="flex-1" disabled>
+                      지원하기
+                    </Button>
+                  </>
+                )}
               </>
             )}
           </div>
+          {ctaMode === "apply-blocked-other" && (
+            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
+              이번 차수에 이미 다른 프로젝트에 지원하여 지원할 수 없습니다.
+            </p>
+          )}
+          {ctaMode === "apply-blocked-approved" && (
+            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
+              이미 합격한 챌린저는 추가로 지원할 수 없습니다.
+            </p>
+          )}
         </div>
       </div>
 
@@ -386,15 +503,11 @@ export function ProjectDetailCard({
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            {isFormLoading ? (
-              <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
-                <span className="text-body-2-regular text-teal-gray-500">
-                  불러오는 중...
-                </span>
-              </div>
+          <Modal.Content>
+            {showFormSkeleton ? (
+              <ApplyFormSkeleton />
             ) : applicationForm == null ? (
-              <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
+              <div className="shadow-drop-neutral-3 flex h-40 w-232 items-center justify-center rounded-2xl bg-white">
                 <span className="text-body-2-regular text-teal-gray-500">
                   등록된 모집 문항이 없습니다.
                 </span>
@@ -409,15 +522,11 @@ export function ProjectDetailCard({
       <Modal.Root open={isApplyModalOpen} onOpenChange={setIsApplyModalOpen}>
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            {isFormLoading ? (
-              <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
-                <span className="text-body-2-regular text-teal-gray-500">
-                  불러오는 중...
-                </span>
-              </div>
+          <Modal.Content>
+            {showFormSkeleton ? (
+              <ApplyFormSkeleton />
             ) : applicationForm == null ? (
-              <div className="flex h-40 w-232 items-center justify-center rounded-b-2xl bg-white">
+              <div className="shadow-drop-neutral-3 flex h-40 w-232 items-center justify-center rounded-2xl bg-white">
                 <span className="text-body-2-regular text-teal-gray-500">
                   등록된 지원 양식이 없습니다.
                 </span>
@@ -426,7 +535,7 @@ export function ProjectDetailCard({
               <ProjectApplyModal
                 data={data}
                 projectId={projectId}
-                matchingRoundId={activeMatchingRound!.id}
+                matchingRoundId={Number(activeMatchingRound!.id)}
                 sections={sections}
                 canToggleSection={userIsOperator || userIsPm}
                 onBack={() => setIsApplyModalOpen(false)}
@@ -437,6 +546,42 @@ export function ProjectDetailCard({
                   })
                 }}
               />
+            )}
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
+
+      <Modal.Root
+        open={isMyApplicationModalOpen}
+        onOpenChange={setIsMyApplicationModalOpen}
+      >
+        <Modal.Portal>
+          <Modal.Overlay tone="deep" />
+          <Modal.Content>
+            {myApplicationForProject ? (
+              <MyApplicationModal
+                data={data}
+                projectId={projectId}
+                applicationId={Number(myApplicationForProject.applicationId)}
+                isRoundOpen={
+                  activeMatchingRound != null &&
+                  Number(myApplicationForProject.matchingRound?.id) ===
+                    Number(activeMatchingRound.id)
+                }
+                onClose={() => setIsMyApplicationModalOpen(false)}
+                onCancelled={() => {
+                  setIsMyApplicationModalOpen(false)
+                  void queryClient.invalidateQueries({
+                    queryKey: ["myApplications", activeGisuId],
+                  })
+                }}
+              />
+            ) : (
+              <div className="shadow-drop-neutral-3 flex h-40 w-232 items-center justify-center rounded-2xl bg-white">
+                <span className="text-body-2-regular text-teal-gray-500">
+                  지원 내역을 찾을 수 없습니다.
+                </span>
+              </div>
             )}
           </Modal.Content>
         </Modal.Portal>
