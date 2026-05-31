@@ -241,6 +241,7 @@ export function ProjectApplyModal({
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPortfolioUploading, setIsPortfolioUploading] = useState(false)
+  const portfolioUploadTokenRef = useRef(0)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false)
   const [isSubmitConfirmModalOpen, setIsSubmitConfirmModalOpen] =
@@ -489,23 +490,27 @@ export function ProjectApplyModal({
             value={fieldValue}
             onChange={(val: PortfolioValue | null) => {
               if (val == null) {
+                portfolioUploadTokenRef.current++
                 onChange(null)
                 return
               }
               if (val.kind === "link") {
+                portfolioUploadTokenRef.current++
                 onChange({ kind: "link", url: val.url })
                 return
               }
               if (val.file) {
+                const token = ++portfolioUploadTokenRef.current
                 setIsPortfolioUploading(true)
                 void uploadPortfolioFile(val.file)
-                  .then((uploaded) =>
+                  .then((uploaded) => {
+                    if (token !== portfolioUploadTokenRef.current) return
                     onChange({
                       kind: "file",
                       fileId: uploaded.fileId,
                       fileName: uploaded.fileName,
-                    }),
-                  )
+                    })
+                  })
                   .catch((err) =>
                     addToast({
                       message: extractUploadErrorMessage(
@@ -519,7 +524,11 @@ export function ProjectApplyModal({
                       duration: 3000,
                     }),
                   )
-                  .finally(() => setIsPortfolioUploading(false))
+                  .finally(() => {
+                    if (token === portfolioUploadTokenRef.current) {
+                      setIsPortfolioUploading(false)
+                    }
+                  })
               }
             }}
             error={error}
