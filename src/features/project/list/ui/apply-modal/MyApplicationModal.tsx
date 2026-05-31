@@ -50,7 +50,11 @@ export function MyApplicationModal({
   const addToast = useToastStore((s) => s.addToast)
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false)
 
-  const { data: detail, isLoading } = useQuery({
+  const {
+    data: detail,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["myApplicationDetail", projectId, applicationId],
     queryFn: () => getApplicationDetail(projectId, applicationId),
     staleTime: 60 * 1000,
@@ -123,66 +127,69 @@ export function MyApplicationModal({
             </div>
           </div>
 
-          {detail && (
-            <div className="text-body-2-regular text-teal-gray-700 px-1 pb-4">
-              지원 상태:{" "}
-              <span className="font-semibold text-teal-600">
-                {STATUS_LABEL[detail.status]}
-              </span>
-              {detail.submittedAt && (
-                <span className="text-teal-gray-500 ml-3">
-                  제출 일시: {formatDateTime(detail.submittedAt)}
-                </span>
-              )}
+          {isError ? (
+            <div className="text-body-2-regular py-20 text-center text-red-400">
+              지원 정보를 불러오지 못했습니다.
             </div>
-          )}
-
-          {isLoading || !detail ? (
+          ) : isLoading || !detail ? (
             <div className="text-body-2-regular text-teal-gray-500 py-20 text-center">
               불러오는 중...
             </div>
           ) : (
-            <div className="flex w-full flex-col gap-5 pb-6">
-              {detail.formResponse.sections.map((section) => {
-                const indexMap = new Map<number, number>()
-                section.questions.forEach((q, i) =>
-                  indexMap.set(q.questionId, i + 1),
-                )
+            <>
+              <div className="text-body-2-regular text-teal-gray-700 px-1 pb-4">
+                지원 상태:{" "}
+                <span className="font-semibold text-teal-600">
+                  {STATUS_LABEL[detail.status]}
+                </span>
+                {detail.submittedAt && (
+                  <span className="text-teal-gray-500 ml-3">
+                    제출 일시: {formatDateTime(detail.submittedAt)}
+                  </span>
+                )}
+              </div>
+              <div className="flex w-full flex-col gap-5 pb-6">
+                {detail.formResponse.sections.map((section) => {
+                  const indexMap = new Map<number, number>()
+                  section.questions.forEach((q, i) =>
+                    indexMap.set(q.questionId, i + 1),
+                  )
 
-                return (
-                  <div key={section.sectionId}>
-                    {section.type === "COMMON" ? (
-                      <FormHeader variant="common" />
-                    ) : (
-                      <FormHeader
-                        variant="part"
-                        partName={section.allowedParts.join(", ")}
-                        toggleChecked
-                        showToggle={false}
-                        onToggleChange={() => {}}
-                      />
-                    )}
-                    {section.questions.length > 0 && (
-                      <div className="flex flex-col items-start gap-10 self-stretch rounded-b-[12px] border border-teal-200 bg-white pt-8.5 pr-5 pb-9.5 pl-5">
-                        {section.questions.map((q) => (
-                          <div
-                            key={q.questionId}
-                            className="flex w-full flex-col gap-3"
-                          >
-                            <QuestionItemTitle
-                              index={`Q${indexMap.get(q.questionId) ?? ""}`}
-                              title={q.title}
-                              required={q.isRequired}
-                            />
-                            <AnswerDisplay question={q} answer={q.answer} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
+                  return (
+                    <div key={section.sectionId}>
+                      {section.type === "COMMON" ? (
+                        <FormHeader variant="common" />
+                      ) : (
+                        <FormHeader
+                          variant="part"
+                          partName={section.allowedParts.join(", ")}
+                          toggleChecked
+                          showToggle={false}
+                          onToggleChange={() => {}}
+                        />
+                      )}
+                      {section.questions.length > 0 && (
+                        <div className="flex flex-col items-start gap-10 self-stretch rounded-b-[12px] border border-teal-200 bg-white pt-8.5 pr-5 pb-9.5 pl-5">
+                          {section.questions.map((q) => (
+                            <div
+                              key={q.questionId}
+                              className="flex w-full flex-col gap-3"
+                            >
+                              <QuestionItemTitle
+                                index={`Q${indexMap.get(q.questionId) ?? ""}`}
+                                title={q.title}
+                                required={q.isRequired}
+                              />
+                              <AnswerDisplay question={q} answer={q.answer} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </>
           )}
         </div>
 
