@@ -6,7 +6,17 @@ import type {
 } from "@/features/project/new/model/applicationQuestion"
 
 const TEXT_MAX = 500
-const MAX_FILE_BYTES = 150 * 1024 * 1024
+
+export type UploadedFileValue = { fileId: string; fileName: string }
+
+export type ApplyPortfolioValue =
+  | { kind: "link"; url: string }
+  | { kind: "file"; fileId: string; fileName: string }
+
+const uploadedFileSchema = z.object({
+  fileId: z.string().min(1),
+  fileName: z.string().min(1),
+})
 
 const portfolioSchema = z.discriminatedUnion("kind", [
   z.object({
@@ -17,13 +27,8 @@ const portfolioSchema = z.discriminatedUnion("kind", [
   }),
   z.object({
     kind: z.literal("file"),
-    name: z.string().min(1),
-    file: z
-      .instanceof(File)
-      .refine(
-        (f) => f.size <= MAX_FILE_BYTES,
-        "150MB 이하의 PDF 파일만 업로드 가능합니다.",
-      ),
+    fileId: z.string().min(1),
+    fileName: z.string().min(1),
   }),
 ])
 
@@ -43,9 +48,18 @@ function fieldSchema(q: Question, enabled: boolean): z.ZodTypeAny {
         ? z.array(z.string()).min(1, "한 개 이상 선택해 주세요.")
         : z.array(z.string())
     case "file":
-      return required
-        ? z.string().min(1, "파일을 첨부해 주세요.")
-        : z.string().nullable().optional()
+      if (required) {
+        return z.unknown().superRefine((val, ctx) => {
+          const parsed = uploadedFileSchema.safeParse(val)
+          if (!parsed.success) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "파일을 첨부해 주세요.",
+            })
+          }
+        })
+      }
+      return uploadedFileSchema.nullable().optional()
     case "portfolio":
       if (required) {
         return z.unknown().superRefine((val, ctx) => {
