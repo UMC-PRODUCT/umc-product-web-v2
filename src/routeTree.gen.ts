@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
+import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -22,6 +23,7 @@ import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
 import { Route as TestToastRouteImport } from './routes/test/toast'
+import { Route as TestSocialButtonRouteImport } from './routes/test/social-button'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
 import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
@@ -58,6 +60,11 @@ const AuthTestRoute = AuthTestRouteImport.update({
   path: '/auth-test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRouteRoute = SettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchingRouteRoute = MatchingRouteRouteImport.update({
   id: '/matching',
   path: '/matching',
@@ -79,9 +86,9 @@ const SignupIndexRoute = SignupIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
-  id: '/settings/',
-  path: '/settings/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRouteRoute,
 } as any)
 const MatchingIndexRoute = MatchingIndexRouteImport.update({
   id: '/',
@@ -116,6 +123,11 @@ const TestToggleRoute = TestToggleRouteImport.update({
 const TestToastRoute = TestToastRouteImport.update({
   id: '/test/toast',
   path: '/test/toast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestSocialButtonRoute = TestSocialButtonRouteImport.update({
+  id: '/test/social-button',
+  path: '/test/social-button',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestQuestionFormRoute = TestQuestionFormRouteImport.update({
@@ -280,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
+  '/settings': typeof SettingsRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
@@ -300,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
+  '/test/social-button': typeof TestSocialButtonRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
@@ -343,6 +357,7 @@ export interface FileRoutesByTo {
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
+  '/test/social-button': typeof TestSocialButtonRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
@@ -368,6 +383,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
+  '/settings': typeof SettingsRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
@@ -388,6 +404,7 @@ export interface FileRoutesById {
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
+  '/test/social-button': typeof TestSocialButtonRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
@@ -415,6 +432,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/matching'
+    | '/settings'
     | '/auth-test'
     | '/login/default'
     | '/matching/applications'
@@ -435,6 +453,7 @@ export interface FileRouteTypes {
     | '/test/input-box'
     | '/test/option-button'
     | '/test/question-form'
+    | '/test/social-button'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
@@ -478,6 +497,7 @@ export interface FileRouteTypes {
     | '/test/input-box'
     | '/test/option-button'
     | '/test/question-form'
+    | '/test/social-button'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
@@ -502,6 +522,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/matching'
+    | '/settings'
     | '/auth-test'
     | '/login/default'
     | '/matching/applications'
@@ -522,6 +543,7 @@ export interface FileRouteTypes {
     | '/test/input-box'
     | '/test/option-button'
     | '/test/question-form'
+    | '/test/social-button'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
@@ -548,6 +570,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
+  SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   SignupOauthRoute: typeof SignupOauthRoute
@@ -564,12 +587,12 @@ export interface RootRouteChildren {
   TestInputBoxRoute: typeof TestInputBoxRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
   TestQuestionFormRoute: typeof TestQuestionFormRoute
+  TestSocialButtonRoute: typeof TestSocialButtonRoute
   TestToastRoute: typeof TestToastRoute
   TestToggleRoute: typeof TestToggleRoute
   TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
   LoginIndexRoute: typeof LoginIndexRoute
-  SettingsIndexRoute: typeof SettingsIndexRoute
   SignupIndexRoute: typeof SignupIndexRoute
   OauthKakaoCallbackRoute: typeof OauthKakaoCallbackRoute
 }
@@ -581,6 +604,13 @@ declare module '@tanstack/react-router' {
       path: '/auth-test'
       fullPath: '/auth-test'
       preLoaderRoute: typeof AuthTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matching': {
@@ -613,10 +643,10 @@ declare module '@tanstack/react-router' {
     }
     '/settings/': {
       id: '/settings/'
-      path: '/settings'
+      path: '/'
       fullPath: '/settings/'
       preLoaderRoute: typeof SettingsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
     '/matching/': {
       id: '/matching/'
@@ -665,6 +695,13 @@ declare module '@tanstack/react-router' {
       path: '/test/toast'
       fullPath: '/test/toast'
       preLoaderRoute: typeof TestToastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/social-button': {
+      id: '/test/social-button'
+      path: '/test/social-button'
+      fullPath: '/test/social-button'
+      preLoaderRoute: typeof TestSocialButtonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/question-form': {
@@ -970,10 +1007,23 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
   MatchingRouteRouteChildren,
 )
 
+interface SettingsRouteRouteChildren {
+  SettingsIndexRoute: typeof SettingsIndexRoute
+}
+
+const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
+  SettingsIndexRoute: SettingsIndexRoute,
+}
+
+const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
+  SettingsRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
+  SettingsRouteRoute: SettingsRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
   LoginDefaultRoute: LoginDefaultRoute,
   SignupOauthRoute: SignupOauthRoute,
@@ -990,12 +1040,12 @@ const rootRouteChildren: RootRouteChildren = {
   TestInputBoxRoute: TestInputBoxRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
+  TestSocialButtonRoute: TestSocialButtonRoute,
   TestToastRoute: TestToastRoute,
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
   LoginIndexRoute: LoginIndexRoute,
-  SettingsIndexRoute: SettingsIndexRoute,
   SignupIndexRoute: SignupIndexRoute,
   OauthKakaoCallbackRoute: OauthKakaoCallbackRoute,
 }
