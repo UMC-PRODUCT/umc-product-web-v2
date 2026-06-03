@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
 import GenerationListItem from "@/components/header/GenerationListItem"
@@ -50,6 +51,7 @@ export function ProfileDropdown({
     onOpenChange?.(newOpen)
   }
 
+  const navigate = useNavigate()
   const role = me?.roles?.[0] ? toRoleTag(me.roles[0].roleType) : "challenger"
 
   return (
@@ -148,7 +150,11 @@ export function ProfileDropdown({
                 </span>
               </button>
             )}
-            <button type="button" className="h-6 w-15">
+            <button
+              type="button"
+              className="h-6 w-15"
+              onClick={() => navigate({ to: "/settings" })}
+            >
               <span className="text-body-2-medium text-teal-gray-700">
                 계정 설정
               </span>
