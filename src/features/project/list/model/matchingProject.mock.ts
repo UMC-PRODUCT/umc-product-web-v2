@@ -62,6 +62,7 @@ function buildBulkMatchingMocks(
       title: `데모 프로젝트 ${n}`,
       description: `${school} · ${branch} 지부 연합 데모 목 데이터입니다.`,
       authorSchoolLine: `닉네임/이름 · ${school}`,
+      externalLink: "https://issac.app",
       coverImage:
         n % 3 !== 0
           ? {
@@ -75,8 +76,7 @@ function buildBulkMatchingMocks(
   return projects
 }
 
-/** 목록 그리드, 카드에서 동일하게 사용하는 목 데이터 리스트 */
-export const MOCK_MATCHING_PROJECTS: MatchingProjectMock[] = [
+const RAW_MOCK_PROJECTS: MatchingProjectMock[] = [
   {
     id: "mock-matching-1",
     branch: "Selenium",
@@ -330,6 +330,13 @@ export const MOCK_MATCHING_PROJECTS: MatchingProjectMock[] = [
   },
   ...buildBulkMatchingMocks(16, 45),
 ]
+
+/** 목록 그리드, 카드에서 동일하게 사용하는 목 데이터 리스트 */
+export const MOCK_MATCHING_PROJECTS: MatchingProjectMock[] =
+  RAW_MOCK_PROJECTS.map((p) => ({
+    ...p,
+    externalLink: p.externalLink ?? "https://issac.app",
+  }))
 
 /** 카드 단독 사용 시 기본값 */
 export const DEFAULT_MATCHING_PROJECT_MOCK = MOCK_MATCHING_PROJECTS[0]! // Selenium (임시 지부로 설정)
