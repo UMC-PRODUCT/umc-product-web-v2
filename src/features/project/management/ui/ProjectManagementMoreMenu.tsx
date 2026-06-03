@@ -77,11 +77,17 @@ export function ProjectManagementMoreMenu({
 
   const handlePlanViewClick = async () => {
     setPopoverOpen(false)
+    const newWindow = window.open(
+      "about:blank",
+      "_blank",
+      "noopener,noreferrer",
+    )
     try {
       const detail = await getProjectDetail(Number(projectId))
       if (detail.externalLink) {
-        window.open(detail.externalLink, "_blank", "noopener,noreferrer")
+        if (newWindow) newWindow.location.href = detail.externalLink
       } else {
+        if (newWindow) newWindow.close()
         addToast({
           message: "등록된 기획안 링크가 없습니다.",
           color: "red",
@@ -91,6 +97,7 @@ export function ProjectManagementMoreMenu({
         })
       }
     } catch {
+      if (newWindow) newWindow.close()
       addToast({
         message: "기획 보기를 불러오는 데 실패했습니다.",
         color: "red",
