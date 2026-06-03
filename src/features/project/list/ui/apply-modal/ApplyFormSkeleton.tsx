@@ -21,10 +21,7 @@ const TRAPEZOID_CLIP_PATH = [
 export function ApplyFormSkeleton() {
   return (
     <div className="flex w-232 flex-col">
-      <div
-        className="flex w-full items-end"
-        style={{ transform: "translateY(14px)" }}
-      >
+      <div className="flex w-full translate-y-3.5 items-end">
         <div
           className="flex h-15 w-fit max-w-[calc(100%-1rem)] min-w-69.5 shrink-0 items-center gap-3.5 bg-teal-100 bg-linear-to-r py-2.5 pr-14 pl-4"
           style={{ clipPath: TRAPEZOID_CLIP_PATH }}
