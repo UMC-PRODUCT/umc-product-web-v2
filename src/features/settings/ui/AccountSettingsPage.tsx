@@ -37,7 +37,7 @@ export function AccountSettingsPage() {
     : "!text-teal-600"
 
   return (
-    <div className="flex w-full justify-center pt-14 pb-[8.4375rem]">
+    <div className="flex w-full justify-center pt-14 pb-33.75">
       <div className="flex w-full max-w-250 flex-col items-start gap-11">
         <h1 className="text-heading-5-semibold text-teal-gray-900 self-stretch">
           계정 설정
@@ -46,8 +46,8 @@ export function AccountSettingsPage() {
         <div className="flex w-full flex-col items-start">
           {/* 프로필 헤더 */}
           <div className="flex items-center gap-4.5 px-3.5 py-0">
-            <div className="relative flex h-[6.25rem] w-[6.25rem] flex-shrink-0 items-center justify-center">
-              <div className="bg-teal-gray-100 flex h-[6.25rem] w-[6.25rem] items-center justify-center overflow-hidden rounded-full">
+            <div className="relative flex h-25 w-25 flex-shrink-0 items-center justify-center">
+              <div className="bg-teal-gray-100 flex h-25 w-25 items-center justify-center overflow-hidden rounded-full">
                 {me?.profileImageLink ? (
                   <img
                     src={me.profileImageLink}

@@ -39,7 +39,7 @@ export function SocialButton({ social, linked, onClick }: SocialButtonProps) {
         type="button"
         onClick={onClick}
         className={cn(
-          "flex h-[3.375rem] w-[3.375rem] items-center justify-center rounded-full",
+          "flex h-13.5 w-13.5 items-center justify-center rounded-full",
           containerClass,
         )}
       >

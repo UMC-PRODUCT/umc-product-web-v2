@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
+import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
 function isValidPassword(pw: string): boolean {
@@ -135,14 +136,17 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
         </div>
       </div>
 
-      <button
+      <Button
         type="button"
+        variant="fill"
+        color="primary"
+        size="s"
         disabled={!current || !isNextValid || !isConfirmMatch}
         onClick={handleSubmit}
-        className="flex h-11 min-h-[2.75rem] w-full min-w-[4.75rem] items-center justify-center gap-2.5 self-stretch rounded-[0.625rem] bg-[#9fdcd4] px-4 py-1 text-center font-['Pretendard'] leading-[140%] font-medium text-[#fbfcfc] disabled:opacity-50"
+        className="h-11 w-full bg-teal-300 disabled:bg-teal-200"
       >
         변경하기
-      </button>
+      </Button>
     </div>
   )
 }
