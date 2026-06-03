@@ -8,7 +8,7 @@ interface ApplyProjectTitleCardProps {
   className?: string
 }
 
-const TRAPEZOID_CLIP_PATH = [
+export const TRAPEZOID_CLIP_PATH = [
   "polygon(",
   "12px 0,",
   "calc(100% - 63px) 0,",

@@ -1,22 +1,4 @@
-const TRAPEZOID_CLIP_PATH = [
-  "polygon(",
-  "12px 0,",
-  "calc(100% - 63px) 0,",
-  "calc(100% - 61px) 0.2px,",
-  "calc(100% - 59px) 0.6px,",
-  "calc(100% - 57.5px) 1.4px,",
-  "calc(100% - 56px) 2.4px,",
-  "calc(100% - 54.5px) 3.7px,",
-  "100% 100%,",
-  "0 100%,",
-  "0 12px,",
-  "0.5px 9px,",
-  "1.5px 6px,",
-  "3.5px 3.5px,",
-  "6px 1.5px,",
-  "9px 0.5px",
-  ")",
-].join(" ")
+import { TRAPEZOID_CLIP_PATH } from "./ApplyProjectTitleCard"
 
 export function ApplyFormSkeleton() {
   return (
