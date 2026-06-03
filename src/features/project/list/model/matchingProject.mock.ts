@@ -62,7 +62,6 @@ function buildBulkMatchingMocks(
       title: `데모 프로젝트 ${n}`,
       description: `${school} · ${branch} 지부 연합 데모 목 데이터입니다.`,
       authorSchoolLine: `닉네임/이름 · ${school}`,
-      externalLink: "https://issac.app",
       coverImage:
         n % 3 !== 0
           ? {
@@ -85,6 +84,7 @@ const RAW_MOCK_PROJECTS: MatchingProjectMock[] = [
     description:
       "프로젝트 한 줄 소개가 여기에 표시됩니다. 초과 내용 ... 처리 없이 설명 전문이 표시됩니다. 본문 내용 공백 포함 200자 이내 약 4줄 표시됩니다. 프로젝트 한 줄 소개가 여기에 표시됩니다. 초과 내용 ... 처리 없이 설명 전문이 표시됩니다. 본문 내용 공백 포함 200자 이내 약 4줄 표시됩니다. 프로젝트 한줄 소개가 여기에 표시됩니다. 초과 내용 ... 처리 없이 설명 전문이 표시됩",
     authorSchoolLine: "닉네임/이름 · 한양대 ERICA",
+    externalLink: "https://issac.app",
     coverImage: {
       src: "https://picsum.photos/seed/umc-matching-1/696/368",
       alt: "프로젝트 대표 이미지",
@@ -332,11 +332,7 @@ const RAW_MOCK_PROJECTS: MatchingProjectMock[] = [
 ]
 
 /** 목록 그리드, 카드에서 동일하게 사용하는 목 데이터 리스트 */
-export const MOCK_MATCHING_PROJECTS: MatchingProjectMock[] =
-  RAW_MOCK_PROJECTS.map((p) => ({
-    ...p,
-    externalLink: p.externalLink ?? "https://issac.app",
-  }))
+export const MOCK_MATCHING_PROJECTS: MatchingProjectMock[] = RAW_MOCK_PROJECTS
 
 /** 카드 단독 사용 시 기본값 */
 export const DEFAULT_MATCHING_PROJECT_MOCK = MOCK_MATCHING_PROJECTS[0]! // Selenium (임시 지부로 설정)
