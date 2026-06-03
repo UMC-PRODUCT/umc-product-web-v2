@@ -7,7 +7,12 @@ import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { getViewerBranch, isCentralStaff } from "@/features/auth/model/identity"
+import {
+  getViewerBranch,
+  isCentralStaff,
+  isChapterPresident,
+  isSuperAdmin,
+} from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllGisu,
@@ -87,7 +92,9 @@ export const Route = createFileRoute("/matching/projects/announce/")({
   },
   beforeLoad: async ({ search, context }) => {
     const me = await ensureMe(context.queryClient)
-    if (isCentralStaff(me)) return
+    const isFullAccess = isSuperAdmin(me) || isCentralStaff(me)
+    if (isFullAccess) return
+
     const userChapter = getViewerBranch(me)
     if (isChapter(userChapter) && search.chapter !== userChapter) {
       throw redirect({
@@ -106,14 +113,11 @@ function ProjectSettingsAnnouncePage() {
   const [pendingNotice] = useState(readPendingNotice)
 
   const { data: me } = useMe()
-  const { hasPermission } = useResourcePermission("NOTICE")
 
+  const isSuper = isSuperAdmin(me)
   const isCentral = isCentralStaff(me)
+  const isChapterPres = isChapterPresident(me)
   const userChapter = getViewerBranch(me) as Chapter | undefined
-
-  const canWrite = hasPermission("WRITE")
-  const canEdit = hasPermission("EDIT")
-  const canDelete = hasPermission("DELETE")
 
   // 기수 정보 조회
   const { data: gisuData } = useQuery({
@@ -159,6 +163,18 @@ function ProjectSettingsAnnouncePage() {
     enabled: !!activeGisuId,
   })
 
+  const firstNoticeId = noticesData?.content[0]?.id
+  const { hasPermission } = useResourcePermission(
+    "NOTICE",
+    firstNoticeId ? Number(firstNoticeId) : undefined,
+    { enabled: !!firstNoticeId },
+  )
+
+  const canWrite =
+    !isSuper && (isCentral || (isChapterPres && chapter === userChapter))
+  const canEdit = hasPermission("EDIT")
+  const canDelete = hasPermission("DELETE")
+
   const notices = useMemo(() => {
     if (!noticesData) return []
 
@@ -200,7 +216,7 @@ function ProjectSettingsAnnouncePage() {
   })
 
   const handleChapterChange = (nextChapter: Chapter) => {
-    if (!isCentral && userChapter && nextChapter !== userChapter) {
+    if (!(isSuper || isCentral) && userChapter && nextChapter !== userChapter) {
       addToast({
         message: "소속된 지부의 공지만 확인할 수 있습니다.",
         color: "red",
