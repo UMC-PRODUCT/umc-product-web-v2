@@ -43,7 +43,7 @@ export async function confirmUpload(fileId: string): Promise<void> {
 export async function uploadFileFlow(
   file: File,
   category: UploadCategory,
-): Promise<{ fileId: string }> {
+): Promise<{ fileId: string; downloadUrl: string }> {
   const prepared = await prepareUpload({
     fileName: file.name,
     contentType: file.type,
@@ -62,5 +62,8 @@ export async function uploadFileFlow(
     file,
   )
   await confirmUpload(prepared.fileId)
-  return { fileId: prepared.fileId }
+  return {
+    fileId: prepared.fileId,
+    downloadUrl: prepared.uploadUrl.split("?")[0] ?? prepared.uploadUrl,
+  }
 }

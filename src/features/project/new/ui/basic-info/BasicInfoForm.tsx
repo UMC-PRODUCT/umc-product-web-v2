@@ -27,6 +27,7 @@ import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
+import { InputBox } from "@/shared/ui/input/InputBox"
 
 import {
   type BasicInfoFormData,
@@ -131,6 +132,14 @@ export const BasicInfoForm = forwardRef<
   const thumbnailRef = useRef<HTMLButtonElement>(null)
   const logoRef = useRef<HTMLButtonElement>(null)
 
+  const normalizeExternalLink = (
+    url: string | undefined,
+  ): string | undefined => {
+    if (!url?.trim()) return undefined
+    const trimmed = url.trim()
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+  }
+
   const {
     register,
     handleSubmit,
@@ -213,10 +222,12 @@ export const BasicInfoForm = forwardRef<
 
   useEffect(() => {
     if (!basicDraftFields) return
-    const { title, description } = basicDraftFields
+    const { title, description, externalLink } = basicDraftFields
     if (title) setValue("title", title, { shouldDirty: false })
     if (description)
       setValue("description", description, { shouldDirty: false })
+    if (externalLink)
+      setValue("externalLink", externalLink, { shouldDirty: false })
   }, [basicDraftFields, setValue])
 
   useEffect(() => {
@@ -315,6 +326,7 @@ export const BasicInfoForm = forwardRef<
         description: values.description,
         thumbnailFileId: thumbnailFileId ?? undefined,
         logoFileId: logoFileId ?? undefined,
+        externalLink: normalizeExternalLink(values.externalLink),
       })
 
       const prevPm2Id = savedSnapshot?.pm2?.id
@@ -494,6 +506,28 @@ export const BasicInfoForm = forwardRef<
             setValue("logo", file, { shouldDirty: true, shouldValidate: true })
             setUploaded({ logoFileId: null, logoUrl: null })
           }}
+        />
+      </div>
+      <div className="flex flex-col gap-4">
+        <SectionHeader index={3} title="프로젝트 기획안" />
+        <InputBox
+          value={watch("externalLink") ?? ""}
+          onChange={(e) => {
+            setValue("externalLink", e.target.value, {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+          }}
+          type="clear"
+          onClear={() => {
+            setValue("externalLink", "", {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+          }}
+          state={errors.externalLink ? "error" : "default"}
+          placeholder="Notion, Figma 등 기획안 링크를 첨부하세요."
+          className="w-full"
         />
       </div>
       <div className="flex justify-between">

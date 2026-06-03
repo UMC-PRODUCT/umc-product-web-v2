@@ -111,6 +111,7 @@ function toMatchingProject(detail: ProjectDetail): MatchingProject {
       total: q.quota,
       done: q.status === "COMPLETED",
     })),
+    externalLink: detail.externalLink,
   }
 }
 
@@ -372,11 +373,11 @@ export function ProjectDetailCard({
               variant="weak"
               color="primary"
               className="flex-1"
-              disabled={!detail?.externalLink}
+              disabled={!data.externalLink}
               onClick={() => {
-                if (detail?.externalLink)
+                if (data.externalLink)
                   window.open(
-                    detail.externalLink,
+                    data.externalLink,
                     "_blank",
                     "noopener,noreferrer",
                   )

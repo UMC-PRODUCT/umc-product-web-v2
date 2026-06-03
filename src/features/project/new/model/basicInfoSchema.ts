@@ -29,6 +29,25 @@ export const basicInfoSchema = z.object({
       }
     })
     .optional(),
+  externalLink: z
+    .string()
+    .refine(
+      (v) => {
+        const trimmed = v.trim()
+        if (!trimmed) return true
+        try {
+          const normalized = /^https?:\/\//i.test(trimmed)
+            ? trimmed
+            : `https://${trimmed}`
+          new URL(normalized)
+          return true
+        } catch {
+          return false
+        }
+      },
+      { message: "올바른 URL을 입력해 주세요." },
+    )
+    .optional(),
 })
 
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>

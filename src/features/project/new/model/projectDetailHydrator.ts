@@ -36,6 +36,7 @@ export function hydrateProjectDetailIntoStore(
   store.setBasicDraftFields({
     title: detail.name ?? "",
     description: detail.description ?? "",
+    externalLink: detail.externalLink ?? "",
   })
 
   store.setUploaded({

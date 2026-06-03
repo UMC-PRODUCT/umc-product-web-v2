@@ -27,4 +27,5 @@ export type MatchingProject = {
   recruitRows: ProjectRecruitRow[]
   partQuotaStatus?: PartQuotaStatus
   isApplied?: boolean
+  externalLink?: string | null
 }

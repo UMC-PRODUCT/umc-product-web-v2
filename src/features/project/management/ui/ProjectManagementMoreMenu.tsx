@@ -5,6 +5,7 @@ import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
+import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { deleteProject } from "@/features/project/management/api"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
@@ -74,9 +75,42 @@ export function ProjectManagementMoreMenu({
     })
   }
 
+  const handlePlanViewClick = async () => {
+    setPopoverOpen(false)
+    const newWindow = window.open(
+      "about:blank",
+      "_blank",
+      "noopener,noreferrer",
+    )
+    try {
+      const detail = await getProjectDetail(Number(projectId))
+      if (detail.externalLink) {
+        if (newWindow) newWindow.location.href = detail.externalLink
+      } else {
+        if (newWindow) newWindow.close()
+        addToast({
+          message: "등록된 기획안 링크가 없습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+    } catch {
+      if (newWindow) newWindow.close()
+      addToast({
+        message: "기획 보기를 불러오는 데 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
+  }
+
   const MENU_ITEMS = [
     { label: "지원 현황 확인하기", onClick: handleApplicationClick },
-    { label: "기획 보기", onClick: () => {} },
+    { label: "기획 보기", onClick: () => void handlePlanViewClick() },
     { label: "프로젝트 수정하기", onClick: handleEditClick },
     { label: "팀원 구성 보기", onClick: () => {} },
   ]

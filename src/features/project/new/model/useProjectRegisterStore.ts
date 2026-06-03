@@ -29,6 +29,7 @@ interface UploadedFileIds {
 interface BasicDraftFields {
   title: string
   description: string
+  externalLink: string
 }
 
 interface ProjectRegisterState {
