@@ -14,6 +14,7 @@ import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIco
 import CloseCircleIcon from "@/shared/assets/icon/close/CloseCircleIcon"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import DragAndDrop from "@/shared/assets/icon/drag-and-drop/DragAndDrop"
+import EditIcon from "@/shared/assets/icon/edit/EditIcon"
 import CollapseAllIcon from "@/shared/assets/icon/expand-collapse/CollapseAllIcon"
 import ExpandAllIcon from "@/shared/assets/icon/expand-collapse/ExpandAllIcon"
 import EyeClosed from "@/shared/assets/icon/eye/EyeClosed"
@@ -23,6 +24,7 @@ import TrashCan from "@/shared/assets/icon/garbage/TrashCan"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
+import LinkIcon from "@/shared/assets/icon/link/LinkIcon"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import MinusIcon from "@/shared/assets/icon/minus/MinusIcon"
@@ -80,6 +82,18 @@ function IconTestPage() {
       </h1>
 
       <div className="flex flex-col gap-10">
+        <Section title="edit">
+          <IconCard name="EditIcon">
+            <EditIcon width={24} height={24} />
+          </IconCard>
+        </Section>
+
+        <Section title="link">
+          <IconCard name="LinkIcon">
+            <LinkIcon width={24} height={24} />
+          </IconCard>
+        </Section>
+
         <Section title="bang">
           <IconCard name="CircleBang">
             <CircleBang width={24} height={24} />
