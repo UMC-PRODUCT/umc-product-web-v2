@@ -33,9 +33,12 @@ export const basicInfoSchema = z.object({
     .string()
     .refine(
       (v) => {
-        if (!v.trim()) return true
+        const trimmed = v.trim()
+        if (!trimmed) return true
         try {
-          const normalized = /^https?:\/\//i.test(v) ? v : `https://${v}`
+          const normalized = /^https?:\/\//i.test(trimmed)
+            ? trimmed
+            : `https://${trimmed}`
           new URL(normalized)
           return true
         } catch {
