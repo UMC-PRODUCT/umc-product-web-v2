@@ -21,7 +21,7 @@ export function useResourcePermission(
       resourceId,
     ],
     queryFn: () => getResourcePermission({ resourceType, resourceId }),
-    enabled: isAuthed && (options?.enabled ?? true),
+    enabled: isAuthed && resourceId !== undefined && (options?.enabled ?? true),
     staleTime: 0,
   })
 

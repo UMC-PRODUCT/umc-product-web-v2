@@ -168,7 +168,6 @@ function TeamMatchingAnnouncePage() {
   const { hasPermission } = useResourcePermission(
     "NOTICE",
     firstNoticeId ? Number(firstNoticeId) : undefined,
-    { enabled: !!firstNoticeId },
   )
 
   const canWrite =
