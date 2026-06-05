@@ -27,14 +27,12 @@ interface ApplicationStatsSectionProps {
 const VARIANT_LABELS = {
   application: {
     sectionTitle: "01 지원 통계",
-    cardTitle: "N차 매칭 지원 현황",
     completedLabel: "지원 완료",
     pendingLabel: "지원 전",
     roundSuffix: "지원",
   },
   matching: {
     sectionTitle: "01 매칭 통계",
-    cardTitle: "지부 프로젝트 매칭률",
     completedLabel: "매칭 완료",
     pendingLabel: "매칭 전",
     roundSuffix: "매칭",
@@ -84,7 +82,9 @@ export function ApplicationStatsSection({
         {/* N차 매칭 지원 현황 */}
         <div className="shadow-drop-neutral-3 border-teal-gray-100 relative h-70 w-102 shrink-0 overflow-hidden rounded-lg border bg-white">
           <h3 className="text-heading-6-semibold absolute top-7 left-8 text-teal-700">
-            {labels.cardTitle}
+            {variant === "application"
+              ? `${currentRound}차 매칭 지원 현황`
+              : "지부 프로젝트 매칭률"}
           </h3>
 
           <div className="absolute top-20.5 left-9">

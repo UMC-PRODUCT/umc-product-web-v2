@@ -10,16 +10,36 @@ import {
   getAllProjects,
   getChapterStatistics,
   getManagedProjects,
+  getMatchingRounds,
   getProjectApplications,
 } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
 import { summaryToStats, toProjectApplication } from "../model/mappers"
 
+import type { MatchingRoundResponse } from "../model/apiTypes"
 import type {
   ApplicationStats,
   ProjectApplication,
   UniversityCount,
 } from "../model/types"
+
+// 매칭 라운드 목록에서 현재 활성 차수 번호 계산
+function getCurrentRound(rounds: MatchingRoundResponse[]): number {
+  const now = Date.now()
+  const active = rounds.find(
+    (r) =>
+      new Date(r.startsAt).getTime() <= now &&
+      now <= new Date(r.endsAt).getTime(),
+  )
+  if (active) {
+    return active.phase === "FIRST" ? 1 : active.phase === "SECOND" ? 2 : 3
+  }
+  const sorted = [...rounds].sort(
+    (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
+  )
+  if (!sorted[0]) return 1
+  return sorted[0].phase === "FIRST" ? 1 : sorted[0].phase === "SECOND" ? 2 : 3
+}
 
 // 활성 기수 ID 조회
 export function useActiveGisuId() {
@@ -179,6 +199,16 @@ export function useAdminPageData(chapterName?: string) {
     enabled: projects.length > 0,
   })
 
+  // 매칭 차수 조회 (현재 진행 차수 계산용)
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(chapterId),
+    queryFn: () => getMatchingRounds(chapterId),
+  })
+  const currentRound = useMemo(
+    () => getCurrentRound(roundsQuery.data ?? []),
+    [roundsQuery.data],
+  )
+
   // 지부 통계 조회 (rounds, totalMembers, projectRounds, topProjects)
   const chapterStatsQuery = useQuery({
     queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
@@ -228,11 +258,13 @@ export function useAdminPageData(chapterName?: string) {
   return {
     projects: transformed,
     stats,
+    currentRound,
     dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
     chapters,
     isLoading:
       gisuQuery.isLoading ||
       chaptersQuery.isLoading ||
+      roundsQuery.isLoading ||
       projectsQuery.isLoading ||
       applicantsQuery.isLoading ||
       chapterStatsQuery.isLoading,

@@ -81,6 +81,7 @@ function MatchingApplicationsPage() {
                   <ApplicationStatsSection
                     stats={adminStats}
                     dataUpdatedAt={admin.dataUpdatedAt}
+                    currentRound={admin.currentRound}
                   />
                   <ApplicationTableSection projects={adminProjects} />
                 </div>
