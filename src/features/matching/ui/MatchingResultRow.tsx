@@ -97,12 +97,19 @@ export function MatchingResultRow({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: applicationKeys.all })
     },
+    onError: () => {
+      // 서버 실패 시 optimistic update 롤백
+      setLocalRoleRows(roleRows)
+    },
   })
 
   const unmatchMutation = useMutation({
     mutationFn: (memberId: number) => removeProjectMember(projectId!, memberId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: applicationKeys.all })
+    },
+    onError: () => {
+      setLocalRoleRows(roleRows)
     },
   })
 

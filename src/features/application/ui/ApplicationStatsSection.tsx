@@ -70,11 +70,11 @@ export function ApplicationStatsSection({
         <h2 className="text-heading-6-semibold text-teal-700">
           {labels.sectionTitle}
         </h2>
-        {dataUpdatedAt && (
+        {dataUpdatedAt ? (
           <span className="text-caption-1-regular text-teal-gray-400">
             {formatUpdatedAt(dataUpdatedAt)}
           </span>
-        )}
+        ) : null}
       </div>
 
       {/* 3열 통계 카드 */}
