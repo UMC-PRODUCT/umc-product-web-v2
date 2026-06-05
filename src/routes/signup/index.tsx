@@ -685,7 +685,7 @@ function SignUpPage() {
         ? !isPasswordValid || !isPasswordMatch
         : currentStep === "PROFILE"
           ? !school || !name || !isNicknameValid
-          : false // TERMS 단계에서는 일단 항상 활성화 (요구사항: UI만 추가)
+          : false // TERMS 단계에서는 일단 항상 활성화
 
   return (
     <FormProvider {...methods}>
@@ -768,7 +768,9 @@ function SignUpPage() {
                 className="px-1 py-0.5"
               >
                 <span className="text-body-1-regular text-teal-gray-500">
-                  이미 계정이 있어요
+                  {currentStep === "EMAIL"
+                    ? "이미 계정이 있어요"
+                    : "로그인으로"}
                 </span>
               </button>
             </div>
