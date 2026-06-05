@@ -314,7 +314,7 @@ function MatchingRoundsPage() {
                   {rounds.map((round, idx) => (
                     <RoundForm
                       key={round.roundLabel}
-                      title={round.title}
+                      title={`${round.roundLabel} 매칭`}
                       startDate={round.startDate}
                       endDate={round.endDate}
                       startTime={round.startTime}
