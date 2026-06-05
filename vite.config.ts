@@ -24,7 +24,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://dev.api.umc.it.kr",
+        target: "https://dev.api.university.neordinary.com",
         changeOrigin: true,
         secure: false,
       },

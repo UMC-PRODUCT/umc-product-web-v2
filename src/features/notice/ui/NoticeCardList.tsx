@@ -17,7 +17,8 @@ interface NoticeCardListProps {
   notices: NoticeItem[]
   page: number
   isLoading?: boolean
-  canManage?: boolean
+  canEdit?: boolean
+  canDelete?: boolean
   focusedNoticeId?: string | null
   onDeleteNotice?: (noticeId: string) => void
   onEditNotice?: (noticeId: string) => void
@@ -30,7 +31,8 @@ export function NoticeCardList({
   notices,
   page,
   isLoading = false,
-  canManage = false,
+  canEdit = false,
+  canDelete = false,
   focusedNoticeId,
   onDeleteNotice,
   onEditNotice,
@@ -97,7 +99,8 @@ export function NoticeCardList({
               date={notice.date}
               chip={notice.chip}
               variant={cardVariant}
-              canManage={canManage}
+              canEdit={canEdit}
+              canDelete={canDelete}
               expanded={isExpanded}
               data-notice-id={notice.id}
               onExpandedChange={(nextExpanded) => {
