@@ -34,4 +34,11 @@ export const applicationKeys = {
       chapterId,
       projectIds,
     ] as const,
+
+  // 통계 API
+  projectStatistics: (projectId: number) =>
+    [...applicationKeys.all, "statistics", "project", projectId] as const,
+
+  chapterStatistics: (chapterId: number) =>
+    [...applicationKeys.all, "statistics", "chapter", chapterId] as const,
 }

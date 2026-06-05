@@ -3,18 +3,18 @@ import { useMemo } from "react"
 
 import {
   getAllProjects,
-  getManagedProjects,
+  getChapterStatistics,
   getMatchingRounds,
   getProjectApplications,
 } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
 import {
-  computeAdminStats,
+  computeUniversities,
   useActiveGisuId,
   useChapters,
 } from "@/features/application/hooks/useApplicationPageData"
 import {
-  toProjectApplication,
+  summaryToStats,
   toRoundNumber,
 } from "@/features/application/model/mappers"
 import { useViewModeStore } from "@/shared/view-mode"
@@ -22,6 +22,7 @@ import { useViewModeStore } from "@/shared/view-mode"
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"
 
 import type { MatchingRoundResponse } from "@/features/application/model/apiTypes"
+import type { ApplicationStats } from "@/features/application/model/types"
 
 // 매칭 라운드 목록에서 현재 활성 차수 번호 계산
 function getCurrentRound(rounds: MatchingRoundResponse[]): number {
@@ -70,14 +71,11 @@ export function useMatchingStatusData(chapterName?: string) {
     [roundsQuery.data],
   )
 
-  // admin: 전체 프로젝트 / pm,others: 내 프로젝트
+  // 전체 프로젝트 조회 (매칭 결과 시트용 - admin만)
   const projectsQuery = useQuery({
     queryKey: applicationKeys.matchingParts(gisuId, chapterId),
-    queryFn: () =>
-      isAdmin
-        ? getAllProjects(gisuId, { chapterId })
-        : getManagedProjects(gisuId),
-    enabled: gisuId > 0,
+    queryFn: () => getAllProjects(gisuId, { chapterId }),
+    enabled: gisuId > 0 && isAdmin,
   })
 
   const projects = useMemo(
@@ -85,7 +83,7 @@ export function useMatchingStatusData(chapterName?: string) {
     [projectsQuery.data],
   )
 
-  // 프로젝트별 지원자 일괄 조회
+  // 프로젝트별 지원자 일괄 조회 (매칭 결과 시트 + 학교별 통계용)
   const applicantsQuery = useQuery({
     queryKey: applicationKeys.matchingApplicants(
       gisuId,
@@ -104,6 +102,19 @@ export function useMatchingStatusData(chapterName?: string) {
     enabled: projects.length > 0,
   })
 
+  // 지부 통계 조회 (rounds, totalMembers, projectRounds, topProjects)
+  const chapterStatsQuery = useQuery({
+    queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
+    queryFn: () => getChapterStatistics(chapterId!),
+    enabled: !!chapterId,
+  })
+
+  // projectId -> name 맵
+  const projectIdToName = useMemo(
+    () => new Map(projects.map((p) => [p.id, p.name])),
+    [projects],
+  )
+
   // 전체 프로젝트에서 APPROVED된 멤버 ID 수집 (수동 배정 시 필터링용)
   const approvedMemberIds = useMemo(() => {
     const ids = new Set<string>()
@@ -118,24 +129,41 @@ export function useMatchingStatusData(chapterName?: string) {
     return ids
   }, [applicantsQuery.data])
 
-  // 매칭 현황 데이터 변환
+  // 매칭 현황 데이터 변환 (매칭 결과 시트용)
   const matchingParts = useMemo(
     () => toMatchingPartDataList(projects, applicantsQuery.data ?? new Map()),
     [projects, applicantsQuery.data],
   )
 
-  // 통계 계산 (기존 로직 재사용)
-  const transformed = useMemo(
-    () =>
-      projects.map((p) =>
-        toProjectApplication(p, applicantsQuery.data?.get(p.id) ?? []),
-      ),
-    [projects, applicantsQuery.data],
-  )
-  const stats = useMemo(
-    () => computeAdminStats(transformed, currentRound),
-    [transformed, currentRound],
-  )
+  // 통계: summary 기반 (universities만 applicant schoolName으로 보완)
+  const stats: ApplicationStats = useMemo(() => {
+    if (!chapterStatsQuery.data) {
+      return {
+        totalMembers: 0,
+        completionRate: 0,
+        completedCount: 0,
+        pendingCount: 0,
+        rounds: [],
+        topProjects: [],
+        universities: [],
+        projectRounds: [],
+      }
+    }
+    const partial = summaryToStats(
+      chapterStatsQuery.data.summary,
+      projectIdToName,
+      currentRound,
+    )
+    const universities = applicantsQuery.data
+      ? computeUniversities(applicantsQuery.data, partial.totalMembers)
+      : []
+    return { ...partial, universities }
+  }, [
+    chapterStatsQuery.data,
+    projectIdToName,
+    currentRound,
+    applicantsQuery.data,
+  ])
 
   return {
     matchingParts,
@@ -151,7 +179,8 @@ export function useMatchingStatusData(chapterName?: string) {
       chaptersQuery.isLoading ||
       roundsQuery.isLoading ||
       projectsQuery.isLoading ||
-      applicantsQuery.isLoading,
+      applicantsQuery.isLoading ||
+      chapterStatsQuery.isLoading,
     isError:
       gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError,
     error:

@@ -8,13 +8,18 @@ import {
 
 import {
   getAllProjects,
+  getChapterStatistics,
   getManagedProjects,
   getProjectApplications,
 } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
-import { toProjectApplication } from "../model/mappers"
+import { summaryToStats, toProjectApplication } from "../model/mappers"
 
-import type { ApplicationStats, ProjectApplication } from "../model/types"
+import type {
+  ApplicationStats,
+  ProjectApplication,
+  UniversityCount,
+} from "../model/types"
 
 // 활성 기수 ID 조회
 export function useActiveGisuId() {
@@ -105,85 +110,22 @@ export function useChapters() {
   })
 }
 
-// 프로젝트 + 지원자 데이터에서 ApplicationStats 계산
-// filterRound: 지정 시 topProjects를 해당 차수 지원자만으로 계산
-export function computeAdminStats(
-  projects: ProjectApplication[],
-  filterRound?: number,
-): ApplicationStats {
-  const allApplicants = projects.flatMap((p) => p.applicants)
-
-  // 차수별 지원자 수
-  const roundMap = new Map<number, number>()
-  for (const a of allApplicants) {
-    roundMap.set(a.round, (roundMap.get(a.round) ?? 0) + 1)
-  }
-
-  // 총 모집 인원
-  const totalQuota = projects.reduce(
-    (sum, p) => sum + p.designCount.total + p.feCount.total + p.beCount.total,
-    0,
-  )
-
-  const completedCount = allApplicants.filter((a) => a.status === "pass").length
-  const pendingCount = totalQuota - completedCount
-
-  const rounds = Array.from(roundMap.entries())
-    .sort(([a], [b]) => a - b)
-    .map(([round, applied]) => ({
-      round,
-      applied,
-      total: totalQuota,
-    }))
-
-  // 프로젝트별 지원자 수 Top 4 (filterRound 지정 시 해당 차수만)
-  const projectCounts = projects
-    .map((p) => ({
-      name: p.projectName,
-      count: filterRound
-        ? p.applicants.filter((a) => a.round === filterRound).length
-        : p.applicants.length,
-    }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 4)
-
-  // 대학별 집계
+// applicant 목록에서 학교별 집계 계산 (schoolId 대신 schoolName 사용)
+export function computeUniversities(
+  applicantsMap: Map<number, { applicant: { schoolName: string } }[]>,
+  totalMembers: number,
+): UniversityCount[] {
   const uniMap = new Map<string, number>()
-  for (const a of allApplicants) {
-    uniMap.set(a.university, (uniMap.get(a.university) ?? 0) + 1)
+  for (const applicants of applicantsMap.values()) {
+    for (const a of applicants) {
+      const name = a.applicant.schoolName
+      uniMap.set(name, (uniMap.get(name) ?? 0) + 1)
+    }
   }
-  const universities = Array.from(uniMap.entries())
+  return Array.from(uniMap.entries())
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5)
-    .map(([name, applied]) => ({
-      name,
-      applied,
-      total: totalQuota,
-    }))
-
-  // 프로젝트별 차수별 지원자 수 (최대 3차수)
-  const projectRounds = projects.map((p) => {
-    const rMap = new Map<number, number>()
-    for (const a of p.applicants) {
-      rMap.set(a.round, (rMap.get(a.round) ?? 0) + 1)
-    }
-    return {
-      name: p.projectName,
-      rounds: [rMap.get(1) ?? 0, rMap.get(2) ?? 0, rMap.get(3) ?? 0],
-    }
-  })
-
-  return {
-    totalMembers: totalQuota,
-    completionRate:
-      totalQuota > 0 ? Math.round((completedCount / totalQuota) * 100) : 0,
-    completedCount,
-    pendingCount: Math.max(0, pendingCount),
-    rounds,
-    topProjects: projectCounts,
-    universities,
-    projectRounds,
-  }
+    .map(([name, applied]) => ({ name, applied, total: totalMembers }))
 }
 
 // Admin 뷰용 데이터
@@ -204,7 +146,7 @@ export function useAdminPageData(chapterName?: string) {
     return found ? Number(found.id) : undefined
   }, [chapterName, chapters])
 
-  // 전체 프로젝트 목록 조회
+  // 전체 프로젝트 목록 조회 (지원자 테이블용)
   const projectsQuery = useQuery({
     queryKey: applicationKeys.allProjects(gisuId, chapterId),
     queryFn: () => getAllProjects(gisuId, { chapterId }),
@@ -216,7 +158,7 @@ export function useAdminPageData(chapterName?: string) {
     [projectsQuery.data],
   )
 
-  // 각 프로젝트의 지원자 목록 조회
+  // 각 프로젝트의 지원자 목록 조회 (테이블 + 학교별 통계용)
   const applicantsQuery = useQuery({
     queryKey: [
       ...applicationKeys.all,
@@ -237,7 +179,20 @@ export function useAdminPageData(chapterName?: string) {
     enabled: projects.length > 0,
   })
 
-  // 서버 데이터 -> 프론트 타입 변환
+  // 지부 통계 조회 (rounds, totalMembers, projectRounds, topProjects)
+  const chapterStatsQuery = useQuery({
+    queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
+    queryFn: () => getChapterStatistics(chapterId!),
+    enabled: !!chapterId,
+  })
+
+  // projectId -> name 맵 (summaryToStats에서 프로젝트명 조회용)
+  const projectIdToName = useMemo(
+    () => new Map(projects.map((p) => [p.id, p.name])),
+    [projects],
+  )
+
+  // 서버 데이터 -> 프론트 타입 변환 (테이블용)
   const transformed: ProjectApplication[] = useMemo(
     () =>
       projects.map((p) =>
@@ -246,8 +201,29 @@ export function useAdminPageData(chapterName?: string) {
     [projects, applicantsQuery.data],
   )
 
-  // 통계 계산
-  const stats = useMemo(() => computeAdminStats(transformed), [transformed])
+  // 통계: summary 기반 (universities만 applicant schoolName으로 보완)
+  const stats: ApplicationStats = useMemo(() => {
+    if (!chapterStatsQuery.data) {
+      return {
+        totalMembers: 0,
+        completionRate: 0,
+        completedCount: 0,
+        pendingCount: 0,
+        rounds: [],
+        topProjects: [],
+        universities: [],
+        projectRounds: [],
+      }
+    }
+    const partial = summaryToStats(
+      chapterStatsQuery.data.summary,
+      projectIdToName,
+    )
+    const universities = applicantsQuery.data
+      ? computeUniversities(applicantsQuery.data, partial.totalMembers)
+      : []
+    return { ...partial, universities }
+  }, [chapterStatsQuery.data, projectIdToName, applicantsQuery.data])
 
   return {
     projects: transformed,
@@ -258,7 +234,8 @@ export function useAdminPageData(chapterName?: string) {
       gisuQuery.isLoading ||
       chaptersQuery.isLoading ||
       projectsQuery.isLoading ||
-      applicantsQuery.isLoading,
+      applicantsQuery.isLoading ||
+      chapterStatsQuery.isLoading,
     isError:
       gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError,
     error: gisuQuery.error ?? chaptersQuery.error ?? projectsQuery.error,
