@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useEffect, useReducer, useRef } from "react"
+import { useEffect, useReducer, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -20,6 +20,7 @@ import {
   AccountCreationStep,
   // PhoneVerificationStep,
   ProfileInfoStep,
+  TermsAgreementStep,
   VerificationStep,
 } from "@/features/signup"
 import { type SignUpFormData, signUpSchema } from "@/features/signup/validation"
@@ -338,6 +339,7 @@ function SignUpPage() {
   const nickname = watch("nickname")
 
   const [state, dispatch] = useReducer(signUpReducer, initialState)
+  const [showTerms, setShowTerms] = useState(false)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const phoneIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -667,7 +669,9 @@ function SignUpPage() {
     ? "EMAIL"
     : !isAccountCreated
       ? "PASSWORD"
-      : "PROFILE"
+      : showTerms
+        ? "TERMS"
+        : "PROFILE"
   // : !isPhoneVerified
   //   ? "PHONE"
   //   : "PROFILE"
@@ -679,11 +683,9 @@ function SignUpPage() {
         state.email.isCodeExpired
       : currentStep === "PASSWORD"
         ? !isPasswordValid || !isPasswordMatch
-        : // : currentStep === "PHONE"
-          //   ? phoneCode.length !== 6 ||
-          //     state.phone.isCodeInvalid ||
-          //     state.phone.isCodeExpired
-          !school || !name || !isNicknameValid
+        : currentStep === "PROFILE"
+          ? !school || !name || !isNicknameValid
+          : false // TERMS 단계에서는 일단 항상 활성화 (요구사항: UI만 추가)
 
   return (
     <FormProvider {...methods}>
@@ -734,6 +736,8 @@ function SignUpPage() {
 
             {currentStep === "PROFILE" && <ProfileInfoStep />}
 
+            {currentStep === "TERMS" && <TermsAgreementStep />}
+
             <div className="flex w-full flex-col items-center gap-4">
               <Button
                 size={"m"}
@@ -750,6 +754,8 @@ function SignUpPage() {
                     // } else if (currentStep === "PHONE") {
                     //   void handlePhoneCodeComplete()
                   } else if (currentStep === "PROFILE") {
+                    setShowTerms(true)
+                  } else if (currentStep === "TERMS") {
                     void handleFinalSignup()
                   }
                 }}
