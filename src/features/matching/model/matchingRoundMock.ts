@@ -105,34 +105,3 @@ export function emptyRoundSchedules(
     endTime: "23:59",
   }))
 }
-
-// 기존 mock (API 데이터 없을 때 fallback)
-export const MOCK_ROUND_SCHEDULES: RoundSchedule[] = [
-  {
-    phase: "FIRST",
-    roundLabel: "1차",
-    title: "Plan-Design 매칭",
-    startDate: "2026-05-07",
-    endDate: "2026-05-07",
-    startTime: "00:00",
-    endTime: "23:59",
-  },
-  {
-    phase: "SECOND",
-    roundLabel: "2차",
-    title: "Plan-Develop 매칭",
-    startDate: "2026-05-12",
-    endDate: "2026-05-12",
-    startTime: "12:00",
-    endTime: "23:59",
-  },
-  {
-    phase: "THIRD",
-    roundLabel: "3차",
-    title: "Plan-Design 매칭",
-    startDate: "2026-05-13",
-    endDate: "2026-05-13",
-    startTime: "12:00",
-    endTime: "23:59",
-  },
-]
