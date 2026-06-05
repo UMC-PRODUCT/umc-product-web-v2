@@ -67,7 +67,7 @@ export function TermsAgreementStep() {
           className="flex items-center gap-2 text-left"
         >
           <CheckIcon
-            className={agreements.service ? "text-teal-500" : "text-teal-200"}
+            className={`h-6 w-6 ${agreements.service ? "text-teal-500" : "text-teal-200"}`}
           />
           <span className="text-body-1-regular text-teal-gray-500">
             (필수) 서비스 이용약관 동의
@@ -79,7 +79,7 @@ export function TermsAgreementStep() {
           className="flex items-center gap-2 text-left"
         >
           <CheckIcon
-            className={agreements.privacy ? "text-teal-500" : "text-teal-200"}
+            className={`h-6 w-6 ${agreements.privacy ? "text-teal-500" : "text-teal-200"}`}
           />
           <span className="text-body-1-regular text-teal-gray-500">
             (필수) 개인정보 처리 방침 동의
@@ -91,7 +91,7 @@ export function TermsAgreementStep() {
           className="flex items-center gap-2 text-left"
         >
           <CheckIcon
-            className={agreements.optional ? "text-teal-500" : "text-teal-200"}
+            className={`h-6 w-6 ${agreements.optional ? "text-teal-500" : "text-teal-200"}`}
           />
           <span className="text-body-1-regular text-teal-gray-500">
             (선택) 서비스 이용약관 동의
