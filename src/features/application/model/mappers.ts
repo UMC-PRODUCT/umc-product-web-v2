@@ -20,7 +20,6 @@ import type {
   Role,
   StatusValue,
   TopProject,
-  UniversityCount,
 } from "./types"
 
 // 서버 status -> 프론트 status
@@ -152,13 +151,12 @@ export function toProjectApplication(
 }
 
 // ChapterStatisticsSummary -> ApplicationStats 변환
-// universities는 schoolId만 있어 이름 알 수 없으므로 호출자가 주입
+// universities는 schoolId만 있어 이름 알 수 없으므로 호출자가 별도 주입
 export function summaryToStats(
   summary: ChapterStatisticsResponse["summary"],
   projectIdToName: Map<number, string>,
-  universities: UniversityCount[],
   filterRound?: number, // 미지정 시 전 차수 합산
-): ApplicationStats {
+): Omit<ApplicationStats, "universities"> {
   // 차수별 지원 현황
   const rounds = summary.roundApplicationStatistics.map((r) => ({
     round: toRoundNumber(r.matchingRound.phase),
@@ -219,7 +217,6 @@ export function summaryToStats(
     pendingCount,
     rounds,
     topProjects,
-    universities,
     projectRounds,
   }
 }
