@@ -9,7 +9,6 @@ import {
 } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
 import {
-  computeUniversities,
   useActiveGisuId,
   useChapters,
 } from "@/features/application/hooks/useApplicationPageData"
@@ -17,12 +16,16 @@ import {
   summaryToStats,
   toRoundNumber,
 } from "@/features/application/model/mappers"
+import { getAllSchools } from "@/features/challenger/api/organization"
 import { useViewModeStore } from "@/shared/view-mode"
 
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"
 
 import type { MatchingRoundResponse } from "@/features/application/model/apiTypes"
-import type { ApplicationStats } from "@/features/application/model/types"
+import type {
+  ApplicationStats,
+  UniversityCount,
+} from "@/features/application/model/types"
 
 // 매칭 라운드 목록에서 현재 활성 차수 번호 계산
 function getCurrentRound(rounds: MatchingRoundResponse[]): number {
@@ -102,6 +105,19 @@ export function useMatchingStatusData(chapterName?: string) {
     enabled: projects.length > 0,
   })
 
+  // 전체 학교 목록 조회 (schoolId -> schoolName 매핑용)
+  const schoolsQuery = useQuery({
+    queryKey: ["schools", "all"],
+    queryFn: getAllSchools,
+  })
+  const schoolIdToName = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const s of schoolsQuery.data?.schools ?? []) {
+      map.set(s.schoolId, s.schoolName)
+    }
+    return map
+  }, [schoolsQuery.data])
+
   // 지부 통계 조회 (rounds, totalMembers, projectRounds, topProjects)
   const chapterStatsQuery = useQuery({
     queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
@@ -135,7 +151,7 @@ export function useMatchingStatusData(chapterName?: string) {
     [projects, applicantsQuery.data],
   )
 
-  // 통계: summary 기반 (universities만 applicant schoolName으로 보완)
+  // 통계: summary 기반 (universities는 schoolMatchingStatistics + schools API로 계산)
   const stats: ApplicationStats = useMemo(() => {
     if (!chapterStatsQuery.data) {
       return {
@@ -154,16 +170,17 @@ export function useMatchingStatusData(chapterName?: string) {
       projectIdToName,
       currentRound,
     )
-    const universities = applicantsQuery.data
-      ? computeUniversities(applicantsQuery.data, partial.totalMembers)
-      : []
+    const universities: UniversityCount[] =
+      chapterStatsQuery.data.summary.schoolMatchingStatistics
+        .map((s) => ({
+          name: schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
+          applied: s.totalMemberCount,
+          total: partial.totalMembers,
+        }))
+        .sort((a, b) => b.applied - a.applied)
+        .slice(0, 5)
     return { ...partial, universities }
-  }, [
-    chapterStatsQuery.data,
-    projectIdToName,
-    currentRound,
-    applicantsQuery.data,
-  ])
+  }, [chapterStatsQuery.data, projectIdToName, currentRound, schoolIdToName])
 
   return {
     matchingParts,

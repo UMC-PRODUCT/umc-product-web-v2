@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import {
   getAllChapters,
   getAllGisu,
+  getAllSchools,
 } from "@/features/challenger/api/organization"
 
 import {
@@ -130,24 +131,6 @@ export function useChapters() {
   })
 }
 
-// applicant 목록에서 학교별 집계 계산 (schoolId 대신 schoolName 사용)
-export function computeUniversities(
-  applicantsMap: Map<number, { applicant: { schoolName: string } }[]>,
-  totalMembers: number,
-): UniversityCount[] {
-  const uniMap = new Map<string, number>()
-  for (const applicants of applicantsMap.values()) {
-    for (const a of applicants) {
-      const name = a.applicant.schoolName
-      uniMap.set(name, (uniMap.get(name) ?? 0) + 1)
-    }
-  }
-  return Array.from(uniMap.entries())
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 5)
-    .map(([name, applied]) => ({ name, applied, total: totalMembers }))
-}
-
 // Admin 뷰용 데이터
 export function useAdminPageData(chapterName?: string) {
   const gisuQuery = useActiveGisuId()
@@ -199,6 +182,19 @@ export function useAdminPageData(chapterName?: string) {
     enabled: projects.length > 0,
   })
 
+  // 전체 학교 목록 조회 (schoolId -> schoolName 매핑용)
+  const schoolsQuery = useQuery({
+    queryKey: ["schools", "all"],
+    queryFn: getAllSchools,
+  })
+  const schoolIdToName = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const s of schoolsQuery.data?.schools ?? []) {
+      map.set(s.schoolId, s.schoolName)
+    }
+    return map
+  }, [schoolsQuery.data])
+
   // 매칭 차수 조회 (현재 진행 차수 계산용)
   const roundsQuery = useQuery({
     queryKey: applicationKeys.matchingRounds(chapterId),
@@ -231,7 +227,7 @@ export function useAdminPageData(chapterName?: string) {
     [projects, applicantsQuery.data],
   )
 
-  // 통계: summary 기반 (universities만 applicant schoolName으로 보완)
+  // 통계: summary 기반 (universities는 schoolMatchingStatistics + schools API로 계산)
   const stats: ApplicationStats = useMemo(() => {
     if (!chapterStatsQuery.data) {
       return {
@@ -249,11 +245,17 @@ export function useAdminPageData(chapterName?: string) {
       chapterStatsQuery.data.summary,
       projectIdToName,
     )
-    const universities = applicantsQuery.data
-      ? computeUniversities(applicantsQuery.data, partial.totalMembers)
-      : []
+    const universities: UniversityCount[] =
+      chapterStatsQuery.data.summary.schoolMatchingStatistics
+        .map((s) => ({
+          name: schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
+          applied: s.totalMemberCount,
+          total: partial.totalMembers,
+        }))
+        .sort((a, b) => b.applied - a.applied)
+        .slice(0, 5)
     return { ...partial, universities }
-  }, [chapterStatsQuery.data, projectIdToName, applicantsQuery.data])
+  }, [chapterStatsQuery.data, projectIdToName, schoolIdToName])
 
   return {
     projects: transformed,
