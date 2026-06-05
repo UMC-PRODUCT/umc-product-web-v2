@@ -43,23 +43,29 @@ export const nicknameSchema = z
   .max(5)
   .regex(/^[가-힣]*$/, "공백 없이 한글 1-5자")
 
-export const signUpSchema = z
-  .object({
-    email: emailSchema,
-    code: codeSchema,
-    phoneNumber: phoneNumberSchema,
-    phoneCode: phoneCodeSchema,
-    id: idSchema,
-    password: passwordSchema,
-    confirmPassword: z.string(),
-    school: z.string().min(1, "학교를 선택해주세요."),
-    name: z.string().min(1, "이름을 입력해 주세요."),
-    nickname: nicknameSchema,
-  })
-  .refine((data) => data.password === data.confirmPassword, {
+export const signUpSchemaObject = z.object({
+  email: emailSchema,
+  code: codeSchema,
+  phoneNumber: phoneNumberSchema,
+  phoneCode: phoneCodeSchema,
+  id: idSchema,
+  password: passwordSchema,
+  confirmPassword: z.string(),
+  school: z.string().min(1, "학교를 선택해주세요."),
+  name: z.string().min(1, "이름을 입력해 주세요."),
+  nickname: nicknameSchema,
+  serviceAgreement: z.boolean(),
+  privacyAgreement: z.boolean(),
+  optionalAgreement: z.boolean(),
+})
+
+export const signUpSchema = signUpSchemaObject.refine(
+  (data) => data.password === data.confirmPassword,
+  {
     message: "비밀번호가 일치하지 않습니다.",
     path: ["confirmPassword"],
-  })
+  },
+)
 
 export type SignUpFormData = z.infer<typeof signUpSchema>
 

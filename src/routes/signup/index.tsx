@@ -10,10 +10,6 @@ import {
   resendEmailVerification,
   sendEmailVerification,
 } from "@/features/auth/api/emailVerification"
-import {
-  registerMemberByEmail,
-  registerMemberByOAuth,
-} from "@/features/auth/api/register"
 import { getAllSchools } from "@/features/auth/api/school"
 import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
 import {
@@ -319,6 +315,9 @@ function SignUpPage() {
       school: "",
       name: "",
       nickname: "",
+      serviceAgreement: false,
+      privacyAgreement: false,
+      optionalAgreement: false,
     },
   })
 
@@ -337,6 +336,8 @@ function SignUpPage() {
   const school = watch("school")
   const name = watch("name")
   const nickname = watch("nickname")
+  const serviceAgreement = watch("serviceAgreement")
+  const privacyAgreement = watch("privacyAgreement")
 
   const [state, dispatch] = useReducer(signUpReducer, initialState)
   const [showTerms, setShowTerms] = useState(false)
@@ -558,66 +559,6 @@ function SignUpPage() {
     dispatch({ type: "SET_PASSWORD", payload: password })
   }
 
-  const handleFinalSignup = async () => {
-    dispatch({ type: "SIGNUP_START" })
-    const selectedSchool = state.schoolList.find((s) => s.schoolName === school)
-    if (!selectedSchool) {
-      addToast({
-        message: "유효한 학교를 선택해주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      dispatch({ type: "SIGNUP_FINISH" })
-      return
-    }
-
-    try {
-      if (state.oAuthVerificationToken) {
-        await registerMemberByOAuth({
-          oAuthVerificationToken: state.oAuthVerificationToken,
-          name,
-          nickname,
-          emailVerificationToken: state.signupData.emailVerificationToken!,
-          schoolId: selectedSchool.schoolId,
-          termsAgreements: state.signupData.termsAgreements || [],
-        })
-      } else {
-        await registerMemberByEmail({
-          rawPassword: state.signupData.rawPassword!,
-          name,
-          nickname,
-          emailVerificationToken: state.signupData.emailVerificationToken!,
-          schoolId: selectedSchool.schoolId,
-          termsAgreements: state.signupData.termsAgreements || [],
-        })
-      }
-
-      addToast({
-        message: "회원가입이 완료되었습니다.",
-        color: "primary",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      sessionStorage.removeItem(OAUTH_VERIFICATION_TOKEN_KEY)
-      void navigate({ to: "/login" })
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "회원가입에 실패했습니다."
-      addToast({
-        message,
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    } finally {
-      dispatch({ type: "SIGNUP_FINISH" })
-    }
-  }
-
   // const handleIdDuplicateCheck = () => {
   //   // TODO: 아이디 중복 확인 API 연동
   // }
@@ -685,7 +626,9 @@ function SignUpPage() {
         ? !isPasswordValid || !isPasswordMatch
         : currentStep === "PROFILE"
           ? !school || !name || !isNicknameValid
-          : false // TERMS 단계에서는 일단 항상 활성화
+          : currentStep === "TERMS"
+            ? !serviceAgreement || !privacyAgreement
+            : false
 
   return (
     <FormProvider {...methods}>
@@ -756,11 +699,12 @@ function SignUpPage() {
                   } else if (currentStep === "PROFILE") {
                     setShowTerms(true)
                   } else if (currentStep === "TERMS") {
-                    void handleFinalSignup()
+                    // 가입하기 버튼 클릭 시 아직은 아무 일도 일어나지 않도록 함
+                    // void handleFinalSignup()
                   }
                 }}
               >
-                다음
+                {currentStep === "TERMS" ? "가입하기" : "다음"}
               </Button>
 
               <button
