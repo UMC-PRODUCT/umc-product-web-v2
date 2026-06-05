@@ -1,5 +1,12 @@
 import { useMutation } from "@tanstack/react-query"
-import { useMemo, useRef, useState } from "react"
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
@@ -21,24 +28,56 @@ import { QuestionCard } from "./QuestionCard"
 import { QuestionListContainer } from "./QuestionListContainer"
 import { QuestionTypeToolbar } from "./QuestionTypeToolbar"
 
+export interface ApplicationFormHandle {
+  save: () => Promise<boolean>
+  getIsDirty: () => boolean
+  resetDirty: () => void
+}
+
 interface ApplicationFormProps {
   onPrev?: () => void
   onNext?: () => void
+  isEditMode?: boolean
+  isHydrated?: boolean
+  isSubmitting?: boolean
 }
 
-export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
+export const ApplicationForm = forwardRef<
+  ApplicationFormHandle,
+  ApplicationFormProps
+>(function ApplicationForm(
+  {
+    onPrev,
+    onNext,
+    isEditMode = false,
+    isHydrated = true,
+    isSubmitting = false,
+  },
+  ref,
+) {
   const addToast = useToastStore((s) => s.addToast)
   const form = useApplicationForm()
   const projectId = useProjectRegisterStore((s) => s.projectId)
-  const [hasSavedOnce, setHasSavedOnce] = useState(false)
+  const commonSectionId = useProjectRegisterStore(
+    (s) => s.application.commonSectionId,
+  )
+  const [hasSavedOnce, setHasSavedOnce] = useState(isEditMode)
   const [errorQuestionIds, setErrorQuestionIds] = useState<string[]>([])
 
-  const lastSavedSnapshotRef = useRef<string | null>(null)
   const currentSnapshot = useMemo(
     () => JSON.stringify({ c: form.commonQuestions, s: form.sections }),
     [form.commonQuestions, form.sections],
   )
+  const lastSavedSnapshotRef = useRef<string | null>(null)
   const isDirty = lastSavedSnapshotRef.current !== currentSnapshot
+  const isDirtyRef = useRef(isDirty)
+  isDirtyRef.current = isDirty
+
+  useEffect(() => {
+    if (isEditMode && isHydrated && lastSavedSnapshotRef.current === null) {
+      lastSavedSnapshotRef.current = currentSnapshot
+    }
+  }, [isEditMode, isHydrated, currentSnapshot])
 
   const saveAppMutation = useMutation({
     mutationFn: async () => {
@@ -49,6 +88,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
       const body = buildUpsertApplicationFormBody(
         form.commonQuestions,
         form.sections,
+        commonSectionId,
       )
       return upsertApplicationForm(projectId, body)
     },
@@ -60,7 +100,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "primary",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
     onError: () => {
@@ -69,10 +109,30 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
     },
   })
+
+  useImperativeHandle(ref, () => ({
+    save: async () => {
+      if (!isDirtyRef.current) return true
+      try {
+        await saveAppMutation.mutateAsync()
+        return true
+      } catch {
+        return false
+      }
+    },
+    getIsDirty: () => {
+      if (isEditMode && !isHydrated) return false
+      return isDirtyRef.current
+    },
+    resetDirty: () => {
+      lastSavedSnapshotRef.current = currentSnapshot
+      isDirtyRef.current = false
+    },
+  }))
 
   const canTempSave = !saveAppMutation.isPending && (isDirty || !hasSavedOnce)
   const tempSaveLabel =
@@ -80,15 +140,7 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
       ? "저장 완료"
       : "임시 저장"
 
-  const handleTempSave = () => {
-    saveAppMutation.mutate()
-  }
-
-  const handlePrev = () => {
-    onPrev?.()
-  }
-
-  const handleNext = () => {
+  const runValidation = (): boolean => {
     const { sectionEmptyName, errors } = validateApplicationForm(
       form.commonQuestions,
       form.sections,
@@ -100,9 +152,9 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
-      return
+      return false
     }
 
     const firstError = errors[0]
@@ -114,12 +166,25 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
         color: "red",
         variant: "deep",
         type: "default",
-        duration: 3,
+        duration: 3000,
       })
-      return
+      return false
     }
 
     setErrorQuestionIds([])
+    return true
+  }
+
+  const handleTempSave = () => {
+    saveAppMutation.mutate()
+  }
+
+  const handlePrev = () => {
+    onPrev?.()
+  }
+
+  const handleNext = () => {
+    if (!runValidation()) return
     onNext?.()
   }
 
@@ -278,12 +343,14 @@ export function ApplicationForm({ onPrev, onNext }: ApplicationFormProps) {
             type="button"
             variant="fill"
             color="primary"
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
             onClick={handleNext}
           >
-            등록하기
+            {isEditMode ? "수정 완료" : "등록하기"}
           </Button>
         </div>
       </div>
     </div>
   )
-}
+})

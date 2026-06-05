@@ -5,6 +5,8 @@ export type ProjectRecruitRow = {
   done?: boolean
 }
 
+export type PartQuotaStatus = "RECRUITING" | "COMPLETED"
+
 export function isRecruitDone(row: ProjectRecruitRow): boolean {
   return row.done ?? (row.total > 0 && row.current >= row.total)
 }
@@ -23,5 +25,7 @@ export type MatchingProject = {
   authorSchoolLine: string
   coverImage?: ProjectCoverImage | null
   recruitRows: ProjectRecruitRow[]
+  partQuotaStatus?: PartQuotaStatus
   isApplied?: boolean
+  externalLink?: string | null
 }

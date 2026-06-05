@@ -107,7 +107,7 @@ export function ToastProvider() {
 
   return (
     <div
-      className="pointer-events-none fixed bottom-24 left-1/2 z-50 -translate-x-1/2"
+      className="pointer-events-none fixed bottom-24 left-1/2 z-9999 -translate-x-1/2"
       aria-live="polite"
       aria-label="알림 목록"
     >

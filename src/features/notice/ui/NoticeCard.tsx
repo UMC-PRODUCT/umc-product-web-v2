@@ -62,7 +62,8 @@ interface NoticeCardProps
   date: string
   chip?: string
   children?: ReactNode
-  canManage?: boolean
+  canEdit?: boolean
+  canDelete?: boolean
   expanded?: boolean
   onExpandedChange?: (expanded: boolean) => void
   onDelete?: () => void
@@ -75,7 +76,8 @@ export function NoticeCard({
   chip,
   variant,
   children,
-  canManage = false,
+  canEdit = false,
+  canDelete = false,
   expanded,
   onExpandedChange,
   onDelete,
@@ -161,26 +163,30 @@ export function NoticeCard({
                 {/* TODO: 공지 API 응답 형식에 맞추어 수정 */}
                 {children}
 
-                {canManage ? (
+                {canEdit || canDelete ? (
                   <div className="flex items-center justify-end gap-2 pt-8">
-                    <Button
-                      type="button"
-                      variant="weak"
-                      color="neutral"
-                      size="m"
-                      onClick={handleDeleteClick}
-                    >
-                      삭제
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="weak"
-                      color="primary"
-                      size="m"
-                      onClick={onEdit}
-                    >
-                      수정
-                    </Button>
+                    {canDelete ? (
+                      <Button
+                        type="button"
+                        variant="weak"
+                        color="neutral"
+                        size="m"
+                        onClick={handleDeleteClick}
+                      >
+                        삭제
+                      </Button>
+                    ) : null}
+                    {canEdit ? (
+                      <Button
+                        type="button"
+                        variant="weak"
+                        color="primary"
+                        size="m"
+                        onClick={onEdit}
+                      >
+                        수정
+                      </Button>
+                    ) : null}
                   </div>
                 ) : null}
               </div>

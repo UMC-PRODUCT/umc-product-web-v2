@@ -23,6 +23,7 @@ export function hydrateDraftIntoStore(draft: DraftProjectResponse): void {
   store.setBasicDraftFields({
     title: draft.name ?? "",
     description: draft.description ?? "",
+    externalLink: draft.externalLink ?? "",
   })
 
   store.setUploaded({

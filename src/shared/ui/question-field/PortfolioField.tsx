@@ -8,7 +8,7 @@ const MAX_FILE_BYTES = 150 * 1024 * 1024
 
 export type PortfolioValue =
   | { kind: "link"; url: string }
-  | { kind: "file"; name: string; file: File }
+  | { kind: "file"; name: string; file?: File }
 
 function isValidUrl(value: string): boolean {
   try {

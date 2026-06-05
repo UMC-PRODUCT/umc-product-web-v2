@@ -186,10 +186,10 @@
 }
 
 @utility text-display-2-medium {
-  font-size: var(--text-display-2-medium-size);
-  font-weight: var(--text-display-2-medium-weight);
-  line-height: var(--text-display-2-medium-leading);
-  letter-spacing: var(--text-display-2-medium-tracking);
+  font-size: var(--text-display-medium-2-size);
+  font-weight: var(--text-display-medium-2-weight);
+  line-height: var(--text-display-medium-2-leading);
+  letter-spacing: var(--text-display-medium-2-tracking);
 }
 
 @utility text-heading-1-bold {

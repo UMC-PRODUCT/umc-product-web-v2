@@ -110,17 +110,22 @@ export function mapApplicationFormToSections(
       const questions: Question[] = apiSection.questions
         .slice()
         .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
-        .map((apiQ) => ({
-          id: String(apiQ.questionId),
-          title: apiQ.title,
-          caption: apiQ.description ?? "",
-          fieldType: API_FIELD_TYPE_TO_UI[apiQ.type],
-          required: apiQ.isRequired ?? false,
-          options: apiQ.options
+        .map((apiQ) => {
+          const sortedOptions = apiQ.options
             .slice()
             .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
-            .map((o) => o.content),
-        }))
+          return {
+            id: String(apiQ.questionId),
+            title: apiQ.title,
+            caption: apiQ.description ?? "",
+            fieldType: API_FIELD_TYPE_TO_UI[apiQ.type],
+            required: apiQ.isRequired ?? false,
+            options: sortedOptions.map((o) => o.content),
+            optionIds: sortedOptions
+              .map((o) => o.optionId)
+              .filter((id): id is number => id != null),
+          }
+        })
 
       return {
         id,
@@ -134,8 +139,10 @@ export function mapApplicationFormToSections(
 export function buildUpsertApplicationFormBody(
   commonQuestions: Question[],
   sections: Section[],
+  commonSectionId?: number,
 ): UpsertApplicationFormRequest {
   const commonSection = {
+    ...(commonSectionId !== undefined && { sectionId: commonSectionId }),
     type: "COMMON" as const,
     title: "공통 질문",
     orderNo: 0,
@@ -145,6 +152,7 @@ export function buildUpsertApplicationFormBody(
   const partSections = sections
     .filter((s) => s.isEnabled)
     .map((s, idx) => ({
+      ...(s.sectionId !== undefined && { sectionId: s.sectionId }),
       type: "PART" as const,
       allowedParts: SECTION_TO_ALLOWED_PARTS[s.id as UiRoleKey],
       title: s.name,

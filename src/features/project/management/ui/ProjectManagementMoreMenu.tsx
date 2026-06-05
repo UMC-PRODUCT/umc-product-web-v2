@@ -1,9 +1,12 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { Popover } from "radix-ui"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
+import { getProjectDetail } from "@/features/project/list/api/matchingProject"
+import { deleteProject } from "@/features/project/management/api"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -15,7 +18,6 @@ interface ProjectManagementMoreMenuProps {
   projectName: string
   projectApplication: ProjectApplication
   chapterName: string
-  onDelete?: () => void
 }
 
 export function ProjectManagementMoreMenu({
@@ -23,13 +25,37 @@ export function ProjectManagementMoreMenu({
   projectName,
   projectApplication,
   chapterName,
-  onDelete,
 }: ProjectManagementMoreMenuProps) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [applicationOpen, setApplicationOpen] = useState(false)
   const addToast = useToastStore((s) => s.addToast)
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteProject(Number(projectId)),
+    onSuccess: () => {
+      setDeleteOpen(false)
+      void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
+      addToast({
+        message: "프로젝트가 삭제되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+    onError: () => {
+      addToast({
+        message: "프로젝트 삭제에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+  })
 
   const handleDeleteClick = () => {
     setPopoverOpen(false)
@@ -49,9 +75,42 @@ export function ProjectManagementMoreMenu({
     })
   }
 
+  const handlePlanViewClick = async () => {
+    setPopoverOpen(false)
+    const newWindow = window.open(
+      "about:blank",
+      "_blank",
+      "noopener,noreferrer",
+    )
+    try {
+      const detail = await getProjectDetail(Number(projectId))
+      if (detail.externalLink) {
+        if (newWindow) newWindow.location.href = detail.externalLink
+      } else {
+        if (newWindow) newWindow.close()
+        addToast({
+          message: "등록된 기획안 링크가 없습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+    } catch {
+      if (newWindow) newWindow.close()
+      addToast({
+        message: "기획 보기를 불러오는 데 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
+  }
+
   const MENU_ITEMS = [
     { label: "지원 현황 확인하기", onClick: handleApplicationClick },
-    { label: "기획 보기", onClick: () => {} },
+    { label: "기획 보기", onClick: () => void handlePlanViewClick() },
     { label: "프로젝트 수정하기", onClick: handleEditClick },
     { label: "팀원 구성 보기", onClick: () => {} },
   ]
@@ -102,26 +161,17 @@ export function ProjectManagementMoreMenu({
         title="프로젝트 삭제"
         content={
           <>
-            프로젝트를 삭제하면 복구할 수 없습니다. <br /> '{projectName}'을
-            정말 삭제하시겠습니까?
+            삭제한 프로젝트는 되돌릴 수 없습니다. <br /> '{projectName}'을
+            삭제하시겠습니까?
           </>
         }
         cancelText="돌아가기"
         confirmText="삭제하기"
+        confirmLoading={deleteMutation.isPending}
         variant="error"
         onOpenChange={setDeleteOpen}
         onCancel={() => setDeleteOpen(false)}
-        onConfirm={() => {
-          onDelete?.()
-          setDeleteOpen(false)
-          addToast({
-            message: "프로젝트가 삭제되었습니다.",
-            color: "primary",
-            variant: "deep",
-            type: "default",
-            duration: 3000,
-          })
-        }}
+        onConfirm={() => deleteMutation.mutate()}
       />
     </>
   )

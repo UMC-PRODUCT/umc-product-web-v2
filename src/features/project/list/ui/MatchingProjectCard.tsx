@@ -74,9 +74,17 @@ function CardBody({ data }: { data: MatchingProject }) {
         </div>
 
         <div className="flex w-full min-w-0 flex-col items-start gap-1 self-stretch">
-          {data.recruitRows.map((row) => (
-            <RecruitRowItem key={row.part} {...row} />
-          ))}
+          {data.recruitRows.length > 0
+            ? data.recruitRows.map((row) => (
+                <RecruitRowItem key={row.part} {...row} />
+              ))
+            : data.partQuotaStatus != null && (
+                <div className="flex w-full justify-end">
+                  <RecruitStatusChip
+                    done={data.partQuotaStatus === "COMPLETED"}
+                  />
+                </div>
+              )}
         </div>
       </div>
     </div>

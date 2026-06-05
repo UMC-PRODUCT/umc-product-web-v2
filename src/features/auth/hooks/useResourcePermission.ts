@@ -10,6 +10,7 @@ import { useAuthStore } from "@/features/auth/store/authStore"
 export function useResourcePermission(
   resourceType: ResourceType,
   resourceId?: number,
+  options?: { enabled?: boolean },
 ) {
   const isAuthed = useAuthStore((s) => s.isAuthed)
   const query = useQuery({
@@ -20,7 +21,7 @@ export function useResourcePermission(
       resourceId,
     ],
     queryFn: () => getResourcePermission({ resourceType, resourceId }),
-    enabled: isAuthed,
+    enabled: isAuthed && resourceId !== undefined && (options?.enabled ?? true),
     staleTime: 0,
   })
 

@@ -7,10 +7,12 @@ export interface Question {
   fieldType: FieldType
   required: boolean
   options: string[]
+  optionIds?: number[]
 }
 
 export interface Section {
   id: string
+  sectionId?: number
   name: string
   isEnabled: boolean
   questions: Question[]
