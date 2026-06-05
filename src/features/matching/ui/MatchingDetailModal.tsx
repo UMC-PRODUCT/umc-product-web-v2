@@ -1,13 +1,13 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
+import { useApplicationDetail } from "@/features/application/hooks/useApplications"
+import {
+  toApplicantDetail,
+  toApplicantFormData,
+} from "@/features/application/model/mappers"
 import { ModalFormPanel } from "@/features/application/ui/detail-modal/ModalFormPanel"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
-
-import {
-  MOCK_MATCHING_APPLICANTS,
-  MOCK_MATCHING_FORM_DATA,
-} from "../model/matchingFormMock"
 
 interface MatchingDetailModalProps {
   applicantId: string | null
@@ -25,8 +25,7 @@ interface MatchingDetailModalProps {
 
 export function MatchingDetailModal({
   applicantId,
-  projectId: _projectId,
-  memberId: _memberId,
+  projectId,
   chapterName,
   projectName,
   challengerName,
@@ -38,10 +37,18 @@ export function MatchingDetailModal({
 }: MatchingDetailModalProps) {
   const [showUnmatchConfirm, setShowUnmatchConfirm] = useState(false)
 
-  const applicant = applicantId ? MOCK_MATCHING_APPLICANTS[applicantId] : null
-  const formData = applicantId
-    ? (MOCK_MATCHING_FORM_DATA[applicantId] ?? null)
-    : null
+  const applicationId = applicantId ? Number(applicantId) : 0
+  const detailQuery = useApplicationDetail(projectId ?? 0, applicationId)
+
+  const applicant = useMemo(() => {
+    if (!detailQuery.data) return null
+    return toApplicantDetail(detailQuery.data)
+  }, [detailQuery.data])
+
+  const formData = useMemo(() => {
+    if (!detailQuery.data?.formResponse || !applicantId) return null
+    return toApplicantFormData(detailQuery.data.formResponse, applicantId)
+  }, [detailQuery.data, applicantId])
 
   const handleClose = () => {
     onOpenChange(false)
@@ -63,9 +70,10 @@ export function MatchingDetailModal({
 
   if (!applicant) return null
 
+  // toDateTimePair 반환 형식: "MM/DD"
   const processedAt = applicant.processedAt
   const dateStr = processedAt
-    ? `${processedAt.date.split(".")[1] ?? ""}월 ${processedAt.date.split(".")[2] ?? ""}일 ${processedAt.time}`
+    ? `${processedAt.date.split("/")[0] ?? ""}월 ${processedAt.date.split("/")[1] ?? ""}일 ${processedAt.time}`
     : ""
 
   return (
