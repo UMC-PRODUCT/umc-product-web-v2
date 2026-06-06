@@ -20,6 +20,7 @@ import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as TestUsabilitySurveyRouteImport } from './routes/test/usability-survey'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
@@ -33,7 +34,6 @@ import { Route as TestIconRouteImport } from './routes/test/icon'
 import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
 import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
 import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
-import { Route as TestEmojiRadioButtonRouteImport } from './routes/test/emoji-radio-button'
 import { Route as TestCounterLabelRouteImport } from './routes/test/counter-label'
 import { Route as TestCounterRouteImport } from './routes/test/counter'
 import { Route as TestChipRouteImport } from './routes/test/chip'
@@ -113,6 +113,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const TestUsabilitySurveyRoute = TestUsabilitySurveyRouteImport.update({
+  id: '/test/usability-survey',
+  path: '/test/usability-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestTooltipRoute = TestTooltipRouteImport.update({
   id: '/test/tooltip',
   path: '/test/tooltip',
@@ -177,11 +182,6 @@ const TestFloatingActionButtonRoute =
 const TestFieldTypeButtonRoute = TestFieldTypeButtonRouteImport.update({
   id: '/test/field-type-button',
   path: '/test/field-type-button',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TestEmojiRadioButtonRoute = TestEmojiRadioButtonRouteImport.update({
-  id: '/test/emoji-radio-button',
-  path: '/test/emoji-radio-button',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestCounterLabelRoute = TestCounterLabelRouteImport.update({
@@ -324,7 +324,6 @@ export interface FileRoutesByFullPath {
   '/test/chip': typeof TestChipRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
-  '/test/emoji-radio-button': typeof TestEmojiRadioButtonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
@@ -338,6 +337,7 @@ export interface FileRoutesByFullPath {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
@@ -371,7 +371,6 @@ export interface FileRoutesByTo {
   '/test/chip': typeof TestChipRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
-  '/test/emoji-radio-button': typeof TestEmojiRadioButtonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
@@ -385,6 +384,7 @@ export interface FileRoutesByTo {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin': typeof AdminIndexRoute
   '/login': typeof LoginIndexRoute
   '/matching': typeof MatchingIndexRoute
@@ -421,7 +421,6 @@ export interface FileRoutesById {
   '/test/chip': typeof TestChipRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
-  '/test/emoji-radio-button': typeof TestEmojiRadioButtonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
@@ -435,6 +434,7 @@ export interface FileRoutesById {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
@@ -473,7 +473,6 @@ export interface FileRouteTypes {
     | '/test/chip'
     | '/test/counter'
     | '/test/counter-label'
-    | '/test/emoji-radio-button'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
@@ -487,6 +486,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/usability-survey'
     | '/admin/'
     | '/login/'
     | '/matching/'
@@ -520,7 +520,6 @@ export interface FileRouteTypes {
     | '/test/chip'
     | '/test/counter'
     | '/test/counter-label'
-    | '/test/emoji-radio-button'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
@@ -534,6 +533,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/usability-survey'
     | '/admin'
     | '/login'
     | '/matching'
@@ -569,7 +569,6 @@ export interface FileRouteTypes {
     | '/test/chip'
     | '/test/counter'
     | '/test/counter-label'
-    | '/test/emoji-radio-button'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
@@ -583,6 +582,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/usability-survey'
     | '/admin/'
     | '/login/'
     | '/matching/'
@@ -616,7 +616,6 @@ export interface RootRouteChildren {
   TestChipRoute: typeof TestChipRoute
   TestCounterRoute: typeof TestCounterRoute
   TestCounterLabelRoute: typeof TestCounterLabelRoute
-  TestEmojiRadioButtonRoute: typeof TestEmojiRadioButtonRoute
   TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
   TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
   TestFormHeaderRoute: typeof TestFormHeaderRoute
@@ -630,6 +629,7 @@ export interface RootRouteChildren {
   TestToggleRoute: typeof TestToggleRoute
   TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
+  TestUsabilitySurveyRoute: typeof TestUsabilitySurveyRoute
   LoginIndexRoute: typeof LoginIndexRoute
   SignupIndexRoute: typeof SignupIndexRoute
   TestIndexRoute: typeof TestIndexRoute
@@ -714,6 +714,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/test/usability-survey': {
+      id: '/test/usability-survey'
+      path: '/test/usability-survey'
+      fullPath: '/test/usability-survey'
+      preLoaderRoute: typeof TestUsabilitySurveyRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/test/tooltip': {
       id: '/test/tooltip'
@@ -804,13 +811,6 @@ declare module '@tanstack/react-router' {
       path: '/test/field-type-button'
       fullPath: '/test/field-type-button'
       preLoaderRoute: typeof TestFieldTypeButtonRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/test/emoji-radio-button': {
-      id: '/test/emoji-radio-button'
-      path: '/test/emoji-radio-button'
-      fullPath: '/test/emoji-radio-button'
-      preLoaderRoute: typeof TestEmojiRadioButtonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/counter-label': {
@@ -1093,7 +1093,6 @@ const rootRouteChildren: RootRouteChildren = {
   TestChipRoute: TestChipRoute,
   TestCounterRoute: TestCounterRoute,
   TestCounterLabelRoute: TestCounterLabelRoute,
-  TestEmojiRadioButtonRoute: TestEmojiRadioButtonRoute,
   TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
   TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
   TestFormHeaderRoute: TestFormHeaderRoute,
@@ -1107,6 +1106,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
+  TestUsabilitySurveyRoute: TestUsabilitySurveyRoute,
   LoginIndexRoute: LoginIndexRoute,
   SignupIndexRoute: SignupIndexRoute,
   TestIndexRoute: TestIndexRoute,
