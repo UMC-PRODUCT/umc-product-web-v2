@@ -2,6 +2,7 @@
 
 import type {
   ApplicationStatusEnum,
+  ChapterStatisticsResponse,
   FormQuestion,
   FormResponseData,
   ManagedProjectSummaryResponse,
@@ -12,10 +13,13 @@ import type {
 import type { ApplicantFormData, FormField } from "./mockFormData"
 import type {
   ApplicantDetail,
+  ApplicationStats,
   AssignmentCount,
   ProjectApplication,
+  ProjectRoundData,
   Role,
   StatusValue,
+  TopProject,
 } from "./types"
 
 // 서버 status -> 프론트 status
@@ -143,6 +147,77 @@ export function toProjectApplication(
     feCount: getQuotaCount(project.partQuotas, "WEB"),
     beCount: getQuotaCount(project.partQuotas, "SPRINGBOOT", "NODEJS"),
     applicants: applicants.map(toApplicantDetail),
+  }
+}
+
+// ChapterStatisticsSummary -> ApplicationStats 변환
+// universities는 schoolId만 있어 이름 알 수 없으므로 호출자가 별도 주입
+export function summaryToStats(
+  summary: ChapterStatisticsResponse["summary"],
+  projectIdToName: Map<number, string>,
+  filterRound?: number, // 미지정 시 전 차수 합산
+): Omit<ApplicationStats, "universities"> {
+  // 차수별 지원 현황
+  const rounds = summary.roundApplicationStatistics.map((r) => ({
+    round: toRoundNumber(r.matchingRound.phase),
+    applied: r.appliedMemberCount,
+    total: r.availableMemberCount,
+  }))
+
+  // 총원 / 매칭 완료 (schoolMatchingStatistics 합산)
+  const totalMembers = summary.schoolMatchingStatistics.reduce(
+    (s, x) => s + x.totalMemberCount,
+    0,
+  )
+  const completedCount = summary.schoolMatchingStatistics.reduce(
+    (s, x) => s + x.matchedMemberCount,
+    0,
+  )
+  const pendingCount = Math.max(0, totalMembers - completedCount)
+  const completionRate =
+    totalMembers > 0 ? Math.round((completedCount / totalMembers) * 100) : 0
+
+  // 프로젝트별 차수별 지원 현황
+  const projectRounds: ProjectRoundData[] = summary.projectRoundStatistics.map(
+    (p) => ({
+      name: projectIdToName.get(p.projectId) ?? String(p.projectId),
+      rounds: [
+        p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
+          ?.appliedMemberCount ?? 0,
+        p.matchingRounds.find((r) => r.matchingRound.phase === "SECOND")
+          ?.appliedMemberCount ?? 0,
+        p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")
+          ?.appliedMemberCount ?? 0,
+      ],
+    }),
+  )
+
+  // Top 4 프로젝트 (filterRound 지정 시 해당 차수, 미지정 시 전 차수 합산)
+  const phaseMap: Record<number, "FIRST" | "SECOND" | "THIRD"> = {
+    1: "FIRST",
+    2: "SECOND",
+    3: "THIRD",
+  }
+  const targetPhase = filterRound ? phaseMap[filterRound] : undefined
+  const topProjects: TopProject[] = summary.projectRoundStatistics
+    .map((p) => ({
+      name: projectIdToName.get(p.projectId) ?? String(p.projectId),
+      count: targetPhase
+        ? (p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)
+            ?.appliedMemberCount ?? 0)
+        : p.matchingRounds.reduce((s, r) => s + r.appliedMemberCount, 0),
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 4)
+
+  return {
+    totalMembers,
+    completionRate,
+    completedCount,
+    pendingCount,
+    rounds,
+    topProjects,
+    projectRounds,
   }
 }
 

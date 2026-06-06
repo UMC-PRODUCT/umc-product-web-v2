@@ -4,20 +4,46 @@ import { useMemo } from "react"
 import {
   getAllChapters,
   getAllGisu,
+  getAllSchools,
 } from "@/features/challenger/api/organization"
 
 import {
   getAllProjects,
+  getChapterStatistics,
   getManagedProjects,
+  getMatchingRounds,
   getProjectApplications,
 } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
-import { toProjectApplication } from "../model/mappers"
+import { summaryToStats, toProjectApplication } from "../model/mappers"
 
-import type { ApplicationStats, ProjectApplication } from "../model/types"
+import type { MatchingRoundResponse } from "../model/apiTypes"
+import type {
+  ApplicationStats,
+  ProjectApplication,
+  UniversityCount,
+} from "../model/types"
+
+// 매칭 라운드 목록에서 현재 활성 차수 번호 계산
+function getCurrentRound(rounds: MatchingRoundResponse[]): number {
+  const now = Date.now()
+  const active = rounds.find(
+    (r) =>
+      new Date(r.startsAt).getTime() <= now &&
+      now <= new Date(r.endsAt).getTime(),
+  )
+  if (active) {
+    return active.phase === "FIRST" ? 1 : active.phase === "SECOND" ? 2 : 3
+  }
+  const sorted = [...rounds].sort(
+    (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
+  )
+  if (!sorted[0]) return 1
+  return sorted[0].phase === "FIRST" ? 1 : sorted[0].phase === "SECOND" ? 2 : 3
+}
 
 // 활성 기수 ID 조회
-function useActiveGisuId() {
+export function useActiveGisuId() {
   return useQuery({
     queryKey: ["gisu", "active"],
     queryFn: async () => {
@@ -40,7 +66,10 @@ export function useChallengerPageData() {
   })
 
   // 프로젝트 목록이 로드되면 각 프로젝트의 지원자 목록도 함께 조회
-  const projects = projectsQuery.data?.content ?? []
+  const projects = useMemo(
+    () => projectsQuery.data?.content ?? [],
+    [projectsQuery.data],
+  )
 
   const applicantsQuery = useQuery({
     queryKey: [
@@ -102,85 +131,16 @@ export function useChapters() {
   })
 }
 
-// 프로젝트 + 지원자 데이터에서 ApplicationStats 계산
-function computeAdminStats(projects: ProjectApplication[]): ApplicationStats {
-  const allApplicants = projects.flatMap((p) => p.applicants)
-
-  // 차수별 지원자 수
-  const roundMap = new Map<number, number>()
-  for (const a of allApplicants) {
-    roundMap.set(a.round, (roundMap.get(a.round) ?? 0) + 1)
-  }
-
-  // 총 모집 인원
-  const totalQuota = projects.reduce(
-    (sum, p) => sum + p.designCount.total + p.feCount.total + p.beCount.total,
-    0,
-  )
-
-  const completedCount = allApplicants.filter((a) => a.status === "pass").length
-  const pendingCount = totalQuota - completedCount
-
-  const rounds = Array.from(roundMap.entries())
-    .sort(([a], [b]) => a - b)
-    .map(([round, applied]) => ({
-      round,
-      applied,
-      total: totalQuota,
-    }))
-
-  // 프로젝트별 지원자 수 Top 4
-  const projectCounts = projects
-    .map((p) => ({ name: p.projectName, count: p.applicants.length }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 4)
-
-  // 대학별 집계
-  const uniMap = new Map<string, number>()
-  for (const a of allApplicants) {
-    uniMap.set(a.university, (uniMap.get(a.university) ?? 0) + 1)
-  }
-  const universities = Array.from(uniMap.entries())
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 5)
-    .map(([name, applied]) => ({
-      name,
-      applied,
-      total: totalQuota,
-    }))
-
-  // 프로젝트별 차수별 지원자 수 (최대 3차수)
-  const projectRounds = projects.map((p) => {
-    const rMap = new Map<number, number>()
-    for (const a of p.applicants) {
-      rMap.set(a.round, (rMap.get(a.round) ?? 0) + 1)
-    }
-    return {
-      name: p.projectName,
-      rounds: [rMap.get(1) ?? 0, rMap.get(2) ?? 0, rMap.get(3) ?? 0],
-    }
-  })
-
-  return {
-    totalMembers: totalQuota,
-    completionRate:
-      totalQuota > 0 ? Math.round((completedCount / totalQuota) * 100) : 0,
-    completedCount,
-    pendingCount: Math.max(0, pendingCount),
-    rounds,
-    topProjects: projectCounts,
-    universities,
-    projectRounds,
-  }
-}
-
 // Admin 뷰용 데이터
 export function useAdminPageData(chapterName?: string) {
   const gisuQuery = useActiveGisuId()
   const gisuId = gisuQuery.data ?? 0
 
   const chaptersQuery = useChapters()
-  const chapters = chaptersQuery.data?.chapters ?? []
+  const chapters = useMemo(
+    () => chaptersQuery.data?.chapters ?? [],
+    [chaptersQuery.data],
+  )
 
   // 선택된 챕터 이름 -> chapterId 매핑
   const chapterId = useMemo(() => {
@@ -189,16 +149,19 @@ export function useAdminPageData(chapterName?: string) {
     return found ? Number(found.id) : undefined
   }, [chapterName, chapters])
 
-  // 전체 프로젝트 목록 조회
+  // 전체 프로젝트 목록 조회 (지원자 테이블용)
   const projectsQuery = useQuery({
     queryKey: applicationKeys.allProjects(gisuId, chapterId),
     queryFn: () => getAllProjects(gisuId, { chapterId }),
     enabled: gisuId > 0,
   })
 
-  const projects = projectsQuery.data?.content ?? []
+  const projects = useMemo(
+    () => projectsQuery.data?.content ?? [],
+    [projectsQuery.data],
+  )
 
-  // 각 프로젝트의 지원자 목록 조회
+  // 각 프로젝트의 지원자 목록 조회 (테이블 + 학교별 통계용)
   const applicantsQuery = useQuery({
     queryKey: [
       ...applicationKeys.all,
@@ -219,7 +182,43 @@ export function useAdminPageData(chapterName?: string) {
     enabled: projects.length > 0,
   })
 
-  // 서버 데이터 -> 프론트 타입 변환
+  // 전체 학교 목록 조회 (schoolId -> schoolName 매핑용)
+  const schoolsQuery = useQuery({
+    queryKey: ["schools", "all"],
+    queryFn: getAllSchools,
+  })
+  const schoolIdToName = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const s of schoolsQuery.data?.schools ?? []) {
+      map.set(s.schoolId, s.schoolName)
+    }
+    return map
+  }, [schoolsQuery.data])
+
+  // 매칭 차수 조회 (현재 진행 차수 계산용)
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(chapterId),
+    queryFn: () => getMatchingRounds(chapterId),
+  })
+  const currentRound = useMemo(
+    () => getCurrentRound(roundsQuery.data ?? []),
+    [roundsQuery.data],
+  )
+
+  // 지부 통계 조회 (rounds, totalMembers, projectRounds, topProjects)
+  const chapterStatsQuery = useQuery({
+    queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
+    queryFn: () => getChapterStatistics(chapterId!),
+    enabled: !!chapterId,
+  })
+
+  // projectId -> name 맵 (summaryToStats에서 프로젝트명 조회용)
+  const projectIdToName = useMemo(
+    () => new Map(projects.map((p) => [p.id, p.name])),
+    [projects],
+  )
+
+  // 서버 데이터 -> 프론트 타입 변환 (테이블용)
   const transformed: ProjectApplication[] = useMemo(
     () =>
       projects.map((p) =>
@@ -228,18 +227,49 @@ export function useAdminPageData(chapterName?: string) {
     [projects, applicantsQuery.data],
   )
 
-  // 통계 계산
-  const stats = useMemo(() => computeAdminStats(transformed), [transformed])
+  // 통계: summary 기반 (universities는 schoolMatchingStatistics + schools API로 계산)
+  const stats: ApplicationStats = useMemo(() => {
+    if (!chapterStatsQuery.data) {
+      return {
+        totalMembers: 0,
+        completionRate: 0,
+        completedCount: 0,
+        pendingCount: 0,
+        rounds: [],
+        topProjects: [],
+        universities: [],
+        projectRounds: [],
+      }
+    }
+    const partial = summaryToStats(
+      chapterStatsQuery.data.summary,
+      projectIdToName,
+    )
+    const universities: UniversityCount[] =
+      chapterStatsQuery.data.summary.schoolMatchingStatistics
+        .map((s) => ({
+          name: schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
+          applied: s.totalMemberCount,
+          total: partial.totalMembers,
+        }))
+        .sort((a, b) => b.applied - a.applied)
+        .slice(0, 5)
+    return { ...partial, universities }
+  }, [chapterStatsQuery.data, projectIdToName, schoolIdToName])
 
   return {
     projects: transformed,
     stats,
+    currentRound,
+    dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
     chapters,
     isLoading:
       gisuQuery.isLoading ||
       chaptersQuery.isLoading ||
+      roundsQuery.isLoading ||
       projectsQuery.isLoading ||
-      applicantsQuery.isLoading,
+      applicantsQuery.isLoading ||
+      chapterStatsQuery.isLoading,
     isError:
       gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError,
     error: gisuQuery.error ?? chaptersQuery.error ?? projectsQuery.error,

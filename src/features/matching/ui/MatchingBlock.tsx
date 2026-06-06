@@ -45,6 +45,17 @@ export function MatchingBlock({
   }
 
   if (type === "none") {
+    if (!onAssignClick) {
+      // 읽기 전용: 빈 블록만 표시
+      return (
+        <div
+          className={cn(
+            "border-teal-gray-100 flex h-8.5 w-31 items-center border bg-white",
+            className,
+          )}
+        />
+      )
+    }
     return (
       <button
         type="button"
@@ -55,7 +66,7 @@ export function MatchingBlock({
         )}
       >
         <span className="text-body-3-medium text-teal-gray-400 hidden w-full text-center group-hover:block">
-          임의 배정하기
+          수동 배정하기
         </span>
       </button>
     )
@@ -70,13 +81,19 @@ export function MatchingBlock({
         )}
       >
         <NumberTag variant="round1" />
-        <button
-          type="button"
-          onClick={onNameClick}
-          className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
-        >
-          {name}
-        </button>
+        {onNameClick ? (
+          <button
+            type="button"
+            onClick={onNameClick}
+            className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
+          >
+            {name}
+          </button>
+        ) : (
+          <span className="text-body-3-medium text-teal-gray-800 whitespace-nowrap">
+            {name}
+          </span>
+        )}
       </div>
     )
   }
@@ -84,18 +101,25 @@ export function MatchingBlock({
   return (
     <div
       className={cn(
-        "border-teal-gray-100 hover:bg-teal-gray-50/50 flex h-8.5 w-31 items-center gap-1.5 border bg-white p-2",
+        "border-teal-gray-100 flex h-8.5 w-31 items-center gap-1.5 border bg-white p-2",
+        onNameClick && "hover:bg-teal-gray-50/50",
         className,
       )}
     >
       <NumberTag variant={tagVariant} />
-      <button
-        type="button"
-        onClick={onNameClick}
-        className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
-      >
-        {name}
-      </button>
+      {onNameClick ? (
+        <button
+          type="button"
+          onClick={onNameClick}
+          className="text-body-3-medium text-teal-gray-800 cursor-pointer whitespace-nowrap hover:underline"
+        >
+          {name}
+        </button>
+      ) : (
+        <span className="text-body-3-medium text-teal-gray-800 whitespace-nowrap">
+          {name}
+        </span>
+      )}
     </div>
   )
 }

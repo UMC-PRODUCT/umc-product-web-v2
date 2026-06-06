@@ -84,7 +84,7 @@ export function RoundDonutChart({
 
       {/* 중앙 퍼센티지 (56x34) */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="flex h-[34px] w-[56px] items-center justify-center gap-px">
+        <div className="flex h-8.5 w-14 items-center justify-center gap-px">
           <span className="text-[1.375rem] leading-none font-semibold text-teal-600">
             {percentage}
           </span>
