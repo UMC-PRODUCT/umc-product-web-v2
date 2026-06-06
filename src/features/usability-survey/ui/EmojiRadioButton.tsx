@@ -3,17 +3,21 @@ import { cn } from "@/shared/lib/utils"
 
 import type { ComponentPropsWithoutRef } from "react"
 
+import type { RatingScore } from "@/shared/assets/icon/emoji"
+
 export interface EmojiRadioButtonProps extends Omit<
   ComponentPropsWithoutRef<"button">,
   "type"
 > {
   selected: boolean
   label: string
+  score: RatingScore
 }
 
 export const EmojiRadioButton = ({
   selected,
   label,
+  score,
   className,
   ...props
 }: EmojiRadioButtonProps) => {
@@ -32,11 +36,12 @@ export const EmojiRadioButton = ({
       {...props}
     >
       <RatingFace
-        score={selected ? 5 : 1}
+        score={score}
         variant={selected ? "default" : "neutral"}
         size="sm"
+        className="shrink-0"
       />
-      {label}
+      <span className="flex-1 text-center">{label}</span>
     </button>
   )
 }
