@@ -43,7 +43,7 @@ export const EmojiScaleQuestion = ({
                 type="button"
                 role="radio"
                 aria-checked={selected}
-                aria-label={label ?? `${index + 1} / ${scores.length}`}
+                aria-label={label || `${index + 1} / ${scores.length}`}
                 onClick={() => onChange(score)}
                 className="flex size-11 shrink-0 cursor-pointer items-center justify-center"
               >
