@@ -1,3 +1,4 @@
+import CloseCircleIcon from "@/shared/assets/icon/close/CloseCircleIcon"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { cn } from "@/shared/lib/utils"
 import { StatusChipDropdown } from "@/shared/ui/chip/StatusChipDropdown"
@@ -49,7 +50,9 @@ interface ModalFormPanelProps {
   projectName: string
   challengerName: string
   challengerUniversity: string
+  variant?: "application" | "matching"
   onStatusChange?: (status: StatusValue) => void
+  onUnmatch?: () => void
   onClose: () => void
   statusDisabled?: boolean
   className?: string
@@ -62,7 +65,9 @@ export function ModalFormPanel({
   projectName,
   challengerName,
   challengerUniversity,
+  variant = "application",
   onStatusChange,
+  onUnmatch,
   onClose,
   statusDisabled = false,
   className,
@@ -105,29 +110,51 @@ export function ModalFormPanel({
                   파트 지원서
                 </span>
               </h3>
-              <OptionButtonGroup
-                variant="segmented"
-                value={applicant.status}
-                onValueChange={(v) => onStatusChange?.(v as StatusValue)}
-                className={cn("w-60", statusDisabled && "pointer-events-none")}
-              >
-                <OptionButton value="pass" className="h-7.5 gap-0.5">
-                  합격
-                </OptionButton>
-                <OptionButton value="fail" className="h-7.5 gap-0.5">
-                  불합격
-                </OptionButton>
-                <OptionButton value="pending" className="h-7.5 gap-0.5">
-                  대기
-                </OptionButton>
-              </OptionButtonGroup>
+              {variant === "matching" ? (
+                onUnmatch && (
+                  <button
+                    type="button"
+                    onClick={onUnmatch}
+                    className="shadow-inner-neutral-2 hover:bg-teal-gray-50 flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-colors"
+                  >
+                    <CloseCircleIcon
+                      width={18}
+                      height={18}
+                      className="text-teal-gray-300"
+                    />
+                    <span className="text-body-3-medium text-teal-gray-600">
+                      매칭 해제
+                    </span>
+                  </button>
+                )
+              ) : (
+                <OptionButtonGroup
+                  variant="segmented"
+                  value={applicant.status}
+                  onValueChange={(v) => onStatusChange?.(v as StatusValue)}
+                  className={cn(
+                    "w-60",
+                    statusDisabled && "pointer-events-none",
+                  )}
+                >
+                  <OptionButton value="pass" className="h-7.5 gap-0.5">
+                    합격
+                  </OptionButton>
+                  <OptionButton value="fail" className="h-7.5 gap-0.5">
+                    불합격
+                  </OptionButton>
+                  <OptionButton value="pending" className="h-7.5 gap-0.5">
+                    대기
+                  </OptionButton>
+                </OptionButtonGroup>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
               <span className="text-body-2-medium text-teal-gray-600">
                 {applicant.name} · {applicant.university}
               </span>
-              {statusDisabled ? (
+              {variant === "matching" || statusDisabled ? (
                 <StatusChipTag value={applicant.status} type="chip" disabled />
               ) : (
                 <StatusChipDropdown

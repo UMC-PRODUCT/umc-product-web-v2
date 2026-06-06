@@ -154,6 +154,82 @@ export interface DecisionResponse {
   status: ApplicationStatusEnum
 }
 
+// ---- 통계 API 공통 타입 ----
+
+// 통계 응답에 포함되는 매칭 차수 요약
+export interface StatMatchingRound {
+  matchingRoundId: number
+  type: MatchingType
+  phase: MatchingPhase
+}
+
+// ProjectMember에 포함된 지원 이력 항목
+export interface MemberApplicationSummary {
+  applicationId: number
+  status: ApplicationStatusEnum | "DRAFT"
+  matchingRound: StatMatchingRound
+}
+
+// 프로젝트 멤버 (ACTIVE) + 지원 이력
+export interface ProjectMemberStat {
+  projectMemberId: number
+  memberId: number
+  part: PartEnum
+  status: "ACTIVE"
+  applications: MemberApplicationSummary[]
+}
+
+// 차수별 지원자 수 / 지원 가능 인원
+export interface RoundApplicationStat {
+  matchingRound: StatMatchingRound
+  appliedMemberCount: number
+  availableMemberCount: number
+}
+
+// 학교별 지원자 수 (차수 단위)
+export interface SchoolApplicationStat {
+  matchingRound: StatMatchingRound
+  schools: Array<{
+    schoolId: number
+    applicantCount: number
+  }>
+}
+
+// GET /api/v1/projects/{projectId}/statistics 응답
+export interface ProjectStatisticsResponse {
+  projectId: number
+  projectMembers: ProjectMemberStat[]
+  roundApplicationStatistics: RoundApplicationStat[]
+  schoolApplicationStatistics: SchoolApplicationStat[]
+}
+
+// GET /api/v1/projects/statistics 응답
+export interface ChapterStatisticsResponse {
+  chapterId: number
+  projects: ProjectStatisticsResponse[]
+  summary: {
+    // N차 매칭 지원 현황 카드
+    roundApplicationStatistics: RoundApplicationStat[]
+    // N차 매칭 지원 Top N (학교별)
+    roundSchoolRankings: SchoolApplicationStat[]
+    // 총원 N명 카드 (학교별 매칭 완료 인원)
+    schoolMatchingStatistics: Array<{
+      schoolId: number
+      matchedMemberCount: number
+      totalMemberCount: number
+    }>
+    // 프로젝트별 차수별 지원 현황
+    projectRoundStatistics: Array<{
+      projectId: number
+      matchingRounds: Array<{
+        matchingRound: StatMatchingRound
+        appliedMemberCount: number
+        matchedMemberCount: number
+      }>
+    }>
+  }
+}
+
 // 페이지네이션 공통
 export interface PageResponse<T> {
   content: T[]

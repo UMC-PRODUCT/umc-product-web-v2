@@ -5,11 +5,14 @@ import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   getViewerBranch,
+  isCentralStaff,
+  isChapterPresident,
   isCurrentTermPm,
-  isOperator,
+  isSuperAdmin,
 } from "@/features/auth/model/identity"
 import {
   getAllChapters,
@@ -90,7 +93,9 @@ export const Route = createFileRoute("/matching/")({
   },
   beforeLoad: async ({ search, context }) => {
     const me = await ensureMe(context.queryClient)
-    if (isOperator(me)) return
+    const isFullAccess = isSuperAdmin(me) || isCentralStaff(me)
+    if (isFullAccess) return
+
     const userChapter = getViewerBranch(me)
     if (isChapter(userChapter) && search.chapter !== userChapter) {
       throw redirect({
@@ -109,7 +114,10 @@ function TeamMatchingAnnouncePage() {
   const [pendingNotice] = useState(readPendingNotice)
 
   const { data: me } = useMe()
-  const canManage = isOperator(me)
+
+  const isSuper = isSuperAdmin(me)
+  const isCentral = isCentralStaff(me)
+  const isChapterPres = isChapterPresident(me)
   const isPm = isCurrentTermPm(me)
   const userChapter = getViewerBranch(me) as Chapter | undefined
 
@@ -156,6 +164,17 @@ function TeamMatchingAnnouncePage() {
     enabled: !!activeGisuId,
   })
 
+  const firstNoticeId = noticesData?.content[0]?.id
+  const { hasPermission } = useResourcePermission(
+    "NOTICE",
+    firstNoticeId ? Number(firstNoticeId) : undefined,
+  )
+
+  const canWrite =
+    !isSuper && (isCentral || (isChapterPres && chapter === userChapter))
+  const canEdit = hasPermission("EDIT")
+  const canDelete = hasPermission("DELETE")
+
   const notices = useMemo(() => {
     if (!noticesData) return []
 
@@ -197,7 +216,7 @@ function TeamMatchingAnnouncePage() {
   })
 
   const handleChapterChange = (nextChapter: Chapter) => {
-    if (!canManage && userChapter && nextChapter !== userChapter) {
+    if (!(isSuper || isCentral) && userChapter && nextChapter !== userChapter) {
       addToast({
         message: "소속된 지부의 공지만 확인할 수 있습니다.",
         color: "red",
@@ -266,7 +285,7 @@ function TeamMatchingAnnouncePage() {
               공지
             </span>
             <p className="text-body-2-regular text-teal-gray-600">
-              {canManage
+              {canWrite
                 ? "팀 매칭에 대한 지부별 공지를 모든 챌린저에게 안내합니다."
                 : isPm
                   ? "팀 매칭에 대한 우리 지부의 모든 공지를 한눈에 조회합니다."
@@ -281,7 +300,7 @@ function TeamMatchingAnnouncePage() {
                 onChapterChange={handleChapterChange}
               />
 
-              {canManage ? (
+              {canWrite ? (
                 <Button
                   type="button"
                   variant="fill"
@@ -302,7 +321,8 @@ function TeamMatchingAnnouncePage() {
               notices={notices}
               page={safePage}
               isLoading={isNoticesLoading}
-              canManage={canManage}
+              canEdit={canEdit}
+              canDelete={canDelete}
               focusedNoticeId={focusedNoticeId}
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}

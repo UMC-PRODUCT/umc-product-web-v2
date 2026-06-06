@@ -4,6 +4,7 @@ import type {
 } from "../ui/MatchingResultRow"
 
 export interface MatchingProjectData {
+  projectId?: number
   projectName: string
   challengerName: string
   challengerUniversity: string
@@ -54,64 +55,6 @@ export interface AssignableChallenger {
   university: string
   partRole: PartRole
 }
-
-// 역할 행 라벨 -> PartTagChip role 매핑
-export const ROLE_LABEL_TO_PART: Record<string, PartRole> = {
-  Frontend: "web",
-  Backend: "springboot",
-  Design: "design",
-}
-
-export const MOCK_ASSIGNABLE_CHALLENGERS: AssignableChallenger[] = [
-  // Web (Frontend)
-  { id: "ac-1", nickname: "김소영", university: "중앙대학교", partRole: "web" },
-  { id: "ac-2", nickname: "이준혁", university: "경희대학교", partRole: "web" },
-  { id: "ac-3", nickname: "박하윤", university: "동국대학교", partRole: "web" },
-  // SpringBoot (Backend)
-  {
-    id: "ac-4",
-    nickname: "최건우",
-    university: "건국대학교",
-    partRole: "springboot",
-  },
-  {
-    id: "ac-5",
-    nickname: "정다은",
-    university: "숙명여자대학교",
-    partRole: "springboot",
-  },
-  // Design
-  {
-    id: "ac-6",
-    nickname: "오지민",
-    university: "국민대학교",
-    partRole: "design",
-  },
-  {
-    id: "ac-7",
-    nickname: "신예은",
-    university: "이화여자대학교",
-    partRole: "design",
-  },
-  {
-    id: "ac-8",
-    nickname: "이방토",
-    university: "이화여자대학교",
-    partRole: "design",
-  },
-  {
-    id: "ac-9",
-    nickname: "이방토토",
-    university: "이화여자대학교",
-    partRole: "design",
-  },
-  {
-    id: "ac-10",
-    nickname: "이방울방울토",
-    university: "이화여자대학교",
-    partRole: "design",
-  },
-]
 
 export const MOCK_MATCHING_PARTS: MatchingPartData[] = [
   {

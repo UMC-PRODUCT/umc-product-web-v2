@@ -18,13 +18,46 @@ const ROUND_LABELS = ["1차 지원", "2차 지원", "3차 지원"] as const
 
 interface ApplicationStatsSectionProps {
   stats: ApplicationStats
+  dataUpdatedAt?: number
+  variant?: "application" | "matching"
+  currentRound?: number
   className?: string
+}
+
+const VARIANT_LABELS = {
+  application: {
+    sectionTitle: "01 지원 통계",
+    completedLabel: "지원 완료",
+    pendingLabel: "지원 전",
+    roundSuffix: "지원",
+  },
+  matching: {
+    sectionTitle: "01 매칭 통계",
+    completedLabel: "매칭 완료",
+    pendingLabel: "매칭 전",
+    roundSuffix: "매칭",
+  },
+} as const
+
+function formatUpdatedAt(timestamp?: number): string {
+  if (!timestamp) return ""
+  const d = new Date(timestamp)
+  const yy = String(d.getFullYear()).slice(2)
+  const MM = String(d.getMonth() + 1).padStart(2, "0")
+  const dd = String(d.getDate()).padStart(2, "0")
+  const HH = String(d.getHours()).padStart(2, "0")
+  const mm = String(d.getMinutes()).padStart(2, "0")
+  return `${yy}.${MM}.${dd} ${HH}:${mm} 기준`
 }
 
 export function ApplicationStatsSection({
   stats,
+  dataUpdatedAt,
+  variant = "application",
+  currentRound = 1,
   className,
 }: ApplicationStatsSectionProps) {
+  const labels = VARIANT_LABELS[variant]
   const maxRoundValue = Math.max(
     ...stats.projectRounds.flatMap((p) => p.rounds),
     1,
@@ -34,10 +67,14 @@ export function ApplicationStatsSection({
     <div className={cn("flex flex-col gap-4", className)}>
       {/* 섹션 헤더 */}
       <div className="flex items-center justify-between">
-        <h2 className="text-heading-6-semibold text-teal-700">01 지원 통계</h2>
-        <span className="text-caption-1-regular text-teal-gray-400">
-          26.04.24 04:48 기준
-        </span>
+        <h2 className="text-heading-6-semibold text-teal-700">
+          {labels.sectionTitle}
+        </h2>
+        {dataUpdatedAt ? (
+          <span className="text-caption-1-regular text-teal-gray-400">
+            {formatUpdatedAt(dataUpdatedAt)}
+          </span>
+        ) : null}
       </div>
 
       {/* 3열 통계 카드 */}
@@ -45,18 +82,34 @@ export function ApplicationStatsSection({
         {/* N차 매칭 지원 현황 */}
         <div className="shadow-drop-neutral-3 border-teal-gray-100 relative h-70 w-102 shrink-0 overflow-hidden rounded-lg border bg-white">
           <h3 className="text-heading-6-semibold absolute top-7 left-8 text-teal-700">
-            N차 매칭 지원 현황
+            {variant === "application"
+              ? `${currentRound}차 매칭 지원 현황`
+              : "지부 프로젝트 매칭률"}
           </h3>
 
           <div className="absolute top-20.5 left-9">
             <DonutChart percentage={stats.completionRate} size={142} />
           </div>
 
+          {/* 커넥터 라인 (도넛 -> 완료/전 범례) */}
+          <svg
+            width="40"
+            height="12"
+            viewBox="0 0 40 12"
+            fill="none"
+            className="absolute top-22.5 left-40"
+          >
+            <path
+              d="M0.353342 10.8125L-0.000214756 11.166L0.706886 11.8731L1.06044 11.5196L0.706892 11.166L0.353342 10.8125ZM9.20703 2.66602V2.16602H8.99993L8.85348 2.31246L9.20703 2.66602ZM34.1654 2.66602C34.1654 4.13877 35.3593 5.33268 36.832 5.33268C38.3048 5.33268 39.4987 4.13877 39.4987 2.66602C39.4987 1.19326 38.3048 -0.000651121 36.832 -0.000651121C35.3593 -0.000651121 34.1654 1.19326 34.1654 2.66602ZM0.706892 11.166L1.06044 11.5196L9.56058 3.01957L9.20703 2.66602L8.85348 2.31246L0.353342 10.8125L0.706892 11.166ZM9.20703 2.66602V3.16602H36.832V2.66602V2.16602H9.20703V2.66602Z"
+              fill="#63C4B8"
+            />
+          </svg>
+
           {/* 지원 완료/전 */}
           <div className="absolute top-20.5 left-53.25 flex flex-col gap-0.5">
             <div className="flex items-center gap-3.5">
               <span className="text-subtitle-3-semibold text-teal-gray-800 w-15">
-                지원 완료
+                {labels.completedLabel}
               </span>
               <span className="text-subtitle-3-semibold text-teal-500">
                 {stats.completedCount}
@@ -65,7 +118,7 @@ export function ApplicationStatsSection({
             </div>
             <div className="flex items-center gap-3.5">
               <span className="text-subtitle-3-semibold text-teal-gray-800 w-15">
-                지원 전
+                {labels.pendingLabel}
               </span>
               <span className="text-subtitle-3-semibold text-error-600">
                 {stats.pendingCount}
@@ -85,9 +138,11 @@ export function ApplicationStatsSection({
             <div className="flex flex-col gap-1.25 text-[12px]">
               {stats.rounds.map((r) => (
                 <div key={r.round} className="flex items-center gap-7">
-                  <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-[1.5]">
+                  <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-normal">
                     <span className="w-4.5">{r.round}차</span>
-                    <span className="whitespace-nowrap">지원</span>
+                    <span className="whitespace-nowrap">
+                      {labels.roundSuffix}
+                    </span>
                   </div>
                   <div className="flex w-20 items-center justify-end gap-2 leading-[1.4]">
                     <span className="text-label-3-semibold whitespace-nowrap text-teal-500">
@@ -105,9 +160,9 @@ export function ApplicationStatsSection({
         </div>
 
         {/* 1차 매칭 지원 Top 4 */}
-        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-[402px] shrink-0 flex-col rounded-lg border bg-white px-8 pt-7 pb-8">
+        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-100.5 shrink-0 flex-col rounded-lg border bg-white px-8 pt-7 pb-8">
           <h3 className="text-heading-6-semibold text-teal-700">
-            1차 매칭 지원 Top 4
+            {currentRound}차 매칭 {labels.roundSuffix} Top 4
           </h3>
           <div className="mt-10 flex items-end gap-2.5 px-2.5">
             {stats.topProjects.slice(0, 4).map((project, i) => {
