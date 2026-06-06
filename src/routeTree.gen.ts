@@ -33,6 +33,7 @@ import { Route as TestIconRouteImport } from './routes/test/icon'
 import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
 import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
 import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
+import { Route as TestEmojiRadioButtonRouteImport } from './routes/test/emoji-radio-button'
 import { Route as TestCounterLabelRouteImport } from './routes/test/counter-label'
 import { Route as TestCounterRouteImport } from './routes/test/counter'
 import { Route as TestChipRouteImport } from './routes/test/chip'
@@ -178,6 +179,11 @@ const TestFieldTypeButtonRoute = TestFieldTypeButtonRouteImport.update({
   path: '/test/field-type-button',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestEmojiRadioButtonRoute = TestEmojiRadioButtonRouteImport.update({
+  id: '/test/emoji-radio-button',
+  path: '/test/emoji-radio-button',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestCounterLabelRoute = TestCounterLabelRouteImport.update({
   id: '/test/counter-label',
   path: '/test/counter-label',
@@ -318,6 +324,7 @@ export interface FileRoutesByFullPath {
   '/test/chip': typeof TestChipRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
+  '/test/emoji-radio-button': typeof TestEmojiRadioButtonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
@@ -364,6 +371,7 @@ export interface FileRoutesByTo {
   '/test/chip': typeof TestChipRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
+  '/test/emoji-radio-button': typeof TestEmojiRadioButtonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
@@ -413,6 +421,7 @@ export interface FileRoutesById {
   '/test/chip': typeof TestChipRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
+  '/test/emoji-radio-button': typeof TestEmojiRadioButtonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
@@ -464,6 +473,7 @@ export interface FileRouteTypes {
     | '/test/chip'
     | '/test/counter'
     | '/test/counter-label'
+    | '/test/emoji-radio-button'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
@@ -510,6 +520,7 @@ export interface FileRouteTypes {
     | '/test/chip'
     | '/test/counter'
     | '/test/counter-label'
+    | '/test/emoji-radio-button'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
@@ -558,6 +569,7 @@ export interface FileRouteTypes {
     | '/test/chip'
     | '/test/counter'
     | '/test/counter-label'
+    | '/test/emoji-radio-button'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
@@ -604,6 +616,7 @@ export interface RootRouteChildren {
   TestChipRoute: typeof TestChipRoute
   TestCounterRoute: typeof TestCounterRoute
   TestCounterLabelRoute: typeof TestCounterLabelRoute
+  TestEmojiRadioButtonRoute: typeof TestEmojiRadioButtonRoute
   TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
   TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
   TestFormHeaderRoute: typeof TestFormHeaderRoute
@@ -791,6 +804,13 @@ declare module '@tanstack/react-router' {
       path: '/test/field-type-button'
       fullPath: '/test/field-type-button'
       preLoaderRoute: typeof TestFieldTypeButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/emoji-radio-button': {
+      id: '/test/emoji-radio-button'
+      path: '/test/emoji-radio-button'
+      fullPath: '/test/emoji-radio-button'
+      preLoaderRoute: typeof TestEmojiRadioButtonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/counter-label': {
@@ -1073,6 +1093,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestChipRoute: TestChipRoute,
   TestCounterRoute: TestCounterRoute,
   TestCounterLabelRoute: TestCounterLabelRoute,
+  TestEmojiRadioButtonRoute: TestEmojiRadioButtonRoute,
   TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
   TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
   TestFormHeaderRoute: TestFormHeaderRoute,
