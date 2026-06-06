@@ -21,10 +21,16 @@ export function useMultistepSurvey(
   const [answers, setAnswers] = useState<SurveyAnswers>({})
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  const configKey = steps
+    .map(
+      (step) => `${step.title}:${step.items.map((item) => item.id).join(",")}`,
+    )
+    .join("|")
+
   useEffect(() => {
     setStepIndex(0)
     setAnswers({})
-  }, [config])
+  }, [configKey])
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 })
