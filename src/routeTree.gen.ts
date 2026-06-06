@@ -14,16 +14,19 @@ import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestIndexRouteImport } from './routes/test/index'
 import { Route as SignupIndexRouteImport } from './routes/signup/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as TestUsabilitySurveyRouteImport } from './routes/test/usability-survey'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
 import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestSocialButtonRouteImport } from './routes/test/social-button'
+import { Route as TestRatingFaceRouteImport } from './routes/test/rating-face'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
 import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
@@ -80,6 +83,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestIndexRoute = TestIndexRouteImport.update({
+  id: '/test/',
+  path: '/test/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupIndexRoute = SignupIndexRouteImport.update({
   id: '/signup/',
   path: '/signup/',
@@ -105,6 +113,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const TestUsabilitySurveyRoute = TestUsabilitySurveyRouteImport.update({
+  id: '/test/usability-survey',
+  path: '/test/usability-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestTooltipRoute = TestTooltipRouteImport.update({
   id: '/test/tooltip',
   path: '/test/tooltip',
@@ -128,6 +141,11 @@ const TestToastRoute = TestToastRouteImport.update({
 const TestSocialButtonRoute = TestSocialButtonRouteImport.update({
   id: '/test/social-button',
   path: '/test/social-button',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestRatingFaceRoute = TestRatingFaceRouteImport.update({
+  id: '/test/rating-face',
+  path: '/test/rating-face',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestQuestionFormRoute = TestQuestionFormRouteImport.update({
@@ -313,16 +331,19 @@ export interface FileRoutesByFullPath {
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
+  '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
+  '/test/': typeof TestIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
@@ -357,16 +378,19 @@ export interface FileRoutesByTo {
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
+  '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin': typeof AdminIndexRoute
   '/login': typeof LoginIndexRoute
   '/matching': typeof MatchingIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/signup': typeof SignupIndexRoute
+  '/test': typeof TestIndexRoute
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
@@ -404,16 +428,19 @@ export interface FileRoutesById {
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
+  '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
+  '/test/': typeof TestIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
@@ -453,16 +480,19 @@ export interface FileRouteTypes {
     | '/test/input-box'
     | '/test/option-button'
     | '/test/question-form'
+    | '/test/rating-face'
     | '/test/social-button'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/usability-survey'
     | '/admin/'
     | '/login/'
     | '/matching/'
     | '/settings/'
     | '/signup/'
+    | '/test/'
     | '/matching/projects/announce'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
@@ -497,16 +527,19 @@ export interface FileRouteTypes {
     | '/test/input-box'
     | '/test/option-button'
     | '/test/question-form'
+    | '/test/rating-face'
     | '/test/social-button'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/usability-survey'
     | '/admin'
     | '/login'
     | '/matching'
     | '/settings'
     | '/signup'
+    | '/test'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
     | '/matching/notice-publish/$noticeId'
@@ -543,16 +576,19 @@ export interface FileRouteTypes {
     | '/test/input-box'
     | '/test/option-button'
     | '/test/question-form'
+    | '/test/rating-face'
     | '/test/social-button'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/usability-survey'
     | '/admin/'
     | '/login/'
     | '/matching/'
     | '/settings/'
     | '/signup/'
+    | '/test/'
     | '/matching/projects/announce'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
@@ -587,13 +623,16 @@ export interface RootRouteChildren {
   TestInputBoxRoute: typeof TestInputBoxRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
   TestQuestionFormRoute: typeof TestQuestionFormRoute
+  TestRatingFaceRoute: typeof TestRatingFaceRoute
   TestSocialButtonRoute: typeof TestSocialButtonRoute
   TestToastRoute: typeof TestToastRoute
   TestToggleRoute: typeof TestToggleRoute
   TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
+  TestUsabilitySurveyRoute: typeof TestUsabilitySurveyRoute
   LoginIndexRoute: typeof LoginIndexRoute
   SignupIndexRoute: typeof SignupIndexRoute
+  TestIndexRoute: typeof TestIndexRoute
   OauthKakaoCallbackRoute: typeof OauthKakaoCallbackRoute
 }
 
@@ -634,6 +673,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/test/': {
+      id: '/test/'
+      path: '/test'
+      fullPath: '/test/'
+      preLoaderRoute: typeof TestIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup/': {
       id: '/signup/'
       path: '/signup'
@@ -669,6 +715,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/test/usability-survey': {
+      id: '/test/usability-survey'
+      path: '/test/usability-survey'
+      fullPath: '/test/usability-survey'
+      preLoaderRoute: typeof TestUsabilitySurveyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/test/tooltip': {
       id: '/test/tooltip'
       path: '/test/tooltip'
@@ -702,6 +755,13 @@ declare module '@tanstack/react-router' {
       path: '/test/social-button'
       fullPath: '/test/social-button'
       preLoaderRoute: typeof TestSocialButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/rating-face': {
+      id: '/test/rating-face'
+      path: '/test/rating-face'
+      fullPath: '/test/rating-face'
+      preLoaderRoute: typeof TestRatingFaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/question-form': {
@@ -1040,13 +1100,16 @@ const rootRouteChildren: RootRouteChildren = {
   TestInputBoxRoute: TestInputBoxRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
+  TestRatingFaceRoute: TestRatingFaceRoute,
   TestSocialButtonRoute: TestSocialButtonRoute,
   TestToastRoute: TestToastRoute,
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
+  TestUsabilitySurveyRoute: TestUsabilitySurveyRoute,
   LoginIndexRoute: LoginIndexRoute,
   SignupIndexRoute: SignupIndexRoute,
+  TestIndexRoute: TestIndexRoute,
   OauthKakaoCallbackRoute: OauthKakaoCallbackRoute,
 }
 export const routeTree = rootRouteImport
