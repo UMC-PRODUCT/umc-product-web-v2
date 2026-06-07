@@ -133,7 +133,7 @@ function MatchingRoundsPage() {
   }
 
   return (
-    <section className="flex w-full flex-col gap-6 pt-10">
+    <section className="flex w-full flex-col gap-6">
       {/* 화이트 카드 */}
       <div className="border-teal-gray-100 flex w-272.5 flex-col gap-6 rounded-xl border bg-white p-8">
         {/* 타이틀 */}
@@ -153,7 +153,7 @@ function MatchingRoundsPage() {
             items={MATCHING_TYPES.map((t) => ({ value: t, label: t }))}
             value={matchingType}
             onValueChange={(v) => setMatchingType(v as MatchingType)}
-            className="w-[734px]"
+            className="w-183.5"
             itemClassName="flex-1"
           />
 

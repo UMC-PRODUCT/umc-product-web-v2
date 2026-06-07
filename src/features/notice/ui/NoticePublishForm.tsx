@@ -258,8 +258,8 @@ export function NoticePublishForm({
 
   return (
     <>
-      <section className="w-full pt-8">
-        <div className="border-teal-gray-100 flex w-full flex-col items-center rounded-[12px] border bg-white px-8.5 py-8">
+      <section className="w-full">
+        <div className="border-teal-gray-100 flex w-full flex-col items-center rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
           <div className="flex w-full justify-start pb-2.5">
             <button
               type="button"
