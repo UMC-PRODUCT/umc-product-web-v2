@@ -354,6 +354,42 @@ function MatchingRoundsPage() {
 
     const filledRounds = rounds.filter((r) => r.startDate || r.endDate)
 
+    // 기존 저장 차수의 날짜를 비워서 저장 시 서버-클라이언트 desync 방지
+    const hasClearedExisting = rounds.some(
+      (r) => r.id !== undefined && (!r.startDate || !r.endDate),
+    )
+    if (hasClearedExisting) {
+      addToast({
+        message: "기존에 저장된 일정은 빈 값으로 수정할 수 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // 날짜/시간 포맷 불완전 시 toISODatetime 크래시 방지
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/
+    const timePattern = /^\d{2}:\d{2}$/
+    const hasInvalidFormat = filledRounds.some(
+      (r) =>
+        !datePattern.test(r.startDate) ||
+        !datePattern.test(r.endDate) ||
+        !timePattern.test(r.startTime) ||
+        !timePattern.test(r.endTime),
+    )
+    if (hasInvalidFormat) {
+      addToast({
+        message: "올바른 날짜 및 시간 형식으로 입력해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
     // Case 3: startDate/endDate 중 하나만 입력된 경우 → 인라인 에러 + 스크롤
     const errors = rounds.map((r) => ({
       startDate: !r.startDate && !!r.endDate,
