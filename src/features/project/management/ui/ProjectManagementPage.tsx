@@ -28,15 +28,17 @@ import type { MatchingProject } from "@/features/project/list/model/matchingProj
 const FE_PART_LABELS = new Set(["Web", "iOS", "Android"])
 
 const PART_LABEL: Record<string, string> = {
+  PLAN: "기획",
+  DESIGN: "Design",
   WEB: "Web",
   IOS: "iOS",
   ANDROID: "Android",
-  DESIGN: "Design",
   SPRINGBOOT: "SpringBoot",
   NODEJS: "Node.js",
-  PLAN: "기획",
   ADMIN: "운영",
 }
+
+const PART_KEYS = Object.keys(PART_LABEL)
 
 type ProjectSummaryInput = {
   id?: number | null
@@ -76,11 +78,18 @@ function toMatchingProject(item: ProjectSummaryInput): MatchingProject {
     description: item.description ?? "",
     authorSchoolLine: ownerLine,
     coverImage: item.thumbnailImageUrl ? { src: item.thumbnailImageUrl } : null,
-    recruitRows: (item.partQuotas ?? []).map((q) => ({
-      part: PART_LABEL[q.part ?? ""] ?? q.part ?? "",
-      current: q.currentCount ?? 0,
-      total: q.quota ?? 0,
-    })),
+    recruitRows: (item.partQuotas ?? [])
+      .slice()
+      .sort((a, b) => {
+        const ai = PART_KEYS.indexOf(a.part ?? "")
+        const bi = PART_KEYS.indexOf(b.part ?? "")
+        return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi)
+      })
+      .map((q) => ({
+        part: PART_LABEL[q.part ?? ""] ?? q.part ?? "",
+        current: q.currentCount ?? 0,
+        total: q.quota ?? 0,
+      })),
   }
 }
 
