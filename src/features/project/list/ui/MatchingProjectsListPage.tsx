@@ -62,7 +62,7 @@ export function MatchingProjectsListPage() {
   >(null)
 
   return (
-    <section className="relative flex w-full flex-col items-start justify-start pt-8">
+    <section className="relative flex w-full flex-col items-start justify-start">
       {openFilterId && (
         <button
           type="button"
@@ -71,7 +71,7 @@ export function MatchingProjectsListPage() {
           onClick={() => setOpenFilterId(null)}
         />
       )}
-      <div className="border-teal-gray-150 relative z-30 flex h-full w-288 flex-col gap-5 rounded-xl border bg-white px-8.5 pt-8 pb-10">
+      <div className="border-teal-gray-100 relative z-30 flex h-full w-288 flex-col gap-5 rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 목록

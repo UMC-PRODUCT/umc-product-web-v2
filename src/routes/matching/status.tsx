@@ -40,8 +40,8 @@ function MatchingStatusPage() {
   const displayStats = stats
 
   return (
-    <section className="flex w-full flex-col pt-10">
-      <div className="border-teal-gray-100 flex w-288 flex-col rounded-xl border bg-white px-8.5 py-8">
+    <section className="flex w-full flex-col">
+      <div className="border-teal-gray-100 flex w-288 flex-col rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
         {/* 페이지 헤더 */}
         <div className="flex flex-col gap-1.5">
           <h1 className="text-heading-6-semibold text-teal-gray-900">

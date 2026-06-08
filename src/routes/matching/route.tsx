@@ -22,7 +22,7 @@ function MatchingLayout() {
           <div className="px-8.5 pt-14.5">
             <MatchingSegmentRegion />
           </div>
-          <div className="min-h-100vh flex min-w-0 flex-1 flex-col px-8.5">
+          <div className="flex min-h-screen min-w-0 flex-1 flex-col px-8.5 pt-8">
             <Outlet />
           </div>
         </div>

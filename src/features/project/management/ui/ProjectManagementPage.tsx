@@ -176,8 +176,8 @@ export function ProjectManagementPage() {
   if (!hasAccess) return null
 
   return (
-    <section className="relative flex w-full flex-col items-start justify-start pt-8">
-      <div className="border-teal-gray-150 relative z-30 flex h-full min-w-242 flex-col gap-6 rounded-xl border bg-white px-8.5 py-8">
+    <section className="relative flex w-full flex-col items-start justify-start">
+      <div className="border-teal-gray-100 relative z-30 flex h-full min-w-242 flex-col gap-6 rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 관리
