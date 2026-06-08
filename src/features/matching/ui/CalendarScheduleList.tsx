@@ -94,14 +94,17 @@ export function CalendarScheduleList({
             </span>
           </div>
 
-          {/* 날짜 & 시간 */}
+          {/* 날짜 & 시간: 날짜 미입력 시 invisible로 높이 유지 */}
           <span
             className={cn(
               "text-body-3-medium whitespace-nowrap opacity-80",
               isDisabled ? "text-teal-gray-400" : "text-teal-gray-500",
+              !startDate && "invisible",
             )}
           >
-            {formatScheduleDateTime(startDate, startTime, endTime)}
+            {startDate
+              ? formatScheduleDateTime(startDate, startTime, endTime)
+              : "\u00A0"}
           </span>
         </div>
 
