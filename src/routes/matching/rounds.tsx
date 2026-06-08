@@ -208,6 +208,16 @@ function MatchingRoundsPage() {
     return { start: minStart, end: maxEnd }
   }, [rounds])
 
+  // REVIEW: 1차 매칭 시작 후에는 차수 기간을 변경할 수 없음 - 서버 스펙 확정 후 재검토
+  const isFirstRoundStarted = useMemo(() => {
+    const first = rounds[0]
+    if (!first) return false
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/
+    if (!datePattern.test(first.startDate)) return false
+    const start = new Date(`${first.startDate}T${first.startTime}:00`)
+    return start <= new Date()
+  }, [rounds])
+
   const updateRound = (
     idx: number,
     field: keyof RoundSchedule,
@@ -406,7 +416,8 @@ function MatchingRoundsPage() {
 
   const saveButtonText =
     saveState === "completed" ? "저장 완료" : isDirty ? "수정하기" : "저장하기"
-  const saveButtonDisabled = !isDirty || saveState === "completed"
+  const saveButtonDisabled =
+    !isDirty || saveState === "completed" || isFirstRoundStarted
 
   return (
     <section className="flex w-full flex-col gap-6 pt-10">
@@ -500,6 +511,7 @@ function MatchingRoundsPage() {
                         endDate={round.endDate}
                         startTime={round.startTime}
                         endTime={round.endTime}
+                        disabled={isFirstRoundStarted}
                         startDateError={roundErrors[idx]?.startDate}
                         endDateError={roundErrors[idx]?.endDate}
                         onStartDateChange={(v) =>
