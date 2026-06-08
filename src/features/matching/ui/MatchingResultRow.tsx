@@ -1,5 +1,11 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 
+import {
+  addProjectMember,
+  removeProjectMember,
+} from "@/features/application/api/applicationApi"
+import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
@@ -11,8 +17,16 @@ import { MatchingBlock } from "./MatchingBlock"
 import { MatchingDetailModal } from "./MatchingDetailModal"
 
 import type { Part } from "@/features/challenger/model/types"
-import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 import type { NumberTagVariant } from "@/shared/ui/NumberTag"
+
+// 역할 행 라벨 -> 서버 Part enum 변환
+function roleToPart(role: string, backendPart: "springboot" | "nodejs"): Part {
+  if (role === "Frontend") return "WEB"
+  if (role === "Backend")
+    return backendPart === "nodejs" ? "NODEJS" : "SPRINGBOOT"
+  if (role === "Design") return "DESIGN"
+  return "WEB"
+}
 
 type BlockType = "round1" | "filled" | "none" | "blocked"
 
@@ -21,6 +35,7 @@ export interface MatchingBlockData {
   name?: string
   tagVariant?: NumberTagVariant
   applicantId?: string
+  memberId?: number
 }
 
 export interface MatchingRoleRow {
@@ -28,24 +43,8 @@ export interface MatchingRoleRow {
   blocks: MatchingBlockData[]
 }
 
-// 역할 라벨 -> 서버 Part enum 변환
-function roleLabelToPart(
-  role: string,
-  backendPart: "springboot" | "nodejs",
-): Part | undefined {
-  switch (role) {
-    case "Frontend":
-      return "WEB"
-    case "Backend":
-      return backendPart === "nodejs" ? "NODEJS" : "SPRINGBOOT"
-    case "Design":
-      return "DESIGN"
-    default:
-      return undefined
-  }
-}
-
 interface MatchingResultRowProps {
+  projectId?: number
   projectName: string
   challengerName: string
   challengerUniversity: string
@@ -54,13 +53,15 @@ interface MatchingResultRowProps {
   status: "recruiting" | "completed"
   currentCount?: number
   totalCount?: number
-  projectData?: MatchingProject
+  isEditable?: boolean
   gisuId?: number
   chapterId?: number
+  approvedMemberIds?: Set<string>
   className?: string
 }
 
 export function MatchingResultRow({
+  projectId,
   projectName,
   challengerName,
   challengerUniversity,
@@ -69,14 +70,16 @@ export function MatchingResultRow({
   status,
   currentCount,
   totalCount,
-  projectData,
+  isEditable = true,
   gisuId,
   chapterId,
+  approvedMemberIds,
   className,
 }: MatchingResultRowProps) {
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
     null,
   )
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null)
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
   const [assignTarget, setAssignTarget] = useState<{
     rowIdx: number
@@ -84,6 +87,29 @@ export function MatchingResultRow({
     role: string
   } | null>(null)
   const [localRoleRows, setLocalRoleRows] = useState(roleRows)
+  const queryClient = useQueryClient()
+
+  const assignMutation = useMutation({
+    mutationFn: ({ memberId, part }: { memberId: number; part: string }) =>
+      addProjectMember(projectId!, { memberId, part }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: applicationKeys.all })
+    },
+    onError: () => {
+      // 서버 실패 시 optimistic update 롤백
+      setLocalRoleRows(roleRows)
+    },
+  })
+
+  const unmatchMutation = useMutation({
+    mutationFn: (memberId: number) => removeProjectMember(projectId!, memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: applicationKeys.all })
+    },
+    onError: () => {
+      setLocalRoleRows(roleRows)
+    },
+  })
 
   useEffect(() => {
     setLocalRoleRows(roleRows)
@@ -141,12 +167,15 @@ export function MatchingResultRow({
                     name={block.name}
                     tagVariant={block.tagVariant}
                     onNameClick={
-                      block.applicantId
-                        ? () => setSelectedApplicantId(block.applicantId!)
+                      isEditable && block.applicantId
+                        ? () => {
+                            setSelectedApplicantId(block.applicantId!)
+                            setSelectedMemberId(block.memberId ?? null)
+                          }
                         : undefined
                     }
                     onAssignClick={
-                      block.type === "none"
+                      isEditable && block.type === "none"
                         ? () =>
                             setAssignTarget({
                               rowIdx,
@@ -204,64 +233,86 @@ export function MatchingResultRow({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            {projectData && (
-              <ProjectDetailCard projectId={Number(projectData.id)} />
-            )}
+            {projectId && <ProjectDetailCard projectId={projectId} />}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
 
       <MatchingDetailModal
         applicantId={selectedApplicantId}
+        projectId={projectId}
+        memberId={selectedMemberId ?? undefined}
         chapterName="Chromium"
         projectName={projectName}
         challengerName={challengerName}
         challengerUniversity={challengerUniversity}
         open={selectedApplicantId !== null}
         onOpenChange={(open) => {
-          if (!open) setSelectedApplicantId(null)
+          if (!open) {
+            setSelectedApplicantId(null)
+            setSelectedMemberId(null)
+          }
         }}
-      />
-
-      <AssignmentModal
-        open={assignTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) setAssignTarget(null)
-        }}
-        projectName={projectName}
-        challengerName={challengerName}
-        challengerUniversity={challengerUniversity}
-        role={assignTarget?.role ?? ""}
-        gisuId={gisuId}
-        chapterId={chapterId}
-        part={
-          assignTarget
-            ? roleLabelToPart(assignTarget.role, backendPart)
+        isEditable={isEditable}
+        onConfirmUnmatch={
+          projectId && selectedMemberId
+            ? () => unmatchMutation.mutate(selectedMemberId)
             : undefined
         }
-        onAssign={(challenger) => {
-          if (!assignTarget) return
-          setLocalRoleRows((prev) =>
-            prev.map((row, rIdx) =>
-              rIdx === assignTarget.rowIdx
-                ? {
-                    ...row,
-                    blocks: row.blocks.map((block, bIdx) =>
-                      bIdx === assignTarget.blockIdx
-                        ? {
-                            type: "filled" as const,
-                            name: challenger.nickname,
-                            tagVariant: "random" as const,
-                            applicantId: challenger.id,
-                          }
-                        : block,
-                    ),
-                  }
-                : row,
-            ),
-          )
-        }}
       />
+
+      {isEditable && (
+        <AssignmentModal
+          open={assignTarget !== null}
+          onOpenChange={(open) => {
+            if (!open) setAssignTarget(null)
+          }}
+          projectName={projectName}
+          challengerName={challengerName}
+          challengerUniversity={challengerUniversity}
+          role={assignTarget?.role ?? ""}
+          part={
+            assignTarget
+              ? roleToPart(assignTarget.role, backendPart)
+              : undefined
+          }
+          gisuId={gisuId}
+          chapterId={chapterId}
+          approvedMemberIds={approvedMemberIds}
+          onAssign={(challenger) => {
+            if (!assignTarget) return
+            // 로컬 UI 즉시 반영
+            setLocalRoleRows((prev) =>
+              prev.map((row, rIdx) =>
+                rIdx === assignTarget.rowIdx
+                  ? {
+                      ...row,
+                      blocks: row.blocks.map((block, bIdx) =>
+                        bIdx === assignTarget.blockIdx
+                          ? {
+                              type: "filled" as const,
+                              name: challenger.nickname,
+                              tagVariant: "random" as const,
+                              applicantId: challenger.id,
+                              memberId: Number(challenger.id),
+                            }
+                          : block,
+                      ),
+                    }
+                  : row,
+              ),
+            )
+            // 서버 API 호출
+            if (projectId) {
+              const part = roleToPart(assignTarget.role, backendPart)
+              assignMutation.mutate({
+                memberId: Number(challenger.id),
+                part,
+              })
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

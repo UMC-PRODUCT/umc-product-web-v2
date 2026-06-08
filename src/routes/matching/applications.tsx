@@ -78,7 +78,11 @@ function MatchingApplicationsPage() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-14.25 pl-4">
-                  <ApplicationStatsSection stats={adminStats} />
+                  <ApplicationStatsSection
+                    stats={adminStats}
+                    dataUpdatedAt={admin.dataUpdatedAt}
+                    currentRound={admin.currentRound}
+                  />
                   <ApplicationTableSection projects={adminProjects} />
                 </div>
               )}

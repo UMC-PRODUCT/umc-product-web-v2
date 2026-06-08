@@ -293,8 +293,8 @@ export function ProjectDetailCard({
 
   return (
     <>
-      <div className="flex w-[33.75rem] flex-col items-start overflow-hidden rounded-2xl bg-white">
-        <div className="bg-teal-gray-200 flex h-[17.875rem] w-[33.75rem] items-center justify-center overflow-hidden">
+      <div className="flex w-135 flex-col items-start overflow-hidden rounded-2xl bg-white">
+        <div className="bg-teal-gray-200 flex h-71.5 w-135 items-center justify-center overflow-hidden">
           {cover?.src ? (
             <img
               src={cover.src}
@@ -334,7 +334,7 @@ export function ProjectDetailCard({
                 </p>
               </div>
 
-              <p className="text-body-2-regular text-teal-gray-600 w-full break-words whitespace-pre-wrap">
+              <p className="text-body-2-regular text-teal-gray-600 w-full wrap-break-word whitespace-pre-wrap">
                 {data.description}
               </p>
             </div>
