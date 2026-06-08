@@ -1,10 +1,17 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 
-import { MOCK_PROJECTS } from "@/features/application/model/applicationMock"
+import { getAllProjects } from "@/features/application/api/applicationApi"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
-import { MOCK_MATCHING_PROJECTS } from "@/features/project/list/model/matchingProject.mock"
+import {
+  getViewerBranch,
+  isCentralStaff,
+  isChapterPresident,
+  isCurrentTermPm,
+  isSchoolStaff,
+  isSuperAdmin,
+} from "@/features/auth/model/identity"
+import { getAllChapters } from "@/features/challenger/api/organization"
 import { gisuKeys } from "@/features/project/new/api/queryKeys"
 import { getActiveGisu } from "@/shared/api/gisu"
 import {
@@ -12,15 +19,45 @@ import {
   ChapterSelector,
 } from "@/shared/ui/segment/ChapterSelector"
 
-import { getManagedProjects, type ManagedProjectSummaryResponse } from "../api"
+import { getManagedProjects } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"
 import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
 import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 
-function toMatchingProject(
-  item: ManagedProjectSummaryResponse,
-): MatchingProject {
+const FE_PART_LABELS = new Set(["Web", "iOS", "Android"])
+
+const PART_LABEL: Record<string, string> = {
+  WEB: "Web",
+  IOS: "iOS",
+  ANDROID: "Android",
+  DESIGN: "Design",
+  SPRINGBOOT: "SpringBoot",
+  NODEJS: "Node.js",
+  PLAN: "기획",
+  ADMIN: "운영",
+}
+
+type ProjectSummaryInput = {
+  id?: number | null
+  name?: string | null
+  description?: string | null
+  thumbnailImageUrl?: string | null
+  productOwner?: {
+    nickname?: string | null
+    name?: string | null
+    schoolName?: string | null
+  } | null
+  partQuotas?:
+    | {
+        part?: string | null
+        currentCount?: number | null
+        quota?: number | null
+      }[]
+    | null
+}
+
+function toMatchingProject(item: ProjectSummaryInput): MatchingProject {
   const owner = item.productOwner
   const ownerLine = [
     owner?.nickname && owner?.name
@@ -40,7 +77,7 @@ function toMatchingProject(
     authorSchoolLine: ownerLine,
     coverImage: item.thumbnailImageUrl ? { src: item.thumbnailImageUrl } : null,
     recruitRows: (item.partQuotas ?? []).map((q) => ({
-      part: q.part ?? "",
+      part: PART_LABEL[q.part ?? ""] ?? q.part ?? "",
       current: q.currentCount ?? 0,
       total: q.quota ?? 0,
     })),
@@ -49,47 +86,85 @@ function toMatchingProject(
 
 export function ProjectManagementPage() {
   const { data: me } = useMe()
+
+  const isCentral = isSuperAdmin(me) || isCentralStaff(me)
+  const isChapPres = isChapterPresident(me)
+  const isSchoolAdmin = isSchoolStaff(me)
   const isPm = isCurrentTermPm(me)
-  const isOp = isOperator(me)
-  const canManage = isOp
+
+  const isAdminScope = isCentral || isChapPres || isSchoolAdmin
+  const hasAccess = isAdminScope || isPm
+
   const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
 
   const gisuQuery = useQuery({
     queryKey: gisuKeys.active,
     queryFn: getActiveGisu,
-    enabled: isPm,
+    enabled: hasAccess,
   })
   const gisuId = gisuQuery.data?.gisuId
     ? Number(gisuQuery.data.gisuId)
     : undefined
 
+  // 중앙/지부장: 챕터명 → chapterId 매핑
+  const chaptersQuery = useQuery({
+    queryKey: ["chapters", "all"],
+    queryFn: getAllChapters,
+    enabled: isCentral || isChapPres,
+  })
+
+  const userChapterName = getViewerBranch(me)
+  const effectiveChapterName = isCentral ? selectedChapter : userChapterName
+
+  const effectiveChapterId = useMemo(() => {
+    if (!chaptersQuery.data || isSchoolAdmin) return undefined
+    return (
+      chaptersQuery.data.chapters.find((c) => c.name === effectiveChapterName)
+        ?.id ?? undefined
+    )
+  }, [chaptersQuery.data, effectiveChapterName, isSchoolAdmin])
+
+  // 어드민 프로젝트 쿼리 (중앙/지부장/학교 회장단)
+  const adminProjectsQuery = useQuery({
+    queryKey: ["projects", "admin", gisuId, effectiveChapterId],
+    queryFn: () =>
+      getAllProjects(gisuId!, {
+        chapterId: effectiveChapterId ? Number(effectiveChapterId) : undefined,
+        size: 200,
+      }),
+    enabled: isAdminScope && !!gisuId,
+  })
+
+  // PM 프로젝트 쿼리
   const managedQuery = useQuery({
     queryKey: ["project", "managed", "me", gisuId],
     queryFn: () => getManagedProjects(gisuId!),
-    enabled: isPm && !!gisuId,
+    enabled: isPm && !isAdminScope && !!gisuId,
   })
+
+  const adminProjects: MatchingProject[] = useMemo(
+    () => (adminProjectsQuery.data?.content ?? []).map(toMatchingProject),
+    [adminProjectsQuery.data],
+  )
 
   const pmProjects: MatchingProject[] = useMemo(
     () => (managedQuery.data ?? []).map(toMatchingProject),
     [managedQuery.data],
   )
 
-  const opProjects = useMemo(() => {
-    return MOCK_MATCHING_PROJECTS.filter((p) => p.branch === selectedChapter)
-  }, [selectedChapter])
-
   const partGroups = useMemo(() => {
-    const map = new Map<string, typeof opProjects>()
-    for (const project of opProjects) {
+    const map = new Map<string, MatchingProject[]>()
+    for (const project of adminProjects) {
       for (const row of project.recruitRows) {
+        if (!FE_PART_LABELS.has(row.part)) continue
         if (!map.has(row.part)) map.set(row.part, [])
         map.get(row.part)!.push(project)
       }
     }
     return map
-  }, [opProjects])
+  }, [adminProjects])
 
-  if (!isOp && !isPm) return null
+  if (!hasAccess) return null
 
   return (
     <section className="relative flex w-full flex-col items-start justify-start pt-8">
@@ -105,7 +180,7 @@ export function ProjectManagementPage() {
           </span>
         </div>
 
-        {canManage && (
+        {isCentral && (
           <ChapterSelector
             selectedChapter={selectedChapter}
             onChapterChange={setSelectedChapter}
@@ -114,27 +189,25 @@ export function ProjectManagementPage() {
         )}
 
         <div className="flex flex-col gap-10">
-          {canManage ? (
-            partGroups.size > 0 ? (
+          {isAdminScope ? (
+            adminProjectsQuery.isLoading ? (
+              <p className="text-body-2-regular text-teal-gray-400 py-10 text-center">
+                데이터를 불러오는 중...
+              </p>
+            ) : partGroups.size > 0 ? (
               Array.from(partGroups.entries()).map(([part, partProjects]) => (
                 <div key={part} className="flex flex-col">
                   <ProjectManagementSubTitle title={part} className="pb-2" />
                   <div className="flex flex-col gap-4">
-                    {partProjects.map((project, i) => (
-                      <ProjectManagementCard
-                        key={project.id}
-                        data={project}
-                        projectApplication={
-                          MOCK_PROJECTS[i % MOCK_PROJECTS.length]!
-                        }
-                      />
+                    {partProjects.map((project) => (
+                      <ProjectManagementCard key={project.id} data={project} />
                     ))}
                   </div>
                 </div>
               ))
             ) : (
               <p className="text-body-2-medium text-teal-gray-400 py-10 text-center">
-                해당 챕터에 등록된 프로젝트가 없습니다.
+                등록된 프로젝트가 없습니다.
               </p>
             )
           ) : isPm ? (
@@ -144,14 +217,8 @@ export function ProjectManagementPage() {
               </p>
             ) : pmProjects.length > 0 ? (
               <div className="flex flex-col gap-3">
-                {pmProjects.map((project, i) => (
-                  <ProjectManagementCard
-                    key={project.id}
-                    data={project}
-                    projectApplication={
-                      MOCK_PROJECTS[i % MOCK_PROJECTS.length]!
-                    }
-                  />
+                {pmProjects.map((project) => (
+                  <ProjectManagementCard key={project.id} data={project} />
                 ))}
               </div>
             ) : (
