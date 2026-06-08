@@ -3,6 +3,7 @@ import { createFileRoute, redirect, useBlocker } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { Tooltip } from "@/components/tooltip/Tooltip"
 import {
   createMatchingRound,
   getMatchingRounds,
@@ -27,6 +28,7 @@ import { BranchSelector } from "@/features/matching/ui/BranchSelector"
 import { Calendar } from "@/features/matching/ui/Calendar"
 import { CalendarScheduleList } from "@/features/matching/ui/CalendarScheduleList"
 import { RoundForm } from "@/features/matching/ui/RoundForm"
+import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
@@ -511,6 +513,34 @@ function MatchingRoundsPage() {
                       />
                     </div>
                   ))}
+
+                  {/* 툴팁: 매칭 차수 기간 설정 안내 */}
+                  <Tooltip
+                    content={
+                      <div className="text-left">
+                        <p className="text-caption-2-medium font-bold text-teal-600">
+                          매칭 차수 기간 설정
+                        </p>
+                        <p className="text-caption-2-regular text-teal-gray-600">
+                          1차 매칭 시작 후에는 차수 기간을 변경할 수 없습니다.
+                        </p>
+                      </div>
+                    }
+                    size="big"
+                    dark={false}
+                    side="right"
+                    sideOffset={8}
+                    className="h-13! w-69!"
+                    triggerClassName="self-start -mt-6"
+                  >
+                    <button
+                      type="button"
+                      className="flex items-center justify-center p-0.75"
+                      aria-label="매칭 차수 기간 설정 안내"
+                    >
+                      <InfoCircleIcon className="text-teal-gray-400 h-5 w-5" />
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
             </div>
