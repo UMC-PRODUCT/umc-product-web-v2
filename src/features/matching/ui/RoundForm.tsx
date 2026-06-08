@@ -9,6 +9,7 @@ interface RoundFormProps {
   endDate: string
   startTime: string
   endTime: string
+  disabled?: boolean
   onStartDateChange: (value: string) => void
   onEndDateChange: (value: string) => void
   onStartTimeChange: (value: string) => void
@@ -22,6 +23,7 @@ export function RoundForm({
   endDate,
   startTime,
   endTime,
+  disabled = false,
   onStartDateChange,
   onEndDateChange,
   onStartTimeChange,
@@ -37,18 +39,28 @@ export function RoundForm({
           <DateTextBox
             label="시작"
             value={startDate}
+            disabled={disabled}
             onChange={onStartDateChange}
           />
-          <TimeTextBox value={startTime} onChange={onStartTimeChange} />
+          <TimeTextBox
+            value={startTime}
+            disabled={disabled}
+            onChange={onStartTimeChange}
+          />
         </div>
         <span className="text-body-2-medium text-teal-gray-400">~</span>
         <div className="flex items-center gap-1.5">
           <DateTextBox
             label="종료"
             value={endDate}
+            disabled={disabled}
             onChange={onEndDateChange}
           />
-          <TimeTextBox value={endTime} onChange={onEndTimeChange} />
+          <TimeTextBox
+            value={endTime}
+            disabled={disabled}
+            onChange={onEndTimeChange}
+          />
         </div>
       </div>
     </div>
