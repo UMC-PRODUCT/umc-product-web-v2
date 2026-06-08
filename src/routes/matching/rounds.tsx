@@ -203,10 +203,10 @@ function MatchingRoundsPage() {
 
         const startsAt = toISODatetime(round.startDate, round.startTime)
         const endsAt = toISODatetime(round.endDate, round.endTime)
-        // decisionDeadline: endsAt 이후여야 하므로 +1초
-        const dlDt = new Date(endsAt)
-        dlDt.setSeconds(dlDt.getSeconds() + 1)
-        const decisionDeadline = dlDt.toISOString()
+        // decisionDeadline: endsAt 이후여야 하므로 +1ms
+        const decisionDeadline = new Date(
+          new Date(endsAt).getTime() + 1,
+        ).toISOString()
 
         if (round.id) {
           // 기존 라운드 수정
