@@ -60,7 +60,7 @@ export function ProjectManagementMoreMenu({
     const getCount = (parts: string[]): AssignmentCount => {
       let current = 0
       let total = 0
-      for (const q of detail.partQuotas) {
+      for (const q of detail.partQuotas ?? []) {
         if (parts.includes(q.part)) {
           current += q.currentCount
           total += q.quota
@@ -73,8 +73,9 @@ export function ProjectManagementMoreMenu({
       id: String(detail.id),
       projectName: detail.name,
       role: "plan" as Role,
-      challengerName: detail.productOwner.nickname || detail.productOwner.name,
-      challengerUniversity: detail.productOwner.schoolName,
+      challengerName:
+        detail.productOwner?.nickname || detail.productOwner?.name || "",
+      challengerUniversity: detail.productOwner?.schoolName || "",
       statusLabel:
         detail.partQuotaStatus === "RECRUITING" ? "모집 중" : "모집 완료",
       designCount: getCount(["DESIGN"]),
