@@ -49,6 +49,7 @@ const textVariants = cva("whitespace-nowrap", {
 export interface SegmentButtonItem {
   value: string
   label: string
+  disabled?: boolean
 }
 
 interface SegmentButtonProps {
@@ -82,9 +83,12 @@ export function SegmentButton({
             key={item.value}
             type="button"
             aria-pressed={isSelected}
+            disabled={item.disabled}
             onClick={() => onValueChange(item.value)}
             className={cn(
               buttonVariants({ selected: isSelected, type }),
+              item.disabled &&
+                "cursor-not-allowed opacity-40 disabled:hover:bg-transparent disabled:hover:shadow-none",
               itemClassName,
             )}
           >

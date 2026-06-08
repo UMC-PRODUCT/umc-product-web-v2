@@ -4,6 +4,7 @@ import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 import type {
   ChapterStatisticsResponse,
+  CreateMatchingRoundRequest,
   DecisionRequest,
   DecisionResponse,
   ManagedProjectSummaryResponse,
@@ -12,6 +13,7 @@ import type {
   ProjectApplicantResponse,
   ProjectApplicationDetailResponse,
   ProjectStatisticsResponse,
+  UpdateMatchingRoundRequest,
 } from "../model/apiTypes"
 
 // 프로젝트별 지원자 목록 조회
@@ -82,6 +84,35 @@ export async function getMatchingRounds(chapterId?: number) {
   const { data } = await api.get<ApiResponse<MatchingRoundResponse[]>>(
     "/v1/project/matching-rounds",
     { params: chapterId ? { chapterId } : undefined },
+  )
+  return data.result
+}
+
+// 매칭 차수 생성
+export async function createMatchingRound(body: CreateMatchingRoundRequest) {
+  const { data } = await api.post<ApiResponse<MatchingRoundResponse>>(
+    "/v1/project/matching-rounds",
+    body,
+  )
+  return data.result
+}
+
+// 매칭 차수 수정
+export async function updateMatchingRound(
+  matchingRoundId: number,
+  body: UpdateMatchingRoundRequest,
+) {
+  const { data } = await api.patch<ApiResponse<MatchingRoundResponse>>(
+    `/v1/project/matching-rounds/${matchingRoundId}`,
+    body,
+  )
+  return data.result
+}
+
+// 매칭 차수 삭제
+export async function deleteMatchingRound(matchingRoundId: number) {
+  const { data } = await api.delete<ApiResponse<unknown>>(
+    `/v1/project/matching-rounds/${matchingRoundId}`,
   )
   return data.result
 }

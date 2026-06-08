@@ -50,14 +50,14 @@ export const EmojiScaleWithTextQuestion = ({
         )}
       >
         <div className="overflow-hidden">
-          <div className="flex w-full pt-6">
+          <div className="flex w-full justify-center pt-6">
             <InputBox
               value={textValue}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 onTextChange(e.target.value)
               }
               placeholder={textPlaceholder}
-              className="flex-1"
+              className="w-full max-w-75"
             />
           </div>
         </div>

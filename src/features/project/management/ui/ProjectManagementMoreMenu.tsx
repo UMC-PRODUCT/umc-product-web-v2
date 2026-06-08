@@ -1,9 +1,12 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { Popover } from "radix-ui"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { getProjectApplications } from "@/features/application/api/applicationApi"
+import { applicationKeys } from "@/features/application/api/applicationKeys"
+import { toApplicantDetail } from "@/features/application/model/mappers"
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { deleteProject } from "@/features/project/management/api"
@@ -11,19 +14,21 @@ import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
-import type { ProjectApplication } from "@/features/application/model/types"
+import type {
+  AssignmentCount,
+  ProjectApplication,
+  Role,
+} from "@/features/application/model/types"
 
 interface ProjectManagementMoreMenuProps {
   projectId: string
   projectName: string
-  projectApplication: ProjectApplication
   chapterName: string
 }
 
 export function ProjectManagementMoreMenu({
   projectId,
   projectName,
-  projectApplication,
   chapterName,
 }: ProjectManagementMoreMenuProps) {
   const navigate = useNavigate()
@@ -32,6 +37,53 @@ export function ProjectManagementMoreMenu({
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [applicationOpen, setApplicationOpen] = useState(false)
   const addToast = useToastStore((s) => s.addToast)
+
+  const numericProjectId = Number(projectId)
+
+  const projectDetailQuery = useQuery({
+    queryKey: ["projectDetail", numericProjectId],
+    queryFn: () => getProjectDetail(numericProjectId),
+    enabled: applicationOpen && numericProjectId > 0,
+  })
+
+  const applicantsQuery = useQuery({
+    queryKey: applicationKeys.applicants(numericProjectId),
+    queryFn: () => getProjectApplications(numericProjectId),
+    enabled: applicationOpen && numericProjectId > 0,
+  })
+
+  const projectApplication = useMemo((): ProjectApplication | null => {
+    const detail = projectDetailQuery.data
+    const applicants = applicantsQuery.data
+    if (!detail || !applicants) return null
+
+    const getCount = (parts: string[]): AssignmentCount => {
+      let current = 0
+      let total = 0
+      for (const q of detail.partQuotas ?? []) {
+        if (parts.includes(q.part)) {
+          current += q.currentCount
+          total += q.quota
+        }
+      }
+      return { current, total }
+    }
+
+    return {
+      id: String(detail.id),
+      projectName: detail.name,
+      role: "plan" as Role,
+      challengerName:
+        detail.productOwner?.nickname || detail.productOwner?.name || "",
+      challengerUniversity: detail.productOwner?.schoolName || "",
+      statusLabel:
+        detail.partQuotaStatus === "RECRUITING" ? "모집 중" : "모집 완료",
+      designCount: getCount(["DESIGN"]),
+      feCount: getCount(["WEB"]),
+      beCount: getCount(["SPRINGBOOT", "NODEJS"]),
+      applicants: applicants.map(toApplicantDetail),
+    }
+  }, [projectDetailQuery.data, applicantsQuery.data])
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteProject(Number(projectId)),
@@ -149,12 +201,14 @@ export function ProjectManagementMoreMenu({
         </Popover.Portal>
       </Popover.Root>
 
-      <ApplicationDetailModal
-        project={projectApplication}
-        chapterName={chapterName}
-        open={applicationOpen}
-        onOpenChange={setApplicationOpen}
-      />
+      {projectApplication && (
+        <ApplicationDetailModal
+          project={projectApplication}
+          chapterName={chapterName}
+          open={applicationOpen}
+          onOpenChange={setApplicationOpen}
+        />
+      )}
 
       <CtaModal
         open={deleteOpen}

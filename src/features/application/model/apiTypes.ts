@@ -154,6 +154,29 @@ export interface DecisionResponse {
   status: ApplicationStatusEnum
 }
 
+// POST /api/v1/project/matching-rounds
+export interface CreateMatchingRoundRequest {
+  name: string
+  description?: string
+  type: MatchingType
+  phase: MatchingPhase
+  chapterId: number
+  startsAt: string // ISO 8601
+  endsAt: string
+  decisionDeadline: string
+}
+
+// PATCH /api/v1/project/matching-rounds/{matchingRoundId}
+export interface UpdateMatchingRoundRequest {
+  name?: string
+  description?: string
+  type?: MatchingType
+  phase?: MatchingPhase
+  startsAt?: string
+  endsAt?: string
+  decisionDeadline?: string
+}
+
 // ---- 통계 API 공통 타입 ----
 
 // 통계 응답에 포함되는 매칭 차수 요약

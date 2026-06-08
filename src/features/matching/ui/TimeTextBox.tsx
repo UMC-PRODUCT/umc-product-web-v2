@@ -34,7 +34,14 @@ export function TimeTextBox({
         value={value}
         placeholder={placeholder}
         disabled={disabled}
-        onChange={(e) => onChange?.(e.target.value)}
+        onChange={(e) => {
+          const digits = e.target.value.replace(/\D/g, "").slice(0, 4)
+          const formatted =
+            digits.length > 2
+              ? `${digits.slice(0, 2)}:${digits.slice(2)}`
+              : digits
+          onChange?.(formatted)
+        }}
         className={cn(
           "text-body-1-medium w-full bg-transparent text-center focus:outline-none",
           disabled

@@ -74,7 +74,7 @@ export const QuestionField = ({
               onAnswer(question.id, e.target.value)
             }
             placeholder={question.placeholder}
-            className="flex-1"
+            className="w-full max-w-none"
           />
         </div>
       )

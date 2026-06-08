@@ -17,7 +17,6 @@ import { MatchingBlock } from "./MatchingBlock"
 import { MatchingDetailModal } from "./MatchingDetailModal"
 
 import type { Part } from "@/features/challenger/model/types"
-import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 import type { NumberTagVariant } from "@/shared/ui/NumberTag"
 
 // 역할 행 라벨 -> 서버 Part enum 변환
@@ -54,7 +53,6 @@ interface MatchingResultRowProps {
   status: "recruiting" | "completed"
   currentCount?: number
   totalCount?: number
-  projectData?: MatchingProject
   isEditable?: boolean
   gisuId?: number
   chapterId?: number
