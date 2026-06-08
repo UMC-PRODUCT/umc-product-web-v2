@@ -57,7 +57,7 @@ export const EmojiScaleWithTextQuestion = ({
                 onTextChange(e.target.value)
               }
               placeholder={textPlaceholder}
-              className="w-full"
+              className="w-full max-w-75"
             />
           </div>
         </div>
