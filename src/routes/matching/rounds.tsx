@@ -123,6 +123,8 @@ function MatchingRoundsPage() {
   const serverType = toServerMatchingType(matchingType)
 
   const syncRoundsFromServer = useCallback(() => {
+    // 사용자가 수정 중인 경우 백그라운드 리페치로 인한 덮어쓰기 방지
+    if (isDirty) return
     const allRounds = roundsQuery.data ?? []
     const filtered = allRounds.filter((r) => r.type === serverType)
     if (filtered.length === 0) {
@@ -158,7 +160,7 @@ function MatchingRoundsPage() {
     setRoundErrors(PHASES.map(() => ({ startDate: false, endDate: false })))
     setIsDirty(false)
     setSaveState("idle")
-  }, [roundsQuery.data, serverType, matchingType])
+  }, [roundsQuery.data, serverType, matchingType, isDirty])
 
   // 서버 데이터 변경 시 로컬 동기화
   useEffect(() => {
