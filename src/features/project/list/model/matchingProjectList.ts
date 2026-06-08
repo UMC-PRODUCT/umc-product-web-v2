@@ -38,7 +38,10 @@ export type MatchingProjectListFilterDescriptor = {
 
 const FILTER_LAYOUT = {
   branch: { className: "w-fit min-w-20", dropdownClassName: "w-[9.5rem]" },
-  school: { className: "w-fit min-w-20", dropdownClassName: "w-[9.5rem]" },
+  school: {
+    className: "w-fit min-w-20",
+    dropdownClassName: "w-[9.5rem] max-h-[25.25rem] overflow-y-auto",
+  },
   part: { className: "w-fit min-w-20", dropdownClassName: "w-[9.125rem]" },
   status: {
     className: "w-[7.125rem]",
@@ -115,7 +118,9 @@ export function useMatchingProjectListFilters() {
             chaptersData?.chapters.find((ch) => ch.chapterId === selectedBranch)
               ?.schools ?? []
           ).map((s) => ({ value: s.schoolId, label: s.schoolName }))
-        : [],
+        : (chaptersData?.chapters ?? []).flatMap((ch) =>
+            ch.schools.map((s) => ({ value: s.schoolId, label: s.schoolName })),
+          ),
     [chaptersData, selectedBranch],
   )
 
