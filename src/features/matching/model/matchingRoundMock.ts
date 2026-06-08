@@ -92,6 +92,7 @@ export function toRoundSchedule(r: MatchingRoundResponse): RoundSchedule {
 }
 
 // 특정 타입의 라운드가 없을 때 빈 3개 차수 생성
+// 1차: 시작 00:00 / 2차·3차: 시작 12:00, 종료 23:59 고정
 export function emptyRoundSchedules(
   matchingType: MatchingType,
 ): RoundSchedule[] {
@@ -101,7 +102,7 @@ export function emptyRoundSchedules(
     title: matchingType,
     startDate: "",
     endDate: "",
-    startTime: "00:00",
+    startTime: phase === "FIRST" ? "00:00" : "12:00",
     endTime: "23:59",
   }))
 }
