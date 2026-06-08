@@ -48,6 +48,26 @@ function parseDate(dateStr: string): Date | null {
   return new Date(y, m - 1, d)
 }
 
+function getRoundState(
+  round: RoundSchedule,
+): "active" | "default" | "disabled" {
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/
+  if (!datePattern.test(round.startDate) || !datePattern.test(round.endDate))
+    return "default"
+  const now = new Date()
+  const start = new Date(`${round.startDate}T${round.startTime}:00`)
+  const end = new Date(`${round.endDate}T${round.endTime}:00`)
+  if (end < now) return "disabled" // 완료
+  if (start <= now) return "active" // 진행중
+  return "default" // 예정
+}
+
+function isRoundStarted(round: RoundSchedule): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(round.startDate)) return false
+  const start = new Date(`${round.startDate}T${round.startTime}:00`)
+  return start <= new Date()
+}
+
 function MatchingRoundsPage() {
   const [matchingType, setMatchingType] =
     useState<MatchingType>("Plan-Develop 매칭")
@@ -150,16 +170,21 @@ function MatchingRoundsPage() {
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
 
-  // 모든 라운드의 날짜 범위를 합쳐서 하이라이트
-  const highlightRanges = useMemo(() => {
-    return rounds
-      .map((r) => {
-        const start = parseDate(r.startDate)
-        const end = parseDate(r.endDate)
-        if (!start || !end) return null
-        return { start, end }
-      })
-      .filter(Boolean) as { start: Date; end: Date }[]
+  // 1차 시작일 ~ 3차 종료일을 잇는 단일 하이라이트
+  const highlightRange = useMemo(() => {
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/
+    const starts = rounds
+      .map((r) =>
+        datePattern.test(r.startDate) ? parseDate(r.startDate) : null,
+      )
+      .filter(Boolean) as Date[]
+    const ends = rounds
+      .map((r) => (datePattern.test(r.endDate) ? parseDate(r.endDate) : null))
+      .filter(Boolean) as Date[]
+    if (starts.length === 0 || ends.length === 0) return null
+    const minStart = new Date(Math.min(...starts.map((d) => d.getTime())))
+    const maxEnd = new Date(Math.max(...ends.map((d) => d.getTime())))
+    return { start: minStart, end: maxEnd }
   }, [rounds])
 
   const updateRound = (
@@ -289,7 +314,7 @@ function MatchingRoundsPage() {
                 <div className="ml-4 w-101 shrink-0">
                   <div className="border-teal-gray-100 flex flex-col gap-5 rounded-2xl border bg-white px-3 pt-2 pb-3 drop-shadow-[0px_4px_8px_rgba(239,240,240,0.3)]">
                     <Calendar
-                      highlightRanges={highlightRanges}
+                      highlightRange={highlightRange}
                       className="border-0 bg-transparent"
                     />
 
@@ -302,7 +327,7 @@ function MatchingRoundsPage() {
                           startDate={round.startDate}
                           startTime={round.startTime}
                           endTime={round.endTime}
-                          state={round.startDate ? "default" : "disabled"}
+                          state={getRoundState(round)}
                         />
                       ))}
                     </div>
@@ -319,6 +344,7 @@ function MatchingRoundsPage() {
                       endDate={round.endDate}
                       startTime={round.startTime}
                       endTime={round.endTime}
+                      disabled={isRoundStarted(round)}
                       onStartDateChange={(v) =>
                         updateRound(idx, "startDate", v)
                       }
