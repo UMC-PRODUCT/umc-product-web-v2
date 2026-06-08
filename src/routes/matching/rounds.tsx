@@ -62,12 +62,6 @@ function getRoundState(
   return "default" // 예정
 }
 
-function isRoundStarted(round: RoundSchedule): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(round.startDate)) return false
-  const start = new Date(`${round.startDate}T${round.startTime}:00`)
-  return start <= new Date()
-}
-
 function MatchingRoundsPage() {
   const [matchingType, setMatchingType] =
     useState<MatchingType>("Plan-Develop 매칭")
@@ -344,7 +338,6 @@ function MatchingRoundsPage() {
                       endDate={round.endDate}
                       startTime={round.startTime}
                       endTime={round.endTime}
-                      disabled={isRoundStarted(round)}
                       onStartDateChange={(v) =>
                         updateRound(idx, "startDate", v)
                       }
