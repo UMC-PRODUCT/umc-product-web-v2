@@ -36,7 +36,7 @@ export const UsabilitySurveyModal = ({
         <Modal.Content
           aria-describedby={undefined}
           style={{ background: CARD_BACKGROUND }}
-          className="top-29.5 flex max-h-[80vh] w-150 translate-y-0 flex-col items-center rounded-[9.2px] border-[0.8px] border-white pt-13.5 pr-8 pb-9.5 pl-9.5 shadow-[0_4.6px_15.333px_0_#E4E4E4]"
+          className="top-29.5 flex max-h-[80vh] w-full max-w-150 translate-y-0 flex-col items-center rounded-[9.2px] border-[0.8px] border-white pt-13.5 pr-8 pb-9.5 pl-9.5 shadow-[0_4.6px_15.333px_0_#E4E4E4]"
           onEscapeKeyDown={
             preventClose ? (event) => event.preventDefault() : undefined
           }
