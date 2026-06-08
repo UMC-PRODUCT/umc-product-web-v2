@@ -10,6 +10,8 @@ interface RoundFormProps {
   startTime: string
   endTime: string
   disabled?: boolean
+  startDateError?: boolean
+  endDateError?: boolean
   onStartDateChange: (value: string) => void
   onEndDateChange: (value: string) => void
   onStartTimeChange: (value: string) => void
@@ -24,6 +26,8 @@ export function RoundForm({
   startTime,
   endTime,
   disabled = false,
+  startDateError = false,
+  endDateError = false,
   onStartDateChange,
   onEndDateChange,
   onStartTimeChange,
@@ -40,6 +44,7 @@ export function RoundForm({
             label="시작"
             value={startDate}
             disabled={disabled}
+            error={startDateError}
             onChange={onStartDateChange}
           />
           <TimeTextBox
@@ -54,6 +59,7 @@ export function RoundForm({
             label="종료"
             value={endDate}
             disabled={disabled}
+            error={endDateError}
             onChange={onEndDateChange}
           />
           <TimeTextBox

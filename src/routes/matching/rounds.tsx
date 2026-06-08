@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, redirect, useBlocker } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import {
   createMatchingRound,
   getMatchingRounds,
@@ -30,6 +31,8 @@ import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 
+import type { AxiosError } from "axios"
+
 export const Route = createFileRoute("/matching/rounds")({
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
@@ -47,6 +50,15 @@ function parseDate(dateStr: string): Date | null {
   if (isNaN(y) || isNaN(m) || isNaN(d)) return null
   return new Date(y, m - 1, d)
 }
+
+function formatDate(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, "0")
+  const d = String(date.getDate()).padStart(2, "0")
+  return `${y}-${m}-${d}`
+}
+
+const MAX_ROUND_DAYS = 3
 
 function getRoundState(
   round: RoundSchedule,
@@ -69,13 +81,22 @@ function MatchingRoundsPage() {
   const [rounds, setRounds] = useState<RoundSchedule[]>(
     emptyRoundSchedules(matchingType),
   )
+  // CalendarScheduleList용: POST/PATCH 완료 후에만 갱신
+  const [committedRounds, setCommittedRounds] = useState<RoundSchedule[]>(
+    emptyRoundSchedules(matchingType),
+  )
   const [isDirty, setIsDirty] = useState(false)
   const [saveState, setSaveState] = useState<"idle" | "loading" | "completed">(
     "idle",
   )
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [roundErrors, setRoundErrors] = useState(() =>
+    PHASES.map(() => ({ startDate: false, endDate: false })),
+  )
+  const roundFormRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const queryClient = useQueryClient()
+  const addToast = useToastStore((s) => s.addToast)
 
   // 지부 목록 조회 -> branch name -> chapterId 매핑
   const chaptersQuery = useChapters()
@@ -103,7 +124,9 @@ function MatchingRoundsPage() {
     const allRounds = roundsQuery.data ?? []
     const filtered = allRounds.filter((r) => r.type === serverType)
     if (filtered.length === 0) {
-      setRounds(emptyRoundSchedules(matchingType))
+      const empty = emptyRoundSchedules(matchingType)
+      setRounds(empty)
+      setCommittedRounds(empty)
     } else {
       // phase 순서대로 정렬
       const phaseOrder = { FIRST: 0, SECOND: 1, THIRD: 2 }
@@ -122,13 +145,15 @@ function MatchingRoundsPage() {
             title: matchingType,
             startDate: "",
             endDate: "",
-            startTime: "00:00",
+            startTime: phase === "FIRST" ? "00:00" : "12:00",
             endTime: "23:59",
           }
         )
       })
       setRounds(result)
+      setCommittedRounds(result)
     }
+    setRoundErrors(PHASES.map(() => ({ startDate: false, endDate: false })))
     setIsDirty(false)
     setSaveState("idle")
   }, [roundsQuery.data, serverType, matchingType])
@@ -186,9 +211,58 @@ function MatchingRoundsPage() {
     field: keyof RoundSchedule,
     value: string,
   ) => {
+    // Case 4: 클램프 여부 미리 계산 (state updater 밖에서 toast 호출)
+    let willClamp = false
+    if (field === "startDate" || field === "endDate") {
+      const current = rounds[idx]
+      const startDate = field === "startDate" ? value : current.startDate
+      const endDate = field === "endDate" ? value : current.endDate
+      const start = parseDate(startDate)
+      const end = parseDate(endDate)
+      if (start && end) {
+        const diffDays =
+          (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+        if (diffDays > MAX_ROUND_DAYS) willClamp = true
+      }
+    }
+
     setRounds((prev) =>
-      prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)),
+      prev.map((r, i) => {
+        if (i !== idx) return r
+        const updated = { ...r, [field]: value }
+        // 단일 차수 최대 3일 제한: startDate 또는 endDate 변경 시 클램프
+        if (field === "startDate" || field === "endDate") {
+          const start = parseDate(updated.startDate)
+          const end = parseDate(updated.endDate)
+          if (start && end) {
+            const diffDays =
+              (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+            if (diffDays > MAX_ROUND_DAYS) {
+              const clamped = new Date(start)
+              clamped.setDate(clamped.getDate() + MAX_ROUND_DAYS)
+              updated.endDate = formatDate(clamped)
+            }
+          }
+        }
+        return updated
+      }),
     )
+
+    if (willClamp) {
+      addToast({
+        message: "하나의 매칭 기간은 3일을 넘어갈 수 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
+
+    if (field === "startDate" || field === "endDate") {
+      setRoundErrors((prev) =>
+        prev.map((e, i) => (i === idx ? { ...e, [field]: false } : e)),
+      )
+    }
     setIsDirty(true)
     if (saveState === "completed") setSaveState("idle")
   }
@@ -196,7 +270,6 @@ function MatchingRoundsPage() {
   // 저장 mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (chapterId === undefined) throw new Error("지부를 선택해주세요.")
       const promises = rounds.map((round) => {
         // 날짜가 비어있으면 스킵
         if (!round.startDate || !round.endDate) return Promise.resolve()
@@ -237,12 +310,75 @@ function MatchingRoundsPage() {
         queryKey: applicationKeys.matchingRounds(chapterId),
       })
     },
-    onError: () => {
+    onError: (error) => {
       setSaveState("idle")
+      if ((error as AxiosError).response?.status === 401) {
+        addToast({
+          message: "권한이 없습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
     },
   })
 
   const handleSave = () => {
+    // Case 1: 지부 미선택
+    if (chapterId === undefined) {
+      addToast({
+        message: "다른 지부의 매칭 일정은 설정할 수 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    const filledRounds = rounds.filter((r) => r.startDate || r.endDate)
+
+    // Case 3: startDate/endDate 중 하나만 입력된 경우 → 인라인 에러 + 스크롤
+    const errors = rounds.map((r) => ({
+      startDate: !r.startDate && !!r.endDate,
+      endDate: !!r.startDate && !r.endDate,
+    }))
+    const firstErrorIdx = errors.findIndex((e) => e.startDate || e.endDate)
+    if (firstErrorIdx !== -1) {
+      setRoundErrors(errors)
+      roundFormRefs.current[firstErrorIdx]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      })
+      addToast({
+        message: "모든 일정을 입력해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // Case 2: 종료 일시 < 시작 일시
+    const hasInvalidRange = filledRounds.some((r) => {
+      if (!r.startDate || !r.endDate) return false
+      const start = new Date(`${r.startDate}T${r.startTime}:00`)
+      const end = new Date(`${r.endDate}T${r.endTime}:00`)
+      return end < start
+    })
+    if (hasInvalidRange) {
+      addToast({
+        message: "종료 일시는 시작 일시 이후로 설정해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
     setSaveState("loading")
     saveMutation.mutate()
   }
@@ -313,7 +449,7 @@ function MatchingRoundsPage() {
                     />
 
                     <div className="flex flex-col gap-2">
-                      {rounds.map((round) => (
+                      {committedRounds.map((round) => (
                         <CalendarScheduleList
                           key={round.roundLabel}
                           roundLabel={round.roundLabel}
@@ -331,22 +467,30 @@ function MatchingRoundsPage() {
                 {/* 우측: 차수 폼 */}
                 <div className="flex flex-1 flex-col gap-10 py-7 pl-8">
                   {rounds.map((round, idx) => (
-                    <RoundForm
+                    <div
                       key={round.roundLabel}
-                      title={`${round.roundLabel} 매칭`}
-                      startDate={round.startDate}
-                      endDate={round.endDate}
-                      startTime={round.startTime}
-                      endTime={round.endTime}
-                      onStartDateChange={(v) =>
-                        updateRound(idx, "startDate", v)
-                      }
-                      onEndDateChange={(v) => updateRound(idx, "endDate", v)}
-                      onStartTimeChange={(v) =>
-                        updateRound(idx, "startTime", v)
-                      }
-                      onEndTimeChange={(v) => updateRound(idx, "endTime", v)}
-                    />
+                      ref={(el) => {
+                        roundFormRefs.current[idx] = el
+                      }}
+                    >
+                      <RoundForm
+                        title={`${round.roundLabel} 매칭`}
+                        startDate={round.startDate}
+                        endDate={round.endDate}
+                        startTime={round.startTime}
+                        endTime={round.endTime}
+                        startDateError={roundErrors[idx]?.startDate}
+                        endDateError={roundErrors[idx]?.endDate}
+                        onStartDateChange={(v) =>
+                          updateRound(idx, "startDate", v)
+                        }
+                        onEndDateChange={(v) => updateRound(idx, "endDate", v)}
+                        onStartTimeChange={(v) =>
+                          updateRound(idx, "startTime", v)
+                        }
+                        onEndTimeChange={(v) => updateRound(idx, "endTime", v)}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
