@@ -53,13 +53,6 @@ function parseDate(dateStr: string): Date | null {
   return new Date(y, m - 1, d)
 }
 
-function formatDate(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, "0")
-  const d = String(date.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
-}
-
 const MAX_ROUND_DAYS = 3
 
 function getRoundState(
@@ -225,53 +218,9 @@ function MatchingRoundsPage() {
     field: keyof RoundSchedule,
     value: string,
   ) => {
-    // Case 4: 클램프 여부 미리 계산 (state updater 밖에서 toast 호출)
-    let willClamp = false
-    if (field === "startDate" || field === "endDate") {
-      const current = rounds[idx]
-      if (!current) return
-      const startDate = field === "startDate" ? value : current.startDate
-      const endDate = field === "endDate" ? value : current.endDate
-      const start = parseDate(startDate)
-      const end = parseDate(endDate)
-      if (start && end) {
-        const diffDays =
-          (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-        if (diffDays > MAX_ROUND_DAYS) willClamp = true
-      }
-    }
-
     setRounds((prev) =>
-      prev.map((r, i) => {
-        if (i !== idx) return r
-        const updated = { ...r, [field]: value }
-        // 단일 차수 최대 3일 제한: startDate 또는 endDate 변경 시 클램프
-        if (field === "startDate" || field === "endDate") {
-          const start = parseDate(updated.startDate)
-          const end = parseDate(updated.endDate)
-          if (start && end) {
-            const diffDays =
-              (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-            if (diffDays > MAX_ROUND_DAYS) {
-              const clamped = new Date(start)
-              clamped.setDate(clamped.getDate() + MAX_ROUND_DAYS)
-              updated.endDate = formatDate(clamped)
-            }
-          }
-        }
-        return updated
-      }),
+      prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)),
     )
-
-    if (willClamp) {
-      addToast({
-        message: "하나의 매칭 기간은 3일을 넘어갈 수 없습니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    }
 
     if (field === "startDate" || field === "endDate") {
       setRoundErrors((prev) =>
@@ -422,6 +371,28 @@ function MatchingRoundsPage() {
     if (hasInvalidRange) {
       addToast({
         message: "종료 일시는 시작 일시 이후로 설정해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // Case 4: 단일 차수 기간 3일 초과
+    const hasExceededMaxDays = filledRounds.some((r) => {
+      if (!r.startDate || !r.endDate) return false
+      const start = parseDate(r.startDate)
+      const end = parseDate(r.endDate)
+      if (!start || !end) return false
+      return (
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24) >
+        MAX_ROUND_DAYS
+      )
+    })
+    if (hasExceededMaxDays) {
+      addToast({
+        message: "하나의 매칭 기간은 3일을 넘어갈 수 없습니다.",
         color: "red",
         variant: "deep",
         type: "default",
