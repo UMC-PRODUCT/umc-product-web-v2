@@ -8,6 +8,7 @@ interface CalendarScheduleListProps {
   startTime: string // "00:00"
   endTime: string // "23:59"
   state?: "default" | "active" | "disabled"
+  onClick?: () => void
   className?: string
 }
 
@@ -33,6 +34,7 @@ export function CalendarScheduleList({
   startTime,
   endTime,
   state = "default",
+  onClick,
   className,
 }: CalendarScheduleListProps) {
   const isActive = state === "active"
@@ -40,9 +42,23 @@ export function CalendarScheduleList({
 
   return (
     <div
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onClick()
+              }
+            }
+          : undefined
+      }
       className={cn(
         "flex w-95 rounded-lg border-l-8 border-l-teal-500 pl-2",
         isActive ? "bg-teal-50" : "bg-teal-gray-50",
+        onClick && "cursor-pointer",
         className,
       )}
     >
@@ -81,14 +97,17 @@ export function CalendarScheduleList({
             </span>
           </div>
 
-          {/* 날짜 & 시간 */}
+          {/* 날짜 & 시간: 날짜 미입력 시 invisible로 높이 유지 */}
           <span
             className={cn(
               "text-body-3-medium whitespace-nowrap opacity-80",
               isDisabled ? "text-teal-gray-400" : "text-teal-gray-500",
+              !startDate && "invisible",
             )}
           >
-            {formatScheduleDateTime(startDate, startTime, endTime)}
+            {startDate
+              ? formatScheduleDateTime(startDate, startTime, endTime)
+              : "\u00A0"}
           </span>
         </div>
 

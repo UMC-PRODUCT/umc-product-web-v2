@@ -48,7 +48,15 @@ export function DateTextBox({
         value={value}
         placeholder={placeholder}
         disabled={disabled}
-        onChange={(e) => onChange?.(e.target.value)}
+        onChange={(e) => {
+          const digits = e.target.value.replace(/\D/g, "").slice(0, 8)
+          let formatted = digits
+          if (digits.length > 6)
+            formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`
+          else if (digits.length > 4)
+            formatted = `${digits.slice(0, 4)}-${digits.slice(4)}`
+          onChange?.(formatted)
+        }}
         className={cn(
           "text-body-1-medium min-w-0 flex-1 bg-transparent focus:outline-none",
           disabled

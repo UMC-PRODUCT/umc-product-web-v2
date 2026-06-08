@@ -13,6 +13,7 @@ interface CalendarProps {
   month?: number
   selectedDate?: Date | null
   highlightRange?: { start: Date; end: Date } | null
+  highlightRanges?: { start: Date; end: Date }[]
   onDateClick?: (date: Date) => void
   onMonthChange?: (year: number, month: number) => void
   className?: string
@@ -40,6 +41,7 @@ export function Calendar({
   month: controlledMonth,
   selectedDate = null,
   highlightRange = null,
+  highlightRanges,
   onDateClick,
   onMonthChange,
   className,
@@ -120,27 +122,37 @@ export function Calendar({
   }
 
   const getHighlightPosition = (date: Date) => {
-    if (!highlightRange) return null
+    const ranges = highlightRanges?.length
+      ? highlightRanges
+      : highlightRange
+        ? [highlightRange]
+        : []
+    if (ranges.length === 0) return null
+
     const t = new Date(
       date.getFullYear(),
       date.getMonth(),
       date.getDate(),
     ).getTime()
-    const s = new Date(
-      highlightRange.start.getFullYear(),
-      highlightRange.start.getMonth(),
-      highlightRange.start.getDate(),
-    ).getTime()
-    const e = new Date(
-      highlightRange.end.getFullYear(),
-      highlightRange.end.getMonth(),
-      highlightRange.end.getDate(),
-    ).getTime()
-    if (t < s || t > e) return null
-    if (s === e) return "single" as const
-    if (t === s) return "start" as const
-    if (t === e) return "end" as const
-    return "middle" as const
+
+    for (const range of ranges) {
+      const s = new Date(
+        range.start.getFullYear(),
+        range.start.getMonth(),
+        range.start.getDate(),
+      ).getTime()
+      const e = new Date(
+        range.end.getFullYear(),
+        range.end.getMonth(),
+        range.end.getDate(),
+      ).getTime()
+      if (t < s || t > e) continue
+      if (s === e) return "single" as const
+      if (t === s) return "start" as const
+      if (t === e) return "end" as const
+      return "middle" as const
+    }
+    return null
   }
 
   return (

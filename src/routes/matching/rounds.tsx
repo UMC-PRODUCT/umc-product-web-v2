@@ -1,22 +1,39 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, redirect, useBlocker } from "@tanstack/react-router"
-import { useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
+import { Tooltip } from "@/components/tooltip/Tooltip"
+import {
+  createMatchingRound,
+  getMatchingRounds,
+  updateMatchingRound,
+} from "@/features/application/api/applicationApi"
+import { applicationKeys } from "@/features/application/api/applicationKeys"
+import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { isOperator } from "@/features/auth/model/identity"
 import {
   type Branch,
+  emptyRoundSchedules,
   MATCHING_TYPES,
   type MatchingType,
-  MOCK_ROUND_SCHEDULES,
+  PHASES,
   type RoundSchedule,
+  toISODatetime,
+  toRoundSchedule,
+  toServerMatchingType,
 } from "@/features/matching/model/matchingRoundMock"
 import { BranchSelector } from "@/features/matching/ui/BranchSelector"
 import { Calendar } from "@/features/matching/ui/Calendar"
 import { CalendarScheduleList } from "@/features/matching/ui/CalendarScheduleList"
 import { RoundForm } from "@/features/matching/ui/RoundForm"
+import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
+
+import type { AxiosError } from "axios"
 
 export const Route = createFileRoute("/matching/rounds")({
   beforeLoad: async ({ context }) => {
@@ -36,36 +53,126 @@ function parseDate(dateStr: string): Date | null {
   return new Date(y, m - 1, d)
 }
 
-function formatDateStr(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, "0")
-  const d = String(date.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
+const MAX_ROUND_DAYS = 3
+
+function getRoundState(
+  round: RoundSchedule,
+): "active" | "default" | "disabled" {
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/
+  if (!datePattern.test(round.startDate) || !datePattern.test(round.endDate))
+    return "default"
+  const now = new Date()
+  const start = new Date(`${round.startDate}T${round.startTime}:00`)
+  const end = new Date(`${round.endDate}T${round.endTime}:00`)
+  if (end < now) return "disabled" // 완료
+  if (start <= now) return "active" // 진행중
+  return "default" // 예정
 }
 
 function MatchingRoundsPage() {
   const [matchingType, setMatchingType] =
-    useState<MatchingType>("Plan-Design 매칭")
+    useState<MatchingType>("Plan-Develop 매칭")
   const [selectedBranch, setSelectedBranch] = useState<Branch>("Chromium")
-  const [rounds, setRounds] = useState<RoundSchedule[]>(MOCK_ROUND_SCHEDULES)
-
-  const isRoundExpired = (round: RoundSchedule) => {
-    const end = parseDate(round.endDate)
-    if (!end) return false
-    const now = new Date()
-    now.setHours(0, 0, 0, 0)
-    return end < now
-  }
-
-  const firstActiveIdx = rounds.findIndex((r) => !isRoundExpired(r))
-  const selectedRoundIdx =
-    firstActiveIdx === -1 ? rounds.length - 1 : firstActiveIdx
-  const [pickingEnd, setPickingEnd] = useState(false)
+  const [rounds, setRounds] = useState<RoundSchedule[]>(
+    emptyRoundSchedules(matchingType),
+  )
+  // CalendarScheduleList용: POST/PATCH 완료 후에만 갱신
+  const [committedRounds, setCommittedRounds] = useState<RoundSchedule[]>(
+    emptyRoundSchedules(matchingType),
+  )
   const [isDirty, setIsDirty] = useState(false)
   const [saveState, setSaveState] = useState<"idle" | "loading" | "completed">(
     "idle",
   )
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [roundErrors, setRoundErrors] = useState(() =>
+    PHASES.map(() => ({ startDate: false, endDate: false })),
+  )
+  const roundFormRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  const queryClient = useQueryClient()
+  const addToast = useToastStore((s) => s.addToast)
+
+  // 지부 목록 조회 -> branch name -> chapterId 매핑
+  const chaptersQuery = useChapters()
+  const chapters = useMemo(
+    () => chaptersQuery.data?.chapters ?? [],
+    [chaptersQuery.data],
+  )
+
+  const chapterId = useMemo(() => {
+    const found = chapters.find((c) => c.name === selectedBranch)
+    return found ? Number(found.id) : undefined
+  }, [selectedBranch, chapters])
+
+  // 매칭 차수 목록 조회
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(chapterId),
+    queryFn: () => getMatchingRounds(chapterId),
+    enabled: chapterId !== undefined,
+  })
+
+  // 서버 데이터 -> 선택된 매칭 타입 필터링 -> RoundSchedule 변환
+  const serverType = toServerMatchingType(matchingType)
+
+  const syncRoundsFromServer = useCallback(() => {
+    // 사용자가 수정 중인 경우 백그라운드 리페치로 인한 덮어쓰기 방지
+    if (isDirty) return
+    const allRounds = roundsQuery.data ?? []
+    const filtered = allRounds.filter((r) => r.type === serverType)
+    if (filtered.length === 0) {
+      const empty = emptyRoundSchedules(matchingType)
+      setRounds(empty)
+      setCommittedRounds(empty)
+    } else {
+      // phase 순서대로 정렬
+      const phaseOrder = { FIRST: 0, SECOND: 1, THIRD: 2 }
+      const sorted = [...filtered].sort(
+        (a, b) => (phaseOrder[a.phase] ?? 0) - (phaseOrder[b.phase] ?? 0),
+      )
+      const mapped = sorted.map(toRoundSchedule)
+      // 누락된 phase 채우기
+      const result: RoundSchedule[] = PHASES.map((phase) => {
+        const existing = mapped.find((r) => r.phase === phase)
+        return (
+          existing ?? {
+            phase,
+            roundLabel:
+              phase === "FIRST" ? "1차" : phase === "SECOND" ? "2차" : "3차",
+            title: matchingType,
+            startDate: "",
+            endDate: "",
+            startTime: phase === "FIRST" ? "00:00" : "12:00",
+            endTime: "23:59",
+          }
+        )
+      })
+      setRounds(result)
+      setCommittedRounds(result)
+    }
+    setRoundErrors(PHASES.map(() => ({ startDate: false, endDate: false })))
+    setIsDirty(false)
+    setSaveState("idle")
+  }, [roundsQuery.data, serverType, matchingType, isDirty])
+
+  // 서버 데이터 변경 시 로컬 동기화
+  useEffect(() => {
+    syncRoundsFromServer()
+  }, [syncRoundsFromServer])
+
+  // 매칭 타입 변경 시 dirty 초기화
+  const handleMatchingTypeChange = (type: MatchingType) => {
+    setMatchingType(type)
+    setIsDirty(false)
+    setSaveState("idle")
+  }
+
+  // 지부 변경 시 dirty 초기화
+  const handleBranchChange = (branch: Branch) => {
+    setSelectedBranch(branch)
+    setIsDirty(false)
+    setSaveState("idle")
+  }
 
   const {
     proceed: proceedLeave,
@@ -79,14 +186,32 @@ function MatchingRoundsPage() {
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
 
-  const selectedRound = rounds[selectedRoundIdx]!
+  // 1차 시작일 ~ 3차 종료일을 잇는 단일 하이라이트
+  const highlightRange = useMemo(() => {
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/
+    const starts = rounds
+      .map((r) =>
+        datePattern.test(r.startDate) ? parseDate(r.startDate) : null,
+      )
+      .filter(Boolean) as Date[]
+    const ends = rounds
+      .map((r) => (datePattern.test(r.endDate) ? parseDate(r.endDate) : null))
+      .filter(Boolean) as Date[]
+    if (starts.length === 0 || ends.length === 0) return null
+    const minStart = new Date(Math.min(...starts.map((d) => d.getTime())))
+    const maxEnd = new Date(Math.max(...ends.map((d) => d.getTime())))
+    return { start: minStart, end: maxEnd }
+  }, [rounds])
 
-  const highlightRange = (() => {
-    const start = parseDate(selectedRound.startDate)
-    const end = parseDate(selectedRound.endDate)
-    if (!start || !end) return null
-    return { start, end }
-  })()
+  // REVIEW: 1차 매칭 시작 후에는 차수 기간을 변경할 수 없음 - 서버 스펙 확정 후 재검토
+  const isFirstRoundStarted = useMemo(() => {
+    const first = rounds[0]
+    if (!first) return false
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/
+    if (!datePattern.test(first.startDate)) return false
+    const start = new Date(`${first.startDate}T${first.startTime}:00`)
+    return start <= new Date()
+  }, [rounds])
 
   const updateRound = (
     idx: number,
@@ -96,41 +221,219 @@ function MatchingRoundsPage() {
     setRounds((prev) =>
       prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)),
     )
+
+    if (field === "startDate" || field === "endDate") {
+      setRoundErrors((prev) =>
+        prev.map((e, i) => (i === idx ? { ...e, [field]: false } : e)),
+      )
+    }
     setIsDirty(true)
     if (saveState === "completed") setSaveState("idle")
   }
 
-  const handleSave = () => {
-    setSaveState("loading")
-    // TODO: API 호출
-    setTimeout(() => {
+  // 저장 mutation
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const promises = rounds.map((round) => {
+        // 날짜가 비어있으면 스킵
+        if (!round.startDate || !round.endDate) return Promise.resolve()
+
+        const startsAt = toISODatetime(round.startDate, round.startTime)
+        const endsAt = toISODatetime(round.endDate, round.endTime)
+        // decisionDeadline: endsAt 이후여야 하므로 +1ms
+        const decisionDeadline = new Date(
+          new Date(endsAt).getTime() + 1,
+        ).toISOString()
+
+        if (round.id) {
+          // 기존 라운드 수정
+          return updateMatchingRound(round.id, {
+            startsAt,
+            endsAt,
+            decisionDeadline,
+          })
+        }
+        // 신규 라운드 생성
+        return createMatchingRound({
+          name: `${round.roundLabel} ${matchingType}`,
+          type: serverType,
+          phase: round.phase,
+          chapterId: chapterId!,
+          startsAt,
+          endsAt,
+          decisionDeadline,
+        })
+      })
+      await Promise.all(promises)
+    },
+    onSuccess: () => {
       setSaveState("completed")
       setIsDirty(false)
       setShowSaveModal(true)
-    }, 1500)
+      queryClient.invalidateQueries({
+        queryKey: applicationKeys.matchingRounds(chapterId),
+      })
+    },
+    onError: (error) => {
+      setSaveState("idle")
+      if ((error as AxiosError).response?.status === 401) {
+        addToast({
+          message: "권한이 없습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+    },
+  })
+
+  const handleSave = () => {
+    // Case 1: 지부 미선택
+    if (chapterId === undefined) {
+      addToast({
+        message: "다른 지부의 매칭 일정은 설정할 수 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    const filledRounds = rounds.filter((r) => r.startDate || r.endDate)
+
+    // 기존 저장 차수의 날짜를 비워서 저장 시 서버-클라이언트 desync 방지
+    const hasClearedExisting = rounds.some(
+      (r) => r.id !== undefined && (!r.startDate || !r.endDate),
+    )
+    if (hasClearedExisting) {
+      addToast({
+        message: "기존에 저장된 일정은 빈 값으로 수정할 수 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // 날짜/시간 포맷 불완전 시 toISODatetime 크래시 방지
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/
+    const timePattern = /^\d{2}:\d{2}$/
+    const hasInvalidFormat = filledRounds.some(
+      (r) =>
+        !datePattern.test(r.startDate) ||
+        !datePattern.test(r.endDate) ||
+        !timePattern.test(r.startTime) ||
+        !timePattern.test(r.endTime),
+    )
+    if (hasInvalidFormat) {
+      addToast({
+        message: "올바른 날짜 및 시간 형식으로 입력해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // Case 3: startDate/endDate 중 하나만 입력된 경우 → 인라인 에러 + 스크롤
+    const errors = rounds.map((r) => ({
+      startDate: !r.startDate && !!r.endDate,
+      endDate: !!r.startDate && !r.endDate,
+    }))
+    const firstErrorIdx = errors.findIndex((e) => e.startDate || e.endDate)
+    if (firstErrorIdx !== -1) {
+      setRoundErrors(errors)
+      roundFormRefs.current[firstErrorIdx]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      })
+      addToast({
+        message: "모든 일정을 입력해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // Case 2: 종료 일시 < 시작 일시
+    const hasInvalidRange = filledRounds.some((r) => {
+      if (!r.startDate || !r.endDate) return false
+      const start = new Date(`${r.startDate}T${r.startTime}:00`)
+      const end = new Date(`${r.endDate}T${r.endTime}:00`)
+      return end < start
+    })
+    if (hasInvalidRange) {
+      addToast({
+        message: "종료 일시는 시작 일시 이후로 설정해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // Case 4: 단일 차수 기간 3일 초과
+    const hasExceededMaxDays = filledRounds.some((r) => {
+      if (!r.startDate || !r.endDate) return false
+      const start = parseDate(r.startDate)
+      const end = parseDate(r.endDate)
+      if (!start || !end) return false
+      return (
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24) >
+        MAX_ROUND_DAYS
+      )
+    })
+    if (hasExceededMaxDays) {
+      addToast({
+        message: "하나의 매칭 기간은 3일을 넘어갈 수 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // Case 5: n+1차 시작일이 n차 시작일보다 앞서는 경우
+    // REVIEW: 현재 벨라의 요청대로 수정, 서버 변동 있는지 확인 후 재검토
+    const filledWithStart = rounds.filter((r) => r.startDate)
+    for (let i = 1; i < filledWithStart.length; i++) {
+      const prev = parseDate(filledWithStart[i - 1]!.startDate)
+      const curr = parseDate(filledWithStart[i]!.startDate)
+      if (prev && curr && curr < prev) {
+        // 트리거 차수의 startDate 초기화
+        const triggerPhase = filledWithStart[i]!.phase
+        setRounds((prev) =>
+          prev.map((r) =>
+            r.phase === triggerPhase ? { ...r, startDate: "" } : r,
+          ),
+        )
+        addToast({
+          message: "매칭 날짜를 한 번 더 확인해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
+    }
+
+    setSaveState("loading")
+    saveMutation.mutate()
   }
 
   const saveButtonText =
     saveState === "completed" ? "저장 완료" : isDirty ? "수정하기" : "저장하기"
-  const saveButtonDisabled = !isDirty || saveState === "completed"
-
-  const handleDateClick = (date: Date) => {
-    const dateStr = formatDateStr(date)
-    if (!pickingEnd) {
-      updateRound(selectedRoundIdx, "startDate", dateStr)
-      updateRound(selectedRoundIdx, "endDate", dateStr)
-      setPickingEnd(true)
-    } else {
-      const startDate = parseDate(selectedRound.startDate)
-      if (startDate && date >= startDate) {
-        updateRound(selectedRoundIdx, "endDate", dateStr)
-      } else {
-        updateRound(selectedRoundIdx, "startDate", dateStr)
-        updateRound(selectedRoundIdx, "endDate", dateStr)
-      }
-      setPickingEnd(false)
-    }
-  }
+  const saveButtonDisabled =
+    !isDirty || saveState === "completed" || isFirstRoundStarted
 
   return (
     <section className="flex w-full flex-col gap-6 pt-10">
@@ -150,10 +453,14 @@ function MatchingRoundsPage() {
         <div className="flex flex-col gap-11.5">
           {/* 매칭 타입 선택 */}
           <SegmentButton
-            items={MATCHING_TYPES.map((t) => ({ value: t, label: t }))}
+            items={MATCHING_TYPES.map((t) => ({
+              value: t,
+              label: t,
+              disabled: t === "Plan-Design 매칭",
+            }))}
             value={matchingType}
-            onValueChange={(v) => setMatchingType(v as MatchingType)}
-            className="w-[734px]"
+            onValueChange={(v) => handleMatchingTypeChange(v as MatchingType)}
+            className="w-183.5"
             itemClassName="flex-1"
           />
 
@@ -173,7 +480,7 @@ function MatchingRoundsPage() {
                     </span>
                     <BranchSelector
                       selected={selectedBranch}
-                      onChange={setSelectedBranch}
+                      onChange={handleBranchChange}
                     />
                   </div>
                 </div>
@@ -186,12 +493,11 @@ function MatchingRoundsPage() {
                   <div className="border-teal-gray-100 flex flex-col gap-5 rounded-2xl border bg-white px-3 pt-2 pb-3 drop-shadow-[0px_4px_8px_rgba(239,240,240,0.3)]">
                     <Calendar
                       highlightRange={highlightRange}
-                      onDateClick={handleDateClick}
                       className="border-0 bg-transparent"
                     />
 
                     <div className="flex flex-col gap-2">
-                      {rounds.map((round, idx) => (
+                      {committedRounds.map((round) => (
                         <CalendarScheduleList
                           key={round.roundLabel}
                           roundLabel={round.roundLabel}
@@ -199,13 +505,7 @@ function MatchingRoundsPage() {
                           startDate={round.startDate}
                           startTime={round.startTime}
                           endTime={round.endTime}
-                          state={
-                            isRoundExpired(round)
-                              ? "disabled"
-                              : idx === firstActiveIdx
-                                ? "active"
-                                : "default"
-                          }
+                          state={getRoundState(round)}
                         />
                       ))}
                     </div>
@@ -215,23 +515,60 @@ function MatchingRoundsPage() {
                 {/* 우측: 차수 폼 */}
                 <div className="flex flex-1 flex-col gap-10 py-7 pl-8">
                   {rounds.map((round, idx) => (
-                    <RoundForm
+                    <div
                       key={round.roundLabel}
-                      title={round.title}
-                      startDate={round.startDate}
-                      endDate={round.endDate}
-                      startTime={round.startTime}
-                      endTime={round.endTime}
-                      onStartDateChange={(v) =>
-                        updateRound(idx, "startDate", v)
-                      }
-                      onEndDateChange={(v) => updateRound(idx, "endDate", v)}
-                      onStartTimeChange={(v) =>
-                        updateRound(idx, "startTime", v)
-                      }
-                      onEndTimeChange={(v) => updateRound(idx, "endTime", v)}
-                    />
+                      ref={(el) => {
+                        roundFormRefs.current[idx] = el
+                      }}
+                    >
+                      <RoundForm
+                        title={`${round.roundLabel} 매칭`}
+                        startDate={round.startDate}
+                        endDate={round.endDate}
+                        startTime={round.startTime}
+                        endTime={round.endTime}
+                        disabled={isFirstRoundStarted}
+                        startDateError={roundErrors[idx]?.startDate}
+                        endDateError={roundErrors[idx]?.endDate}
+                        onStartDateChange={(v) =>
+                          updateRound(idx, "startDate", v)
+                        }
+                        onEndDateChange={(v) => updateRound(idx, "endDate", v)}
+                        onStartTimeChange={(v) =>
+                          updateRound(idx, "startTime", v)
+                        }
+                        onEndTimeChange={(v) => updateRound(idx, "endTime", v)}
+                      />
+                    </div>
                   ))}
+
+                  {/* 툴팁: 매칭 차수 기간 설정 안내 */}
+                  <Tooltip
+                    content={
+                      <div className="text-left">
+                        <p className="text-caption-2-medium font-bold text-teal-600">
+                          매칭 차수 기간 설정
+                        </p>
+                        <p className="text-caption-2-regular text-teal-gray-600">
+                          1차 매칭 시작 후에는 차수 기간을 변경할 수 없습니다.
+                        </p>
+                      </div>
+                    }
+                    size="big"
+                    dark={false}
+                    side="right"
+                    sideOffset={8}
+                    className="h-13! w-69!"
+                    triggerClassName="self-start -mt-6"
+                  >
+                    <button
+                      type="button"
+                      className="flex items-center justify-center p-0.75"
+                      aria-label="매칭 차수 기간 설정 안내"
+                    >
+                      <InfoCircleIcon className="text-teal-gray-400 h-5 w-5" />
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
             </div>
