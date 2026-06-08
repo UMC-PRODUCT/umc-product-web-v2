@@ -402,14 +402,21 @@ function MatchingRoundsPage() {
     }
 
     // Case 5: n+1차 시작일이 n차 시작일보다 앞서는 경우
-    // TODO: 서버 수정되면 로직 보고 수정해야 함
+    // REVIEW: 현재 벨라의 요청대로 수정, 서버 변동 있는지 확인 후 재검토
     const filledWithStart = rounds.filter((r) => r.startDate)
     for (let i = 1; i < filledWithStart.length; i++) {
       const prev = parseDate(filledWithStart[i - 1]!.startDate)
       const curr = parseDate(filledWithStart[i]!.startDate)
       if (prev && curr && curr < prev) {
+        // 트리거 차수의 startDate 초기화
+        const triggerPhase = filledWithStart[i]!.phase
+        setRounds((prev) =>
+          prev.map((r) =>
+            r.phase === triggerPhase ? { ...r, startDate: "" } : r,
+          ),
+        )
         addToast({
-          message: "매칭 차수 순서에 맞게 일정을 설정해 주세요.",
+          message: "매칭 날짜를 한 번 더 확인해 주세요.",
           color: "red",
           variant: "deep",
           type: "default",
