@@ -146,6 +146,7 @@ export const SURVEY_VARIANTS: Record<SurveyVariantKey, SurveyVariantConfig> = {
         items: [
           DIFFICULTY_SCALE,
           MATCHING_PROCESS_PREV,
+          REUSE_CHOICE,
           FEEDBACK_TEXT,
           EXTRA_TEXT,
         ],
@@ -166,6 +167,7 @@ export const SURVEY_VARIANTS: Record<SurveyVariantKey, SurveyVariantConfig> = {
             "만족스러워요",
             "아쉬워요",
           ),
+          REUSE_CHOICE,
           FEEDBACK_TEXT,
           EXTRA_TEXT,
         ],
