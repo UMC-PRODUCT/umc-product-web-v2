@@ -87,7 +87,8 @@ export function SegmentButton({
             onClick={() => onValueChange(item.value)}
             className={cn(
               buttonVariants({ selected: isSelected, type }),
-              item.disabled && "cursor-not-allowed opacity-40",
+              item.disabled &&
+                "cursor-not-allowed opacity-40 disabled:hover:bg-transparent disabled:hover:shadow-none",
               itemClassName,
             )}
           >
