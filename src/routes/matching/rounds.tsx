@@ -215,6 +215,7 @@ function MatchingRoundsPage() {
     let willClamp = false
     if (field === "startDate" || field === "endDate") {
       const current = rounds[idx]
+      if (!current) return
       const startDate = field === "startDate" ? value : current.startDate
       const endDate = field === "endDate" ? value : current.endDate
       const start = parseDate(startDate)
@@ -294,7 +295,7 @@ function MatchingRoundsPage() {
           name: `${round.roundLabel} ${matchingType}`,
           type: serverType,
           phase: round.phase,
-          chapterId,
+          chapterId: chapterId!,
           startsAt,
           endsAt,
           decisionDeadline,
