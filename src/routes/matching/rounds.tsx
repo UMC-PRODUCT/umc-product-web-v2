@@ -380,6 +380,24 @@ function MatchingRoundsPage() {
       return
     }
 
+    // Case 5: n+1차 시작일이 n차 시작일보다 앞서는 경우
+    // TODO: 서버 수정되면 로직 보고 수정해야 함
+    const filledWithStart = rounds.filter((r) => r.startDate)
+    for (let i = 1; i < filledWithStart.length; i++) {
+      const prev = parseDate(filledWithStart[i - 1]!.startDate)
+      const curr = parseDate(filledWithStart[i]!.startDate)
+      if (prev && curr && curr < prev) {
+        addToast({
+          message: "매칭 차수 순서에 맞게 일정을 설정해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
+    }
+
     setSaveState("loading")
     saveMutation.mutate()
   }
@@ -413,7 +431,7 @@ function MatchingRoundsPage() {
             }))}
             value={matchingType}
             onValueChange={(v) => handleMatchingTypeChange(v as MatchingType)}
-            className="w-[734px]"
+            className="w-183.5"
             itemClassName="flex-1"
           />
 
