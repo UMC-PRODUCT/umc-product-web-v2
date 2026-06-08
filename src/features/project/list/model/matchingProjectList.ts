@@ -77,13 +77,10 @@ export function useMatchingProjectListFilters() {
 
   const { data: gisuData } = useQuery({
     queryKey: ["gisu", "active"],
-    queryFn: async () => {
-      const res = await getActiveGisu()
-      return res.gisuId ?? null
-    },
+    queryFn: getActiveGisu,
   })
 
-  const activeGisuId = gisuData ?? undefined
+  const activeGisuId = gisuData?.gisuId ? Number(gisuData.gisuId) : undefined
 
   const userGisuId = useMemo(() => {
     const records = me?.challengerRecords

@@ -9,19 +9,13 @@ import { Modal } from "@/shared/ui/Modal"
 import { isRecruitDone } from "../../list/model/matchingProject"
 import { ProjectManagementMoreMenu } from "./ProjectManagementMoreMenu"
 
-import type { ProjectApplication } from "@/features/application/model/types"
-
 import type { MatchingProject } from "../../list/model/matchingProject"
 
 interface ProjectManagementCardProps {
   data: MatchingProject
-  projectApplication: ProjectApplication
 }
 
-export function ProjectManagementCard({
-  data,
-  projectApplication,
-}: ProjectManagementCardProps) {
+export function ProjectManagementCard({ data }: ProjectManagementCardProps) {
   const cover = data.coverImage
   const [open, setOpen] = useState(false)
 
@@ -36,7 +30,7 @@ export function ProjectManagementCard({
           if (e.key === "Enter" || e.key === " ") setOpen(true)
         }}
       >
-        <div className="bg-teal-gray-200 text-teal-gray-400 flex h-[10.5625rem] w-80 shrink-0 items-center justify-center overflow-hidden rounded-[0.625rem] text-center text-sm">
+        <div className="bg-teal-gray-200 flex h-[10.5625rem] w-80 shrink-0 overflow-hidden rounded-[0.625rem]">
           {cover?.src ? (
             <img
               src={cover.src}
@@ -46,7 +40,11 @@ export function ProjectManagementCard({
               decoding="async"
             />
           ) : (
-            "프로젝트 대표 이미지 320*169"
+            <div className="text-body-2-medium text-teal-gray-400 flex h-full w-full items-center justify-center text-center">
+              프로젝트 대표 이미지
+              <br />
+              320*169
+            </div>
           )}
         </div>
 
@@ -63,7 +61,6 @@ export function ProjectManagementCard({
                 <ProjectManagementMoreMenu
                   projectId={data.id}
                   projectName={data.title}
-                  projectApplication={projectApplication}
                   chapterName={data.branch}
                 />
               </div>
