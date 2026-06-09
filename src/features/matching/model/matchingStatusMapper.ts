@@ -92,7 +92,9 @@ function toMatchingProject(
           ? {
               ...phaseToBlock(
                 toRoundNumber(app.matchingRound.phase),
-                `${member.nickname}/${member.name}`,
+                member.nickname
+                  ? `${member.nickname}/${member.name}`
+                  : member.name,
                 String(app.applicationId),
               ),
               memberId: member.memberId,
@@ -100,7 +102,9 @@ function toMatchingProject(
           : {
               type:
                 currentRound === 1 ? ("round1" as const) : ("filled" as const),
-              name: `${member.nickname}/${member.name}`,
+              name: member.nickname
+                ? `${member.nickname}/${member.name}`
+                : member.name,
               tagVariant: roundVariantMap[currentRound] ?? "random",
               memberId: member.memberId,
             }
@@ -117,7 +121,9 @@ function toMatchingProject(
       const block: MatchingBlockData = {
         ...phaseToBlock(
           toRoundNumber(app.matchingRound.phase),
-          `${app.applicant.nickname}/${app.applicant.name}`,
+          app.applicant.nickname
+            ? `${app.applicant.nickname}/${app.applicant.name}`
+            : app.applicant.name,
           String(app.applicationId),
         ),
         memberId: app.applicant.memberId,
@@ -177,7 +183,9 @@ function toMatchingProject(
   return {
     projectId: project.id,
     projectName: project.name,
-    challengerName: `${project.productOwner.nickname}/${project.productOwner.name}`,
+    challengerName: project.productOwner.nickname
+      ? `${project.productOwner.nickname}/${project.productOwner.name}`
+      : project.productOwner.name,
     challengerUniversity: project.productOwner.schoolName,
     backendPart,
     roleRows,
