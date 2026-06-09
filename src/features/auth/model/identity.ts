@@ -27,6 +27,11 @@ const SCHOOL_ROLE_TYPES: RoleType[] = [
   "SCHOOL_ETC_ADMIN",
 ]
 
+const SCHOOL_LEADERSHIP_ROLE_TYPES: RoleType[] = [
+  "SCHOOL_PRESIDENT",
+  "SCHOOL_VICE_PRESIDENT",
+]
+
 export function hasAnyRoleType(
   me: MemberInfoResponse | undefined,
   types: RoleType[],
@@ -55,6 +60,26 @@ export function isSchoolStaff(me: MemberInfoResponse | undefined): boolean {
 
 export function isOperator(me: MemberInfoResponse | undefined): boolean {
   return hasAnyRoleType(me, ADMIN_ROLE_TYPES)
+}
+
+export function isSchoolLeadership(
+  me: MemberInfoResponse | undefined,
+): boolean {
+  return hasAnyRoleType(me, SCHOOL_LEADERSHIP_ROLE_TYPES)
+}
+
+export function isAnyOperator(me: MemberInfoResponse | undefined): boolean {
+  return isOperator(me) || isSchoolStaff(me)
+}
+
+export function canAccessProjectSettings(
+  me: MemberInfoResponse | undefined,
+): boolean {
+  return isAnyOperator(me) || isCurrentTermPm(me)
+}
+
+export function canManageProjects(me: MemberInfoResponse | undefined): boolean {
+  return isOperator(me) || isSchoolLeadership(me) || isCurrentTermPm(me)
 }
 
 export function isCurrentTermPm(me: MemberInfoResponse | undefined): boolean {
