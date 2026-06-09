@@ -11,7 +11,7 @@ const config: SurveyVariantConfig = {
     {
       title: "step1",
       footer: "next-only",
-      progressive: true,
+      reveal: "optional-group",
       items: [
         {
           id: "q1",

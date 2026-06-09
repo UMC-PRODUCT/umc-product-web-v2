@@ -119,7 +119,7 @@ function UsabilitySurveyTestPage() {
           answers={survey.answers}
           onAnswer={survey.onAnswer}
           startNumber={survey.startNumber}
-          progressive={survey.currentStep.progressive}
+          reveal={survey.currentStep.reveal}
         />
       </UsabilitySurveyModal>
     </main>
