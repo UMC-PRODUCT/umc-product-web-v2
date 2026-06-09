@@ -41,19 +41,14 @@ export function AccountSettingsPage() {
   const [showPasswordChange, setShowPasswordChange] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [unlinkTarget, setUnlinkTarget] = useState<number | null>(null)
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const {
-    unlinkTarget,
-    setUnlinkTarget,
-    handleGoogleLink,
-    handleAppleLink,
-    handleKakaoLink,
-    handleUnlink,
-  } = useOAuthLinking()
+  const { handleGoogleLink, handleAppleLink, handleKakaoLink, handleUnlink } =
+    useOAuthLinking()
 
   const linkedMap = new Map(
     oauths.map((o) => [PROVIDER_TO_SOCIAL[o.provider], o.memberOAuthId]),
@@ -141,7 +136,7 @@ export function AccountSettingsPage() {
         : social === "google"
           ? handleGoogleLink
           : handleAppleLink
-    const onUnlink = () => setUnlinkTarget({ memberOAuthId: memberOAuthId! })
+    const onUnlink = () => setUnlinkTarget(memberOAuthId!)
     return { linked, onClick: linked ? onUnlink : onLink }
   }
 
@@ -303,7 +298,9 @@ export function AccountSettingsPage() {
           if (!open) setUnlinkTarget(null)
         }}
         onCancel={() => setUnlinkTarget(null)}
-        onConfirm={() => void handleUnlink()}
+        onConfirm={() =>
+          unlinkTarget !== null && void handleUnlink(unlinkTarget)
+        }
       />
 
       <CtaModal

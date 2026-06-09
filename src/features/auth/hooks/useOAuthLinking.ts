@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query"
-import axios from "axios"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -26,40 +25,10 @@ import {
 
 import { MEMBER_OAUTH_QUERY_KEY } from "./useMemberOAuthList"
 
-function getBeErrorCode(error: unknown): string | null {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { code?: string } | undefined
-    return data?.code ?? null
-  }
-  return null
-}
-
-interface UnlinkTarget {
-  memberOAuthId: number
-}
-
 export function useOAuthLinking() {
   const addToast = useToastStore((s) => s.addToast)
   const queryClient = useQueryClient()
   const [isLinking, setIsLinking] = useState(false)
-  const [unlinkTarget, setUnlinkTarget] = useState<UnlinkTarget | null>(null)
-
-  const handleLinkError = (error: unknown, provider: string) => {
-    const code = getBeErrorCode(error)
-    let message = `${provider} 연동에 실패했습니다. 다시 시도해주세요.`
-    if (code === "AUTHENTICATION-0012") {
-      message = `이미 다른 계정에 연결된 ${provider} 계정입니다.`
-    } else if (code === "AUTHENTICATION-0013") {
-      message = `이미 연동되어 있는 ${provider} 계정입니다.`
-    }
-    addToast({
-      message,
-      color: "red",
-      variant: "deep",
-      type: "default",
-      duration: 3000,
-    })
-  }
 
   const handleGoogleLink = async () => {
     if (isLinking) return
@@ -92,7 +61,13 @@ export function useOAuthLinking() {
       })
     } catch (err) {
       if (isGooglePopupCancelled(err)) return
-      handleLinkError(err, "Google")
+      addToast({
+        message: "Google 연동에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
     } finally {
       setIsLinking(false)
     }
@@ -129,7 +104,13 @@ export function useOAuthLinking() {
       })
     } catch (err) {
       if (isApplePopupCancelled(err)) return
-      handleLinkError(err, "Apple")
+      addToast({
+        message: "Apple 연동에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
     } finally {
       setIsLinking(false)
     }
@@ -140,10 +121,9 @@ export function useOAuthLinking() {
     startKakaoSignIn()
   }
 
-  const handleUnlink = async () => {
-    if (!unlinkTarget) return
+  const handleUnlink = async (memberOAuthId: number) => {
     try {
-      await removeMemberOAuth(unlinkTarget.memberOAuthId)
+      await removeMemberOAuth(memberOAuthId)
       await queryClient.invalidateQueries({ queryKey: MEMBER_OAUTH_QUERY_KEY })
       addToast({
         message: "소셜 연동이 해제되었습니다.",
@@ -152,27 +132,18 @@ export function useOAuthLinking() {
         type: "default",
         duration: 3000,
       })
-    } catch (err) {
-      const code = getBeErrorCode(err)
-      const message =
-        code === "AUTHENTICATION-0016"
-          ? "마지막 소셜 연동은 해제할 수 없습니다. 비밀번호를 먼저 설정해주세요."
-          : "연동 해제에 실패했습니다. 다시 시도해주세요."
+    } catch {
       addToast({
-        message,
+        message: "연동 해제에 실패했습니다. 다시 시도해주세요.",
         color: "red",
         variant: "deep",
         type: "default",
         duration: 3000,
       })
-    } finally {
-      setUnlinkTarget(null)
     }
   }
 
   return {
-    unlinkTarget,
-    setUnlinkTarget,
     handleGoogleLink,
     handleAppleLink,
     handleKakaoLink,
