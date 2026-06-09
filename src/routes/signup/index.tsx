@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useReducer, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -10,7 +11,9 @@ import {
   resendEmailVerification,
   sendEmailVerification,
 } from "@/features/auth/api/emailVerification"
+import { registerMemberByEmail } from "@/features/auth/api/register"
 import { getAllSchools } from "@/features/auth/api/school"
+import { getTerms } from "@/features/auth/api/terms"
 import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
 import {
   AccountCreationStep,
@@ -19,6 +22,7 @@ import {
   TermsAgreementStep,
   VerificationStep,
 } from "@/features/signup"
+import { getFieldName } from "@/features/signup/ui/TermsAgreementStep"
 import { type SignUpFormData, signUpSchema } from "@/features/signup/validation"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -301,6 +305,13 @@ export const Route = createFileRoute("/signup/")({
 })
 
 function SignUpPage() {
+  const { data: termsData, isLoading: isLoadingTerms } = useQuery({
+    queryKey: ["terms"],
+    queryFn: getTerms,
+  })
+
+  const terms = termsData?.terms || []
+
   const methods = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     mode: "onChange",
@@ -336,11 +347,10 @@ function SignUpPage() {
   const school = watch("school")
   const name = watch("name")
   const nickname = watch("nickname")
-  const serviceAgreement = watch("serviceAgreement")
-  const privacyAgreement = watch("privacyAgreement")
 
   const [state, dispatch] = useReducer(signUpReducer, initialState)
   const [showTerms, setShowTerms] = useState(false)
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const phoneIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -559,6 +569,68 @@ function SignUpPage() {
     dispatch({ type: "SET_PASSWORD", payload: password })
   }
 
+  const handleFinalSignup = async () => {
+    const emailVerificationToken = state.signupData.emailVerificationToken
+    if (!emailVerificationToken) {
+      addToast({
+        message: "이메일 인증이 완료되지 않았습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    const selectedSchool = state.schoolList.find((s) => s.schoolName === school)
+    if (!selectedSchool) {
+      addToast({
+        message: "유효한 학교를 선택해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    const termsAgreements = terms.map((term) => {
+      const fieldName = getFieldName(term.type)
+      const isAgreed = watch(fieldName)
+      return {
+        termsId: term.id,
+        isAgreed: !!isAgreed,
+      }
+    })
+
+    const payload: EmailRegisterMemberRequest = {
+      rawPassword: password,
+      name,
+      nickname,
+      emailVerificationToken,
+      schoolId: selectedSchool.schoolId,
+      termsAgreements,
+    }
+
+    dispatch({ type: "SIGNUP_START" })
+    try {
+      await registerMemberByEmail(payload)
+      setIsSuccessModalOpen(true)
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "회원가입에 실패했습니다."
+      addToast({
+        message,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      dispatch({ type: "SIGNUP_FINISH" })
+    }
+  }
+
   // const handleIdDuplicateCheck = () => {
   //   // TODO: 아이디 중복 확인 API 연동
   // }
@@ -627,7 +699,9 @@ function SignUpPage() {
         : currentStep === "PROFILE"
           ? !school || !name || !isNicknameValid
           : currentStep === "TERMS"
-            ? !serviceAgreement || !privacyAgreement
+            ? terms
+                .filter((t) => t.isMandatory)
+                .some((t) => !watch(getFieldName(t.type)))
             : false
 
   return (
@@ -679,7 +753,9 @@ function SignUpPage() {
 
             {currentStep === "PROFILE" && <ProfileInfoStep />}
 
-            {currentStep === "TERMS" && <TermsAgreementStep />}
+            {currentStep === "TERMS" && (
+              <TermsAgreementStep terms={terms} isLoading={isLoadingTerms} />
+            )}
 
             <div className="flex w-full flex-col items-center gap-4">
               <Button
@@ -699,8 +775,7 @@ function SignUpPage() {
                   } else if (currentStep === "PROFILE") {
                     setShowTerms(true)
                   } else if (currentStep === "TERMS") {
-                    // 가입하기 버튼 클릭 시 아직은 아무 일도 일어나지 않도록 함
-                    // void handleFinalSignup()
+                    void handleFinalSignup()
                   }
                 }}
               >
@@ -743,6 +818,20 @@ function SignUpPage() {
           dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: false })
         }
         onConfirm={handleSpamGuideConfirm}
+      />
+
+      <CtaModal
+        open={isSuccessModalOpen}
+        title="가입 완료"
+        content="회원가입이 완료되었습니다."
+        confirmText="로그인하기"
+        variant="success"
+        overlayTone="light"
+        onOpenChange={setIsSuccessModalOpen}
+        onConfirm={() => {
+          setIsSuccessModalOpen(false)
+          navigate({ to: "/login" })
+        }}
       />
 
       {/* <CtaModal

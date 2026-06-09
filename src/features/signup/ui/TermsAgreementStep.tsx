@@ -1,13 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
 import { useFormContext } from "react-hook-form"
 
-import { getTerms } from "@/features/auth/api/terms"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
 import { type SignUpFormData } from "../validation"
 
-import type { TermType } from "@/features/auth/model/types"
+import type { Term, TermType } from "@/features/auth/model/types"
 
 const TERM_TITLE_MAP: Record<TermType, string> = {
   SERVICE: "서비스 이용약관 동의",
@@ -20,7 +18,7 @@ const getTermTitle = (type: TermType, fallback: string): string => {
   return TERM_TITLE_MAP[type] || fallback || "이용약관 동의"
 }
 
-const getFieldName = (
+export const getFieldName = (
   type: TermType,
 ): "serviceAgreement" | "privacyAgreement" | "optionalAgreement" => {
   if (type === "SERVICE") return "serviceAgreement"
@@ -28,18 +26,19 @@ const getFieldName = (
   return "optionalAgreement"
 }
 
-export function TermsAgreementStep() {
+interface TermsAgreementStepProps {
+  terms: Term[]
+  isLoading: boolean
+}
+
+export function TermsAgreementStep({
+  terms,
+  isLoading,
+}: TermsAgreementStepProps) {
   const { watch, setValue } = useFormContext<SignUpFormData>()
   const nickname = watch("nickname")
   const name = watch("name")
   const school = watch("school")
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["terms"],
-    queryFn: getTerms,
-  })
-
-  const terms = data?.terms || []
 
   const allAgreed =
     terms.length > 0 && terms.every((term) => watch(getFieldName(term.type)))
