@@ -1,41 +1,12 @@
+import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 
+import { getAllSchools } from "@/features/auth/api/school"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
 import { cn } from "@/shared/lib/utils"
 
-// TODO: API 연동 후 서버에서 학교 목록을 받아오기
-const SCHOOLS = [
-  "가천대",
-  "가톨릭대",
-  "광운대",
-  "단국대",
-  "덕성여대",
-  "동국대",
-  "동덕여대",
-  "동아대",
-  "동양미래대",
-  "서경대",
-  "서울여대",
-  "성신여대",
-  "숙명여대",
-  "숭실대",
-  "안양대",
-  "영남대",
-  "이화여대",
-  "인제대",
-  "인하대",
-  "중앙대",
-  "한국공학대",
-  "한국외대",
-  "한국항공대",
-  "한성대",
-  "한양대 ERICA",
-  "홍익대 서울",
-  "홍익대 세종",
-] as const
-
-export type School = (typeof SCHOOLS)[number]
+export type School = string
 
 interface SchoolDropdownProps {
   value: School | undefined
@@ -55,6 +26,13 @@ export function SchoolDropdown({
   const containerRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
+  const { data, isLoading } = useQuery({
+    queryKey: ["schools"],
+    queryFn: getAllSchools,
+  })
+
+  const schools = data?.schools || []
+
   useEffect(() => {
     if (!open) return
     const handler = (event: MouseEvent) => {
@@ -71,6 +49,10 @@ export function SchoolDropdown({
       setIsFocused(false)
     }
   }, [open])
+
+  const filteredSchools = schools.filter((school) =>
+    school.schoolName.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (!open) {
@@ -94,20 +76,18 @@ export function SchoolDropdown({
         e.preventDefault()
         setFocusedIndex((prev) => (prev > 0 ? prev - 1 : -1))
         break
-      case "Enter":
+      case "Enter": {
         e.preventDefault()
-        if (focusedIndex >= 0) {
-          onChange(filteredSchools[focusedIndex] as School)
+        const selected = filteredSchools[focusedIndex]
+        if (selected) {
+          onChange(selected.schoolName)
           setOpen(false)
           setSearchQuery("")
         }
         break
+      }
     }
   }
-
-  const filteredSchools = SCHOOLS.filter((school) =>
-    school.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
 
   const displayLabel = value ?? "학교를 선택해주세요"
   const hasValue = value !== undefined
@@ -172,18 +152,22 @@ export function SchoolDropdown({
             role="listbox"
             className="flex w-full flex-1 flex-col items-center overflow-y-scroll [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {filteredSchools.length === 0 ? (
+            {isLoading ? (
+              <li className="text-body-2-regular text-teal-gray-400 flex w-full items-center justify-start rounded-[8px] px-4 py-[9.5px]">
+                불러오는 중...
+              </li>
+            ) : filteredSchools.length === 0 ? (
               <li className="text-body-2-regular text-teal-gray-400 flex w-full items-center justify-start rounded-[8px] px-4 py-[9.5px]">
                 검색 결과가 없습니다.
               </li>
             ) : (
               filteredSchools.map((school, index) => {
                 return (
-                  <li key={school} role="option" className="w-full">
+                  <li key={school.schoolId} role="option" className="w-full">
                     <button
                       type="button"
                       onClick={() => {
-                        onChange(school)
+                        onChange(school.schoolName)
                         setOpen(false)
                         setSearchQuery("")
                         setFocusedIndex(-1)
@@ -192,7 +176,7 @@ export function SchoolDropdown({
                       onMouseLeave={() => setFocusedIndex(-1)}
                       className="text-body-2-regular text-teal-gray-700 hover:shadow-inner-neutral-3 hover:bg-teal-gray-50 flex w-full items-center justify-start rounded-[8px] px-4 py-[9.5px]"
                     >
-                      <span className="truncate">{school}</span>
+                      <span className="truncate">{school.schoolName}</span>
                     </button>
                   </li>
                 )
