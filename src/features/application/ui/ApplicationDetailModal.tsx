@@ -68,6 +68,13 @@ export function ApplicationDetailModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: applicationKeys.all })
     },
+    onError: (_error, variables) => {
+      setStatusOverrides((prev) => {
+        const next = { ...prev }
+        delete next[variables.appId]
+        return next
+      })
+    },
   })
 
   const handleStatusChange = (appId: string, status: StatusValue) => {
