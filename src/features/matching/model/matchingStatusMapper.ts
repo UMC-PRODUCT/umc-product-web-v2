@@ -37,12 +37,24 @@ function phaseToBlock(
   }
 }
 
-// 서버 part -> 역할 행 라벨
+// 서버 part -> 역할 행 라벨 (ANDROID/IOS도 Frontend 행으로 표시)
 const PART_TO_ROLE: Record<string, string> = {
   DESIGN: "Design",
   WEB: "Frontend",
+  ANDROID: "Frontend",
+  IOS: "Frontend",
   SPRINGBOOT: "Backend",
   NODEJS: "Backend",
+}
+
+// 섹션 헤더용 FE 플랫폼 분류
+const FE_PLATFORM_ORDER = ["Web", "iOS", "Android"] as const
+type FEPlatform = (typeof FE_PLATFORM_ORDER)[number]
+
+const PART_TO_FE_PLATFORM: Record<string, FEPlatform> = {
+  WEB: "Web",
+  ANDROID: "Android",
+  IOS: "iOS",
 }
 
 // 프로젝트 + 지원자 -> MatchingProjectData 변환
@@ -65,7 +77,10 @@ function toMatchingProject(
   // partQuotas에서 역할별 quota 추출
   const designQuota =
     project.partQuotas.find((q) => q.part === "DESIGN")?.quota ?? 0
-  const feQuota = project.partQuotas.find((q) => q.part === "WEB")?.quota ?? 0
+  // WEB/ANDROID/IOS 중 해당 프로젝트의 FE 파트 quota 합산
+  const feQuota = project.partQuotas
+    .filter((q) => q.part === "WEB" || q.part === "ANDROID" || q.part === "IOS")
+    .reduce((sum, q) => sum + q.quota, 0)
   const beQuota = project.partQuotas
     .filter((q) => q.part === "SPRINGBOOT" || q.part === "NODEJS")
     .reduce((sum, q) => sum + q.quota, 0)
@@ -143,24 +158,37 @@ function computeMaxCols(
   return maxCols
 }
 
-// TODO: 서버에 productOwner.part 필드 추가되면 PM 파트별 그룹핑으로 전환
 export function toMatchingPartDataList(
   projects: ManagedProjectSummaryResponse[],
   applicantsByProject: Map<number, ProjectApplicantResponse[]>,
 ): MatchingPartData[] {
   if (projects.length === 0) return []
 
-  const maxCols = computeMaxCols(projects)
+  // FE 플랫폼별 프로젝트 그룹핑 (quota > 0인 파트 기준)
+  const byPlatform = new Map<FEPlatform, ManagedProjectSummaryResponse[]>()
+  for (const p of projects) {
+    const addedPlatforms = new Set<FEPlatform>()
+    for (const q of p.partQuotas) {
+      const platform = PART_TO_FE_PLATFORM[q.part]
+      if (platform && q.quota > 0 && !addedPlatforms.has(platform)) {
+        addedPlatforms.add(platform)
+        const list = byPlatform.get(platform) ?? []
+        list.push(p)
+        byPlatform.set(platform, list)
+      }
+    }
+  }
 
-  const matchingProjects = projects.map((p) =>
-    toMatchingProject(p, applicantsByProject.get(p.id) ?? [], maxCols),
-  )
-
-  // 현재 PM 파트 정보 없으므로 전체 프로젝트를 단일 섹션으로 표시
-  return [
-    {
-      partName: "전체",
-      projects: matchingProjects,
+  return FE_PLATFORM_ORDER.filter((platform) => byPlatform.has(platform)).map(
+    (platform) => {
+      const platformProjects = byPlatform.get(platform)!
+      const maxCols = computeMaxCols(platformProjects)
+      return {
+        partName: platform,
+        projects: platformProjects.map((p) =>
+          toMatchingProject(p, applicantsByProject.get(p.id) ?? [], maxCols),
+        ),
+      }
     },
-  ]
+  )
 }
