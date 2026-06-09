@@ -95,6 +95,21 @@ export interface TermResponse {
   isMandatory: boolean
 }
 
+export interface Term {
+  id: number
+  type: TermType
+  typeDescription: string
+  link: string
+  isMandatory: boolean
+  version: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Terms {
+  terms: Term[]
+}
+
 export interface SchoolNameItem {
   schoolId: number
   schoolName: string
