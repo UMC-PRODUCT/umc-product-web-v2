@@ -28,7 +28,7 @@ export const EmojiScaleQuestion = ({
           scores.length <= 3 ? "gap-23" : "gap-10",
         )}
       >
-        <div className="absolute right-5.5 bottom-4 left-5.5 h-0.5 bg-teal-100" />
+        <div className="absolute right-5.5 bottom-5.5 left-5.5 h-0.5 translate-y-1/2 bg-teal-100" />
         {scores.map((score, index) => {
           const selected = value === score
           const label = labels[index]

@@ -27,7 +27,7 @@ export const EmojiRadioButton = ({
       role="radio"
       aria-checked={selected}
       className={cn(
-        "text-subtitle-3-semibold inline-flex cursor-pointer items-center gap-3 rounded-[8px] border-[1.5px] py-2 pr-3 pl-2.5 transition-colors",
+        "text-subtitle-3-semibold inline-flex min-w-39 cursor-pointer items-center gap-3 rounded-[8px] border-[1.5px] py-2 pr-3 pl-2.5 transition-colors",
         selected
           ? "border-teal-300 bg-teal-100 text-teal-600 hover:border-transparent hover:bg-[linear-gradient(0deg,rgba(199,235,230,0.5)_0%,rgba(199,235,230,0.5)_100%)]"
           : "text-teal-gray-600 bg-teal-gray-100 hover:bg-teal-gray-150 border-transparent",

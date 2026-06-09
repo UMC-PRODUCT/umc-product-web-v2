@@ -21,20 +21,22 @@ export const EmojiChoiceQuestion = ({
     <div
       role="radiogroup"
       aria-label={ariaLabel}
-      className="flex justify-center gap-3"
+      className="flex justify-center"
     >
-      <EmojiRadioButton
-        selected={value === "positive"}
-        score={5}
-        label={positiveLabel}
-        onClick={() => onChange("positive")}
-      />
-      <EmojiRadioButton
-        selected={value === "negative"}
-        score={1}
-        label={negativeLabel}
-        onClick={() => onChange("negative")}
-      />
+      <div className="grid grid-cols-[1fr_1fr] gap-4">
+        <EmojiRadioButton
+          selected={value === "positive"}
+          score={5}
+          label={positiveLabel}
+          onClick={() => onChange("positive")}
+        />
+        <EmojiRadioButton
+          selected={value === "negative"}
+          score={1}
+          label={negativeLabel}
+          onClick={() => onChange("negative")}
+        />
+      </div>
     </div>
   )
 }
