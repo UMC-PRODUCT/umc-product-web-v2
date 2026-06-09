@@ -96,7 +96,7 @@ export function AssignmentModal({
     setIsAssigning(true)
     try {
       await onAssign({
-        id: member.memberId,
+        id: String(member.memberId),
         nickname: member.nickname,
         university: member.schoolName,
         partRole: (member.part?.toLowerCase() ??
