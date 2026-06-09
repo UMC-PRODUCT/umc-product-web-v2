@@ -59,13 +59,19 @@ export interface SurveyDivider {
 
 export type SurveyItem = SurveyQuestion | SurveyDivider
 
-export type SurveyFooter = "close-submit" | "submit-only" | "next-only"
+export type SurveyFooter =
+  | "close-submit"
+  | "submit-only"
+  | "next-only"
+  | "back-submit"
+
+export type SurveyRevealMode = "optional-group"
 
 export interface SurveyStep {
   title: string
   items: SurveyItem[]
   footer: SurveyFooter
-  progressive?: boolean
+  reveal?: SurveyRevealMode
 }
 
 export interface SurveyVariantConfig {

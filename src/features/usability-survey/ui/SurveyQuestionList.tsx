@@ -9,20 +9,20 @@ import type {
   SurveyAnswers,
   SurveyAnswerValue,
   SurveyItem,
+  SurveyRevealMode,
 } from "../model/types"
 
 export type { SurveyAnswers, SurveyAnswerValue } from "../model/types"
 
-const REVEAL_DURATION = "duration-1000"
+const REVEAL_DURATION = "duration-[1500ms]"
 const REVEAL_EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]"
-const STAGGER_MS = 300
 
 interface SurveyQuestionListProps {
   items: SurveyItem[]
   answers: SurveyAnswers
   onAnswer: (id: string, value: SurveyAnswerValue) => void
   startNumber?: number
-  progressive?: boolean
+  reveal?: SurveyRevealMode
 }
 
 interface NumberedItem {
@@ -35,7 +35,7 @@ export const SurveyQuestionList = ({
   answers,
   onAnswer,
   startNumber = 1,
-  progressive = false,
+  reveal,
 }: SurveyQuestionListProps) => {
   let runningNumber = startNumber
   const numbered: NumberedItem[] = items.map((item) => {
@@ -57,45 +57,30 @@ export const SurveyQuestionList = ({
     )
   }
 
-  if (!progressive) {
-    return (
-      <div className="flex w-full flex-col gap-12">
-        {numbered.map((entry) => (
-          <div key={entry.item.id}>{renderItem(entry)}</div>
-        ))}
-      </div>
+  if (reveal === "optional-group") {
+    const lastRequiredIndex = items.reduce(
+      (last, item, index) =>
+        item.kind !== "divider" && !item.optional ? index : last,
+      -1,
     )
-  }
+    const leading = numbered.slice(0, lastRequiredIndex + 1)
+    const trailing = numbered.slice(lastRequiredIndex + 1)
+    const revealed = leading.every((entry) =>
+      isItemAnswered(entry.item, answers),
+    )
 
-  const lastGateIndex = (index: number) => {
-    for (let i = index - 1; i >= 0; i -= 1) {
-      const prev = items[i]
-      if (prev && prev.kind !== "divider" && !prev.optional) return i
-    }
-    return -1
-  }
+    return (
+      <div className="flex w-full flex-col">
+        <div className="flex w-full flex-col gap-12">
+          {leading.map((entry) => (
+            <div key={entry.item.id}>{renderItem(entry)}</div>
+          ))}
+        </div>
 
-  return (
-    <div className="flex w-full flex-col">
-      {numbered.map((entry, index) => {
-        if (index === 0) {
-          return <div key={entry.item.id}>{renderItem(entry)}</div>
-        }
-
-        const revealed = items
-          .slice(0, index)
-          .every((prev) => isItemAnswered(prev, answers))
-        const staggerOrder = items
-          .slice(lastGateIndex(index) + 1, index)
-          .filter((prev) => prev.kind !== "divider").length
-        const delay = revealed ? `${staggerOrder * STAGGER_MS}ms` : "0ms"
-
-        return (
+        {trailing.length > 0 && (
           <div
-            key={entry.item.id}
             aria-hidden={!revealed}
             inert={!revealed || undefined}
-            style={{ transitionDelay: delay }}
             className={cn(
               "grid transition-[grid-template-rows] motion-reduce:transition-none",
               REVEAL_DURATION,
@@ -105,9 +90,8 @@ export const SurveyQuestionList = ({
           >
             <div className="overflow-hidden">
               <div
-                style={{ transitionDelay: delay }}
                 className={cn(
-                  "pt-12 transition-[transform,opacity] motion-reduce:transition-none",
+                  "flex flex-col gap-12 pt-12 transition-[transform,opacity] motion-reduce:transition-none",
                   REVEAL_DURATION,
                   REVEAL_EASE,
                   revealed
@@ -115,12 +99,29 @@ export const SurveyQuestionList = ({
                     : "-translate-y-2 opacity-0",
                 )}
               >
-                {renderItem(entry)}
+                {trailing.map((entry) => (
+                  <div
+                    key={entry.item.id}
+                    className={
+                      entry.item.kind === "divider" ? "-mb-2" : undefined
+                    }
+                  >
+                    {renderItem(entry)}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        )
-      })}
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex w-full flex-col gap-12">
+      {numbered.map((entry) => (
+        <div key={entry.item.id}>{renderItem(entry)}</div>
+      ))}
     </div>
   )
 }

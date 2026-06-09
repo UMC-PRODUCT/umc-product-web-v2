@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import {
   SURVEY_VARIANTS,
   SurveyQuestionList,
@@ -36,15 +37,26 @@ function UsabilitySurveyTestPage() {
     onSubmit: (answers: SurveyAnswers) =>
       console.log("[usability-survey] submit", { variant, answers }),
   })
+  const addToast = useToastStore((s) => s.addToast)
+  const surveyToast = (message: string) =>
+    addToast({
+      message,
+      color: "primary",
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
 
   const handleOpen = () => {
     survey.reset()
     setOpen(true)
+    surveyToast("소중한 의견을 부탁드립니다!")
   }
 
   const handleSubmit = () => {
     survey.submit()
     setOpen(false)
+    surveyToast("소중한 의견 감사합니다!")
   }
 
   const submitButton = (
@@ -80,6 +92,16 @@ function UsabilitySurveyTestPage() {
           </Button>
           {submitButton}
         </>
+      )
+    }
+    if (footerKind === "back-submit") {
+      return (
+        <div className="flex gap-3">
+          <Button variant="weak" color="neutral" onClick={survey.goPrev}>
+            이전
+          </Button>
+          {submitButton}
+        </div>
       )
     }
     return submitButton
@@ -119,7 +141,7 @@ function UsabilitySurveyTestPage() {
           answers={survey.answers}
           onAnswer={survey.onAnswer}
           startNumber={survey.startNumber}
-          progressive={survey.currentStep.progressive}
+          reveal={survey.currentStep.reveal}
         />
       </UsabilitySurveyModal>
     </main>

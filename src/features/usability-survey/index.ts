@@ -3,6 +3,7 @@ export type {
   SurveyAnswerValue,
   SurveyItem,
   SurveyQuestion,
+  SurveyRevealMode,
   SurveyStep,
   SurveyVariantConfig,
 } from "./model/types"
