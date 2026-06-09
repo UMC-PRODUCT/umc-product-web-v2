@@ -17,6 +17,7 @@ import {
   toRoundNumber,
 } from "@/features/application/model/mappers"
 import { getAllSchools } from "@/features/challenger/api/organization"
+import { getProjectMembers } from "@/features/project/list/api/matchingProject"
 import { useViewModeStore } from "@/shared/view-mode"
 
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"
@@ -145,10 +146,35 @@ export function useMatchingStatusData(chapterName?: string) {
     return ids
   }, [applicantsQuery.data])
 
+  // 프로젝트별 팀원 조회 (수동 배정 멤버 포함)
+  const membersQuery = useQuery({
+    queryKey: applicationKeys.matchingMembers(
+      gisuId,
+      chapterId,
+      projects.map((p) => p.id),
+    ),
+    queryFn: async () => {
+      const results = await Promise.all(
+        projects.map(async (p) => {
+          const members = await getProjectMembers(p.id)
+          return { projectId: p.id, members }
+        }),
+      )
+      return new Map(results.map((r) => [r.projectId, r.members]))
+    },
+    enabled: projects.length > 0,
+  })
+
   // 매칭 현황 데이터 변환 (매칭 결과 시트용)
   const matchingParts = useMemo(
-    () => toMatchingPartDataList(projects, applicantsQuery.data ?? new Map()),
-    [projects, applicantsQuery.data],
+    () =>
+      toMatchingPartDataList(
+        projects,
+        applicantsQuery.data ?? new Map(),
+        membersQuery.data ?? new Map(),
+        currentRound,
+      ),
+    [projects, applicantsQuery.data, membersQuery.data, currentRound],
   )
 
   // 통계: summary 기반 (universities는 schoolMatchingStatistics + schools API로 계산)
