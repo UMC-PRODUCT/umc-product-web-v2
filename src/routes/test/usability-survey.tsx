@@ -84,16 +84,6 @@ function UsabilitySurveyTestPage() {
         </Button>
       )
     }
-    if (footerKind === "close-submit") {
-      return (
-        <>
-          <Button variant="weak" color="neutral" onClick={() => setOpen(false)}>
-            닫기
-          </Button>
-          {submitButton}
-        </>
-      )
-    }
     if (footerKind === "back-submit") {
       return (
         <div className="flex gap-3">
