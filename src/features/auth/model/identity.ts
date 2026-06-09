@@ -11,6 +11,15 @@ const CENTRAL_ROLE_TYPES: RoleType[] = [
   "CENTRAL_EDUCATION_TEAM_MEMBER",
 ]
 
+const ADMIN_ROLE_TYPES: RoleType[] = [
+  "SUPER_ADMIN",
+  "CENTRAL_PRESIDENT",
+  "CENTRAL_VICE_PRESIDENT",
+  "CENTRAL_OPERATING_TEAM_MEMBER",
+  "CENTRAL_EDUCATION_TEAM_MEMBER",
+  "CHAPTER_PRESIDENT",
+]
+
 const SCHOOL_ROLE_TYPES: RoleType[] = [
   "SCHOOL_PRESIDENT",
   "SCHOOL_VICE_PRESIDENT",
@@ -45,7 +54,7 @@ export function isSchoolStaff(me: MemberInfoResponse | undefined): boolean {
 }
 
 export function isOperator(me: MemberInfoResponse | undefined): boolean {
-  return !!me?.roles?.length
+  return hasAnyRoleType(me, ADMIN_ROLE_TYPES)
 }
 
 export function isCurrentTermPm(me: MemberInfoResponse | undefined): boolean {
