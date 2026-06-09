@@ -109,6 +109,21 @@ describe("useMultistepSurvey", () => {
     expect(result.current.isLastStep).toBe(true)
   })
 
+  it("goPrev 시 이전 스텝으로 이동하고 응답은 보존된다", () => {
+    const { result } = renderHook(() => useMultistepSurvey(config))
+    act(() => result.current.onAnswer("q1", 5))
+    act(() => result.current.goNext())
+    act(() => result.current.goPrev())
+    expect(result.current.currentStep.title).toBe("step1")
+    expect(result.current.answers).toEqual({ q1: 5 })
+  })
+
+  it("첫 스텝에서 goPrev는 스텝을 유지한다", () => {
+    const { result } = renderHook(() => useMultistepSurvey(config))
+    act(() => result.current.goPrev())
+    expect(result.current.currentStep.title).toBe("step1")
+  })
+
   it("submit은 onSubmit에 현재 answers를 전달한다", () => {
     const onSubmit = vi.fn()
     const { result } = renderHook(() =>
@@ -117,6 +132,15 @@ describe("useMultistepSurvey", () => {
     act(() => result.current.onAnswer("q1", 5))
     act(() => result.current.submit())
     expect(onSubmit).toHaveBeenCalledWith({ q1: 5 })
+  })
+
+  it("미완료 상태에서 submit은 onSubmit을 호출하지 않는다", () => {
+    const onSubmit = vi.fn()
+    const { result } = renderHook(() =>
+      useMultistepSurvey(config, { onSubmit }),
+    )
+    act(() => result.current.submit())
+    expect(onSubmit).not.toHaveBeenCalled()
   })
 
   it("reset은 스텝과 응답을 초기화한다", () => {

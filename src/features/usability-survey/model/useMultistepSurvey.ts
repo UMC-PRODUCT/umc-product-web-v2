@@ -67,7 +67,12 @@ export function useMultistepSurvey(
     setStepIndex((index) => index + 1)
   }
 
+  const goPrev = () => {
+    setStepIndex((index) => Math.max(0, index - 1))
+  }
+
   const submit = () => {
+    if (!isStepComplete) return
     options?.onSubmit?.(answers)
   }
 
@@ -86,6 +91,7 @@ export function useMultistepSurvey(
     isStepComplete,
     onAnswer,
     goNext,
+    goPrev,
     submit,
     reset,
     scrollRef,

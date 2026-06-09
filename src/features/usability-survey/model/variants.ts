@@ -74,7 +74,7 @@ const WORST_STEP_SELECT: SingleSelectQuestion = {
 }
 
 const FEEDBACK_TEXT = makeFeedbackText(
-  "가장 불편했던 점 or 좋았던 점은 무엇이었나요?",
+  "가장 불편했던 점 or 좋았던 점은 무엇이었나요? (선택)",
 )
 
 const ADMIN_FEEDBACK_TEXT = makeFeedbackText(
@@ -84,7 +84,7 @@ const ADMIN_FEEDBACK_TEXT = makeFeedbackText(
 const EXTRA_TEXT: TextQuestion = {
   id: "extra",
   kind: "text",
-  text: "추가로 남기고 싶은 의견이 있나요?",
+  text: "추가로 남기고 싶은 의견이 있나요? (선택)",
   placeholder: "자유롭게 작성해 주세요 (선택)",
   optional: true,
 }
@@ -197,7 +197,7 @@ export const SURVEY_VARIANTS: Record<SurveyVariantKey, SurveyVariantConfig> = {
           WORST_STEP_SELECT,
           EXTRA_TEXT,
         ],
-        footer: "submit-only",
+        footer: "back-submit",
         reveal: "optional-group",
       },
     ],
