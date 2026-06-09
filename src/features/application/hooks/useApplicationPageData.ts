@@ -65,6 +65,16 @@ export function useChallengerPageData() {
     enabled: gisuId > 0,
   })
 
+  // 매칭 차수 조회 (PM은 챕터 선택 없으므로 전체 조회)
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(undefined),
+    queryFn: () => getMatchingRounds(),
+  })
+  const currentRound = useMemo(
+    () => getCurrentRound(roundsQuery.data ?? []),
+    [roundsQuery.data],
+  )
+
   // 프로젝트 목록이 로드되면 각 프로젝트의 지원자 목록도 함께 조회
   const projects = useMemo(
     () => projectsQuery.data?.content ?? [],
@@ -114,8 +124,10 @@ export function useChallengerPageData() {
   return {
     projects: transformed,
     projectInfo,
+    currentRound,
     isLoading:
       gisuQuery.isLoading ||
+      roundsQuery.isLoading ||
       projectsQuery.isLoading ||
       applicantsQuery.isLoading,
     isError: gisuQuery.isError || projectsQuery.isError,
