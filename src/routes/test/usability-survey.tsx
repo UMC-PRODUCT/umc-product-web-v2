@@ -50,7 +50,11 @@ function UsabilitySurveyTestPage() {
   const handleOpen = () => {
     survey.reset()
     setOpen(true)
-    surveyToast("운영진 여러분들의 소중한 의견을 부탁드립니다 !")
+    surveyToast(
+      variant === "admin-matching"
+        ? "운영진 여러분들의 소중한 의견을 부탁드립니다 !"
+        : "여러분들의 소중한 의견을 부탁드립니다 !",
+    )
   }
 
   const handleSubmit = () => {
