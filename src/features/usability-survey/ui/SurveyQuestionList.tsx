@@ -14,7 +14,7 @@ import type {
 
 export type { SurveyAnswers, SurveyAnswerValue } from "../model/types"
 
-const REVEAL_DURATION = "duration-1500"
+const REVEAL_DURATION = "duration-[1500ms]"
 const REVEAL_EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]"
 
 interface SurveyQuestionListProps {
