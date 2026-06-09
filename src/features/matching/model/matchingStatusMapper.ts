@@ -66,36 +66,65 @@ function toMatchingProject(
   maxColsByRole: Record<string, number>,
   currentRound: number,
 ): MatchingProjectData {
-  // APPROVED 지원자만 블록에 표시
-  const approvedByRole = new Map<string, ProjectApplicantResponse[]>()
+  // memberId -> APPROVED 지원서 매핑 (차수 태그 조회용)
   // 서버가 memberId를 string으로 내려주는 경우 대비해 String으로 정규화
-  const approvedMemberIds = new Set<string>()
+  const approvedAppByMemberId = new Map<string, ProjectApplicantResponse>()
   for (const app of applicants) {
     if (app.status !== "APPROVED") continue
-    const role = PART_TO_ROLE[app.applicant.part]
-    if (!role) continue
-    const list = approvedByRole.get(role) ?? []
-    list.push(app)
-    approvedByRole.set(role, list)
-    approvedMemberIds.add(String(app.applicant.memberId))
+    approvedAppByMemberId.set(String(app.applicant.memberId), app)
   }
 
-  // 수동 배정 멤버: partGroups에 있지만 APPROVED 지원서가 없는 멤버
-  const manualByRole = new Map<
-    string,
-    { memberId: number; nickname: string; name: string }[]
-  >()
+  const roundVariantMap: Record<number, "round2" | "round3" | "random"> = {
+    2: "round2",
+    3: "round3",
+  }
+
+  // partGroups를 현재 멤버 기준으로 사용 - 매칭 해제 시 즉시 반영
+  // members 미로딩 시 APPROVED 지원서 기반으로 폴백
+  const blocksByRole = new Map<string, MatchingBlockData[]>()
   if (members) {
     for (const group of members.partGroups) {
       const role = PART_TO_ROLE[group.part]
       if (!role) continue
       for (const member of group.members) {
-        if (!approvedMemberIds.has(String(member.memberId))) {
-          const list = manualByRole.get(role) ?? []
-          list.push(member)
-          manualByRole.set(role, list)
-        }
+        const app = approvedAppByMemberId.get(String(member.memberId))
+        const block: MatchingBlockData = app
+          ? {
+              ...phaseToBlock(
+                toRoundNumber(app.matchingRound.phase),
+                `${member.nickname}/${member.name}`,
+                String(app.applicationId),
+              ),
+              memberId: member.memberId,
+            }
+          : {
+              type:
+                currentRound === 1 ? ("round1" as const) : ("filled" as const),
+              name: `${member.nickname}/${member.name}`,
+              tagVariant: roundVariantMap[currentRound] ?? "random",
+              memberId: member.memberId,
+            }
+        const list = blocksByRole.get(role) ?? []
+        list.push(block)
+        blocksByRole.set(role, list)
       }
+    }
+  } else {
+    // members 미로딩 폴백: APPROVED 지원서 기반
+    for (const [, app] of approvedAppByMemberId) {
+      const role = PART_TO_ROLE[app.applicant.part]
+      if (!role) continue
+      const block: MatchingBlockData = {
+        ...phaseToBlock(
+          toRoundNumber(app.matchingRound.phase),
+          `${app.applicant.nickname}/${app.applicant.name}`,
+          String(app.applicationId),
+        ),
+        memberId: app.applicant.memberId,
+      }
+      const list = blocksByRole.get(role) ?? []
+      list.push(block)
+      blocksByRole.set(role, list)
     }
   }
 
@@ -115,31 +144,8 @@ function toMatchingProject(
     quota: number,
     maxCols: number,
   ): MatchingRoleRow {
-    const approved = approvedByRole.get(role) ?? []
-    const manual = manualByRole.get(role) ?? []
-
-    const approvedBlocks: MatchingBlockData[] = approved.map((app) => ({
-      ...phaseToBlock(
-        toRoundNumber(app.matchingRound.phase),
-        `${app.applicant.nickname}/${app.applicant.name}`,
-        String(app.applicationId),
-      ),
-      memberId: app.applicant.memberId,
-    }))
-    // 수동 배정 멤버는 현재 차수 태그로 표시
-    const roundVariantMap: Record<number, "round2" | "round3" | "random"> = {
-      2: "round2",
-      3: "round3",
-    }
-    const manualBlocks: MatchingBlockData[] = manual.map((member) => ({
-      type: currentRound === 1 ? ("round1" as const) : ("filled" as const),
-      name: `${member.nickname}/${member.name}`,
-      tagVariant: roundVariantMap[currentRound] ?? "random",
-      memberId: member.memberId,
-    }))
-
-    const totalFilled = approved.length + manual.length
-    const emptyCount = Math.max(0, quota - totalFilled)
+    const filledBlocks = blocksByRole.get(role) ?? []
+    const emptyCount = Math.max(0, quota - filledBlocks.length)
     const emptyBlocks: MatchingBlockData[] = Array.from(
       { length: emptyCount },
       () => ({ type: "none" }),
@@ -149,15 +155,7 @@ function toMatchingProject(
       { length: blockedCount },
       () => ({ type: "blocked" }),
     )
-    return {
-      role,
-      blocks: [
-        ...approvedBlocks,
-        ...manualBlocks,
-        ...emptyBlocks,
-        ...blockedBlocks,
-      ],
-    }
+    return { role, blocks: [...filledBlocks, ...emptyBlocks, ...blockedBlocks] }
   }
 
   const roleRows = [
