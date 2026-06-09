@@ -38,7 +38,7 @@ export const EmojiScaleWithTextQuestion = ({
     const input = inputRef.current
     if (!input) return
     input.focus({ preventScroll: true })
-    input.scrollIntoView({ block: "end", behavior: "instant" })
+    input.scrollIntoView({ block: "end", behavior: "auto" })
   }, [showText])
 
   return (
