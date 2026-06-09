@@ -23,7 +23,7 @@ export const EmojiChoiceQuestion = ({
       aria-label={ariaLabel}
       className="flex justify-center"
     >
-      <div className="grid grid-cols-[1fr_1fr] gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <EmojiRadioButton
           selected={value === "positive"}
           score={5}
