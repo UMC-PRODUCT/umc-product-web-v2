@@ -57,6 +57,7 @@ interface MatchingResultRowProps {
   gisuId?: number
   chapterId?: number
   approvedMemberIds?: Set<string>
+  chapterName?: string
   className?: string
 }
 
@@ -74,6 +75,7 @@ export function MatchingResultRow({
   gisuId,
   chapterId,
   approvedMemberIds,
+  chapterName,
   className,
 }: MatchingResultRowProps) {
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
@@ -242,7 +244,7 @@ export function MatchingResultRow({
         applicantId={selectedApplicantId}
         projectId={projectId}
         memberId={selectedMemberId ?? undefined}
-        chapterName="Chromium"
+        chapterName={chapterName ?? ""}
         projectName={projectName}
         challengerName={challengerName}
         challengerUniversity={challengerUniversity}
