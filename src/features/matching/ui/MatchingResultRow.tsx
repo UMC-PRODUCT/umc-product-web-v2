@@ -57,6 +57,7 @@ interface MatchingResultRowProps {
   gisuId?: number
   chapterId?: number
   approvedMemberIds?: Set<string>
+  chapterName?: string
   className?: string
 }
 
@@ -74,6 +75,7 @@ export function MatchingResultRow({
   gisuId,
   chapterId,
   approvedMemberIds,
+  chapterName,
   className,
 }: MatchingResultRowProps) {
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
@@ -242,7 +244,7 @@ export function MatchingResultRow({
         applicantId={selectedApplicantId}
         projectId={projectId}
         memberId={selectedMemberId ?? undefined}
-        chapterName="Chromium"
+        chapterName={chapterName ?? ""}
         projectName={projectName}
         challengerName={challengerName}
         challengerUniversity={challengerUniversity}
@@ -279,9 +281,9 @@ export function MatchingResultRow({
           gisuId={gisuId}
           chapterId={chapterId}
           approvedMemberIds={approvedMemberIds}
-          onAssign={(challenger) => {
-            if (!assignTarget) return
-            // 로컬 UI 즉시 반영
+          onAssign={async (challenger) => {
+            if (!assignTarget || !projectId) return
+            // 로컬 UI 즉시 반영 (optimistic update)
             setLocalRoleRows((prev) =>
               prev.map((row, rIdx) =>
                 rIdx === assignTarget.rowIdx
@@ -302,14 +304,12 @@ export function MatchingResultRow({
                   : row,
               ),
             )
-            // 서버 API 호출
-            if (projectId) {
-              const part = roleToPart(assignTarget.role, backendPart)
-              assignMutation.mutate({
-                memberId: Number(challenger.id),
-                part,
-              })
-            }
+            // 서버 API 호출 - 실패 시 throw해서 AssignmentModal에서 완료 모달 미표시
+            const part = roleToPart(assignTarget.role, backendPart)
+            await assignMutation.mutateAsync({
+              memberId: Number(challenger.id),
+              part,
+            })
           }}
         />
       )}

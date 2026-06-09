@@ -10,6 +10,7 @@ import type { ProjectApplication } from "../model/types"
 
 interface ChallengerApplicationViewProps {
   projects: ProjectApplication[]
+  currentRound?: number
   className?: string
 }
 
@@ -61,11 +62,11 @@ function computeStats(projects: ProjectApplication[]): ChallengerStats {
 
 export function ChallengerApplicationView({
   projects,
+  currentRound,
   className,
 }: ChallengerApplicationViewProps) {
   const stats = useMemo(() => computeStats(projects), [projects])
 
-  // TODO: API 연동 시 현재 활성 차수를 서버에서 받아오도록 변경
   return (
     <div className={cn("flex flex-col gap-[57px] pl-4", className)}>
       <ChallengerStatsSection stats={stats} />
@@ -73,7 +74,7 @@ export function ChallengerApplicationView({
         projects={projects}
         searchPlaceholder="닉네임/이름으로 검색하세요."
         visibleFilters={["round", "part", "school", "appStatus"]}
-        currentRound={2}
+        currentRound={currentRound}
       />
     </div>
   )

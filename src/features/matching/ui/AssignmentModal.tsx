@@ -36,7 +36,7 @@ interface AssignmentModalProps {
   gisuId?: number
   chapterId?: number
   approvedMemberIds?: Set<string>
-  onAssign: (challenger: AssignableChallenger) => void
+  onAssign: (challenger: AssignableChallenger) => Promise<void>
 }
 
 export function AssignmentModal({
@@ -88,18 +88,26 @@ export function AssignmentModal({
     return items.filter((m) => !approvedMemberIds.has(m.memberId))
   }, [data, approvedMemberIds])
 
-  const handleAssign = () => {
-    const member = filtered.find((m) => m.memberId === selectedId)
+  const [isAssigning, setIsAssigning] = useState(false)
+
+  const handleAssign = async () => {
+    const member = filtered.find((m) => String(m.memberId) === selectedId)
     if (!member) return
-    // SearchMemberItem -> AssignableChallenger 변환
-    onAssign({
-      id: member.memberId,
-      nickname: member.nickname,
-      university: member.schoolName,
-      partRole: (member.part?.toLowerCase() ??
-        "web") as AssignableChallenger["partRole"],
-    })
-    setShowComplete(true)
+    setIsAssigning(true)
+    try {
+      await onAssign({
+        id: String(member.memberId),
+        nickname: member.nickname,
+        university: member.schoolName,
+        partRole: (member.part?.toLowerCase() ??
+          "web") as AssignableChallenger["partRole"],
+      })
+      setShowComplete(true)
+    } catch {
+      // 서버 오류 - 완료 모달 미표시
+    } finally {
+      setIsAssigning(false)
+    }
   }
 
   const handleClose = () => {
@@ -220,7 +228,7 @@ export function AssignmentModal({
                   filtered.map((m) => (
                     <AssignmentChallengerRow
                       key={m.memberId}
-                      nickname={m.nickname}
+                      nickname={`${m.nickname}/${m.name}`}
                       university={m.schoolName}
                       partRole={
                         (m.part?.toLowerCase() ??
@@ -247,6 +255,7 @@ export function AssignmentModal({
                 color="primary"
                 size="lg"
                 onClick={handleAssign}
+                isLoading={isAssigning}
                 className="w-50 rounded-[10px]"
               >
                 해당 프로젝트에 배정

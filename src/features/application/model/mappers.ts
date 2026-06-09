@@ -140,7 +140,9 @@ export function toProjectApplication(
     id: String(project.id),
     projectName: project.name,
     role: "plan", // PM 프로젝트이므로 기본값
-    challengerName: project.productOwner.nickname || project.productOwner.name,
+    challengerName: project.productOwner.nickname
+      ? `${project.productOwner.nickname}/${project.productOwner.name}`
+      : project.productOwner.name,
     challengerUniversity: project.productOwner.schoolName,
     statusLabel,
     designCount: getQuotaCount(project.partQuotas, "DESIGN"),

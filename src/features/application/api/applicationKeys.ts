@@ -35,6 +35,19 @@ export const applicationKeys = {
       projectIds,
     ] as const,
 
+  matchingMembers: (
+    gisuId: number,
+    chapterId?: number,
+    projectIds?: number[],
+  ) =>
+    [
+      ...applicationKeys.all,
+      "matching-members",
+      gisuId,
+      chapterId,
+      projectIds,
+    ] as const,
+
   // 통계 API
   projectStatistics: (projectId: number) =>
     [...applicationKeys.all, "statistics", "project", projectId] as const,

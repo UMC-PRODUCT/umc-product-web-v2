@@ -72,7 +72,7 @@ export function ProjectStatusRow({
         </div>
 
         {/* 챌린저 */}
-        <div className="flex h-12.5 w-50 items-center rounded-lg px-4">
+        <div className="flex h-12.5 w-50 items-center justify-center rounded-lg px-4">
           <div className="flex flex-col whitespace-nowrap">
             <span className="text-body-2-medium text-teal-gray-900">
               {challengerName}
@@ -84,7 +84,7 @@ export function ProjectStatusRow({
         </div>
 
         {/* 상태 */}
-        <div className="flex h-12.5 w-34 items-center px-2.5">
+        <div className="flex h-12.5 w-34 items-center justify-center px-2.5">
           <span className="text-label-2-medium shadow-drop-neutral-2 inline-flex h-6 items-center justify-center rounded-md bg-teal-100 px-2 py-0.5 text-teal-600">
             {statusLabel}
           </span>

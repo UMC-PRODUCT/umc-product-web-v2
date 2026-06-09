@@ -370,7 +370,7 @@ function MatchingRoundsPage() {
     })
     if (hasInvalidRange) {
       addToast({
-        message: "종료 일시는 시작 일시 이후로 설정해 주세요.",
+        message: "종료 날짜는 시작 날짜 이후로 설정해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",

@@ -6,6 +6,7 @@ import type {
   ManagedProjectSummaryResponse,
   ProjectApplicantResponse,
 } from "@/features/application/model/apiTypes"
+import type { ProjectMembersResponse } from "@/features/project/list/api/matchingProject"
 
 import type {
   MatchingBlockData,
@@ -37,35 +38,109 @@ function phaseToBlock(
   }
 }
 
-// 서버 part -> 역할 행 라벨
+// 서버 part -> 역할 행 라벨 (ANDROID/IOS도 Frontend 행으로 표시)
 const PART_TO_ROLE: Record<string, string> = {
   DESIGN: "Design",
   WEB: "Frontend",
+  ANDROID: "Frontend",
+  IOS: "Frontend",
   SPRINGBOOT: "Backend",
   NODEJS: "Backend",
 }
 
-// 프로젝트 + 지원자 -> MatchingProjectData 변환
+// 섹션 헤더용 FE 플랫폼 분류
+const FE_PLATFORM_ORDER = ["Web", "iOS", "Android"] as const
+type FEPlatform = (typeof FE_PLATFORM_ORDER)[number]
+
+const PART_TO_FE_PLATFORM: Record<string, FEPlatform> = {
+  WEB: "Web",
+  ANDROID: "Android",
+  IOS: "iOS",
+}
+
+// 프로젝트 + 지원자 + 팀원 -> MatchingProjectData 변환
 function toMatchingProject(
   project: ManagedProjectSummaryResponse,
   applicants: ProjectApplicantResponse[],
+  members: ProjectMembersResponse | undefined,
   maxColsByRole: Record<string, number>,
+  currentRound: number,
 ): MatchingProjectData {
-  // APPROVED 지원자만 블록에 표시
-  const approvedByRole = new Map<string, ProjectApplicantResponse[]>()
+  // memberId -> APPROVED 지원서 매핑 (차수 태그 조회용)
+  // 서버가 memberId를 string으로 내려주는 경우 대비해 String으로 정규화
+  const approvedAppByMemberId = new Map<string, ProjectApplicantResponse>()
   for (const app of applicants) {
     if (app.status !== "APPROVED") continue
-    const role = PART_TO_ROLE[app.applicant.part]
-    if (!role) continue
-    const list = approvedByRole.get(role) ?? []
-    list.push(app)
-    approvedByRole.set(role, list)
+    approvedAppByMemberId.set(String(app.applicant.memberId), app)
+  }
+
+  const roundVariantMap: Record<number, "round2" | "round3" | "random"> = {
+    2: "round2",
+    3: "round3",
+  }
+
+  // partGroups를 현재 멤버 기준으로 사용 - 매칭 해제 시 즉시 반영
+  // members 미로딩 시 APPROVED 지원서 기반으로 폴백
+  const blocksByRole = new Map<string, MatchingBlockData[]>()
+  if (members) {
+    for (const group of members.partGroups) {
+      const role = PART_TO_ROLE[group.part]
+      if (!role) continue
+      for (const member of group.members) {
+        const app = approvedAppByMemberId.get(String(member.memberId))
+        const block: MatchingBlockData = app
+          ? {
+              ...phaseToBlock(
+                toRoundNumber(app.matchingRound.phase),
+                member.nickname
+                  ? `${member.nickname}/${member.name}`
+                  : member.name,
+                String(app.applicationId),
+              ),
+              memberId: member.memberId,
+            }
+          : {
+              type:
+                currentRound === 1 ? ("round1" as const) : ("filled" as const),
+              name: member.nickname
+                ? `${member.nickname}/${member.name}`
+                : member.name,
+              tagVariant: roundVariantMap[currentRound] ?? "random",
+              memberId: member.memberId,
+            }
+        const list = blocksByRole.get(role) ?? []
+        list.push(block)
+        blocksByRole.set(role, list)
+      }
+    }
+  } else {
+    // members 미로딩 폴백: APPROVED 지원서 기반
+    for (const [, app] of approvedAppByMemberId) {
+      const role = PART_TO_ROLE[app.applicant.part]
+      if (!role) continue
+      const block: MatchingBlockData = {
+        ...phaseToBlock(
+          toRoundNumber(app.matchingRound.phase),
+          app.applicant.nickname
+            ? `${app.applicant.nickname}/${app.applicant.name}`
+            : app.applicant.name,
+          String(app.applicationId),
+        ),
+        memberId: app.applicant.memberId,
+      }
+      const list = blocksByRole.get(role) ?? []
+      list.push(block)
+      blocksByRole.set(role, list)
+    }
   }
 
   // partQuotas에서 역할별 quota 추출
   const designQuota =
     project.partQuotas.find((q) => q.part === "DESIGN")?.quota ?? 0
-  const feQuota = project.partQuotas.find((q) => q.part === "WEB")?.quota ?? 0
+  // WEB/ANDROID/IOS 중 해당 프로젝트의 FE 파트 quota 합산
+  const feQuota = project.partQuotas
+    .filter((q) => q.part === "WEB" || q.part === "ANDROID" || q.part === "IOS")
+    .reduce((sum, q) => sum + q.quota, 0)
   const beQuota = project.partQuotas
     .filter((q) => q.part === "SPRINGBOOT" || q.part === "NODEJS")
     .reduce((sum, q) => sum + q.quota, 0)
@@ -75,16 +150,8 @@ function toMatchingProject(
     quota: number,
     maxCols: number,
   ): MatchingRoleRow {
-    const approved = approvedByRole.get(role) ?? []
-    const filledBlocks: MatchingBlockData[] = approved.map((app) => ({
-      ...phaseToBlock(
-        toRoundNumber(app.matchingRound.phase),
-        app.applicant.nickname || app.applicant.name,
-        String(app.applicationId),
-      ),
-      memberId: app.applicant.memberId,
-    }))
-    const emptyCount = Math.max(0, quota - approved.length)
+    const filledBlocks = blocksByRole.get(role) ?? []
+    const emptyCount = Math.max(0, quota - filledBlocks.length)
     const emptyBlocks: MatchingBlockData[] = Array.from(
       { length: emptyCount },
       () => ({ type: "none" }),
@@ -116,7 +183,9 @@ function toMatchingProject(
   return {
     projectId: project.id,
     projectName: project.name,
-    challengerName: project.productOwner.nickname || project.productOwner.name,
+    challengerName: project.productOwner.nickname
+      ? `${project.productOwner.nickname}/${project.productOwner.name}`
+      : project.productOwner.name,
     challengerUniversity: project.productOwner.schoolName,
     backendPart,
     roleRows,
@@ -143,24 +212,45 @@ function computeMaxCols(
   return maxCols
 }
 
-// TODO: 서버에 productOwner.part 필드 추가되면 PM 파트별 그룹핑으로 전환
 export function toMatchingPartDataList(
   projects: ManagedProjectSummaryResponse[],
   applicantsByProject: Map<number, ProjectApplicantResponse[]>,
+  membersByProject: Map<number, ProjectMembersResponse>,
+  currentRound: number,
 ): MatchingPartData[] {
   if (projects.length === 0) return []
 
-  const maxCols = computeMaxCols(projects)
+  // FE 플랫폼별 프로젝트 그룹핑 (quota > 0인 파트 기준)
+  const byPlatform = new Map<FEPlatform, ManagedProjectSummaryResponse[]>()
+  for (const p of projects) {
+    const addedPlatforms = new Set<FEPlatform>()
+    for (const q of p.partQuotas) {
+      const platform = PART_TO_FE_PLATFORM[q.part]
+      if (platform && q.quota > 0 && !addedPlatforms.has(platform)) {
+        addedPlatforms.add(platform)
+        const list = byPlatform.get(platform) ?? []
+        list.push(p)
+        byPlatform.set(platform, list)
+      }
+    }
+  }
 
-  const matchingProjects = projects.map((p) =>
-    toMatchingProject(p, applicantsByProject.get(p.id) ?? [], maxCols),
-  )
-
-  // 현재 PM 파트 정보 없으므로 전체 프로젝트를 단일 섹션으로 표시
-  return [
-    {
-      partName: "전체",
-      projects: matchingProjects,
+  return FE_PLATFORM_ORDER.filter((platform) => byPlatform.has(platform)).map(
+    (platform) => {
+      const platformProjects = byPlatform.get(platform)!
+      const maxCols = computeMaxCols(platformProjects)
+      return {
+        partName: platform,
+        projects: platformProjects.map((p) =>
+          toMatchingProject(
+            p,
+            applicantsByProject.get(p.id) ?? [],
+            membersByProject.get(p.id),
+            maxCols,
+            currentRound,
+          ),
+        ),
+      }
     },
-  ]
+  )
 }

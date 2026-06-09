@@ -83,7 +83,11 @@ function MatchingApplicationsPage() {
                     dataUpdatedAt={admin.dataUpdatedAt}
                     currentRound={admin.currentRound}
                   />
-                  <ApplicationTableSection projects={adminProjects} />
+                  <ApplicationTableSection
+                    projects={adminProjects}
+                    currentRound={admin.currentRound}
+                    chapterName={selectedChapter}
+                  />
                 </div>
               )}
             </>
@@ -98,7 +102,10 @@ function MatchingApplicationsPage() {
                   </p>
                 </div>
               ) : (
-                <ChallengerApplicationView projects={pmProjects} />
+                <ChallengerApplicationView
+                  projects={pmProjects}
+                  currentRound={challenger.currentRound}
+                />
               )}
             </>
           )}

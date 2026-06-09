@@ -1,9 +1,12 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 
 import { Modal } from "@/shared/ui/Modal"
 
+import { updateApplicationDecision } from "../api/applicationApi"
+import { applicationKeys } from "../api/applicationKeys"
 import { useApplicationDetail } from "../hooks/useApplications"
-import { toApplicantFormData } from "../model/mappers"
+import { toApplicantFormData, toServerStatus } from "../model/mappers"
 import { ModalApplicantPanel } from "./detail-modal/ModalApplicantPanel"
 import { ModalFormPanel } from "./detail-modal/ModalFormPanel"
 
@@ -55,6 +58,29 @@ export function ApplicationDetailModal({
   const projectId = Number(project.id)
   const applicationId = selectedApplicantId ? Number(selectedApplicantId) : 0
   const detailQuery = useApplicationDetail(projectId, applicationId)
+
+  const queryClient = useQueryClient()
+  const decisionMutation = useMutation({
+    mutationFn: ({ appId, status }: { appId: number; status: StatusValue }) =>
+      updateApplicationDecision(projectId, appId, {
+        status: toServerStatus(status),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: applicationKeys.all })
+    },
+    onError: (_error, variables) => {
+      setStatusOverrides((prev) => {
+        const next = { ...prev }
+        delete next[variables.appId]
+        return next
+      })
+    },
+  })
+
+  const handleStatusChange = (appId: string, status: StatusValue) => {
+    setStatusOverrides((prev) => ({ ...prev, [appId]: status }))
+    decisionMutation.mutate({ appId: Number(appId), status })
+  }
 
   // 서버 formResponse -> 프론트 ApplicantFormData 변환
   const formData = useMemo(() => {
@@ -111,9 +137,7 @@ export function ApplicationDetailModal({
               onStatusFilterChange={setStatusFilter}
               selectedApplicantId={selectedApplicantId}
               onApplicantClick={setSelectedApplicantId}
-              onStatusChange={(id, status) =>
-                setStatusOverrides((prev) => ({ ...prev, [id]: status }))
-              }
+              onStatusChange={handleStatusChange}
               onClose={handleClose}
               currentRound={currentRound}
             />
@@ -128,10 +152,7 @@ export function ApplicationDetailModal({
               challengerName={project.challengerName}
               challengerUniversity={project.challengerUniversity}
               onStatusChange={(status) =>
-                setStatusOverrides((prev) => ({
-                  ...prev,
-                  [selectedApplicantId!]: status,
-                }))
+                handleStatusChange(selectedApplicantId!, status)
               }
               onClose={handlePanelClose}
               statusDisabled={
