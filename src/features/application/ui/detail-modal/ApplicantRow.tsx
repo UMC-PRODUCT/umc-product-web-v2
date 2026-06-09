@@ -58,7 +58,6 @@ export function ApplicantRow({
             </span>
           </div>
           <div className="flex h-12.5 w-25 flex-col items-start justify-center px-2.5">
-            {/* TODO: API 연동 시 차수별 마감 여부로 disabled 분기 */}
             {statusDisabled ? (
               <StatusChipTag value={status} type="chip" disabled />
             ) : (
