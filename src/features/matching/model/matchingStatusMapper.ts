@@ -116,7 +116,7 @@ function toMatchingProject(
   return {
     projectId: project.id,
     projectName: project.name,
-    challengerName: project.productOwner.nickname || project.productOwner.name,
+    challengerName: `${project.productOwner.nickname}/${project.productOwner.name}`,
     challengerUniversity: project.productOwner.schoolName,
     backendPart,
     roleRows,
