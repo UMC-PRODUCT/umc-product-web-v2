@@ -91,7 +91,7 @@ export function AssignmentModal({
   const [isAssigning, setIsAssigning] = useState(false)
 
   const handleAssign = async () => {
-    const member = filtered.find((m) => m.memberId === selectedId)
+    const member = filtered.find((m) => String(m.memberId) === selectedId)
     if (!member) return
     setIsAssigning(true)
     try {
