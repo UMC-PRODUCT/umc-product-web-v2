@@ -40,14 +40,13 @@ export const EmojiScaleWithTextQuestion = ({
     const input = inputRef.current
     if (!input) return
     input.focus({ preventScroll: true })
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches
+    const prefersReducedMotion =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false
     const timer = setTimeout(
       () => {
         input.scrollIntoView({
           block: "nearest",
-          behavior: prefersReducedMotion ? "instant" : "smooth",
+          behavior: prefersReducedMotion ? "auto" : "smooth",
         })
       },
       prefersReducedMotion ? 0 : REVEAL_MS,
