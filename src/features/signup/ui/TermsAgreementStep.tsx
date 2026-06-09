@@ -1,9 +1,32 @@
+import { useQuery } from "@tanstack/react-query"
 import { useFormContext } from "react-hook-form"
 
+import { getTerms } from "@/features/auth/api/terms"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
 import { type SignUpFormData } from "../validation"
+
+import type { TermType } from "@/features/auth/model/types"
+
+const TERM_TITLE_MAP: Record<TermType, string> = {
+  SERVICE: "서비스 이용약관 동의",
+  PRIVACY: "개인정보 처리 방침 동의",
+  MARKETING: "마케팅 정보 수신 동의",
+  LOCATION: "위치정보 이용약관 동의",
+}
+
+const getTermTitle = (type: TermType, fallback: string): string => {
+  return TERM_TITLE_MAP[type] || fallback || "이용약관 동의"
+}
+
+const getFieldName = (
+  type: TermType,
+): "serviceAgreement" | "privacyAgreement" | "optionalAgreement" => {
+  if (type === "SERVICE") return "serviceAgreement"
+  if (type === "PRIVACY") return "privacyAgreement"
+  return "optionalAgreement"
+}
 
 export function TermsAgreementStep() {
   const { watch, setValue } = useFormContext<SignUpFormData>()
@@ -11,16 +34,20 @@ export function TermsAgreementStep() {
   const name = watch("name")
   const school = watch("school")
 
-  const serviceAgreement = watch("serviceAgreement")
-  const privacyAgreement = watch("privacyAgreement")
-  const optionalAgreement = watch("optionalAgreement")
+  const { data, isLoading } = useQuery({
+    queryKey: ["terms"],
+    queryFn: getTerms,
+  })
 
-  const allAgreed = serviceAgreement && privacyAgreement && optionalAgreement
+  const terms = data?.terms || []
+
+  const allAgreed =
+    terms.length > 0 && terms.every((term) => watch(getFieldName(term.type)))
 
   const handleAgreeAll = (checked: boolean) => {
-    setValue("serviceAgreement", checked)
-    setValue("privacyAgreement", checked)
-    setValue("optionalAgreement", checked)
+    terms.forEach((term) => {
+      setValue(getFieldName(term.type), checked)
+    })
   }
 
   const toggleAgreement = (
@@ -54,43 +81,42 @@ export function TermsAgreementStep() {
         </div>
 
         <div className="bg-teal-gray-200 h-[1px] w-full rounded-[0.5px]" />
-        <button
-          type="button"
-          onClick={() => toggleAgreement("serviceAgreement")}
-          className="flex items-center gap-2 text-left"
-        >
-          <CheckIcon
-            className={`h-6 w-6 ${serviceAgreement ? "text-teal-500" : "text-teal-200"}`}
-          />
-          <span className="text-body-1-regular text-teal-gray-500">
-            (필수) 서비스 이용약관 동의
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => toggleAgreement("privacyAgreement")}
-          className="flex items-center gap-2 text-left"
-        >
-          <CheckIcon
-            className={`h-6 w-6 ${privacyAgreement ? "text-teal-500" : "text-teal-200"}`}
-          />
-          <span className="text-body-1-regular text-teal-gray-500">
-            (필수) 개인정보 처리 방침 동의
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => toggleAgreement("optionalAgreement")}
-          className="flex items-center gap-2 text-left"
-        >
-          <CheckIcon
-            className={`h-6 w-6 ${optionalAgreement ? "text-teal-500" : "text-teal-200"}`}
-          />
-          <span className="text-body-1-regular text-teal-gray-500">
-            (선택) 서비스 이용약관 동의
-          </span>
-        </button>
-        <div className="flex w-full flex-col gap-3.5"></div>
+
+        {isLoading ? (
+          <p className="text-body-2-medium text-teal-gray-400 py-4 text-center">
+            약관을 불러오는 중입니다...
+          </p>
+        ) : (
+          terms.map((term) => {
+            const fieldName = getFieldName(term.type)
+            const isAgreed = watch(fieldName)
+            const requiredText = term.isMandatory ? "(필수)" : "(선택)"
+            const title = getTermTitle(term.type, term.typeDescription)
+
+            return (
+              <div key={term.id} className="flex items-center gap-2 text-left">
+                <button
+                  type="button"
+                  onClick={() => toggleAgreement(fieldName)}
+                  className="flex items-center justify-center"
+                >
+                  <CheckIcon
+                    className={`h-6 w-6 ${isAgreed ? "text-teal-500" : "text-teal-200"}`}
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.open(term.link, "_blank")}
+                  className="text-left"
+                >
+                  <span className="text-body-1-regular text-teal-gray-500">
+                    {`${requiredText} ${title}`}
+                  </span>
+                </button>
+              </div>
+            )
+          })
+        )}
       </div>
     </div>
   )
