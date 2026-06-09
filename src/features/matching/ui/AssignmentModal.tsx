@@ -220,7 +220,7 @@ export function AssignmentModal({
                   filtered.map((m) => (
                     <AssignmentChallengerRow
                       key={m.memberId}
-                      nickname={m.nickname}
+                      nickname={`${m.nickname}/${m.name}`}
                       university={m.schoolName}
                       partRole={
                         (m.part?.toLowerCase() ??
