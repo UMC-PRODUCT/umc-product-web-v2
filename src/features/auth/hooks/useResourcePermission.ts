@@ -5,30 +5,43 @@ import {
   type PermissionType,
   type ResourceType,
 } from "@/features/auth/api/permissions"
+import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
 import { useAuthStore } from "@/features/auth/store/authStore"
+
+interface UseResourcePermissionOptions {
+  enabled?: boolean
+  permissionType?: PermissionType
+  allowTypeLevel?: boolean
+}
 
 export function useResourcePermission(
   resourceType: ResourceType,
   resourceId?: number,
-  options?: { enabled?: boolean },
+  options?: UseResourcePermissionOptions,
 ) {
   const isAuthed = useAuthStore((s) => s.isAuthed)
+  const canRequest =
+    resourceId !== undefined || options?.allowTypeLevel === true
   const query = useQuery({
     queryKey: [
       "authorization",
       "resource-permission",
       resourceType,
       resourceId,
+      options?.permissionType,
     ],
-    queryFn: () => getResourcePermission({ resourceType, resourceId }),
-    enabled: isAuthed && resourceId !== undefined && (options?.enabled ?? true),
+    queryFn: () =>
+      getResourcePermission({
+        resourceType,
+        resourceId,
+        permissionType: options?.permissionType,
+      }),
+    enabled: isAuthed && canRequest && (options?.enabled ?? true),
     staleTime: 0,
   })
 
   const hasPermission = (type: PermissionType): boolean =>
-    query.data?.permissions?.some(
-      (p) => p.permissionType === type && p.hasPermission === true,
-    ) ?? false
+    hasGrantedPermission(query.data, type)
 
   return {
     ...query,

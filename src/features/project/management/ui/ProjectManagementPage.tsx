@@ -3,6 +3,7 @@ import { useMemo, useState } from "react"
 
 import { getAllProjects } from "@/features/application/api/applicationApi"
 import { useMe } from "@/features/auth/hooks/useMe"
+import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
 import {
   getViewerBranch,
   isCentralStaff,
@@ -23,6 +24,7 @@ import { getManagedProjects } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"
 import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
+import type { ResourcePermissionQuery } from "@/features/auth/api/permissions"
 import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 
 const FE_PART_LABELS = new Set(["Web", "iOS", "Android"])
@@ -91,6 +93,11 @@ function toMatchingProject(item: ProjectSummaryInput): MatchingProject {
         total: q.quota ?? 0,
       })),
   }
+}
+
+function toValidProjectId(project: MatchingProject): number | null {
+  const id = Number(project.id)
+  return Number.isFinite(id) && id > 0 ? id : null
 }
 
 export function ProjectManagementPage() {
@@ -173,6 +180,58 @@ export function ProjectManagementPage() {
     return map
   }, [adminProjects])
 
+  const permissionProjectIds = useMemo(() => {
+    const projects = isAdminScope ? adminProjects : pmProjects
+    const ids = new Set<number>()
+    for (const project of projects) {
+      const id = toValidProjectId(project)
+      if (id !== null) ids.add(id)
+    }
+    return Array.from(ids)
+  }, [adminProjects, isAdminScope, pmProjects])
+
+  const projectPermissionQueries = useMemo<ResourcePermissionQuery[]>(
+    () => [
+      {
+        resourceType: "PROJECT",
+        resourceIds: permissionProjectIds,
+        permissionTypes: ["EDIT", "MANAGE", "DELETE"],
+      },
+    ],
+    [permissionProjectIds],
+  )
+
+  const projectPermissionsQuery = useResourcePermissionsBatch(
+    projectPermissionQueries,
+    { enabled: hasAccess },
+  )
+
+  const isProjectPermissionLoading =
+    permissionProjectIds.length > 0 && projectPermissionsQuery.isPending
+
+  const getProjectActionPermissions = (project: MatchingProject) => {
+    const projectId = toValidProjectId(project)
+    if (projectId === null) {
+      return {
+        canDeleteProject: false,
+        canEditProject: false,
+      }
+    }
+
+    return {
+      canDeleteProject: projectPermissionsQuery.hasPermission({
+        resourceType: "PROJECT",
+        resourceId: projectId,
+        permissionType: "DELETE",
+      }),
+      canEditProject: projectPermissionsQuery.hasPermission({
+        resourceType: "PROJECT",
+        resourceId: projectId,
+        permissionType: "EDIT",
+      }),
+    }
+  }
+
   if (!hasAccess) return null
 
   return (
@@ -208,9 +267,17 @@ export function ProjectManagementPage() {
                 <div key={part} className="flex flex-col">
                   <ProjectManagementSubTitle title={part} className="pb-2" />
                   <div className="flex flex-col gap-4">
-                    {partProjects.map((project) => (
-                      <ProjectManagementCard key={project.id} data={project} />
-                    ))}
+                    {partProjects.map((project) => {
+                      const permissions = getProjectActionPermissions(project)
+                      return (
+                        <ProjectManagementCard
+                          key={project.id}
+                          data={project}
+                          isPermissionLoading={isProjectPermissionLoading}
+                          {...permissions}
+                        />
+                      )
+                    })}
                   </div>
                 </div>
               ))
@@ -226,9 +293,17 @@ export function ProjectManagementPage() {
               </p>
             ) : pmProjects.length > 0 ? (
               <div className="flex flex-col gap-3">
-                {pmProjects.map((project) => (
-                  <ProjectManagementCard key={project.id} data={project} />
-                ))}
+                {pmProjects.map((project) => {
+                  const permissions = getProjectActionPermissions(project)
+                  return (
+                    <ProjectManagementCard
+                      key={project.id}
+                      data={project}
+                      isPermissionLoading={isProjectPermissionLoading}
+                      {...permissions}
+                    />
+                  )
+                })}
               </div>
             ) : (
               <p className="text-body-2-medium text-teal-gray-400 py-10 text-center">

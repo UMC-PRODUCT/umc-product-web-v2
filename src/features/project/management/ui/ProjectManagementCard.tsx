@@ -13,9 +13,17 @@ import type { MatchingProject } from "../../list/model/matchingProject"
 
 interface ProjectManagementCardProps {
   data: MatchingProject
+  canDeleteProject: boolean
+  canEditProject: boolean
+  isPermissionLoading: boolean
 }
 
-export function ProjectManagementCard({ data }: ProjectManagementCardProps) {
+export function ProjectManagementCard({
+  data,
+  canDeleteProject,
+  canEditProject,
+  isPermissionLoading,
+}: ProjectManagementCardProps) {
   const cover = data.coverImage
   const [open, setOpen] = useState(false)
 
@@ -62,6 +70,9 @@ export function ProjectManagementCard({ data }: ProjectManagementCardProps) {
                   projectId={data.id}
                   projectName={data.title}
                   chapterName={data.branch}
+                  canDeleteProject={canDeleteProject}
+                  canEditProject={canEditProject}
+                  isPermissionLoading={isPermissionLoading}
                 />
               </div>
             </div>
@@ -105,7 +116,12 @@ export function ProjectManagementCard({ data }: ProjectManagementCardProps) {
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
             <Modal.Title className="sr-only">{data.title}</Modal.Title>
-            <ProjectDetailCard projectId={Number(data.id)} showEditCta />
+            <ProjectDetailCard
+              projectId={Number(data.id)}
+              showEditCta
+              canEditProject={canEditProject}
+              editPermissionLoading={isPermissionLoading}
+            />
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>

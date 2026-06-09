@@ -8,9 +8,13 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { getResourcePermission } from "@/features/auth/api/permissions"
 import { useMe } from "@/features/auth/hooks/useMe"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
+import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import { getManagedProjects } from "@/features/project/management/api"
 import {
   ApplicationForm,
@@ -42,11 +46,39 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
 export const Route = createFileRoute("/matching/projects/new")({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, search }) => {
     const me = await ensureMe(context.queryClient)
-    if (!isOperator(me) && !isCurrentTermPm(me)) {
+
+    if (search.projectId !== undefined) {
+      if (!isOperator(me) && !isCurrentTermPm(me)) {
+        throw redirect({ to: "/matching/projects" })
+      }
+      return
+    }
+
+    try {
+      const permission = await context.queryClient.ensureQueryData({
+        queryKey: [
+          "authorization",
+          "resource-permission",
+          "PROJECT",
+          undefined,
+          "WRITE",
+        ],
+        queryFn: () =>
+          getResourcePermission({
+            resourceType: "PROJECT",
+            permissionType: "WRITE",
+          }),
+        staleTime: 0,
+      })
+
+      if (hasGrantedPermission(permission, "WRITE")) return
+    } catch {
       throw redirect({ to: "/matching/projects" })
     }
+
+    throw redirect({ to: "/matching/projects" })
   },
   validateSearch: (search: Record<string, unknown>) => ({
     projectId:
@@ -79,7 +111,6 @@ function ProjectRegisterPage() {
   const queryClient = useQueryClient()
   const { data: me } = useMe()
   const isPm = isCurrentTermPm(me)
-
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
   const recruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
@@ -88,6 +119,26 @@ function ProjectRegisterPage() {
   const setProjectId = useProjectRegisterStore((s) => s.setProjectId)
   const setGisuId = useProjectRegisterStore((s) => s.setGisuId)
   const setApplication = useProjectRegisterStore((s) => s.setApplication)
+  const projectWritePermissionQuery = useResourcePermission(
+    "PROJECT",
+    undefined,
+    {
+      allowTypeLevel: true,
+      enabled: !isEditMode,
+      permissionType: "WRITE",
+    },
+  )
+  const projectPermissionsQuery = useProjectPermissions(
+    projectId ?? undefined,
+    {
+      enabled: projectId !== null,
+    },
+  )
+  const canCreateProject =
+    isEditMode || projectWritePermissionQuery.hasPermission("WRITE")
+  const isCreatePermissionLoading =
+    !isEditMode && projectWritePermissionQuery.isPending
+  const canManageProject = projectPermissionsQuery.canManage
 
   const isStoreDirty = useProjectRegisterStore((s) => {
     const recruitTotal =
@@ -195,6 +246,9 @@ function ProjectRegisterPage() {
   const submitMutation = useMutation({
     mutationFn: async () => {
       if (!projectId) throw new Error("프로젝트 ID가 없습니다.")
+      if (!isEditMode && !canCreateProject) {
+        throw new Error("프로젝트 생성 권한이 없습니다.")
+      }
       if (applicationFormRef.current?.getIsDirty() ?? true) {
         const body = buildUpsertApplicationFormBody(
           application.commonQuestions,
@@ -205,7 +259,7 @@ function ProjectRegisterPage() {
       }
       if (isEditMode) return
       const result = await submitProject(projectId)
-      if (pmInfo.pm1) {
+      if (pmInfo.pm1 && canManageProject) {
         await transferOwnership(projectId, {
           newOwnerMemberId: Number(pmInfo.pm1.id),
         })
@@ -385,7 +439,12 @@ function ProjectRegisterPage() {
           openTooltipStep={tooltipTriggerStep}
         />
         {step === 1 && (
-          <BasicInfoForm ref={basicInfoRef} onNext={handleBasicInfoNext} />
+          <BasicInfoForm
+            ref={basicInfoRef}
+            canCreateProject={canCreateProject}
+            createPermissionLoading={isCreatePermissionLoading}
+            onNext={handleBasicInfoNext}
+          />
         )}
         {step === 2 && (
           <RecruitInfoForm
@@ -401,7 +460,9 @@ function ProjectRegisterPage() {
             ref={applicationFormRef}
             isEditMode={isEditMode}
             isHydrated={isEditMode ? applicationFormHydrated : true}
-            isSubmitting={submitMutation.isPending}
+            isSubmitting={submitMutation.isPending || isCreatePermissionLoading}
+            canCreateProject={canCreateProject}
+            createPermissionLoading={isCreatePermissionLoading}
             onPrev={handleApplicationFormPrev}
             onNext={handleRegister}
           />

@@ -13,6 +13,8 @@ interface ApplicantRoleSectionProps {
   onApplicantClick: (id: string) => void
   onStatusChange?: (applicantId: string, status: StatusValue) => void
   currentRound?: number
+  canApproveApplicant: (applicantId: string) => boolean
+  approvePermissionLoading: boolean
   className?: string
 }
 
@@ -24,6 +26,8 @@ export function ApplicantRoleSection({
   onApplicantClick,
   onStatusChange,
   currentRound,
+  canApproveApplicant,
+  approvePermissionLoading,
   className,
 }: ApplicantRoleSectionProps) {
   const roundCounts = applicants.reduce<Record<number, number>>((acc, a) => {
@@ -61,23 +65,28 @@ export function ApplicantRoleSection({
 
       {/* 행 */}
       <div className="mt-2">
-        {applicants.map((applicant) => (
-          <ApplicantRow
-            key={applicant.id}
-            name={applicant.name}
-            university={applicant.university}
-            round={applicant.round}
-            status={applicant.status}
-            processedAt={applicant.processedAt}
-            appliedAt={applicant.appliedAt}
-            isSelected={selectedApplicantId === applicant.id}
-            onClick={() => onApplicantClick(applicant.id)}
-            onStatusChange={(s) => onStatusChange?.(applicant.id, s)}
-            statusDisabled={
-              currentRound != null && applicant.round < currentRound
-            }
-          />
-        ))}
+        {applicants.map((applicant) => {
+          const statusDisabled =
+            approvePermissionLoading ||
+            !canApproveApplicant(applicant.id) ||
+            (currentRound != null && applicant.round < currentRound)
+
+          return (
+            <ApplicantRow
+              key={applicant.id}
+              name={applicant.name}
+              university={applicant.university}
+              round={applicant.round}
+              status={applicant.status}
+              processedAt={applicant.processedAt}
+              appliedAt={applicant.appliedAt}
+              isSelected={selectedApplicantId === applicant.id}
+              onClick={() => onApplicantClick(applicant.id)}
+              onStatusChange={(s) => onStatusChange?.(applicant.id, s)}
+              statusDisabled={statusDisabled}
+            />
+          )
+        })}
       </div>
     </div>
   )

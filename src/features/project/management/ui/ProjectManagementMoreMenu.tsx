@@ -24,12 +24,18 @@ interface ProjectManagementMoreMenuProps {
   projectId: string
   projectName: string
   chapterName: string
+  canDeleteProject: boolean
+  canEditProject: boolean
+  isPermissionLoading: boolean
 }
 
 export function ProjectManagementMoreMenu({
   projectId,
   projectName,
   chapterName,
+  canDeleteProject,
+  canEditProject,
+  isPermissionLoading,
 }: ProjectManagementMoreMenuProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -110,6 +116,7 @@ export function ProjectManagementMoreMenu({
   })
 
   const handleDeleteClick = () => {
+    if (!canDeleteProject || isPermissionLoading) return
     setPopoverOpen(false)
     setDeleteOpen(true)
   }
@@ -120,6 +127,7 @@ export function ProjectManagementMoreMenu({
   }
 
   const handleEditClick = () => {
+    if (!canEditProject || isPermissionLoading) return
     setPopoverOpen(false)
     navigate({
       to: "/matching/projects/new",
@@ -160,12 +168,18 @@ export function ProjectManagementMoreMenu({
     }
   }
 
-  const MENU_ITEMS = [
+  const menuItems = [
     { label: "지원 현황 확인하기", onClick: handleApplicationClick },
     { label: "기획 보기", onClick: () => void handlePlanViewClick() },
-    { label: "프로젝트 수정하기", onClick: handleEditClick },
     { label: "팀원 구성 보기", onClick: () => {} },
   ]
+
+  if (isPermissionLoading || canEditProject) {
+    menuItems.splice(2, 0, {
+      label: "프로젝트 수정하기",
+      onClick: handleEditClick,
+    })
+  }
 
   return (
     <>
@@ -188,14 +202,24 @@ export function ProjectManagementMoreMenu({
             </span>
 
             <div className="flex w-full flex-col">
-              {MENU_ITEMS.map(({ label, onClick }) => (
-                <DropdownItem key={label} label={label} onClick={onClick} />
+              {menuItems.map(({ label, onClick }) => (
+                <DropdownItem
+                  key={label}
+                  label={label}
+                  disabled={
+                    label === "프로젝트 수정하기" && isPermissionLoading
+                  }
+                  onClick={onClick}
+                />
               ))}
-              <DropdownItem
-                label="삭제"
-                onClick={handleDeleteClick}
-                className="text-error-500"
-              />
+              {(isPermissionLoading || canDeleteProject) && (
+                <DropdownItem
+                  label="삭제"
+                  disabled={isPermissionLoading}
+                  onClick={handleDeleteClick}
+                  className="text-error-500"
+                />
+              )}
             </div>
           </Popover.Content>
         </Popover.Portal>

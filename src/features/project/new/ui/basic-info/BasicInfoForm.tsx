@@ -46,13 +46,18 @@ export interface BasicInfoFormHandle {
 }
 
 interface BasicInfoFormProps {
+  canCreateProject?: boolean
+  createPermissionLoading?: boolean
   onNext: () => void
 }
 
 export const BasicInfoForm = forwardRef<
   BasicInfoFormHandle,
   BasicInfoFormProps
->(function BasicInfoForm({ onNext }, ref) {
+>(function BasicInfoForm(
+  { canCreateProject = true, createPermissionLoading = false, onNext },
+  ref,
+) {
   const { data: meData } = useMe()
   const isPm = isCurrentTermPm(meData)
   const activeGisuQuery = useQuery({
@@ -272,7 +277,9 @@ export const BasicInfoForm = forwardRef<
 
   const hasDirtyFields = Object.keys(dirtyFields).length > 0
   const hasUnsavedChanges = hasDirtyFields || isPmChanged
-  const canTempSave = hasUnsavedChanges && !isSaving
+  const canCreateDraft =
+    projectId !== null || (canCreateProject && !createPermissionLoading)
+  const canTempSave = hasUnsavedChanges && !isSaving && canCreateDraft
   const tempSaveLabel =
     hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
 
@@ -281,6 +288,16 @@ export const BasicInfoForm = forwardRef<
   }): Promise<boolean> => {
     const silent = options?.silent ?? false
     if (!hasUnsavedChanges) return true
+    if (!canCreateDraft) {
+      addToast({
+        message: "임시 저장에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
     const values = getValues()
     if (!projectId && !pm1Member) {
       addToast({
