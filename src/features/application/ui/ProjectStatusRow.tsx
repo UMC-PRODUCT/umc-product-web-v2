@@ -72,7 +72,7 @@ export function ProjectStatusRow({
         </div>
 
         {/* 챌린저 */}
-        <div className="flex h-12.5 w-50 items-center rounded-lg px-16">
+        <div className="flex h-12.5 w-50 items-center justify-center rounded-lg px-4">
           <div className="flex flex-col whitespace-nowrap">
             <span className="text-body-2-medium text-teal-gray-900">
               {challengerName}
