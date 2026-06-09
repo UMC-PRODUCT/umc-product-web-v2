@@ -52,8 +52,8 @@ function UsabilitySurveyTestPage() {
     setOpen(true)
     surveyToast(
       variant === "admin-matching"
-        ? "운영진 여러분들의 소중한 의견을 부탁드립니다 !"
-        : "여러분들의 소중한 의견을 부탁드립니다 !",
+        ? "운영진 여러분들의 소중한 의견을 부탁드립니다!"
+        : "여러분들의 소중한 의견을 부탁드립니다!",
     )
   }
 
