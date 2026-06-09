@@ -24,3 +24,28 @@ export async function getMyInfo(): Promise<MemberInfoResponse> {
     await api.get<ApiResponse<MemberInfoResponse>>("/v1/member/me")
   return data.result
 }
+
+export async function updateMemberInfo(body: {
+  profileImageId?: string
+}): Promise<MemberInfoResponse> {
+  const { data } = await api.patch<ApiResponse<MemberInfoResponse>>(
+    "/v1/member",
+    body,
+  )
+  return data.result
+}
+
+export interface DeleteMemberRequest {
+  googleAccessToken?: string
+  kakaoAccessToken?: string
+}
+
+export async function deleteMember(
+  body: DeleteMemberRequest = {},
+): Promise<MemberInfoResponse> {
+  const { data } = await api.delete<ApiResponse<MemberInfoResponse>>(
+    "/v1/member",
+    { data: body },
+  )
+  return data.result
+}

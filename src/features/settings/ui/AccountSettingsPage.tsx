@@ -1,12 +1,19 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { deleteMember, updateMemberInfo } from "@/features/auth/api/me"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { signInWithApple } from "@/features/auth/lib/appleSignIn"
-import { signInWithGoogle } from "@/features/auth/lib/googleSignIn"
-import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
+import { useMemberOAuthList } from "@/features/auth/hooks/useMemberOAuthList"
+import { useOAuthLinking } from "@/features/auth/hooks/useOAuthLinking"
+import {
+  isGooglePopupCancelled,
+  signInWithGoogle,
+} from "@/features/auth/lib/googleSignIn"
 import { toRoleTag } from "@/features/auth/model/mappers"
+import { useAuthStore } from "@/features/auth/store/authStore"
+import { uploadFileFlow } from "@/features/project/new/api/storage"
 import EditIcon from "@/shared/assets/icon/edit/EditIcon"
 import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import { Button } from "@/shared/ui/Button"
@@ -17,21 +24,130 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { ChangePasswordForm } from "./ChangePasswordForm"
 import { SocialButton } from "./SocialButton"
 
-// TODO: GET /v1/member-oauth/me 및 로컬 계정 여부 조회 API 연결 후 동적 처리
-export type UserLoginType = "social" | "local" | "local-linked"
-const MOCK_LOGIN_TYPE: UserLoginType = "local"
+import type { OAuthProvider } from "@/features/auth/model/types"
+
+import type { Social } from "./SocialButton"
+
+const PROVIDER_TO_SOCIAL: Record<OAuthProvider, Social> = {
+  GOOGLE: "google",
+  KAKAO: "kakao",
+  APPLE: "apple",
+}
 
 export function AccountSettingsPage() {
   const { data: me } = useMe()
+  const { data: oauths = [] } = useMemberOAuthList()
   const role = me?.roles?.[0] ? toRoleTag(me.roles[0].roleType) : "challenger"
   const [showPasswordChange, setShowPasswordChange] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
+  const queryClient = useQueryClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // TODO: API 연결 후 실제 값으로 교체
-  const loginType: UserLoginType = MOCK_LOGIN_TYPE
-  const isSocialOnly = loginType === "social"
+  const {
+    unlinkTarget,
+    setUnlinkTarget,
+    handleGoogleLink,
+    handleAppleLink,
+    handleKakaoLink,
+    handleUnlink,
+  } = useOAuthLinking()
+
+  const linkedMap = new Map(
+    oauths.map((o) => [PROVIDER_TO_SOCIAL[o.provider], o.memberOAuthId]),
+  )
+
+  const handleProfileImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setIsUploadingImage(true)
+    try {
+      const { fileId } = await uploadFileFlow(file, "PROFILE_IMAGE")
+      await updateMemberInfo({ profileImageId: fileId })
+      await queryClient.invalidateQueries({ queryKey: ["auth", "me"] })
+      addToast({
+        message: "프로필 이미지가 변경되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } catch {
+      addToast({
+        message: "이미지 업로드에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      setIsUploadingImage(false)
+      e.target.value = ""
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    let googleAccessToken: string | undefined
+    if (linkedMap.has("google")) {
+      try {
+        const result = await signInWithGoogle()
+        googleAccessToken = result.accessToken
+      } catch (err) {
+        if (!isGooglePopupCancelled(err)) {
+          addToast({
+            message: "Google 인증에 실패했습니다. 다시 시도해주세요.",
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+          return
+        }
+      }
+    }
+    try {
+      await deleteMember({ googleAccessToken })
+      useAuthStore.getState().clear()
+      addToast({
+        message: "계정이 삭제되어 로그아웃되었습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      void navigate({ to: "/login" })
+    } catch {
+      addToast({
+        message: "계정 삭제에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setShowDeleteModal(false)
+    }
+  }
+
+  const getSocialProps = (social: Social) => {
+    const memberOAuthId = linkedMap.get(social)
+    const linked = memberOAuthId !== undefined
+    const onLink =
+      social === "kakao"
+        ? handleKakaoLink
+        : social === "google"
+          ? handleGoogleLink
+          : handleAppleLink
+    const onUnlink = () => setUnlinkTarget({ memberOAuthId: memberOAuthId! })
+    return { linked, onClick: linked ? onUnlink : onLink }
+  }
+
+  // TODO: 로컬 계정 여부 조회 API 연결 후 동적 처리
+  const isSocialOnly = false
+
   const emailInputClass = isSocialOnly
     ? "!text-teal-gray-700"
     : "!text-teal-600"
@@ -58,10 +174,19 @@ export function AccountSettingsPage() {
                   <ProfileIcon className="text-teal-gray-300 size-full" />
                 )}
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleProfileImageChange}
+              />
               <button
                 type="button"
                 aria-label="프로필 사진 변경"
-                className="border-teal-gray-100 absolute right-0 bottom-0 flex h-7 w-7 items-center justify-center rounded-[0.875rem] border bg-white"
+                disabled={isUploadingImage}
+                className="border-teal-gray-100 absolute right-0 bottom-0 flex h-7 w-7 items-center justify-center rounded-[0.875rem] border bg-white disabled:opacity-50"
+                onClick={() => fileInputRef.current?.click()}
               >
                 <EditIcon className="text-teal-gray-500" />
               </button>
@@ -94,22 +219,18 @@ export function AccountSettingsPage() {
                     <span className="text-heading-7-semibold text-teal-gray-900">
                       계정 연동
                     </span>
-                    {/* TODO: API 연결 후 linked 값 동적으로 처리 */}
                     <div className="flex items-center gap-8">
                       <SocialButton
                         social="kakao"
-                        linked={true}
-                        onClick={startKakaoSignIn}
+                        {...getSocialProps("kakao")}
                       />
                       <SocialButton
                         social="apple"
-                        linked={false}
-                        onClick={() => void signInWithApple()}
+                        {...getSocialProps("apple")}
                       />
                       <SocialButton
                         social="google"
-                        linked={false}
-                        onClick={() => void signInWithGoogle()}
+                        {...getSocialProps("google")}
                       />
                     </div>
                   </div>
@@ -169,6 +290,22 @@ export function AccountSettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* 연동 해제 확인 모달 */}
+      <CtaModal
+        open={unlinkTarget !== null}
+        variant="error"
+        title="연동을 해제하시겠습니까?"
+        content="해제하면 해당 소셜 계정으로 로그인할 수 없게 됩니다."
+        cancelText="돌아가기"
+        confirmText="연동 해제"
+        onOpenChange={(open) => {
+          if (!open) setUnlinkTarget(null)
+        }}
+        onCancel={() => setUnlinkTarget(null)}
+        onConfirm={() => void handleUnlink()}
+      />
+
       <CtaModal
         open={showDeleteModal}
         variant="error"
@@ -185,16 +322,8 @@ export function AccountSettingsPage() {
         onOpenChange={setShowDeleteModal}
         onCancel={() => setShowDeleteModal(false)}
         onConfirm={() => {
-          // TODO: 계정 삭제 API 연결
           setShowDeleteModal(false)
-          addToast({
-            message: "계정이 삭제되어 로그아웃되었습니다.",
-            color: "red",
-            variant: "deep",
-            type: "default",
-            duration: 3000,
-          })
-          void navigate({ to: "/login" })
+          void handleDeleteAccount()
         }}
       />
     </div>
