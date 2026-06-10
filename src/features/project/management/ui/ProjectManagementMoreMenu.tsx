@@ -96,6 +96,9 @@ export function ProjectManagementMoreMenu({
     onSuccess: () => {
       setDeleteOpen(false)
       void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
+      void queryClient.invalidateQueries({
+        queryKey: [...applicationKeys.all, "managed"],
+      })
       addToast({
         message: "프로젝트가 삭제되었습니다.",
         color: "primary",
