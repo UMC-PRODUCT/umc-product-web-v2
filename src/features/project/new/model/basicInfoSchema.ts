@@ -7,11 +7,9 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024
 export const basicInfoSchema = z.object({
   title: z
     .string()
-    .min(1)
-    .max(16)
-    .refine((v) => v.trim().length > 0, {
-      message: "프로젝트 이름을 입력해 주세요.",
-    }),
+    .trim()
+    .min(1, { message: "프로젝트 이름을 입력해 주세요." })
+    .max(16),
   description: z.string().min(1).max(200),
   thumbnail: z
     .instanceof(File)
