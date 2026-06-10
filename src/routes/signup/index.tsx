@@ -219,6 +219,7 @@ function SignUpPage() {
   const {
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = methods
   const email = watch("email")
@@ -420,7 +421,7 @@ function SignUpPage() {
     }
 
     const termsAgreements = terms.map((term) => {
-      const isAgreed = watch("termsAgreements")?.[term.id]
+      const isAgreed = getValues("termsAgreements")?.[term.id]
       return {
         termsId: term.id,
         isAgreed: !!isAgreed,
