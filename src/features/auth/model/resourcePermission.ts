@@ -25,11 +25,15 @@ export function hasGrantedResourcePermission(
     permissionType: PermissionType
   },
 ): boolean {
-  const permissionResponse = permissionResponses?.find(
-    (response) =>
-      response.resourceType === params.resourceType &&
-      String(response.resourceId) === String(params.resourceId),
-  )
+  const permissionResponse = permissionResponses?.find((response) => {
+    const responseId =
+      response.resourceId == null ? undefined : String(response.resourceId)
+    const paramId =
+      params.resourceId == null ? undefined : String(params.resourceId)
+    return (
+      response.resourceType === params.resourceType && responseId === paramId
+    )
+  })
 
   return hasGrantedPermission(permissionResponse, params.permissionType)
 }
