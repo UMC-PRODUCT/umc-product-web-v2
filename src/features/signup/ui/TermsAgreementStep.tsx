@@ -105,7 +105,9 @@ export function TermsAgreementStep({
                 </button>
                 <button
                   type="button"
-                  onClick={() => window.open(term.link, "_blank")}
+                  onClick={() =>
+                    window.open(term.link, "_blank", "noopener,noreferrer")
+                  }
                   className="text-left"
                 >
                   <span className="text-body-1-regular text-teal-gray-500">
