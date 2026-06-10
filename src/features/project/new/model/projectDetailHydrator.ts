@@ -55,7 +55,7 @@ export function hydrateProjectDetailIntoStore(
     const mapping = PART_TO_ROLE[quota.part as ApiPart]
     if (!mapping) continue
     recruitInfo[mapping.role] = {
-      count: quota.quota ?? 0,
+      count: Number(quota.quota ?? 0),
       stack: mapping.stack,
     }
   }
