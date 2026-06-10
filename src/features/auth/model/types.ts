@@ -56,6 +56,15 @@ export interface CompleteEmailVerificationResponse {
   emailVerificationToken: string
 }
 
+export interface GetEmailAvailabilityRequest {
+  email: string
+}
+
+export interface GetEmailAvailabilityResponse {
+  email: string
+  available: boolean
+}
+
 export interface TermConsentStatus {
   termsId: number
   isAgreed: boolean
@@ -69,6 +78,7 @@ export interface RegisterMemberRequest {
   schoolId: number
   termsAgreements: TermConsentStatus[]
   appleRefreshToken?: string
+  appleClientId?: string
 }
 
 export interface RegisterResponse {
@@ -83,6 +93,21 @@ export interface TermResponse {
   id: number
   link: string
   isMandatory: boolean
+}
+
+export interface Term {
+  id: number
+  type: TermType
+  typeDescription: string
+  link: string
+  isMandatory: boolean
+  version: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Terms {
+  terms: Term[]
 }
 
 export interface SchoolNameItem {
@@ -121,8 +146,7 @@ export interface ChangePasswordRequest {
   newPassword: string
 }
 
-export interface IdPwRegisterMemberRequest {
-  loginId: string
+export interface EmailRegisterMemberRequest {
   rawPassword: string
   name: string
   nickname: string

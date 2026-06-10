@@ -1,185 +1,515 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useReducer, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
+import { useToastStore } from "@/components/toast/useToastStore"
+import {
+  completeEmailVerification,
+  getEmailAvailability,
+  resendEmailVerification,
+  sendEmailVerification,
+} from "@/features/auth/api/emailVerification"
+import { registerMemberByEmail } from "@/features/auth/api/register"
+import { getTerms } from "@/features/auth/api/terms"
+import { useSchools } from "@/features/auth/hooks/useSchools"
+import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
 import {
   AccountCreationStep,
   ProfileInfoStep,
+  TermsAgreementStep,
   VerificationStep,
 } from "@/features/signup"
 import { type SignUpFormData, signUpSchema } from "@/features/signup/validation"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
+import type {
+  EmailRegisterMemberRequest,
+  SchoolNameItem,
+} from "@/features/auth/model/types"
+
 const REMAINING_SECONDS = 600 // 10분
-// TODO: API 연동 후 실제 인증번호 사용
-const VERIFICATION_CODE = "123456" // 임시 인증 번호
+
+type SignUpState = {
+  signupData: Partial<EmailRegisterMemberRequest>
+  email: {
+    verifiedValue: string
+    isCodeVisible: boolean
+    remainingSeconds: number
+    showSent: boolean
+    showSpamModal: boolean
+    isCodeInvalid: boolean
+    isCodeExpired: boolean
+    hasExpiredBefore: boolean
+    isRequested: boolean
+    isLoading: boolean
+    isDuplicated: boolean
+    verificationId: number | null
+  }
+
+  oAuthVerificationToken: string | null
+  schoolList: SchoolNameItem[]
+  isSignupLoading: boolean
+}
+
+type SignUpAction =
+  | { type: "SET_OAUTH_TOKEN"; payload: string | null }
+  | { type: "SET_SCHOOL_LIST"; payload: SchoolNameItem[] }
+  | { type: "EMAIL_REQUEST_START" }
+  | { type: "EMAIL_REQUEST_SUCCESS"; payload: { id: number; value: string } }
+  | { type: "EMAIL_REQUEST_FAILURE"; payload: { isDuplicated: boolean } }
+  | { type: "EMAIL_CODE_CHANGE"; payload: boolean }
+  | { type: "EMAIL_INPUT_CHANGE" }
+  | { type: "EMAIL_TICK" }
+  | { type: "EMAIL_EXPIRED" }
+  | { type: "EMAIL_VERIFIED"; payload: string }
+  | { type: "EMAIL_SET_SPAM_MODAL"; payload: boolean }
+  | { type: "SET_PASSWORD"; payload: string }
+  | { type: "SIGNUP_START" }
+  | { type: "SIGNUP_FINISH" }
+
+const initialState: SignUpState = {
+  signupData: {
+    termsAgreements: [],
+  },
+  email: {
+    verifiedValue: "",
+    isCodeVisible: false,
+    remainingSeconds: 0,
+    showSent: false,
+    showSpamModal: false,
+    isCodeInvalid: false,
+    isCodeExpired: false,
+    hasExpiredBefore: false,
+    isRequested: false,
+    isLoading: false,
+    isDuplicated: false,
+    verificationId: null,
+  },
+
+  oAuthVerificationToken: null,
+  schoolList: [],
+  isSignupLoading: false,
+}
+
+function signUpReducer(state: SignUpState, action: SignUpAction): SignUpState {
+  switch (action.type) {
+    case "SET_OAUTH_TOKEN":
+      return { ...state, oAuthVerificationToken: action.payload }
+    case "SET_SCHOOL_LIST":
+      return { ...state, schoolList: action.payload }
+    case "EMAIL_REQUEST_START":
+      return { ...state, email: { ...state.email, isLoading: true } }
+    case "EMAIL_REQUEST_SUCCESS":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          isLoading: false,
+          verificationId: action.payload.id,
+          verifiedValue: action.payload.value,
+          isCodeVisible: true,
+          showSent: true,
+          isCodeInvalid: false,
+          isCodeExpired: false,
+          isRequested: true,
+          remainingSeconds: REMAINING_SECONDS,
+        },
+      }
+    case "EMAIL_REQUEST_FAILURE":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          isLoading: false,
+          isDuplicated: action.payload.isDuplicated,
+        },
+      }
+    case "EMAIL_CODE_CHANGE":
+      return {
+        ...state,
+        email: { ...state.email, isCodeInvalid: action.payload },
+      }
+    case "EMAIL_INPUT_CHANGE":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          showSent: false,
+          isRequested: false,
+          isDuplicated: false,
+        },
+      }
+    case "EMAIL_TICK":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          remainingSeconds: Math.max(0, state.email.remainingSeconds - 1),
+        },
+      }
+    case "EMAIL_EXPIRED":
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          isCodeExpired: true,
+          hasExpiredBefore: true,
+          isRequested: false,
+          remainingSeconds: 0,
+        },
+      }
+    case "EMAIL_VERIFIED":
+      return {
+        ...state,
+        signupData: {
+          ...state.signupData,
+          emailVerificationToken: action.payload,
+        },
+      }
+    case "EMAIL_SET_SPAM_MODAL":
+      return {
+        ...state,
+        email: { ...state.email, showSpamModal: action.payload },
+      }
+
+    case "SET_PASSWORD":
+      return {
+        ...state,
+        signupData: { ...state.signupData, rawPassword: action.payload },
+      }
+    case "SIGNUP_START":
+      return { ...state, isSignupLoading: true }
+    case "SIGNUP_FINISH":
+      return { ...state, isSignupLoading: false }
+    default:
+      return state
+  }
+}
 
 export const Route = createFileRoute("/signup/")({
   component: SignUpPage,
 })
 
 function SignUpPage() {
+  const { data: termsData, isLoading: isLoadingTerms } = useQuery({
+    queryKey: ["terms"],
+    queryFn: getTerms,
+  })
+
+  const terms = termsData?.terms || []
+
   const methods = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     mode: "onChange",
     defaultValues: {
       email: "",
       code: "",
-      id: "",
       password: "",
       confirmPassword: "",
       school: "",
       name: "",
       nickname: "",
+      termsAgreements: {},
     },
   })
 
   const {
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = methods
   const email = watch("email")
   const code = watch("code")
-  const id = watch("id")
+
   const password = watch("password")
   const confirmPassword = watch("confirmPassword")
   const school = watch("school")
   const name = watch("name")
   const nickname = watch("nickname")
 
-  // 인증 상태
-  const [verifiedEmail, setVerifiedEmail] = useState("")
-  const [isEmailChanged, setIsEmailChanged] = useState(false)
-  const [isCodeVisible, setIsCodeVisible] = useState(false)
-  const [remainingSeconds, setRemainingSeconds] = useState(0)
-  const [showVerificationSent, setShowVerificationSent] = useState(false)
-  const [showSpamGuideModal, setShowSpamGuideModal] = useState(false)
-  const [isCodeInvalid, setIsCodeInvalid] = useState(false)
-  const [isCodeExpired, setIsCodeExpired] = useState(false)
-  const [hasExpiredBefore, setHasExpiredBefore] = useState(false)
-  const [isVerificationRequested, setIsVerificationRequested] = useState(false)
-  const [isVerificationComplete, setIsVerificationComplete] = useState(false)
-
-  // 계정 생성 상태
-  const [isIdDuplicated, setIsIdDuplicated] = useState(false)
-  const [isAccountCreationComplete, setIsAccountCreationComplete] =
-    useState(false)
-
-  const isEmailValid = email !== "" && !errors.email
+  const [state, dispatch] = useReducer(signUpReducer, initialState)
+  const [showTerms, setShowTerms] = useState(false)
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   const navigate = useNavigate({ from: Route.fullPath })
+  const addToast = useToastStore((s) => s.addToast)
+
+  const { schools: hookSchools, isError: isSchoolsError } = useSchools({
+    nameType: "short",
+  })
+
+  // 초기 로드: OAuth 토큰
+  useEffect(() => {
+    const token = sessionStorage.getItem(OAUTH_VERIFICATION_TOKEN_KEY)
+    dispatch({ type: "SET_OAUTH_TOKEN", payload: token })
+  }, [])
+
+  useEffect(() => {
+    if (hookSchools.length > 0) {
+      dispatch({ type: "SET_SCHOOL_LIST", payload: hookSchools })
+    }
+  }, [hookSchools])
+
+  useEffect(() => {
+    if (isSchoolsError) {
+      addToast({
+        message: "학교 목록을 불러오는데 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
+  }, [isSchoolsError, addToast])
+
+  // 타이머 정리 (언마운트 시)
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [])
 
   // 이메일 변경 시 사이드 이펙트
   useEffect(() => {
-    setShowVerificationSent(false)
-    setIsVerificationRequested(false)
+    dispatch({ type: "EMAIL_INPUT_CHANGE" })
   }, [email])
 
   // 인증번호 변경 시 사이드 이펙트
   useEffect(() => {
-    setIsCodeInvalid(false)
+    dispatch({ type: "EMAIL_CODE_CHANGE", payload: false })
   }, [code])
-
-  // 아이디 변경 시 사이드 이펙트
-  useEffect(() => {
-    setIsIdDuplicated(false)
-  }, [id])
-
-  // 이메일 검증
-  useEffect(() => {
-    if (isCodeVisible && email !== verifiedEmail) {
-      setIsEmailChanged(true)
-    } else {
-      setIsEmailChanged(false)
-    }
-  }, [email, verifiedEmail, isCodeVisible])
 
   // 인증번호 타이머
   useEffect(() => {
-    if (remainingSeconds <= 0 && intervalRef.current) {
+    if (state.email.remainingSeconds <= 0 && intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
-      if (isCodeVisible && remainingSeconds === 0) {
-        setIsCodeExpired(true)
-        setHasExpiredBefore(true)
-        setIsVerificationRequested(false)
+      if (state.email.isCodeVisible && state.email.remainingSeconds === 0) {
+        dispatch({ type: "EMAIL_EXPIRED" })
       }
     }
-  }, [remainingSeconds, isCodeVisible])
+  }, [state.email.remainingSeconds, state.email.isCodeVisible])
 
   const startVerificationTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     intervalRef.current = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          if (intervalRef.current) clearInterval(intervalRef.current)
-          return 0
-        }
-        return prev - 1
-      })
+      dispatch({ type: "EMAIL_TICK" })
     }, 1000)
   }
 
-  const handleVerificationClick = () => {
-    setVerifiedEmail(email)
-    setValue("code", "")
-    setIsCodeVisible(true)
-    setShowVerificationSent(true)
-    setIsCodeInvalid(false)
-    setIsCodeExpired(false)
-    setIsVerificationRequested(true)
-    setRemainingSeconds(REMAINING_SECONDS)
-    setIsEmailChanged(false)
-    startVerificationTimer()
+  const handleVerificationClick = async () => {
+    dispatch({ type: "EMAIL_REQUEST_START" })
+    try {
+      const availability = await getEmailAvailability({ email })
+      if (!availability.available) {
+        dispatch({
+          type: "EMAIL_REQUEST_FAILURE",
+          payload: { isDuplicated: true },
+        })
+        return
+      }
+
+      const res = await sendEmailVerification({
+        email,
+        purpose: "REGISTER",
+      })
+      dispatch({
+        type: "EMAIL_REQUEST_SUCCESS",
+        payload: { id: Number(res.emailVerificationId), value: email },
+      })
+      setValue("code", "")
+      startVerificationTimer()
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "인증 메일 발송에 실패했습니다."
+      addToast({
+        message,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      dispatch({
+        type: "EMAIL_REQUEST_FAILURE",
+        payload: { isDuplicated: false },
+      })
+    }
   }
 
-  const handleSpamGuideConfirm = () => {
-    handleVerificationClick()
-    setShowSpamGuideModal(false)
+  const handleSpamGuideConfirm = async () => {
+    try {
+      if (state.email.verificationId) {
+        dispatch({ type: "EMAIL_REQUEST_START" })
+        await resendEmailVerification({
+          emailVerificationId: state.email.verificationId,
+        })
+        dispatch({
+          type: "EMAIL_REQUEST_SUCCESS",
+          payload: { id: state.email.verificationId, value: email },
+        })
+        setValue("code", "")
+        startVerificationTimer()
+        dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: false })
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "인증 메일 재발송에 실패했습니다."
+      addToast({
+        message,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      dispatch({
+        type: "EMAIL_REQUEST_FAILURE",
+        payload: { isDuplicated: false },
+      })
+    }
   }
 
-  const handleCodeComplete = () => {
-    // TODO: 인증번호 검증 API 연동
-    if (code === VERIFICATION_CODE) {
-      setIsVerificationComplete(true)
-    } else {
-      setIsCodeInvalid(true)
+  const handleCodeComplete = async () => {
+    try {
+      if (state.email.verificationId) {
+        const res = await completeEmailVerification({
+          emailVerificationId: state.email.verificationId,
+          verificationCode: code,
+        })
+        dispatch({
+          type: "EMAIL_VERIFIED",
+          payload: res.emailVerificationToken,
+        })
+      }
+    } catch {
+      dispatch({ type: "EMAIL_CODE_CHANGE", payload: true })
     }
   }
 
   const handleAccountCreationComplete = () => {
-    // TODO: 회원가입 정보 제출 API 연동 필요 (학교/이름/닉네임 입력 후)
-    setIsAccountCreationComplete(true)
+    dispatch({ type: "SET_PASSWORD", payload: password })
   }
 
-  const handleIdDuplicateCheck = () => {
-    // TODO: 아이디 중복 확인 API 연동
+  const handleFinalSignup = async () => {
+    const emailVerificationToken = state.signupData.emailVerificationToken
+    if (!emailVerificationToken) {
+      addToast({
+        message: "이메일 인증이 완료되지 않았습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    const selectedSchool = state.schoolList.find((s) => s.schoolName === school)
+    if (!selectedSchool) {
+      addToast({
+        message: "유효한 학교를 선택해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    const termsAgreements = terms.map((term) => {
+      const isAgreed = getValues("termsAgreements")?.[term.id]
+      return {
+        termsId: term.id,
+        isAgreed: !!isAgreed,
+      }
+    })
+
+    const payload: EmailRegisterMemberRequest = {
+      rawPassword: password,
+      name,
+      nickname,
+      emailVerificationToken,
+      schoolId: selectedSchool.schoolId,
+      termsAgreements,
+    }
+
+    dispatch({ type: "SIGNUP_START" })
+    try {
+      await registerMemberByEmail(payload)
+      setIsSuccessModalOpen(true)
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "회원가입에 실패했습니다."
+      addToast({
+        message,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      dispatch({ type: "SIGNUP_FINISH" })
+    }
   }
+
+  // const handleIdDuplicateCheck = () => {
+  //   // TODO: 아이디 중복 확인 API 연동
+  // }
 
   // 각종 버튼 상태
-  const verificationButtonDisabled = isVerificationRequested
+  const isEmailValid = email !== "" && !errors.email
+
+  const isEmailChanged =
+    state.email.isCodeVisible && email !== state.email.verifiedValue
+
+  const verificationButtonDisabled = state.email.isRequested
     ? true
-    : hasExpiredBefore || isCodeExpired
+    : state.email.hasExpiredBefore || state.email.isCodeExpired
       ? false
-      : !isEmailValid || (isCodeVisible && !isEmailChanged)
+      : !isEmailValid || (state.email.isCodeVisible && !isEmailChanged)
 
   const verificationButtonText =
-    hasExpiredBefore || isCodeExpired ? "다시 받기" : "인증하기"
+    state.email.hasExpiredBefore || state.email.isCodeExpired
+      ? "다시 받기"
+      : "인증하기"
 
-  const isIdValid = id !== "" && !errors.id
   const isPasswordValid = password !== "" && !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
 
-  const accountCreationNextButtonDisabled = !isVerificationComplete
-    ? code.length !== 6 || isCodeInvalid || isCodeExpired
-    : !isIdValid || isIdDuplicated || !isPasswordValid || !isPasswordMatch
-
   const isNicknameValid = nickname !== "" && !errors.nickname
-  const profileInfoNextButtonDisabled = !school || !name || !isNicknameValid
+
+  // 단계별 완료 여부 (상태 A에서 유도)
+  const isEmailVerified = !!state.signupData.emailVerificationToken
+  const isAccountCreated =
+    !!state.oAuthVerificationToken || !!state.signupData.rawPassword
+
+  // 현재 활성 단계 결정
+  const currentStep = !isEmailVerified
+    ? "EMAIL"
+    : !isAccountCreated
+      ? "PASSWORD"
+      : showTerms
+        ? "TERMS"
+        : "PROFILE"
+
+  const nextButtonDisabled =
+    currentStep === "EMAIL"
+      ? code.length !== 6 ||
+        state.email.isCodeInvalid ||
+        state.email.isCodeExpired
+      : currentStep === "PASSWORD"
+        ? !isPasswordValid || !isPasswordMatch
+        : currentStep === "PROFILE"
+          ? !school || !name || !isNicknameValid
+          : currentStep === "TERMS"
+            ? terms
+                .filter((t) => t.isMandatory)
+                .some((t) => !watch("termsAgreements")?.[t.id])
+            : false
 
   return (
     <FormProvider {...methods}>
@@ -190,56 +520,53 @@ function SignUpPage() {
           </span>
 
           <div className="flex w-full flex-col items-center gap-8">
-            {!isVerificationComplete && (
+            {currentStep === "EMAIL" && (
               <VerificationStep
-                remainingSeconds={remainingSeconds}
-                showVerificationSent={showVerificationSent}
-                isCodeVisible={isCodeVisible}
-                isCodeInvalid={isCodeInvalid}
-                isCodeExpired={isCodeExpired}
+                remainingSeconds={state.email.remainingSeconds}
+                showVerificationSent={state.email.showSent}
+                isCodeVisible={state.email.isCodeVisible}
+                isCodeInvalid={state.email.isCodeInvalid}
+                isCodeExpired={state.email.isCodeExpired}
                 verificationButtonDisabled={verificationButtonDisabled}
                 verificationButtonText={verificationButtonText}
+                isVerificationLoading={state.email.isLoading}
+                isEmailDuplicated={state.email.isDuplicated}
                 onVerificationClick={handleVerificationClick}
-                onSpamGuideClick={() => setShowSpamGuideModal(true)}
+                onSpamGuideClick={() =>
+                  dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: true })
+                }
               />
             )}
 
-            {isVerificationComplete && !isAccountCreationComplete && (
-              <AccountCreationStep
-                isIdDuplicated={isIdDuplicated}
-                onIdDuplicateCheck={handleIdDuplicateCheck}
-              />
-            )}
+            {currentStep === "PASSWORD" && <AccountCreationStep />}
 
-            {isAccountCreationComplete && <ProfileInfoStep />}
+            {currentStep === "PROFILE" && <ProfileInfoStep />}
+
+            {currentStep === "TERMS" && (
+              <TermsAgreementStep terms={terms} isLoading={isLoadingTerms} />
+            )}
 
             <div className="flex w-full flex-col items-center gap-4">
               <Button
                 size={"m"}
                 color={"primary"}
                 variant={"fill"}
-                disabled={
-                  isAccountCreationComplete
-                    ? profileInfoNextButtonDisabled
-                    : accountCreationNextButtonDisabled
-                }
+                disabled={nextButtonDisabled}
+                isLoading={state.isSignupLoading}
                 className="w-full"
                 onClick={() => {
-                  if (!isVerificationComplete && code.length === 6) {
-                    handleCodeComplete()
-                  } else if (
-                    isVerificationComplete &&
-                    !isAccountCreationComplete
-                  ) {
+                  if (currentStep === "EMAIL") {
+                    void handleCodeComplete()
+                  } else if (currentStep === "PASSWORD") {
                     handleAccountCreationComplete()
-                  } else if (isAccountCreationComplete) {
-                    // TODO: 최종 회원가입 API 연동
-                    // 이메일, 아이디, 비밀번호, 이름, 닉네임, 학교 정보를 서버로 전송
-                    // API 성공 시 로그인 페이지로 이동
+                  } else if (currentStep === "PROFILE") {
+                    setShowTerms(true)
+                  } else if (currentStep === "TERMS") {
+                    void handleFinalSignup()
                   }
                 }}
               >
-                다음
+                {currentStep === "TERMS" ? "가입하기" : "다음"}
               </Button>
 
               <button
@@ -247,7 +574,9 @@ function SignUpPage() {
                 className="px-1 py-0.5"
               >
                 <span className="text-body-1-regular text-teal-gray-500">
-                  이미 계정이 있어요
+                  {currentStep === "EMAIL"
+                    ? "이미 계정이 있어요"
+                    : "로그인으로"}
                 </span>
               </button>
             </div>
@@ -256,7 +585,7 @@ function SignUpPage() {
       </section>
 
       <CtaModal
-        open={showSpamGuideModal}
+        open={state.email.showSpamModal}
         title="인증 메일을 받지 못하셨나요?"
         content={
           <>
@@ -269,9 +598,27 @@ function SignUpPage() {
         confirmText="다시 보내기"
         variant="success"
         overlayTone="light"
-        onOpenChange={setShowSpamGuideModal}
-        onCancel={() => setShowSpamGuideModal(false)}
+        onOpenChange={(open) =>
+          dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: open })
+        }
+        onCancel={() =>
+          dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: false })
+        }
         onConfirm={handleSpamGuideConfirm}
+      />
+
+      <CtaModal
+        open={isSuccessModalOpen}
+        title="가입 완료"
+        content="회원가입이 완료되었습니다."
+        confirmText="로그인하기"
+        variant="success"
+        overlayTone="light"
+        onOpenChange={setIsSuccessModalOpen}
+        onConfirm={() => {
+          setIsSuccessModalOpen(false)
+          navigate({ to: "/login" })
+        }}
       />
     </FormProvider>
   )

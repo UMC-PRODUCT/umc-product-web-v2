@@ -3,6 +3,8 @@ import { api } from "@/shared/lib/axios"
 import type {
   CompleteEmailVerificationRequest,
   CompleteEmailVerificationResponse,
+  GetEmailAvailabilityRequest,
+  GetEmailAvailabilityResponse,
   ResendEmailVerificationRequest,
   SendEmailVerificationRequest,
   SendEmailVerificationResponse,
@@ -31,5 +33,15 @@ export async function completeEmailVerification(
   const { data } = await api.post<
     ApiResponse<CompleteEmailVerificationResponse>
   >("/v1/auth/email-verification/code", payload)
+  return data.result
+}
+
+export async function getEmailAvailability(
+  params: GetEmailAvailabilityRequest,
+): Promise<GetEmailAvailabilityResponse> {
+  const { data } = await api.get<ApiResponse<GetEmailAvailabilityResponse>>(
+    "/v1/auth/email/availability",
+    { params },
+  )
   return data.result
 }

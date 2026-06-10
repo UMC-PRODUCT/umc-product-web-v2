@@ -1,7 +1,6 @@
 import { useFormContext } from "react-hook-form"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
-import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
 import {
@@ -10,33 +9,22 @@ import {
   type SignUpFormData,
 } from "../validation"
 
-interface AccountCreationStepProps {
-  isIdDuplicated: boolean
-  onIdDuplicateCheck: () => void
-}
-
-export function AccountCreationStep({
-  isIdDuplicated,
-  onIdDuplicateCheck,
-}: AccountCreationStepProps) {
+export function AccountCreationStep() {
   const {
     register,
     watch,
     formState: { errors },
   } = useFormContext<SignUpFormData>()
 
-  const id = watch("id")
+  const email = watch("email")
   const password = watch("password")
   const confirmPassword = watch("confirmPassword")
 
-  const isIdValid = !errors.id
   const isPasswordValid = !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
   const hasInvalidSpecialChar =
     !!errors.password?.message?.includes("사용 가능한 특수문자")
 
-  const idValidationState = getSimpleValidationState(id, isIdValid)
-  const idValidationColor = getValidationColor(idValidationState)
   const passwordValidationState = hasInvalidSpecialChar
     ? "invalid"
     : getSimpleValidationState(password, isPasswordValid)
@@ -44,50 +32,22 @@ export function AccountCreationStep({
 
   return (
     <>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex min-w-90 flex-col gap-1.5">
         <div>
-          <span className="text-body-1-medium text-teal-gray-600">아이디</span>
+          <span className="text-body-1-medium text-teal-gray-600">
+            이메일 아이디
+          </span>
           <span className="text-body-1-medium text-error-600">*</span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <InputBox
-            {...register("id")}
-            value={id}
-            state={
-              isIdDuplicated || (id !== "" && !isIdValid) ? "error" : "default"
-            }
+            value={email ?? ""}
+            onChange={() => {}}
+            state="disabled"
             rightAdornment={<></>}
+            className="w-full"
           />
-          <Button
-            size={"m"}
-            color={"primary"}
-            variant={"weak"}
-            disabled={!isIdValid || id === ""}
-            onClick={onIdDuplicateCheck}
-          >
-            중복 확인
-          </Button>
-        </div>
-
-        <div className="flex h-5.5 items-center gap-1">
-          {!isIdDuplicated && (
-            <>
-              <CheckIcon className={`h-4 w-4 ${idValidationColor}`} />
-              <p className={`text-body-2-medium ${idValidationColor}`}>
-                5~20자의 영문, 숫자와 특수기호(_),(-) 사용 가능
-              </p>
-            </>
-          )}
-
-          {isIdDuplicated && (
-            <>
-              <CheckIcon className="text-error-500 h-4 w-4" />
-              <p className="text-error-500 text-body-2-medium">
-                중복된 아이디입니다.
-              </p>
-            </>
-          )}
         </div>
       </div>
 
@@ -146,21 +106,25 @@ export function AccountCreationStep({
           className="w-full"
         />
 
-        {confirmPassword && !isPasswordMatch && (
-          <div className="flex h-5.5 items-center gap-1">
-            <CheckIcon className="text-error-500 h-4 w-4" />
-            <p className="text-error-500 text-body-2-medium">
-              비밀번호와 일치하지 않습니다.
-            </p>
-          </div>
-        )}
+        <div className="flex h-5.5 items-center gap-1">
+          {confirmPassword && !isPasswordMatch && (
+            <>
+              <CheckIcon className="text-error-500 h-4 w-4" />
+              <p className="text-error-500 text-body-2-medium">
+                비밀번호와 일치하지 않습니다.
+              </p>
+            </>
+          )}
 
-        {confirmPassword && isPasswordMatch && (
-          <div className="flex h-5.5 items-center gap-1">
-            <CheckIcon className="text-success-600 h-4 w-4" />
-            <p className="text-success-600 text-body-2-medium">비밀번호 일치</p>
-          </div>
-        )}
+          {confirmPassword && isPasswordMatch && (
+            <>
+              <CheckIcon className="text-success-600 h-4 w-4" />
+              <p className="text-success-600 text-body-2-medium">
+                비밀번호 일치
+              </p>
+            </>
+          )}
+        </div>
       </div>
     </>
   )
