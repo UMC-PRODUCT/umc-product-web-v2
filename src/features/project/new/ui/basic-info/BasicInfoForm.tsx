@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
+import { isAxiosError } from "axios"
 import {
   forwardRef,
   useEffect,
@@ -12,12 +13,16 @@ import { useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { isCurrentTermPm } from "@/features/auth/model/identity"
+import {
+  getProjectPmSearchScope,
+  isCurrentTermPm,
+} from "@/features/auth/model/identity"
 import { searchMembers } from "@/features/challenger/api/member"
 import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
   addProjectMember,
   createProjectDraft,
+  removeProjectMember,
   updateProjectDraft,
   uploadFileFlow,
 } from "@/features/project/new/api"
@@ -38,6 +43,14 @@ import { SectionHeader } from "../shared/SectionHeader"
 import { ProjectCardForm } from "./ProjectCardForm"
 
 import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"
+
+function extractApiErrorCode(error: unknown): string | undefined {
+  if (!isAxiosError(error)) return undefined
+  const data = error.response?.data
+  if (typeof data !== "object" || data === null) return undefined
+  const code = (data as { code?: unknown }).code
+  return typeof code === "string" ? code : undefined
+}
 
 export interface BasicInfoFormHandle {
   validate: () => Promise<boolean>
@@ -67,13 +80,20 @@ export const BasicInfoForm = forwardRef<
   })
   const activeGisuId = activeGisuQuery.data?.gisuId
 
+  const pmSearchScope = useMemo(() => getProjectPmSearchScope(meData), [meData])
+
   const pmListQuery = useQuery({
-    queryKey: ["member", "list", { part: "PLAN", gisuId: activeGisuId }],
+    queryKey: [
+      "member",
+      "list",
+      { part: "PLAN", gisuId: activeGisuId, ...pmSearchScope },
+    ],
     queryFn: () =>
       searchMembers({
         part: "PLAN",
         gisuId: activeGisuId != null ? String(activeGisuId) : undefined,
         size: 200,
+        ...pmSearchScope,
       }),
     enabled: activeGisuId != null,
     staleTime: 60 * 1000,
@@ -136,6 +156,7 @@ export const BasicInfoForm = forwardRef<
 
   const thumbnailRef = useRef<HTMLButtonElement>(null)
   const logoRef = useRef<HTMLButtonElement>(null)
+  const externalLinkRef = useRef<HTMLInputElement>(null)
 
   const normalizeExternalLink = (
     url: string | undefined,
@@ -147,14 +168,12 @@ export const BasicInfoForm = forwardRef<
 
   const {
     register,
-    handleSubmit,
     setValue,
     setFocus,
     getValues,
     reset,
     watch,
     trigger,
-    formState,
     formState: { errors, dirtyFields },
   } = useForm<BasicInfoFormData>({
     resolver: zodResolver(basicInfoSchema),
@@ -188,39 +207,83 @@ export const BasicInfoForm = forwardRef<
     return true
   }
 
+  const runReadingOrderValidation = async (): Promise<boolean> => {
+    const titleOk = await trigger("title")
+    if (!titleOk) {
+      addToast({
+        message: "프로젝트 이름을 입력해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setTimeout(() => setFocus("title"), 0)
+      return false
+    }
+    const descOk = await trigger("description")
+    if (!descOk) {
+      addToast({
+        message: "프로젝트 한 줄 소개를 입력해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setTimeout(() => setFocus("description"), 0)
+      return false
+    }
+    const values = getValues()
+    if (!validateImages(values.thumbnail, values.logo)) return false
+    const imagesValid = await trigger(["thumbnail", "logo"])
+    if (!imagesValid) {
+      addToast({
+        message: "이미지 형식 또는 크기(10MB 이하)를 확인해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
+    if (!pm1Member) {
+      setPm1Error(true)
+      addToast({
+        message: "PM을 선택해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
+    if (isMultiPm && !pm2Member) {
+      setPm2Error(true)
+      addToast({
+        message: "모든 PM을 선택해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
+    const linkOk = await trigger("externalLink")
+    if (!linkOk) {
+      addToast({
+        message: "올바른 URL을 입력해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      setTimeout(() => externalLinkRef.current?.focus(), 0)
+      return false
+    }
+    return true
+  }
+
   useImperativeHandle(ref, () => ({
-    validate: async () => {
-      if (!pm1Member) {
-        setPm1Error(true)
-        addToast({
-          message: "PM을 선택해 주세요.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-        return false
-      }
-      if (isMultiPm && !pm2Member) {
-        setPm2Error(true)
-        addToast({
-          message: "모든 PM을 선택해 주세요.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-        return false
-      }
-      const valid = await trigger()
-      if (!valid) {
-        onInvalid(formState.errors)
-        return false
-      }
-      const values = getValues()
-      if (!validateImages(values.thumbnail, values.logo)) return false
-      return true
-    },
+    validate: () => runReadingOrderValidation(),
     save: () => handleTempSave({ silent: false }),
     getIsDirty: () => hasUnsavedChanges,
   }))
@@ -245,29 +308,6 @@ export const BasicInfoForm = forwardRef<
       isMultiPm: storePmInfo.isMultiPm,
     })
   }, [storePmInfo])
-
-  const onInvalid = (fieldErrors: typeof errors) => {
-    let message = "모든 항목을 입력해 주세요."
-    let focusFn: (() => void) | null = null
-
-    if (fieldErrors.title) {
-      message = "프로젝트 이름을 입력해 주세요."
-      focusFn = () => setFocus("title")
-    } else if (fieldErrors.description) {
-      message = "프로젝트 한 줄 소개를 입력해 주세요."
-      focusFn = () => setFocus("description")
-    }
-
-    addToast({
-      message,
-      color: "red",
-      variant: "deep",
-      type: "default",
-      duration: 3000,
-    })
-
-    if (focusFn) setTimeout(focusFn, 0)
-  }
 
   const isPmChanged = savedSnapshot
     ? pm1Member !== savedSnapshot.pm1 ||
@@ -348,6 +388,9 @@ export const BasicInfoForm = forwardRef<
 
       const prevPm2Id = savedSnapshot?.pm2?.id
       const currPm2Id = pm2Member?.id
+      if (prevPm2Id && prevPm2Id !== currPm2Id) {
+        await removeProjectMember(resolvedProjectId, Number(prevPm2Id))
+      }
       if (currPm2Id && currPm2Id !== prevPm2Id) {
         await addProjectMember(resolvedProjectId, {
           memberId: Number(currPm2Id),
@@ -369,9 +412,13 @@ export const BasicInfoForm = forwardRef<
         })
       }
       return true
-    } catch {
+    } catch (error) {
+      const code = extractApiErrorCode(error)
       addToast({
-        message: "임시 저장에 실패했습니다. 다시 시도해주세요.",
+        message:
+          code === "PROJECT-0012"
+            ? "선택한 PM의 프로젝트를 생성할 권한이 없습니다. 담당 범위 내 PM을 선택해 주세요."
+            : "임시 저장에 실패했습니다. 다시 시도해주세요.",
         color: "red",
         variant: "deep",
         type: "default",
@@ -383,11 +430,14 @@ export const BasicInfoForm = forwardRef<
     }
   }
 
-  const onSubmit = async (data: BasicInfoFormData) => {
-    if (!validateImages(data.thumbnail, data.logo)) return
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const ok = await runReadingOrderValidation()
+    if (!ok) return
+    const values = getValues()
     if (hasUnsavedChanges) {
-      const ok = await handleTempSave({ silent: true })
-      if (!ok) return
+      const saved = await handleTempSave({ silent: true })
+      if (!saved) return
       addToast({
         message: "작성한 내용이 저장되었습니다.",
         color: "primary",
@@ -396,35 +446,8 @@ export const BasicInfoForm = forwardRef<
         duration: 3000,
       })
     }
-    setBasicInfo(data)
+    setBasicInfo(values)
     onNext()
-  }
-
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!pm1Member) {
-      setPm1Error(true)
-      addToast({
-        message: "PM을 선택해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      return
-    }
-    if (isMultiPm && !pm2Member) {
-      setPm2Error(true)
-      addToast({
-        message: "모든 PM을 선택해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      return
-    }
-    void handleSubmit(onSubmit, onInvalid)(e)
   }
 
   const displayNickname = pm1Member?.nickname ?? meData?.nickname ?? "-"
@@ -523,11 +546,19 @@ export const BasicInfoForm = forwardRef<
             setValue("logo", file, { shouldDirty: true, shouldValidate: true })
             setUploaded({ logoFileId: null, logoUrl: null })
           }}
+          onRemove={() => {
+            setValue("logo", undefined, {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+            setUploaded({ logoFileId: null, logoUrl: null })
+          }}
         />
       </div>
       <div className="flex flex-col gap-4">
         <SectionHeader index={3} title="프로젝트 기획안" />
         <InputBox
+          ref={externalLinkRef}
           value={watch("externalLink") ?? ""}
           onChange={(e) => {
             setValue("externalLink", e.target.value, {

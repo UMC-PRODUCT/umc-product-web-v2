@@ -17,7 +17,11 @@ export {
   updateProjectDraft,
 } from "./projectDraft"
 
-export { addProjectMember, transferOwnership } from "./projectMembers"
+export {
+  addProjectMember,
+  removeProjectMember,
+  transferOwnership,
+} from "./projectMembers"
 
 export { publishProject } from "./projectPublish"
 
