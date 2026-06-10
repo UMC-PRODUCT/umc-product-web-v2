@@ -6,6 +6,7 @@ import { Controller, useForm } from "react-hook-form"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { uploadFileFlow } from "@/features/project/new/api/storage"
+import { getActiveGisu } from "@/shared/api/gisu"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { Button } from "@/shared/ui/Button"
@@ -26,6 +27,7 @@ import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 import {
   type ApplicationAnswerItem,
   createApplicationDraft,
+  getMyApplications,
   saveApplicationDraft,
   submitApplication,
 } from "../../api/matchingProject"
@@ -283,6 +285,14 @@ export function ProjectApplyModal({
         setApplicationId(draft.applicationId)
       } catch (err) {
         if (err instanceof AxiosError && err.response?.status === 409) {
+          const gisu = await getActiveGisu().catch(() => null)
+          if (gisu) {
+            const apps = await getMyApplications(Number(gisu.gisuId)).catch(
+              () => [],
+            )
+            const existing = apps.find((a) => Number(a.projectId) === projectId)
+            if (existing) setApplicationId(Number(existing.applicationId))
+          }
           return
         }
         addToast({
