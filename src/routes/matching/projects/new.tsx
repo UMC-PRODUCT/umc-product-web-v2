@@ -143,6 +143,29 @@ function ProjectRegisterPage() {
   const isCreatePermissionLoading =
     !isEditMode && projectWritePermissionQuery.isPending
   const canManageProject = projectPermissionsQuery.canManage
+  const canEditRecruitStep = projectId !== null ? canManageProject : !isPm
+
+  const resolveCanEditRecruitStep = async (): Promise<boolean> => {
+    const pid = useProjectRegisterStore.getState().projectId
+    if (pid === null) return !isPm
+    try {
+      const permission = await queryClient.ensureQueryData({
+        queryKey: [
+          "authorization",
+          "resource-permission",
+          "PROJECT",
+          pid,
+          undefined,
+        ],
+        queryFn: () =>
+          getResourcePermission({ resourceType: "PROJECT", resourceId: pid }),
+        staleTime: 0,
+      })
+      return hasGrantedPermission(permission, "MANAGE")
+    } catch {
+      return !isPm
+    }
+  }
 
   const isStoreDirty = useProjectRegisterStore((s) => {
     const recruitTotal =
@@ -303,17 +326,19 @@ function ProjectRegisterPage() {
     )
   }
 
-  const handleBasicInfoNext = () => {
-    setStep(isPm ? 3 : 2)
+  const handleBasicInfoNext = async () => {
+    const canEdit = await resolveCanEditRecruitStep()
+    setStep(canEdit ? 2 : 3)
   }
 
-  const handleApplicationFormPrev = () => {
-    setStep(isPm ? 1 : 2)
+  const handleApplicationFormPrev = async () => {
+    const canEdit = await resolveCanEditRecruitStep()
+    setStep(canEdit ? 2 : 1)
   }
 
   const handleStepChange = async (idx: number) => {
     if (isEditMode) return
-    if (isPm && idx === 2) {
+    if (!canEditRecruitStep && idx === 2) {
       setStep(2)
       triggerStepTooltip(2)
       return
@@ -330,7 +355,7 @@ function ProjectRegisterPage() {
       }
       const saved = await basicInfoRef.current?.save()
       if (!saved) return
-    } else if (step === 2 && !isPm) {
+    } else if (step === 2 && canEditRecruitStep) {
       const total = Object.values(recruitInfo).reduce(
         (sum, { count }) => sum + count,
         0,
@@ -423,14 +448,14 @@ function ProjectRegisterPage() {
           disabledSteps={
             isEditMode
               ? [1, 2, 3].filter((idx) => idx !== step)
-              : isPm
+              : !canEditRecruitStep
                 ? [2]
                 : []
           }
           disabledTooltips={
             isEditMode
               ? {}
-              : isPm
+              : !canEditRecruitStep
                 ? {
                     2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
                     3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
@@ -453,7 +478,7 @@ function ProjectRegisterPage() {
         {step === 2 && (
           <RecruitInfoForm
             ref={recruitInfoRef}
-            readOnly={isPm}
+            readOnly={!canEditRecruitStep}
             isHydrated={isEditMode ? detailQuery.isSuccess : true}
             onPrev={() => setStep(1)}
             onNext={() => setStep(3)}
