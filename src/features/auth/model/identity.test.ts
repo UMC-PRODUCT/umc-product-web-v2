@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   canAccessProjectSettings,
   canManageProjects,
+  getProjectPmSearchScope,
   isAnyOperator,
   isSchoolLeadership,
 } from "./identity"
@@ -15,19 +16,26 @@ import type {
   RoleType,
 } from "@/features/challenger/model/types"
 
+type RoleSpec = RoleType | { roleType: RoleType; organizationId: string }
+
 function makeMe(
-  roleTypes: RoleType[],
+  roleSpecs: RoleSpec[],
   records: Array<{ gisuId: string; part: Part }> = [],
+  overrides: Partial<MemberInfoResponse> = {},
 ): MemberInfoResponse {
-  const roles: ChallengerRoleResponse[] = roleTypes.map((roleType) => ({
-    challengerRoleId: "0",
-    challengerId: "0",
-    roleType,
-    organizationType: "CENTRAL",
-    organizationId: "0",
-    gisuId: "10",
-    gisu: "10",
-  }))
+  const roles: ChallengerRoleResponse[] = roleSpecs.map((spec) => {
+    const roleType = typeof spec === "string" ? spec : spec.roleType
+    const organizationId = typeof spec === "string" ? "0" : spec.organizationId
+    return {
+      challengerRoleId: "0",
+      challengerId: "0",
+      roleType,
+      organizationType: "CENTRAL",
+      organizationId,
+      gisuId: "10",
+      gisu: "10",
+    }
+  })
 
   const challengerRecords: ChallengerInfoResponse[] = records.map((r) => ({
     challengerId: "0",
@@ -56,6 +64,7 @@ function makeMe(
     status: "ACTIVE",
     roles,
     challengerRecords,
+    ...overrides,
   }
 }
 
@@ -154,5 +163,51 @@ describe("canManageProjects", () => {
         makeMe(["CHALLENGER"], [{ gisuId: "10", part: "NODEJS" }]),
       ),
     ).toBe(false)
+  })
+})
+
+describe("getProjectPmSearchScope", () => {
+  it("SUPER_ADMIN은 빈 객체 반환", () => {
+    expect(getProjectPmSearchScope(makeMe(["SUPER_ADMIN"]))).toEqual({})
+  })
+
+  it("중앙 운영진(CENTRAL_PRESIDENT)은 빈 객체 반환", () => {
+    expect(getProjectPmSearchScope(makeMe(["CENTRAL_PRESIDENT"]))).toEqual({})
+  })
+
+  it("CHAPTER_PRESIDENT는 해당 역할의 organizationId를 chapterId로 반환", () => {
+    expect(
+      getProjectPmSearchScope(
+        makeMe([{ roleType: "CHAPTER_PRESIDENT", organizationId: "77" }]),
+      ),
+    ).toEqual({ chapterId: "77" })
+  })
+
+  it("SCHOOL_PRESIDENT는 schoolId를 문자열로 반환", () => {
+    expect(
+      getProjectPmSearchScope(
+        makeMe(["SCHOOL_PRESIDENT"], [], { schoolId: 12 }),
+      ),
+    ).toEqual({ schoolId: "12" })
+  })
+
+  it("SCHOOL_VICE_PRESIDENT도 schoolId를 문자열로 반환", () => {
+    expect(
+      getProjectPmSearchScope(
+        makeMe(["SCHOOL_VICE_PRESIDENT"], [], { schoolId: 5 }),
+      ),
+    ).toEqual({ schoolId: "5" })
+  })
+
+  it("순수 PM(현기수 PLAN, 운영 역할 없음)은 빈 객체 반환", () => {
+    expect(
+      getProjectPmSearchScope(
+        makeMe(["CHALLENGER"], [{ gisuId: "10", part: "PLAN" }]),
+      ),
+    ).toEqual({})
+  })
+
+  it("undefined는 빈 객체 반환", () => {
+    expect(getProjectPmSearchScope(undefined)).toEqual({})
   })
 })

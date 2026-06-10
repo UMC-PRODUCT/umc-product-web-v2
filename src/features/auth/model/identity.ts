@@ -82,6 +82,23 @@ export function canManageProjects(me: MemberInfoResponse | undefined): boolean {
   return isOperator(me) || isSchoolLeadership(me) || isCurrentTermPm(me)
 }
 
+export function getProjectPmSearchScope(me: MemberInfoResponse | undefined): {
+  chapterId?: string
+  schoolId?: string
+} {
+  if (isSuperAdmin(me) || isCentralStaff(me)) return {}
+  if (isChapterPresident(me)) {
+    const chapterId = me?.roles?.find(
+      (r) => r.roleType === "CHAPTER_PRESIDENT",
+    )?.organizationId
+    return chapterId ? { chapterId } : {}
+  }
+  if (isSchoolLeadership(me)) {
+    return me?.schoolId != null ? { schoolId: String(me.schoolId) } : {}
+  }
+  return {}
+}
+
 export function isCurrentTermPm(me: MemberInfoResponse | undefined): boolean {
   if (!me?.challengerRecords?.length) return false
   const latest = latestRecord(me.challengerRecords)
