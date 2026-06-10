@@ -56,7 +56,7 @@ interface MatchingResultRowProps {
   isEditable?: boolean
   gisuId?: number
   chapterId?: number
-  approvedMemberIds?: Set<string>
+  assignedMemberIds?: Set<string>
   currentRound?: number
   chapterName?: string
   className?: string
@@ -75,7 +75,7 @@ export function MatchingResultRow({
   isEditable = true,
   gisuId,
   chapterId,
-  approvedMemberIds,
+  assignedMemberIds,
   currentRound,
   chapterName,
   className,
@@ -330,7 +330,7 @@ export function MatchingResultRow({
           }
           gisuId={gisuId}
           chapterId={chapterId}
-          approvedMemberIds={approvedMemberIds}
+          assignedMemberIds={assignedMemberIds}
           onAssign={async (challenger) => {
             if (!assignTarget || !projectId) return
             // 배정 후 refetch 시 클릭한 슬롯으로 재배치하기 위해 저장

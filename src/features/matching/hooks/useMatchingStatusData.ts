@@ -132,20 +132,6 @@ export function useMatchingStatusData(chapterName?: string) {
     [projects],
   )
 
-  // 전체 프로젝트에서 APPROVED된 멤버 ID 수집 (수동 배정 시 필터링용)
-  const approvedMemberIds = useMemo(() => {
-    const ids = new Set<string>()
-    if (!applicantsQuery.data) return ids
-    for (const applicants of applicantsQuery.data.values()) {
-      for (const app of applicants) {
-        if (app.status === "APPROVED") {
-          ids.add(String(app.applicant.memberId))
-        }
-      }
-    }
-    return ids
-  }, [applicantsQuery.data])
-
   // 프로젝트별 팀원 조회 (수동 배정 멤버 포함)
   const membersQuery = useQuery({
     queryKey: applicationKeys.matchingMembers(
@@ -164,6 +150,33 @@ export function useMatchingStatusData(chapterName?: string) {
     },
     enabled: projects.length > 0,
   })
+
+  // 전체 프로젝트에 배정된 멤버 ID 수집 (수동 배정 시 중복 필터링용)
+  // APPROVED 지원자 + 수동 배정 멤버(지원서 없이 추가된 멤버) 모두 포함
+  const assignedMemberIds = useMemo(() => {
+    const ids = new Set<string>()
+    // 1. APPROVED 지원서 기반
+    if (applicantsQuery.data) {
+      for (const applicants of applicantsQuery.data.values()) {
+        for (const app of applicants) {
+          if (app.status === "APPROVED") {
+            ids.add(String(app.applicant.memberId))
+          }
+        }
+      }
+    }
+    // 2. 프로젝트 멤버 목록 기반 (수동 배정 멤버 포함)
+    if (membersQuery.data) {
+      for (const members of membersQuery.data.values()) {
+        for (const group of members.partGroups) {
+          for (const member of group.members) {
+            ids.add(String(member.memberId))
+          }
+        }
+      }
+    }
+    return ids
+  }, [applicantsQuery.data, membersQuery.data])
 
   // 매칭 현황 데이터 변환 (매칭 결과 시트용)
   const matchingParts = useMemo(
@@ -214,7 +227,7 @@ export function useMatchingStatusData(chapterName?: string) {
     currentRound,
     gisuId,
     chapterId,
-    approvedMemberIds,
+    assignedMemberIds,
     dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
     isAdmin,
     isLoading:

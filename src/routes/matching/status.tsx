@@ -31,7 +31,7 @@ function MatchingStatusPage() {
     currentRound,
     gisuId,
     chapterId,
-    approvedMemberIds,
+    assignedMemberIds,
     dataUpdatedAt,
     isLoading,
   } = useMatchingStatusData(selectedChapter)
@@ -41,7 +41,7 @@ function MatchingStatusPage() {
 
   return (
     <section className="flex w-full flex-col">
-      <div className="border-teal-gray-100 flex w-288 flex-col rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
+      <div className="border-teal-gray-100 flex w-6xl flex-col rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
         {/* 페이지 헤더 */}
         <div className="flex flex-col gap-1.5">
           <h1 className="text-heading-6-semibold text-teal-gray-900">
@@ -53,7 +53,7 @@ function MatchingStatusPage() {
         </div>
 
         {/* 지부 선택 + 콘텐츠 */}
-        <div className="mt-6 flex flex-col gap-[99px]">
+        <div className="mt-6 flex flex-col gap-24.75">
           <SegmentButton
             items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
             value={selectedChapter}
@@ -68,7 +68,7 @@ function MatchingStatusPage() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-[57px] pl-4">
+            <div className="flex flex-col gap-14.25 pl-4">
               {/* 01 매칭 통계 */}
               <ApplicationStatsSection
                 stats={displayStats}
@@ -105,7 +105,7 @@ function MatchingStatusPage() {
                           isEditable={isAdmin}
                           gisuId={gisuId}
                           chapterId={chapterId}
-                          approvedMemberIds={approvedMemberIds}
+                          assignedMemberIds={assignedMemberIds}
                           currentRound={currentRound}
                           chapterName={selectedChapter}
                         />

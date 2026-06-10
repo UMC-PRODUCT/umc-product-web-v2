@@ -35,7 +35,7 @@ interface AssignmentModalProps {
   part?: Part
   gisuId?: number
   chapterId?: number
-  approvedMemberIds?: Set<string>
+  assignedMemberIds?: Set<string>
   onAssign: (challenger: AssignableChallenger) => Promise<void>
 }
 
@@ -49,7 +49,7 @@ export function AssignmentModal({
   part,
   gisuId,
   chapterId,
-  approvedMemberIds,
+  assignedMemberIds,
   onAssign,
 }: AssignmentModalProps) {
   const [search, setSearch] = useState("")
@@ -84,9 +84,9 @@ export function AssignmentModal({
   // 이미 매칭된 챌린저 제외
   const filtered = useMemo(() => {
     const items = data?.page.content ?? []
-    if (!approvedMemberIds || approvedMemberIds.size === 0) return items
-    return items.filter((m) => !approvedMemberIds.has(m.memberId))
-  }, [data, approvedMemberIds])
+    if (!assignedMemberIds || assignedMemberIds.size === 0) return items
+    return items.filter((m) => !assignedMemberIds.has(m.memberId))
+  }, [data, assignedMemberIds])
 
   const [isAssigning, setIsAssigning] = useState(false)
 
