@@ -33,9 +33,7 @@ import type {
 const REMAINING_SECONDS = 600 // 10분
 
 type SignUpState = {
-  signupData: Partial<EmailRegisterMemberRequest> & {
-    isPhoneVerified?: boolean
-  }
+  signupData: Partial<EmailRegisterMemberRequest>
   email: {
     verifiedValue: string
     isCodeVisible: boolean
@@ -50,19 +48,7 @@ type SignUpState = {
     isDuplicated: boolean
     verificationId: number | null
   }
-  phone: {
-    verifiedValue: string
-    isCodeVisible: boolean
-    remainingSeconds: number
-    showSent: boolean
-    showSpamModal: boolean
-    isCodeInvalid: boolean
-    isCodeExpired: boolean
-    hasExpiredBefore: boolean
-    isRequested: boolean
-    isLoading: boolean
-    isDuplicated: boolean
-  }
+
   oAuthVerificationToken: string | null
   schoolList: SchoolNameItem[]
   isSignupLoading: boolean
@@ -81,15 +67,6 @@ type SignUpAction =
   | { type: "EMAIL_EXPIRED" }
   | { type: "EMAIL_VERIFIED"; payload: string }
   | { type: "EMAIL_SET_SPAM_MODAL"; payload: boolean }
-  | { type: "PHONE_REQUEST_START" }
-  | { type: "PHONE_REQUEST_SUCCESS"; payload: string }
-  | { type: "PHONE_REQUEST_FAILURE"; payload: { isDuplicated: boolean } }
-  | { type: "PHONE_CODE_CHANGE"; payload: boolean }
-  | { type: "PHONE_INPUT_CHANGE" }
-  | { type: "PHONE_TICK" }
-  | { type: "PHONE_EXPIRED" }
-  | { type: "PHONE_VERIFIED" }
-  | { type: "PHONE_SET_SPAM_MODAL"; payload: boolean }
   | { type: "SET_ID_DUPLICATED"; payload: boolean }
   | { type: "SET_PASSWORD"; payload: string }
   | { type: "SIGNUP_START" }
@@ -113,19 +90,7 @@ const initialState: SignUpState = {
     isDuplicated: false,
     verificationId: null,
   },
-  phone: {
-    verifiedValue: "",
-    isCodeVisible: false,
-    remainingSeconds: 0,
-    showSent: false,
-    showSpamModal: false,
-    isCodeInvalid: false,
-    isCodeExpired: false,
-    hasExpiredBefore: false,
-    isRequested: false,
-    isLoading: false,
-    isDuplicated: false,
-  },
+
   oAuthVerificationToken: null,
   schoolList: [],
   isSignupLoading: false,
@@ -212,76 +177,7 @@ function signUpReducer(state: SignUpState, action: SignUpAction): SignUpState {
         ...state,
         email: { ...state.email, showSpamModal: action.payload },
       }
-    case "PHONE_REQUEST_START":
-      return { ...state, phone: { ...state.phone, isLoading: true } }
-    case "PHONE_REQUEST_SUCCESS":
-      return {
-        ...state,
-        phone: {
-          ...state.phone,
-          isLoading: false,
-          verifiedValue: action.payload,
-          isCodeVisible: true,
-          showSent: true,
-          isCodeInvalid: false,
-          isCodeExpired: false,
-          isRequested: true,
-          remainingSeconds: REMAINING_SECONDS,
-        },
-      }
-    case "PHONE_REQUEST_FAILURE":
-      return {
-        ...state,
-        phone: {
-          ...state.phone,
-          isLoading: false,
-          isDuplicated: action.payload.isDuplicated,
-        },
-      }
-    case "PHONE_CODE_CHANGE":
-      return {
-        ...state,
-        phone: { ...state.phone, isCodeInvalid: action.payload },
-      }
-    case "PHONE_INPUT_CHANGE":
-      return {
-        ...state,
-        phone: {
-          ...state.phone,
-          showSent: false,
-          isRequested: false,
-          isDuplicated: false,
-        },
-      }
-    case "PHONE_TICK":
-      return {
-        ...state,
-        phone: {
-          ...state.phone,
-          remainingSeconds: Math.max(0, state.phone.remainingSeconds - 1),
-        },
-      }
-    case "PHONE_EXPIRED":
-      return {
-        ...state,
-        phone: {
-          ...state.phone,
-          isCodeExpired: true,
-          hasExpiredBefore: true,
-          isRequested: false,
-          remainingSeconds: 0,
-        },
-      }
-    case "PHONE_VERIFIED":
-      return {
-        ...state,
-        signupData: { ...state.signupData, isPhoneVerified: true },
-      }
-    case "PHONE_SET_SPAM_MODAL":
-      return {
-        ...state,
-        phone: { ...state.phone, showSpamModal: action.payload },
-      }
+
     case "SET_ID_DUPLICATED":
       return { ...state, isIdDuplicated: action.payload }
     case "SET_PASSWORD":
@@ -316,8 +212,7 @@ function SignUpPage() {
     defaultValues: {
       email: "",
       code: "",
-      phoneNumber: "",
-      phoneCode: "",
+
       id: "",
       password: "",
       confirmPassword: "",
@@ -335,8 +230,7 @@ function SignUpPage() {
   } = methods
   const email = watch("email")
   const code = watch("code")
-  const phoneNumber = watch("phoneNumber")
-  const phoneCode = watch("phoneCode")
+
   const id = watch("id")
   const password = watch("password")
   const confirmPassword = watch("confirmPassword")
@@ -349,7 +243,7 @@ function SignUpPage() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const phoneIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((s) => s.addToast)
 
@@ -385,7 +279,6 @@ function SignUpPage() {
   useEffect(() => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
-      if (phoneIntervalRef.current) clearInterval(phoneIntervalRef.current)
     }
   }, [])
 
@@ -398,16 +291,6 @@ function SignUpPage() {
   useEffect(() => {
     dispatch({ type: "EMAIL_CODE_CHANGE", payload: false })
   }, [code])
-
-  // 전화번호 변경 시 사이드 이펙트
-  useEffect(() => {
-    dispatch({ type: "PHONE_INPUT_CHANGE" })
-  }, [phoneNumber])
-
-  // 전화번호 인증번호 변경 시 사이드 이펙트
-  useEffect(() => {
-    dispatch({ type: "PHONE_CODE_CHANGE", payload: false })
-  }, [phoneCode])
 
   // 아이디 변경 시 사이드 이펙트
   useEffect(() => {
@@ -424,17 +307,6 @@ function SignUpPage() {
       }
     }
   }, [state.email.remainingSeconds, state.email.isCodeVisible])
-
-  // 전화번호 인증번호 타이머
-  useEffect(() => {
-    if (state.phone.remainingSeconds <= 0 && phoneIntervalRef.current) {
-      clearInterval(phoneIntervalRef.current)
-      phoneIntervalRef.current = null
-      if (state.phone.isCodeVisible && state.phone.remainingSeconds === 0) {
-        dispatch({ type: "PHONE_EXPIRED" })
-      }
-    }
-  }, [state.phone.remainingSeconds, state.phone.isCodeVisible])
 
   const startVerificationTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -760,29 +632,6 @@ function SignUpPage() {
           navigate({ to: "/login" })
         }}
       />
-
-      {/* <CtaModal
-        open={state.phone.showSpamModal}
-        title="인증 문자를 받지 못하셨나요?"
-        content={
-          <>
-            문자 수신까지 시간이 걸릴 수 있어요.
-            <br />
-            잠시 기다린 뒤에도 받지 못했다면 다시 요청해 주세요.
-          </>
-        }
-        cancelText="닫기"
-        confirmText="다시 보내기"
-        variant="success"
-        overlayTone="light"
-        onOpenChange={(open) =>
-          dispatch({ type: "PHONE_SET_SPAM_MODAL", payload: open })
-        }
-        onCancel={() =>
-          dispatch({ type: "PHONE_SET_SPAM_MODAL", payload: false })
-        }
-        onConfirm={handlePhoneSpamGuideConfirm}
-      /> */}
     </FormProvider>
   )
 }
