@@ -127,6 +127,22 @@ export const RecruitInfoForm = forwardRef<
       })
       return false
     }
+    const missingStackRole = ROLES.find(
+      ({ key, stacks }) =>
+        stacks.length > 0 &&
+        roleStates[key].count > 0 &&
+        !roleStates[key].stack,
+    )
+    if (missingStackRole) {
+      addToast({
+        message: `${missingStackRole.label} 스택을 선택해 주세요.`,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
     const snapshotToSave = JSON.stringify(roleStates)
     setIsSaving(true)
     try {
