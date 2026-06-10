@@ -5,6 +5,7 @@ import {
   useBlocker,
   useNavigate,
 } from "@tanstack/react-router"
+import { isAxiosError } from "axios"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -238,6 +239,23 @@ function ProjectRegisterPage() {
     }
   }, [detailQuery.data])
 
+  useEffect(() => {
+    if (!isEditMode || !detailQuery.isError) return
+    const status = isAxiosError(detailQuery.error)
+      ? detailQuery.error.response?.status
+      : undefined
+    if (status === 403 || status === 404) {
+      addToast({
+        message: "프로젝트에 접근할 권한이 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      navigate({ to: "/matching/projects/management", replace: true })
+    }
+  }, [isEditMode, detailQuery.isError, detailQuery.error, addToast, navigate])
+
   const draftQuery = useQuery({
     queryKey: projectKeys.draft(gisuId ?? 0),
     queryFn: () => getMyDraft(gisuId!),
@@ -298,11 +316,18 @@ function ProjectRegisterPage() {
       void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
       setShowSuccessModal(true)
     },
-    onError: () => {
+    onError: (error) => {
+      const status = isAxiosError(error) ? error.response?.status : undefined
+      const message =
+        status === 403
+          ? isEditMode
+            ? "프로젝트를 수정할 권한이 없습니다."
+            : "프로젝트를 등록할 권한이 없습니다."
+          : isEditMode
+            ? "프로젝트 수정에 실패했습니다. 다시 시도해주세요."
+            : "프로젝트 등록에 실패했습니다. 다시 시도해주세요."
       addToast({
-        message: isEditMode
-          ? "프로젝트 수정에 실패했습니다. 다시 시도해주세요."
-          : "프로젝트 등록에 실패했습니다. 다시 시도해주세요.",
+        message,
         color: "red",
         variant: "deep",
         type: "default",
