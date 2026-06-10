@@ -304,7 +304,7 @@ function ProjectRegisterPage() {
       }
       if (isEditMode) return
       const result = await submitProject(projectId)
-      if (pmInfo.pm1 && canManageProject) {
+      if (pmInfo.pm1 && (await resolveCanEditRecruitStep())) {
         await transferOwnership(projectId, {
           newOwnerMemberId: Number(pmInfo.pm1.id),
         })
