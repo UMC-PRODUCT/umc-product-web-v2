@@ -12,7 +12,10 @@ import { getResourcePermission } from "@/features/auth/api/permissions"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import {
+  canManageProjects,
+  isCurrentTermPm,
+} from "@/features/auth/model/identity"
 import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import { getManagedProjects } from "@/features/project/management/api"
@@ -49,10 +52,11 @@ export const Route = createFileRoute("/matching/projects/new")({
   beforeLoad: async ({ context, search }) => {
     const me = await ensureMe(context.queryClient)
 
+    if (!canManageProjects(me)) {
+      throw redirect({ to: "/matching/projects" })
+    }
+
     if (search.projectId !== undefined) {
-      if (!isOperator(me) && !isCurrentTermPm(me)) {
-        throw redirect({ to: "/matching/projects" })
-      }
       return
     }
 
