@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import {
   addProjectMember,
@@ -57,6 +57,7 @@ interface MatchingResultRowProps {
   gisuId?: number
   chapterId?: number
   approvedMemberIds?: Set<string>
+  currentRound?: number
   chapterName?: string
   className?: string
 }
@@ -75,6 +76,7 @@ export function MatchingResultRow({
   gisuId,
   chapterId,
   approvedMemberIds,
+  currentRound,
   chapterName,
   className,
 }: MatchingResultRowProps) {
@@ -89,6 +91,12 @@ export function MatchingResultRow({
     role: string
   } | null>(null)
   const [localRoleRows, setLocalRoleRows] = useState(roleRows)
+  // 수동 배정 후 서버 refetch 시 멤버를 클릭한 슬롯 위치로 재배치
+  const lastAssignRef = useRef<{
+    rowIdx: number
+    blockIdx: number
+    memberId: number
+  } | null>(null)
   const queryClient = useQueryClient()
 
   const assignMutation = useMutation({
@@ -99,6 +107,7 @@ export function MatchingResultRow({
     },
     onError: () => {
       // 서버 실패 시 optimistic update 롤백
+      lastAssignRef.current = null
       setLocalRoleRows(roleRows)
     },
   })
@@ -114,7 +123,48 @@ export function MatchingResultRow({
   })
 
   useEffect(() => {
-    setLocalRoleRows(roleRows)
+    if (!lastAssignRef.current) {
+      setLocalRoleRows(roleRows)
+      return
+    }
+
+    const { rowIdx, blockIdx, memberId } = lastAssignRef.current
+    const targetRow = roleRows[rowIdx]
+
+    if (!targetRow) {
+      lastAssignRef.current = null
+      setLocalRoleRows(roleRows)
+      return
+    }
+
+    const serverIdx = targetRow.blocks.findIndex((b) => b.memberId === memberId)
+
+    if (serverIdx === -1) {
+      // 아직 refetch 전 중간 렌더 - optimistic 상태 유지, ref 보존
+      return
+    }
+
+    lastAssignRef.current = null
+
+    if (serverIdx === blockIdx) {
+      setLocalRoleRows(roleRows)
+      return
+    }
+
+    // 서버가 채워진 블록을 항상 앞에 두므로, 클릭한 슬롯으로 재배치
+    const newBlocks = [...targetRow.blocks]
+    const block = newBlocks.splice(serverIdx, 1)[0]
+    if (!block) {
+      setLocalRoleRows(roleRows)
+      return
+    }
+    newBlocks.splice(blockIdx, 0, block)
+
+    setLocalRoleRows(
+      roleRows.map((row, idx) =>
+        idx === rowIdx ? { ...row, blocks: newBlocks } : row,
+      ),
+    )
   }, [roleRows])
 
   return (
@@ -283,6 +333,12 @@ export function MatchingResultRow({
           approvedMemberIds={approvedMemberIds}
           onAssign={async (challenger) => {
             if (!assignTarget || !projectId) return
+            // 배정 후 refetch 시 클릭한 슬롯으로 재배치하기 위해 저장
+            lastAssignRef.current = {
+              rowIdx: assignTarget.rowIdx,
+              blockIdx: assignTarget.blockIdx,
+              memberId: Number(challenger.id),
+            }
             // 로컬 UI 즉시 반영 (optimistic update)
             setLocalRoleRows((prev) =>
               prev.map((row, rIdx) =>
@@ -294,7 +350,11 @@ export function MatchingResultRow({
                           ? {
                               type: "filled" as const,
                               name: challenger.nickname,
-                              tagVariant: "random" as const,
+                              tagVariant: (currentRound === 2
+                                ? "round2"
+                                : currentRound === 3
+                                  ? "round3"
+                                  : "random") as NumberTagVariant,
                               applicantId: challenger.id,
                               memberId: Number(challenger.id),
                             }

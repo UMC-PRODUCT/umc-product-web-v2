@@ -97,7 +97,9 @@ export function AssignmentModal({
     try {
       await onAssign({
         id: String(member.memberId),
-        nickname: member.nickname,
+        nickname: member.nickname
+          ? `${member.nickname}/${member.name}`
+          : member.name,
         university: member.schoolName,
         partRole: (member.part?.toLowerCase() ??
           "web") as AssignableChallenger["partRole"],
