@@ -42,7 +42,8 @@ export function AccountCreationStep() {
 
         <div className="flex items-center gap-1.5">
           <InputBox
-            value={email}
+            value={email ?? ""}
+            onChange={() => {}}
             state="disabled"
             rightAdornment={<></>}
             className="w-full"
