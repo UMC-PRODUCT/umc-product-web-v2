@@ -12,8 +12,8 @@ import {
   sendEmailVerification,
 } from "@/features/auth/api/emailVerification"
 import { registerMemberByEmail } from "@/features/auth/api/register"
-import { getAllSchools } from "@/features/auth/api/school"
 import { getTerms } from "@/features/auth/api/terms"
+import { useSchools } from "@/features/auth/hooks/useSchools"
 import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
 import {
   AccountCreationStep,
@@ -357,27 +357,33 @@ function SignUpPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((s) => s.addToast)
 
-  // 초기 로드: OAuth 토큰 및 학교 목록 가져오기
+  const { schools: hookSchools, isError: isSchoolsError } = useSchools({
+    nameType: "short",
+  })
+
+  // 초기 로드: OAuth 토큰
   useEffect(() => {
     const token = sessionStorage.getItem(OAUTH_VERIFICATION_TOKEN_KEY)
     dispatch({ type: "SET_OAUTH_TOKEN", payload: token })
+  }, [])
 
-    const fetchSchools = async () => {
-      try {
-        const res = await getAllSchools()
-        dispatch({ type: "SET_SCHOOL_LIST", payload: res.schools })
-      } catch {
-        addToast({
-          message: "학교 목록을 불러오는데 실패했습니다.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-      }
+  useEffect(() => {
+    if (hookSchools.length > 0) {
+      dispatch({ type: "SET_SCHOOL_LIST", payload: hookSchools })
     }
-    void fetchSchools()
-  }, [addToast])
+  }, [hookSchools])
+
+  useEffect(() => {
+    if (isSchoolsError) {
+      addToast({
+        message: "학교 목록을 불러오는데 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
+  }, [isSchoolsError, addToast])
 
   // 타이머 정리 (언마운트 시)
   useEffect(() => {

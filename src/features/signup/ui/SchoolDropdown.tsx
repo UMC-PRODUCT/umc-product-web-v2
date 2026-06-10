@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 
-import { getAllSchools } from "@/features/auth/api/school"
+import { useSchools } from "@/features/auth/hooks/useSchools"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
 import { cn } from "@/shared/lib/utils"
@@ -26,12 +25,7 @@ export function SchoolDropdown({
   const containerRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["schools"],
-    queryFn: getAllSchools,
-  })
-
-  const schools = data?.schools || []
+  const { schools, isLoading } = useSchools({ nameType: "short" })
 
   useEffect(() => {
     if (!open) return
@@ -50,8 +44,10 @@ export function SchoolDropdown({
     }
   }, [open])
 
-  const filteredSchools = schools.filter((school) =>
-    school.schoolName.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredSchools = schools.filter(
+    (school) =>
+      school.schoolName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      school.originalName.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
