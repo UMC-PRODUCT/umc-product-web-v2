@@ -72,7 +72,7 @@ export function ProjectStatusRow({
         </div>
 
         {/* 챌린저 */}
-        <div className="flex h-12.5 w-50 items-center justify-center rounded-lg px-4">
+        <div className="flex h-12.5 w-50 items-center rounded-lg px-16">
           <div className="flex flex-col whitespace-nowrap">
             <span className="text-body-2-medium text-teal-gray-900">
               {challengerName}
@@ -113,7 +113,7 @@ export function ProjectStatusRow({
         aria-expanded={isExpanded}
         onClick={onToggleExpand}
         className={cn(
-          "shadow-inner-neutral-2 flex size-[30px] shrink-0 items-center justify-center rounded-[10px] transition-colors",
+          "shadow-inner-neutral-2 flex size-7.5 shrink-0 items-center justify-center rounded-[10px] transition-colors",
           isExpanded ? "bg-teal-100/50" : "hover:bg-teal-gray-150 bg-white",
         )}
       >
