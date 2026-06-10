@@ -5,7 +5,13 @@ const LOGO_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/svg+xml"]
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 export const basicInfoSchema = z.object({
-  title: z.string().min(1).max(16),
+  title: z
+    .string()
+    .min(1)
+    .max(16)
+    .refine((v) => v.trim().length > 0, {
+      message: "프로젝트 이름을 입력해 주세요.",
+    }),
   description: z.string().min(1).max(200),
   thumbnail: z
     .instanceof(File)
@@ -35,12 +41,13 @@ export const basicInfoSchema = z.object({
       (v) => {
         const trimmed = v.trim()
         if (!trimmed) return true
+        if (/\s/.test(trimmed)) return false
         try {
           const normalized = /^https?:\/\//i.test(trimmed)
             ? trimmed
             : `https://${trimmed}`
-          new URL(normalized)
-          return true
+          const url = new URL(normalized)
+          return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(url.hostname)
         } catch {
           return false
         }
