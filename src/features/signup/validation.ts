@@ -46,8 +46,8 @@ export const nicknameSchema = z
 export const signUpSchemaObject = z.object({
   email: emailSchema,
   code: codeSchema,
-  phoneNumber: phoneNumberSchema,
-  phoneCode: phoneCodeSchema,
+  phoneNumber: z.string().optional(),
+  phoneCode: z.string().optional(),
   id: idSchema,
   password: passwordSchema,
   confirmPassword: z.string(),
