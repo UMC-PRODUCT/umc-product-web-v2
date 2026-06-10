@@ -19,6 +19,8 @@ interface ApplicationDetailModalProps {
   onOpenChange: (open: boolean) => void
   /** 현재 활성 차수 (이전 차수의 상태 칩 disabled 처리) */
   currentRound?: number
+  /** true이면 합불 변경 불가 (Admin 뷰 등 PO가 아닌 경우) */
+  readOnly?: boolean
 }
 
 export function ApplicationDetailModal({
@@ -27,6 +29,7 @@ export function ApplicationDetailModal({
   open,
   onOpenChange,
   currentRound,
+  readOnly = false,
 }: ApplicationDetailModalProps) {
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
     null,
@@ -137,9 +140,9 @@ export function ApplicationDetailModal({
               onStatusFilterChange={setStatusFilter}
               selectedApplicantId={selectedApplicantId}
               onApplicantClick={setSelectedApplicantId}
-              onStatusChange={handleStatusChange}
+              onStatusChange={readOnly ? undefined : handleStatusChange}
               onClose={handleClose}
-              currentRound={currentRound}
+              currentRound={readOnly ? Infinity : currentRound}
             />
           </div>
 
@@ -151,12 +154,15 @@ export function ApplicationDetailModal({
               projectName={project.projectName}
               challengerName={project.challengerName}
               challengerUniversity={project.challengerUniversity}
-              onStatusChange={(status) =>
-                handleStatusChange(selectedApplicantId!, status)
+              onStatusChange={
+                readOnly
+                  ? undefined
+                  : (status) => handleStatusChange(selectedApplicantId!, status)
               }
               onClose={handlePanelClose}
               statusDisabled={
-                currentRound != null && selectedApplicant.round < currentRound
+                readOnly ||
+                (currentRound != null && selectedApplicant.round < currentRound)
               }
               className="max-h-[calc(100vh-60px)] shadow-xl"
             />

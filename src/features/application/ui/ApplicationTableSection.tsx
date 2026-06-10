@@ -66,6 +66,8 @@ interface ApplicationTableSectionProps {
   currentRound?: number
   /** 현재 선택된 챕터 이름 (상세 모달 전달용) */
   chapterName?: string
+  /** true이면 상세 모달에서 합불 변경 불가 */
+  readOnly?: boolean
   className?: string
 }
 
@@ -83,6 +85,7 @@ export function ApplicationTableSection({
   visibleFilters = DEFAULT_FILTERS,
   currentRound,
   chapterName,
+  readOnly = false,
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -349,6 +352,7 @@ export function ApplicationTableSection({
           open={detailModalOpen}
           onOpenChange={setDetailModalOpen}
           currentRound={currentRound}
+          readOnly={readOnly}
         />
       )}
     </div>
