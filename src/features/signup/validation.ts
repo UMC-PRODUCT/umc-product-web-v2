@@ -54,9 +54,7 @@ export const signUpSchemaObject = z.object({
   school: z.string().min(1, "학교를 선택해주세요."),
   name: z.string().min(1, "이름을 입력해 주세요."),
   nickname: nicknameSchema,
-  serviceAgreement: z.boolean(),
-  privacyAgreement: z.boolean(),
-  optionalAgreement: z.boolean(),
+  termsAgreements: z.record(z.coerce.number(), z.boolean()),
 })
 
 export const signUpSchema = signUpSchemaObject.refine(

@@ -18,14 +18,6 @@ const getTermTitle = (type: TermType, fallback: string): string => {
   return TERM_TITLE_MAP[type] || fallback || "이용약관 동의"
 }
 
-export const getFieldName = (
-  type: TermType,
-): "serviceAgreement" | "privacyAgreement" | "optionalAgreement" => {
-  if (type === "SERVICE") return "serviceAgreement"
-  if (type === "PRIVACY") return "privacyAgreement"
-  return "optionalAgreement"
-}
-
 interface TermsAgreementStepProps {
   terms: Term[]
   isLoading: boolean
@@ -40,19 +32,28 @@ export function TermsAgreementStep({
   const name = watch("name")
   const school = watch("school")
 
+  const termsAgreements = watch("termsAgreements") || {}
+
   const allAgreed =
-    terms.length > 0 && terms.every((term) => watch(getFieldName(term.type)))
+    terms.length > 0 && terms.every((term) => !!termsAgreements[term.id])
 
   const handleAgreeAll = (checked: boolean) => {
+    const updated = { ...termsAgreements }
     terms.forEach((term) => {
-      setValue(getFieldName(term.type), checked)
+      updated[term.id] = checked
     })
+    setValue("termsAgreements", updated, { shouldValidate: true })
   }
 
-  const toggleAgreement = (
-    key: "serviceAgreement" | "privacyAgreement" | "optionalAgreement",
-  ) => {
-    setValue(key, !watch(key))
+  const toggleAgreement = (termId: number) => {
+    setValue(
+      "termsAgreements",
+      {
+        ...termsAgreements,
+        [termId]: !termsAgreements[termId],
+      },
+      { shouldValidate: true },
+    )
   }
 
   return (
@@ -87,8 +88,7 @@ export function TermsAgreementStep({
           </p>
         ) : (
           terms.map((term) => {
-            const fieldName = getFieldName(term.type)
-            const isAgreed = watch(fieldName)
+            const isAgreed = !!termsAgreements[term.id]
             const requiredText = term.isMandatory ? "(필수)" : "(선택)"
             const title = getTermTitle(term.type, term.typeDescription)
 
@@ -96,7 +96,7 @@ export function TermsAgreementStep({
               <div key={term.id} className="flex items-center gap-2 text-left">
                 <button
                   type="button"
-                  onClick={() => toggleAgreement(fieldName)}
+                  onClick={() => toggleAgreement(term.id)}
                   className="flex items-center justify-center"
                 >
                   <CheckIcon

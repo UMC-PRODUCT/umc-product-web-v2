@@ -22,7 +22,6 @@ import {
   TermsAgreementStep,
   VerificationStep,
 } from "@/features/signup"
-import { getFieldName } from "@/features/signup/ui/TermsAgreementStep"
 import { type SignUpFormData, signUpSchema } from "@/features/signup/validation"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -326,9 +325,7 @@ function SignUpPage() {
       school: "",
       name: "",
       nickname: "",
-      serviceAgreement: false,
-      privacyAgreement: false,
-      optionalAgreement: false,
+      termsAgreements: {},
     },
   })
 
@@ -601,8 +598,7 @@ function SignUpPage() {
     }
 
     const termsAgreements = terms.map((term) => {
-      const fieldName = getFieldName(term.type)
-      const isAgreed = watch(fieldName)
+      const isAgreed = watch("termsAgreements")?.[term.id]
       return {
         termsId: term.id,
         isAgreed: !!isAgreed,
@@ -707,7 +703,7 @@ function SignUpPage() {
           : currentStep === "TERMS"
             ? terms
                 .filter((t) => t.isMandatory)
-                .some((t) => !watch(getFieldName(t.type)))
+                .some((t) => !watch("termsAgreements")?.[t.id])
             : false
 
   return (
