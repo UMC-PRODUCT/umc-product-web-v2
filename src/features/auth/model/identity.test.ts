@@ -104,6 +104,32 @@ describe("canAccessProjectSettings", () => {
       ),
     ).toBe(false)
   })
+  it("최신 기수의 part가 PLAN이 아니면 false (이전 기수 PLAN 무시)", () => {
+    expect(
+      canAccessProjectSettings(
+        makeMe(
+          ["CHALLENGER"],
+          [
+            { gisuId: "9", part: "PLAN" },
+            { gisuId: "10", part: "IOS" },
+          ],
+        ),
+      ),
+    ).toBe(false)
+  })
+  it("이전 기수가 비PLAN이어도 최신 기수가 PLAN이면 true", () => {
+    expect(
+      canAccessProjectSettings(
+        makeMe(
+          ["CHALLENGER"],
+          [
+            { gisuId: "9", part: "IOS" },
+            { gisuId: "10", part: "PLAN" },
+          ],
+        ),
+      ),
+    ).toBe(true)
+  })
 })
 
 describe("canManageProjects", () => {
@@ -111,6 +137,7 @@ describe("canManageProjects", () => {
     expect(canManageProjects(makeMe(["SCHOOL_VICE_PRESIDENT"]))).toBe(true)
     expect(canManageProjects(makeMe(["CHAPTER_PRESIDENT"]))).toBe(true)
     expect(canManageProjects(makeMe(["CENTRAL_PRESIDENT"]))).toBe(true)
+    expect(canManageProjects(makeMe(["SUPER_ADMIN"]))).toBe(true)
   })
   it("학교 파트장·기타운영진은 false(등록·관리 제외)", () => {
     expect(canManageProjects(makeMe(["SCHOOL_PART_LEADER"]))).toBe(false)
