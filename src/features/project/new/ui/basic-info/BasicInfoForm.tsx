@@ -181,32 +181,6 @@ export const BasicInfoForm = forwardRef<
     shouldFocusError: false,
   })
 
-  const validateImages = (thumbnail: unknown, logo: unknown): boolean => {
-    if (!(thumbnail instanceof File) && !uploaded.thumbnailUrl) {
-      addToast({
-        message: "프로젝트 대표 이미지를 업로드해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      setTimeout(() => thumbnailRef.current?.focus(), 0)
-      return false
-    }
-    if (!(logo instanceof File) && !uploaded.logoUrl) {
-      addToast({
-        message: "프로젝트 로고를 업로드해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      setTimeout(() => logoRef.current?.focus(), 0)
-      return false
-    }
-    return true
-  }
-
   const runReadingOrderValidation = async (): Promise<boolean> => {
     const titleOk = await trigger("title")
     if (!titleOk) {
@@ -232,8 +206,6 @@ export const BasicInfoForm = forwardRef<
       setTimeout(() => setFocus("description"), 0)
       return false
     }
-    const values = getValues()
-    if (!validateImages(values.thumbnail, values.logo)) return false
     const imagesValid = await trigger(["thumbnail", "logo"])
     if (!imagesValid) {
       addToast({
