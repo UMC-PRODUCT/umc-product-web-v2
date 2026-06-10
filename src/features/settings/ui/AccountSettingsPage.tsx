@@ -201,11 +201,22 @@ export function AccountSettingsPage() {
           </div>
 
           {/* 설정 카드 */}
-          <div className="border-teal-gray-100 mt-8 flex w-full items-start gap-2.5 rounded-xl border bg-white py-9 pl-11">
+          <div className="border-teal-gray-100 relative mt-8 flex w-full items-start gap-2.5 rounded-xl border bg-white py-9 pl-11">
             {showPasswordChange ? (
-              <ChangePasswordForm
-                onSuccess={() => setShowPasswordChange(false)}
-              />
+              <>
+                <ChangePasswordForm
+                  onSuccess={() => setShowPasswordChange(false)}
+                />
+                <Button
+                  variant="weak"
+                  color="neutral"
+                  size="s"
+                  className="absolute right-11 bottom-10 h-11"
+                  onClick={() => setShowPasswordChange(false)}
+                >
+                  이전
+                </Button>
+              </>
             ) : (
               <div className="flex w-full max-w-100 flex-col items-start gap-20">
                 <div className="flex w-full flex-col items-start gap-14">
