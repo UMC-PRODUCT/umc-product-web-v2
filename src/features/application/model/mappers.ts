@@ -184,12 +184,18 @@ export function summaryToStats(
     (p) => ({
       name: projectIdToName.get(p.projectId) ?? String(p.projectId),
       rounds: [
-        p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
-          ?.appliedMemberCount ?? 0,
-        p.matchingRounds.find((r) => r.matchingRound.phase === "SECOND")
-          ?.appliedMemberCount ?? 0,
-        p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")
-          ?.appliedMemberCount ?? 0,
+        Number(
+          p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
+            ?.appliedMemberCount ?? 0,
+        ),
+        Number(
+          p.matchingRounds.find((r) => r.matchingRound.phase === "SECOND")
+            ?.appliedMemberCount ?? 0,
+        ),
+        Number(
+          p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")
+            ?.appliedMemberCount ?? 0,
+        ),
       ],
     }),
   )
