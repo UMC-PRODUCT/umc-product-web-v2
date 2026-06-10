@@ -91,7 +91,7 @@ export function CtaModal({
               size="s"
               className="rounded-[10px]"
               isLoading={confirmLoading}
-              onClick={onConfirm}
+              onClick={confirmLoading ? undefined : onConfirm}
             >
               {confirmText}
             </Button>
