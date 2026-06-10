@@ -100,8 +100,8 @@ export function AccountSettingsPage() {
             type: "default",
             duration: 3000,
           })
-          return
         }
+        return
       }
     }
     try {
