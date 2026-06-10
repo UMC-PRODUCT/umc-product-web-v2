@@ -76,4 +76,22 @@ describe("hasGrantedResourcePermission", () => {
       }),
     ).toBe(false)
   })
+
+  it("서버가 문자열 resourceId를 반환해도 number 조회와 매칭된다 (id 타입 불일치 회귀 방지)", () => {
+    const stringIdResponses = [
+      {
+        resourceType: "PROJECT",
+        resourceId: "92",
+        permissions: [{ permissionType: "EDIT", hasPermission: true }],
+      },
+    ] as unknown as ResourcePermissionResponse[]
+
+    expect(
+      hasGrantedResourcePermission(stringIdResponses, {
+        resourceType: "PROJECT",
+        resourceId: 92,
+        permissionType: "EDIT",
+      }),
+    ).toBe(true)
+  })
 })

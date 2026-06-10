@@ -28,7 +28,7 @@ export function hasGrantedResourcePermission(
   const permissionResponse = permissionResponses?.find(
     (response) =>
       response.resourceType === params.resourceType &&
-      response.resourceId === params.resourceId,
+      String(response.resourceId) === String(params.resourceId),
   )
 
   return hasGrantedPermission(permissionResponse, params.permissionType)
