@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { useMemo } from "react"
 
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 
@@ -16,16 +17,19 @@ export function useSchools(options: UseSchoolsOptions = {}) {
     queryFn: getAllSchools,
   })
 
-  const schools =
-    query.data?.schools.map((school) => {
-      const shortName = formatSchoolName(school.schoolName)
-      return {
-        schoolId: school.schoolId,
-        schoolName: nameType === "short" ? shortName : school.schoolName,
-        originalName: school.schoolName,
-        shortName,
-      }
-    }) ?? []
+  const schools = useMemo(() => {
+    return (
+      query.data?.schools.map((school) => {
+        const shortName = formatSchoolName(school.schoolName)
+        return {
+          schoolId: school.schoolId,
+          schoolName: nameType === "short" ? shortName : school.schoolName,
+          originalName: school.schoolName,
+          shortName,
+        }
+      }) ?? []
+    )
+  }, [query.data, nameType])
 
   return {
     ...query,
