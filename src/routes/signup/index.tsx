@@ -517,10 +517,16 @@ function SignUpPage() {
   const handleSpamGuideConfirm = async () => {
     try {
       if (state.email.verificationId) {
+        dispatch({ type: "EMAIL_REQUEST_START" })
         await resendEmailVerification({
           emailVerificationId: state.email.verificationId,
         })
-        handleVerificationClick()
+        dispatch({
+          type: "EMAIL_REQUEST_SUCCESS",
+          payload: { id: state.email.verificationId, value: email },
+        })
+        setValue("code", "")
+        startVerificationTimer()
         dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: false })
       }
     } catch (err) {
@@ -532,6 +538,10 @@ function SignUpPage() {
         variant: "deep",
         type: "default",
         duration: 3000,
+      })
+      dispatch({
+        type: "EMAIL_REQUEST_FAILURE",
+        payload: { isDuplicated: false },
       })
     }
   }
