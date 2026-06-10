@@ -20,8 +20,7 @@ export function useResourcePermission(
   options?: UseResourcePermissionOptions,
 ) {
   const isAuthed = useAuthStore((s) => s.isAuthed)
-  const canRequest =
-    resourceId !== undefined || options?.allowTypeLevel === true
+  const canRequest = resourceId != null || options?.allowTypeLevel === true
   const query = useQuery({
     queryKey: [
       "authorization",
