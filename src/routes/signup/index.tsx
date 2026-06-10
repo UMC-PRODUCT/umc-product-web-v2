@@ -17,7 +17,6 @@ import { useSchools } from "@/features/auth/hooks/useSchools"
 import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
 import {
   AccountCreationStep,
-  // PhoneVerificationStep,
   ProfileInfoStep,
   TermsAgreementStep,
   VerificationStep,
@@ -444,13 +443,6 @@ function SignUpPage() {
     }, 1000)
   }
 
-  // const startPhoneVerificationTimer = () => {
-  //   if (phoneIntervalRef.current) clearInterval(phoneIntervalRef.current)
-  //   phoneIntervalRef.current = setInterval(() => {
-  //     dispatch({ type: "PHONE_TICK" })
-  //   }, 1000)
-  // }
-
   const handleVerificationClick = async () => {
     dispatch({ type: "EMAIL_REQUEST_START" })
     try {
@@ -490,30 +482,6 @@ function SignUpPage() {
     }
   }
 
-  // const handlePhoneVerificationClick = async () => {
-  //   dispatch({ type: "PHONE_REQUEST_START" })
-  //   try {
-  //     // TODO: 전화번호 인증번호 발송 API 연동 필요
-  //     dispatch({ type: "PHONE_REQUEST_SUCCESS", payload: phoneNumber })
-  //     setValue("phoneCode", "")
-  //     startPhoneVerificationTimer()
-  //   } catch (err) {
-  //     const message =
-  //       err instanceof Error ? err.message : "인증 문자 발송에 실패했습니다."
-  //     addToast({
-  //       message,
-  //       color: "red",
-  //       variant: "deep",
-  //       type: "default",
-  //       duration: 3000,
-  //     })
-  //     dispatch({
-  //       type: "PHONE_REQUEST_FAILURE",
-  //       payload: { isDuplicated: false },
-  //     })
-  //   }
-  // }
-
   const handleSpamGuideConfirm = async () => {
     try {
       if (state.email.verificationId) {
@@ -546,12 +514,6 @@ function SignUpPage() {
     }
   }
 
-  // const handlePhoneSpamGuideConfirm = async () => {
-  //   // TODO: 전화번호 인증번호 재발송 API 연동 필요
-  //   void handlePhoneVerificationClick()
-  //   dispatch({ type: "PHONE_SET_SPAM_MODAL", payload: false })
-  // }
-
   const handleCodeComplete = async () => {
     try {
       if (state.email.verificationId) {
@@ -568,15 +530,6 @@ function SignUpPage() {
       dispatch({ type: "EMAIL_CODE_CHANGE", payload: true })
     }
   }
-
-  // const handlePhoneCodeComplete = async () => {
-  //   try {
-  //     // TODO: 전화번호 인증 완료 API 연동 필요
-  //     dispatch({ type: "PHONE_VERIFIED" })
-  //   } catch {
-  //     dispatch({ type: "PHONE_CODE_CHANGE", payload: true })
-  //   }
-  // }
 
   const handleAccountCreationComplete = () => {
     dispatch({ type: "SET_PASSWORD", payload: password })
@@ -649,12 +602,9 @@ function SignUpPage() {
 
   // 각종 버튼 상태
   const isEmailValid = email !== "" && !errors.email
-  // const isPhoneValid = phoneNumber !== "" && !errors.phoneNumber
 
   const isEmailChanged =
     state.email.isCodeVisible && email !== state.email.verifiedValue
-  // const isPhoneChanged =
-  //   state.phone.isCodeVisible && phoneNumber !== state.phone.verifiedValue
 
   const verificationButtonDisabled = state.email.isRequested
     ? true
@@ -667,17 +617,6 @@ function SignUpPage() {
       ? "다시 받기"
       : "인증하기"
 
-  // const phoneVerificationButtonDisabled = state.phone.isRequested
-  //   ? true
-  //   : state.phone.hasExpiredBefore || state.phone.isCodeExpired
-  //     ? false
-  //     : !isPhoneValid || (state.phone.isCodeVisible && !isPhoneChanged)
-
-  // const phoneVerificationButtonText =
-  //   state.phone.hasExpiredBefore || state.phone.isCodeExpired
-  //     ? "다시 받기"
-  //     : "인증하기"
-
   const isPasswordValid = password !== "" && !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
 
@@ -687,7 +626,6 @@ function SignUpPage() {
   const isEmailVerified = !!state.signupData.emailVerificationToken
   const isAccountCreated =
     !!state.oAuthVerificationToken || !!state.signupData.rawPassword
-  // const isPhoneVerified = !!state.signupData.isPhoneVerified
 
   // 현재 활성 단계 결정
   const currentStep = !isEmailVerified
@@ -697,9 +635,6 @@ function SignUpPage() {
       : showTerms
         ? "TERMS"
         : "PROFILE"
-  // : !isPhoneVerified
-  //   ? "PHONE"
-  //   : "PROFILE"
 
   const nextButtonDisabled =
     currentStep === "EMAIL"
@@ -745,24 +680,6 @@ function SignUpPage() {
 
             {currentStep === "PASSWORD" && <AccountCreationStep />}
 
-            {/* {currentStep === "PHONE" && (
-              <PhoneVerificationStep
-                remainingSeconds={state.phone.remainingSeconds}
-                showVerificationSent={state.phone.showSent}
-                isCodeVisible={state.phone.isCodeVisible}
-                isCodeInvalid={state.phone.isCodeInvalid}
-                isCodeExpired={state.phone.isCodeExpired}
-                verificationButtonDisabled={phoneVerificationButtonDisabled}
-                verificationButtonText={phoneVerificationButtonText}
-                isVerificationLoading={state.phone.isLoading}
-                isPhoneDuplicated={state.phone.isDuplicated}
-                onVerificationClick={handlePhoneVerificationClick}
-                onSpamGuideClick={() =>
-                  dispatch({ type: "PHONE_SET_SPAM_MODAL", payload: true })
-                }
-              />
-            )} */}
-
             {currentStep === "PROFILE" && <ProfileInfoStep />}
 
             {currentStep === "TERMS" && (
@@ -782,8 +699,6 @@ function SignUpPage() {
                     void handleCodeComplete()
                   } else if (currentStep === "PASSWORD") {
                     handleAccountCreationComplete()
-                    // } else if (currentStep === "PHONE") {
-                    //   void handlePhoneCodeComplete()
                   } else if (currentStep === "PROFILE") {
                     setShowTerms(true)
                   } else if (currentStep === "TERMS") {
