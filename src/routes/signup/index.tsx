@@ -52,7 +52,6 @@ type SignUpState = {
   oAuthVerificationToken: string | null
   schoolList: SchoolNameItem[]
   isSignupLoading: boolean
-  isIdDuplicated: boolean
 }
 
 type SignUpAction =
@@ -67,7 +66,6 @@ type SignUpAction =
   | { type: "EMAIL_EXPIRED" }
   | { type: "EMAIL_VERIFIED"; payload: string }
   | { type: "EMAIL_SET_SPAM_MODAL"; payload: boolean }
-  | { type: "SET_ID_DUPLICATED"; payload: boolean }
   | { type: "SET_PASSWORD"; payload: string }
   | { type: "SIGNUP_START" }
   | { type: "SIGNUP_FINISH" }
@@ -94,7 +92,6 @@ const initialState: SignUpState = {
   oAuthVerificationToken: null,
   schoolList: [],
   isSignupLoading: false,
-  isIdDuplicated: false,
 }
 
 function signUpReducer(state: SignUpState, action: SignUpAction): SignUpState {
@@ -178,8 +175,6 @@ function signUpReducer(state: SignUpState, action: SignUpAction): SignUpState {
         email: { ...state.email, showSpamModal: action.payload },
       }
 
-    case "SET_ID_DUPLICATED":
-      return { ...state, isIdDuplicated: action.payload }
     case "SET_PASSWORD":
       return {
         ...state,
@@ -212,8 +207,6 @@ function SignUpPage() {
     defaultValues: {
       email: "",
       code: "",
-
-      id: "",
       password: "",
       confirmPassword: "",
       school: "",
@@ -231,7 +224,6 @@ function SignUpPage() {
   const email = watch("email")
   const code = watch("code")
 
-  const id = watch("id")
   const password = watch("password")
   const confirmPassword = watch("confirmPassword")
   const school = watch("school")
@@ -291,11 +283,6 @@ function SignUpPage() {
   useEffect(() => {
     dispatch({ type: "EMAIL_CODE_CHANGE", payload: false })
   }, [code])
-
-  // 아이디 변경 시 사이드 이펙트
-  useEffect(() => {
-    dispatch({ type: "SET_ID_DUPLICATED", payload: false })
-  }, [id])
 
   // 인증번호 타이머
   useEffect(() => {

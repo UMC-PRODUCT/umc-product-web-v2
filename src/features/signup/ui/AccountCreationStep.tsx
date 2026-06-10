@@ -1,8 +1,6 @@
-import { useEffect } from "react"
 import { useFormContext } from "react-hook-form"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
-// import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
 import {
@@ -11,40 +9,22 @@ import {
   type SignUpFormData,
 } from "../validation"
 
-// interface AccountCreationStepProps {
-//   isIdDuplicated: boolean
-//   onIdDuplicateCheck: () => void
-// }
-
-// {
-//   isIdDuplicated,
-//   onIdDuplicateCheck,
-// }: AccountCreationStepProps
 export function AccountCreationStep() {
   const {
     register,
     watch,
-    setValue,
     formState: { errors },
   } = useFormContext<SignUpFormData>()
 
   const email = watch("email")
-  const id = watch("id")
   const password = watch("password")
   const confirmPassword = watch("confirmPassword")
 
-  useEffect(() => {
-    setValue("id", email)
-  }, [email, setValue])
-
-  // const isIdValid = !errors.id
   const isPasswordValid = !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
   const hasInvalidSpecialChar =
     !!errors.password?.message?.includes("사용 가능한 특수문자")
 
-  // const idValidationState = getSimpleValidationState(id, isIdValid)
-  // const idValidationColor = getValidationColor(idValidationState)
   const passwordValidationState = hasInvalidSpecialChar
     ? "invalid"
     : getSimpleValidationState(password, isPasswordValid)
@@ -61,51 +41,13 @@ export function AccountCreationStep() {
         </div>
 
         <div className="flex items-center gap-1.5">
-          {/* <InputBox
-            {...register("id")}
-            value={id}
-            state={
-              isIdDuplicated || (id !== "" && !isIdValid) ? "error" : "default"
-            }
-            rightAdornment={<></>}
-          /> */}
           <InputBox
-            {...register("id")}
-            value={id}
+            value={email}
             state="disabled"
             rightAdornment={<></>}
             className="w-full"
           />
-          {/* <Button
-            size={"m"}
-            color={"primary"}
-            variant={"weak"}
-            disabled={!isIdValid || id === ""}
-            onClick={onIdDuplicateCheck}
-          >
-            중복 확인
-          </Button> */}
         </div>
-
-        {/* <div className="flex h-5.5 items-center gap-1">
-          {!isIdDuplicated && (
-            <>
-              <CheckIcon className={`h-4 w-4 ${idValidationColor}`} />
-              <p className={`text-body-2-medium ${idValidationColor}`}>
-                5~20자의 영문, 숫자와 특수기호(_),(-) 사용 가능
-              </p>
-            </>
-          )}
-
-          {isIdDuplicated && (
-            <>
-              <CheckIcon className="text-error-500 h-4 w-4" />
-              <p className="text-error-500 text-body-2-medium">
-                중복된 아이디입니다.
-              </p>
-            </>
-          )}
-        </div> */}
       </div>
 
       <div className="flex w-full flex-col gap-1.5">
