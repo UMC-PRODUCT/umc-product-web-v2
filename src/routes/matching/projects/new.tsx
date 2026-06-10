@@ -493,10 +493,11 @@ function ProjectRegisterPage() {
         variant="warning"
         title="페이지 이탈"
         content="저장되지 않았습니다. 저장 후 나가시겠습니까?"
-        cancelText="돌아가기"
+        cancelText="나가기"
         confirmText="저장 후 나가기"
         confirmLoading={isSavingAndLeaving}
-        onCancel={() => resetLeave?.()}
+        cancelOnDismiss={false}
+        onCancel={() => proceedLeave?.()}
         onConfirm={() => void handleSaveAndLeave()}
       />
     </section>
