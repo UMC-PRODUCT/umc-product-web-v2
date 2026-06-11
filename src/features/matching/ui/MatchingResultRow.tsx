@@ -300,6 +300,7 @@ export function MatchingResultRow({
               <ProjectDetailCard
                 projectId={projectId}
                 projectChapterId={chapterId}
+                viewOnly
               />
             )}
           </Modal.Content>
