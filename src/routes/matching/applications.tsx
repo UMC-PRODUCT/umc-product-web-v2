@@ -29,7 +29,8 @@ function MatchingApplicationsPage() {
 
   const canApprove = isOperator(me)
   const isPm = isCurrentTermPm(me)
-  const isOthers = !canApprove && !isPm
+  // TODO: 작업 완료 후 isOthers 조건으로 복구
+  // const isOthers = !canApprove && !isPm
 
   const admin = useAdminPageData(selectedChapter)
   const adminStats = admin.stats
@@ -110,7 +111,8 @@ function MatchingApplicationsPage() {
             </>
           )}
 
-          {isOthers && <MyApplicationView />}
+          {/* TODO: 테스트용 강제 렌더, 작업 완료 후 isOthers 조건으로 복구 */}
+          <MyApplicationView />
         </div>
       </div>
     </section>
