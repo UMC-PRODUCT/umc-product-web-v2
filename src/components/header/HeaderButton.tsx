@@ -45,14 +45,19 @@ export default function HeaderButton({
       >
         {label}
         {type === "trailing-icon" && (
-          <DownChevronIcon className="ml-0.5 size-4" />
+          <DownChevronIcon
+            className={cn(
+              "ml-0.5 size-4 transition-transform",
+              isOpen && "-rotate-180",
+            )}
+          />
         )}
       </button>
 
       {isOpen && (
         <div
           role="menu"
-          className="shadow-drop-neutral-1 border-teal-gray-50 fixed top-15 right-22.5 flex flex-col rounded-[8px] border bg-white p-0.5"
+          className="shadow-drop-neutral-1 border-teal-gray-50 absolute top-9 right-0 flex flex-col rounded-[8px] border bg-white p-0.5"
         >
           <div className="h-[26px] w-full px-3 pt-[7px] pb-[1px]">
             <span className="text-caption-2-medium text-teal-gray-400">
@@ -60,9 +65,28 @@ export default function HeaderButton({
             </span>
           </div>
 
-          {/* TODO: 카카오톡 채널 연동 */}
-          <KakaoChannelListItem label="UMC" />
-          <KakaoChannelListItem label="UMC PRODUCT" />
+          <KakaoChannelListItem
+            label="UMC"
+            onClick={() => {
+              window.open(
+                "https://pf.kakao.com/_xjqxcln/chat",
+                "_blank",
+                "noopener,noreferrer",
+              )
+              setIsOpen(false)
+            }}
+          />
+          <KakaoChannelListItem
+            label="UMC PRODUCT"
+            onClick={() => {
+              window.open(
+                "https://pf.kakao.com/_MDxhqX/chat",
+                "_blank",
+                "noopener,noreferrer",
+              )
+              setIsOpen(false)
+            }}
+          />
         </div>
       )}
     </div>
