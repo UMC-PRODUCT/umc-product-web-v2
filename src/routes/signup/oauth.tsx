@@ -208,8 +208,6 @@ function OAuthSignupPage() {
     defaultValues: {
       email: "",
       code: "",
-      password: "",
-      confirmPassword: "",
       school: "",
       name: "",
       nickname: "",
