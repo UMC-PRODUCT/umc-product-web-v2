@@ -40,6 +40,29 @@ const DEFAULT_PAGE = 1
 const NOTICE_PAGE_SIZE = 10
 const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
 
+const DEFAULT_MATCHING_NOTICES: NoticeItem[] = [
+  {
+    id: "default-matching-1",
+    title: "[프로덕트 팀이 작성한 FAQ예요]",
+    date: "2003.03.16",
+    chip: "필독",
+  },
+]
+
+const DEFAULT_MATCHING_CONTENTS: Record<string, string> = {
+  "default-matching-1": `Q1. 여러 프로젝트에 동시에 지원할 수 있나요? 
+A1. 동일한 매칭 차수 내에는 하나의 프로젝트에만 지원할 수 있어요. 차수가 바뀌면 다른 프로젝트에 새로 지원할 수 있어요.
+
+Q2. 같은 프로젝트에 여러 차수에 걸쳐 지원할 수 있나요?
+A2. 네, 가능해요. 1차에 지원했다가 불합격하더라도 2차, 3차에 동일한 프로젝트에 다시 지원할 수 있어요.
+
+Q3. 지원 폼 제출 후 수정이 가능한가요? 지원을 취소할 수 있나요?
+A3. 이미 제출한 지원 폼의 수정은 불가능해요. 단, 해당 매칭 차수가 종료되기 전까지는 지원 취소가 가능해요. 지원 취소 후 동일한 프로젝트에 지원 폼을 새롭게 제출할 수 있어요.
+
+Q4. 합/불 결과는 언제, 어디서 확인할 수 있나요?
+A4. 매칭 차수가 종료된 후, 웹사이트의 내 지원 현황 페이지에서 확인할 수 있어요. 차수가 진행되는 동안에는 결과가 공개되지 않아요.`,
+}
+
 type PendingNotice = {
   id: string
   title: string
@@ -176,7 +199,7 @@ function TeamMatchingAnnouncePage() {
   const canDelete = hasPermission("DELETE")
 
   const notices = useMemo(() => {
-    if (!noticesData) return []
+    if (!noticesData) return page === 1 ? DEFAULT_MATCHING_NOTICES : []
 
     const mappedNotices: NoticeItem[] = noticesData.content.map((item) => ({
       id: String(item.id),
@@ -185,12 +208,17 @@ function TeamMatchingAnnouncePage() {
       chip: item.mustRead ? "필독" : undefined,
     }))
 
-    return [...mappedNotices].sort((a, b) => {
+    const combined =
+      page === 1
+        ? [...DEFAULT_MATCHING_NOTICES, ...mappedNotices]
+        : mappedNotices
+
+    return [...combined].sort((a, b) => {
       if (a.chip === "필독" && b.chip !== "필독") return -1
       if (a.chip !== "필독" && b.chip === "필독") return 1
       return 0
     })
-  }, [noticesData])
+  }, [noticesData, page])
 
   const totalPages = noticesData?.totalPages || 1
   const safePage = Math.min(Math.max(1, page), totalPages)
@@ -326,9 +354,19 @@ function TeamMatchingAnnouncePage() {
               focusedNoticeId={focusedNoticeId}
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
-              renderContent={(noticeId) => (
-                <NoticeDetailContent noticeId={noticeId} />
-              )}
+              renderContent={(noticeId) => {
+                const defaultContent = DEFAULT_MATCHING_CONTENTS[noticeId]
+                if (defaultContent !== undefined) {
+                  return (
+                    <div className="flex flex-col gap-4">
+                      <div className="text-body-1-regular text-teal-gray-900 whitespace-pre-wrap">
+                        {defaultContent}
+                      </div>
+                    </div>
+                  )
+                }
+                return <NoticeDetailContent noticeId={noticeId} />
+              }}
             />
           </div>
         </div>

@@ -278,6 +278,7 @@ export function NoticePublishForm({
               type="text"
               name="title"
               id="title"
+              autoFocus
               className="text-heading-5-semibold placeholder-teal-gray-400 flex-1 text-teal-600 focus:outline-none"
               placeholder="제목"
               value={noticeTitle}
@@ -352,7 +353,7 @@ export function NoticePublishForm({
                   className="rounded-[10px]"
                   onClick={handleCompletionGoBack}
                 >
-                  보러가기
+                  보러 가기
                 </Button>
               </Modal.Close>
             </div>

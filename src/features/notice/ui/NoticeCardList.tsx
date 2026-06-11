@@ -99,8 +99,8 @@ export function NoticeCardList({
               date={notice.date}
               chip={notice.chip}
               variant={cardVariant}
-              canEdit={canEdit}
-              canDelete={canDelete}
+              canEdit={notice.id.startsWith("default-") ? false : canEdit}
+              canDelete={notice.id.startsWith("default-") ? false : canDelete}
               expanded={isExpanded}
               data-notice-id={notice.id}
               onExpandedChange={(nextExpanded) => {
