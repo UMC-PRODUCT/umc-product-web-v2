@@ -105,8 +105,8 @@ function getQuotaCount(
   let total = 0
   for (const q of quotas) {
     if (parts.includes(q.part)) {
-      current += q.currentCount
-      total += q.quota
+      current += Number(q.currentCount)
+      total += Number(q.quota)
     }
   }
   return { current, total }
@@ -156,7 +156,7 @@ export function toProjectApplication(
 // universities는 schoolId만 있어 이름 알 수 없으므로 호출자가 별도 주입
 export function summaryToStats(
   summary: ChapterStatisticsResponse["summary"],
-  projectIdToName: Map<number, string>,
+  projectIdToName: Map<string, string>,
   filterRound?: number, // 미지정 시 전 차수 합산
 ): Omit<ApplicationStats, "universities"> {
   // 차수별 지원 현황
@@ -183,7 +183,7 @@ export function summaryToStats(
   // 프로젝트별 차수별 지원 현황
   const projectRounds: ProjectRoundData[] = summary.projectRoundStatistics.map(
     (p) => ({
-      name: projectIdToName.get(p.projectId) ?? String(p.projectId),
+      name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
       rounds: [
         Number(
           p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
@@ -211,7 +211,7 @@ export function summaryToStats(
   const topProjects: TopProject[] = summary.projectRoundStatistics
     .map((p) => ({
       projectId: p.projectId,
-      name: projectIdToName.get(p.projectId) ?? String(p.projectId),
+      name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
       count: targetPhase
         ? Number(
             p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)
@@ -222,7 +222,9 @@ export function summaryToStats(
             0,
           ),
     }))
-    .sort((a, b) => b.count - a.count || a.projectId - b.projectId)
+    .sort(
+      (a, b) => b.count - a.count || Number(a.projectId) - Number(b.projectId),
+    )
     .slice(0, 4)
 
   return {

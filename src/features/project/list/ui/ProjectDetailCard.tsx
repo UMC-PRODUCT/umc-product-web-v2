@@ -115,8 +115,8 @@ function toMatchingProject(detail: ProjectDetail): MatchingProject {
       : null,
     recruitRows: detail.partQuotas.map((q) => ({
       part: q.part,
-      current: q.currentCount,
-      total: q.quota,
+      current: Number(q.currentCount),
+      total: Number(q.quota),
       done: q.status === "COMPLETED",
     })),
     externalLink: detail.externalLink,
