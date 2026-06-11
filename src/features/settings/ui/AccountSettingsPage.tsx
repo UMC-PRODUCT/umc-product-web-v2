@@ -140,8 +140,7 @@ export function AccountSettingsPage() {
     return { linked, onClick: linked ? onUnlink : onLink }
   }
 
-  // TODO: 로컬 계정 여부 조회 API 연결 후 동적 처리
-  const isSocialOnly = false
+  const isSocialOnly = me?.hasLocalCredential === false
 
   const emailInputClass = isSocialOnly
     ? "!text-teal-gray-700"

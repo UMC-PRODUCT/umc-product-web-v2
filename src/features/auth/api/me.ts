@@ -15,13 +15,14 @@ export interface MemberInfoResponse {
   schoolName: string
   profileImageLink: string
   status: "ACTIVE" | "INACTIVE" | "WITHDRAWN"
+  hasLocalCredential: boolean
   roles: ChallengerRoleResponse[]
   challengerRecords?: ChallengerInfoResponse[]
 }
 
 export async function getMyInfo(): Promise<MemberInfoResponse> {
   const { data } =
-    await api.get<ApiResponse<MemberInfoResponse>>("/v1/member/me")
+    await api.get<ApiResponse<MemberInfoResponse>>("/v2/member/me")
   return data.result
 }
 
