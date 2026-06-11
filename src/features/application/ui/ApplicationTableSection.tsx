@@ -17,17 +17,29 @@ import type { ApplicantDetail, ProjectApplication } from "../model/types"
 
 const ITEMS_PER_PAGE = 15
 
-const SCHOOL_OPTIONS = [
-  { value: "all", label: "전체" },
-  { value: "서경대", label: "서경대" },
-  { value: "성신여대", label: "성신여대" },
-  { value: "숭실대", label: "숭실대" },
-  { value: "안양대", label: "안양대" },
-  { value: "한양대 ERICA", label: "한양대 ERICA" },
-]
+function buildSchoolOptions(projects: ProjectApplication[]) {
+  const schools = new Set<string>()
+  for (const p of projects) {
+    for (const a of p.applicants) {
+      if (a.university) schools.add(a.university)
+    }
+  }
+  const sorted = [...schools].sort((a, b) => a.localeCompare(b, "ko"))
+  return sorted.map((s) => ({ value: s, label: s }))
+}
+
+function buildMultiSelectLabel(
+  selected: string[],
+  options: { value: string; label: string }[],
+): string | undefined {
+  if (selected.length === 0) return undefined
+  const first =
+    options.find((o) => o.value === selected[0])?.label ?? selected[0]
+  if (selected.length === 1) return first
+  return `${first} 외 ${selected.length - 1}`
+}
 
 const PART_OPTIONS = [
-  { value: "all", label: "전체" },
   { value: "plan", label: "Plan" },
   { value: "web", label: "Web" },
   { value: "ios", label: "iOS" },
@@ -37,7 +49,6 @@ const PART_OPTIONS = [
 ]
 
 const ROUND_OPTIONS = [
-  { value: "all", label: "전체" },
   { value: "1", label: "1차" },
   { value: "2", label: "2차" },
   { value: "3", label: "3차" },
@@ -45,15 +56,15 @@ const ROUND_OPTIONS = [
 
 const RECRUIT_STATUS_OPTIONS = [
   { value: "all", label: "전체" },
-  { value: "모집 중", label: "모집 중" },
-  { value: "모집 완료", label: "모집 완료" },
+  { value: "recruiting", label: "모집 중" },
+  { value: "done", label: "모집 완료" },
 ]
 
 const APPLICATION_STATUS_OPTIONS = [
   { value: "all", label: "전체" },
   { value: "pass", label: "합격" },
-  { value: "fail", label: "불합격" },
   { value: "pending", label: "대기" },
+  { value: "fail", label: "불합격" },
 ]
 
 type FilterName = "round" | "part" | "school" | "recruit" | "appStatus"
@@ -96,9 +107,9 @@ export function ApplicationTableSection({
 
   // 필터 상태
   const [openFilter, setOpenFilter] = useState<string | null>(null)
-  const [schoolFilter, setSchoolFilter] = useState("all")
-  const [partFilter, setPartFilter] = useState("all")
-  const [roundFilter, setRoundFilter] = useState("all")
+  const [schoolFilter, setSchoolFilter] = useState<string[]>([])
+  const [partFilter, setPartFilter] = useState<string[]>([])
+  const [roundFilter, setRoundFilter] = useState<string[]>([])
   const [recruitFilter, setRecruitFilter] = useState("all")
   const [appStatusFilter, setAppStatusFilter] = useState("all")
 
@@ -128,8 +139,12 @@ export function ApplicationTableSection({
       ) {
         return false
       }
-      if (recruitFilter !== "all" && p.statusLabel !== recruitFilter) {
-        return false
+      if (recruitFilter !== "all") {
+        const match =
+          recruitFilter === "recruiting"
+            ? p.statusLabel === "모집 중"
+            : p.statusLabel === "모집 완료"
+        if (!match) return false
       }
       return true
     })
@@ -156,12 +171,12 @@ export function ApplicationTableSection({
   const filterApplicants = useCallback(
     (applicants: ApplicantDetail[]) => {
       return applicants.filter((a) => {
-        if (partFilter !== "all" && a.role !== partFilter) return false
-        if (roundFilter !== "all" && a.round !== Number(roundFilter))
+        if (partFilter.length > 0 && !partFilter.includes(a.role)) return false
+        if (roundFilter.length > 0 && !roundFilter.includes(String(a.round)))
           return false
         if (appStatusFilter !== "all" && a.status !== appStatusFilter)
           return false
-        if (schoolFilter !== "all" && a.university !== schoolFilter)
+        if (schoolFilter.length > 0 && !schoolFilter.includes(a.university))
           return false
         return true
       })
@@ -169,55 +184,77 @@ export function ApplicationTableSection({
     [partFilter, roundFilter, appStatusFilter, schoolFilter],
   )
 
+  const schoolOptions = useMemo(() => buildSchoolOptions(projects), [projects])
+
   const filters: (FilterDropdownProps & { name: string })[] = useMemo(
     () => [
       {
         name: "school",
         label: "학교",
-        options: SCHOOL_OPTIONS,
-        selectedValue: schoolFilter === "all" ? undefined : schoolFilter,
+        options: schoolOptions,
+        multiSelect: true,
+        selectedValues: schoolFilter,
+        selectedLabel: buildMultiSelectLabel(schoolFilter, schoolOptions),
         open: openFilter === "school",
         onClick: () => toggleFilter("school"),
         onSelect: (v: string) => {
-          setSchoolFilter(v)
+          setSchoolFilter((prev) => {
+            const next = prev.includes(v)
+              ? prev.filter((s) => s !== v)
+              : [...prev, v]
+            return next
+          })
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
-        className: "min-w-0",
+        className: schoolFilter.length > 0 ? "w-[156px]" : "w-20",
       },
       {
         name: "part",
         label: "파트",
         options: PART_OPTIONS,
-        selectedValue: partFilter === "all" ? undefined : partFilter,
+        multiSelect: true,
+        selectedValues: partFilter,
+        selectedLabel: buildMultiSelectLabel(partFilter, PART_OPTIONS),
         open: openFilter === "part",
         onClick: () => toggleFilter("part"),
         onSelect: (v: string) => {
-          setPartFilter(v)
+          setPartFilter((prev) =>
+            prev.includes(v) ? prev.filter((s) => s !== v) : [...prev, v],
+          )
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
-        className: "min-w-0",
+        className: partFilter.length > 0 ? "w-[152px]" : "w-20",
       },
       {
         name: "round",
         label: "차수",
         options: ROUND_OPTIONS,
-        selectedValue: roundFilter === "all" ? undefined : roundFilter,
+        multiSelect: true,
+        selectedValues: roundFilter,
+        selectedLabel: buildMultiSelectLabel(roundFilter, ROUND_OPTIONS),
         open: openFilter === "round",
         onClick: () => toggleFilter("round"),
         onSelect: (v: string) => {
-          setRoundFilter(v)
+          setRoundFilter((prev) =>
+            prev.includes(v) ? prev.filter((s) => s !== v) : [...prev, v],
+          )
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
-        className: "min-w-0",
+        className: roundFilter.length > 0 ? "w-[94px]" : "w-20",
       },
       {
         name: "recruit",
         label: "모집 상태",
         options: RECRUIT_STATUS_OPTIONS,
         selectedValue: recruitFilter === "all" ? undefined : recruitFilter,
+        selectedLabel:
+          recruitFilter === "all"
+            ? undefined
+            : RECRUIT_STATUS_OPTIONS.find((o) => o.value === recruitFilter)
+                ?.label,
         open: openFilter === "recruit",
         onClick: () => toggleFilter("recruit"),
         onSelect: (v: string) => {
@@ -232,6 +269,12 @@ export function ApplicationTableSection({
         label: "지원 상태",
         options: APPLICATION_STATUS_OPTIONS,
         selectedValue: appStatusFilter === "all" ? undefined : appStatusFilter,
+        selectedLabel:
+          appStatusFilter === "all"
+            ? undefined
+            : APPLICATION_STATUS_OPTIONS.find(
+                (o) => o.value === appStatusFilter,
+              )?.label,
         open: openFilter === "appStatus",
         onClick: () => toggleFilter("appStatus"),
         onSelect: (v: string) => {
@@ -243,6 +286,7 @@ export function ApplicationTableSection({
       },
     ],
     [
+      schoolOptions,
       schoolFilter,
       partFilter,
       roundFilter,
@@ -261,7 +305,7 @@ export function ApplicationTableSection({
 
       {/* 검색 + 필터 */}
       <div className="flex items-center justify-between">
-        <div className="shadow-inner-neutral-2 bg-teal-gray-100 flex h-11 w-[456px] items-center gap-2 rounded-xl px-4">
+        <div className="shadow-inner-neutral-2 bg-teal-gray-100 flex h-11 w-114 items-center gap-2 rounded-xl px-4">
           <input
             type="text"
             placeholder={searchPlaceholder}

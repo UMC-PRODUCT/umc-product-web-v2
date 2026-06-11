@@ -3,6 +3,7 @@ import { ChevronDown } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
+import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 
 import type { AssignmentCount, Role } from "../model/types"
 
@@ -85,9 +86,7 @@ export function ProjectStatusRow({
 
         {/* 상태 */}
         <div className="flex h-12.5 w-34 items-center justify-center px-2.5">
-          <span className="text-label-2-medium shadow-drop-neutral-2 inline-flex h-6 items-center justify-center rounded-md bg-teal-100 px-2 py-0.5 text-teal-600">
-            {statusLabel}
-          </span>
+          <RecruitStatusChip done={statusLabel === "모집 완료"} size="md" />
         </div>
 
         {/* Design 배정 */}
