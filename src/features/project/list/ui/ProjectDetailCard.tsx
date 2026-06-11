@@ -406,7 +406,7 @@ export function ProjectDetailCard({
               <div className="flex w-full items-center justify-between gap-4">
                 {showLogo ? (
                   <div className="flex min-w-0 items-center gap-2">
-                    <ProjectLogo />
+                    <ProjectLogo src={detail?.logoImageUrl ?? undefined} />
                     <h2 className="text-heading-6-semibold text-teal-gray-900 line-clamp-1 w-60 min-w-0">
                       {data.title}
                     </h2>
