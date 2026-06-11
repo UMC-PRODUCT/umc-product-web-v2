@@ -29,15 +29,15 @@ type ProjectMember = {
 }
 
 export type ProjectItem = {
-  id: number | string
+  id: string
   name: string
   description: string
   thumbnailImageUrl: string | null
   productOwner: ProjectMember
   partQuotas: {
     part: ProjectPart
-    currentCount: number | string
-    quota: number | string
+    currentCount: string
+    quota: string
     status: PartQuotaStatus
   }[]
   partQuotaStatus: PartQuotaStatus
@@ -139,10 +139,10 @@ export type MyApplicationStatus =
   | "CANCELLED"
 
 export type MyProjectApplicationResponse = {
-  applicationId: number | string
-  projectId: number | string
+  applicationId: string
+  projectId: string
   matchingRound: {
-    id: number | string | null
+    id: string | null
     type: string
     phase: string
   }

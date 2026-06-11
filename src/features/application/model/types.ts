@@ -21,7 +21,7 @@ export interface RoundCount {
 }
 
 export interface TopProject {
-  projectId: number
+  projectId: string
   name: string
   count: number
 }

@@ -17,16 +17,16 @@ export type MatchingType = "PLAN_DESIGN" | "PLAN_DEVELOPER"
 
 // GET /api/v1/projects/{projectId}/applications 응답 항목
 export interface ProjectApplicantResponse {
-  applicationId: number
+  applicationId: string
   applicant: {
-    memberId: number
+    memberId: string
     nickname: string
     name: string
     schoolName: string
     part: PartEnum
   }
   matchingRound: {
-    id: number
+    id: string
     type: MatchingType
     phase: MatchingPhase
   }
@@ -42,8 +42,8 @@ export interface ProjectApplicationDetailResponse extends ProjectApplicantRespon
 
 // 지원서 폼 응답 (상세 조회 시 포함)
 export interface FormResponseData {
-  formResponseId: number
-  formId: number
+  formResponseId: string
+  formId: string
   status: "DRAFT" | "SUBMITTED"
   submittedAt: string
   lastSavedAt: string
@@ -51,7 +51,7 @@ export interface FormResponseData {
 }
 
 export interface FormSection {
-  sectionId: number
+  sectionId: string
   type: "COMMON" | "PART"
   allowedParts: PartEnum[]
   title: string
@@ -61,7 +61,7 @@ export interface FormSection {
 }
 
 export interface FormQuestion {
-  questionId: number
+  questionId: string
   type:
     | "SHORT_TEXT"
     | "LONG_TEXT"
@@ -80,18 +80,18 @@ export interface FormQuestion {
 }
 
 export interface FormQuestionOption {
-  optionId: number
+  optionId: string
   content: string
   orderNo: number
   isOther: boolean
 }
 
 export interface FormAnswer {
-  answerId: number
+  answerId: string
   answeredAsType: FormQuestion["type"]
   textValue: string | null
   selectedOptions: Array<{
-    questionOptionId: number
+    questionOptionId: string
     answeredAsContent: string
   }>
   files: Array<{
@@ -104,13 +104,13 @@ export interface FormAnswer {
 
 // GET /api/v1/projects/me/managed 응답
 export interface ManagedProjectSummaryResponse {
-  id: number
+  id: string
   name: string
   description: string
   thumbnailImageUrl: string
   status: string
   productOwner: {
-    memberId: number
+    memberId: string
     nickname: string
     name: string
     schoolName: string
@@ -121,24 +121,24 @@ export interface ManagedProjectSummaryResponse {
 
 export interface PartQuota {
   part: PartEnum
-  currentCount: number
-  quota: number
+  currentCount: string
+  quota: string
   status: "RECRUITING" | "COMPLETED"
 }
 
 // GET /api/v1/project/matching-rounds 응답 항목
 export interface MatchingRoundResponse {
-  id: number
+  id: string
   name: string
   description: string
   type: MatchingType
   phase: MatchingPhase
-  chapterId: number
+  chapterId: string
   startsAt: string
   endsAt: string
   decisionDeadline: string
   autoDecisionExecutedAt: string | null
-  autoDecisionExecutedMemberId: number | null
+  autoDecisionExecutedMemberId: string | null
   createdAt: string
   updatedAt: string
 }
@@ -150,7 +150,7 @@ export interface DecisionRequest {
 }
 
 export interface DecisionResponse {
-  applicationId: number
+  applicationId: string
   status: ApplicationStatusEnum
 }
 
@@ -181,22 +181,22 @@ export interface UpdateMatchingRoundRequest {
 
 // 통계 응답에 포함되는 매칭 차수 요약
 export interface StatMatchingRound {
-  matchingRoundId: number
+  matchingRoundId: string
   type: MatchingType
   phase: MatchingPhase
 }
 
 // ProjectMember에 포함된 지원 이력 항목
 export interface MemberApplicationSummary {
-  applicationId: number
+  applicationId: string
   status: ApplicationStatusEnum | "DRAFT"
   matchingRound: StatMatchingRound
 }
 
 // 프로젝트 멤버 (ACTIVE) + 지원 이력
 export interface ProjectMemberStat {
-  projectMemberId: number
-  memberId: number
+  projectMemberId: string
+  memberId: string
   part: PartEnum
   status: "ACTIVE"
   applications: MemberApplicationSummary[]
@@ -205,22 +205,22 @@ export interface ProjectMemberStat {
 // 차수별 지원자 수 / 지원 가능 인원
 export interface RoundApplicationStat {
   matchingRound: StatMatchingRound
-  appliedMemberCount: number
-  availableMemberCount: number
+  appliedMemberCount: string
+  availableMemberCount: string
 }
 
 // 학교별 지원자 수 (차수 단위)
 export interface SchoolApplicationStat {
   matchingRound: StatMatchingRound
   schools: Array<{
-    schoolId: number
-    applicantCount: number
+    schoolId: string
+    applicantCount: string
   }>
 }
 
 // GET /api/v1/projects/{projectId}/statistics 응답
 export interface ProjectStatisticsResponse {
-  projectId: number
+  projectId: string
   projectMembers: ProjectMemberStat[]
   roundApplicationStatistics: RoundApplicationStat[]
   schoolApplicationStatistics: SchoolApplicationStat[]
@@ -237,17 +237,17 @@ export interface ChapterStatisticsResponse {
     roundSchoolRankings: SchoolApplicationStat[]
     // 총원 N명 카드 (학교별 매칭 완료 인원)
     schoolMatchingStatistics: Array<{
-      schoolId: number
-      matchedMemberCount: number
-      totalMemberCount: number
+      schoolId: string
+      matchedMemberCount: string
+      totalMemberCount: string
     }>
     // 프로젝트별 차수별 지원 현황
     projectRoundStatistics: Array<{
-      projectId: number
+      projectId: string
       matchingRounds: Array<{
         matchingRound: StatMatchingRound
-        appliedMemberCount: number
-        matchedMemberCount: number
+        appliedMemberCount: string
+        matchedMemberCount: string
       }>
     }>
   }
@@ -256,10 +256,10 @@ export interface ChapterStatisticsResponse {
 // 페이지네이션 공통
 export interface PageResponse<T> {
   content: T[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
+  page: string
+  size: string
+  totalElements: string
+  totalPages: string
   hasNext: boolean
   hasPrevious: boolean
 }
