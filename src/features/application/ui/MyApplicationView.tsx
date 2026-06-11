@@ -1,16 +1,18 @@
-import { Popover } from "radix-ui"
+// import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 
+// import { useActiveGisuId } from "@/features/application/hooks/useApplicationPageData"
+import {
+  // getMyApplications,
+  type MyProjectApplicationResponse,
+} from "@/features/project/list/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { ProjectManagementSubTitle } from "@/features/project/management/ui/ProjectManagementSubTitle"
-import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
-import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { Modal } from "@/shared/ui/Modal"
 
 import { ApplicationProjectCard } from "./ApplicationProjectCard"
-
-import type { MyProjectApplicationResponse } from "@/features/project/list/api/matchingProject"
+import { MyApplicationMoreMenu } from "./MyApplicationMoreMenu"
 
 import type { StatusValue } from "../model/types"
 import type { ApplicationProjectCardPart } from "./ApplicationProjectCard"
@@ -60,6 +62,53 @@ function toParts(
     total: q.quota,
     done: q.status === "COMPLETED",
   }))
+}
+
+interface MyApplicationRoundSectionProps {
+  item: MyProjectApplicationResponse
+}
+
+function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
+  const [detailOpen, setDetailOpen] = useState(false)
+
+  const roundLabel = toRoundLabel(
+    item.matchingRound.type,
+    item.matchingRound.phase,
+  )
+  const status = STATUS_MAP[item.status]
+  const pmInfo = toPmInfo(item.project.productOwner)
+  const parts = toParts(item.project.partQuotas)
+
+  return (
+    <>
+      <div className="flex flex-col">
+        <ProjectManagementSubTitle title={roundLabel} className="pb-2">
+          <StatusChipTag value={status} type="tag" />
+        </ProjectManagementSubTitle>
+        <div className="flex flex-col gap-4">
+          <ApplicationProjectCard
+            projectName={item.project.name}
+            thumbnailUrl={item.project.thumbnailImageUrl ?? undefined}
+            pmInfo={pmInfo}
+            parts={parts}
+            onClick={() => setDetailOpen(true)}
+            rightAction={<MyApplicationMoreMenu item={item} />}
+          />
+        </div>
+      </div>
+
+      {/* 프로젝트 상세 (카드 클릭) */}
+      <Modal.Root open={detailOpen} onOpenChange={setDetailOpen}>
+        <Modal.Portal>
+          <Modal.Overlay tone="deep" />
+          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
+            <Modal.Title className="sr-only">{item.project.name}</Modal.Title>
+            <ProjectDetailCard projectId={item.projectId} />
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
+    </>
+  )
 }
 
 // TODO: API 연동 후 제거
@@ -129,98 +178,17 @@ const MOCK_DATA: MyProjectApplicationResponse[] = [
   },
 ]
 
-interface MyApplicationRoundSectionProps {
-  item: MyProjectApplicationResponse
-}
+export function MyApplicationView() {
+  // TODO: API 연동 시 아래 주석 해제 후 MOCK_DATA 제거
+  // const { data: gisuId } = useActiveGisuId()
+  // const { data: applications, isLoading } = useQuery({
+  //   queryKey: ["myApplications", gisuId],
+  //   queryFn: () => getMyApplications(gisuId!),
+  //   enabled: gisuId != null,
+  // })
 
-function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
-  const [popoverOpen, setPopoverOpen] = useState(false)
-  const [detailOpen, setDetailOpen] = useState(false)
+  const applications = MOCK_DATA
 
-  const roundLabel = toRoundLabel(
-    item.matchingRound.type,
-    item.matchingRound.phase,
-  )
-  const status = STATUS_MAP[item.status]
-  const pmInfo = toPmInfo(item.project.productOwner)
-  const parts = toParts(item.project.partQuotas)
-
-  return (
-    <>
-      <div className="flex flex-col">
-        <ProjectManagementSubTitle title={roundLabel} className="pb-2">
-          <StatusChipTag value={status} type="tag" />
-        </ProjectManagementSubTitle>
-        <div className="flex flex-col gap-4">
-          <ApplicationProjectCard
-            projectName={item.project.name}
-            thumbnailUrl={item.project.thumbnailImageUrl ?? undefined}
-            pmInfo={pmInfo}
-            parts={parts}
-            onClick={() => setDetailOpen(true)}
-            rightAction={
-              <Popover.Root open={popoverOpen} onOpenChange={setPopoverOpen}>
-                <Popover.Trigger asChild>
-                  <MoreVerticalIcon />
-                </Popover.Trigger>
-                <Popover.Portal>
-                  <Popover.Content
-                    side="bottom"
-                    align="end"
-                    sideOffset={10}
-                    avoidCollisions={false}
-                    onOpenAutoFocus={(e) => e.preventDefault()}
-                    className="shadow-drop-neutral-1 border-teal-gray-50 z-[1100] flex w-[9.5rem] flex-col items-start gap-1 rounded-lg border bg-white px-0.5 pt-2.5 pb-0.5"
-                  >
-                    <span className="text-label-3-semibold text-teal-gray-400 px-4">
-                      바로가기
-                    </span>
-                    <div className="flex w-full flex-col">
-                      <DropdownItem
-                        label="내 지원서 보기"
-                        onClick={() => {
-                          setPopoverOpen(false)
-                          setDetailOpen(true)
-                        }}
-                      />
-                      <DropdownItem
-                        label="기획 보기"
-                        onClick={() => setPopoverOpen(false)}
-                      />
-                      <DropdownItem
-                        label="지원 취소"
-                        onClick={() => setPopoverOpen(false)}
-                        className="text-error-500"
-                      />
-                    </div>
-                  </Popover.Content>
-                </Popover.Portal>
-              </Popover.Root>
-            }
-          />
-        </div>
-      </div>
-
-      <Modal.Root open={detailOpen} onOpenChange={setDetailOpen}>
-        <Modal.Portal>
-          <Modal.Overlay tone="deep" />
-          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            <Modal.Title className="sr-only">{item.project.name}</Modal.Title>
-            <ProjectDetailCard projectId={item.projectId} />
-          </Modal.Content>
-        </Modal.Portal>
-      </Modal.Root>
-    </>
-  )
-}
-
-interface MyApplicationViewProps {
-  applications?: MyProjectApplicationResponse[]
-}
-
-export function MyApplicationView({
-  applications = MOCK_DATA,
-}: MyApplicationViewProps) {
   return (
     <div className="flex flex-col gap-10">
       {applications.map((item) => (
