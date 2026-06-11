@@ -62,12 +62,17 @@ function KakaoCallbackPage() {
 
     void (async () => {
       try {
+        const keepLoggedInStr = sessionStorage.getItem("kakao_keep_logged_in")
+        const keepLoggedIn =
+          keepLoggedInStr !== null ? keepLoggedInStr === "true" : undefined
+        sessionStorage.removeItem("kakao_keep_logged_in")
+
         const res = await loginWithKakao({
           authorizationCode: code,
           redirectUri: getKakaoRedirectUri(),
         })
         if (!isActiveRef.current) return
-        const result = handleLoginResponse(res)
+        const result = handleLoginResponse(res, keepLoggedIn)
         if (result === "LOGIN_SUCCESS") {
           void navigate({ to: "/" })
         } else {

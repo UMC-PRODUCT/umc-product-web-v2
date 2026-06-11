@@ -59,11 +59,11 @@ function DefaultLoginPage() {
     try {
       const { authorizationCode } = await signInWithApple()
       const res = await loginWithApple({ authorizationCode })
-      const result = handleLoginResponse(res)
+      const result = handleLoginResponse(res, isKeepLoggedIn)
       if (result === "LOGIN_SUCCESS") {
-        void navigate({ to: "/" })
+        await navigate({ to: "/" })
       } else {
-        void navigate({ to: "/signup/oauth" })
+        await navigate({ to: "/signup/oauth" })
       }
     } catch (error) {
       if (isApplePopupCancelled(error)) return
@@ -75,11 +75,11 @@ function DefaultLoginPage() {
     try {
       const { accessToken } = await signInWithGoogle()
       const res = await loginWithGoogle({ accessToken })
-      const result = handleLoginResponse(res)
+      const result = handleLoginResponse(res, isKeepLoggedIn)
       if (result === "LOGIN_SUCCESS") {
-        void navigate({ to: "/" })
+        await navigate({ to: "/" })
       } else {
-        void navigate({ to: "/signup/oauth" })
+        await navigate({ to: "/signup/oauth" })
       }
     } catch (error) {
       if (isGooglePopupCancelled(error)) return
@@ -89,6 +89,7 @@ function DefaultLoginPage() {
 
   const handleKakaoSignIn = () => {
     try {
+      sessionStorage.setItem("kakao_keep_logged_in", String(isKeepLoggedIn))
       startKakaoSignIn()
     } catch (error) {
       console.error("[Kakao Sign-In]", error)
@@ -104,12 +105,15 @@ function DefaultLoginPage() {
 
     try {
       const res = await loginWithEmail({ email, password, clientType: "WEB" })
-      useAuthStore.getState().setTokens({
-        accessToken: res.accessToken,
-        refreshToken: res.refreshToken,
-        memberId: res.memberId,
-      })
-      void navigate({ to: "/" })
+      useAuthStore.getState().setTokens(
+        {
+          accessToken: res.accessToken,
+          refreshToken: res.refreshToken,
+          memberId: res.memberId,
+        },
+        isKeepLoggedIn,
+      )
+      await navigate({ to: "/" })
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.")
@@ -146,7 +150,7 @@ function DefaultLoginPage() {
 
                 <Input
                   variant={"password"}
-                  placeholder={"Password"}
+                  placeholder={"비밀번호"}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value)

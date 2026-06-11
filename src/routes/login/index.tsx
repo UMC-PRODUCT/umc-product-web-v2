@@ -48,9 +48,9 @@ function SocialLoginPage() {
       const res = await loginWithApple({ authorizationCode })
       const result = handleLoginResponse(res)
       if (result === "LOGIN_SUCCESS") {
-        void navigate({ to: "/" })
+        await navigate({ to: "/" })
       } else {
-        void navigate({ to: "/signup/oauth" })
+        await navigate({ to: "/signup/oauth" })
       }
     } catch (error) {
       if (isApplePopupCancelled(error)) return
@@ -64,9 +64,9 @@ function SocialLoginPage() {
       const res = await loginWithGoogle({ accessToken })
       const result = handleLoginResponse(res)
       if (result === "LOGIN_SUCCESS") {
-        void navigate({ to: "/" })
+        await navigate({ to: "/" })
       } else {
-        void navigate({ to: "/signup/oauth" })
+        await navigate({ to: "/signup/oauth" })
       }
     } catch (error) {
       if (isGooglePopupCancelled(error)) return
