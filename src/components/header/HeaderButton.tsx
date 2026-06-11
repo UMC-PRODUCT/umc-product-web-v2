@@ -65,9 +65,28 @@ export default function HeaderButton({
             </span>
           </div>
 
-          {/* TODO: 카카오톡 채널 연동 */}
-          <KakaoChannelListItem label="UMC" />
-          <KakaoChannelListItem label="UMC PRODUCT" />
+          <KakaoChannelListItem
+            label="UMC"
+            onClick={() => {
+              window.open(
+                "https://pf.kakao.com/_xjqxcln/chat",
+                "_blank",
+                "noopener,noreferrer",
+              )
+              setIsOpen(false)
+            }}
+          />
+          <KakaoChannelListItem
+            label="UMC PRODUCT"
+            onClick={() => {
+              window.open(
+                "http://pf.kakao.com/_MDxhqX/chat",
+                "_blank",
+                "noopener,noreferrer",
+              )
+              setIsOpen(false)
+            }}
+          />
         </div>
       )}
     </div>
