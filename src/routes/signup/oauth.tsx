@@ -230,6 +230,7 @@ function OAuthSignupPage() {
   const nickname = watch("nickname")
 
   const [state, dispatch] = useReducer(signUpReducer, initialState)
+  const isEmailVerified = !!state.signupData.emailVerificationToken
   const [showTerms, setShowTerms] = useState(false)
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
 
@@ -285,6 +286,14 @@ function OAuthSignupPage() {
 
   // 인증번호 타이머
   useEffect(() => {
+    if (isEmailVerified) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+      return
+    }
+
     if (state.email.remainingSeconds <= 0 && intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
@@ -292,7 +301,7 @@ function OAuthSignupPage() {
         dispatch({ type: "EMAIL_EXPIRED" })
       }
     }
-  }, [state.email.remainingSeconds, state.email.isCodeVisible])
+  }, [state.email.remainingSeconds, state.email.isCodeVisible, isEmailVerified])
 
   const startVerificationTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -487,7 +496,6 @@ function OAuthSignupPage() {
   const isNicknameValid = nickname !== "" && !errors.nickname
 
   // 단계별 완료 여부 (상태 A에서 유도)
-  const isEmailVerified = !!state.signupData.emailVerificationToken
 
   // 현재 활성 단계 결정
   const currentStep = !isEmailVerified
