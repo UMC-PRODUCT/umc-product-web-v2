@@ -614,7 +614,7 @@ export function ProjectDetailCard({
       <Modal.Root open={isTeamModalOpen} onOpenChange={setIsTeamModalOpen}>
         <Modal.Portal>
           <Modal.Overlay tone="light" />
-          <Modal.Content>
+          <Modal.Content aria-describedby={undefined}>
             <Modal.Title className="sr-only">팀원 구성</Modal.Title>
             <TeamMemberModal
               projectId={projectId}
@@ -631,7 +631,7 @@ export function ProjectDetailCard({
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content>
+          <Modal.Content aria-describedby={undefined}>
             {showFormSkeleton ? (
               <ApplyFormSkeleton />
             ) : applicationForm == null ? (
@@ -651,6 +651,7 @@ export function ProjectDetailCard({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content
+            aria-describedby={undefined}
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
@@ -688,7 +689,7 @@ export function ProjectDetailCard({
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content>
+          <Modal.Content aria-describedby={undefined}>
             {myApplicationForProject ? (
               <MyApplicationModal
                 data={data}
