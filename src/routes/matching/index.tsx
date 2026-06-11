@@ -40,6 +40,29 @@ const DEFAULT_PAGE = 1
 const NOTICE_PAGE_SIZE = 10
 const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
 
+const DEFAULT_MATCHING_NOTICES: NoticeItem[] = [
+  {
+    id: "default-matching-1",
+    title: "[프로덕트 팀이 작성한 FAQ예요.]",
+    date: "2003.03.16",
+    chip: "필독",
+  },
+]
+
+const DEFAULT_MATCHING_CONTENTS: Record<string, string> = {
+  "default-matching-1": `Q1. 프로젝트 등록 후 수정이 가능한가요? 매칭 진행 중에도 지원 폼 문항을 수정할 수 있나요?
+A1. 매칭이 진행되는 동안에는 프로젝트 정보와 지원 폼 문항 수정이 제한돼요. 차수가 끝나고 다음 차수가 시작되기 전 사이 기간에는 자유롭게 수정할 수 있어요.
+
+Q2. 지원 폼 문항을 수정하면 어떻게 되나요?
+A2. 즉, Plan 챌린저가 문항을 수정하면 차수에 따라 지원자에게 보이는 문항이 달라지고 Plan 챌린저 또한 차수별로 서로 다른 문항 구성의 지원서를 검토하게 돼요. 매칭이 진행되는 동안에는 지원 폼 문항을 수정할 수 없다는 점 유의해 주세요!
+
+Q3. 지원자 합/불 처리는 언제부터 가능한가요? 한 번 불합격 처리한 지원자를 다시 합격으로 바꿀 수 있나요?
+A3. 지원자 합/불 처리는 해당 차수가 종료된 후부터 다음 차수가 시작되기 전까지 가능해요. 이 기간 안에는 합/불 상태를 자유롭게 변경할 수 있어요. 단, 다음 차수가 시작되면 결정을 번복할 수 없어요.
+
+Q4. 지원자가 아무도 없는 파트는 어떻게 처리되나요?
+A4. 1차, 2차, 3차 매칭을 거쳐도 TO가 채워지지 않은 파트는 랜덤으로 팀원이 배정될 예정이에요.`,
+}
+
 type PendingNotice = {
   id: string
   title: string
@@ -176,7 +199,7 @@ function TeamMatchingAnnouncePage() {
   const canDelete = hasPermission("DELETE")
 
   const notices = useMemo(() => {
-    if (!noticesData) return []
+    if (!noticesData) return page === 1 ? DEFAULT_MATCHING_NOTICES : []
 
     const mappedNotices: NoticeItem[] = noticesData.content.map((item) => ({
       id: String(item.id),
@@ -185,12 +208,17 @@ function TeamMatchingAnnouncePage() {
       chip: item.mustRead ? "필독" : undefined,
     }))
 
-    return [...mappedNotices].sort((a, b) => {
+    const combined =
+      page === 1
+        ? [...DEFAULT_MATCHING_NOTICES, ...mappedNotices]
+        : mappedNotices
+
+    return [...combined].sort((a, b) => {
       if (a.chip === "필독" && b.chip !== "필독") return -1
       if (a.chip !== "필독" && b.chip === "필독") return 1
       return 0
     })
-  }, [noticesData])
+  }, [noticesData, page])
 
   const totalPages = noticesData?.totalPages || 1
   const safePage = Math.min(Math.max(1, page), totalPages)
@@ -326,9 +354,18 @@ function TeamMatchingAnnouncePage() {
               focusedNoticeId={focusedNoticeId}
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
-              renderContent={(noticeId) => (
-                <NoticeDetailContent noticeId={noticeId} />
-              )}
+              renderContent={(noticeId) => {
+                if (noticeId in DEFAULT_MATCHING_CONTENTS) {
+                  return (
+                    <div className="flex flex-col gap-4">
+                      <div className="text-body-1-regular text-teal-gray-900 whitespace-pre-wrap">
+                        {DEFAULT_MATCHING_CONTENTS[noticeId]}
+                      </div>
+                    </div>
+                  )
+                }
+                return <NoticeDetailContent noticeId={noticeId} />
+              }}
             />
           </div>
         </div>
