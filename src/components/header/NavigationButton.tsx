@@ -23,7 +23,7 @@ export default function NavigationButton({
         "flex h-9 min-w-18 items-center justify-center rounded-full px-4.5 py-1.5 transition-colors",
         selected
           ? "text-subtitle-3-semibold bg-teal-100 text-teal-600"
-          : "bg-teal-gray-50 text-body-1-medium text-teal-gray-600",
+          : "text-body-1-medium text-teal-gray-600",
         !disabled &&
           !selected &&
           "hover:bg-teal-gray-100 hover:shadow-inner-neutral-3",
