@@ -80,7 +80,7 @@ export default function HeaderButton({
             label="UMC PRODUCT"
             onClick={() => {
               window.open(
-                "http://pf.kakao.com/_MDxhqX/chat",
+                "https://pf.kakao.com/_MDxhqX/chat",
                 "_blank",
                 "noopener,noreferrer",
               )
