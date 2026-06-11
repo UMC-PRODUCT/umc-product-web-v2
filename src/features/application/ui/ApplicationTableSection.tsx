@@ -17,6 +17,16 @@ import type { ApplicantDetail, ProjectApplication } from "../model/types"
 
 const ITEMS_PER_PAGE = 15
 
+/** 학교명 약칭 변환 (UI에 "~학교" 붙지 않음) */
+function shortenSchoolName(name: string): string {
+  return name
+    .replace(/캠퍼스/, "")
+    .replace(/외국어대학교/, "외대")
+    .replace(/여자대학교/, "여대")
+    .replace(/대학교/, "대")
+    .replace(/학교$/, "")
+}
+
 function buildSchoolOptions(projects: ProjectApplication[]) {
   const schools = new Set<string>()
   for (const p of projects) {
@@ -25,7 +35,7 @@ function buildSchoolOptions(projects: ProjectApplication[]) {
     }
   }
   const sorted = [...schools].sort((a, b) => a.localeCompare(b, "ko"))
-  return sorted.map((s) => ({ value: s, label: s }))
+  return sorted.map((s) => ({ value: s, label: shortenSchoolName(s) }))
 }
 
 function buildMultiSelectLabel(
@@ -40,7 +50,6 @@ function buildMultiSelectLabel(
 }
 
 const PART_OPTIONS = [
-  { value: "plan", label: "Plan" },
   { value: "web", label: "Web" },
   { value: "ios", label: "iOS" },
   { value: "android", label: "Android" },
@@ -208,6 +217,7 @@ export function ApplicationTableSection({
         },
         onRequestClose: closeFilter,
         className: schoolFilter.length > 0 ? "w-[156px]" : "w-20",
+        dropdownClassName: "!min-w-[156px] w-[156px]",
       },
       {
         name: "part",
@@ -226,6 +236,7 @@ export function ApplicationTableSection({
         },
         onRequestClose: closeFilter,
         className: partFilter.length > 0 ? "w-[152px]" : "w-20",
+        dropdownClassName: "!min-w-[152px] w-[152px]",
       },
       {
         name: "round",
@@ -244,6 +255,7 @@ export function ApplicationTableSection({
         },
         onRequestClose: closeFilter,
         className: roundFilter.length > 0 ? "w-[94px]" : "w-20",
+        dropdownClassName: "!min-w-[94px] w-[94px]",
       },
       {
         name: "recruit",
@@ -262,7 +274,8 @@ export function ApplicationTableSection({
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
-        className: "min-w-0",
+        className: "w-[114px]",
+        dropdownClassName: "!min-w-[114px] w-[114px]",
       },
       {
         name: "appStatus",
@@ -282,7 +295,8 @@ export function ApplicationTableSection({
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
-        className: "min-w-0",
+        className: "w-[102px]",
+        dropdownClassName: "!min-w-[102px] w-[102px]",
       },
     ],
     [
