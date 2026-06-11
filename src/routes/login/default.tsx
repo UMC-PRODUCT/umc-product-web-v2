@@ -59,7 +59,7 @@ function DefaultLoginPage() {
     try {
       const { authorizationCode } = await signInWithApple()
       const res = await loginWithApple({ authorizationCode })
-      const result = handleLoginResponse(res)
+      const result = handleLoginResponse(res, isKeepLoggedIn)
       if (result === "LOGIN_SUCCESS") {
         await navigate({ to: "/" })
       } else {
@@ -75,7 +75,7 @@ function DefaultLoginPage() {
     try {
       const { accessToken } = await signInWithGoogle()
       const res = await loginWithGoogle({ accessToken })
-      const result = handleLoginResponse(res)
+      const result = handleLoginResponse(res, isKeepLoggedIn)
       if (result === "LOGIN_SUCCESS") {
         await navigate({ to: "/" })
       } else {
@@ -89,6 +89,7 @@ function DefaultLoginPage() {
 
   const handleKakaoSignIn = () => {
     try {
+      sessionStorage.setItem("kakao_keep_logged_in", String(isKeepLoggedIn))
       startKakaoSignIn()
     } catch (error) {
       console.error("[Kakao Sign-In]", error)
@@ -104,11 +105,14 @@ function DefaultLoginPage() {
 
     try {
       const res = await loginWithEmail({ email, password, clientType: "WEB" })
-      useAuthStore.getState().setTokens({
-        accessToken: res.accessToken,
-        refreshToken: res.refreshToken,
-        memberId: res.memberId,
-      })
+      useAuthStore.getState().setTokens(
+        {
+          accessToken: res.accessToken,
+          refreshToken: res.refreshToken,
+          memberId: res.memberId,
+        },
+        isKeepLoggedIn,
+      )
       await navigate({ to: "/" })
     } catch (error) {
       if (axios.isAxiosError(error)) {
