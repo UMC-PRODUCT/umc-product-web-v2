@@ -122,7 +122,6 @@ export function ProfileDropdown({
                     <GenerationListItem
                       key={record.challengerId}
                       generation={Number(record.gisu)}
-                      year={2026} // API에서 연도 정보를 제공하지 않으므로 임시값 사용
                       active={index === 0} // 현재는 첫 번째 항목을 활성 상태로 표시
                       className="w-full"
                     />
