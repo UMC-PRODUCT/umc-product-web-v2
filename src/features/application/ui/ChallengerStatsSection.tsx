@@ -4,7 +4,7 @@ import { cn } from "@/shared/lib/utils"
 import { RankBar } from "./RankBar"
 import { RoundDonutChart } from "./RoundDonutChart"
 
-import type { ChallengerStats } from "../model/challengerMock"
+import type { ChallengerStats } from "../model/types"
 
 const ROUND_COLORS = [
   "#81D3C9",
