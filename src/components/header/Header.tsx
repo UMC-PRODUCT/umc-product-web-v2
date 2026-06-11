@@ -22,8 +22,8 @@ const BASE_NAV: NavItem[] = [
 ]
 
 const MANAGE_NAV: NavItem = {
-  label: "모집 관리",
-  to: "/management",
+  label: "리크루팅",
+  to: "recruiting",
   disabled: true,
 }
 
