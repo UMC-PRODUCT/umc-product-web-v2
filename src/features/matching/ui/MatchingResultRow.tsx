@@ -296,7 +296,13 @@ export function MatchingResultRow({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
-            {projectId && <ProjectDetailCard projectId={projectId} />}
+            {projectId && (
+              <ProjectDetailCard
+                projectId={projectId}
+                projectChapterId={chapterId}
+                viewOnly
+              />
+            )}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>

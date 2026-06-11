@@ -14,7 +14,11 @@ frontend:
   artifacts:
     baseDirectory: dist
     files:
-      - '**/*'
+      - "**/*"
   cache:
     paths:
       - .pnpm-store/**/*
+  customRules:
+    - source: /<*>
+      target: /index.html
+      status: "200"

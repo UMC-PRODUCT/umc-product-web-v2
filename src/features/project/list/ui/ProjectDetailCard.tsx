@@ -50,12 +50,16 @@ interface ProjectDetailCardProps {
   showEditCta?: boolean
   canEditProject?: boolean
   editPermissionLoading?: boolean
+  /** 프로젝트가 속한 지부 ID. 제공 시 본인 지부 일치 여부를 실제 비교 */
+  projectChapterId?: number
+  /** 매칭현황 등 조회 전용 컨텍스트. PM/Others는 기획 보기만 노출 */
+  viewOnly?: boolean
 }
 
 function ProjectDetailCardSkeleton() {
   return (
-    <div className="flex w-[33.75rem] flex-col items-start overflow-hidden rounded-2xl bg-white">
-      <div className="bg-teal-gray-200 h-[17.875rem] w-[33.75rem] animate-pulse" />
+    <div className="flex w-135 flex-col items-start overflow-hidden rounded-2xl bg-white">
+      <div className="bg-teal-gray-200 h-71.5 w-135 animate-pulse" />
       <div className="flex w-full flex-col items-start p-5">
         <div className="flex w-full flex-col items-start gap-6">
           <div className="flex w-full flex-col items-start gap-2.5">
@@ -125,6 +129,8 @@ export function ProjectDetailCard({
   showEditCta = false,
   canEditProject,
   editPermissionLoading,
+  projectChapterId,
+  viewOnly = false,
 }: ProjectDetailCardProps) {
   const projectId = Number(projectIdProp)
   const navigate = useNavigate()
@@ -276,7 +282,11 @@ export function ProjectDetailCard({
     addToast,
   ])
 
-  const isSameBranch = !userIsOperator
+  const isSameBranch = userIsOperator
+    ? true
+    : projectChapterId != null && myChapterId != null
+      ? projectChapterId === myChapterId
+      : true
   const isChallengerView = !userIsOperator && !userIsPm
 
   const devMatchingRoundId =
@@ -307,14 +317,24 @@ export function ProjectDetailCard({
     )
   }, [myApplications, activeMatchingRound, projectId])
 
-  const ctaMode = resolveProjectDetailCtaMode({
-    isOperator: userIsOperator,
-    isPm: userIsPm,
-    isSameBranch,
-    isApplied,
-    hasOtherActiveApplication,
-    isAlreadyApproved,
-  })
+  const ctaMode =
+    viewOnly && !userIsOperator
+      ? resolveProjectDetailCtaMode({
+          isOperator: false,
+          isPm: false,
+          isSameBranch,
+          isApplied,
+          hasOtherActiveApplication,
+          isAlreadyApproved,
+        })
+      : resolveProjectDetailCtaMode({
+          isOperator: userIsOperator,
+          isPm: userIsPm,
+          isSameBranch,
+          isApplied,
+          hasOtherActiveApplication,
+          isAlreadyApproved,
+        })
 
   const cover: ProjectCoverImage | null = detail?.thumbnailImageUrl
     ? { src: detail.thumbnailImageUrl }
@@ -383,7 +403,7 @@ export function ProjectDetailCard({
                     key={row.part}
                     className="flex w-full items-center justify-between"
                   >
-                    <div className="flex w-[7.625rem] items-center justify-between">
+                    <div className="flex w-30.5 items-center justify-between">
                       <span className="text-body-2-medium text-teal-gray-700">
                         {row.part}
                       </span>
@@ -403,7 +423,10 @@ export function ProjectDetailCard({
           <div className="mt-8.5 flex w-full items-start gap-2.5">
             <TeamMemberButton
               variant="weak"
-              onClick={() => setIsTeamModalOpen(true)}
+              onClick={
+                userIsOperator ? () => setIsTeamModalOpen(true) : undefined
+              }
+              disabled={!userIsOperator}
             />
             <Button
               variant="weak"
@@ -466,19 +489,39 @@ export function ProjectDetailCard({
                   </Button>
                 )}
                 {ctaMode === "apply" &&
-                  (isApplicationWritePermissionLoading ||
-                    canWriteProjectApplication) && (
+                  (viewOnly && userIsPm
+                    ? true
+                    : isApplicationWritePermissionLoading ||
+                      canWriteProjectApplication) && (
                     <Button
                       className="flex-1"
                       isLoading={
-                        isDetailLoading || isApplicationWritePermissionLoading
+                        !(viewOnly && userIsPm) &&
+                        (isDetailLoading || isApplicationWritePermissionLoading)
                       }
                       disabled={
-                        (!isDetailLoading && !detail?.applicationFormId) ||
-                        isApplicationWritePermissionLoading ||
-                        !canWriteProjectApplication
+                        !(viewOnly && userIsPm) &&
+                        ((!isDetailLoading && !detail?.applicationFormId) ||
+                          isApplicationWritePermissionLoading ||
+                          !canWriteProjectApplication)
                       }
                       onClick={() => {
+                        if (viewOnly && userIsPm) {
+                          // PM 읽기 전용: 모집 문항 보기 모달로 열기
+                          if (!detail?.applicationFormId) {
+                            addToast({
+                              message:
+                                "지원 양식이 등록되지 않은 프로젝트입니다.",
+                              color: "red",
+                              variant: "deep",
+                              type: "default",
+                              duration: 3000,
+                            })
+                            return
+                          }
+                          setIsRecruitQuestionsModalOpen(true)
+                          return
+                        }
                         if (
                           isApplicationWritePermissionLoading ||
                           !canWriteProjectApplication
@@ -514,17 +557,42 @@ export function ProjectDetailCard({
                 {(ctaMode === "apply-blocked-other" ||
                   ctaMode === "apply-blocked-approved") && (
                   <>
+                    {!viewOnly && (
+                      <Button
+                        variant="weak"
+                        color="primary"
+                        className="flex-1"
+                        isLoading={isDetailLoading}
+                        disabled={
+                          !isDetailLoading && !detail?.applicationFormId
+                        }
+                        onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                      >
+                        모집 문항 보기
+                      </Button>
+                    )}
                     <Button
-                      variant="weak"
-                      color="primary"
                       className="flex-1"
-                      isLoading={isDetailLoading}
-                      disabled={!isDetailLoading && !detail?.applicationFormId}
-                      onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                      disabled={!viewOnly}
+                      onClick={
+                        viewOnly
+                          ? () => {
+                              if (!detail?.applicationFormId) {
+                                addToast({
+                                  message:
+                                    "지원 양식이 등록되지 않은 프로젝트입니다.",
+                                  color: "red",
+                                  variant: "deep",
+                                  type: "default",
+                                  duration: 3000,
+                                })
+                                return
+                              }
+                              setIsRecruitQuestionsModalOpen(true)
+                            }
+                          : undefined
+                      }
                     >
-                      모집 문항 보기
-                    </Button>
-                    <Button className="flex-1" disabled>
                       지원하기
                     </Button>
                   </>
@@ -532,12 +600,12 @@ export function ProjectDetailCard({
               </>
             )}
           </div>
-          {ctaMode === "apply-blocked-other" && (
+          {!viewOnly && ctaMode === "apply-blocked-other" && (
             <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
               이번 차수에 이미 다른 프로젝트에 지원하여 지원할 수 없습니다.
             </p>
           )}
-          {ctaMode === "apply-blocked-approved" && (
+          {!viewOnly && ctaMode === "apply-blocked-approved" && (
             <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
               이미 합격한 챌린저는 추가로 지원할 수 없습니다.
             </p>
