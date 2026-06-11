@@ -114,7 +114,10 @@ export function ProjectManagementCard({
       <Modal.Root open={open} onOpenChange={setOpen}>
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
+          <Modal.Content
+            className="shadow-drop-neutral-3 rounded-2xl"
+            aria-describedby={undefined}
+          >
             <Modal.Title className="sr-only">{data.title}</Modal.Title>
             <ProjectDetailCard
               projectId={Number(data.id)}
