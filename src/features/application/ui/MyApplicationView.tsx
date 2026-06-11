@@ -157,6 +157,7 @@ function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
             thumbnailUrl={item.project.thumbnailImageUrl ?? undefined}
             pmInfo={pmInfo}
             parts={parts}
+            onClick={() => setDetailOpen(true)}
             rightAction={
               <Popover.Root open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <Popover.Trigger asChild>
