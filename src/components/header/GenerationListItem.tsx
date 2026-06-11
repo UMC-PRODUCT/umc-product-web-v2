@@ -3,14 +3,12 @@ import { cn } from "@/shared/lib/utils"
 
 interface GenerationListItemProps extends React.ComponentProps<"button"> {
   generation: number
-  year: number
   active?: boolean
   onClick?: () => void
 }
 
 export default function GenerationListItem({
   generation,
-  year,
   active = false,
   onClick,
   className,
@@ -26,7 +24,7 @@ export default function GenerationListItem({
       )}
     >
       {active && <CheckIcon className="mr-0.5 size-4 shrink-0 text-teal-600" />}
-      <div className="flex flex-1 items-center justify-between">
+      <div className="flex flex-1">
         <span
           className={cn(
             "text-body-3-regular",
@@ -34,14 +32,6 @@ export default function GenerationListItem({
           )}
         >
           {generation}기
-        </span>
-        <span
-          className={cn(
-            "text-[8px] leading-[1.6] font-medium tracking-[-0.16px]",
-            active ? "text-teal-500" : "text-teal-gray-300",
-          )}
-        >
-          {year}
         </span>
       </div>
     </button>
