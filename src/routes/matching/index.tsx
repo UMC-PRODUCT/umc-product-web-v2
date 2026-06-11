@@ -355,11 +355,12 @@ function TeamMatchingAnnouncePage() {
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
               renderContent={(noticeId) => {
-                if (noticeId in DEFAULT_MATCHING_CONTENTS) {
+                const defaultContent = DEFAULT_MATCHING_CONTENTS[noticeId]
+                if (defaultContent !== undefined) {
                   return (
                     <div className="flex flex-col gap-4">
                       <div className="text-body-1-regular text-teal-gray-900 whitespace-pre-wrap">
-                        {DEFAULT_MATCHING_CONTENTS[noticeId]}
+                        {defaultContent}
                       </div>
                     </div>
                   )
