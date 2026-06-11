@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
@@ -14,8 +14,7 @@ import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 
 export const Route = createFileRoute("/matching/status")({
   beforeLoad: async ({ context }) => {
-    const me = await ensureMe(context.queryClient)
-    if (!isOperator(me)) throw redirect({ to: "/" })
+    await ensureMe(context.queryClient)
   },
   component: MatchingStatusPage,
 })

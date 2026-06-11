@@ -50,12 +50,14 @@ interface ProjectDetailCardProps {
   showEditCta?: boolean
   canEditProject?: boolean
   editPermissionLoading?: boolean
+  /** 프로젝트가 속한 지부 ID. 제공 시 본인 지부 일치 여부를 실제 비교 */
+  projectChapterId?: number
 }
 
 function ProjectDetailCardSkeleton() {
   return (
-    <div className="flex w-[33.75rem] flex-col items-start overflow-hidden rounded-2xl bg-white">
-      <div className="bg-teal-gray-200 h-[17.875rem] w-[33.75rem] animate-pulse" />
+    <div className="flex w-135 flex-col items-start overflow-hidden rounded-2xl bg-white">
+      <div className="bg-teal-gray-200 h-71.5 w-135 animate-pulse" />
       <div className="flex w-full flex-col items-start p-5">
         <div className="flex w-full flex-col items-start gap-6">
           <div className="flex w-full flex-col items-start gap-2.5">
@@ -125,6 +127,7 @@ export function ProjectDetailCard({
   showEditCta = false,
   canEditProject,
   editPermissionLoading,
+  projectChapterId,
 }: ProjectDetailCardProps) {
   const projectId = Number(projectIdProp)
   const navigate = useNavigate()
@@ -276,7 +279,11 @@ export function ProjectDetailCard({
     addToast,
   ])
 
-  const isSameBranch = !userIsOperator
+  const isSameBranch = userIsOperator
+    ? true
+    : projectChapterId != null && myChapterId != null
+      ? projectChapterId === myChapterId
+      : true
   const isChallengerView = !userIsOperator && !userIsPm
 
   const devMatchingRoundId =
@@ -403,7 +410,10 @@ export function ProjectDetailCard({
           <div className="mt-8.5 flex w-full items-start gap-2.5">
             <TeamMemberButton
               variant="weak"
-              onClick={() => setIsTeamModalOpen(true)}
+              onClick={
+                userIsOperator ? () => setIsTeamModalOpen(true) : undefined
+              }
+              disabled={!userIsOperator}
             />
             <Button
               variant="weak"
