@@ -23,9 +23,16 @@ export const Route = createFileRoute("/")({
       throw redirect({ to: "/matching/projects" })
     }
 
-    // Plan Challenger(PM): 프로젝트 설정 > 공지
+    // Plan Challenger(PM): 프로젝트 설정 > 공지 (본인 지부)
     if (isCurrentTermPm(me)) {
-      throw redirect({ to: "/matching/projects/announce" })
+      const pmChapter = getViewerBranch(me)
+      throw redirect({
+        to: "/matching/projects/announce",
+        search: {
+          chapter: isChapter(pmChapter) ? pmChapter : CHAPTERS[0],
+          page: 1,
+        },
+      })
     }
 
     // Design/FE/BE Challenger: 팀 매칭 > 공지 (본인 지부)
