@@ -4,7 +4,7 @@ import { useState } from "react"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isOperator } from "@/features/auth/model/identity"
+import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
 import { useMatchingStatusData } from "@/features/matching/hooks/useMatchingStatusData"
 import { MatchingPartSection } from "@/features/matching/ui/MatchingPartSection"
 import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"
@@ -22,7 +22,16 @@ export const Route = createFileRoute("/matching/status")({
 function MatchingStatusPage() {
   const { data: me } = useMe()
   const isAdmin = isOperator(me)
-  const [selectedChapter, setSelectedChapter] = useState<Chapter>("Chromium")
+
+  // 챌린저(Plan/Others)는 본인 지부를 초기 탭으로, 운영진은 첫 번째 지부로
+  const userChapter = getViewerBranch(me)
+  const defaultChapter: Chapter =
+    !isAdmin && CHAPTERS.includes(userChapter as Chapter)
+      ? (userChapter as Chapter)
+      : CHAPTERS[0]
+
+  const [selectedChapter, setSelectedChapter] =
+    useState<Chapter>(defaultChapter)
 
   const {
     matchingParts,
