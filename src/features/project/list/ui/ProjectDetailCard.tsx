@@ -485,7 +485,7 @@ export function ProjectDetailCard({
                     disabled={myApplicationForProject == null}
                     onClick={() => setIsMyApplicationModalOpen(true)}
                   >
-                    내 지원서 확인하기
+                    내 지원서 보기
                   </Button>
                 )}
                 {ctaMode === "apply" &&
