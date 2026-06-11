@@ -48,7 +48,7 @@ export default function SideBar({ className }: SideBarProps) {
       {!isLoading && (
         <div className="flex flex-col py-4">
           <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
-            {DEMO_DAY_EDITION}th Demoday
+            {DEMO_DAY_EDITION}th Demo Day
           </span>
           {visibleSections.map(({ id, title, icon, menus }) => (
             <SideBarMenu
