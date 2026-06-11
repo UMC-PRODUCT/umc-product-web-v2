@@ -234,26 +234,42 @@ function MatchingRoundsPage() {
   // 저장 mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const promises = rounds.map((round) => {
-        // 날짜가 비어있으면 스킵
-        if (!round.startDate || !round.endDate) return Promise.resolve()
+      // 차수별 startsAt/endsAt 미리 계산 (decisionDeadline 자동 산출용)
+      const filledData = rounds.map((round) => {
+        if (!round.startDate || !round.endDate) return null
+        return {
+          round,
+          startsAt: toISODatetime(round.startDate, round.startTime),
+          endsAt: toISODatetime(round.endDate, round.endTime),
+        }
+      })
 
-        const startsAt = toISODatetime(round.startDate, round.startTime)
-        const endsAt = toISODatetime(round.endDate, round.endTime)
-        // decisionDeadline: endsAt 이후여야 하므로 +1ms
-        const decisionDeadline = new Date(
-          new Date(endsAt).getTime() + 1,
-        ).toISOString()
+      const promises = rounds.map((round, idx) => {
+        const data = filledData[idx]
+        if (!data) return Promise.resolve()
+
+        const { startsAt, endsAt } = data
+
+        // decisionDeadline 자동 계산:
+        // 1차 -> 2차 startsAt, 2차 -> 3차 startsAt, 3차 -> 3차 endsAt + 12h
+        let decisionDeadline: string
+        const nextData = filledData[idx + 1]
+        if (nextData) {
+          decisionDeadline = nextData.startsAt
+        } else {
+          // 마지막 차수(또는 다음 차수 미입력): endsAt + 12시간
+          decisionDeadline = new Date(
+            new Date(endsAt).getTime() + 12 * 60 * 60 * 1000,
+          ).toISOString()
+        }
 
         if (round.id) {
-          // 기존 라운드 수정
           return updateMatchingRound(round.id, {
             startsAt,
             endsAt,
             decisionDeadline,
           })
         }
-        // 신규 라운드 생성
         return createMatchingRound({
           name: `${round.roundLabel} ${matchingType}`,
           type: serverType,
