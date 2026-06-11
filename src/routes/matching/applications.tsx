@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
 import {
@@ -8,6 +8,7 @@ import {
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
+import { MyApplicationView } from "@/features/application/ui/MyApplicationView"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
@@ -17,8 +18,7 @@ import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 
 export const Route = createFileRoute("/matching/applications")({
   beforeLoad: async ({ context }) => {
-    const me = await ensureMe(context.queryClient)
-    if (!isOperator(me) && !isCurrentTermPm(me)) throw redirect({ to: "/" })
+    await ensureMe(context.queryClient)
   },
   component: MatchingApplicationsPage,
 })
@@ -110,13 +110,7 @@ function MatchingApplicationsPage() {
             </>
           )}
 
-          {isOthers && (
-            <div className="border-teal-gray-150 flex items-center justify-center rounded-xl border bg-white px-8.5 py-20">
-              <p className="text-body-2-regular text-teal-gray-400">
-                해당 역할의 지원 현황 뷰는 준비 중입니다.
-              </p>
-            </div>
-          )}
+          {isOthers && <MyApplicationView />}
         </div>
       </div>
     </section>
