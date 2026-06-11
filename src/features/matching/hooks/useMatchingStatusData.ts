@@ -29,13 +29,13 @@ import type {
 } from "@/features/application/model/types"
 
 // 매칭 라운드 목록에서 현재 활성 차수 번호 계산
+// PM 결정 기간(endsAt ~ decisionDeadline)도 "활성"으로 판별
 function getCurrentRound(rounds: MatchingRoundResponse[]): number {
   const now = Date.now()
-  // 현재 진행 중인 라운드 (startsAt <= now <= endsAt)
   const active = rounds.find(
     (r) =>
       new Date(r.startsAt).getTime() <= now &&
-      now <= new Date(r.endsAt).getTime(),
+      now <= new Date(r.decisionDeadline).getTime(),
   )
   if (active) return toRoundNumber(active.phase)
   // 없으면 가장 최근 라운드
@@ -97,11 +97,11 @@ export function useMatchingStatusData(chapterName?: string) {
     queryFn: async () => {
       const results = await Promise.all(
         projects.map(async (p) => {
-          const applicants = await getProjectApplications(p.id)
+          const applicants = await getProjectApplications(Number(p.id))
           return { projectId: p.id, applicants }
         }),
       )
-      return new Map(results.map((r) => [r.projectId, r.applicants]))
+      return new Map(results.map((r) => [String(r.projectId), r.applicants]))
     },
     enabled: projects.length > 0,
   })
@@ -126,9 +126,9 @@ export function useMatchingStatusData(chapterName?: string) {
     enabled: !!chapterId,
   })
 
-  // projectId -> name 맵
+  // projectId -> name 맵 (키를 String으로 통일)
   const projectIdToName = useMemo(
-    () => new Map(projects.map((p) => [p.id, p.name])),
+    () => new Map(projects.map((p) => [String(p.id), p.name])),
     [projects],
   )
 
@@ -142,11 +142,11 @@ export function useMatchingStatusData(chapterName?: string) {
     queryFn: async () => {
       const results = await Promise.all(
         projects.map(async (p) => {
-          const members = await getProjectMembers(p.id)
+          const members = await getProjectMembers(Number(p.id))
           return { projectId: p.id, members }
         }),
       )
-      return new Map(results.map((r) => [r.projectId, r.members]))
+      return new Map(results.map((r) => [String(r.projectId), r.members]))
     },
     enabled: projects.length > 0,
   })
@@ -213,7 +213,7 @@ export function useMatchingStatusData(chapterName?: string) {
       chapterStatsQuery.data.summary.schoolMatchingStatistics
         .map((s) => ({
           name: schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
-          applied: s.totalMemberCount,
+          applied: Number(s.totalMemberCount),
           total: partial.totalMembers,
         }))
         .sort((a, b) => b.applied - a.applied)

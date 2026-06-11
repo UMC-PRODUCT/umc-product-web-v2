@@ -11,8 +11,8 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 interface MatchingDetailModalProps {
   applicantId: string | null
-  projectId?: number
-  memberId?: number
+  projectId?: string
+  memberId?: string
   chapterName: string
   projectName: string
   challengerName: string
@@ -38,7 +38,10 @@ export function MatchingDetailModal({
   const [showUnmatchConfirm, setShowUnmatchConfirm] = useState(false)
 
   const applicationId = applicantId ? Number(applicantId) : 0
-  const detailQuery = useApplicationDetail(projectId ?? 0, applicationId)
+  const detailQuery = useApplicationDetail(
+    Number(projectId) || 0,
+    applicationId,
+  )
 
   const applicant = useMemo(() => {
     if (!detailQuery.data) return null

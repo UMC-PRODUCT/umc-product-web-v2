@@ -97,7 +97,7 @@ function toMatchingProject(
                   : member.name,
                 String(app.applicationId),
               ),
-              memberId: member.memberId,
+              memberId: String(member.memberId),
             }
           : {
               type:
@@ -106,7 +106,7 @@ function toMatchingProject(
                 ? `${member.nickname}/${member.name}`
                 : member.name,
               tagVariant: roundVariantMap[currentRound] ?? "random",
-              memberId: member.memberId,
+              memberId: String(member.memberId),
             }
         const list = blocksByRole.get(role) ?? []
         list.push(block)
@@ -136,14 +136,14 @@ function toMatchingProject(
 
   // partQuotas에서 역할별 quota 추출
   const designQuota =
-    project.partQuotas.find((q) => q.part === "DESIGN")?.quota ?? 0
+    Number(project.partQuotas.find((q) => q.part === "DESIGN")?.quota) || 0
   // WEB/ANDROID/IOS 중 해당 프로젝트의 FE 파트 quota 합산
   const feQuota = project.partQuotas
     .filter((q) => q.part === "WEB" || q.part === "ANDROID" || q.part === "IOS")
-    .reduce((sum, q) => sum + q.quota, 0)
+    .reduce((sum, q) => sum + Number(q.quota), 0)
   const beQuota = project.partQuotas
     .filter((q) => q.part === "SPRINGBOOT" || q.part === "NODEJS")
-    .reduce((sum, q) => sum + q.quota, 0)
+    .reduce((sum, q) => sum + Number(q.quota), 0)
 
   function buildRoleRow(
     role: string,
@@ -171,7 +171,7 @@ function toMatchingProject(
   ]
 
   const hasNodejs = project.partQuotas.some(
-    (q) => q.part === "NODEJS" && q.quota > 0,
+    (q) => q.part === "NODEJS" && Number(q.quota) > 0,
   )
   const backendPart: "springboot" | "nodejs" = hasNodejs
     ? "nodejs"
@@ -204,8 +204,9 @@ function computeMaxCols(
   for (const p of projects) {
     for (const q of p.partQuotas) {
       const role = PART_TO_ROLE[q.part]
-      if (role && q.quota > (maxCols[role] ?? 0)) {
-        maxCols[role] = q.quota
+      const numQuota = Number(q.quota)
+      if (role && numQuota > (maxCols[role] ?? 0)) {
+        maxCols[role] = numQuota
       }
     }
   }
@@ -214,8 +215,8 @@ function computeMaxCols(
 
 export function toMatchingPartDataList(
   projects: ManagedProjectSummaryResponse[],
-  applicantsByProject: Map<number, ProjectApplicantResponse[]>,
-  membersByProject: Map<number, ProjectMembersResponse>,
+  applicantsByProject: Map<string, ProjectApplicantResponse[]>,
+  membersByProject: Map<string, ProjectMembersResponse>,
   currentRound: number,
 ): MatchingPartData[] {
   if (projects.length === 0) return []
@@ -226,7 +227,7 @@ export function toMatchingPartDataList(
     const addedPlatforms = new Set<FEPlatform>()
     for (const q of p.partQuotas) {
       const platform = PART_TO_FE_PLATFORM[q.part]
-      if (platform && q.quota > 0 && !addedPlatforms.has(platform)) {
+      if (platform && Number(q.quota) > 0 && !addedPlatforms.has(platform)) {
         addedPlatforms.add(platform)
         const list = byPlatform.get(platform) ?? []
         list.push(p)
@@ -244,8 +245,8 @@ export function toMatchingPartDataList(
         projects: platformProjects.map((p) =>
           toMatchingProject(
             p,
-            applicantsByProject.get(p.id) ?? [],
-            membersByProject.get(p.id),
+            applicantsByProject.get(String(p.id)) ?? [],
+            membersByProject.get(String(p.id)),
             maxCols,
             currentRound,
           ),

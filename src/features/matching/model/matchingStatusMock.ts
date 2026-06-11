@@ -4,7 +4,7 @@ import type {
 } from "../ui/MatchingResultRow"
 
 export interface MatchingProjectData {
-  projectId?: number
+  projectId?: string
   projectName: string
   challengerName: string
   challengerUniversity: string
