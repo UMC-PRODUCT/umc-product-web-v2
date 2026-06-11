@@ -210,6 +210,7 @@ export function summaryToStats(
   const targetPhase = filterRound ? phaseMap[filterRound] : undefined
   const topProjects: TopProject[] = summary.projectRoundStatistics
     .map((p) => ({
+      projectId: p.projectId,
       name: projectIdToName.get(p.projectId) ?? String(p.projectId),
       count: targetPhase
         ? Number(
@@ -221,7 +222,7 @@ export function summaryToStats(
             0,
           ),
     }))
-    .sort((a, b) => b.count - a.count)
+    .sort((a, b) => b.count - a.count || a.projectId - b.projectId)
     .slice(0, 4)
 
   return {
