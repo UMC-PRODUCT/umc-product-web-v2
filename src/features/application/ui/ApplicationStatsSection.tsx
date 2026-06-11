@@ -160,7 +160,7 @@ export function ApplicationStatsSection({
         </div>
 
         {/* 1차 매칭 지원 Top 4 */}
-        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-100.5 shrink-0 flex-col rounded-lg border bg-white px-8 pt-7 pb-8">
+        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-100.5 shrink-0 flex-col rounded-xl border bg-white px-8 pt-7 pb-8">
           <h3 className="text-heading-6-semibold text-teal-700">
             {currentRound}차 매칭 {labels.roundSuffix} Top 4
           </h3>
@@ -168,10 +168,17 @@ export function ApplicationStatsSection({
             {stats.topProjects.slice(0, 4).map((project, i) => {
               const rank = (i + 1) as 1 | 2 | 3 | 4
               const maxCount = stats.topProjects[0]?.count ?? 1
-              const heightPx = Math.max(
-                40,
-                Math.round((project.count / maxCount) * 120),
-              )
+              const topSlice = stats.topProjects.slice(0, 4)
+              const isLastBar = i === topSlice.length - 1
+              const minHeight =
+                stats.topProjects.length <= 3 && isLastBar ? 5 : 30
+              const heightPx =
+                maxCount > 0
+                  ? Math.max(
+                      minHeight,
+                      Math.round((project.count / maxCount) * 120),
+                    )
+                  : minHeight
               return (
                 <RankBar
                   key={project.name}
@@ -186,7 +193,7 @@ export function ApplicationStatsSection({
         </div>
 
         {/* 우: 총원 N명 */}
-        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-52.5 shrink-0 flex-col rounded-lg border bg-white px-6 pt-7 pb-8">
+        <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-52.5 shrink-0 flex-col rounded-xl border bg-white px-6 pt-7 pb-8">
           <div className="flex items-center gap-2.5">
             <PersonGraphicIcon
               width={30}

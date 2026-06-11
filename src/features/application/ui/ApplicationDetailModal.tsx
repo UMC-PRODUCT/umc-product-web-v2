@@ -176,6 +176,14 @@ export function ApplicationDetailModal({
         <Modal.Overlay tone="deep" />
         <Modal.Content
           className="flex max-h-[calc(100vh-60px)] items-start gap-4"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => {
+            // 우측 패널 열려있으면 패널만 닫고, 없으면 전체 닫기
+            if (hasPanel) {
+              e.preventDefault()
+              handlePanelClose()
+            }
+          }}
           onPointerDownOutside={(e) => {
             const target = e.target as HTMLElement
             if (target.closest("[data-status-chip-dropdown]")) {

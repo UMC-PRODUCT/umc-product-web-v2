@@ -35,7 +35,7 @@ interface AssignmentModalProps {
   part?: Part
   gisuId?: number
   chapterId?: number
-  approvedMemberIds?: Set<string>
+  assignedMemberIds?: Set<string>
   onAssign: (challenger: AssignableChallenger) => Promise<void>
 }
 
@@ -49,7 +49,7 @@ export function AssignmentModal({
   part,
   gisuId,
   chapterId,
-  approvedMemberIds,
+  assignedMemberIds,
   onAssign,
 }: AssignmentModalProps) {
   const [search, setSearch] = useState("")
@@ -84,9 +84,9 @@ export function AssignmentModal({
   // 이미 매칭된 챌린저 제외
   const filtered = useMemo(() => {
     const items = data?.page.content ?? []
-    if (!approvedMemberIds || approvedMemberIds.size === 0) return items
-    return items.filter((m) => !approvedMemberIds.has(m.memberId))
-  }, [data, approvedMemberIds])
+    if (!assignedMemberIds || assignedMemberIds.size === 0) return items
+    return items.filter((m) => !assignedMemberIds.has(m.memberId))
+  }, [data, assignedMemberIds])
 
   const [isAssigning, setIsAssigning] = useState(false)
 
@@ -97,7 +97,9 @@ export function AssignmentModal({
     try {
       await onAssign({
         id: String(member.memberId),
-        nickname: member.nickname,
+        nickname: member.nickname
+          ? `${member.nickname}/${member.name}`
+          : member.name,
         university: member.schoolName,
         partRole: (member.part?.toLowerCase() ??
           "web") as AssignableChallenger["partRole"],
@@ -121,7 +123,10 @@ export function AssignmentModal({
     <Modal.Root open={open} onOpenChange={handleClose}>
       <Modal.Portal>
         <Modal.Overlay tone="deep" />
-        <Modal.Content className="flex h-157.5 w-185 max-w-[calc(100vw-32px)] flex-col rounded-xl bg-white px-12.5 pt-14 pb-10 shadow-lg focus:outline-none">
+        <Modal.Content
+          className="flex h-157.5 w-185 max-w-[calc(100vw-32px)] flex-col rounded-xl bg-white px-12.5 pt-14 pb-10 shadow-lg focus:outline-none"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <Modal.Title className="sr-only">팀원 수동 배정</Modal.Title>
 
           {/* 헤더 */}
@@ -157,6 +162,7 @@ export function AssignmentModal({
                 size="big"
                 dark={false}
                 side="left"
+                sideOffset={10}
                 className="min-h-17.5! w-100!"
               >
                 <button

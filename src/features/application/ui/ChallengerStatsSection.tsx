@@ -4,7 +4,7 @@ import { cn } from "@/shared/lib/utils"
 import { RankBar } from "./RankBar"
 import { RoundDonutChart } from "./RoundDonutChart"
 
-import type { ChallengerStats } from "../model/challengerMock"
+import type { ChallengerStats } from "../model/types"
 
 const ROUND_COLORS = [
   "#81D3C9",
@@ -134,10 +134,16 @@ export function ChallengerStatsSection({
             {stats.universities.map((uni, i) => {
               const rank = Math.min(i + 1, 5) as 1 | 2 | 3 | 4 | 5
               const maxCount = stats.universities[0]?.count ?? 1
+              const isLastBar = i === stats.universities.length - 1
+              const minHeight =
+                stats.universities.length <= 3 && isLastBar ? 5 : 30
               const heightPx =
-                maxCount === 0
-                  ? 40
-                  : Math.max(40, Math.round((uni.count / maxCount) * 120))
+                maxCount > 0
+                  ? Math.max(
+                      minHeight,
+                      Math.round((uni.count / maxCount) * 120),
+                    )
+                  : minHeight
               return (
                 <RankBar
                   key={uni.name}

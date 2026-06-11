@@ -18,8 +18,6 @@ interface SideBarProps {
   className?: string
 }
 
-const DEMO_DAY_EDITION = 10
-
 export default function SideBar({ className }: SideBarProps) {
   const { data: me, isLoading: isMeLoading } = useMe()
   const canAccessSettings = canAccessProjectSettings(me)
@@ -60,7 +58,7 @@ export default function SideBar({ className }: SideBarProps) {
       {!isLoading && (
         <div className="flex flex-col py-4">
           <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
-            {DEMO_DAY_EDITION}th Demoday
+            Demo Day
           </span>
           {visibleSections.map(({ id, title, icon, menus }) => (
             <SideBarMenu

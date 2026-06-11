@@ -5,8 +5,7 @@ import { cn } from "@/shared/lib/utils"
 import { ApplicationTableSection } from "./ApplicationTableSection"
 import { ChallengerStatsSection } from "./ChallengerStatsSection"
 
-import type { ChallengerStats } from "../model/challengerMock"
-import type { ProjectApplication } from "../model/types"
+import type { ChallengerStats, ProjectApplication } from "../model/types"
 
 interface ChallengerApplicationViewProps {
   projects: ProjectApplication[]

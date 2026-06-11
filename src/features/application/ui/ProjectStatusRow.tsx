@@ -3,6 +3,7 @@ import { ChevronDown } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
+import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 
 import type { AssignmentCount, Role } from "../model/types"
 
@@ -72,7 +73,7 @@ export function ProjectStatusRow({
         </div>
 
         {/* 챌린저 */}
-        <div className="flex h-12.5 w-50 items-center justify-center rounded-lg px-4">
+        <div className="flex h-12.5 w-50 items-center rounded-lg px-16">
           <div className="flex flex-col whitespace-nowrap">
             <span className="text-body-2-medium text-teal-gray-900">
               {challengerName}
@@ -85,9 +86,7 @@ export function ProjectStatusRow({
 
         {/* 상태 */}
         <div className="flex h-12.5 w-34 items-center justify-center px-2.5">
-          <span className="text-label-2-medium shadow-drop-neutral-2 inline-flex h-6 items-center justify-center rounded-md bg-teal-100 px-2 py-0.5 text-teal-600">
-            {statusLabel}
-          </span>
+          <RecruitStatusChip done={statusLabel === "모집 완료"} size="md" />
         </div>
 
         {/* Design 배정 */}
@@ -113,7 +112,7 @@ export function ProjectStatusRow({
         aria-expanded={isExpanded}
         onClick={onToggleExpand}
         className={cn(
-          "shadow-inner-neutral-2 flex size-[30px] shrink-0 items-center justify-center rounded-[10px] transition-colors",
+          "shadow-inner-neutral-2 flex size-7.5 shrink-0 items-center justify-center rounded-[10px] transition-colors",
           isExpanded ? "bg-teal-100/50" : "hover:bg-teal-gray-150 bg-white",
         )}
       >

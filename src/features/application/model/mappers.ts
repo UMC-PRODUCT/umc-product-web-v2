@@ -162,17 +162,18 @@ export function summaryToStats(
   // 차수별 지원 현황
   const rounds = summary.roundApplicationStatistics.map((r) => ({
     round: toRoundNumber(r.matchingRound.phase),
-    applied: r.appliedMemberCount,
-    total: r.availableMemberCount,
+    applied: Number(r.appliedMemberCount),
+    total: Number(r.availableMemberCount),
   }))
 
   // 총원 / 매칭 완료 (schoolMatchingStatistics 합산)
+  // 서버가 숫자 필드를 문자열로 내려주므로 Number() 변환 필요
   const totalMembers = summary.schoolMatchingStatistics.reduce(
-    (s, x) => s + x.totalMemberCount,
+    (s, x) => s + Number(x.totalMemberCount),
     0,
   )
   const completedCount = summary.schoolMatchingStatistics.reduce(
-    (s, x) => s + x.matchedMemberCount,
+    (s, x) => s + Number(x.matchedMemberCount),
     0,
   )
   const pendingCount = Math.max(0, totalMembers - completedCount)
@@ -184,12 +185,18 @@ export function summaryToStats(
     (p) => ({
       name: projectIdToName.get(p.projectId) ?? String(p.projectId),
       rounds: [
-        p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
-          ?.appliedMemberCount ?? 0,
-        p.matchingRounds.find((r) => r.matchingRound.phase === "SECOND")
-          ?.appliedMemberCount ?? 0,
-        p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")
-          ?.appliedMemberCount ?? 0,
+        Number(
+          p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
+            ?.appliedMemberCount ?? 0,
+        ),
+        Number(
+          p.matchingRounds.find((r) => r.matchingRound.phase === "SECOND")
+            ?.appliedMemberCount ?? 0,
+        ),
+        Number(
+          p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")
+            ?.appliedMemberCount ?? 0,
+        ),
       ],
     }),
   )
@@ -203,13 +210,19 @@ export function summaryToStats(
   const targetPhase = filterRound ? phaseMap[filterRound] : undefined
   const topProjects: TopProject[] = summary.projectRoundStatistics
     .map((p) => ({
+      projectId: p.projectId,
       name: projectIdToName.get(p.projectId) ?? String(p.projectId),
       count: targetPhase
-        ? (p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)
-            ?.appliedMemberCount ?? 0)
-        : p.matchingRounds.reduce((s, r) => s + r.appliedMemberCount, 0),
+        ? Number(
+            p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)
+              ?.appliedMemberCount ?? 0,
+          )
+        : p.matchingRounds.reduce(
+            (s, r) => s + Number(r.appliedMemberCount),
+            0,
+          ),
     }))
-    .sort((a, b) => b.count - a.count)
+    .sort((a, b) => b.count - a.count || a.projectId - b.projectId)
     .slice(0, 4)
 
   return {
