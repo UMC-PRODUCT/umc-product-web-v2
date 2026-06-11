@@ -45,7 +45,12 @@ export default function HeaderButton({
       >
         {label}
         {type === "trailing-icon" && (
-          <DownChevronIcon className="ml-0.5 size-4" />
+          <DownChevronIcon
+            className={cn(
+              "ml-0.5 size-4 transition-transform",
+              isOpen && "-rotate-180",
+            )}
+          />
         )}
       </button>
 
