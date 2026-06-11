@@ -6,6 +6,7 @@ import { isOperator, isSchoolStaff } from "@/features/auth/model/identity"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import Profile from "@/shared/ui/Profile"
 
+import HeaderButton from "./HeaderButton"
 import NavigationButton from "./NavigationButton"
 
 interface NavItem {
@@ -61,7 +62,8 @@ export default function Header() {
         ))}
       </nav>
 
-      <div className="flex w-55 items-center justify-end pr-8.5">
+      <div className="flex w-55 items-center justify-end gap-4 pr-8.5">
+        <HeaderButton label="문의사항" type="trailing-icon" />
         <Profile />
       </div>
     </header>
