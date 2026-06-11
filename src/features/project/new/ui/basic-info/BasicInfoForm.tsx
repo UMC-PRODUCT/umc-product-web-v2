@@ -15,7 +15,9 @@ import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
 import {
   getProjectPmSearchScope,
+  isCentralStaff,
   isCurrentTermPm,
+  isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { searchMembers } from "@/features/challenger/api/member"
 import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
@@ -124,35 +126,34 @@ export const BasicInfoForm = forwardRef<
   const [pm2Member, setPm2Member] = useState<MemberItem | null>(storePmInfo.pm2)
   const [pm2Error, setPm2Error] = useState(false)
 
-  const allPmMembers = useMemo(
-    () => (pmListQuery.data?.page.content ?? []).map(toMemberItem),
-    [pmListQuery.data],
+  const isCentral = isCentralStaff(meData) || isSuperAdmin(meData)
+
+  const allPmMembers = useMemo(() => {
+    const members = (pmListQuery.data?.page.content ?? []).map(toMemberItem)
+    if (isCentral) {
+      return members.sort((a, b) => a.nickname.localeCompare(b.nickname, "ko"))
+    }
+    return members
+  }, [pmListQuery.data, isCentral])
+
+  const pm1Options = useMemo(
+    () =>
+      allPmMembers.map((m) => ({
+        value: m.id,
+        label: `${m.nickname}/${m.name} · ${m.university}`,
+      })),
+    [allPmMembers],
   )
 
-  const pm1Options = useMemo(() => {
-    const filtered =
-      isPm && meData
-        ? allPmMembers.filter((m) => m.id === String(meData.id))
-        : allPmMembers
-    return filtered.map((m) => ({
-      value: m.id,
-      label: `${m.nickname}/${m.name} · ${m.university}`,
-    }))
-  }, [allPmMembers, isPm, meData])
-
   const pm2Options = useMemo(() => {
-    const excludeIds = new Set(
-      [pm1Member?.id, isPm && meData ? String(meData.id) : undefined].filter(
-        Boolean,
-      ),
-    )
+    const excludeId = pm1Member?.id
     return allPmMembers
-      .filter((m) => !excludeIds.has(m.id))
+      .filter((m) => m.id !== excludeId)
       .map((m) => ({
         value: m.id,
         label: `${m.nickname}/${m.name} · ${m.university}`,
       }))
-  }, [allPmMembers, pm1Member, isPm, meData])
+  }, [allPmMembers, pm1Member])
 
   const thumbnailRef = useRef<HTMLButtonElement>(null)
   const logoRef = useRef<HTMLButtonElement>(null)
@@ -280,6 +281,16 @@ export const BasicInfoForm = forwardRef<
       isMultiPm: storePmInfo.isMultiPm,
     })
   }, [storePmInfo])
+
+  useEffect(() => {
+    if (!isPm || !meData || pm1Member !== null || allPmMembers.length === 0)
+      return
+    const self = allPmMembers.find((m) => m.id === String(meData.id))
+    if (self) {
+      setPm1Member(self)
+      setPm1Error(false)
+    }
+  }, [isPm, meData, allPmMembers, pm1Member])
 
   const isPmChanged = savedSnapshot
     ? pm1Member !== savedSnapshot.pm1 ||

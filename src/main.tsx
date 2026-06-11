@@ -1,6 +1,7 @@
 import "./app.css"
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
@@ -14,7 +15,7 @@ const isMaintenance = import.meta.env.VITE_MAINTENANCE === "true"
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,
+      staleTime: 0,
       retry: 1,
     },
   },
@@ -44,6 +45,7 @@ if (!rootElement.innerHTML) {
       ) : (
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
+          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       )}
     </StrictMode>,
