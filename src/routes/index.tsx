@@ -1,7 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
+import {
+  getViewerBranch,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
 import { type Chapter, CHAPTERS } from "@/features/notice"
 
 function isChapter(value: unknown): value is Chapter {
@@ -14,10 +18,17 @@ export const Route = createFileRoute("/")({
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
 
+    // Admin(운영진): 팀 매칭 > 프로젝트 목록
     if (isOperator(me)) {
       throw redirect({ to: "/matching/projects" })
     }
 
+    // Plan Challenger(PM): 프로젝트 설정 > 공지
+    if (isCurrentTermPm(me)) {
+      throw redirect({ to: "/matching/projects/announce" })
+    }
+
+    // Design/FE/BE Challenger: 팀 매칭 > 공지 (본인 지부)
     const userChapter = getViewerBranch(me)
     if (isChapter(userChapter)) {
       throw redirect({

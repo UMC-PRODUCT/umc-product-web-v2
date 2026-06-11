@@ -1,3 +1,4 @@
+import { useRouterState } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 
 import { useMe } from "@/features/auth/hooks/useMe"
@@ -8,6 +9,7 @@ import {
   isOperator,
 } from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
+import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { cn } from "@/shared/lib/utils"
 
 import { SideBarMenu } from "./menu/SideBarMenu"
@@ -19,6 +21,7 @@ interface SideBarProps {
 }
 
 export default function SideBar({ className }: SideBarProps) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
   const { data: me, isLoading: isMeLoading } = useMe()
   const canAccessSettings = canAccessProjectSettings(me)
   const canManage = canManageProjects(me)
@@ -34,9 +37,13 @@ export default function SideBar({ className }: SideBarProps) {
     [canAccessSettings, canManage, canRecruit],
   )
 
-  const [openSectionId, setOpenSectionId] = useState<string>(
-    visibleSections[0]?.id ?? SIDEBAR_ITEMS[0]?.id ?? "",
-  )
+  // 현재 경로에 해당하는 섹션을 초기값으로 사용
+  const [openSectionId, setOpenSectionId] = useState<string>(() => {
+    const active = resolveNavigationFromPathname(pathname, visibleSections)
+    return (
+      active?.section.id ?? visibleSections[0]?.id ?? SIDEBAR_ITEMS[0]?.id ?? ""
+    )
+  })
 
   useEffect(() => {
     const ids = new Set(visibleSections.map((section) => section.id))
