@@ -25,7 +25,7 @@ const optionButtonVariants = cva(
       {
         selected: false,
         class:
-          "disabled:border-teal-gray-200 disabled:text-teal-gray-300 disabled:bg-white disabled:hover:bg-white",
+          "disabled:border-teal-gray-150 disabled:text-teal-gray-400 disabled:bg-white disabled:hover:bg-white",
       },
       {
         selected: true,
@@ -129,7 +129,7 @@ export function OptionButton({
           isSelected
             ? selectedClass
             : cn(
-                "border-teal-gray-200 text-teal-gray-900 hover:bg-teal-gray-50 disabled:border-teal-gray-200 disabled:text-teal-gray-300 border-t border-b bg-white disabled:bg-white disabled:hover:bg-white",
+                "border-teal-gray-200 text-teal-gray-900 hover:bg-teal-gray-50 disabled:border-teal-gray-150 disabled:text-teal-gray-400 border-t border-b bg-white disabled:bg-white disabled:hover:bg-white",
                 unselectedPadding,
                 showLeft && "border-l",
                 showRight && "border-r",
