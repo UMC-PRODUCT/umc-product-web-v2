@@ -150,7 +150,7 @@ function DefaultLoginPage() {
 
                 <Input
                   variant={"password"}
-                  placeholder={"Password"}
+                  placeholder={"비밀번호"}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value)
