@@ -56,7 +56,20 @@ export const signUpSchema = signUpSchemaObject.refine(
   },
 )
 
+export const oauthSignUpSchema = z.object({
+  email: emailSchema,
+  code: codeSchema,
+  id: z.string().optional(),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+  school: z.string().min(1, "학교를 선택해주세요."),
+  name: z.string().min(1, "이름을 입력해 주세요."),
+  nickname: nicknameSchema,
+  termsAgreements: z.record(z.coerce.number(), z.boolean()),
+})
+
 export type SignUpFormData = z.infer<typeof signUpSchema>
+export type OAuthSignUpFormData = z.infer<typeof oauthSignUpSchema>
 
 export type ValidationState = "default" | "pending" | "valid" | "invalid"
 
