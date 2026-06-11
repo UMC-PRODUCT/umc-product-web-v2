@@ -52,7 +52,7 @@ export default function HeaderButton({
       {isOpen && (
         <div
           role="menu"
-          className="shadow-drop-neutral-1 border-teal-gray-50 fixed top-15 right-22.5 flex flex-col rounded-[8px] border bg-white p-0.5"
+          className="shadow-drop-neutral-1 border-teal-gray-50 absolute top-9 right-0 flex flex-col rounded-[8px] border bg-white p-0.5"
         >
           <div className="h-[26px] w-full px-3 pt-[7px] pb-[1px]">
             <span className="text-caption-2-medium text-teal-gray-400">
