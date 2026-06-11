@@ -93,6 +93,7 @@ export function MatchingResultRow({
   const [localRoleRows, setLocalRoleRows] = useState(roleRows)
   // 수동 배정 후 서버 refetch 시 멤버를 클릭한 슬롯 위치로 재배치
   const lastAssignRef = useRef<{
+    projectId?: number
     rowIdx: number
     blockIdx: number
     memberId: number
@@ -128,7 +129,17 @@ export function MatchingResultRow({
       return
     }
 
-    const { rowIdx, blockIdx, memberId } = lastAssignRef.current
+    const {
+      projectId: refProjectId,
+      rowIdx,
+      blockIdx,
+      memberId,
+    } = lastAssignRef.current
+    if (refProjectId !== projectId) {
+      lastAssignRef.current = null
+      setLocalRoleRows(roleRows)
+      return
+    }
     const targetRow = roleRows[rowIdx]
 
     if (!targetRow) {
@@ -335,6 +346,7 @@ export function MatchingResultRow({
             if (!assignTarget || !projectId) return
             // 배정 후 refetch 시 클릭한 슬롯으로 재배치하기 위해 저장
             lastAssignRef.current = {
+              projectId,
               rowIdx: assignTarget.rowIdx,
               blockIdx: assignTarget.blockIdx,
               memberId: Number(challenger.id),
