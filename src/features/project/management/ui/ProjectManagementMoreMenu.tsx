@@ -68,8 +68,8 @@ export function ProjectManagementMoreMenu({
       let total = 0
       for (const q of detail.partQuotas ?? []) {
         if (parts.includes(q.part)) {
-          current += q.currentCount
-          total += q.quota
+          current += Number(q.currentCount)
+          total += Number(q.quota)
         }
       }
       return { current, total }
@@ -198,7 +198,7 @@ export function ProjectManagementMoreMenu({
             sideOffset={10}
             avoidCollisions={false}
             onOpenAutoFocus={(e) => e.preventDefault()}
-            className="shadow-drop-neutral-1 border-teal-gray-50 z-[1100] flex w-[9.5rem] flex-col items-start gap-1 rounded-lg border bg-white px-0.5 pt-2.5 pb-0.5"
+            className="shadow-drop-neutral-1 border-teal-gray-50 z-1100 flex w-38 flex-col items-start gap-1 rounded-lg border bg-white px-0.5 pt-2.5 pb-0.5"
           >
             <span className="text-label-3-semibold text-teal-gray-400 px-4">
               바로가기
