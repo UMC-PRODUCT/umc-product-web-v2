@@ -118,7 +118,7 @@ function DefaultLoginPage() {
       if (axios.isAxiosError(error)) {
         setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.")
       } else {
-        showToast("로그인 중 오류가 발생했습니다.", "red")
+        showToast("잠시 후 다시 시도해 주세요.", "red")
       }
     } finally {
       setIsLoading(false)
