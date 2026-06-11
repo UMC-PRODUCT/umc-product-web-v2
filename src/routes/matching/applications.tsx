@@ -87,7 +87,6 @@ function MatchingApplicationsPage() {
                     projects={adminProjects}
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
-                    readOnly
                   />
                 </div>
               )}
