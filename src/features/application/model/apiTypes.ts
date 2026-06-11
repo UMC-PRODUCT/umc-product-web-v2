@@ -133,7 +133,7 @@ export interface MatchingRoundResponse {
   description: string
   type: MatchingType
   phase: MatchingPhase
-  chapterId: string
+  chapterId: string | null
   startsAt: string
   endsAt: string
   decisionDeadline: string
