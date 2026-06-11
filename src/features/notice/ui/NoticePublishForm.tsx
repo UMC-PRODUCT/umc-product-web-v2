@@ -353,7 +353,7 @@ export function NoticePublishForm({
                   className="rounded-[10px]"
                   onClick={handleCompletionGoBack}
                 >
-                  보러가기
+                  보러 가기
                 </Button>
               </Modal.Close>
             </div>
