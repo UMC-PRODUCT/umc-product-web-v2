@@ -453,6 +453,7 @@ function ProjectRegisterPage() {
   const handleSuccessConfirm = async () => {
     setShowSuccessModal(false)
     reset()
+    queryClient.removeQueries({ queryKey: ["project", "managed"] })
     await navigate({ to: "/matching/projects/management", replace: true })
   }
 
