@@ -5,12 +5,20 @@ import {
   useBlocker,
   useNavigate,
 } from "@tanstack/react-router"
+import { isAxiosError } from "axios"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { getResourcePermission } from "@/features/auth/api/permissions"
 import { useMe } from "@/features/auth/hooks/useMe"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import {
+  canManageProjects,
+  isCurrentTermPm,
+} from "@/features/auth/model/identity"
+import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
+import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import { getManagedProjects } from "@/features/project/management/api"
 import {
   ApplicationForm,
@@ -42,11 +50,40 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
 export const Route = createFileRoute("/matching/projects/new")({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, search }) => {
     const me = await ensureMe(context.queryClient)
-    if (!isOperator(me) && !isCurrentTermPm(me)) {
+
+    if (!canManageProjects(me)) {
       throw redirect({ to: "/matching/projects" })
     }
+
+    if (search.projectId !== undefined) {
+      return
+    }
+
+    try {
+      const permission = await context.queryClient.ensureQueryData({
+        queryKey: [
+          "authorization",
+          "resource-permission",
+          "PROJECT",
+          undefined,
+          "WRITE",
+        ],
+        queryFn: () =>
+          getResourcePermission({
+            resourceType: "PROJECT",
+            permissionType: "WRITE",
+          }),
+        staleTime: 0,
+      })
+
+      if (hasGrantedPermission(permission, "WRITE")) return
+    } catch {
+      throw redirect({ to: "/matching/projects" })
+    }
+
+    throw redirect({ to: "/matching/projects" })
   },
   validateSearch: (search: Record<string, unknown>) => ({
     projectId:
@@ -79,7 +116,6 @@ function ProjectRegisterPage() {
   const queryClient = useQueryClient()
   const { data: me } = useMe()
   const isPm = isCurrentTermPm(me)
-
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
   const recruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
@@ -88,6 +124,49 @@ function ProjectRegisterPage() {
   const setProjectId = useProjectRegisterStore((s) => s.setProjectId)
   const setGisuId = useProjectRegisterStore((s) => s.setGisuId)
   const setApplication = useProjectRegisterStore((s) => s.setApplication)
+  const projectWritePermissionQuery = useResourcePermission(
+    "PROJECT",
+    undefined,
+    {
+      allowTypeLevel: true,
+      enabled: !isEditMode,
+      permissionType: "WRITE",
+    },
+  )
+  const projectPermissionsQuery = useProjectPermissions(
+    projectId ?? undefined,
+    {
+      enabled: projectId !== null,
+    },
+  )
+  const canCreateProject =
+    isEditMode || projectWritePermissionQuery.hasPermission("WRITE")
+  const isCreatePermissionLoading =
+    !isEditMode && projectWritePermissionQuery.isPending
+  const canManageProject = projectPermissionsQuery.canManage
+  const canEditRecruitStep = projectId !== null ? canManageProject : !isPm
+
+  const resolveCanEditRecruitStep = async (): Promise<boolean> => {
+    const pid = useProjectRegisterStore.getState().projectId
+    if (pid === null) return !isPm
+    try {
+      const permission = await queryClient.ensureQueryData({
+        queryKey: [
+          "authorization",
+          "resource-permission",
+          "PROJECT",
+          pid,
+          undefined,
+        ],
+        queryFn: () =>
+          getResourcePermission({ resourceType: "PROJECT", resourceId: pid }),
+        staleTime: 0,
+      })
+      return hasGrantedPermission(permission, "MANAGE")
+    } catch {
+      return !isPm
+    }
+  }
 
   const isStoreDirty = useProjectRegisterStore((s) => {
     const recruitTotal =
@@ -160,6 +239,23 @@ function ProjectRegisterPage() {
     }
   }, [detailQuery.data])
 
+  useEffect(() => {
+    if (!isEditMode || !detailQuery.isError) return
+    const status = isAxiosError(detailQuery.error)
+      ? detailQuery.error.response?.status
+      : undefined
+    if (status === 403 || status === 404) {
+      addToast({
+        message: "프로젝트에 접근할 권한이 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      navigate({ to: "/matching/projects/management", replace: true })
+    }
+  }, [isEditMode, detailQuery.isError, detailQuery.error, addToast, navigate])
+
   const draftQuery = useQuery({
     queryKey: projectKeys.draft(gisuId ?? 0),
     queryFn: () => getMyDraft(gisuId!),
@@ -195,6 +291,9 @@ function ProjectRegisterPage() {
   const submitMutation = useMutation({
     mutationFn: async () => {
       if (!projectId) throw new Error("프로젝트 ID가 없습니다.")
+      if (!isEditMode && !canCreateProject) {
+        throw new Error("프로젝트 생성 권한이 없습니다.")
+      }
       if (applicationFormRef.current?.getIsDirty() ?? true) {
         const body = buildUpsertApplicationFormBody(
           application.commonQuestions,
@@ -205,7 +304,7 @@ function ProjectRegisterPage() {
       }
       if (isEditMode) return
       const result = await submitProject(projectId)
-      if (pmInfo.pm1) {
+      if (pmInfo.pm1 && (await resolveCanEditRecruitStep())) {
         await transferOwnership(projectId, {
           newOwnerMemberId: Number(pmInfo.pm1.id),
         })
@@ -217,11 +316,18 @@ function ProjectRegisterPage() {
       void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
       setShowSuccessModal(true)
     },
-    onError: () => {
+    onError: (error) => {
+      const status = isAxiosError(error) ? error.response?.status : undefined
+      const message =
+        status === 403
+          ? isEditMode
+            ? "프로젝트를 수정할 권한이 없습니다."
+            : "프로젝트를 등록할 권한이 없습니다."
+          : isEditMode
+            ? "프로젝트 수정에 실패했습니다. 다시 시도해주세요."
+            : "프로젝트 등록에 실패했습니다. 다시 시도해주세요."
       addToast({
-        message: isEditMode
-          ? "프로젝트 수정에 실패했습니다. 다시 시도해주세요."
-          : "프로젝트 등록에 실패했습니다. 다시 시도해주세요.",
+        message,
         color: "red",
         variant: "deep",
         type: "default",
@@ -245,17 +351,19 @@ function ProjectRegisterPage() {
     )
   }
 
-  const handleBasicInfoNext = () => {
-    setStep(isPm ? 3 : 2)
+  const handleBasicInfoNext = async () => {
+    const canEdit = await resolveCanEditRecruitStep()
+    setStep(canEdit ? 2 : 3)
   }
 
-  const handleApplicationFormPrev = () => {
-    setStep(isPm ? 1 : 2)
+  const handleApplicationFormPrev = async () => {
+    const canEdit = await resolveCanEditRecruitStep()
+    setStep(canEdit ? 2 : 1)
   }
 
   const handleStepChange = async (idx: number) => {
     if (isEditMode) return
-    if (isPm && idx === 2) {
+    if (!canEditRecruitStep && idx === 2) {
       setStep(2)
       triggerStepTooltip(2)
       return
@@ -272,7 +380,7 @@ function ProjectRegisterPage() {
       }
       const saved = await basicInfoRef.current?.save()
       if (!saved) return
-    } else if (step === 2 && !isPm) {
+    } else if (step === 2 && canEditRecruitStep) {
       const total = Object.values(recruitInfo).reduce(
         (sum, { count }) => sum + count,
         0,
@@ -365,14 +473,14 @@ function ProjectRegisterPage() {
           disabledSteps={
             isEditMode
               ? [1, 2, 3].filter((idx) => idx !== step)
-              : isPm
+              : !canEditRecruitStep
                 ? [2]
                 : []
           }
           disabledTooltips={
             isEditMode
               ? {}
-              : isPm
+              : !canEditRecruitStep
                 ? {
                     2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
                     3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
@@ -385,12 +493,17 @@ function ProjectRegisterPage() {
           openTooltipStep={tooltipTriggerStep}
         />
         {step === 1 && (
-          <BasicInfoForm ref={basicInfoRef} onNext={handleBasicInfoNext} />
+          <BasicInfoForm
+            ref={basicInfoRef}
+            canCreateProject={canCreateProject}
+            createPermissionLoading={isCreatePermissionLoading}
+            onNext={handleBasicInfoNext}
+          />
         )}
         {step === 2 && (
           <RecruitInfoForm
             ref={recruitInfoRef}
-            readOnly={isPm}
+            readOnly={!canEditRecruitStep}
             isHydrated={isEditMode ? detailQuery.isSuccess : true}
             onPrev={() => setStep(1)}
             onNext={() => setStep(3)}
@@ -401,7 +514,9 @@ function ProjectRegisterPage() {
             ref={applicationFormRef}
             isEditMode={isEditMode}
             isHydrated={isEditMode ? applicationFormHydrated : true}
-            isSubmitting={submitMutation.isPending}
+            isSubmitting={submitMutation.isPending || isCreatePermissionLoading}
+            canCreateProject={canCreateProject}
+            createPermissionLoading={isCreatePermissionLoading}
             onPrev={handleApplicationFormPrev}
             onNext={handleRegister}
           />
@@ -428,10 +543,11 @@ function ProjectRegisterPage() {
         variant="warning"
         title="페이지 이탈"
         content="저장되지 않았습니다. 저장 후 나가시겠습니까?"
-        cancelText="돌아가기"
+        cancelText="나가기"
         confirmText="저장 후 나가기"
         confirmLoading={isSavingAndLeaving}
-        onCancel={() => resetLeave?.()}
+        cancelOnDismiss={false}
+        onCancel={() => proceedLeave?.()}
         onConfirm={() => void handleSaveAndLeave()}
       />
     </section>

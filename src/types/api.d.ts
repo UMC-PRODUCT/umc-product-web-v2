@@ -130,8 +130,8 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** [TEST-004] 웹훅 알람 전송 테스트 */
-    post: operations["sendWebhookAlarm"]
+    /** 웹훅 알람 전송 테스트 */
+    post: operations["TEST-004"]
     delete?: never
     options?: never
     head?: never
@@ -147,8 +147,8 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** [TEST-005] 웹훅 알람 버퍼 전송 테스트 */
-    post: operations["sendBufferedWebhookAlarm"]
+    /** 웹훅 알람 버퍼 전송 테스트 */
+    post: operations["TEST-005"]
     delete?: never
     options?: never
     head?: never
@@ -165,14 +165,75 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SEED-003] 프로젝트 시딩
+     * 프로젝트 시딩
      * @description 활성 기수(또는 지정 기수)의 같은 school 멤버 풀에서 PLAN 1 + 프론트엔드 5~6 +
      *     백엔드 5~6 의 멤버 슬롯을 추출해 프로젝트를 N 개 생성합니다.
      *     School 단위 round-robin 으로 채우며, 풀이 부족한 셀은 skip 합니다.
      *     PO 후보가 PLAN 챌린저로 등록되지 않은 경우 시딩 측에서 PLAN 챌린저로 등록한 뒤
      *     createDraft 를 호출합니다.
      */
-    post: operations["seedProjects"]
+    post: operations["SEED-003"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/test/seed/projects/scenarios": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 프로젝트 시나리오 시딩
+     * @description 활성 기수에 대해 DRAFT / PENDING_REVIEW / IN_PROGRESS 중 하나의 상태까지 도달한
+     *     프로젝트를 N 개 생성합니다. SQL 직접 주입이 아니라 도메인 UseCase 시퀀스 호출로 만들기 때문에
+     *     도메인 가드를 모두 통과한 데이터가 됩니다.
+     *     productOwnerMemberIds 를 명시하면 그 리스트로만 PO 를 사용하고(size 가 projectCount 와
+     *     같아야 하며 각각 활성 기수 PLAN 챌린저여야 함), null 이면 활성 기수 PLAN 챌린저 풀에서
+     *     랜덤 픽 합니다. 시딩 측에서 챌린저를 강제로 만들지는 않습니다.
+     *     IN_PROGRESS 단계에서는 DESIGN×1~2 + FE 1 개×3~4 + BE 1 개×3~4 의 partQuota 가 자동 분배되고,
+     *     각 파트마다 PO 학교의 해당 파트 챌린저 풀에서 random(0, quota) 만큼 멤버가 충원됩니다.
+     */
+    post: operations["SEED-003-S"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/test/seed/project-applications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * [SEED-006] 지원서 시나리오 시딩
+     * @description 지정 매칭 차수 + 지부를 기준으로, 아직 팀에 합류하지 않은 ACTIVE 챌린저들이
+     *     지부의 IN_PROGRESS 프로젝트에 지원서를 제출하는 시나리오를 실행합니다.
+     *
+     *     전제 조건:
+     *     - 매칭차수가 현재 OPEN 상태(startsAt <= now <= endsAt)여야 합니다.
+     *     - 지부 내 IN_PROGRESS 프로젝트가 존재해야 합니다. (SEED-003-S 선행 필요)
+     *     - 챌린저가 시딩되어 있어야 합니다. (SEED-002 선행 필요)
+     *
+     *     동작:
+     *     각 챌린저는 createDraft → fill → submit 까지 진행한 뒤, 최종 상태가
+     *     SUBMITTED / APPROVED / REJECTED 중 하나로 무작위 결정됩니다 (약 1/3 분포).
+     *     그 결과로 운영 화면의 "검토 대기 + 합격자 + 불합격자" 분포가 자연스럽게 채워집니다.
+     *
+     *     ProjectMember 등록은 시딩 책임 밖입니다. 매칭 완료(APPROVED → ProjectMember 일괄 등록)는
+     *     차수 종료 시점의 autoDecide 가 처리합니다.
+     */
+    post: operations["seedProjectApplications"]
     delete?: never
     options?: never
     head?: never
@@ -189,7 +250,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SEED-005] Notice 시딩 (지부 · 학교 · 파트 분포)
+     * Notice 시딩 (지부 · 학교 · 파트 분포)
      * @description 활성 기수(또는 지정 기수)에 대해 다음 4 가지 scope 로 공지를 분포 시딩합니다.
      *       GLOBAL  : 기수 전체 대상 (작성자에게 중앙 총괄단 권한 필요)
      *       CHAPTER : 각 지부별        (작성자에게 해당 지부 회장 권한 필요)
@@ -199,7 +260,7 @@ export interface paths {
      *     포함되어 운영 화면에서 시딩 데이터 식별이 쉬워집니다.
      *     authorMemberId 의 권한이 부족한 scope 는 scopeBreakdown 의 failed 카운트에 잡힙니다.
      */
-    post: operations["seedNotice"]
+    post: operations["SEED-005"]
     delete?: never
     options?: never
     head?: never
@@ -216,14 +277,14 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SEED-001] 더미 멤버 시딩
+     * 더미 멤버 시딩
      * @description ID/PW 더미 멤버를 N 명 즉시 생성합니다. 모든 더미 회원은 동일한 비밀번호
      *     (app.seed.default-password)를 사용합니다.
      *     force=false (기본) 이면 현재 회원 수가 임계값을 초과한 경우 시딩을 스킵합니다.
      *     force=true 이면 임계값 체크를 무시하고 무조건 시딩합니다.
      *     챌린저/프로젝트 시딩 전 호출이 필요합니다.
      */
-    post: operations["seedMembers"]
+    post: operations["SEED-001"]
     delete?: never
     options?: never
     head?: never
@@ -240,13 +301,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SEED-004] Curriculum 시딩 (Curriculum · WeeklyCurriculum · OriginalWorkbook · Mission)
+     * Curriculum 시딩 (Curriculum · WeeklyCurriculum · OriginalWorkbook · Mission)
      * @description 활성 기수(또는 지정 기수)에 대해 ADMIN 제외 파트별로 다음 골격을 시딩합니다.
      *     Curriculum (1/파트) → WeeklyCurriculum (1~N 주차) → OriginalWorkbook (MAIN, READY) → Mission (M개).
      *     releaseRequesterMemberId 가 지정되면 모든 워크북을 READY → RELEASED 로 전환합니다.
      *     각 단계별로 실패 격리되며, 단계별 실패 카운트가 응답에 포함됩니다.
      */
-    post: operations["seedCurriculum"]
+    post: operations["SEED-004"]
     delete?: never
     options?: never
     head?: never
@@ -263,13 +324,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SEED-002] 챌린저 분포 시딩
+     * 챌린저 분포 시딩
      * @description 특정 기수에 대해 (Chapter, School, Part) 셀마다 countPerPartPerSchool 명의 더미 회원 +
      *     챌린저를 함께 생성합니다.
      *     gisuId 가 null 이면 활성 기수, parts 가 null/empty 면 ADMIN 제외 전 파트,
      *     chapterIds 가 null/empty 면 해당 기수의 모든 Chapter 가 대상입니다.
      */
-    post: operations["seedChallengers"]
+    post: operations["SEED-002"]
     delete?: never
     options?: never
     head?: never
@@ -285,8 +346,8 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** [TEST-002] FCM 푸시 알림 테스트 전송 */
-    post: operations["sendTestNotification"]
+    /** FCM 푸시 알림 테스트 전송 */
+    post: operations["TEST-002"]
     delete?: never
     options?: never
     head?: never
@@ -686,6 +747,27 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/user-feedbacks/responses": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 사용자 피드백 응답 제출
+     * @description 지정한 피드백 템플릿에 대한 응답을 즉시 제출합니다.
+     *     동일 폼에 이미 응답한 경우 Survey 도메인에서 중복 응답 예외가 발생합니다.
+     */
+    post: operations["submit"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/trophies": {
     parameters: {
       query?: never
@@ -900,7 +982,7 @@ export interface paths {
      * [PROJECT-107] 프로젝트 제출
      * @description DRAFT 상태의 프로젝트를 제출하여 PENDING_REVIEW로 전이합니다. 작성자(creator)만 호출 가능.
      */
-    post: operations["submit"]
+    post: operations["submit_1"]
     delete?: never
     options?: never
     head?: never
@@ -1007,7 +1089,27 @@ export interface paths {
      * [APPLY-003] 챌린저 지원서 최종 제출
      * @description DRAFT -> SUBMITTED 전이. 필수 답변 누락 시 400. 본인의 DRAFT 지원서에서만 호출 가능.
      */
-    post: operations["submit_1"]
+    post: operations["submit_2"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/projects/{projectId}/abort": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * [PROJECT-110] 프로젝트 중단
+     * @description IN_PROGRESS 상태의 프로젝트를 ABORTED 로 전이합니다. ACTIVE ProjectMember 는 WITHDRAWN, 진행 중(DRAFT/SUBMITTED) ProjectApplication 은 CANCELLED 로 일괄 동기화. 운영진(본인 지부장 또는 Central Core) 만 호출 가능.
+     */
+    post: operations["abort"]
     delete?: never
     options?: never
     head?: never
@@ -1736,6 +1838,26 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/authorization/resource-permissions/batch": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * [PERMISSION-002] 리소스 권한 배치 조회
+     * @description 여러 리소스에 대해 현재 사용자의 권한을 한 번에 조회합니다. 유효하지 않은 query가 하나라도 있으면 요청 전체가 실패합니다.
+     */
+    post: operations["batchGetResourcePermission"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/authorization/challenger-role": {
     parameters: {
       query?: never
@@ -1877,7 +1999,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [LOGIN-006] 이메일/PW 로그인
+     * [LOGIN-011] 이메일/PW 로그인
      * @description email/password 로 인증하여 AccessToken/RefreshToken 을 발급받습니다. clientType(ANDROID, IOS, WEB)을 함께 전달하면 AccessToken claim 으로 반영됩니다.
      */
     post: operations["loginByEmail"]
@@ -2657,7 +2779,11 @@ export interface paths {
     get: operations["getDetail"]
     put?: never
     post?: never
-    delete?: never
+    /**
+     * [PROJECT-109] 프로젝트 삭제
+     * @description DRAFT / PENDING_REVIEW 상태의 프로젝트를 hard delete 합니다. 연관 ProjectMember / PartQuota / ApplicationForm + survey Form 까지 cascade 삭제. PO 본인 또는 운영진(본인 지부장 / 해당 기수 총괄단)만 호출 가능. IN_PROGRESS 이상은 abort 엔드포인트 사용.
+     */
+    delete: operations["delete_2"]
     options?: never
     head?: never
     /**
@@ -2707,7 +2833,7 @@ export interface paths {
      *     - 지부장은 본인 지부의 매칭 차수만 삭제할 수 있습니다.
      *     - 해당 매칭 차수를 참조하는 지원서가 하나라도 있으면 삭제할 수 없으며 409를 반환합니다.
      */
-    delete: operations["delete_2"]
+    delete: operations["delete_3"]
     options?: never
     head?: never
     /**
@@ -2983,8 +3109,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TEST-003] AOP로 전송하는 알람 테스트 */
-    get: operations["sendAopWebhookAlarm"]
+    /** AOP로 전송하는 알람 테스트 */
+    get: operations["TEST-003"]
     put?: never
     post?: never
     delete?: never
@@ -3000,8 +3126,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TEST-008] RefreshToken 발급 */
-    get: operations["getRefreshToken"]
+    /** RefreshToken 발급 */
+    get: operations["TEST-008"]
     put?: never
     post?: never
     delete?: never
@@ -3017,8 +3143,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TEST-010] oAuthVerificationToken 발급 */
-    get: operations["getOAuthVerificationToken"]
+    /** oAuthVerificationToken 발급 */
+    get: operations["TEST-010"]
     put?: never
     post?: never
     delete?: never
@@ -3034,8 +3160,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TEST-009] EmailVerificationToken 발급 */
-    get: operations["getEmailVerification"]
+    /** EmailVerificationToken 발급 */
+    get: operations["TEST-009"]
     put?: never
     post?: never
     delete?: never
@@ -3051,8 +3177,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TEST-007] AccessToken 발급 */
-    get: operations["getAccessToken"]
+    /** AccessToken 발급 */
+    get: operations["TEST-007"]
     put?: never
     post?: never
     delete?: never
@@ -3084,8 +3210,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TEST-011] 헬스 체크 API */
-    get: operations["healthCheck"]
+    /** 헬스 체크 API */
+    get: operations["TEST-011"]
     put?: never
     post?: never
     delete?: never
@@ -3102,12 +3228,12 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [TEST-001] [개발용] 파일 ID를 기반으로 접근 가능한 URL을 조회합니다.
+     * [개발용] 파일 ID를 기반으로 접근 가능한 URL을 조회합니다.
      * @description local 및 development 환경에서만 사용 가능합니다.
      *
      *     크롤링을 방지하기 위한 절차입니다. 파일이 정상적으로 업로드되었는지 확인하는 용도로만 사용하세요.
      */
-    get: operations["getFile"]
+    get: operations["TEST-001"]
     put?: never
     post?: never
     delete?: never
@@ -3124,10 +3250,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [TEST-012] 인증된 사용자인지 여부를 확인합니다.
+     * 인증된 사용자인지 여부를 확인합니다.
      * @description 인증되지 않은 사용자인 경우 401을 반환합니다.
      */
-    get: operations["checkAuthenticated"]
+    get: operations["TEST-012"]
     put?: never
     post?: never
     delete?: never
@@ -3143,8 +3269,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TEST-006] Apple Client Secret 생성 */
-    get: operations["getAppleClientSecret"]
+    /** Apple Client Secret 생성 */
+    get: operations["TEST-006"]
     put?: never
     post?: never
     delete?: never
@@ -3262,6 +3388,65 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v2/member/search": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * [MEMBER-202] 회원 검색 v2
+     * @description 회원 단위 검색 결과를 반환합니다.
+     *
+     *     - `currentChallenger` : 활성 기수 챌린저 우선, 없으면 최신 기수 챌린저
+     *     - `challengerRecords` : 회원이 보유한 모든 챌린저 이력 요약
+     *     - `isAdminInActiveGisu` : 회원이 현재 활성 기수에 운영진 ChallengerRole을 하나라도 보유하는지
+     *
+     *     검색 조건/필터는 v1과 동일합니다.
+     *
+     *     검색 결과에는 본인 외 회원이 포함되므로, 로그인 식별자인 이메일은 평문 노출을 피하기 위해
+     *     컨트롤러 단에서 마스킹 처리되어 응답됩니다.
+     */
+    get: operations["searchMembersV2"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v2/member/me": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * [MEMBER-201] 내 종합 정보 조회
+     * @description 현재 로그인한 사용자의 통합 정보를 반환합니다.
+     *
+     *     - 기본 프로필 및 소셜 링크
+     *     - 모든 참여 기수의 활동 기간을 합산한 `totalActivityDays`
+     *     - `currentGisuMemberInfo`
+     *       - 활성 기수 정보 (gisuId, generation)
+     *       - 활성 기수에 ACTIVE 상태인 챌린저 신분 (없으면 null)
+     *       - 활성 기수에 운영진 ChallengerRole 하나라도 보유 여부 (`isAdmin`)
+     *       - 보유 운영진 RoleType 목록
+     *       - 휴지기에는 `currentGisuMemberInfo = null`
+     *     - `challengerHistory` : 모든 기수의 챌린저 이력 (최신 기수 우선). 기수별 상벌점 포함.
+     */
+    get: operations["getMySummary"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v2/curriculums/weekly-best-workbooks": {
     parameters: {
       query?: never
@@ -3353,6 +3538,61 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v2/challenger/search": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * [CHALLENGER-201] 챌린저 검색 v2
+     * @description 챌린저 단위 페이지네이션 검색입니다.
+     *
+     *     - 같은 회원이 여러 기수에 참여했다면 기수별 챌린저가 각각 별도 row로 반환됩니다.
+     *     - v1 회원 검색 응답에 더해 다음 두 필드를 제공합니다.
+     *       - `challengerStatus`: 해당 행 챌린저의 상태 (ACTIVE/GRADUATED/EXPELLED/WITHDRAWN)
+     *       - `isAdminInActiveGisu`: 회원이 현재 활성 기수에 운영진 ChallengerRole을 하나라도 보유하는지
+     *     - 검색 결과에는 본인 외 회원이 포함되므로, 로그인 식별자인 이메일은 평문 노출을 피하기 위해
+     *       컨트롤러 단에서 마스킹 처리되어 응답됩니다.
+     *     - 회원 단위로 묶인 검색이 필요하다면 `/api/v2/member/search` 를 사용해 주세요.
+     */
+    get: operations["searchChallengersV2"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/user-feedbacks/templates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 사용자 피드백 템플릿 조회
+     * @description 요청자의 챌린저 이력 및 운영진 역할을 기반으로 TargetType을 자동 판별하여,
+     *     해당 context에 맞는 활성 피드백 템플릿(Survey 폼 전체 구조 포함)을 반환합니다.
+     *     활성 기수가 없거나 해당 context + targetType 조합의 템플릿이 없으면 result = null.
+     *
+     *     [조건부 렌더링 - ADMIN / APPLICATION_MONITORING 템플릿]
+     *     현재 Survey 엔진은 조건부 렌더링을 지원하지 않으므로, 프론트엔드에서 직접 처리해야 합니다.
+     *     questions 및 options 배열은 orderNo 기준 오름차순으로 정렬되어 내려오며, 조건에 따라 숨길 질문도 포함되어 있습니다.
+     *     (예: '필요한 정보를 찾는 데 어려움이 있었나요?' 질문에서 '조금 있었어요' 또는 '많이 있었어요' 선택 시 자유 서술 텍스트 박스 표시)
+     */
+    get: operations["getTemplate"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/terms/{termsId}": {
     parameters: {
       query?: never
@@ -3379,6 +3619,23 @@ export interface paths {
     }
     /** [TERM-101] 약관 유형으로 약관 조회 */
     get: operations["getTerms"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/terms/consent-status/me": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** [TERM-103] 내 필수 약관 재동의 상태 조회 */
+    get: operations["getMyRequiredTermConsentStatus"]
     put?: never
     post?: never
     delete?: never
@@ -3505,6 +3762,32 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/projects/{projectId}/statistics": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * [PROJECT-STAT-001] 단건 프로젝트 지원/매칭 현황 조회
+     * @description 프로젝트 ID와 함께 멤버 목록을 포함하고 있고, FE단 재가공을 최소화해드리기 위해서 `roundApplicationStatistics` 및 `schoolApplicationStatistics` 필드를 두고 있습니다.
+     *
+     *     각 항목이 매칭 차수별 지원률, N차 매칭에서의 학교별 및 총 지원자 수를 포함하고 있습니다.
+     *     프로젝트 멤버 목록의 경우 각 멤버가 해당 프로젝트에 작성한 지원 이력을 포함하고 있으며,
+     *     없거나 (강제배정/랜덤매칭) 여러 건 (떨어지고 재 지원하는 경우) 이 존재할 수 있어 배열로 구성되어 있습니다.
+     *
+     *     지원자 목록은(특정 프로젝트에 대한 지원서 조회) `/api/v1/projects/{projectId}/applications`를 호출하셔서 활용하셔야 합니다.
+     */
+    get: operations["getProjectStatistics"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/projects/{projectId}/applications/{applicationId}": {
     parameters: {
       query?: never
@@ -3555,6 +3838,41 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/projects/statistics": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * [PROJECT-STAT-002] 지부 전체 프로젝트 지원/매칭 현황 조회
+     * @description chapterId에 속한 전체 프로젝트를 대상으로 ACTIVE ProjectMember 목록과
+     *     각 멤버가 해당 프로젝트에 작성한 지원 이력을 프로젝트별로 반환합니다.
+     *     summary에는 차수별 지원 완료 인원/지원 가능 총원, 학교 순위, 학교별 매칭 인원,
+     *     프로젝트별 차수 인원 수를 함께 반환합니다.
+     *
+     *     지부 내 회장단 이상의 운영진이 매칭 통계를 조회할 때 활용합니다.
+     *
+     *     지부 내 모든 프로젝트 목록 및 각 프로젝트에 대한 프로젝트 멤버를 포함하고 있으며,
+     *     이는 `/api/v1/projects/{projectId}/statistics` 에서 제공하는 것과 동일한 형태입니다.
+     *
+     *     추가로 BFF 패턴을 적용하여 FE단 데이터 가공 책임을 줄이기 위해 `summary` 필드를 제공하고 있습니다.
+     *
+     *     - roundApplicationStatistics: N차 매칭 지원 현황 카드에 활용합니다. 각 매칭 차수별 정보 (매칭 종류 및 차수) 와 각 차수별 지원자 수 & 지원 가능했던 인원
+     *     - roundSchoolRankings: N차 매칭 지원 Top N에 활용합니다. 각 차수별로, 각 학교별 지원자 수
+     *     - schoolMatchingStatistics: 총원 N명 카드에 활용합니다. 차수와 무관하게, 각 학교별 총 매칭 완료 인원 & 지원 가능 총원
+     *     - projectRoundStatistics: 프로젝트별 지원 현황 필드에 활용합니다. 각 프로젝트별로, 각 매칭 차수별 정보 (매칭 종류 & 차수) 와 지원자 수
+     */
+    get: operations["listChapterProjectStatistics"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/projects/members": {
     parameters: {
       query?: never
@@ -3563,7 +3881,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-004] 프로젝트 팀원 구성 일괄 조회
+     * [PROJECT-007] 프로젝트 팀원 구성 일괄 조회
      * @description 복수의 projectId에 대한 팀원 구성을 조회합니다. 권한이 없거나 조회에 실패한 프로젝트는 결과에서 제외됩니다.
      */
     get: operations["getBatchMembers"]
@@ -3807,7 +4125,10 @@ export interface paths {
     }
     /**
      * [MEMBER-103] 회원 검색
-     * @description 이름, 닉네임, 이메일, 학교명으로 검색, 기수/파트/지부/학교별 필터링
+     * @description 이름, 닉네임, 이메일, 학교명으로 검색하며 기수/파트/지부/학교별 필터링을 지원합니다.
+     *
+     *     검색 결과에는 본인 외 회원이 포함되므로, 로그인 식별자인 이메일은 평문 노출을 피하기 위해
+     *     컨트롤러 단에서 마스킹 처리되어 응답됩니다.
      */
     get: operations["searchMembers"]
     put?: never
@@ -4103,7 +4424,7 @@ export interface paths {
     }
     /**
      * [PERMISSION-001] 리소스 권한 조회
-     * @description 특정 리소스에 대해 현재 사용자가 가진 권한 목록을 조회합니다.
+     * @description 특정 리소스에 대해 현재 사용자가 가진 권한을 조회합니다. permissionType을 지정하면 해당 권한만 평가합니다.
      */
     get: operations["getResourcePermission"]
     put?: never
@@ -4201,7 +4522,7 @@ export interface paths {
       cookie?: never
     }
     /** [FIGMA-009] 폴링 대상 파일 단건 조회 (sync 상태 포함) */
-    get: operations["getFile_1"]
+    get: operations["getFile"]
     put?: never
     post?: never
     /** [FIGMA-004] 폴링 대상 파일 비활성화 */
@@ -4677,6 +4998,119 @@ export interface components {
       schoolId?: number
       reason?: string
     }
+    SeedProjectScenariosRequest: {
+      /** @enum {string} */
+      targetStatus: "DRAFT" | "PENDING_REVIEW" | "IN_PROGRESS"
+      /** Format: int32 */
+      projectCount?: number
+      productOwnerMemberIds?: number[]
+    }
+    CreatedProject: {
+      /** Format: int64 */
+      projectId?: number
+      /** @enum {string} */
+      finalStatus?: "DRAFT" | "PENDING_REVIEW" | "IN_PROGRESS"
+      /** Format: int64 */
+      productOwnerMemberId?: number
+      /** Format: int64 */
+      chapterId?: number
+      /** Format: int64 */
+      schoolId?: number
+      /** Format: int64 */
+      applicationFormId?: number
+      partFills?: components["schemas"]["PartFill"][]
+    }
+    FailedProject: {
+      /** Format: int64 */
+      projectId?: number
+      /** @enum {string} */
+      reachedStatus?: "DRAFT" | "PENDING_REVIEW" | "IN_PROGRESS"
+      /** @enum {string} */
+      intendedStatus?: "DRAFT" | "PENDING_REVIEW" | "IN_PROGRESS"
+      failedStep?: string
+      reason?: string
+    }
+    PartFill: {
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** Format: int64 */
+      quota?: number
+      /** Format: int64 */
+      filled?: number
+    }
+    SeedProjectScenariosResponse: {
+      createdProjects?: components["schemas"]["CreatedProject"][]
+      failedProjects?: components["schemas"]["FailedProject"][]
+    }
+    SeedProjectApplicationsRequest: {
+      /** Format: int64 */
+      matchingRoundId: number
+      /** Format: int64 */
+      chapterId: number
+    }
+    ApplicationEntry: {
+      /** Format: int64 */
+      applicationId?: number
+      /** Format: int64 */
+      applicantMemberId?: number
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** @enum {string} */
+      finalStatus?:
+        | "DRAFT"
+        | "SUBMITTED"
+        | "APPROVED"
+        | "REJECTED"
+        | "CANCELLED"
+    }
+    Counts: {
+      /** Format: int32 */
+      submittedTotal?: number
+      /** Format: int32 */
+      approvedTotal?: number
+      /** Format: int32 */
+      rejectedTotal?: number
+      /** Format: int32 */
+      failedTotal?: number
+    }
+    FailedApplication: {
+      /** Format: int64 */
+      applicantMemberId?: number
+      /** Format: int64 */
+      projectId?: number
+      /** Format: int64 */
+      applicationId?: number
+      failedStep?: string
+      reason?: string
+    }
+    ProjectApplications: {
+      /** Format: int64 */
+      projectId?: number
+      applications?: components["schemas"]["ApplicationEntry"][]
+    }
+    SeedProjectApplicationsResponse: {
+      /** Format: int64 */
+      matchingRoundId?: number
+      createdApplications?: components["schemas"]["ProjectApplications"][]
+      failedApplications?: components["schemas"]["FailedApplication"][]
+      counts?: components["schemas"]["Counts"]
+    }
     SeedNoticeRequest: {
       /** Format: int64 */
       gisuId?: number
@@ -5132,6 +5566,25 @@ export interface components {
       hasFeedback?: boolean
       feedbacks?: components["schemas"]["MissionFeedbackResponse"][]
     }
+    SubmitUserFeedbackResponseRequest: {
+      /** Format: int64 */
+      templateId: number
+      answers: components["schemas"]["UserFeedbackAnswerItem"][]
+    }
+    UserFeedbackAnswerItem: {
+      /** Format: int64 */
+      questionId: number
+      /** @description SHORT_TEXT / LONG_TEXT 타입에서 사용 */
+      textValue?: string
+      /** @description RADIO / CHECKBOX / DROPDOWN 타입에서 사용 */
+      selectedOptionIds?: number[]
+      /** @description FILE 타입에서 사용 */
+      fileIds?: string[]
+    }
+    UserFeedbackSubmitResponse: {
+      /** Format: int64 */
+      formResponseId?: number
+    }
     CreateTrophyRequest: {
       /** Format: int32 */
       week?: number
@@ -5397,6 +5850,9 @@ export interface components {
     CreateProjectApplicationRequest: {
       /** Format: int64 */
       matchingRoundId: number
+    }
+    AbortProjectRequest: {
+      reason: string
     }
     CreateProjectMatchingRoundRequest: {
       name: string
@@ -5926,9 +6382,9 @@ export interface components {
     }
     CreateChallengerInfoRequest: {
       /** Format: int64 */
-      memberId?: number
+      memberId: number
       /** @enum {string} */
-      part?:
+      part:
         | "PLAN"
         | "DESIGN"
         | "WEB"
@@ -5938,7 +6394,7 @@ export interface components {
         | "SPRINGBOOT"
         | "ADMIN"
       /** Format: int64 */
-      gisuId?: number
+      gisuId: number
     }
     ChallengerInfoResponse: {
       /** Format: int64 */
@@ -6050,7 +6506,7 @@ export interface components {
     }
     GrantChallengerPointRequest: {
       /** @enum {string} */
-      pointType?:
+      pointType:
         | "BEST_WORKBOOK"
         | "WARNING"
         | "OUT"
@@ -6075,20 +6531,20 @@ export interface components {
     }
     DeactivateChallengerRequest: {
       /** @enum {string} */
-      deactivationType?: "WITHDRAW" | "EXPEL"
+      deactivationType: "WITHDRAW" | "EXPEL"
       /** Format: int64 */
-      modifiedBy?: number
-      reason?: string
+      modifiedBy: number
+      reason: string
     }
     CreateChallengerRecordRequest: {
       /** Format: int64 */
-      gisuId?: number
+      gisuId: number
       /** Format: int64 */
-      chapterId?: number
+      chapterId: number
       /** Format: int64 */
-      schoolId?: number
+      schoolId: number
       /** @enum {string} */
-      part?:
+      part:
         | "PLAN"
         | "DESIGN"
         | "WEB"
@@ -6097,7 +6553,7 @@ export interface components {
         | "NODEJS"
         | "SPRINGBOOT"
         | "ADMIN"
-      memberName?: string
+      memberName: string
       /** @enum {string} */
       challengerRoleType?:
         | "SUPER_ADMIN"
@@ -6150,7 +6606,104 @@ export interface components {
       organizationId?: number
     }
     AddChallengerRecordToMemberRequest: {
-      code?: string
+      code: string
+    }
+    BatchResourcePermissionRequest: {
+      queries: components["schemas"]["ResourcePermissionQueryRequest"][]
+    }
+    ResourcePermissionQueryRequest: {
+      /** @enum {string} */
+      resourceType:
+        | "AUDIT"
+        | "SCHEDULE"
+        | "ATTENDANCE"
+        | "ATTENDANCE_SHEET"
+        | "ATTENDANCE_RECORD"
+        | "NOTICE"
+        | "CURRICULUM"
+        | "WORKBOOK_SUBMISSION"
+        | "ORIGINAL_WORKBOOK"
+        | "GISU"
+        | "CHAPTER"
+        | "SCHOOL"
+        | "STUDY_GROUP"
+        | "COMMUNITY_POST"
+        | "COMMUNITY_COMMENT"
+        | "RECRUITMENT"
+        | "MEMBER"
+        | "ANALYTICS"
+        | "TERM"
+        | "CHALLENGER"
+        | "CHALLENGER_ROLE"
+        | "CHALLENGER_POINT"
+        | "CHALLENGER_RECORD"
+        | "FCM"
+        | "PROJECT"
+        | "PROJECT_APPLICATION"
+        | "FIGMA"
+      resourceIds?: number[]
+      permissionTypes?: (
+        | "READ"
+        | "WRITE"
+        | "EDIT"
+        | "DELETE"
+        | "FORCE_DELETE"
+        | "APPROVE"
+        | "CHECK"
+        | "MANAGE"
+        | "RELEASE"
+      )[]
+    }
+    BatchResourcePermissionResponse: {
+      results?: components["schemas"]["ResourcePermissionResponse"][]
+    }
+    PermissionInfo: {
+      /** @enum {string} */
+      permissionType?:
+        | "READ"
+        | "WRITE"
+        | "EDIT"
+        | "DELETE"
+        | "FORCE_DELETE"
+        | "APPROVE"
+        | "CHECK"
+        | "MANAGE"
+        | "RELEASE"
+      hasPermission?: boolean
+    }
+    ResourcePermissionResponse: {
+      /** @enum {string} */
+      resourceType?:
+        | "AUDIT"
+        | "SCHEDULE"
+        | "ATTENDANCE"
+        | "ATTENDANCE_SHEET"
+        | "ATTENDANCE_RECORD"
+        | "NOTICE"
+        | "CURRICULUM"
+        | "WORKBOOK_SUBMISSION"
+        | "ORIGINAL_WORKBOOK"
+        | "GISU"
+        | "CHAPTER"
+        | "SCHOOL"
+        | "STUDY_GROUP"
+        | "COMMUNITY_POST"
+        | "COMMUNITY_COMMENT"
+        | "RECRUITMENT"
+        | "MEMBER"
+        | "ANALYTICS"
+        | "TERM"
+        | "CHALLENGER"
+        | "CHALLENGER_ROLE"
+        | "CHALLENGER_POINT"
+        | "CHALLENGER_RECORD"
+        | "FCM"
+        | "PROJECT"
+        | "PROJECT_APPLICATION"
+        | "FIGMA"
+      /** Format: int64 */
+      resourceId?: number
+      permissions?: components["schemas"]["PermissionInfo"][]
     }
     CreateChallengerRoleRequest: {
       /** Format: int64 */
@@ -6722,7 +7275,7 @@ export interface components {
     }
     EditChallengerPartRequest: {
       /** @enum {string} */
-      newPart?:
+      newPart:
         | "PLAN"
         | "DESIGN"
         | "WEB"
@@ -6733,7 +7286,7 @@ export interface components {
         | "ADMIN"
     }
     EditChallengerPointRequest: {
-      newDescription?: string
+      newDescription: string
     }
     ChangePasswordRequest: {
       currentPassword: string
@@ -6916,6 +7469,165 @@ export interface components {
       /** Format: int32 */
       maxParticipantCount?: number
     }
+    /** @description 대표 챌린저. 활성 기수 챌린저 우선, 없으면 최신 기수 */
+    CurrentChallengerResponse: {
+      /** Format: int64 */
+      challengerId?: number
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      generation?: number
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** @enum {string} */
+      challengerStatus?: "ACTIVE" | "GRADUATED" | "EXPELLED" | "WITHDRAWN"
+    }
+    PageResponseSearchMemberV2ItemResponse: {
+      content?: components["schemas"]["SearchMemberV2ItemResponse"][]
+      /** Format: int32 */
+      page?: number
+      /** Format: int32 */
+      size?: number
+      /** Format: int64 */
+      totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
+      hasNext?: boolean
+      hasPrevious?: boolean
+    }
+    SearchMemberV2ItemResponse: {
+      /** Format: int64 */
+      memberId?: number
+      name?: string
+      nickname?: string
+      email?: string
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      profileImageLink?: string
+      currentChallenger?: components["schemas"]["CurrentChallengerResponse"]
+      /** @description 이 회원이 현재 활성 기수에 운영진 ChallengerRole을 하나라도 보유하는지 */
+      isAdminInActiveGisu?: boolean
+      /** @description 회원이 보유한 모든 챌린저 이력 요약 (최신 기수 우선) */
+      challengerRecords?: components["schemas"]["ChallengerRecordResponse"][]
+    }
+    SearchMemberV2Response: {
+      /** Format: int64 */
+      totalCount?: number
+      page?: components["schemas"]["PageResponseSearchMemberV2ItemResponse"]
+    }
+    /** @description 활성 기수에서 현재 ACTIVE 상태인 챌린저 신분. ACTIVE가 아니면 null */
+    ActiveChallenger: {
+      /** Format: int64 */
+      challengerId?: number
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** @enum {string} */
+      challengerStatus?: "ACTIVE" | "GRADUATED" | "EXPELLED" | "WITHDRAWN"
+      points?: components["schemas"]["ChallengerPointInfo"][]
+      /** Format: double */
+      totalPoints?: number
+    }
+    /** @description 모든 챌린저 기록 (최신 기수 우선) */
+    ChallengerHistoryV2: {
+      /** Format: int64 */
+      challengerId?: number
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      generation?: number
+      /** Format: int64 */
+      chapterId?: number
+      chapterName?: string
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** @enum {string} */
+      challengerStatus?: "ACTIVE" | "GRADUATED" | "EXPELLED" | "WITHDRAWN"
+      points?: components["schemas"]["ChallengerPointInfo"][]
+      /** Format: double */
+      totalPoints?: number
+      roleTypes?: (
+        | "SUPER_ADMIN"
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+      )[]
+    }
+    /** @description 현재 활성 기수에 대한 챌린저 정보 */
+    CurrentGisuMemberInfo: {
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      generation?: number
+      challenger?: components["schemas"]["ActiveChallenger"]
+      /** @description 활성 기수에 운영진 ChallengerRole이 하나라도 존재하는지 */
+      isAdmin?: boolean
+      /** @description 활성 기수에 가지고 있는 역할 목록 */
+      roleTypes?: (
+        | "SUPER_ADMIN"
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+      )[]
+    }
+    MemberSummaryV2Response: {
+      /** Format: int64 */
+      id?: number
+      name?: string
+      nickname?: string
+      email?: string
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      profileImageLink?: string
+      /** @enum {string} */
+      status?: "ACTIVE" | "INACTIVE" | "WITHDRAWN"
+      profile?: components["schemas"]["MemberProfileInfo"]
+      /**
+       * Format: int64
+       * @description 챌린저로 활동한 총 일수
+       */
+      totalActivityDays?: number
+      currentGisuMemberInfo?: components["schemas"]["CurrentGisuMemberInfo"]
+      /** @description 모든 챌린저 기록 (최신 기수 우선) */
+      challengerHistory?: components["schemas"]["ChallengerHistoryV2"][]
+    }
     BestWorkbookResponse: {
       /** Format: int64 */
       weeklyBestWorkbookEntityId?: number
@@ -7038,11 +7750,135 @@ export interface components {
       releasedMemberId?: number
       missions?: components["schemas"]["OriginalWorkbookMissionResponse"]
     }
+    ChallengerSearchV2ItemResponse: {
+      /** Format: int64 */
+      memberId?: number
+      name?: string
+      nickname?: string
+      email?: string
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      profileImageLink?: string
+      /** Format: int64 */
+      challengerId?: number
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      generation?: number
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /**
+       * @description 검색 결과 행의 챌린저 상태
+       * @enum {string}
+       */
+      challengerStatus?: "ACTIVE" | "GRADUATED" | "EXPELLED" | "WITHDRAWN"
+      roleTypes?: (
+        | "SUPER_ADMIN"
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+      )[]
+      /** @description 이 회원이 현재 활성 기수에 운영진 ChallengerRole을 하나라도 보유하는지 */
+      isAdminInActiveGisu?: boolean
+    }
+    ChallengerSearchV2Response: {
+      /** Format: int64 */
+      totalCount?: number
+      page?: components["schemas"]["PageResponseChallengerSearchV2ItemResponse"]
+    }
+    PageResponseChallengerSearchV2ItemResponse: {
+      content?: components["schemas"]["ChallengerSearchV2ItemResponse"][]
+      /** Format: int32 */
+      page?: number
+      /** Format: int32 */
+      size?: number
+      /** Format: int64 */
+      totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
+      hasNext?: boolean
+      hasPrevious?: boolean
+    }
+    FeedbackForm: {
+      /** Format: int64 */
+      formId?: number
+      title?: string
+      description?: string
+      sections?: components["schemas"]["FeedbackSection"][]
+    }
+    FeedbackOption: {
+      /** Format: int64 */
+      optionId?: number
+      content?: string
+      /** Format: int64 */
+      orderNo?: number
+      isOther?: boolean
+    }
+    FeedbackQuestion: {
+      /** Format: int64 */
+      questionId?: number
+      title?: string
+      description?: string
+      /** @enum {string} */
+      type?:
+        | "SHORT_TEXT"
+        | "LONG_TEXT"
+        | "RADIO"
+        | "CHECKBOX"
+        | "DROPDOWN"
+        | "SCHEDULE"
+        | "FILE"
+        | "PORTFOLIO"
+      isRequired?: boolean
+      /** Format: int64 */
+      orderNo?: number
+      options?: components["schemas"]["FeedbackOption"][]
+    }
+    FeedbackSection: {
+      /** Format: int64 */
+      sectionId?: number
+      title?: string
+      description?: string
+      /** Format: int64 */
+      orderNo?: number
+      questions?: components["schemas"]["FeedbackQuestion"][]
+    }
+    GetUserFeedbackTemplateResponse: {
+      /** Format: int64 */
+      templateId?: number
+      /** @enum {string} */
+      context?:
+        | "APPLICATION_SUBMITTED"
+        | "MATCHING_COMPLETED"
+        | "APPLICATION_MONITORING"
+      /** @enum {string} */
+      targetType?: "NEW_CHALLENGER" | "EXPERIENCED_CHALLENGER" | "ADMIN"
+      form?: components["schemas"]["FeedbackForm"]
+    }
     TermResponse: {
       /** Format: int64 */
       id?: number
       link?: string
       isMandatory?: boolean
+    }
+    RequiredTermConsentStatusResponse: {
+      needsReconsent?: boolean
+      missingRequiredTerms?: components["schemas"]["TermResponse"][]
     }
     /** @description 시스템 점검 상태 */
     SystemStatusResponse: {
@@ -7295,6 +8131,118 @@ export interface components {
       /** Format: int64 */
       applicationFormId?: number
     }
+    /** @description 지원서가 연결된 매칭 차수 정보 */
+    ProjectMatchingRoundStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 매칭 차수 ID
+       */
+      matchingRoundId?: number
+      /**
+       * @description 매칭 유형
+       * @enum {string}
+       */
+      type?: "PLAN_DESIGN" | "PLAN_DEVELOPER"
+      /**
+       * @description 매칭 차수
+       * @enum {string}
+       */
+      phase?: "FIRST" | "SECOND" | "THIRD"
+    }
+    /** @description 프로젝트 멤버의 차수별 지원 이력 */
+    ProjectMemberApplicationStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 지원서 ID
+       */
+      applicationId?: number
+      /**
+       * @description 지원서 상태
+       * @enum {string}
+       */
+      status?: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED" | "CANCELLED"
+      matchingRound?: components["schemas"]["ProjectMatchingRoundStatisticsResponse"]
+    }
+    /** @description 프로젝트 멤버별 지원 이력 */
+    ProjectMemberStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 프로젝트 멤버 ID
+       */
+      projectMemberId?: number
+      /**
+       * Format: int64
+       * @description 멤버 ID
+       */
+      memberId?: number
+      /**
+       * @description 프로젝트 내 파트
+       * @enum {string}
+       */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /**
+       * @description 프로젝트 멤버 상태
+       * @enum {string}
+       */
+      status?: "ACTIVE" | "COMPLETED" | "WITHDRAWN" | "DISMISSED"
+      /** @description 해당 멤버가 이 프로젝트에 작성한 지원 이력. 강제 배정이면 빈 목록입니다. */
+      applications?: components["schemas"]["ProjectMemberApplicationStatisticsResponse"][]
+    }
+    /** @description 프로젝트 지원/매칭 현황 통합 응답 */
+    ProjectStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 프로젝트 ID
+       */
+      projectId?: number
+      /** @description 프로젝트에 최종 합류한 활성 멤버 목록 */
+      projectMembers?: components["schemas"]["ProjectMemberStatisticsResponse"][]
+      /** @description 매칭 차수별 지원 완료 인원 수와 지원 가능 인원 수 */
+      roundApplicationStatistics?: components["schemas"]["RoundApplicationStatisticsResponse"][]
+      /** @description 매칭 차수별 지원자 학교 인원 수 */
+      schoolApplicationStatistics?: components["schemas"]["RoundSchoolApplicationStatisticsResponse"][]
+    }
+    /** @description 매칭 차수별 지원 완료 인원 수와 지원 가능 인원 수 */
+    RoundApplicationStatisticsResponse: {
+      matchingRound?: components["schemas"]["ProjectMatchingRoundStatisticsResponse"]
+      /**
+       * Format: int64
+       * @description 지원 완료 인원 수
+       */
+      appliedMemberCount?: number
+      /**
+       * Format: int64
+       * @description 지원 가능 인원 수
+       */
+      availableMemberCount?: number
+    }
+    /** @description 매칭 차수별 지원자 학교 인원 수 */
+    RoundSchoolApplicationStatisticsResponse: {
+      matchingRound?: components["schemas"]["ProjectMatchingRoundStatisticsResponse"]
+      /** @description 학교별 지원자 수 */
+      schools?: components["schemas"]["SchoolApplicationStatisticsResponse"][]
+    }
+    /** @description 학교별 지원자 수 */
+    SchoolApplicationStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 학교 ID
+       */
+      schoolId?: number
+      /**
+       * Format: int64
+       * @description 지원자 수
+       */
+      applicantCount?: number
+    }
     PartGroup: {
       /** @enum {string} */
       part?:
@@ -7464,6 +8412,70 @@ export interface components {
       title?: string
       description?: string
       sections?: components["schemas"]["ApplicationFormSection"][]
+    }
+    /** @description 지부 전체 프로젝트 지원/매칭 현황 BFF 응답 */
+    ChapterProjectStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 지부 ID
+       */
+      chapterId?: number
+      /** @description 지부 내 프로젝트별 기존 지원/매칭 현황 */
+      projects?: components["schemas"]["ProjectStatisticsResponse"][]
+      summary?: components["schemas"]["ChapterProjectStatisticsSummaryResponse"]
+    }
+    /** @description 지부 단위 지원/매칭 요약 */
+    ChapterProjectStatisticsSummaryResponse: {
+      /** @description 매칭 차수별 지원 완료 인원 수와 지원 가능 총원 */
+      roundApplicationStatistics?: components["schemas"]["RoundApplicationStatisticsResponse"][]
+      /** @description 매칭 차수별 지원자 학교 순위 */
+      roundSchoolRankings?: components["schemas"]["RoundSchoolApplicationStatisticsResponse"][]
+      /** @description 학교별 총 매칭 인원 수와 총원 */
+      schoolMatchingStatistics?: components["schemas"]["SchoolMatchingStatisticsResponse"][]
+      /** @description 프로젝트별 매칭 차수 인원 수 */
+      projectRoundStatistics?: components["schemas"]["ProjectRoundMemberStatisticsResponse"][]
+    }
+    /** @description 프로젝트 내 특정 매칭 차수의 지원 완료 인원 수와 매칭 완료 인원 수 */
+    ProjectRoundMemberCountResponse: {
+      matchingRound?: components["schemas"]["ProjectMatchingRoundStatisticsResponse"]
+      /**
+       * Format: int64
+       * @description 지원 완료 인원 수
+       */
+      appliedMemberCount?: number
+      /**
+       * Format: int64
+       * @description 매칭 완료 인원 수
+       */
+      matchedMemberCount?: number
+    }
+    /** @description 프로젝트별 매칭 차수 인원 수 */
+    ProjectRoundMemberStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 프로젝트 ID
+       */
+      projectId?: number
+      /** @description 매칭 차수별 인원 수 */
+      matchingRounds?: components["schemas"]["ProjectRoundMemberCountResponse"][]
+    }
+    /** @description 학교별 총 매칭 인원 수와 총원 */
+    SchoolMatchingStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 학교 ID
+       */
+      schoolId?: number
+      /**
+       * Format: int64
+       * @description 매칭 완료 인원 수
+       */
+      matchedMemberCount?: number
+      /**
+       * Format: int64
+       * @description 학교별 지원 가능 총원
+       */
+      totalMemberCount?: number
     }
     ManagedProjectSummaryResponse: {
       /** Format: int64 */
@@ -8153,54 +9165,6 @@ export interface components {
       cursor?: components["schemas"]["CursorResponseSearchChallengerItemResponse"]
       partCounts?: components["schemas"]["PartCountResponse"][]
     }
-    PermissionInfo: {
-      /** @enum {string} */
-      permissionType?:
-        | "READ"
-        | "WRITE"
-        | "EDIT"
-        | "DELETE"
-        | "FORCE_DELETE"
-        | "APPROVE"
-        | "CHECK"
-        | "MANAGE"
-        | "RELEASE"
-      hasPermission?: boolean
-    }
-    ResourcePermissionResponse: {
-      /** @enum {string} */
-      resourceType?:
-        | "AUDIT"
-        | "SCHEDULE"
-        | "ATTENDANCE"
-        | "ATTENDANCE_SHEET"
-        | "ATTENDANCE_RECORD"
-        | "NOTICE"
-        | "CURRICULUM"
-        | "WORKBOOK_SUBMISSION"
-        | "ORIGINAL_WORKBOOK"
-        | "GISU"
-        | "CHAPTER"
-        | "SCHOOL"
-        | "STUDY_GROUP"
-        | "COMMUNITY_POST"
-        | "COMMUNITY_COMMENT"
-        | "RECRUITMENT"
-        | "MEMBER"
-        | "ANALYTICS"
-        | "TERM"
-        | "CHALLENGER"
-        | "CHALLENGER_ROLE"
-        | "CHALLENGER_POINT"
-        | "CHALLENGER_RECORD"
-        | "FCM"
-        | "PROJECT"
-        | "PROJECT_APPLICATION"
-        | "FIGMA"
-      /** Format: int64 */
-      resourceId?: number
-      permissions?: components["schemas"]["PermissionInfo"][]
-    }
     EmailAvailabilityResponse: {
       email?: string
       available?: boolean
@@ -8542,6 +9506,7 @@ export interface components {
         | "LLM"
         | "ANALYTICS"
         | "MAINTENANCE"
+        | "FEEDBACK"
       /** @enum {string} */
       action?:
         | "CREATE"
@@ -8564,10 +9529,10 @@ export interface components {
       createdAt?: string
     }
     PageAuditLogInfo: {
-      /** Format: int64 */
-      totalElements?: number
       /** Format: int32 */
       totalPages?: number
+      /** Format: int64 */
+      totalElements?: number
       /** Format: int32 */
       size?: number
       content?: components["schemas"]["AuditLogInfo"][]
@@ -8814,7 +9779,7 @@ export interface operations {
       }
     }
   }
-  sendWebhookAlarm: {
+  "TEST-004": {
     parameters: {
       query: {
         title: string
@@ -8835,7 +9800,7 @@ export interface operations {
       }
     }
   }
-  sendBufferedWebhookAlarm: {
+  "TEST-005": {
     parameters: {
       query: {
         title: string
@@ -8857,7 +9822,7 @@ export interface operations {
       }
     }
   }
-  seedProjects: {
+  "SEED-003": {
     parameters: {
       query?: never
       header?: never
@@ -8881,7 +9846,55 @@ export interface operations {
       }
     }
   }
-  seedNotice: {
+  "SEED-003-S": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SeedProjectScenariosRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SeedProjectScenariosResponse"]
+        }
+      }
+    }
+  }
+  seedProjectApplications: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SeedProjectApplicationsRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SeedProjectApplicationsResponse"]
+        }
+      }
+    }
+  }
+  "SEED-005": {
     parameters: {
       query?: never
       header?: never
@@ -8905,7 +9918,7 @@ export interface operations {
       }
     }
   }
-  seedMembers: {
+  "SEED-001": {
     parameters: {
       query?: never
       header?: never
@@ -8929,7 +9942,7 @@ export interface operations {
       }
     }
   }
-  seedCurriculum: {
+  "SEED-004": {
     parameters: {
       query?: never
       header?: never
@@ -8953,7 +9966,7 @@ export interface operations {
       }
     }
   }
-  seedChallengers: {
+  "SEED-002": {
     parameters: {
       query?: never
       header?: never
@@ -8977,7 +9990,7 @@ export interface operations {
       }
     }
   }
-  sendTestNotification: {
+  "TEST-002": {
     parameters: {
       query?: never
       header?: never
@@ -9460,6 +10473,30 @@ export interface operations {
       }
     }
   }
+  submit: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubmitUserFeedbackResponseRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["UserFeedbackSubmitResponse"]
+        }
+      }
+    }
+  }
   getTrophies: {
     parameters: {
       query?: {
@@ -9807,7 +10844,7 @@ export interface operations {
       }
     }
   }
-  submit: {
+  submit_1: {
     parameters: {
       query?: never
       header?: never
@@ -9960,7 +10997,7 @@ export interface operations {
       }
     }
   }
-  submit_1: {
+  submit_2: {
     parameters: {
       query?: never
       header?: never
@@ -9979,6 +11016,30 @@ export interface operations {
         content: {
           "*/*": components["schemas"]["ProjectApplicationStatusResponse"]
         }
+      }
+    }
+  }
+  abort: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        projectId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AbortProjectRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
     }
   }
@@ -11041,6 +12102,30 @@ export interface operations {
         }
         content: {
           "*/*": number[]
+        }
+      }
+    }
+  }
+  batchGetResourcePermission: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BatchResourcePermissionRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BatchResourcePermissionResponse"]
         }
       }
     }
@@ -12452,6 +13537,26 @@ export interface operations {
       }
     }
   }
+  delete_2: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        projectId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
   update_1: {
     parameters: {
       query?: never
@@ -12505,7 +13610,7 @@ export interface operations {
       }
     }
   }
-  delete_2: {
+  delete_3: {
     parameters: {
       query?: never
       header?: never
@@ -13072,7 +14177,7 @@ export interface operations {
       }
     }
   }
-  sendAopWebhookAlarm: {
+  "TEST-003": {
     parameters: {
       query: {
         title: string
@@ -13095,7 +14200,7 @@ export interface operations {
       }
     }
   }
-  getRefreshToken: {
+  "TEST-008": {
     parameters: {
       query: {
         memberId: number
@@ -13117,7 +14222,7 @@ export interface operations {
       }
     }
   }
-  getOAuthVerificationToken: {
+  "TEST-010": {
     parameters: {
       query: {
         provider: "GOOGLE" | "APPLE" | "KAKAO"
@@ -13141,7 +14246,7 @@ export interface operations {
       }
     }
   }
-  getEmailVerification: {
+  "TEST-009": {
     parameters: {
       query: {
         email: string
@@ -13164,7 +14269,7 @@ export interface operations {
       }
     }
   }
-  getAccessToken: {
+  "TEST-007": {
     parameters: {
       query: {
         memberId: number
@@ -13205,7 +14310,7 @@ export interface operations {
       }
     }
   }
-  healthCheck: {
+  "TEST-011": {
     parameters: {
       query?: never
       header?: never
@@ -13225,7 +14330,7 @@ export interface operations {
       }
     }
   }
-  getFile: {
+  "TEST-001": {
     parameters: {
       query?: never
       header?: never
@@ -13247,7 +14352,7 @@ export interface operations {
       }
     }
   }
-  checkAuthenticated: {
+  "TEST-012": {
     parameters: {
       query?: never
       header?: never
@@ -13267,7 +14372,7 @@ export interface operations {
       }
     }
   }
-  getAppleClientSecret: {
+  "TEST-006": {
     parameters: {
       query: {
         clientType: "ANDROID" | "IOS" | "WEB"
@@ -13451,6 +14556,66 @@ export interface operations {
       }
     }
   }
+  searchMembersV2: {
+    parameters: {
+      query?: {
+        /** @description Zero-based page index (0..N) */
+        page?: number
+        /** @description The size of the page to be returned */
+        size?: number
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[]
+        keyword?: string
+        gisuId?: number
+        part?:
+          | "PLAN"
+          | "DESIGN"
+          | "WEB"
+          | "ANDROID"
+          | "IOS"
+          | "NODEJS"
+          | "SPRINGBOOT"
+          | "ADMIN"
+        chapterId?: number
+        schoolId?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SearchMemberV2Response"]
+        }
+      }
+    }
+  }
+  getMySummary: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["MemberSummaryV2Response"]
+        }
+      }
+    }
+  }
   getBestWorkbooks: {
     parameters: {
       query?: {
@@ -13540,6 +14705,71 @@ export interface operations {
       }
     }
   }
+  searchChallengersV2: {
+    parameters: {
+      query?: {
+        /** @description Zero-based page index (0..N) */
+        page?: number
+        /** @description The size of the page to be returned */
+        size?: number
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[]
+        keyword?: string
+        gisuId?: number
+        part?:
+          | "PLAN"
+          | "DESIGN"
+          | "WEB"
+          | "ANDROID"
+          | "IOS"
+          | "NODEJS"
+          | "SPRINGBOOT"
+          | "ADMIN"
+        chapterId?: number
+        schoolId?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ChallengerSearchV2Response"]
+        }
+      }
+    }
+  }
+  getTemplate: {
+    parameters: {
+      query: {
+        context:
+          | "APPLICATION_SUBMITTED"
+          | "MATCHING_COMPLETED"
+          | "APPLICATION_MONITORING"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["GetUserFeedbackTemplateResponse"]
+        }
+      }
+    }
+  }
   getTermsById: {
     parameters: {
       query?: never
@@ -13580,6 +14810,26 @@ export interface operations {
         }
         content: {
           "*/*": components["schemas"]["TermResponse"]
+        }
+      }
+    }
+  }
+  getMyRequiredTermConsentStatus: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RequiredTermConsentStatusResponse"]
         }
       }
     }
@@ -13729,6 +14979,29 @@ export interface operations {
       }
     }
   }
+  getProjectStatistics: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description 프로젝트 ID */
+        projectId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ProjectStatisticsResponse"]
+        }
+      }
+    }
+  }
   getApplicationDetail: {
     parameters: {
       query?: never
@@ -13772,6 +15045,29 @@ export interface operations {
         }
         content: {
           "*/*": components["schemas"]["ProjectApplicationStatusResponse"]
+        }
+      }
+    }
+  }
+  listChapterProjectStatistics: {
+    parameters: {
+      query: {
+        /** @description 지부 ID */
+        chapterId: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ChapterProjectStatisticsResponse"]
         }
       }
     }
@@ -14653,6 +15949,16 @@ export interface operations {
           | "PROJECT_APPLICATION"
           | "FIGMA"
         resourceId?: number
+        permissionType?:
+          | "READ"
+          | "WRITE"
+          | "EDIT"
+          | "DELETE"
+          | "FORCE_DELETE"
+          | "APPROVE"
+          | "CHECK"
+          | "MANAGE"
+          | "RELEASE"
       }
       header?: never
       path?: never
@@ -14788,7 +16094,7 @@ export interface operations {
       }
     }
   }
-  getFile_1: {
+  getFile: {
     parameters: {
       query?: never
       header?: never
@@ -15046,6 +16352,7 @@ export interface operations {
           | "LLM"
           | "ANALYTICS"
           | "MAINTENANCE"
+          | "FEEDBACK"
         action?:
           | "CREATE"
           | "UPDATE"

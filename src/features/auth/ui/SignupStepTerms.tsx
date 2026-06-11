@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
-  registerMemberByIdPw,
+  registerMemberByEmail,
   registerMemberByOAuth,
 } from "@/features/auth/api/register"
 import { getTermsByType } from "@/features/auth/api/terms"
@@ -39,7 +39,6 @@ export function SignupStepTerms() {
   const {
     mode,
     oAuthVerificationToken,
-    loginId,
     rawPassword,
     emailVerificationToken,
     name,
@@ -113,8 +112,7 @@ export function SignupStepTerms() {
     try {
       const res =
         mode === "id-pw"
-          ? await registerMemberByIdPw({
-              loginId,
+          ? await registerMemberByEmail({
               rawPassword,
               emailVerificationToken,
               name,

@@ -137,13 +137,25 @@ export function ModalFormPanel({
                     statusDisabled && "pointer-events-none",
                   )}
                 >
-                  <OptionButton value="pass" className="h-7.5 gap-0.5">
+                  <OptionButton
+                    value="pass"
+                    disabled={statusDisabled}
+                    className="h-7.5 gap-0.5"
+                  >
                     합격
                   </OptionButton>
-                  <OptionButton value="fail" className="h-7.5 gap-0.5">
+                  <OptionButton
+                    value="fail"
+                    disabled={statusDisabled}
+                    className="h-7.5 gap-0.5"
+                  >
                     불합격
                   </OptionButton>
-                  <OptionButton value="pending" className="h-7.5 gap-0.5">
+                  <OptionButton
+                    value="pending"
+                    disabled={statusDisabled}
+                    className="h-7.5 gap-0.5"
+                  >
                     대기
                   </OptionButton>
                 </OptionButtonGroup>

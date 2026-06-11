@@ -71,7 +71,6 @@ export function useApplicationForm() {
     setApplication({
       commonQuestions: insertAfter(commonQuestions, afterId, newQ),
     })
-    setFocusedId(newQ.id)
   }
 
   function updateSection(sectionId: string, patch: Partial<Section>) {
@@ -112,7 +111,6 @@ export function useApplicationForm() {
           : { ...s, questions: insertAfter(s.questions, afterId, newQ) },
       ),
     })
-    setFocusedId(newQ.id)
   }
 
   function appendSectionQuestion(sectionId: string) {

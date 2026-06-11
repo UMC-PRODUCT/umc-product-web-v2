@@ -14,6 +14,15 @@ export async function addProjectMember(
   await api.post<ApiResponse<void>>(`/v1/projects/${projectId}/members`, body)
 }
 
+export async function removeProjectMember(
+  projectId: number,
+  memberId: number,
+): Promise<void> {
+  await api.delete<ApiResponse<void>>(
+    `/v1/projects/${projectId}/members/${memberId}`,
+  )
+}
+
 export async function transferOwnership(
   projectId: number,
   body: TransferProjectOwnershipRequest,

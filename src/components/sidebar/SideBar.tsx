@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react"
 
 import { useMe } from "@/features/auth/hooks/useMe"
-import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import {
+  canAccessProjectSettings,
+  canManageProjects,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { cn } from "@/shared/lib/utils"
 
@@ -15,11 +20,18 @@ interface SideBarProps {
 
 export default function SideBar({ className }: SideBarProps) {
   const { data: me, isLoading: isMeLoading } = useMe()
-  const canManageRecruitment = isOperator(me) || isCurrentTermPm(me)
+  const canAccessSettings = canAccessProjectSettings(me)
+  const canManage = canManageProjects(me)
+  const canRecruit = isOperator(me) || isCurrentTermPm(me)
 
   const visibleSections = useMemo(
-    () => filterSectionsByPermission(SIDEBAR_ITEMS, canManageRecruitment),
-    [canManageRecruitment],
+    () =>
+      filterSectionsByPermission(SIDEBAR_ITEMS, {
+        canAccessProjectSettings: canAccessSettings,
+        canManageProjects: canManage,
+        canManageRecruitment: canRecruit,
+      }),
+    [canAccessSettings, canManage, canRecruit],
   )
 
   const [openSectionId, setOpenSectionId] = useState<string>(

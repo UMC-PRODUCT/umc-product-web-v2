@@ -100,6 +100,7 @@ export type SurveyVariantKey =
 
 export const SURVEY_VARIANTS: Record<SurveyVariantKey, SurveyVariantConfig> = {
   "prev-gisu-general-apply": {
+    preventClose: true,
     steps: [
       {
         title: "새롭게 바뀐 지원 경험이 어떠셨나요?",
@@ -114,12 +115,13 @@ export const SURVEY_VARIANTS: Record<SurveyVariantKey, SurveyVariantConfig> = {
           FEEDBACK_TEXT,
           EXTRA_TEXT,
         ],
-        footer: "close-submit",
+        footer: "submit-only",
         reveal: "optional-group",
       },
     ],
   },
   "new-gisu-general-apply": {
+    preventClose: true,
     steps: [
       {
         title: "프로젝트 지원 경험이 어떠셨나요?",
@@ -134,12 +136,13 @@ export const SURVEY_VARIANTS: Record<SurveyVariantKey, SurveyVariantConfig> = {
           FEEDBACK_TEXT,
           EXTRA_TEXT,
         ],
-        footer: "close-submit",
+        footer: "submit-only",
         reveal: "optional-group",
       },
     ],
   },
   "prev-gisu-general-matching": {
+    preventClose: true,
     steps: [
       {
         title: "새롭게 바뀐 매칭 경험이 어떠셨나요?",
@@ -156,6 +159,7 @@ export const SURVEY_VARIANTS: Record<SurveyVariantKey, SurveyVariantConfig> = {
     ],
   },
   "new-gisu-general-matching": {
+    preventClose: true,
     steps: [
       {
         title: "전반적인 매칭 경험이 어떠셨나요?",

@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { Button } from "@/shared/ui/Button"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
@@ -49,6 +50,11 @@ export function MyApplicationModal({
 }: MyApplicationModalProps) {
   const addToast = useToastStore((s) => s.addToast)
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false)
+  const deletePermissionQuery = useResourcePermission(
+    "PROJECT_APPLICATION",
+    applicationId,
+    { permissionType: "DELETE" },
+  )
 
   const {
     data: detail,
@@ -86,7 +92,15 @@ export function MyApplicationModal({
 
   const isCancellableStatus =
     detail?.status === "DRAFT" || detail?.status === "SUBMITTED"
-  const canCancel = isRoundOpen && isCancellableStatus
+  const canDeleteApplication = deletePermissionQuery.hasPermission("DELETE")
+  const isDeletePermissionLoading = deletePermissionQuery.isPending
+  const shouldShowCancelButton =
+    isCancellableStatus && (isDeletePermissionLoading || canDeleteApplication)
+  const canCancel =
+    isRoundOpen &&
+    isCancellableStatus &&
+    canDeleteApplication &&
+    !isDeletePermissionLoading
 
   return (
     <div className="flex w-232 flex-col">
@@ -198,7 +212,7 @@ export function MyApplicationModal({
             <Button variant="weak" color="neutral" size="xl" onClick={onClose}>
               닫기
             </Button>
-            {isCancellableStatus && (
+            {shouldShowCancelButton && (
               <Button
                 color="primary"
                 size="xl"
@@ -251,8 +265,11 @@ export function MyApplicationModal({
               </Button>
               <Button
                 size="s"
-                onClick={() => cancelMutation.mutate()}
-                disabled={cancelMutation.isPending}
+                onClick={() => {
+                  if (!canCancel) return
+                  cancelMutation.mutate()
+                }}
+                disabled={!canCancel || cancelMutation.isPending}
               >
                 지원 취소하기
               </Button>
