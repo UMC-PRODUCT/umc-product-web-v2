@@ -42,7 +42,7 @@ const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
 const DEFAULT_PROJECT_NOTICES: NoticeItem[] = [
   {
     id: "default-project-1",
-    title: "[프로덕트 팀이 작성한 FAQ예요.]",
+    title: "[프로덕트 팀이 작성한 FAQ예요]",
     date: "2003.03.16",
     chip: "필독",
   },
