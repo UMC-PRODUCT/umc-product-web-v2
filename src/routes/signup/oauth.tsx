@@ -614,10 +614,15 @@ function OAuthSignupPage() {
         confirmText="로그인하기"
         variant="success"
         overlayTone="light"
-        onOpenChange={setIsSuccessModalOpen}
+        onOpenChange={(open) => {
+          setIsSuccessModalOpen(open)
+          if (!open) {
+            void navigate({ to: "/login" })
+          }
+        }}
         onConfirm={() => {
           setIsSuccessModalOpen(false)
-          navigate({ to: "/login" })
+          void navigate({ to: "/login" })
         }}
       />
     </FormProvider>
