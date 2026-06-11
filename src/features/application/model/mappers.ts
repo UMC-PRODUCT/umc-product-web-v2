@@ -10,7 +10,7 @@ import type {
   PartEnum,
   ProjectApplicantResponse,
 } from "./apiTypes"
-import type { ApplicantFormData, FormField } from "./mockFormData"
+import type { ApplicantFormData, FormField } from "./types"
 import type {
   ApplicantDetail,
   ApplicationStats,

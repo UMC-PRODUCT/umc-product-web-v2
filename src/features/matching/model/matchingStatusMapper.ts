@@ -15,7 +15,7 @@ import type {
 import type {
   MatchingPartData,
   MatchingProjectData,
-} from "./matchingStatusMock"
+} from "./matchingStatusTypes"
 
 // phase 번호 -> 블록 타입/variant 매핑
 function phaseToBlock(

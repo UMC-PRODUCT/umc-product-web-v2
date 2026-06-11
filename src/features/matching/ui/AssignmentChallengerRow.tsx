@@ -2,7 +2,7 @@ import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { cn } from "@/shared/lib/utils"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 
-import type { PartRole } from "../model/matchingStatusMock"
+import type { PartRole } from "../model/matchingStatusTypes"
 
 interface AssignmentChallengerRowProps {
   nickname: string
