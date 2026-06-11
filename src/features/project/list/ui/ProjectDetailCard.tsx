@@ -92,6 +92,17 @@ function ProjectDetailCardSkeleton() {
   )
 }
 
+const PART_LABEL: Record<string, string> = {
+  PLAN: "기획",
+  DESIGN: "Design",
+  WEB: "Web",
+  IOS: "iOS",
+  ANDROID: "Android",
+  SPRINGBOOT: "SpringBoot",
+  NODEJS: "Node.js",
+}
+const PART_ORDER = Object.keys(PART_LABEL)
+
 function toMatchingProject(detail: ProjectDetail): MatchingProject {
   const owner = detail.productOwner
   const authorSchoolLine = [
@@ -113,12 +124,18 @@ function toMatchingProject(detail: ProjectDetail): MatchingProject {
     coverImage: detail.thumbnailImageUrl
       ? { src: detail.thumbnailImageUrl }
       : null,
-    recruitRows: detail.partQuotas.map((q) => ({
-      part: q.part,
-      current: q.currentCount,
-      total: q.quota,
-      done: q.status === "COMPLETED",
-    })),
+    recruitRows: [...detail.partQuotas]
+      .sort((a, b) => {
+        const ai = PART_ORDER.indexOf(a.part ?? "")
+        const bi = PART_ORDER.indexOf(b.part ?? "")
+        return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi)
+      })
+      .map((q) => ({
+        part: PART_LABEL[q.part] ?? q.part,
+        current: q.currentCount,
+        total: q.quota,
+        done: q.status === "COMPLETED",
+      })),
     externalLink: detail.externalLink,
   }
 }

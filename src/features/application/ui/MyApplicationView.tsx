@@ -17,6 +17,17 @@ import { MyApplicationMoreMenu } from "./MyApplicationMoreMenu"
 import type { StatusValue } from "../model/types"
 import type { ApplicationProjectCardPart } from "./ApplicationProjectCard"
 
+const PART_LABEL: Record<string, string> = {
+  PLAN: "기획",
+  DESIGN: "Design",
+  WEB: "Web",
+  IOS: "iOS",
+  ANDROID: "Android",
+  SPRINGBOOT: "SpringBoot",
+  NODEJS: "Node.js",
+}
+const PART_ORDER = Object.keys(PART_LABEL)
+
 const PHASE_LABEL: Record<string, string> = {
   FIRST: "1차 매칭",
   SECOND: "2차 매칭",
@@ -56,12 +67,18 @@ function toPmInfo(
 function toParts(
   partQuotas: MyProjectApplicationResponse["project"]["partQuotas"],
 ): ApplicationProjectCardPart[] {
-  return partQuotas.map((q) => ({
-    label: q.part,
-    current: q.currentCount,
-    total: q.quota,
-    done: q.status === "COMPLETED",
-  }))
+  return [...partQuotas]
+    .sort((a, b) => {
+      const ai = PART_ORDER.indexOf(a.part ?? "")
+      const bi = PART_ORDER.indexOf(b.part ?? "")
+      return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi)
+    })
+    .map((q) => ({
+      label: PART_LABEL[q.part] ?? q.part,
+      current: q.currentCount,
+      total: q.quota,
+      done: q.status === "COMPLETED",
+    }))
 }
 
 interface MyApplicationRoundSectionProps {
