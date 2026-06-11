@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { uploadFileFlow } from "@/features/project/new/api/storage"
+import { getActiveGisu } from "@/shared/api/gisu"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { Button } from "@/shared/ui/Button"
@@ -25,6 +27,7 @@ import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 import {
   type ApplicationAnswerItem,
   createApplicationDraft,
+  getMyApplications,
   saveApplicationDraft,
   submitApplication,
 } from "../../api/matchingProject"
@@ -240,9 +243,11 @@ export function ProjectApplyModal({
   onSubmitSuccess,
 }: ProjectApplyModalProps) {
   const addToast = useToastStore((s) => s.addToast)
+  const isDevMatchingRound = Boolean(import.meta.env.VITE_DEV_MATCHING_ROUND_ID)
   const [sectionEnabled, setSectionEnabled] = useState<Record<string, boolean>>(
     () => Object.fromEntries(sections.map((s) => [s.id, s.isEnabled])),
   )
+  const [applicationId, setApplicationId] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isFileUploading, setIsFileUploading] = useState(false)
   const [isPortfolioUploading, setIsPortfolioUploading] = useState(false)
@@ -255,16 +260,39 @@ export function ProjectApplyModal({
     null,
   )
   const draftInitializedRef = useRef(false)
+  const applicationEditPermissionQuery = useResourcePermission(
+    "PROJECT_APPLICATION",
+    applicationId ?? undefined,
+    {
+      enabled: applicationId !== null && !isDevMatchingRound,
+      permissionType: "EDIT",
+    },
+  )
+  const isApplicationEditPermissionLoading =
+    applicationId !== null &&
+    !isDevMatchingRound &&
+    applicationEditPermissionQuery.isPending
+  const canEditApplication =
+    isDevMatchingRound || applicationEditPermissionQuery.hasPermission("EDIT")
 
   useEffect(() => {
     if (draftInitializedRef.current) return
     draftInitializedRef.current = true
     async function initDraft() {
-      if (import.meta.env.VITE_DEV_MATCHING_ROUND_ID) return
+      if (isDevMatchingRound) return
       try {
-        await createApplicationDraft(projectId, matchingRoundId)
+        const draft = await createApplicationDraft(projectId, matchingRoundId)
+        setApplicationId(draft.applicationId)
       } catch (err) {
         if (err instanceof AxiosError && err.response?.status === 409) {
+          const gisu = await getActiveGisu().catch(() => null)
+          if (gisu) {
+            const apps = await getMyApplications(Number(gisu.gisuId)).catch(
+              () => [],
+            )
+            const existing = apps.find((a) => Number(a.projectId) === projectId)
+            if (existing) setApplicationId(Number(existing.applicationId))
+          }
           return
         }
         addToast({
@@ -348,7 +376,17 @@ export function ProjectApplyModal({
     setIsSubmitConfirmModalOpen(false)
     setIsSubmitting(true)
     try {
-      if (!import.meta.env.VITE_DEV_MATCHING_ROUND_ID) {
+      if (!isDevMatchingRound) {
+        if (!applicationId || !canEditApplication) {
+          addToast({
+            message: "지원서 제출에 실패했습니다. 다시 시도해 주세요.",
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+          return
+        }
         const answers = buildAnswerPayload(formValues, sections)
         await saveApplicationDraft(projectId, answers)
         await submitApplication(projectId)
@@ -657,7 +695,13 @@ export function ProjectApplyModal({
             </Button>
             <Button
               size="xl"
-              disabled={isSubmitting || isFileUploading || isPortfolioUploading}
+              disabled={
+                isSubmitting ||
+                isFileUploading ||
+                isPortfolioUploading ||
+                isApplicationEditPermissionLoading ||
+                !canEditApplication
+              }
               onClick={() => {
                 void handleSubmit(onValid, onInvalid)()
               }}
@@ -762,7 +806,11 @@ export function ProjectApplyModal({
               <Button
                 size="s"
                 onClick={() => void handleSubmitConfirm()}
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting ||
+                  isApplicationEditPermissionLoading ||
+                  !canEditApplication
+                }
               >
                 제출하기
               </Button>

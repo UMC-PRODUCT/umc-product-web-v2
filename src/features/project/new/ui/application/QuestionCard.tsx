@@ -1,6 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { useState } from "react"
 
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { CheckboxFieldList } from "@/shared/ui/question-field/CheckboxFieldList"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import { PortfolioField } from "@/shared/ui/question-field/PortfolioField"
@@ -89,11 +91,23 @@ export function QuestionCard({
     transition,
     isDragging,
   } = useSortable({ id: question.id })
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+  }
+
+  const hasContent =
+    question.title.trim().length > 0 || (question.options?.length ?? 0) > 0
+
+  const handleDeleteRequest = () => {
+    if (hasContent) {
+      setConfirmDeleteOpen(true)
+      return
+    }
+    onDelete()
   }
 
   return (
@@ -115,7 +129,7 @@ export function QuestionCard({
           required={question.required}
           onRequiredChange={(required) => onUpdate({ required })}
           canDelete={canDelete}
-          onDelete={onDelete}
+          onDelete={handleDeleteRequest}
           dragHandleProps={{ ...attributes, ...listeners }}
         >
           <QuestionFieldRenderer
@@ -124,6 +138,21 @@ export function QuestionCard({
           />
         </QuestionForm>
       </div>
+
+      <CtaModal
+        open={confirmDeleteOpen}
+        title="질문 삭제"
+        content="삭제한 질문은 되돌릴 수 없습니다. 질문을 삭제하시겠습니까?"
+        cancelText="돌아가기"
+        confirmText="삭제하기"
+        variant="error"
+        onOpenChange={setConfirmDeleteOpen}
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={() => {
+          onDelete()
+          setConfirmDeleteOpen(false)
+        }}
+      />
     </div>
   )
 }

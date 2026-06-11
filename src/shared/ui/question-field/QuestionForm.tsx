@@ -68,12 +68,13 @@ export function QuestionForm({
         />
       )}
 
-      {focused && (
+      {dragHandleProps && (
         <button
           type="button"
           className="mt-4 inline-flex cursor-grab items-center justify-center active:cursor-grabbing"
           aria-label="순서 변경 핸들"
           {...dragHandleProps}
+          onClick={(e) => e.stopPropagation()}
         >
           <DragAndDrop className="h-3 w-6" aria-hidden />
         </button>

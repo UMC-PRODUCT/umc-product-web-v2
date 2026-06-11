@@ -29,6 +29,8 @@ interface ModalApplicantPanelProps {
   onStatusChange?: (applicantId: string, status: StatusValue) => void
   onClose: () => void
   currentRound?: number
+  canApproveApplicant: (applicantId: string) => boolean
+  approvePermissionLoading: boolean
   className?: string
 }
 
@@ -44,6 +46,8 @@ export function ModalApplicantPanel({
   onStatusChange,
   onClose,
   currentRound,
+  canApproveApplicant,
+  approvePermissionLoading,
   className,
 }: ModalApplicantPanelProps) {
   const filteredApplicants = useMemo(() => {
@@ -216,6 +220,8 @@ export function ModalApplicantPanel({
             onApplicantClick={onApplicantClick}
             onStatusChange={onStatusChange}
             currentRound={currentRound}
+            canApproveApplicant={canApproveApplicant}
+            approvePermissionLoading={approvePermissionLoading}
           />
         ))}
 

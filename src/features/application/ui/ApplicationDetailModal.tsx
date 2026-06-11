@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 
+import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
 import { Modal } from "@/shared/ui/Modal"
 
 import { updateApplicationDecision } from "../api/applicationApi"
@@ -9,6 +10,8 @@ import { useApplicationDetail } from "../hooks/useApplications"
 import { toApplicantFormData, toServerStatus } from "../model/mappers"
 import { ModalApplicantPanel } from "./detail-modal/ModalApplicantPanel"
 import { ModalFormPanel } from "./detail-modal/ModalFormPanel"
+
+import type { ResourcePermissionQuery } from "@/features/auth/api/permissions"
 
 import type { ProjectApplication, StatusValue } from "../model/types"
 
@@ -19,6 +22,11 @@ interface ApplicationDetailModalProps {
   onOpenChange: (open: boolean) => void
   /** 현재 활성 차수 (이전 차수의 상태 칩 disabled 처리) */
   currentRound?: number
+}
+
+function toApplicationId(applicantId: string): number | null {
+  const id = Number(applicantId)
+  return Number.isFinite(id) && id > 0 ? id : null
 }
 
 export function ApplicationDetailModal({
@@ -36,6 +44,44 @@ export function ApplicationDetailModal({
   const [statusOverrides, setStatusOverrides] = useState<
     Record<string, StatusValue>
   >({})
+
+  const applicationIds = useMemo(() => {
+    const ids = new Set<number>()
+    for (const applicant of project.applicants) {
+      const id = toApplicationId(applicant.id)
+      if (id !== null) ids.add(id)
+    }
+    return Array.from(ids)
+  }, [project.applicants])
+
+  const approvePermissionQueries = useMemo<ResourcePermissionQuery[]>(
+    () => [
+      {
+        resourceType: "PROJECT_APPLICATION",
+        resourceIds: applicationIds,
+        permissionTypes: ["APPROVE"],
+      },
+    ],
+    [applicationIds],
+  )
+
+  const approvePermissionsQuery = useResourcePermissionsBatch(
+    approvePermissionQueries,
+    { enabled: open },
+  )
+
+  const isApprovePermissionLoading =
+    open && applicationIds.length > 0 && approvePermissionsQuery.isPending
+
+  const canApproveApplicant = (applicantId: string): boolean => {
+    const applicationId = toApplicationId(applicantId)
+    if (applicationId === null) return false
+    return approvePermissionsQuery.hasPermission({
+      resourceType: "PROJECT_APPLICATION",
+      resourceId: applicationId,
+      permissionType: "APPROVE",
+    })
+  }
 
   const projectWithOverrides = useMemo(() => {
     if (Object.keys(statusOverrides).length === 0) return project
@@ -77,11 +123,6 @@ export function ApplicationDetailModal({
     },
   })
 
-  const handleStatusChange = (appId: string, status: StatusValue) => {
-    setStatusOverrides((prev) => ({ ...prev, [appId]: status }))
-    decisionMutation.mutate({ appId: Number(appId), status })
-  }
-
   // 서버 formResponse -> 프론트 ApplicantFormData 변환
   const formData = useMemo(() => {
     if (!detailQuery.data?.formResponse || !selectedApplicantId) return null
@@ -92,6 +133,27 @@ export function ApplicationDetailModal({
   }, [detailQuery.data, selectedApplicantId])
 
   const hasPanel = selectedApplicant !== null
+
+  const canChangeApplicantStatus = (
+    applicantId: string,
+    applicantRound: number,
+  ): boolean =>
+    !isApprovePermissionLoading &&
+    canApproveApplicant(applicantId) &&
+    !(currentRound != null && applicantRound < currentRound)
+
+  const handleApplicantStatusChange = (
+    applicantId: string,
+    status: StatusValue,
+  ) => {
+    const applicant = projectWithOverrides.applicants.find(
+      (item) => item.id === applicantId,
+    )
+    if (!applicant) return
+    if (!canChangeApplicantStatus(applicant.id, applicant.round)) return
+    setStatusOverrides((prev) => ({ ...prev, [applicant.id]: status }))
+    decisionMutation.mutate({ appId: Number(applicant.id), status })
+  }
 
   const handleClose = () => {
     onOpenChange(false)
@@ -137,9 +199,11 @@ export function ApplicationDetailModal({
               onStatusFilterChange={setStatusFilter}
               selectedApplicantId={selectedApplicantId}
               onApplicantClick={setSelectedApplicantId}
-              onStatusChange={handleStatusChange}
+              onStatusChange={handleApplicantStatusChange}
               onClose={handleClose}
               currentRound={currentRound}
+              canApproveApplicant={canApproveApplicant}
+              approvePermissionLoading={isApprovePermissionLoading}
             />
           </div>
 
@@ -152,11 +216,14 @@ export function ApplicationDetailModal({
               challengerName={project.challengerName}
               challengerUniversity={project.challengerUniversity}
               onStatusChange={(status) =>
-                handleStatusChange(selectedApplicantId!, status)
+                handleApplicantStatusChange(selectedApplicant.id, status)
               }
               onClose={handlePanelClose}
               statusDisabled={
-                currentRound != null && selectedApplicant.round < currentRound
+                !canChangeApplicantStatus(
+                  selectedApplicant.id,
+                  selectedApplicant.round,
+                )
               }
               className="max-h-[calc(100vh-60px)] shadow-xl"
             />

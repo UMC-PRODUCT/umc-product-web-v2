@@ -40,6 +40,8 @@ interface ApplicationFormProps {
   isEditMode?: boolean
   isHydrated?: boolean
   isSubmitting?: boolean
+  canCreateProject?: boolean
+  createPermissionLoading?: boolean
 }
 
 export const ApplicationForm = forwardRef<
@@ -52,6 +54,8 @@ export const ApplicationForm = forwardRef<
     isEditMode = false,
     isHydrated = true,
     isSubmitting = false,
+    canCreateProject = true,
+    createPermissionLoading = false,
   },
   ref,
 ) {
@@ -134,7 +138,10 @@ export const ApplicationForm = forwardRef<
     },
   }))
 
-  const canTempSave = !saveAppMutation.isPending && (isDirty || !hasSavedOnce)
+  const canCreateDraft =
+    projectId !== null || (canCreateProject && !createPermissionLoading)
+  const canTempSave =
+    !saveAppMutation.isPending && (isDirty || !hasSavedOnce) && canCreateDraft
   const tempSaveLabel =
     hasSavedOnce && !isDirty && !saveAppMutation.isPending
       ? "저장 완료"
@@ -176,6 +183,16 @@ export const ApplicationForm = forwardRef<
   }
 
   const handleTempSave = () => {
+    if (!canCreateDraft) {
+      addToast({
+        message: "임시 저장에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
     saveAppMutation.mutate()
   }
 

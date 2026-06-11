@@ -74,6 +74,10 @@ export function ProjectCardForm({
           setValue("thumbnail", file, { shouldValidate: true })
           setUploaded({ thumbnailFileId: null, thumbnailUrl: null })
         }}
+        onRemove={() => {
+          setValue("thumbnail", undefined, { shouldValidate: true })
+          setUploaded({ thumbnailFileId: null, thumbnailUrl: null })
+        }}
       />
       <div className="h-fit w-full rounded-[12px] p-5">
         <div className="mb-2.5 flex items-center justify-between">

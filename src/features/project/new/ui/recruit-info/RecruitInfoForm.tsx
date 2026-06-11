@@ -7,8 +7,7 @@ import {
 } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { isOperator } from "@/features/auth/model/identity"
+import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   buildPartQuotasEntries,
   updatePartQuotas,
@@ -73,8 +72,17 @@ export const RecruitInfoForm = forwardRef<
   const storeRecruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const setRecruitInfo = useProjectRegisterStore((s) => s.setRecruitInfo)
   const projectId = useProjectRegisterStore((s) => s.projectId)
-  const { data: me } = useMe()
-  const canUpdatePartQuotas = isOperator(me)
+  const projectPermissionsQuery = useProjectPermissions(
+    projectId ?? undefined,
+    {
+      enabled: projectId !== null,
+    },
+  )
+  const canUpdatePartQuotas = projectPermissionsQuery.canManage
+  const isPartQuotaPermissionLoading =
+    projectId !== null && projectPermissionsQuery.isPending
+  const isReadOnly =
+    readOnly || isPartQuotaPermissionLoading || !canUpdatePartQuotas
 
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
@@ -98,12 +106,13 @@ export const RecruitInfoForm = forwardRef<
 
   const hasUnsavedChanges =
     savedSnapshotRef.current !== JSON.stringify(roleStates)
-  const canTempSave = totalCount > 0 && hasUnsavedChanges && !isSaving
+  const canTempSave =
+    totalCount > 0 && hasUnsavedChanges && !isSaving && !isReadOnly
   const tempSaveLabel =
     hasSavedOnce && !hasUnsavedChanges ? "저장 완료" : "임시 저장"
 
   const savePartQuotas = async (silent = false): Promise<boolean> => {
-    if (!canUpdatePartQuotas) {
+    if (isReadOnly || !canUpdatePartQuotas) {
       setRecruitInfo(roleStates)
       return true
     }
@@ -111,6 +120,22 @@ export const RecruitInfoForm = forwardRef<
     if (!projectId) {
       addToast({
         message: "기본 정보를 먼저 임시 저장해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
+    const missingStackRole = ROLES.find(
+      ({ key, stacks }) =>
+        stacks.length > 0 &&
+        roleStates[key].count > 0 &&
+        !roleStates[key].stack,
+    )
+    if (missingStackRole) {
+      addToast({
+        message: `${missingStackRole.label} 스택을 선택해 주세요.`,
         color: "red",
         variant: "deep",
         type: "default",
@@ -157,7 +182,7 @@ export const RecruitInfoForm = forwardRef<
   }))
 
   const handleNext = async () => {
-    if (readOnly) {
+    if (isReadOnly) {
       onNext()
       return
     }
@@ -222,7 +247,7 @@ export const RecruitInfoForm = forwardRef<
               <Counter
                 value={roleStates[key].count}
                 onChange={(v) => updateCount(key, v)}
-                disabled={readOnly}
+                disabled={isReadOnly}
                 aria-label={`${label} 인원`}
               />
               {stacks.length > 0 && (
@@ -231,7 +256,7 @@ export const RecruitInfoForm = forwardRef<
                   allowDeselect
                   value={roleStates[key].stack}
                   onValueChange={(v) =>
-                    readOnly
+                    isReadOnly
                       ? undefined
                       : updateStack(key, v as RoleStack | undefined)
                   }
@@ -240,7 +265,7 @@ export const RecruitInfoForm = forwardRef<
                     <OptionButton
                       key={stack}
                       value={stack}
-                      disabled={readOnly || roleStates[key].count === 0}
+                      disabled={isReadOnly || roleStates[key].count === 0}
                     >
                       {stack}
                     </OptionButton>

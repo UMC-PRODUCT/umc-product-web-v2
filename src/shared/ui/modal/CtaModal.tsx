@@ -17,6 +17,7 @@ interface CtaModalProps {
   confirmLoading?: boolean
   variant?: CtaModalVariant
   overlayTone?: "light" | "deep"
+  cancelOnDismiss?: boolean
   onOpenChange: (open: boolean) => void
   onCancel?: () => void
   onConfirm: () => void
@@ -31,6 +32,7 @@ export function CtaModal({
   confirmLoading = false,
   variant = "warning",
   overlayTone = "light",
+  cancelOnDismiss = true,
   onOpenChange,
   onCancel,
   onConfirm,
@@ -49,7 +51,7 @@ export function CtaModal({
       open={open}
       onOpenChange={(nextOpen) => {
         onOpenChange(nextOpen)
-        if (!nextOpen) onCancel?.()
+        if (!nextOpen && cancelOnDismiss) onCancel?.()
       }}
     >
       <Modal.Portal>
@@ -89,7 +91,7 @@ export function CtaModal({
               size="s"
               className="rounded-[10px]"
               isLoading={confirmLoading}
-              onClick={onConfirm}
+              onClick={confirmLoading ? undefined : onConfirm}
             >
               {confirmText}
             </Button>

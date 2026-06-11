@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/features/auth/hooks/useMe"
+import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   getApplicationForm,
   mapApplicationFormToSections,
@@ -46,6 +48,8 @@ interface ProjectDetailCardProps {
   projectId: number | string
   logo?: ProjectDetailCardLogo
   showEditCta?: boolean
+  canEditProject?: boolean
+  editPermissionLoading?: boolean
 }
 
 function ProjectDetailCardSkeleton() {
@@ -119,12 +123,45 @@ export function ProjectDetailCard({
   projectId: projectIdProp,
   logo = "on",
   showEditCta = false,
+  canEditProject,
+  editPermissionLoading,
 }: ProjectDetailCardProps) {
   const projectId = Number(projectIdProp)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { data: me } = useMe()
   const addToast = useToastStore((s) => s.addToast)
+  const userIsOperator = isOperator(me)
+  const userIsPm = isCurrentTermPm(me)
+  const shouldQueryEditPermission =
+    showEditCta && canEditProject === undefined && Number.isFinite(projectId)
+  const projectPermissionsQuery = useProjectPermissions(projectId, {
+    enabled: shouldQueryEditPermission,
+  })
+  const shouldQueryApplicationWritePermission =
+    !showEditCta &&
+    Number.isFinite(projectId) &&
+    me !== undefined &&
+    !userIsOperator &&
+    !userIsPm
+  const applicationWritePermissionQuery = useResourcePermission(
+    "PROJECT_APPLICATION",
+    projectId,
+    {
+      enabled: shouldQueryApplicationWritePermission,
+      permissionType: "WRITE",
+    },
+  )
+  const resolvedCanEditProject =
+    canEditProject ?? projectPermissionsQuery.canEdit
+  const resolvedEditPermissionLoading =
+    editPermissionLoading ??
+    (shouldQueryEditPermission && projectPermissionsQuery.isPending)
+  const canWriteProjectApplication =
+    applicationWritePermissionQuery.hasPermission("WRITE")
+  const isApplicationWritePermissionLoading =
+    shouldQueryApplicationWritePermission &&
+    applicationWritePermissionQuery.isPending
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
   const [isMyApplicationModalOpen, setIsMyApplicationModalOpen] =
@@ -144,9 +181,6 @@ export function ProjectDetailCard({
       return res.gisuId ?? null
     },
   })
-
-  const userIsOperator = isOperator(me)
-  const userIsPm = isCurrentTermPm(me)
 
   const { data: myApplications } = useQuery({
     queryKey: ["myApplications", activeGisuId],
@@ -286,6 +320,8 @@ export function ProjectDetailCard({
     ? { src: detail.thumbnailImageUrl }
     : null
   const showLogo = logo === "on"
+  const shouldShowEditCta =
+    showEditCta && (resolvedEditPermissionLoading || resolvedCanEditProject)
 
   if (isDetailLoading) {
     return <ProjectDetailCardSkeleton />
@@ -386,17 +422,28 @@ export function ProjectDetailCard({
               기획 보기
             </Button>
             {showEditCta ? (
-              <Button
-                className="flex-1"
-                onClick={() =>
-                  navigate({
-                    to: "/matching/projects/new",
-                    search: { projectId },
-                  })
-                }
-              >
-                프로젝트 수정하기
-              </Button>
+              shouldShowEditCta ? (
+                <Button
+                  className="flex-1"
+                  disabled={
+                    resolvedEditPermissionLoading || !resolvedCanEditProject
+                  }
+                  isLoading={resolvedEditPermissionLoading}
+                  onClick={() => {
+                    if (
+                      resolvedEditPermissionLoading ||
+                      !resolvedCanEditProject
+                    )
+                      return
+                    navigate({
+                      to: "/matching/projects/new",
+                      search: { projectId },
+                    })
+                  }}
+                >
+                  프로젝트 수정하기
+                </Button>
+              ) : null
             ) : (
               <>
                 {ctaMode === "recruit-questions" && (
@@ -418,38 +465,52 @@ export function ProjectDetailCard({
                     내 지원서 확인하기
                   </Button>
                 )}
-                {ctaMode === "apply" && (
-                  <Button
-                    className="flex-1"
-                    isLoading={isDetailLoading}
-                    disabled={!isDetailLoading && !detail?.applicationFormId}
-                    onClick={() => {
-                      if (!detail?.applicationFormId) {
-                        addToast({
-                          message: "지원 양식이 등록되지 않은 프로젝트입니다.",
-                          color: "red",
-                          variant: "deep",
-                          type: "default",
-                          duration: 3000,
-                        })
-                        return
+                {ctaMode === "apply" &&
+                  (isApplicationWritePermissionLoading ||
+                    canWriteProjectApplication) && (
+                    <Button
+                      className="flex-1"
+                      isLoading={
+                        isDetailLoading || isApplicationWritePermissionLoading
                       }
-                      if (!activeMatchingRound) {
-                        addToast({
-                          message: "매칭 기간이 아닙니다!",
-                          color: "red",
-                          variant: "deep",
-                          type: "default",
-                          duration: 3000,
-                        })
-                        return
+                      disabled={
+                        (!isDetailLoading && !detail?.applicationFormId) ||
+                        isApplicationWritePermissionLoading ||
+                        !canWriteProjectApplication
                       }
-                      setIsApplyModalOpen(true)
-                    }}
-                  >
-                    지원하기
-                  </Button>
-                )}
+                      onClick={() => {
+                        if (
+                          isApplicationWritePermissionLoading ||
+                          !canWriteProjectApplication
+                        )
+                          return
+                        if (!detail?.applicationFormId) {
+                          addToast({
+                            message:
+                              "지원 양식이 등록되지 않은 프로젝트입니다.",
+                            color: "red",
+                            variant: "deep",
+                            type: "default",
+                            duration: 3000,
+                          })
+                          return
+                        }
+                        if (!activeMatchingRound) {
+                          addToast({
+                            message: "매칭 기간이 아닙니다!",
+                            color: "red",
+                            variant: "deep",
+                            type: "default",
+                            duration: 3000,
+                          })
+                          return
+                        }
+                        setIsApplyModalOpen(true)
+                      }}
+                    >
+                      지원하기
+                    </Button>
+                  )}
                 {(ctaMode === "apply-blocked-other" ||
                   ctaMode === "apply-blocked-approved") && (
                   <>
