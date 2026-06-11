@@ -699,8 +699,7 @@ export function ProjectApplyModal({
                 isSubmitting ||
                 isFileUploading ||
                 isPortfolioUploading ||
-                isApplicationEditPermissionLoading ||
-                !canEditApplication
+                isApplicationEditPermissionLoading
               }
               onClick={() => {
                 void handleSubmit(onValid, onInvalid)()
@@ -806,11 +805,7 @@ export function ProjectApplyModal({
               <Button
                 size="s"
                 onClick={() => void handleSubmitConfirm()}
-                disabled={
-                  isSubmitting ||
-                  isApplicationEditPermissionLoading ||
-                  !canEditApplication
-                }
+                disabled={isSubmitting || isApplicationEditPermissionLoading}
               >
                 제출하기
               </Button>

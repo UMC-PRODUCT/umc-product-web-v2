@@ -652,7 +652,10 @@ export function ProjectDetailCard({
       <Modal.Root open={isApplyModalOpen} onOpenChange={setIsApplyModalOpen}>
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content>
+          <Modal.Content
+            onInteractOutside={(e) => e.preventDefault()}
+            onEscapeKeyDown={(e) => e.preventDefault()}
+          >
             {showFormSkeleton ? (
               <ApplyFormSkeleton />
             ) : applicationForm == null ? (

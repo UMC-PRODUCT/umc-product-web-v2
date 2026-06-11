@@ -453,6 +453,17 @@ function ProjectRegisterPage() {
   const handleSuccessConfirm = async () => {
     setShowSuccessModal(false)
     reset()
+    queryClient.removeQueries({ queryKey: ["project", "managed"] })
+    if (isEditMode && editProjectId) {
+      queryClient.removeQueries({ queryKey: projectKeys.detail(editProjectId) })
+      queryClient.removeQueries({
+        queryKey: projectKeys.applicationForm(editProjectId),
+      })
+    } else if (gisuId) {
+      queryClient.removeQueries({
+        queryKey: projectKeys.draft(Number(gisuId)),
+      })
+    }
     await navigate({ to: "/matching/projects/management", replace: true })
   }
 
