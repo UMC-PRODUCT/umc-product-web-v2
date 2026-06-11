@@ -61,9 +61,9 @@ function DefaultLoginPage() {
       const res = await loginWithApple({ authorizationCode })
       const result = handleLoginResponse(res)
       if (result === "LOGIN_SUCCESS") {
-        void navigate({ to: "/" })
+        await navigate({ to: "/" })
       } else {
-        void navigate({ to: "/signup/oauth" })
+        await navigate({ to: "/signup/oauth" })
       }
     } catch (error) {
       if (isApplePopupCancelled(error)) return
@@ -77,9 +77,9 @@ function DefaultLoginPage() {
       const res = await loginWithGoogle({ accessToken })
       const result = handleLoginResponse(res)
       if (result === "LOGIN_SUCCESS") {
-        void navigate({ to: "/" })
+        await navigate({ to: "/" })
       } else {
-        void navigate({ to: "/signup/oauth" })
+        await navigate({ to: "/signup/oauth" })
       }
     } catch (error) {
       if (isGooglePopupCancelled(error)) return
@@ -109,7 +109,7 @@ function DefaultLoginPage() {
         refreshToken: res.refreshToken,
         memberId: res.memberId,
       })
-      void navigate({ to: "/" })
+      await navigate({ to: "/" })
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.")
