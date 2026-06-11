@@ -71,3 +71,22 @@ export interface ProjectApplication {
   beCount: AssignmentCount
   applicants: ApplicantDetail[]
 }
+
+export interface ChallengerProjectInfo {
+  projectName: string
+  pmName: string
+  pmUniversity: string
+  thumbnailUrl?: string
+}
+
+export interface UniversityApplicant {
+  name: string
+  count: number
+}
+
+export interface ChallengerStats {
+  completionRate: number
+  rounds: RoundCount[]
+  universities: UniversityApplicant[]
+  totalApplicants: number
+}
