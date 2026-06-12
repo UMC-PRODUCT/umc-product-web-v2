@@ -16,9 +16,9 @@ export const Route = createFileRoute("/test/header")({
 })
 
 function HeaderTestPage() {
-  const ready = useHeaderPreviewUser()
+  const isReady = useHeaderPreviewUser()
 
-  if (!ready) return null
+  if (!isReady) return null
 
   return (
     <main className="h-full min-h-screen w-full">
@@ -89,7 +89,7 @@ export const HEADER_PREVIEW_USER: MemberInfoResponse = {
 
 export function useHeaderPreviewUser() {
   const queryClient = useQueryClient()
-  const [ready, setReady] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
     useAuthStore.setState({
@@ -99,8 +99,8 @@ export function useHeaderPreviewUser() {
       isAuthed: false,
     })
     queryClient.setQueryData(["auth"], HEADER_PREVIEW_USER)
-    setReady(true)
+    setIsReady(true)
   }, [queryClient])
 
-  return ready
+  return isReady
 }
