@@ -13,11 +13,13 @@ import {
 } from "@/features/application/model/mappers"
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
+import { TeamMemberModal } from "@/features/project/list/ui/team-member-modal/TeamMemberModal"
 import { deleteProject } from "@/features/project/management/api"
 import { invalidateProjectSummaryQueries } from "@/features/project/new/api"
 import { publishProject } from "@/features/project/new/api/projectPublish"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
+import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import type { PartEnum } from "@/features/application/model/apiTypes"
@@ -27,12 +29,14 @@ import type {
   Role,
 } from "@/features/application/model/types"
 import type { ProjectStatus } from "@/features/project/list/api/matchingProject"
+import type { ProjectRecruitRow } from "@/features/project/list/model/matchingProject"
 
 interface ProjectManagementMoreMenuProps {
   projectId: string
   projectName: string
   chapterName: string
   status?: ProjectStatus
+  recruitRows: ProjectRecruitRow[]
   canDeleteProject: boolean
   canEditProject: boolean
   canPublishProject: boolean
@@ -44,6 +48,7 @@ export function ProjectManagementMoreMenu({
   projectName,
   chapterName,
   status,
+  recruitRows,
   canDeleteProject,
   canEditProject,
   canPublishProject,
@@ -55,6 +60,7 @@ export function ProjectManagementMoreMenu({
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [publishOpen, setPublishOpen] = useState(false)
   const [applicationOpen, setApplicationOpen] = useState(false)
+  const [teamModalOpen, setTeamModalOpen] = useState(false)
   const addToast = useToastStore((s) => s.addToast)
 
   const numericProjectId = Number(projectId)
@@ -223,10 +229,15 @@ export function ProjectManagementMoreMenu({
     }
   }
 
+  const handleTeamViewClick = () => {
+    setPopoverOpen(false)
+    setTeamModalOpen(true)
+  }
+
   const menuItems = [
     { label: "지원 현황 확인하기", onClick: handleApplicationClick },
     { label: "기획 보기", onClick: () => void handlePlanViewClick() },
-    { label: "팀원 구성 보기", onClick: () => {} },
+    { label: "팀원 구성 보기", onClick: handleTeamViewClick },
   ]
 
   if (isPermissionLoading || canEditProject) {
@@ -288,6 +299,20 @@ export function ProjectManagementMoreMenu({
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>
+
+      <Modal.Root open={teamModalOpen} onOpenChange={setTeamModalOpen}>
+        <Modal.Portal>
+          <Modal.Overlay tone="light" />
+          <Modal.Content aria-describedby={undefined}>
+            <Modal.Title className="sr-only">팀원 구성</Modal.Title>
+            <TeamMemberModal
+              projectId={numericProjectId}
+              recruitRows={recruitRows}
+              onClose={() => setTeamModalOpen(false)}
+            />
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
 
       {projectApplication && (
         <ApplicationDetailModal

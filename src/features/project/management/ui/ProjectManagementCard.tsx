@@ -75,6 +75,7 @@ export function ProjectManagementCard({
                   projectName={data.title}
                   chapterName={data.branch}
                   status={data.status}
+                  recruitRows={data.recruitRows}
                   canDeleteProject={canDeleteProject}
                   canEditProject={canEditProject}
                   canPublishProject={canPublishProject}
