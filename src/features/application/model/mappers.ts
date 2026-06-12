@@ -1,5 +1,14 @@
 // 서버 enum <-> 프론트 타입 매핑
 
+export function shortenSchoolName(name: string): string {
+  return name
+    .replace(/캠퍼스/, "")
+    .replace(/외국어대학교/, "외대")
+    .replace(/여자대학교/, "여대")
+    .replace(/대학교/, "대")
+    .replace(/학교$/, "")
+}
+
 import type {
   ApplicationStatusEnum,
   ChapterStatisticsResponse,
@@ -10,7 +19,7 @@ import type {
   PartEnum,
   ProjectApplicantResponse,
 } from "./apiTypes"
-import type { ApplicantFormData, FormField } from "./mockFormData"
+import type { ApplicantFormData, FormField } from "./types"
 import type {
   ApplicantDetail,
   ApplicationStats,
@@ -105,8 +114,8 @@ function getQuotaCount(
   let total = 0
   for (const q of quotas) {
     if (parts.includes(q.part)) {
-      current += q.currentCount
-      total += q.quota
+      current += Number(q.currentCount)
+      total += Number(q.quota)
     }
   }
   return { current, total }
@@ -136,10 +145,16 @@ export function toProjectApplication(
   const statusLabel =
     project.partQuotaStatus === "RECRUITING" ? "모집 중" : "모집 완료"
 
+  // quota > 0인 파트만 추출 (plan 제외 - PM은 항상 plan이므로)
+  const parts = project.partQuotas
+    .filter((q) => Number(q.quota) > 0 && q.part !== "PLAN")
+    .map((q) => toFrontRole(q.part))
+
   return {
     id: String(project.id),
     projectName: project.name,
     role: "plan", // PM 프로젝트이므로 기본값
+    parts,
     challengerName: project.productOwner.nickname
       ? `${project.productOwner.nickname}/${project.productOwner.name}`
       : project.productOwner.name,
@@ -156,7 +171,7 @@ export function toProjectApplication(
 // universities는 schoolId만 있어 이름 알 수 없으므로 호출자가 별도 주입
 export function summaryToStats(
   summary: ChapterStatisticsResponse["summary"],
-  projectIdToName: Map<number, string>,
+  projectIdToName: Map<string, string>,
   filterRound?: number, // 미지정 시 전 차수 합산
 ): Omit<ApplicationStats, "universities"> {
   // 차수별 지원 현황
@@ -183,7 +198,7 @@ export function summaryToStats(
   // 프로젝트별 차수별 지원 현황
   const projectRounds: ProjectRoundData[] = summary.projectRoundStatistics.map(
     (p) => ({
-      name: projectIdToName.get(p.projectId) ?? String(p.projectId),
+      name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
       rounds: [
         Number(
           p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
@@ -211,7 +226,7 @@ export function summaryToStats(
   const topProjects: TopProject[] = summary.projectRoundStatistics
     .map((p) => ({
       projectId: p.projectId,
-      name: projectIdToName.get(p.projectId) ?? String(p.projectId),
+      name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
       count: targetPhase
         ? Number(
             p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)
@@ -222,7 +237,9 @@ export function summaryToStats(
             0,
           ),
     }))
-    .sort((a, b) => b.count - a.count || a.projectId - b.projectId)
+    .sort(
+      (a, b) => b.count - a.count || Number(a.projectId) - Number(b.projectId),
+    )
     .slice(0, 4)
 
   return {
@@ -274,7 +291,7 @@ export function toApplicantFormData(
 
   const toFormFields = (questions: FormQuestion[]): FormField[] =>
     questions
-      .sort((a, b) => a.orderNo - b.orderNo)
+      .sort((a, b) => Number(a.orderNo) - Number(b.orderNo))
       .map((q, i) => ({
         label: `Q${i + 1}`,
         question: q.title,

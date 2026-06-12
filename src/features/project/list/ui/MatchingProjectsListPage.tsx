@@ -14,6 +14,17 @@ import { ProjectSearchField } from "./ProjectSearchField"
 import type { ProjectItem } from "../api/matchingProject"
 import type { MatchingProject } from "../model/matchingProject"
 
+const PART_LABEL: Record<string, string> = {
+  PLAN: "기획",
+  DESIGN: "Design",
+  WEB: "Web",
+  IOS: "iOS",
+  ANDROID: "Android",
+  SPRINGBOOT: "SpringBoot",
+  NODEJS: "Node.js",
+}
+const PART_ORDER = Object.keys(PART_LABEL)
+
 function toMatchingProject(project: ProjectItem): MatchingProject {
   const owner = project.productOwner
   const ownerLine = [
@@ -35,11 +46,17 @@ function toMatchingProject(project: ProjectItem): MatchingProject {
     coverImage: project.thumbnailImageUrl
       ? { src: project.thumbnailImageUrl }
       : null,
-    recruitRows: project.partQuotas.map((q) => ({
-      part: q.part,
-      current: Number(q.currentCount),
-      total: Number(q.quota),
-    })),
+    recruitRows: [...(project.partQuotas ?? [])]
+      .sort((a, b) => {
+        const ai = PART_ORDER.indexOf(a.part ?? "")
+        const bi = PART_ORDER.indexOf(b.part ?? "")
+        return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi)
+      })
+      .map((q) => ({
+        part: PART_LABEL[q.part ?? ""] ?? q.part ?? "",
+        current: Number(q.currentCount),
+        total: Number(q.quota),
+      })),
     partQuotaStatus: project.partQuotaStatus,
   }
 }

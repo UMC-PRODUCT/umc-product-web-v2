@@ -14,7 +14,7 @@ import { AssignmentChallengerRow } from "./AssignmentChallengerRow"
 
 import type { Part } from "@/features/challenger/model/types"
 
-import type { AssignableChallenger } from "../model/matchingStatusMock"
+import type { AssignableChallenger } from "../model/matchingStatusTypes"
 
 function useDebounced<T>(value: T, delayMs = 300) {
   const [debounced, setDebounced] = useState(value)

@@ -7,7 +7,7 @@ import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 
-import type { ApplicantFormData, FormField } from "../../model/mockFormData"
+import type { ApplicantFormData, FormField } from "../../model/types"
 import type { ApplicantDetail, StatusValue } from "../../model/types"
 
 const ROLE_LABEL: Record<string, string> = {

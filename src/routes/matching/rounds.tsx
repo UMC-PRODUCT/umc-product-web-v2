@@ -11,8 +11,9 @@ import {
 } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
+import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isOperator } from "@/features/auth/model/identity"
+import { isChapterPresident, isOperator } from "@/features/auth/model/identity"
 import {
   type Branch,
   emptyRoundSchedules,
@@ -92,9 +93,11 @@ function MatchingRoundsPage() {
     PHASES.map(() => ({ startDate: false, endDate: false })),
   )
   const roundFormRefs = useRef<(HTMLDivElement | null)[]>([])
+  const hasAutoSelectedBranch = useRef(false)
 
   const queryClient = useQueryClient()
   const addToast = useToastStore((s) => s.addToast)
+  const { data: me } = useMe()
 
   // 지부 목록 조회 -> branch name -> chapterId 매핑
   const chaptersQuery = useChapters()
@@ -102,6 +105,20 @@ function MatchingRoundsPage() {
     () => chaptersQuery.data?.chapters ?? [],
     [chaptersQuery.data],
   )
+
+  // 로그인한 계정의 지부 정보가 있으면 최초 1회 자동 선택
+  useEffect(() => {
+    if (hasAutoSelectedBranch.current || !me || chapters.length === 0) return
+    const myChapterId = me.roles?.find(
+      (r) => r.roleType === "CHAPTER_PRESIDENT",
+    )?.organizationId
+    if (!myChapterId) return
+    const myChapter = chapters.find((c) => c.id === myChapterId)
+    if (myChapter) {
+      setSelectedBranch(myChapter.name as Branch)
+      hasAutoSelectedBranch.current = true
+    }
+  }, [me, chapters])
 
   const chapterId = useMemo(() => {
     const found = chapters.find((c) => c.name === selectedBranch)
@@ -206,15 +223,15 @@ function MatchingRoundsPage() {
     return { start: minStart, end: maxEnd }
   }, [rounds])
 
-  // REVIEW: 1차 매칭 시작 후에는 차수 기간을 변경할 수 없음 - 서버 스펙 확정 후 재검토
+  // 서버에 저장된 1차 시작일 기준 (편집 중인 값 무관)
   const isFirstRoundStarted = useMemo(() => {
-    const first = rounds[0]
+    const first = committedRounds[0]
     if (!first) return false
     const datePattern = /^\d{4}-\d{2}-\d{2}$/
     if (!datePattern.test(first.startDate)) return false
     const start = new Date(`${first.startDate}T${first.startTime}:00`)
     return start <= new Date()
-  }, [rounds])
+  }, [committedRounds])
 
   const updateRound = (
     idx: number,
@@ -237,26 +254,44 @@ function MatchingRoundsPage() {
   // 저장 mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const promises = rounds.map((round) => {
-        // 날짜가 비어있으면 스킵
-        if (!round.startDate || !round.endDate) return Promise.resolve()
+      // 차수별 startsAt/endsAt 미리 계산 (decisionDeadline 자동 산출용)
+      const filledData = rounds.map((round) => {
+        if (!round.startDate || !round.endDate) return null
+        return {
+          round,
+          startsAt: toISODatetime(round.startDate, round.startTime),
+          endsAt: toISODatetime(round.endDate, round.endTime),
+        }
+      })
 
-        const startsAt = toISODatetime(round.startDate, round.startTime)
-        const endsAt = toISODatetime(round.endDate, round.endTime)
-        // decisionDeadline: endsAt 이후여야 하므로 +1ms
-        const decisionDeadline = new Date(
-          new Date(endsAt).getTime() + 1,
-        ).toISOString()
+      const promises = rounds.map((round, idx) => {
+        const data = filledData[idx]
+        if (!data) return Promise.resolve()
+
+        const { startsAt, endsAt } = data
+
+        // decisionDeadline 자동 계산:
+        // 1차 -> 2차 startsAt, 2차 -> 3차 startsAt, 3차 -> 3차 endsAt + 12h
+        let decisionDeadline: string
+        const nextData = filledData[idx + 1]
+        if (nextData) {
+          decisionDeadline = new Date(
+            new Date(nextData.startsAt).getTime() - 1000,
+          ).toISOString()
+        } else {
+          // 마지막 차수(또는 다음 차수 미입력): endsAt + 12시간
+          decisionDeadline = new Date(
+            new Date(endsAt).getTime() + 12 * 60 * 60 * 1000,
+          ).toISOString()
+        }
 
         if (round.id) {
-          // 기존 라운드 수정
           return updateMatchingRound(round.id, {
             startsAt,
             endsAt,
             decisionDeadline,
           })
         }
-        // 신규 라운드 생성
         return createMatchingRound({
           name: `${round.roundLabel} ${matchingType}`,
           type: serverType,
@@ -279,9 +314,14 @@ function MatchingRoundsPage() {
     },
     onError: (error) => {
       setSaveState("idle")
-      if ((error as AxiosError).response?.status === 401) {
+      const status = (error as AxiosError).response?.status
+      const message =
+        status === 401
+          ? "권한이 없습니다."
+          : "올바른 날짜 및 시간 형식으로 입력해 주세요."
+      if (message) {
         addToast({
-          message: "권한이 없습니다.",
+          message,
           color: "red",
           variant: "deep",
           type: "default",
@@ -292,16 +332,21 @@ function MatchingRoundsPage() {
   })
 
   const handleSave = () => {
-    // Case 1: 지부 미선택
-    if (chapterId === undefined) {
-      addToast({
-        message: "다른 지부의 매칭 일정은 설정할 수 없습니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      return
+    // CHAPTER_PRESIDENT는 본인 지부 외 설정 불가
+    if (isChapterPresident(me)) {
+      const myChapterId = me?.roles?.find(
+        (r) => r.roleType === "CHAPTER_PRESIDENT",
+      )?.organizationId
+      if (!chapterId || String(chapterId) !== myChapterId) {
+        addToast({
+          message: "다른 지부의 매칭 일정은 설정할 수 없습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
     }
 
     const filledRounds = rounds.filter((r) => r.startDate || r.endDate)
@@ -374,6 +419,24 @@ function MatchingRoundsPage() {
     if (hasInvalidRange) {
       addToast({
         message: "종료 날짜는 시작 날짜 이후로 설정해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // 시작 또는 종료 일시가 현재 시각보다 이전인 경우
+    const now = new Date()
+    const hasPastDate = filledRounds.some((r) => {
+      const start = new Date(`${r.startDate}T${r.startTime}:00`)
+      const end = new Date(`${r.endDate}T${r.endTime}:00`)
+      return start < now || end < now
+    })
+    if (hasPastDate) {
+      addToast({
+        message: "매칭 날짜를 다시 확인해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
@@ -507,6 +570,7 @@ function MatchingRoundsPage() {
                           title={round.title}
                           startDate={round.startDate}
                           startTime={round.startTime}
+                          endDate={round.endDate}
                           endTime={round.endTime}
                           state={getRoundState(round)}
                         />
@@ -530,7 +594,6 @@ function MatchingRoundsPage() {
                         endDate={round.endDate}
                         startTime={round.startTime}
                         endTime={round.endTime}
-                        disabled={isFirstRoundStarted}
                         startDateError={roundErrors[idx]?.startDate}
                         endDateError={roundErrors[idx]?.endDate}
                         onStartDateChange={(v) =>

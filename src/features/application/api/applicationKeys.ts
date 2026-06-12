@@ -25,7 +25,7 @@ export const applicationKeys = {
   matchingApplicants: (
     gisuId: number,
     chapterId?: number,
-    projectIds?: number[],
+    projectIds?: string[],
   ) =>
     [
       ...applicationKeys.all,
@@ -38,7 +38,7 @@ export const applicationKeys = {
   matchingMembers: (
     gisuId: number,
     chapterId?: number,
-    projectIds?: number[],
+    projectIds?: string[],
   ) =>
     [
       ...applicationKeys.all,

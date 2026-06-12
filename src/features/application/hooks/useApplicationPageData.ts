@@ -6,6 +6,7 @@ import {
   getAllSchools,
 } from "@/features/challenger/api/organization"
 import { getActiveGisu } from "@/shared/api/gisu"
+import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 import {
   getAllProjects,
@@ -15,7 +16,11 @@ import {
   getProjectApplications,
 } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
-import { summaryToStats, toProjectApplication } from "../model/mappers"
+import {
+  shortenSchoolName,
+  summaryToStats,
+  toProjectApplication,
+} from "../model/mappers"
 
 import type { MatchingRoundResponse } from "../model/apiTypes"
 import type {
@@ -25,27 +30,35 @@ import type {
 } from "../model/types"
 
 // 매칭 라운드 목록에서 현재 활성 차수 번호 계산
-function getCurrentRound(rounds: MatchingRoundResponse[]): number {
+// PM 결정 기간(endsAt ~ decisionDeadline)도 "활성"으로 판별
+function getCurrentRound(rounds: MatchingRoundResponse[]): {
+  currentRound: number
+  activeRound: number | undefined
+} {
   const now = Date.now()
   const active = rounds.find(
     (r) =>
       new Date(r.startsAt).getTime() <= now &&
-      now <= new Date(r.endsAt).getTime(),
+      now <= new Date(r.decisionDeadline).getTime(),
   )
   if (active) {
-    return active.phase === "FIRST" ? 1 : active.phase === "SECOND" ? 2 : 3
+    const round =
+      active.phase === "FIRST" ? 1 : active.phase === "SECOND" ? 2 : 3
+    return { currentRound: round, activeRound: round }
   }
   const sorted = [...rounds].sort(
     (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
   )
-  if (!sorted[0]) return 1
-  return sorted[0].phase === "FIRST" ? 1 : sorted[0].phase === "SECOND" ? 2 : 3
+  if (!sorted[0]) return { currentRound: 1, activeRound: undefined }
+  const fallback =
+    sorted[0].phase === "FIRST" ? 1 : sorted[0].phase === "SECOND" ? 2 : 3
+  return { currentRound: fallback, activeRound: undefined }
 }
 
 // 활성 기수 ID 조회
 export function useActiveGisuId() {
   return useQuery({
-    queryKey: ["gisu"],
+    queryKey: ["gisu", "active"],
     queryFn: getActiveGisu,
     staleTime: 5 * 60 * 1000,
     select: (data) => (data?.gisuId != null ? Number(data.gisuId) : null),
@@ -68,7 +81,7 @@ export function useChallengerPageData() {
     queryKey: applicationKeys.matchingRounds(undefined),
     queryFn: () => getMatchingRounds(),
   })
-  const currentRound = useMemo(
+  const { currentRound, activeRound } = useMemo(
     () => getCurrentRound(roundsQuery.data ?? []),
     [roundsQuery.data],
   )
@@ -89,11 +102,11 @@ export function useChallengerPageData() {
     queryFn: async () => {
       const results = await Promise.all(
         projects.map(async (p) => {
-          const applicants = await getProjectApplications(p.id)
+          const applicants = await getProjectApplications(Number(p.id))
           return { projectId: p.id, applicants }
         }),
       )
-      return new Map(results.map((r) => [r.projectId, r.applicants]))
+      return new Map(results.map((r) => [String(r.projectId), r.applicants]))
     },
     enabled: projects.length > 0,
   })
@@ -102,7 +115,7 @@ export function useChallengerPageData() {
   const transformed: ProjectApplication[] = useMemo(
     () =>
       projects.map((p) =>
-        toProjectApplication(p, applicantsQuery.data?.get(p.id) ?? []),
+        toProjectApplication(p, applicantsQuery.data?.get(String(p.id)) ?? []),
       ),
     [projects, applicantsQuery.data],
   )
@@ -116,6 +129,7 @@ export function useChallengerPageData() {
       pmName:
         firstProject.productOwner.nickname || firstProject.productOwner.name,
       pmUniversity: firstProject.productOwner.schoolName,
+      thumbnailUrl: firstProject.thumbnailImageUrl || undefined,
     }
   }, [projects])
 
@@ -123,6 +137,7 @@ export function useChallengerPageData() {
     projects: transformed,
     projectInfo,
     currentRound,
+    activeRound,
     isLoading:
       gisuQuery.isLoading ||
       roundsQuery.isLoading ||
@@ -183,11 +198,11 @@ export function useAdminPageData(chapterName?: string) {
     queryFn: async () => {
       const results = await Promise.all(
         projects.map(async (p) => {
-          const applicants = await getProjectApplications(p.id)
+          const applicants = await getProjectApplications(Number(p.id))
           return { projectId: p.id, applicants }
         }),
       )
-      return new Map(results.map((r) => [r.projectId, r.applicants]))
+      return new Map(results.map((r) => [String(r.projectId), r.applicants]))
     },
     enabled: projects.length > 0,
   })
@@ -210,7 +225,7 @@ export function useAdminPageData(chapterName?: string) {
     queryKey: applicationKeys.matchingRounds(chapterId),
     queryFn: () => getMatchingRounds(chapterId),
   })
-  const currentRound = useMemo(
+  const { currentRound, activeRound } = useMemo(
     () => getCurrentRound(roundsQuery.data ?? []),
     [roundsQuery.data],
   )
@@ -222,9 +237,9 @@ export function useAdminPageData(chapterName?: string) {
     enabled: !!chapterId,
   })
 
-  // projectId -> name 맵 (summaryToStats에서 프로젝트명 조회용)
+  // projectId -> name 맵 (키를 String으로 통일)
   const projectIdToName = useMemo(
-    () => new Map(projects.map((p) => [p.id, p.name])),
+    () => new Map(projects.map((p) => [String(p.id), p.name])),
     [projects],
   )
 
@@ -232,12 +247,13 @@ export function useAdminPageData(chapterName?: string) {
   const transformed: ProjectApplication[] = useMemo(
     () =>
       projects.map((p) =>
-        toProjectApplication(p, applicantsQuery.data?.get(p.id) ?? []),
+        toProjectApplication(p, applicantsQuery.data?.get(String(p.id)) ?? []),
       ),
     [projects, applicantsQuery.data],
   )
 
   // 통계: summary 기반 (universities는 schoolMatchingStatistics + schools API로 계산)
+  // 서버가 schoolMatchingStatistics를 챕터 필터링 없이 내려주므로 프론트에서 필터링
   const stats: ApplicationStats = useMemo(() => {
     if (!chapterStatsQuery.data) {
       return {
@@ -251,26 +267,54 @@ export function useAdminPageData(chapterName?: string) {
         projectRounds: [],
       }
     }
-    const partial = summaryToStats(
-      chapterStatsQuery.data.summary,
-      projectIdToName,
-    )
+
+    const chapterSchools = chapterName
+      ? new Set<string>(
+          SCHOOLS_BY_BRANCH[chapterName as keyof typeof SCHOOLS_BY_BRANCH] ??
+            [],
+        )
+      : null
+
+    // 해당 챕터 소속 학교 + 프로젝트만 필터링 (서버가 챕터 필터링 없이 내려줌)
+    const filteredSummary = chapterSchools
+      ? {
+          ...chapterStatsQuery.data.summary,
+          schoolMatchingStatistics:
+            chapterStatsQuery.data.summary.schoolMatchingStatistics.filter(
+              (s) => {
+                const name = shortenSchoolName(
+                  schoolIdToName.get(String(s.schoolId)) ?? "",
+                )
+                return chapterSchools.has(name)
+              },
+            ),
+          projectRoundStatistics:
+            chapterStatsQuery.data.summary.projectRoundStatistics.filter((p) =>
+              projectIdToName.has(String(p.projectId)),
+            ),
+        }
+      : chapterStatsQuery.data.summary
+
+    const partial = summaryToStats(filteredSummary, projectIdToName)
     const universities: UniversityCount[] =
-      chapterStatsQuery.data.summary.schoolMatchingStatistics
+      filteredSummary.schoolMatchingStatistics
         .map((s) => ({
-          name: schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
-          applied: s.totalMemberCount,
-          total: partial.totalMembers,
+          name: shortenSchoolName(
+            schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
+          ),
+          applied: Number(s.matchedMemberCount),
+          total: Number(s.totalMemberCount),
         }))
         .sort((a, b) => b.applied - a.applied)
         .slice(0, 5)
     return { ...partial, universities }
-  }, [chapterStatsQuery.data, projectIdToName, schoolIdToName])
+  }, [chapterStatsQuery.data, projectIdToName, schoolIdToName, chapterName])
 
   return {
     projects: transformed,
     stats,
     currentRound,
+    activeRound,
     dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
     chapters,
     isLoading:
