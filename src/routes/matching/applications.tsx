@@ -91,6 +91,7 @@ function MatchingApplicationsPage() {
             projectName={pmProjectInfo.projectName}
             challengerName={pmProjectInfo.pmName}
             challengerUniversity={pmProjectInfo.pmUniversity}
+            thumbnailUrl={pmProjectInfo.thumbnailUrl}
             size="lg"
           />
         )}

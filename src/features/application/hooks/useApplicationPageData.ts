@@ -123,6 +123,7 @@ export function useChallengerPageData() {
       pmName:
         firstProject.productOwner.nickname || firstProject.productOwner.name,
       pmUniversity: firstProject.productOwner.schoolName,
+      thumbnailUrl: firstProject.thumbnailImageUrl || undefined,
     }
   }, [projects])
 
