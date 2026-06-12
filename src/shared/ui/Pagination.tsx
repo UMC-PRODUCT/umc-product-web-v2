@@ -34,7 +34,7 @@ export function Pagination({
       {showPrev ? (
         <button
           type="button"
-          className="text-teal-gray-400 hover:text-teal-gray-700 hover:bg-teal-gray-50 hover:shadow-pagination-num-hover flex h-[1.875rem] w-[1.875rem] shrink-0 items-center justify-center gap-1 rounded-xl border-0 bg-transparent transition-colors transition-shadow focus-visible:ring-2 focus-visible:ring-teal-500/40 focus-visible:outline-none disabled:pointer-events-none"
+          className="text-teal-gray-400 hover:text-teal-gray-700 hover:bg-teal-gray-50 hover:shadow-pagination-num-hover flex h-7.5 w-7.5 shrink-0 items-center justify-center gap-1 rounded-xl border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:ring-teal-500/40 focus-visible:outline-none disabled:pointer-events-none"
           aria-label="이전 페이지"
           onClick={() => onPageChange(safePage - 1)}
         >
@@ -52,7 +52,7 @@ export function Pagination({
               aria-label={`${page}페이지`}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "text-subtitle-4-semibold text-teal-gray-900 flex h-[1.875rem] min-w-[1.875rem] shrink-0 items-center justify-center gap-1 rounded-xl border-0 px-1 transition-colors transition-shadow focus-visible:ring-2 focus-visible:ring-teal-500/40 focus-visible:outline-none disabled:pointer-events-none",
+                "text-subtitle-4-semibold text-teal-gray-900 flex h-7.5 min-w-7.5 shrink-0 items-center justify-center gap-1 rounded-xl border-0 px-1 transition-shadow focus-visible:ring-2 focus-visible:ring-teal-500/40 focus-visible:outline-none disabled:pointer-events-none",
                 isActive
                   ? "bg-teal-gray-100 hover:bg-teal-gray-100"
                   : "hover:bg-teal-gray-50 hover:shadow-pagination-num-hover bg-transparent",
@@ -68,7 +68,7 @@ export function Pagination({
       {showNext ? (
         <button
           type="button"
-          className="text-teal-gray-400 hover:text-teal-gray-700 hover:bg-teal-gray-50 hover:shadow-pagination-num-hover flex h-[1.875rem] w-[1.875rem] shrink-0 items-center justify-center gap-1 rounded-xl border-0 bg-transparent transition-colors transition-shadow focus-visible:ring-2 focus-visible:ring-teal-500/40 focus-visible:outline-none disabled:pointer-events-none"
+          className="text-teal-gray-100 hover:text-teal-gray-700 hover:bg-teal-gray-50 hover:shadow-pagination-num-hover flex h-7.5 w-7.5 shrink-0 items-center justify-center gap-1 rounded-xl border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:ring-teal-500/40 focus-visible:outline-none disabled:pointer-events-none"
           aria-label="다음 페이지"
           onClick={() => onPageChange(safePage + 1)}
         >

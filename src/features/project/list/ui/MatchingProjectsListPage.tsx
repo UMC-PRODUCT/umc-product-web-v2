@@ -158,7 +158,10 @@ export function MatchingProjectsListPage() {
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
+          <Modal.Content
+            className="shadow-drop-neutral-3 rounded-2xl"
+            aria-describedby={undefined}
+          >
             <Modal.Title className="sr-only">프로젝트 상세</Modal.Title>
             {selectedProjectId !== null && (
               <ProjectDetailCard projectId={selectedProjectId} />

@@ -13,7 +13,7 @@ export const projectKeys = {
 } as const
 
 export const gisuKeys = {
-  active: ["gisu", "active"] as const,
+  active: ["gisu"] as const,
 } as const
 
 export const memberKeys = {

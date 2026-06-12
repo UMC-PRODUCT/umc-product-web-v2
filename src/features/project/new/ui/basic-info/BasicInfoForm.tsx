@@ -76,7 +76,7 @@ export const BasicInfoForm = forwardRef<
   const { data: meData } = useMe()
   const isPm = isCurrentTermPm(meData)
   const activeGisuQuery = useQuery({
-    queryKey: ["gisu", "active"],
+    queryKey: ["gisu"],
     queryFn: getActiveGisu,
     staleTime: 5 * 60 * 1000,
   })
