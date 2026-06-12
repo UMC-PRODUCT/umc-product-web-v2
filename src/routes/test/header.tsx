@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useLayoutEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 import Header from "@/components/header/Header"
 import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
@@ -91,7 +91,7 @@ export function useHeaderPreviewUser() {
   const queryClient = useQueryClient()
   const [ready, setReady] = useState(false)
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     useAuthStore.setState({
       accessToken: null,
       refreshToken: null,
