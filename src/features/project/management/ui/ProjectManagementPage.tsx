@@ -9,7 +9,7 @@ import {
   isCurrentTermPm,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
-import { gisuKeys } from "@/features/project/new/api/queryKeys"
+import { gisuKeys, projectKeys } from "@/features/project/new/api/queryKeys"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
@@ -120,7 +120,7 @@ export function ProjectManagementPage() {
     : undefined
 
   const managedQuery = useQuery({
-    queryKey: ["project", "managed", "me", gisuId],
+    queryKey: projectKeys.managedMe(gisuId),
     queryFn: () =>
       getManagedProjects(gisuId!, { size: MANAGED_PROJECTS_PAGE_SIZE }),
     enabled: hasAccess && !!gisuId,

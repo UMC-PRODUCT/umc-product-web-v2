@@ -15,6 +15,7 @@ import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDet
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { deleteProject } from "@/features/project/management/api"
 import { publishProject } from "@/features/project/new/api/projectPublish"
+import { invalidateProjectSummaryQueries } from "@/features/project/new/api"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -112,7 +113,7 @@ export function ProjectManagementMoreMenu({
     mutationFn: () => deleteProject(Number(projectId)),
     onSuccess: () => {
       setDeleteOpen(false)
-      void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
+      invalidateProjectSummaryQueries(queryClient, Number(projectId))
       void queryClient.invalidateQueries({
         queryKey: [...applicationKeys.all, "managed"],
       })
