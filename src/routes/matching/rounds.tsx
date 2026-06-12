@@ -567,6 +567,7 @@ function MatchingRoundsPage() {
                           title={round.title}
                           startDate={round.startDate}
                           startTime={round.startTime}
+                          endDate={round.endDate}
                           endTime={round.endTime}
                           state={getRoundState(round)}
                         />
