@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ChallengerVerificationRouteImport } from './routes/challenger-verification'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
@@ -36,8 +37,10 @@ import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floa
 import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
 import { Route as TestCounterLabelRouteImport } from './routes/test/counter-label'
 import { Route as TestCounterRouteImport } from './routes/test/counter'
+import { Route as TestCodeInputRouteImport } from './routes/test/code-input'
 import { Route as TestChipRouteImport } from './routes/test/chip'
 import { Route as TestCheckboxRouteImport } from './routes/test/checkbox'
+import { Route as TestChallengerVerificationRouteImport } from './routes/test/challenger-verification'
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
 import { Route as SignupOauthRouteImport } from './routes/signup/oauth'
@@ -58,6 +61,11 @@ import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matc
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
+const ChallengerVerificationRoute = ChallengerVerificationRouteImport.update({
+  id: '/challenger-verification',
+  path: '/challenger-verification',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthTestRoute = AuthTestRouteImport.update({
   id: '/auth-test',
   path: '/auth-test',
@@ -194,6 +202,11 @@ const TestCounterRoute = TestCounterRouteImport.update({
   path: '/test/counter',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestCodeInputRoute = TestCodeInputRouteImport.update({
+  id: '/test/code-input',
+  path: '/test/code-input',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestChipRoute = TestChipRouteImport.update({
   id: '/test/chip',
   path: '/test/chip',
@@ -204,6 +217,12 @@ const TestCheckboxRoute = TestCheckboxRouteImport.update({
   path: '/test/checkbox',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestChallengerVerificationRoute =
+  TestChallengerVerificationRouteImport.update({
+    id: '/test/challenger-verification',
+    path: '/test/challenger-verification',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const TestButtonRoute = TestButtonRouteImport.update({
   id: '/test/button',
   path: '/test/button',
@@ -312,6 +331,7 @@ export interface FileRoutesByFullPath {
   '/matching': typeof MatchingRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
+  '/challenger-verification': typeof ChallengerVerificationRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -320,8 +340,10 @@ export interface FileRoutesByFullPath {
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
+  '/test/challenger-verification': typeof TestChallengerVerificationRoute
   '/test/checkbox': typeof TestCheckboxRoute
   '/test/chip': typeof TestChipRoute
+  '/test/code-input': typeof TestCodeInputRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
@@ -359,6 +381,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth-test': typeof AuthTestRoute
+  '/challenger-verification': typeof ChallengerVerificationRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -367,8 +390,10 @@ export interface FileRoutesByTo {
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
+  '/test/challenger-verification': typeof TestChallengerVerificationRoute
   '/test/checkbox': typeof TestCheckboxRoute
   '/test/chip': typeof TestChipRoute
+  '/test/code-input': typeof TestCodeInputRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
@@ -409,6 +434,7 @@ export interface FileRoutesById {
   '/matching': typeof MatchingRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
+  '/challenger-verification': typeof ChallengerVerificationRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -417,8 +443,10 @@ export interface FileRoutesById {
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
+  '/test/challenger-verification': typeof TestChallengerVerificationRoute
   '/test/checkbox': typeof TestCheckboxRoute
   '/test/chip': typeof TestChipRoute
+  '/test/code-input': typeof TestCodeInputRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
@@ -461,6 +489,7 @@ export interface FileRouteTypes {
     | '/matching'
     | '/settings'
     | '/auth-test'
+    | '/challenger-verification'
     | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -469,8 +498,10 @@ export interface FileRouteTypes {
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
+    | '/test/challenger-verification'
     | '/test/checkbox'
     | '/test/chip'
+    | '/test/code-input'
     | '/test/counter'
     | '/test/counter-label'
     | '/test/field-type-button'
@@ -508,6 +539,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth-test'
+    | '/challenger-verification'
     | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -516,8 +548,10 @@ export interface FileRouteTypes {
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
+    | '/test/challenger-verification'
     | '/test/checkbox'
     | '/test/chip'
+    | '/test/code-input'
     | '/test/counter'
     | '/test/counter-label'
     | '/test/field-type-button'
@@ -557,6 +591,7 @@ export interface FileRouteTypes {
     | '/matching'
     | '/settings'
     | '/auth-test'
+    | '/challenger-verification'
     | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -565,8 +600,10 @@ export interface FileRouteTypes {
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
+    | '/test/challenger-verification'
     | '/test/checkbox'
     | '/test/chip'
+    | '/test/code-input'
     | '/test/counter'
     | '/test/counter-label'
     | '/test/field-type-button'
@@ -608,12 +645,15 @@ export interface RootRouteChildren {
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
+  ChallengerVerificationRoute: typeof ChallengerVerificationRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   SignupOauthRoute: typeof SignupOauthRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
   TestButtonRoute: typeof TestButtonRoute
+  TestChallengerVerificationRoute: typeof TestChallengerVerificationRoute
   TestCheckboxRoute: typeof TestCheckboxRoute
   TestChipRoute: typeof TestChipRoute
+  TestCodeInputRoute: typeof TestCodeInputRoute
   TestCounterRoute: typeof TestCounterRoute
   TestCounterLabelRoute: typeof TestCounterLabelRoute
   TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
@@ -638,6 +678,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/challenger-verification': {
+      id: '/challenger-verification'
+      path: '/challenger-verification'
+      fullPath: '/challenger-verification'
+      preLoaderRoute: typeof ChallengerVerificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth-test': {
       id: '/auth-test'
       path: '/auth-test'
@@ -827,6 +874,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestCounterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/test/code-input': {
+      id: '/test/code-input'
+      path: '/test/code-input'
+      fullPath: '/test/code-input'
+      preLoaderRoute: typeof TestCodeInputRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/test/chip': {
       id: '/test/chip'
       path: '/test/chip'
@@ -839,6 +893,13 @@ declare module '@tanstack/react-router' {
       path: '/test/checkbox'
       fullPath: '/test/checkbox'
       preLoaderRoute: typeof TestCheckboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/challenger-verification': {
+      id: '/test/challenger-verification'
+      path: '/test/challenger-verification'
+      fullPath: '/test/challenger-verification'
+      preLoaderRoute: typeof TestChallengerVerificationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/button': {
@@ -1085,12 +1146,15 @@ const rootRouteChildren: RootRouteChildren = {
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   SettingsRouteRoute: SettingsRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
+  ChallengerVerificationRoute: ChallengerVerificationRoute,
   LoginDefaultRoute: LoginDefaultRoute,
   SignupOauthRoute: SignupOauthRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
+  TestChallengerVerificationRoute: TestChallengerVerificationRoute,
   TestCheckboxRoute: TestCheckboxRoute,
   TestChipRoute: TestChipRoute,
+  TestCodeInputRoute: TestCodeInputRoute,
   TestCounterRoute: TestCounterRoute,
   TestCounterLabelRoute: TestCounterLabelRoute,
   TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
