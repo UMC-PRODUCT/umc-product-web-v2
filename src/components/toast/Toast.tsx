@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/utils"
 export const FADE_OUT_DURATION = 300
 
 const toastVariants = cva(
-  "w-100 h-12.5 px-4 py-1 gap-2.5 rounded-[12px] flex justify-between items-center text-label-1-medium shadow-drop-neutral-2 transition-opacity",
+  "w-fit min-w-60 h-12.5 px-4 py-1 gap-2.5 rounded-[12px] flex justify-between items-center text-label-1-medium shadow-drop-neutral-2 transition-opacity",
   {
     variants: {
       variant: {

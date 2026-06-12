@@ -111,10 +111,7 @@ export function ToastProvider() {
       aria-live="polite"
       aria-label="알림 목록"
     >
-      <div
-        className="pointer-events-none relative"
-        style={{ height: "50px", width: "400px" }}
-      >
+      <div className="pointer-events-none relative" style={{ height: "50px" }}>
         {visible.map((toast, i) => {
           const fromFront = visible.length - 1 - i
           const translateY = -fromFront * STACK_OFFSET
@@ -127,7 +124,7 @@ export function ToastProvider() {
               key={toast.id}
               className="pointer-events-auto absolute bottom-0 left-0 origin-bottom transition-all duration-300"
               style={{
-                transform: `translateY(${translateY}px) scale(${scale})`,
+                transform: `translateX(-50%) translateY(${translateY}px) scale(${scale})`,
                 zIndex,
                 animation: isFront ? "toast-shake 0.4s ease-in-out" : undefined,
               }}
