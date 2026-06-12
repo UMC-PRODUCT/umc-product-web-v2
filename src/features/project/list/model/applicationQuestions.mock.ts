@@ -92,7 +92,7 @@ const DEFAULT_SECTIONS: Section[] = [
         caption: "",
         fieldType: "checkbox",
         required: true,
-        options: [{ content: "Figma" }, { content: "Github" }],
+        options: [{ content: "Figma" }, { content: "GitHub" }],
       },
       {
         id: "q-f2",
