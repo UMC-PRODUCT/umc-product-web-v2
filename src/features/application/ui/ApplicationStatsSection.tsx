@@ -182,32 +182,41 @@ export function ApplicationStatsSection({
           <h3 className="text-heading-6-semibold text-teal-700">
             {currentRound}차 매칭 {labels.roundSuffix} Top 4
           </h3>
-          <div className="mt-10 flex items-end gap-2.5 px-2.5">
-            {stats.topProjects.slice(0, 4).map((project, i) => {
-              const rank = (i + 1) as 1 | 2 | 3 | 4
-              const maxCount = stats.topProjects[0]?.count ?? 1
-              const topSlice = stats.topProjects.slice(0, 4)
-              const isLastBar = i === topSlice.length - 1
-              const minHeight =
-                stats.topProjects.length <= 3 && isLastBar ? 5 : 30
-              const heightPx =
-                maxCount > 0
-                  ? Math.max(
-                      minHeight,
-                      Math.round((project.count / maxCount) * 120),
-                    )
-                  : minHeight
-              return (
-                <RankBar
-                  key={project.name}
-                  rank={rank}
-                  count={project.count}
-                  label={project.name}
-                  heightPx={heightPx}
-                />
-              )
-            })}
-          </div>
+          {stats.topProjects.some((p) => p.count > 0) ? (
+            <div className="mt-10 flex items-end gap-2.5 px-2.5">
+              {stats.topProjects
+                .filter((p) => p.count > 0)
+                .slice(0, 4)
+                .map((project, i) => {
+                  const topSlice = stats.topProjects
+                    .filter((p) => p.count > 0)
+                    .slice(0, 4)
+                  const rank = (i + 1) as 1 | 2 | 3 | 4
+                  const maxCount = topSlice[0]?.count ?? 1
+                  const isLastBar = i === topSlice.length - 1
+                  const minHeight = topSlice.length <= 3 && isLastBar ? 5 : 30
+                  const heightPx = Math.max(
+                    minHeight,
+                    Math.round((project.count / maxCount) * 120),
+                  )
+                  return (
+                    <RankBar
+                      key={project.name}
+                      rank={rank}
+                      count={project.count}
+                      label={project.name}
+                      heightPx={heightPx}
+                    />
+                  )
+                })}
+            </div>
+          ) : (
+            <div className="mt-10 flex flex-1 items-center justify-center">
+              <p className="text-body-2-regular text-teal-gray-400">
+                아직 지원자가 없습니다.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* 우: 총원 N명 */}
