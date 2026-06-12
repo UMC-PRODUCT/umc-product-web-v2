@@ -9,7 +9,7 @@ import { useAuthStore } from "@/features/auth/store/authStore"
 
 import type { MemberInfoResponse } from "@/features/auth/api/me"
 
-const headerPreviewPathname = "/matching/projects/management"
+const HEADER_PREVIEW_PATHNAME = "/matching/projects/management"
 
 export const Route = createFileRoute("/test/header")({
   component: HeaderTestPage,
@@ -22,12 +22,12 @@ function HeaderTestPage() {
 
   return (
     <main className="h-full min-h-screen w-full">
-      <Header activePathname={headerPreviewPathname} />
+      <Header activePathname={HEADER_PREVIEW_PATHNAME} />
       <div className="flex w-full">
-        <SideBar activePathname={headerPreviewPathname} />
+        <SideBar activePathname={HEADER_PREVIEW_PATHNAME} />
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="px-4 pt-6 min-[960px]:px-8.5 min-[960px]:pt-14.5">
-            <MatchingSegmentRegion activePathname={headerPreviewPathname} />
+            <MatchingSegmentRegion activePathname={HEADER_PREVIEW_PATHNAME} />
           </div>
           <div className="flex min-h-screen min-w-0 flex-1 flex-col px-4 pt-6 min-[960px]:px-8.5 min-[960px]:pt-8">
             <section className="border-teal-gray-100 flex flex-col gap-3 rounded-lg border bg-white p-6">
