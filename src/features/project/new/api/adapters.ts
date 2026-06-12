@@ -113,7 +113,7 @@ export function mapApplicationFormToSections(
             )
 
       const questions: Question[] = apiSection.questions
-        .slice()
+        .filter((apiQ) => apiQ.questionId != null)
         .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
         .map((apiQ) => {
           const sortedOptions = apiQ.options
