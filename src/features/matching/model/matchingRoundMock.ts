@@ -69,9 +69,14 @@ function parseServerDatetime(iso: string): { date: string; time: string } {
   return { date: `${y}-${m}-${d}`, time: `${hh}:${mm}` }
 }
 
-// UI date + time -> ISO datetime 문자열 (로컬 시간 -> UTC 변환, 초:밀리초는 59:999 고정)
-export function toISODatetime(date: string, time: string): string {
-  const dt = new Date(`${date}T${time}:59.999`)
+// UI date + time -> ISO datetime 문자열 (로컬 시간 -> UTC 변환)
+export function toISODatetime(
+  date: string,
+  time: string,
+  seconds: "start" | "end" = "end",
+): string {
+  const suffix = seconds === "start" ? ":00.000" : ":59.999"
+  const dt = new Date(`${date}T${time}${suffix}`)
   return dt.toISOString()
 }
 
