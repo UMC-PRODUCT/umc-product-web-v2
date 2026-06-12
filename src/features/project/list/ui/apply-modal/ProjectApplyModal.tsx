@@ -280,7 +280,7 @@ export function ProjectApplyModal({
       if (isDevMatchingRound) return
       try {
         const draft = await createApplicationDraft(projectId, matchingRoundId)
-        setApplicationId(draft.applicationId)
+        setApplicationId(Number(draft.applicationId))
       } catch (err) {
         if (err instanceof AxiosError && err.response?.status === 409) {
           const gisu = await getActiveGisu().catch(() => null)

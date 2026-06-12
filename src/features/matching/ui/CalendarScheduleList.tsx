@@ -6,25 +6,31 @@ interface CalendarScheduleListProps {
   title: string
   startDate: string // "2025-05-11"
   startTime: string // "00:00"
+  endDate: string // "2025-05-13"
   endTime: string // "23:59"
   state?: "default" | "active" | "disabled"
   onClick?: () => void
   className?: string
 }
 
+function formatDate(dateStr: string): string {
+  const parts = dateStr.split("-")
+  if (parts.length !== 3) return dateStr
+  const [y, m, d] = parts
+  const currentYear = new Date().getFullYear()
+  return Number(y) !== currentYear ? `${y}년 ${m}월 ${d}일` : `${m}월 ${d}일`
+}
+
 function formatScheduleDateTime(
   startDate: string,
   startTime: string,
+  endDate: string,
   endTime: string,
 ) {
-  const parts = startDate.split("-")
-  if (parts.length !== 3) return `${startDate} ${startTime}-${endTime}`
-  const [y, m, d] = parts
-  const currentYear = new Date().getFullYear()
-  const dateYear = Number(y)
-  const dateStr =
-    dateYear !== currentYear ? `${y}년 ${m}월 ${d}일` : `${m}월 ${d}일`
-  return `${dateStr} ${startTime}-${endTime}`
+  if (startDate === endDate) {
+    return `${formatDate(startDate)} ${startTime} ~ ${endTime}`
+  }
+  return `${formatDate(startDate)} ${startTime} ~ ${formatDate(endDate)} ${endTime}`
 }
 
 export function CalendarScheduleList({
@@ -32,6 +38,7 @@ export function CalendarScheduleList({
   title,
   startDate,
   startTime,
+  endDate,
   endTime,
   state = "default",
   onClick,
@@ -64,7 +71,7 @@ export function CalendarScheduleList({
     >
       <div
         className={cn(
-          "flex flex-1 items-center gap-2.5 rounded-r-lg border-y border-r px-3.5 py-[9px]",
+          "flex flex-1 items-center gap-2.5 rounded-r-lg border-y border-r px-3.5 py-2.25",
           isActive ? "border-teal-100" : "border-teal-gray-100",
         )}
       >
@@ -106,7 +113,7 @@ export function CalendarScheduleList({
             )}
           >
             {startDate
-              ? formatScheduleDateTime(startDate, startTime, endTime)
+              ? formatScheduleDateTime(startDate, startTime, endDate, endTime)
               : "\u00A0"}
           </span>
         </div>
