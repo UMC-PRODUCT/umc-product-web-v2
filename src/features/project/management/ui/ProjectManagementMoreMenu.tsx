@@ -136,7 +136,7 @@ export function ProjectManagementMoreMenu({
     },
   })
 
-  const publishMutation = useMutation({
+    mutationFn: () => publishProject(numericProjectId),
     mutationFn: () => publishProject(Number(projectId)),
     onSuccess: () => {
       setPublishOpen(false)
