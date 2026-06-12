@@ -85,7 +85,7 @@ function MatchingStatusPage() {
         </div>
 
         {/* 지부 선택 + 콘텐츠 */}
-        <div className="mt-6 flex flex-col gap-24.75">
+        <div className="mt-6 flex flex-col gap-[52px]">
           <SegmentButton
             items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
             value={selectedChapter}

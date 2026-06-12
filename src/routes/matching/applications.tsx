@@ -99,7 +99,7 @@ function MatchingApplicationsPage() {
           />
         )}
 
-        <div className="mt-6 flex flex-col gap-24.75">
+        <div className="mt-6 flex flex-col gap-13">
           {canApprove && (
             <>
               <SegmentButton
