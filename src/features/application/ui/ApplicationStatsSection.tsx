@@ -139,8 +139,12 @@ export function ApplicationStatsSection({
             }}
           >
             <div className="flex flex-col gap-1.25 text-[12px]">
-              {stats.rounds.map((r) => {
-                const isActive = activeRound === r.round
+              {(stats.rounds.length > 0
+                ? stats.rounds
+                : [{ round: 1, applied: 0, total: stats.totalMembers }]
+              ).map((r) => {
+                const isFallback = stats.rounds.length === 0
+                const isActive = isFallback || activeRound === r.round
                 return (
                   <div key={r.round} className="flex items-center gap-7">
                     <div
@@ -180,7 +184,9 @@ export function ApplicationStatsSection({
         {/* 1차 매칭 지원 Top 4 */}
         <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-100.5 shrink-0 flex-col rounded-xl border bg-white px-8 pt-7 pb-8">
           <h3 className="text-heading-6-semibold text-teal-700">
-            {currentRound}차 매칭 {labels.roundSuffix} Top 4
+            {stats.rounds.length > 0
+              ? `${currentRound}차 매칭 ${labels.roundSuffix} Top 4 `
+              : `N차 매칭 완료 Top 4 `}
           </h3>
           {stats.topProjects.some((p) => p.count > 0) ? (
             <div className="mt-10 flex items-end gap-2.5 px-2.5">
@@ -211,10 +217,22 @@ export function ApplicationStatsSection({
                 })}
             </div>
           ) : (
-            <div className="mt-10 flex flex-1 items-center justify-center">
-              <p className="text-body-2-regular text-teal-gray-400">
-                아직 지원자가 없습니다.
-              </p>
+            <div className="flex flex-1 flex-col justify-between">
+              <div className="flex flex-1 items-center justify-center">
+                <p className="text-body-2-medium text-teal-gray-300">
+                  {variant === "matching"
+                    ? "아직 매칭 완료된 챌린저가 없습니다"
+                    : "아직 지원자가 없습니다"}
+                </p>
+              </div>
+              <div className="flex items-end gap-2.5 px-2.5">
+                {Array.from({ length: 4 }, (_, i) => (
+                  <div
+                    key={i}
+                    className="h-1.25 w-18 rounded-t border-b-[5px] border-teal-200 bg-teal-50"
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
