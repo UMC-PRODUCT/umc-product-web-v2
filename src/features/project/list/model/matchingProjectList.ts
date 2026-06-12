@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { useMe } from "@/features/auth/hooks/useMe"
 import { isOperator } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { getActiveGisu } from "@/shared/api/gisu"
+import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 import { getMatchingProjects, type ProjectItem } from "../api/matchingProject"
 import {
@@ -75,7 +75,7 @@ export function useMatchingProjectListFilters() {
     debouncedSearchQuery,
   ])
 
-  const { data: me } = useMe()
+  const { viewMe: me } = useViewMe()
   const userIsOperator = isOperator(me)
 
   const { data: gisuData } = useQuery({

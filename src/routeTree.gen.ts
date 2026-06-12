@@ -31,6 +31,7 @@ import { Route as TestQuestionFormRouteImport } from './routes/test/question-for
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
 import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
 import { Route as TestIconRouteImport } from './routes/test/icon'
+import { Route as TestHeaderRouteImport } from './routes/test/header'
 import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
 import { Route as TestFooterRouteImport } from './routes/test/footer'
 import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
@@ -167,6 +168,11 @@ const TestInputBoxRoute = TestInputBoxRouteImport.update({
 const TestIconRoute = TestIconRouteImport.update({
   id: '/test/icon',
   path: '/test/icon',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestHeaderRoute = TestHeaderRouteImport.update({
+  id: '/test/header',
+  path: '/test/header',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestFormHeaderRoute = TestFormHeaderRouteImport.update({
@@ -334,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/footer': typeof TestFooterRoute
   '/test/form-header': typeof TestFormHeaderRoute
+  '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
@@ -382,6 +389,7 @@ export interface FileRoutesByTo {
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/footer': typeof TestFooterRoute
   '/test/form-header': typeof TestFormHeaderRoute
+  '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
@@ -433,6 +441,7 @@ export interface FileRoutesById {
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/footer': typeof TestFooterRoute
   '/test/form-header': typeof TestFormHeaderRoute
+  '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
@@ -486,6 +495,7 @@ export interface FileRouteTypes {
     | '/test/floating-action-button'
     | '/test/footer'
     | '/test/form-header'
+    | '/test/header'
     | '/test/icon'
     | '/test/input-box'
     | '/test/option-button'
@@ -534,6 +544,7 @@ export interface FileRouteTypes {
     | '/test/floating-action-button'
     | '/test/footer'
     | '/test/form-header'
+    | '/test/header'
     | '/test/icon'
     | '/test/input-box'
     | '/test/option-button'
@@ -584,6 +595,7 @@ export interface FileRouteTypes {
     | '/test/floating-action-button'
     | '/test/footer'
     | '/test/form-header'
+    | '/test/header'
     | '/test/icon'
     | '/test/input-box'
     | '/test/option-button'
@@ -632,6 +644,7 @@ export interface RootRouteChildren {
   TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
   TestFooterRoute: typeof TestFooterRoute
   TestFormHeaderRoute: typeof TestFormHeaderRoute
+  TestHeaderRoute: typeof TestHeaderRoute
   TestIconRoute: typeof TestIconRoute
   TestInputBoxRoute: typeof TestInputBoxRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
@@ -803,6 +816,13 @@ declare module '@tanstack/react-router' {
       path: '/test/icon'
       fullPath: '/test/icon'
       preLoaderRoute: typeof TestIconRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/header': {
+      id: '/test/header'
+      path: '/test/header'
+      fullPath: '/test/header'
+      preLoaderRoute: typeof TestHeaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/form-header': {
@@ -1117,6 +1137,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
   TestFooterRoute: TestFooterRoute,
   TestFormHeaderRoute: TestFormHeaderRoute,
+  TestHeaderRoute: TestHeaderRoute,
   TestIconRoute: TestIconRoute,
   TestInputBoxRoute: TestInputBoxRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,

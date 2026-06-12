@@ -23,9 +23,14 @@ function MatchingLayout() {
       <div className="flex w-full flex-1">
         <SideBar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className={cn(isProjectsIndex ? "px-9.5" : "px-11", "pt-12")}>
+          <div
+            className={cn(
+              "px-4 pt-6 min-[960px]:pt-12",
+              isProjectsIndex ? "min-[960px]:px-9.5" : "min-[960px]:px-11",
+            )}
+          >
             <MatchingSegmentRegion />
-            <div className="flex min-w-0 flex-1 flex-col pt-8 pb-20">
+            <div className="flex min-w-0 flex-1 flex-col pt-6 pb-20 min-[960px]:pt-8">
               <Outlet />
             </div>
           </div>

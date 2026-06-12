@@ -38,7 +38,7 @@ export default function HeaderButton({
         aria-haspopup="menu"
         onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
-          "text-body-1-medium text-teal-gray-600 hover:bg-teal-gray-100 flex h-9 items-center rounded-full transition-colors",
+          "text-body-1-medium text-teal-gray-600 hover:bg-teal-gray-100 flex h-9 items-center rounded-full whitespace-nowrap transition-colors",
           type === "trailing-icon" ? "pr-3 pl-4.5" : "px-4.5",
           className,
         )}

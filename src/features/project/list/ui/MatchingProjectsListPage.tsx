@@ -79,7 +79,7 @@ export function MatchingProjectsListPage() {
   >(null)
 
   return (
-    <section className="relative flex w-full flex-col items-start justify-start">
+    <section className="relative isolate flex w-full flex-col items-start justify-start">
       {openFilterId && (
         <button
           type="button"

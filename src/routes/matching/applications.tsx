@@ -22,6 +22,7 @@ import {
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
+import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 export const Route = createFileRoute("/matching/applications")({
   beforeLoad: async ({ context }) => {
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/matching/applications")({
 
 function MatchingApplicationsPage() {
   const { data: me } = useMe()
+  const { viewMe } = useViewMe()
   const chaptersQuery = useChapters()
   const chapters = chaptersQuery.data?.chapters ?? []
 
@@ -45,9 +47,9 @@ function MatchingApplicationsPage() {
 
   const [selectedChapter, setSelectedChapter] = useState(defaultChapter)
 
-  const canApprove = isOperator(me)
-  const isPm = isCurrentTermPm(me)
-  const isOthers = !isAnyOperator(me) && !isPm
+  const canApprove = isOperator(viewMe)
+  const isPm = isCurrentTermPm(viewMe)
+  const isOthers = !isAnyOperator(viewMe) && !isPm
 
   // challenger records에 지부 정보가 없는 경우 chapters API로 폴백 (페인트 전 적용)
   const hasAutoSelected = useRef(false)

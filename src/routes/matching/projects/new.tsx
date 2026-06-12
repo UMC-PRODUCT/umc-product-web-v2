@@ -46,14 +46,17 @@ import { useProjectRegisterStore } from "@/features/project/new/model/useProject
 import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useViewModeStore } from "@/shared/view-mode"
+import { projectViewMe } from "@/shared/view-mode/projectViewMe"
 
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
 export const Route = createFileRoute("/matching/projects/new")({
   beforeLoad: async ({ context, search }) => {
     const me = await ensureMe(context.queryClient)
+    const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
 
-    if (!canManageProjects(me)) {
+    if (!canManageProjects(viewMe)) {
       throw redirect({ to: "/matching/projects" })
     }
 

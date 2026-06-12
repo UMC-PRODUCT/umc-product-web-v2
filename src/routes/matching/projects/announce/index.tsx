@@ -29,6 +29,9 @@ import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { Pagination } from "@/shared/ui/Pagination"
+import { useViewModeStore } from "@/shared/view-mode"
+import { projectViewMe } from "@/shared/view-mode/projectViewMe"
+import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 interface AnnounceSearch {
   chapter: Chapter
@@ -115,7 +118,8 @@ export const Route = createFileRoute("/matching/projects/announce/")({
   },
   beforeLoad: async ({ search, context }) => {
     const me = await ensureMe(context.queryClient)
-    const isFullAccess = isSuperAdmin(me) || isCentralStaff(me)
+    const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
+    const isFullAccess = isSuperAdmin(viewMe) || isCentralStaff(viewMe)
     if (isFullAccess) return
 
     const userChapter = getViewerBranch(me)
@@ -136,10 +140,11 @@ function ProjectSettingsAnnouncePage() {
   const [pendingNotice] = useState(readPendingNotice)
 
   const { data: me } = useMe()
+  const { viewMe } = useViewMe()
 
-  const isSuper = isSuperAdmin(me)
-  const isCentral = isCentralStaff(me)
-  const isChapterPres = isChapterPresident(me)
+  const isSuper = isSuperAdmin(viewMe)
+  const isCentral = isCentralStaff(viewMe)
+  const isChapterPres = isChapterPresident(viewMe)
   const userChapter = getViewerBranch(me) as Chapter | undefined
 
   // 기수 정보 조회

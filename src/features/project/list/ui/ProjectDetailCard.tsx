@@ -4,7 +4,6 @@ import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
@@ -21,6 +20,7 @@ import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
+import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 import {
   getActiveMatchingRound,
@@ -155,7 +155,7 @@ export function ProjectDetailCard({
   const projectId = Number(projectIdProp)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { data: me } = useMe()
+  const { viewMe: me } = useViewMe()
   const addToast = useToastStore((s) => s.addToast)
   const userIsOperator = isOperator(me)
   const userIsPm = isCurrentTermPm(me)

@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
-import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
 import {
   isAnyOperator,
@@ -15,6 +14,7 @@ import { getActiveGisu } from "@/shared/api/gisu"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
+import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 import { getManagedProjects } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"
@@ -99,7 +99,7 @@ function toValidProjectId(project: MatchingProject): number | null {
 
 export function ProjectManagementPage() {
   const navigate = useNavigate()
-  const { data: me } = useMe()
+  const { viewMe: me } = useViewMe()
   const [selectedChapter, setSelectedChapter] = useState<string>(CHAPTERS[0])
 
   const isAdminScope = isAnyOperator(me)
@@ -195,7 +195,7 @@ export function ProjectManagementPage() {
   if (!hasAccess) return null
 
   return (
-    <section className="relative flex w-full flex-col items-start justify-start">
+    <section className="relative isolate flex w-full flex-col items-start justify-start">
       <div className="border-teal-gray-100 relative z-30 flex h-full min-w-242 flex-col gap-6 rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
