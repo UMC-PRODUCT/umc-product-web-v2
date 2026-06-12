@@ -33,7 +33,7 @@ const TEAM_ROWS = [
 
 export default function Footer() {
   return (
-    <footer className="bg-teal-gray-100 flex flex-col items-center gap-2.5 self-stretch px-5 py-10">
+    <footer className="bg-teal-gray-100 max-bp1:px-9 max-bp1:py-10 flex flex-col items-center gap-2.5 self-stretch py-16 pr-14 pl-15">
       <div className="flex flex-col items-start gap-6 self-stretch">
         <div className="flex w-full justify-between gap-4 max-[930px]:flex-col">
           <div className="flex items-center gap-4">
