@@ -9,7 +9,7 @@ import {
   isCurrentTermPm,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
-import { gisuKeys } from "@/features/project/new/api/queryKeys"
+import { gisuKeys, projectKeys } from "@/features/project/new/api/queryKeys"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
@@ -21,6 +21,7 @@ import { ProjectManagementCard } from "./ProjectManagementCard"
 import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
 import type { ResourcePermissionQuery } from "@/features/auth/api/permissions"
+import type { ProjectStatus } from "@/features/project/list/api/matchingProject"
 import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 
 const FE_PART_LABELS = new Set(["Web", "iOS", "Android"])
@@ -44,6 +45,7 @@ type ProjectSummaryInput = {
   name?: string | null
   description?: string | null
   thumbnailImageUrl?: string | null
+  status?: ProjectStatus | null
   productOwner?: {
     nickname?: string | null
     name?: string | null
@@ -76,6 +78,7 @@ function toMatchingProject(item: ProjectSummaryInput): MatchingProject {
     title: item.name ?? "",
     description: item.description ?? "",
     authorSchoolLine: ownerLine,
+    status: item.status ?? undefined,
     coverImage: item.thumbnailImageUrl ? { src: item.thumbnailImageUrl } : null,
     recruitRows: (item.partQuotas ?? [])
       .slice()
@@ -117,7 +120,7 @@ export function ProjectManagementPage() {
     : undefined
 
   const managedQuery = useQuery({
-    queryKey: ["project", "managed", "me", gisuId],
+    queryKey: projectKeys.managedMe(gisuId),
     queryFn: () =>
       getManagedProjects(gisuId!, { size: MANAGED_PROJECTS_PAGE_SIZE }),
     enabled: hasAccess && !!gisuId,
@@ -175,6 +178,7 @@ export function ProjectManagementPage() {
       return {
         canDeleteProject: false,
         canEditProject: false,
+        canPublishProject: false,
       }
     }
 
@@ -188,6 +192,11 @@ export function ProjectManagementPage() {
         resourceType: "PROJECT",
         resourceId: projectId,
         permissionType: "EDIT",
+      }),
+      canPublishProject: projectPermissionsQuery.hasPermission({
+        resourceType: "PROJECT",
+        resourceId: projectId,
+        permissionType: "MANAGE",
       }),
     }
   }
