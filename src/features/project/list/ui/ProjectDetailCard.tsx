@@ -5,7 +5,11 @@ import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
-import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import {
+  getLatestChallengerRecord,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   getApplicationForm,
@@ -215,11 +219,7 @@ export function ProjectDetailCard({
   })
 
   const myChapterId = useMemo(() => {
-    const records = me?.challengerRecords
-    if (!records?.length) return null
-    const id = [...records].sort(
-      (a, b) => Number(b.gisuId) - Number(a.gisuId),
-    )[0]?.chapterId
+    const id = getLatestChallengerRecord(me)?.chapterId
     return id != null ? Number(id) : null
   }, [me])
 
@@ -265,10 +265,7 @@ export function ProjectDetailCard({
   )
 
   const latestChallengerPart = useMemo(() => {
-    const records = me?.challengerRecords
-    if (!records?.length) return undefined
-    return [...records].sort((a, b) => Number(b.gisuId) - Number(a.gisuId))[0]
-      ?.part
+    return getLatestChallengerRecord(me)?.part
   }, [me])
 
   const visibleSections = useMemo(() => {
