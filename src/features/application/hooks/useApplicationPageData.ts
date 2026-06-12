@@ -15,7 +15,11 @@ import {
   getProjectApplications,
 } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
-import { summaryToStats, toProjectApplication } from "../model/mappers"
+import {
+  shortenSchoolName,
+  summaryToStats,
+  toProjectApplication,
+} from "../model/mappers"
 
 import type { MatchingRoundResponse } from "../model/apiTypes"
 import type {
@@ -261,7 +265,9 @@ export function useAdminPageData(chapterName?: string) {
     const universities: UniversityCount[] =
       chapterStatsQuery.data.summary.schoolMatchingStatistics
         .map((s) => ({
-          name: schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
+          name: shortenSchoolName(
+            schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
+          ),
           applied: Number(s.totalMemberCount),
           total: partial.totalMembers,
         }))

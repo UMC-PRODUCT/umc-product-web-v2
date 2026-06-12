@@ -8,6 +8,7 @@ import {
 import { cn } from "@/shared/lib/utils"
 import { Pagination } from "@/shared/ui/Pagination"
 
+import { shortenSchoolName } from "../model/mappers"
 import { ApplicantDetailRow } from "./ApplicantDetailRow"
 import { ApplicantTableHead } from "./ApplicantTableHead"
 import { ApplicationDetailModal } from "./ApplicationDetailModal"
@@ -16,16 +17,6 @@ import { ProjectStatusRow } from "./ProjectStatusRow"
 import type { ApplicantDetail, ProjectApplication } from "../model/types"
 
 const ITEMS_PER_PAGE = 15
-
-/** 학교명 약칭 변환 (UI에 "~학교" 붙지 않음) */
-function shortenSchoolName(name: string): string {
-  return name
-    .replace(/캠퍼스/, "")
-    .replace(/외국어대학교/, "외대")
-    .replace(/여자대학교/, "여대")
-    .replace(/대학교/, "대")
-    .replace(/학교$/, "")
-}
 
 function buildSchoolOptions(projects: ProjectApplication[]) {
   const schools = new Set<string>()

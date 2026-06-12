@@ -1,5 +1,14 @@
 // 서버 enum <-> 프론트 타입 매핑
 
+export function shortenSchoolName(name: string): string {
+  return name
+    .replace(/캠퍼스/, "")
+    .replace(/외국어대학교/, "외대")
+    .replace(/여자대학교/, "여대")
+    .replace(/대학교/, "대")
+    .replace(/학교$/, "")
+}
+
 import type {
   ApplicationStatusEnum,
   ChapterStatisticsResponse,
