@@ -53,6 +53,14 @@ function parseOptionId(value: string): number | null {
   return Number.isSafeInteger(optionId) ? optionId : null
 }
 
+function getValidOptionId(question: Question, value: string): number | null {
+  const optionId = parseOptionId(value)
+  if (optionId === null) return null
+  return question.options.some((option) => option.optionId === optionId)
+    ? optionId
+    : null
+}
+
 export function buildAnswerPayload(
   formValues: Record<string, ApplyAnswerValue>,
   sections: Section[],
@@ -72,7 +80,7 @@ export function buildAnswerPayload(
 
     if (question.fieldType === "radio") {
       if (typeof value !== "string" || !value) return [base]
-      const optionId = parseOptionId(value)
+      const optionId = getValidOptionId(question, value)
       if (optionId === null) return [base]
       return [{ ...base, selectedOptionIds: [optionId] }]
     }
@@ -80,7 +88,7 @@ export function buildAnswerPayload(
     if (question.fieldType === "checkbox") {
       if (!Array.isArray(value) || value.length === 0) return [base]
       const selectedIds = value.flatMap((optionValue) => {
-        const optionId = parseOptionId(optionValue)
+        const optionId = getValidOptionId(question, optionValue)
         return optionId === null ? [] : [optionId]
       })
       if (selectedIds.length === 0) return [base]

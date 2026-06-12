@@ -64,4 +64,19 @@ describe("buildAnswerPayload", () => {
 
     expect(payload).toEqual([{ questionId: 101 }, { questionId: 102 }])
   })
+
+  it("현재 옵션에 없는 option id는 selectedOptionIds에 포함하지 않는다", () => {
+    const payload = buildAnswerPayload(
+      {
+        "101": "9999",
+        "102": ["2001", "9999"],
+      },
+      sections,
+    )
+
+    expect(payload).toEqual([
+      { questionId: 101 },
+      { questionId: 102, selectedOptionIds: [2001] },
+    ])
+  })
 })
