@@ -46,7 +46,7 @@ function HeaderTestPage() {
   )
 }
 
-export const headerPreviewUser: MemberInfoResponse = {
+export const HEADER_PREVIEW_USER: MemberInfoResponse = {
   id: 1,
   name: "김운영",
   nickname: "운영자",
@@ -98,7 +98,7 @@ export function useHeaderPreviewUser() {
       memberId: null,
       isAuthed: false,
     })
-    queryClient.setQueryData(["auth"], headerPreviewUser)
+    queryClient.setQueryData(["auth"], HEADER_PREVIEW_USER)
     setReady(true)
   }, [queryClient])
 
