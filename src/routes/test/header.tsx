@@ -92,6 +92,9 @@ export function useHeaderPreviewUser() {
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
+    const previousAuthState = useAuthStore.getState()
+    const previousAuthQuery = queryClient.getQueryData(["auth"])
+
     useAuthStore.setState({
       accessToken: null,
       refreshToken: null,
@@ -100,6 +103,16 @@ export function useHeaderPreviewUser() {
     })
     queryClient.setQueryData(["auth"], HEADER_PREVIEW_USER)
     setIsReady(true)
+
+    return () => {
+      useAuthStore.setState({
+        accessToken: previousAuthState.accessToken,
+        refreshToken: previousAuthState.refreshToken,
+        memberId: previousAuthState.memberId,
+        isAuthed: previousAuthState.isAuthed,
+      })
+      queryClient.setQueryData(["auth"], previousAuthQuery)
+    }
   }, [queryClient])
 
   return isReady
