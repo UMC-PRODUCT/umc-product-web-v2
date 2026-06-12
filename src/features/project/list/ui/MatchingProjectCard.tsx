@@ -120,8 +120,8 @@ export function MatchingProjectCard({
           aria-hidden
           className={cn(
             "pointer-events-none absolute inset-0 z-10 rounded-xl border-[1.5px] border-solid border-transparent transition-[border-color] delay-0 duration-200 ease-in-out group-hover:duration-[650ms] motion-reduce:transition-none motion-reduce:duration-0",
-            forcedHover && "border-teal-400",
-            interactiveHover && !forcedHover && "group-hover:border-teal-400",
+            forcedHover && "border-teal-300",
+            interactiveHover && !forcedHover && "group-hover:border-teal-300",
           )}
         />
       </div>
