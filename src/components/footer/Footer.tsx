@@ -93,7 +93,7 @@ export default function Footer() {
                     |
                   </span>
                 </dt>
-                <dd className="max- flex gap-2.25 max-[930px]:flex-col max-[930px]:gap-1">
+                <dd className="flex gap-2.25 max-[930px]:flex-col max-[930px]:gap-1">
                   <div className="text-body-3-regular shrink-0 tracking-[-0.02em]">
                     {members?.group_1.join("   ")}
                   </div>
