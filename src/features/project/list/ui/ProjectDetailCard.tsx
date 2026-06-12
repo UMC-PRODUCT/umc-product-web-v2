@@ -54,6 +54,8 @@ interface ProjectDetailCardProps {
   projectChapterId?: number
   /** 매칭현황 등 조회 전용 컨텍스트. PM/Others는 기획 보기만 노출 */
   viewOnly?: boolean
+  /** 랜덤 매칭 항목: 내 지원서 보기 버튼 미노출 */
+  hideMyApplication?: boolean
 }
 
 function ProjectDetailCardSkeleton() {
@@ -148,6 +150,7 @@ export function ProjectDetailCard({
   editPermissionLoading,
   projectChapterId,
   viewOnly = false,
+  hideMyApplication = false,
 }: ProjectDetailCardProps) {
   const projectId = Number(projectIdProp)
   const navigate = useNavigate()
@@ -494,7 +497,7 @@ export function ProjectDetailCard({
                     모집 문항 보기
                   </Button>
                 )}
-                {ctaMode === "my-application" && (
+                {ctaMode === "my-application" && !hideMyApplication && (
                   <Button
                     className="flex-1"
                     disabled={myApplicationForProject == null}
