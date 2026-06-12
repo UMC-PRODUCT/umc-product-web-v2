@@ -79,7 +79,7 @@ export function useMatchingProjectListFilters() {
   const userIsOperator = isOperator(me)
 
   const { data: gisuData } = useQuery({
-    queryKey: ["gisu", "active"],
+    queryKey: ["gisu"],
     queryFn: getActiveGisu,
   })
 

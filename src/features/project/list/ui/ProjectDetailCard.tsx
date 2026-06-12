@@ -181,7 +181,7 @@ export function ProjectDetailCard({
   })
 
   const { data: activeGisuData } = useQuery({
-    queryKey: ["gisu", "active"],
+    queryKey: ["gisu"],
     queryFn: getActiveGisu,
     staleTime: 5 * 60 * 1000,
   })
