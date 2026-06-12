@@ -10,6 +10,16 @@ import { TeamMemberRow } from "./TeamMemberRow"
 
 import type { ProjectRecruitRow } from "../../model/matchingProject"
 
+const PART_LABEL: Record<string, string> = {
+  PLAN: "기획",
+  DESIGN: "Design",
+  WEB: "Web",
+  IOS: "iOS",
+  ANDROID: "Android",
+  SPRINGBOOT: "SpringBoot",
+  NODEJS: "Node.js",
+}
+
 interface TeamMemberModalProps {
   projectId: number
   recruitRows: ProjectRecruitRow[]
@@ -59,7 +69,8 @@ export function TeamMemberModal({
         ) : (
           <div className="flex flex-col gap-8">
             {(data?.partGroups ?? []).map((group) => {
-              const recruitRow = recruitRows.find((r) => r.part === group.part)
+              const partLabel = PART_LABEL[group.part] ?? group.part
+              const recruitRow = recruitRows.find((r) => r.part === partLabel)
               const total = recruitRow?.total ?? group.members.length
               const role = group.part.toLowerCase() as Parameters<
                 typeof PartTagChip
