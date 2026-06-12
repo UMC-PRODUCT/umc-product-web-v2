@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { cn } from "@/shared/lib/utils"
 
+import { SideBarViewSwitcher } from "./SideBarViewSwitcher"
 import { useVisibleSidebarSections } from "./useVisibleSidebarSections"
 
 interface MobileSidebarDrawerContentProps {
@@ -24,6 +25,7 @@ export function MobileSidebarDrawerContent({
 
   return (
     <section className="border-teal-gray-100 flex flex-col gap-3 border-t pt-4">
+      <SideBarViewSwitcher className="px-0 pt-0" onSelect={onNavigate} />
       <span className="text-caption-2-medium text-teal-gray-400 px-1">
         Demo Day
       </span>

@@ -1,4 +1,5 @@
 import { create } from "zustand"
+import { createJSONStorage, persist } from "zustand/middleware"
 
 export const VIEW_MODE_OPTIONS = [
   { mode: "admin", label: "Admin View" },
@@ -10,10 +11,8 @@ export type ViewMode = (typeof VIEW_MODE_OPTIONS)[number]["mode"]
 
 interface ViewModeState {
   mode: ViewMode
-  previewMode: ViewMode
-  viewerBranch: string
+  setMode: (mode: ViewMode) => void
   setModeByIndex: (index: number) => void
-  setPreviewModeByIndex: (index: number) => void
 }
 
 function modeFromIndex(index: number): ViewMode {
@@ -25,11 +24,16 @@ export function indexFromMode(mode: ViewMode): number {
   return idx === -1 ? 0 : idx
 }
 
-/** 임시 상태: 권한에 따른 뷰 변화를 보고 싶으시면 아래에서 임시 설정 가능합니다. */
-export const useViewModeStore = create<ViewModeState>((set) => ({
-  mode: "admin",
-  previewMode: "admin",
-  viewerBranch: "Selenium",
-  setModeByIndex: (index) => set({ mode: modeFromIndex(index) }),
-  setPreviewModeByIndex: (index) => set({ previewMode: modeFromIndex(index) }),
-}))
+export const useViewModeStore = create<ViewModeState>()(
+  persist(
+    (set) => ({
+      mode: "admin",
+      setMode: (mode) => set({ mode }),
+      setModeByIndex: (index) => set({ mode: modeFromIndex(index) }),
+    }),
+    {
+      name: "umc-view-mode",
+      storage: createJSONStorage(() => sessionStorage),
+    },
+  ),
+)

@@ -1,15 +1,16 @@
 import { useRouterState } from "@tanstack/react-router"
 import { useMemo } from "react"
 
-import { useMe } from "@/features/auth/hooks/useMe"
 import {
   canAccessProjectSettings,
   canManageProjects,
+  isCurrentTermPm,
   isOperator,
 } from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { Segment, type SegmentItem } from "@/shared/ui/segment/Segment"
+import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 import { filterSectionsByPermission } from "./utils"
 
@@ -22,10 +23,11 @@ export function MatchingSegmentRegion({
 }: MatchingSegmentRegionProps = {}) {
   const currentPathname = useRouterState({ select: (s) => s.location.pathname })
   const pathname = activePathname ?? currentPathname
-  const { data: me } = useMe()
-  const canAccessSettings = canAccessProjectSettings(me)
-  const canManage = canManageProjects(me)
-  const canRecruit = isOperator(me)
+  const { viewMe } = useViewMe()
+  const canAccessSettings = canAccessProjectSettings(viewMe)
+  const canManage = canManageProjects(viewMe)
+  const canRecruit = isOperator(viewMe)
+  const canViewApplications = isOperator(viewMe) || isCurrentTermPm(viewMe)
 
   const visibleSections = useMemo(
     () =>
@@ -33,8 +35,9 @@ export function MatchingSegmentRegion({
         canAccessProjectSettings: canAccessSettings,
         canManageProjects: canManage,
         canManageRecruitment: canRecruit,
+        canViewApplications,
       }),
-    [canAccessSettings, canManage, canRecruit],
+    [canAccessSettings, canManage, canRecruit, canViewApplications],
   )
 
   const resolved = resolveNavigationFromPathname(pathname, visibleSections)

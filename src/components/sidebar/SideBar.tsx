@@ -1,12 +1,14 @@
-import { useRouterState } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useNavigate, useRouterState } from "@tanstack/react-router"
+import { useEffect, useRef, useState } from "react"
 
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { cn } from "@/shared/lib/utils"
+import { useViewModeStore } from "@/shared/view-mode"
 
 import { SideBarMenu } from "./menu/SideBarMenu"
 import { SideBarMenuItem } from "./menu/SideBarMenuItem"
+import { SideBarViewSwitcher } from "./SideBarViewSwitcher"
 import { useVisibleSidebarSections } from "./useVisibleSidebarSections"
 
 interface SideBarProps {
@@ -18,6 +20,9 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
   const currentPathname = useRouterState({ select: (s) => s.location.pathname })
   const pathname = activePathname ?? currentPathname
   const { visibleSections, isLoading } = useVisibleSidebarSections()
+  const navigate = useNavigate()
+  const mode = useViewModeStore((s) => s.mode)
+  const prevModeRef = useRef(mode)
 
   // 현재 경로에 해당하는 섹션을 초기값으로 사용
   const [openSectionId, setOpenSectionId] = useState<string>(() => {
@@ -36,6 +41,16 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
     })
   }, [visibleSections, pathname])
 
+  useEffect(() => {
+    if (prevModeRef.current === mode) return
+    prevModeRef.current = mode
+    if (activePathname || visibleSections.length === 0) return
+    const active = resolveNavigationFromPathname(pathname, visibleSections)
+    if (!active && visibleSections[0]?.menus[0]) {
+      navigate({ to: visibleSections[0].menus[0].to })
+    }
+  }, [mode, visibleSections, pathname, navigate, activePathname])
+
   return (
     <nav
       aria-label="사이드 메뉴"
@@ -44,6 +59,7 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
         className,
       )}
     >
+      <SideBarViewSwitcher />
       {!isLoading && (
         <div className="flex flex-col py-4">
           <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
