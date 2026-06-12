@@ -21,6 +21,8 @@ interface ApplicationStatsSectionProps {
   dataUpdatedAt?: number
   variant?: "application" | "matching"
   currentRound?: number
+  /** 실제 활성 차수. undefined이면 오프시즌/랜덤매칭 기간 (강조 없음) */
+  activeRound?: number
   className?: string
 }
 
@@ -55,6 +57,7 @@ export function ApplicationStatsSection({
   dataUpdatedAt,
   variant = "application",
   currentRound = 1,
+  activeRound,
   className,
 }: ApplicationStatsSectionProps) {
   const labels = VARIANT_LABELS[variant]
@@ -136,25 +139,40 @@ export function ApplicationStatsSection({
             }}
           >
             <div className="flex flex-col gap-1.25 text-[12px]">
-              {stats.rounds.map((r) => (
-                <div key={r.round} className="flex items-center gap-7">
-                  <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-normal">
-                    <span className="w-4.5">{r.round}차</span>
-                    <span className="whitespace-nowrap">
-                      {labels.roundSuffix}
-                    </span>
-                  </div>
-                  <div className="flex w-20 items-center justify-end gap-2 leading-[1.4]">
-                    <span className="text-label-3-semibold whitespace-nowrap text-teal-500">
-                      {r.applied}명
-                    </span>
-                    <div className="text-label-4-medium text-teal-gray-500 flex items-center justify-end gap-0.5">
-                      <span>/</span>
-                      <span className="w-8">{r.total}명</span>
+              {stats.rounds.map((r) => {
+                const isActive = activeRound === r.round
+                return (
+                  <div key={r.round} className="flex items-center gap-7">
+                    <div
+                      className={cn(
+                        "flex items-center gap-0.75 leading-normal",
+                        isActive
+                          ? "text-body-3-semibold text-teal-600"
+                          : "text-body-3-medium text-teal-gray-600",
+                      )}
+                    >
+                      <span className="w-4.5">{r.round}차</span>
+                      <span className="whitespace-nowrap">
+                        {labels.roundSuffix}
+                      </span>
+                    </div>
+                    <div className="flex w-20 items-center justify-end gap-2 leading-[1.4]">
+                      <span
+                        className={cn(
+                          "text-label-3-semibold whitespace-nowrap",
+                          isActive ? "text-teal-500" : "text-teal-gray-500",
+                        )}
+                      >
+                        {r.applied}명
+                      </span>
+                      <div className="text-label-4-medium text-teal-gray-500 flex items-center justify-end gap-0.5">
+                        <span>/</span>
+                        <span className="w-8">{r.total}명</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>

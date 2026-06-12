@@ -117,6 +117,7 @@ function MatchingApplicationsPage() {
                     stats={adminStats}
                     dataUpdatedAt={admin.dataUpdatedAt}
                     currentRound={admin.currentRound}
+                    activeRound={admin.activeRound}
                   />
                   <ApplicationTableSection
                     projects={adminProjects}

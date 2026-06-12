@@ -6,6 +6,7 @@ import {
   getAllGisu,
   getAllSchools,
 } from "@/features/challenger/api/organization"
+import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 import {
   getAllProjects,
@@ -30,7 +31,10 @@ import type {
 
 // 매칭 라운드 목록에서 현재 활성 차수 번호 계산
 // PM 결정 기간(endsAt ~ decisionDeadline)도 "활성"으로 판별
-function getCurrentRound(rounds: MatchingRoundResponse[]): number {
+function getCurrentRound(rounds: MatchingRoundResponse[]): {
+  currentRound: number
+  activeRound: number | undefined
+} {
   const now = Date.now()
   const active = rounds.find(
     (r) =>
@@ -38,13 +42,17 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): number {
       now <= new Date(r.decisionDeadline).getTime(),
   )
   if (active) {
-    return active.phase === "FIRST" ? 1 : active.phase === "SECOND" ? 2 : 3
+    const round =
+      active.phase === "FIRST" ? 1 : active.phase === "SECOND" ? 2 : 3
+    return { currentRound: round, activeRound: round }
   }
   const sorted = [...rounds].sort(
     (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
   )
-  if (!sorted[0]) return 1
-  return sorted[0].phase === "FIRST" ? 1 : sorted[0].phase === "SECOND" ? 2 : 3
+  if (!sorted[0]) return { currentRound: 1, activeRound: undefined }
+  const fallback =
+    sorted[0].phase === "FIRST" ? 1 : sorted[0].phase === "SECOND" ? 2 : 3
+  return { currentRound: fallback, activeRound: undefined }
 }
 
 // 활성 기수 ID 조회
@@ -75,7 +83,7 @@ export function useChallengerPageData() {
     queryKey: applicationKeys.matchingRounds(undefined),
     queryFn: () => getMatchingRounds(),
   })
-  const currentRound = useMemo(
+  const { currentRound, activeRound } = useMemo(
     () => getCurrentRound(roundsQuery.data ?? []),
     [roundsQuery.data],
   )
@@ -131,6 +139,7 @@ export function useChallengerPageData() {
     projects: transformed,
     projectInfo,
     currentRound,
+    activeRound,
     isLoading:
       gisuQuery.isLoading ||
       roundsQuery.isLoading ||
@@ -218,7 +227,7 @@ export function useAdminPageData(chapterName?: string) {
     queryKey: applicationKeys.matchingRounds(chapterId),
     queryFn: () => getMatchingRounds(chapterId),
   })
-  const currentRound = useMemo(
+  const { currentRound, activeRound } = useMemo(
     () => getCurrentRound(roundsQuery.data ?? []),
     [roundsQuery.data],
   )
@@ -246,6 +255,7 @@ export function useAdminPageData(chapterName?: string) {
   )
 
   // 통계: summary 기반 (universities는 schoolMatchingStatistics + schools API로 계산)
+  // 서버가 schoolMatchingStatistics를 챕터 필터링 없이 내려주므로 프론트에서 필터링
   const stats: ApplicationStats = useMemo(() => {
     if (!chapterStatsQuery.data) {
       return {
@@ -259,28 +269,54 @@ export function useAdminPageData(chapterName?: string) {
         projectRounds: [],
       }
     }
-    const partial = summaryToStats(
-      chapterStatsQuery.data.summary,
-      projectIdToName,
-    )
+
+    const chapterSchools = chapterName
+      ? new Set<string>(
+          SCHOOLS_BY_BRANCH[chapterName as keyof typeof SCHOOLS_BY_BRANCH] ??
+            [],
+        )
+      : null
+
+    // 해당 챕터 소속 학교 + 프로젝트만 필터링 (서버가 챕터 필터링 없이 내려줌)
+    const filteredSummary = chapterSchools
+      ? {
+          ...chapterStatsQuery.data.summary,
+          schoolMatchingStatistics:
+            chapterStatsQuery.data.summary.schoolMatchingStatistics.filter(
+              (s) => {
+                const name = shortenSchoolName(
+                  schoolIdToName.get(String(s.schoolId)) ?? "",
+                )
+                return chapterSchools.has(name)
+              },
+            ),
+          projectRoundStatistics:
+            chapterStatsQuery.data.summary.projectRoundStatistics.filter((p) =>
+              projectIdToName.has(String(p.projectId)),
+            ),
+        }
+      : chapterStatsQuery.data.summary
+
+    const partial = summaryToStats(filteredSummary, projectIdToName)
     const universities: UniversityCount[] =
-      chapterStatsQuery.data.summary.schoolMatchingStatistics
+      filteredSummary.schoolMatchingStatistics
         .map((s) => ({
           name: shortenSchoolName(
             schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
           ),
-          applied: Number(s.totalMemberCount),
-          total: partial.totalMembers,
+          applied: Number(s.matchedMemberCount),
+          total: Number(s.totalMemberCount),
         }))
         .sort((a, b) => b.applied - a.applied)
         .slice(0, 5)
     return { ...partial, universities }
-  }, [chapterStatsQuery.data, projectIdToName, schoolIdToName])
+  }, [chapterStatsQuery.data, projectIdToName, schoolIdToName, chapterName])
 
   return {
     projects: transformed,
     stats,
     currentRound,
+    activeRound,
     dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
     chapters,
     isLoading:

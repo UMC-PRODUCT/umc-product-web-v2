@@ -60,6 +60,7 @@ function MatchingStatusPage() {
     matchingParts,
     stats,
     currentRound,
+    activeRound,
     gisuId,
     chapterId,
     assignedMemberIds,
@@ -106,6 +107,7 @@ function MatchingStatusPage() {
                 dataUpdatedAt={dataUpdatedAt}
                 variant="matching"
                 currentRound={currentRound}
+                activeRound={activeRound}
               />
 
               {/* 02 매칭 결과 시트 */}
