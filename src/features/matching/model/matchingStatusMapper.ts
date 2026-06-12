@@ -21,10 +21,10 @@ import type {
 function phaseToBlock(
   phase: number,
   name: string,
-  applicantId: string,
+  applicantId?: string,
 ): MatchingBlockData {
   if (phase === 1) {
-    return { type: "round1", name, applicantId }
+    return { type: "round1", name, ...(applicantId ? { applicantId } : {}) }
   }
   const variantMap: Record<number, "round2" | "round3" | "random"> = {
     2: "round2",
@@ -34,7 +34,7 @@ function phaseToBlock(
     type: "filled",
     name,
     tagVariant: variantMap[phase] ?? "random",
-    applicantId,
+    ...(applicantId ? { applicantId } : {}),
   }
 }
 
@@ -64,7 +64,6 @@ function toMatchingProject(
   applicants: ProjectApplicantResponse[],
   members: ProjectMembersResponse | undefined,
   maxColsByRole: Record<string, number>,
-  currentRound: number,
 ): MatchingProjectData {
   // memberId -> APPROVED 지원서 매핑 (차수 태그 조회용)
   // 서버가 memberId를 string으로 내려주는 경우 대비해 String으로 정규화
@@ -72,11 +71,6 @@ function toMatchingProject(
   for (const app of applicants) {
     if (app.status !== "APPROVED") continue
     approvedAppByMemberId.set(String(app.applicant.memberId), app)
-  }
-
-  const roundVariantMap: Record<number, "round2" | "round3" | "random"> = {
-    2: "round2",
-    3: "round3",
   }
 
   // partGroups를 현재 멤버 기준으로 사용 - 매칭 해제 시 즉시 반영
@@ -88,26 +82,37 @@ function toMatchingProject(
       if (!role) continue
       for (const member of group.members) {
         const app = approvedAppByMemberId.get(String(member.memberId))
+        const displayName = member.nickname
+          ? `${member.nickname}/${member.name}`
+          : member.name
+        // APPROVED 지원서 있으면 지원서 차수 사용
+        // 없고 matchedRoundInfo 있으면 해당 차수 사용 (수동 배정 차수 보존)
+        // 둘 다 없으면 랜덤 매칭으로 표기
         const block: MatchingBlockData = app
           ? {
               ...phaseToBlock(
                 toRoundNumber(app.matchingRound.phase),
-                member.nickname
-                  ? `${member.nickname}/${member.name}`
-                  : member.name,
+                displayName,
                 String(app.applicationId),
               ),
               memberId: String(member.memberId),
             }
-          : {
-              type:
-                currentRound === 1 ? ("round1" as const) : ("filled" as const),
-              name: member.nickname
-                ? `${member.nickname}/${member.name}`
-                : member.name,
-              tagVariant: roundVariantMap[currentRound] ?? "random",
-              memberId: String(member.memberId),
-            }
+          : member.matchedRoundInfo
+            ? {
+                ...phaseToBlock(
+                  toRoundNumber(member.matchedRoundInfo.phase),
+                  displayName,
+                ),
+                memberId: String(member.memberId),
+              }
+            : {
+                // matchedRoundInfo 미제공: 배정 차수 알 수 없음 → 랜덤 매칭으로 표기
+                // 서버에서 matchedRoundInfo 배포 후 정확한 차수로 표시됨
+                type: "filled" as const,
+                name: displayName,
+                tagVariant: "random" as const,
+                memberId: String(member.memberId),
+              }
         const list = blocksByRole.get(role) ?? []
         list.push(block)
         blocksByRole.set(role, list)
@@ -217,7 +222,6 @@ export function toMatchingPartDataList(
   projects: ManagedProjectSummaryResponse[],
   applicantsByProject: Map<string, ProjectApplicantResponse[]>,
   membersByProject: Map<string, ProjectMembersResponse>,
-  currentRound: number,
 ): MatchingPartData[] {
   if (projects.length === 0) return []
 
@@ -248,7 +252,6 @@ export function toMatchingPartDataList(
             applicantsByProject.get(String(p.id)) ?? [],
             membersByProject.get(String(p.id)),
             maxCols,
-            currentRound,
           ),
         ),
       }

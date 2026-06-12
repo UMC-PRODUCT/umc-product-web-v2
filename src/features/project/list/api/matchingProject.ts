@@ -86,10 +86,14 @@ export type GetMatchingProjectsParams = {
 }
 
 export type MemberBrief = {
-  memberId: number
+  memberId: string
   nickname: string
   name: string
   schoolName: string
+  /** 배정된 차수 정보. null이면 랜덤 매칭으로 표기 */
+  matchedRoundInfo: {
+    phase: "FIRST" | "SECOND" | "THIRD"
+  } | null
 }
 
 export type PartGroup = {
@@ -98,7 +102,7 @@ export type PartGroup = {
 }
 
 export type ProjectMembersResponse = {
-  projectId: number
+  projectId: string
   productOwner: MemberBrief
   coProductOwners: MemberBrief[]
   partGroups: PartGroup[]

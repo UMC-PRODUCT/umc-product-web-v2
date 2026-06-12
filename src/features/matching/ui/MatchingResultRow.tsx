@@ -57,7 +57,6 @@ interface MatchingResultRowProps {
   gisuId?: number
   chapterId?: number
   assignedMemberIds?: Set<string>
-  currentRound?: number
   chapterName?: string
   className?: string
 }
@@ -76,7 +75,6 @@ export function MatchingResultRow({
   gisuId,
   chapterId,
   assignedMemberIds,
-  currentRound,
   chapterName,
   className,
 }: MatchingResultRowProps) {
@@ -362,6 +360,13 @@ export function MatchingResultRow({
               memberId: String(challenger.id),
             }
             // 로컬 UI 즉시 반영 (optimistic update)
+            // 수동 배정은 항상 랜덤 매칭으로 표시
+            const optimisticBlock: MatchingBlockData = {
+              type: "filled" as const,
+              name: challenger.nickname,
+              tagVariant: "random" as NumberTagVariant,
+              memberId: String(challenger.id),
+            }
             setLocalRoleRows((prev) =>
               prev.map((row, rIdx) =>
                 rIdx === assignTarget.rowIdx
@@ -369,17 +374,7 @@ export function MatchingResultRow({
                       ...row,
                       blocks: row.blocks.map((block, bIdx) =>
                         bIdx === assignTarget.blockIdx
-                          ? {
-                              type: "filled" as const,
-                              name: challenger.nickname,
-                              tagVariant: (currentRound === 2
-                                ? "round2"
-                                : currentRound === 3
-                                  ? "round3"
-                                  : "random") as NumberTagVariant,
-                              applicantId: challenger.id,
-                              memberId: String(challenger.id),
-                            }
+                          ? optimisticBlock
                           : block,
                       ),
                     }

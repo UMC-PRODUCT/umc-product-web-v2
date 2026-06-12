@@ -185,7 +185,6 @@ export function useMatchingStatusData(chapterName?: string) {
         projects,
         applicantsQuery.data ?? new Map(),
         membersQuery.data ?? new Map(),
-        currentRound,
       ),
     [projects, applicantsQuery.data, membersQuery.data, currentRound],
   )
