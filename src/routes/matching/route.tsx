@@ -18,9 +18,9 @@ function MatchingLayout() {
   const matchRoute = useMatchRoute()
   const isProjectsIndex = Boolean(matchRoute({ to: "/matching/projects" }))
   return (
-    <main className="h-full min-h-screen w-full">
+    <main className="flex h-full min-h-screen w-full flex-col">
       <Header />
-      <div className="flex w-full">
+      <div className="flex w-full flex-1">
         <SideBar />
         <div className="flex min-w-0 flex-1 flex-col">
           <div className={cn(isProjectsIndex ? "px-9.5" : "px-11", "pt-12")}>
