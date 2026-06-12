@@ -83,7 +83,10 @@ export function MatchingDetailModal({
     <Modal.Root open={open} onOpenChange={(next) => !next && handleClose()}>
       <Modal.Portal>
         <Modal.Overlay tone="deep" />
-        <Modal.Content className="flex max-h-[calc(100vh-60px)] items-start">
+        <Modal.Content
+          className="flex max-h-[calc(100vh-60px)] items-start"
+          aria-describedby={undefined}
+        >
           <Modal.Title className="sr-only">
             {applicant.name} 지원서 상세
           </Modal.Title>

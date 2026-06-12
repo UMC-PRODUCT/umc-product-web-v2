@@ -272,8 +272,6 @@ export function ProjectApplyModal({
     applicationId !== null &&
     !isDevMatchingRound &&
     applicationEditPermissionQuery.isPending
-  const canEditApplication =
-    isDevMatchingRound || applicationEditPermissionQuery.hasPermission("EDIT")
 
   useEffect(() => {
     if (draftInitializedRef.current) return
@@ -377,16 +375,6 @@ export function ProjectApplyModal({
     setIsSubmitting(true)
     try {
       if (!isDevMatchingRound) {
-        if (!applicationId || !canEditApplication) {
-          addToast({
-            message: "지원서 제출에 실패했습니다. 다시 시도해 주세요.",
-            color: "red",
-            variant: "deep",
-            type: "default",
-            duration: 3000,
-          })
-          return
-        }
         const answers = buildAnswerPayload(formValues, sections)
         await saveApplicationDraft(projectId, answers)
         await submitApplication(projectId)
@@ -699,8 +687,7 @@ export function ProjectApplyModal({
                 isSubmitting ||
                 isFileUploading ||
                 isPortfolioUploading ||
-                isApplicationEditPermissionLoading ||
-                !canEditApplication
+                isApplicationEditPermissionLoading
               }
               onClick={() => {
                 void handleSubmit(onValid, onInvalid)()
@@ -806,11 +793,7 @@ export function ProjectApplyModal({
               <Button
                 size="s"
                 onClick={() => void handleSubmitConfirm()}
-                disabled={
-                  isSubmitting ||
-                  isApplicationEditPermissionLoading ||
-                  !canEditApplication
-                }
+                disabled={isSubmitting || isApplicationEditPermissionLoading}
               >
                 제출하기
               </Button>

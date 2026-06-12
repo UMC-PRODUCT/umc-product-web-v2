@@ -96,7 +96,9 @@ export function getProjectPmSearchScope(me: MemberInfoResponse | undefined): {
   if (isSchoolLeadership(me)) {
     return me?.schoolId != null ? { schoolId: String(me.schoolId) } : {}
   }
-  return {}
+  if (!me?.challengerRecords?.length) return {}
+  const latest = latestRecord(me.challengerRecords)
+  return latest?.chapterId ? { chapterId: latest.chapterId } : {}
 }
 
 export function isCurrentTermPm(me: MemberInfoResponse | undefined): boolean {

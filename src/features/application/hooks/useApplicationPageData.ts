@@ -3,9 +3,9 @@ import { useMemo } from "react"
 
 import {
   getAllChapters,
-  getAllGisu,
   getAllSchools,
 } from "@/features/challenger/api/organization"
+import { getActiveGisu } from "@/shared/api/gisu"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 import {
@@ -58,12 +58,10 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): {
 // 활성 기수 ID 조회
 export function useActiveGisuId() {
   return useQuery({
-    queryKey: ["gisu", "active"],
-    queryFn: async () => {
-      const res = await getAllGisu()
-      const active = res.gisuList.find((g) => g.isActive)
-      return active ? Number(active.gisuId) : null
-    },
+    queryKey: ["gisu"],
+    queryFn: getActiveGisu,
+    staleTime: 5 * 60 * 1000,
+    select: (data) => (data?.gisuId != null ? Number(data.gisuId) : null),
   })
 }
 

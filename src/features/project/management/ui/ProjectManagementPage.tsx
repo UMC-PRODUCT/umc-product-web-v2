@@ -3,7 +3,12 @@ import { useMemo } from "react"
 
 import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
-import { isAnyOperator, isCurrentTermPm } from "@/features/auth/model/identity"
+import {
+  isAnyOperator,
+  isCentralStaff,
+  isCurrentTermPm,
+  isSuperAdmin,
+} from "@/features/auth/model/identity"
 import { gisuKeys } from "@/features/project/new/api/queryKeys"
 import { getActiveGisu } from "@/shared/api/gisu"
 
@@ -94,6 +99,7 @@ export function ProjectManagementPage() {
   const isAdminScope = isAnyOperator(me)
   const isPm = isCurrentTermPm(me)
   const hasAccess = isAdminScope || isPm
+  const useGroupedView = isCentralStaff(me) || isSuperAdmin(me)
 
   const gisuQuery = useQuery({
     queryKey: gisuKeys.active,
@@ -117,7 +123,7 @@ export function ProjectManagementPage() {
   )
 
   const partGroups = useMemo(() => {
-    if (!isAdminScope) return new Map<string, MatchingProject[]>()
+    if (!useGroupedView) return new Map<string, MatchingProject[]>()
     const map = new Map<string, MatchingProject[]>()
     for (const project of projects) {
       for (const row of project.recruitRows) {
@@ -127,7 +133,7 @@ export function ProjectManagementPage() {
       }
     }
     return map
-  }, [isAdminScope, projects])
+  }, [useGroupedView, projects])
 
   const permissionProjectIds = useMemo(() => {
     const ids = new Set<number>()
@@ -201,7 +207,7 @@ export function ProjectManagementPage() {
             <p className="text-body-2-regular text-teal-gray-400 py-10 text-center">
               데이터를 불러오는 중...
             </p>
-          ) : isAdminScope ? (
+          ) : useGroupedView ? (
             partGroups.size > 0 ? (
               Array.from(partGroups.entries()).map(([part, partProjects]) => (
                 <div key={part} className="flex flex-col">
