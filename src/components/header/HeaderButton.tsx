@@ -59,11 +59,9 @@ export default function HeaderButton({
           role="menu"
           className="shadow-drop-neutral-1 border-teal-gray-50 absolute top-9 right-0 flex flex-col rounded-[8px] border bg-white p-0.5"
         >
-          <div className="h-[26px] w-full px-3 pt-[7px] pb-[1px]">
-            <span className="text-caption-2-medium text-teal-gray-400">
-              카카오톡 채널
-            </span>
-          </div>
+          <p className="text-caption-2-medium text-teal-gray-400 h-[26px] w-full px-3 pt-[7px] pb-[1px]">
+            카카오톡 채널
+          </p>
 
           <KakaoChannelListItem
             label="UMC"
