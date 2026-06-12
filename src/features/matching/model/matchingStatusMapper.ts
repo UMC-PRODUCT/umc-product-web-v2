@@ -183,7 +183,10 @@ function toMatchingProject(
     : "springboot"
 
   const totalCount = designQuota + feQuota + beQuota
-  const currentCount = applicants.filter((a) => a.status === "APPROVED").length
+  // 실제 배정된 멤버 수 (수동 배정 포함, 매칭 해제 즉시 반영)
+  const currentCount = members
+    ? members.partGroups.reduce((sum, g) => sum + g.members.length, 0)
+    : applicants.filter((a) => a.status === "APPROVED").length
 
   return {
     projectId: project.id,
