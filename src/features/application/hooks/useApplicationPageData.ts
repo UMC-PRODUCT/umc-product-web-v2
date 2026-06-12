@@ -58,7 +58,7 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): {
 // 활성 기수 ID 조회
 export function useActiveGisuId() {
   return useQuery({
-    queryKey: ["gisu"],
+    queryKey: ["gisu", "active"],
     queryFn: getActiveGisu,
     staleTime: 5 * 60 * 1000,
     select: (data) => (data?.gisuId != null ? Number(data.gisuId) : null),

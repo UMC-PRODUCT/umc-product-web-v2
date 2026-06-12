@@ -145,6 +145,22 @@ export type MyApplicationStatus =
 export type MyProjectApplicationResponse = {
   applicationId: string
   projectId: string
+  project: {
+    name: string
+    thumbnailImageUrl: string | null
+    productOwner: {
+      memberId: number
+      nickname: string
+      name: string
+      schoolName: string
+    }
+    partQuotas: {
+      part: ProjectPart
+      currentCount: number
+      quota: number
+      status: PartQuotaStatus
+    }[]
+  }
   matchingRound: {
     id: string | null
     type: string

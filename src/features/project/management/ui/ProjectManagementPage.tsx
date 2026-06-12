@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useNavigate } from "@tanstack/react-router"
+import { useMemo, useState } from "react"
 
 import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
@@ -11,6 +12,9 @@ import {
 } from "@/features/auth/model/identity"
 import { gisuKeys } from "@/features/project/new/api/queryKeys"
 import { getActiveGisu } from "@/shared/api/gisu"
+import { EmptyState } from "@/shared/ui/EmptyState"
+import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
+import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 
 import { getManagedProjects } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"
@@ -94,7 +98,9 @@ function toValidProjectId(project: MatchingProject): number | null {
 }
 
 export function ProjectManagementPage() {
+  const navigate = useNavigate()
   const { data: me } = useMe()
+  const [selectedChapter, setSelectedChapter] = useState<string>(CHAPTERS[0])
 
   const isAdminScope = isAnyOperator(me)
   const isPm = isCurrentTermPm(me)
@@ -203,12 +209,20 @@ export function ProjectManagementPage() {
         </div>
 
         <div className="flex flex-col gap-10">
+          {isAdminScope && (
+            <SegmentButton
+              items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+              value={selectedChapter}
+              onValueChange={setSelectedChapter}
+              itemClassName="flex-1"
+            />
+          )}
           {managedQuery.isLoading ? (
             <p className="text-body-2-regular text-teal-gray-400 py-10 text-center">
               데이터를 불러오는 중...
             </p>
-          ) : useGroupedView ? (
-            partGroups.size > 0 ? (
+          ) : isAdminScope ? (
+            useGroupedView && partGroups.size > 0 ? (
               Array.from(partGroups.entries()).map(([part, partProjects]) => (
                 <div key={part} className="flex flex-col">
                   <ProjectManagementSubTitle title={part} className="pb-2" />
@@ -227,10 +241,25 @@ export function ProjectManagementPage() {
                   </div>
                 </div>
               ))
+            ) : !useGroupedView && projects.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {projects.map((project) => {
+                  const permissions = getProjectActionPermissions(project)
+                  return (
+                    <ProjectManagementCard
+                      key={project.id}
+                      data={project}
+                      isPermissionLoading={isProjectPermissionLoading}
+                      {...permissions}
+                    />
+                  )
+                })}
+              </div>
             ) : (
-              <p className="text-body-2-medium text-teal-gray-400 py-10 text-center">
-                등록된 프로젝트가 없습니다.
-              </p>
+              <EmptyState
+                message="등록된 프로젝트가 없습니다."
+                subMessage="챌린저들이 프로젝트를 등록한 후 확인할 수 있습니다."
+              />
             )
           ) : projects.length > 0 ? (
             <div className="flex flex-col gap-3">
@@ -247,9 +276,18 @@ export function ProjectManagementPage() {
               })}
             </div>
           ) : (
-            <p className="text-body-2-medium text-teal-gray-400 py-10 text-center">
-              등록된 프로젝트가 없습니다.
-            </p>
+            <EmptyState
+              message="등록한 프로젝트가 없습니다."
+              subMessage="프로젝트 지원 후 확인할 수 있습니다."
+              button={{
+                label: "프로젝트 등록으로",
+                onClick: () =>
+                  navigate({
+                    to: "/matching/projects/new",
+                    search: { projectId: undefined },
+                  }),
+              }}
+            />
           )}
         </div>
       </div>

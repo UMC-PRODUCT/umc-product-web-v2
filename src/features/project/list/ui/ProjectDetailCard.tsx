@@ -54,6 +54,8 @@ interface ProjectDetailCardProps {
   projectChapterId?: number
   /** 매칭현황 등 조회 전용 컨텍스트. PM/Others는 기획 보기만 노출 */
   viewOnly?: boolean
+  /** 랜덤 매칭 항목: 내 지원서 보기 버튼 미노출 */
+  hideMyApplication?: boolean
 }
 
 function ProjectDetailCardSkeleton() {
@@ -92,6 +94,17 @@ function ProjectDetailCardSkeleton() {
   )
 }
 
+const PART_LABEL: Record<string, string> = {
+  PLAN: "기획",
+  DESIGN: "Design",
+  WEB: "Web",
+  IOS: "iOS",
+  ANDROID: "Android",
+  SPRINGBOOT: "SpringBoot",
+  NODEJS: "Node.js",
+}
+const PART_ORDER = Object.keys(PART_LABEL)
+
 function toMatchingProject(detail: ProjectDetail): MatchingProject {
   const owner = detail.productOwner
   const authorSchoolLine = [
@@ -113,12 +126,18 @@ function toMatchingProject(detail: ProjectDetail): MatchingProject {
     coverImage: detail.thumbnailImageUrl
       ? { src: detail.thumbnailImageUrl }
       : null,
-    recruitRows: detail.partQuotas.map((q) => ({
-      part: q.part,
-      current: Number(q.currentCount),
-      total: Number(q.quota),
-      done: q.status === "COMPLETED",
-    })),
+    recruitRows: [...detail.partQuotas]
+      .sort((a, b) => {
+        const ai = PART_ORDER.indexOf(a.part)
+        const bi = PART_ORDER.indexOf(b.part)
+        return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi)
+      })
+      .map((q) => ({
+        part: PART_LABEL[q.part] ?? q.part,
+        current: Number(q.currentCount) || 0,
+        total: Number(q.quota) || 0,
+        done: q.status === "COMPLETED",
+      })),
     externalLink: detail.externalLink,
   }
 }
@@ -131,6 +150,7 @@ export function ProjectDetailCard({
   editPermissionLoading,
   projectChapterId,
   viewOnly = false,
+  hideMyApplication = false,
 }: ProjectDetailCardProps) {
   const projectId = Number(projectIdProp)
   const navigate = useNavigate()
@@ -478,13 +498,13 @@ export function ProjectDetailCard({
                     모집 문항 보기
                   </Button>
                 )}
-                {ctaMode === "my-application" && (
+                {ctaMode === "my-application" && !hideMyApplication && (
                   <Button
                     className="flex-1"
                     disabled={myApplicationForProject == null}
                     onClick={() => setIsMyApplicationModalOpen(true)}
                   >
-                    내 지원서 확인하기
+                    내 지원서 보기
                   </Button>
                 )}
                 {ctaMode === "apply" &&
