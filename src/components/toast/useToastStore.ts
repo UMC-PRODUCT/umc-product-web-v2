@@ -7,6 +7,8 @@ export interface ToastItem {
   variant: "deep" | "weak"
   type: "default" | "time"
   duration: number
+  /** 양옆에 표시할 이미지 src (cone 등) */
+  sideImage?: string
 }
 
 type AddToastOptions = Omit<ToastItem, "id">

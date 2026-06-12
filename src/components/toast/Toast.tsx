@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/utils"
 export const FADE_OUT_DURATION = 300
 
 const toastVariants = cva(
-  "w-fit min-w-60 h-12.5 px-4 py-1 gap-2.5 rounded-[12px] flex justify-between items-center text-label-1-medium shadow-drop-neutral-2 transition-opacity",
+  "w-fit h-12.5 px-4 py-1 gap-2.5 rounded-[12px] flex justify-between items-center whitespace-nowrap text-label-1-medium shadow-drop-neutral-2 transition-opacity",
   {
     variants: {
       variant: {
@@ -53,6 +53,7 @@ interface ToastProps extends VariantProps<typeof toastVariants> {
   remaining: number
   isDismissing: boolean
   onDismiss: () => void
+  sideImage?: string
 }
 
 export function Toast({
@@ -63,6 +64,7 @@ export function Toast({
   remaining,
   isDismissing,
   onDismiss,
+  sideImage,
 }: ToastProps) {
   const resolvedColor = color ?? "primary"
 
@@ -72,37 +74,53 @@ export function Toast({
       aria-atomic="true"
       className={cn(
         toastVariants({ variant, color }),
+        !sideImage && "min-w-100",
         isDismissing && "opacity-0",
       )}
       style={{ transitionDuration: `${FADE_OUT_DURATION}ms` }}
     >
-      <div className="flex items-center gap-2.5">
-        <SvgCircleCheckIcon
-          aria-hidden="true"
-          width={20}
-          height={20}
-          className={iconColorMap[resolvedColor]}
-        />
-        <span className={textColorMap[resolvedColor]}>{message}</span>
-      </div>
-      {type === "time" ? (
-        <span
-          className={cn(
-            "text-label-1-medium",
-            countdownColorMap[resolvedColor],
-          )}
-        >
-          {Math.ceil(remaining / 1000)}s
-        </span>
+      {sideImage ? (
+        <>
+          <img
+            src={sideImage}
+            alt=""
+            className="size-6 -scale-x-100"
+            aria-hidden="true"
+          />
+          <span className={textColorMap[resolvedColor]}>{message}</span>
+          <img src={sideImage} alt="" className="size-6" aria-hidden="true" />
+        </>
       ) : (
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="text-teal-gray-400 flex items-center justify-center"
-          aria-label="토스트 닫기"
-        >
-          <SvgCloseIcon width={20} height={20} />
-        </button>
+        <>
+          <div className="flex items-center gap-2.5">
+            <SvgCircleCheckIcon
+              aria-hidden="true"
+              width={20}
+              height={20}
+              className={iconColorMap[resolvedColor]}
+            />
+            <span className={textColorMap[resolvedColor]}>{message}</span>
+          </div>
+          {type === "time" ? (
+            <span
+              className={cn(
+                "text-label-1-medium",
+                countdownColorMap[resolvedColor],
+              )}
+            >
+              {Math.ceil(remaining / 1000)}s
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="text-teal-gray-400 flex items-center justify-center"
+              aria-label="토스트 닫기"
+            >
+              <SvgCloseIcon width={20} height={20} />
+            </button>
+          )}
+        </>
       )}
     </div>
   )

@@ -1,14 +1,14 @@
 import { Link, useLocation } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { MobileSidebarDrawerContent } from "@/components/sidebar/MobileSidebarDrawerContent"
-import { isOperator, isSchoolStaff } from "@/features/auth/model/identity"
+import { useToastStore } from "@/components/toast/useToastStore"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
+import errorCone from "@/shared/assets/icon/error/error-cone.svg"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { cn } from "@/shared/lib/utils"
 import Profile from "@/shared/ui/Profile"
-import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 import HeaderButton from "./HeaderButton"
 import NavigationButton from "./NavigationButton"
@@ -17,25 +17,8 @@ interface NavItem {
   label: string
   to: string
   disabled?: boolean
-}
-
-const BASE_NAV: NavItem[] = [
-  { label: "소개", to: "/intro", disabled: true },
-  { label: "모집 안내", to: "/recruit", disabled: true },
-  { label: "프로젝트", to: "/projects", disabled: true },
-  { label: "데모데이 매칭", to: "/matching" },
-]
-
-const MANAGE_NAV: NavItem = {
-  label: "리크루팅",
-  to: "recruiting",
-  disabled: true,
-}
-
-const SYSTEM_NAV: NavItem = {
-  label: "시스템 관리",
-  to: "/system",
-  disabled: true,
+  /** 클릭 시 네비게이션 대신 실행할 핸들러 */
+  onClick?: () => void
 }
 
 interface HeaderProps {
@@ -44,15 +27,28 @@ interface HeaderProps {
 
 export default function Header({ activePathname }: HeaderProps = {}) {
   const location = useLocation()
-  const { viewMe } = useViewMe()
   const pathname = activePathname ?? location.pathname
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const addToast = useToastStore((s) => s.addToast)
 
-  const navItems = useMemo(() => {
-    if (isOperator(viewMe)) return [...BASE_NAV, MANAGE_NAV, SYSTEM_NAV]
-    if (isSchoolStaff(viewMe)) return [...BASE_NAV, MANAGE_NAV]
-    return BASE_NAV
-  }, [viewMe])
+  const navItems: NavItem[] = [
+    { label: "소개", to: "/intro", disabled: true },
+    { label: "데모데이 매칭", to: "/matching" },
+    {
+      label: "리크루팅",
+      to: "/recruiting",
+      onClick: () =>
+        addToast({
+          message:
+            "리크루팅 서비스는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!",
+          color: "primary",
+          variant: "deep",
+          type: "time",
+          duration: 3000,
+          sideImage: errorCone,
+        }),
+    },
+  ]
 
   useEffect(() => {
     setIsMobileMenuOpen(false)
@@ -77,6 +73,7 @@ export default function Header({ activePathname }: HeaderProps = {}) {
               to={item.to}
               selected={pathname.startsWith(item.to)}
               disabled={item.disabled}
+              onClick={item.onClick}
               className="min-w-0 px-3 xl:min-w-18 xl:px-4.5"
             />
           ))}
@@ -132,7 +129,7 @@ export default function Header({ activePathname }: HeaderProps = {}) {
                 selected={selected}
                 disabled={item.disabled}
                 className="text-body-1-medium h-11 w-full min-w-0 justify-center px-4"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={item.onClick ?? (() => setIsMobileMenuOpen(false))}
               />
             )
           })}

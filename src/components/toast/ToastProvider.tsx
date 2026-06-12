@@ -107,25 +107,28 @@ export function ToastProvider() {
 
   return (
     <div
-      className="pointer-events-none fixed bottom-20 left-1/2 z-9999 -translate-x-1/2"
+      className="pointer-events-none fixed inset-x-0 bottom-20 z-9999 flex flex-col items-center"
       aria-live="polite"
       aria-label="알림 목록"
     >
-      <div className="pointer-events-none relative" style={{ height: "50px" }}>
-        {visible.map((toast, i) => {
-          const fromFront = visible.length - 1 - i
-          const translateY = -fromFront * STACK_OFFSET
-          const scale = 1 - fromFront * STACK_SCALE
-          const zIndex = MAX_VISIBLE - fromFront
-          const isFront = fromFront === 0
+      {visible.map((toast, i) => {
+        const fromFront = visible.length - 1 - i
+        const translateY = -fromFront * STACK_OFFSET
+        const scale = 1 - fromFront * STACK_SCALE
+        const zIndex = MAX_VISIBLE - fromFront
+        const isFront = fromFront === 0
 
-          return (
+        return (
+          <div
+            key={toast.id}
+            className="pointer-events-auto absolute bottom-0 origin-bottom transition-all duration-300"
+            style={{
+              transform: `translateY(${translateY}px) scale(${scale})`,
+              zIndex,
+            }}
+          >
             <div
-              key={toast.id}
-              className="pointer-events-auto absolute bottom-0 left-0 origin-bottom transition-all duration-300"
               style={{
-                transform: `translateX(-50%) translateY(${translateY}px) scale(${scale})`,
-                zIndex,
                 animation: isFront ? "toast-shake 0.4s ease-in-out" : undefined,
               }}
             >
@@ -137,11 +140,12 @@ export function ToastProvider() {
                 remaining={remainingMap.get(toast.id) ?? toast.duration}
                 isDismissing={dismissingIds.has(toast.id)}
                 onDismiss={() => dismiss(toast.id)}
+                sideImage={toast.sideImage}
               />
             </div>
-          )
-        })}
-      </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

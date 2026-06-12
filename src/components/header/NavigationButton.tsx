@@ -23,7 +23,12 @@ export default function NavigationButton({
     <Link
       to={to}
       disabled={disabled}
-      onClick={onClick}
+      onClick={(e) => {
+        if (onClick) {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       className={cn(
         "flex h-9 min-w-18 items-center justify-center rounded-full px-4.5 py-1.5 whitespace-nowrap transition-colors",
         selected
