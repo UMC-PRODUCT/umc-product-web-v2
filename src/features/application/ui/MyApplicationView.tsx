@@ -1,14 +1,11 @@
-// import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
-// import { useActiveGisuId } from "@/features/application/hooks/useApplicationPageData"
-import {
-  // getMyApplications,
-  type MyProjectApplicationResponse,
-} from "@/features/project/list/api/matchingProject"
+import { type MyProjectApplicationResponse } from "@/features/project/list/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { ProjectManagementSubTitle } from "@/features/project/management/ui/ProjectManagementSubTitle"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
+import { EmptyState } from "@/shared/ui/EmptyState"
 import { Modal } from "@/shared/ui/Modal"
 
 import { ApplicationProjectCard } from "./ApplicationProjectCard"
@@ -37,6 +34,7 @@ const PHASE_LABEL: Record<string, string> = {
 
 const ROUND_TYPE_LABEL: Record<string, string> = {
   PLAN_DESIGN: "Plan-Design",
+  PLAN_DEVELOPER: "Plan-Developer",
 }
 
 const STATUS_MAP: Record<MyProjectApplicationResponse["status"], StatusValue> =
@@ -49,8 +47,9 @@ const STATUS_MAP: Record<MyProjectApplicationResponse["status"], StatusValue> =
   }
 
 function toRoundLabel(type: string, phase: string): string {
-  const typeLabel = ROUND_TYPE_LABEL[type] ?? type
   const phaseLabel = PHASE_LABEL[phase] ?? phase
+  if (!type) return phaseLabel
+  const typeLabel = ROUND_TYPE_LABEL[type] ?? type
   return `${typeLabel} ${phaseLabel}`
 }
 
@@ -88,6 +87,7 @@ interface MyApplicationRoundSectionProps {
 function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
   const [detailOpen, setDetailOpen] = useState(false)
 
+  const isRandomMatching = item.matchingRound.phase === "RANDOM_MATCHING"
   const roundLabel = toRoundLabel(
     item.matchingRound.type,
     item.matchingRound.phase,
@@ -100,7 +100,7 @@ function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
     <>
       <div className="flex flex-col">
         <ProjectManagementSubTitle title={roundLabel} className="pb-2">
-          <StatusChipTag value={status} type="tag" />
+          {!isRandomMatching && <StatusChipTag value={status} type="tag" />}
         </ProjectManagementSubTitle>
         <div className="flex flex-col gap-4">
           <ApplicationProjectCard
@@ -109,7 +109,12 @@ function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
             pmInfo={pmInfo}
             parts={parts}
             onClick={() => setDetailOpen(true)}
-            rightAction={<MyApplicationMoreMenu item={item} />}
+            rightAction={
+              <MyApplicationMoreMenu
+                item={item}
+                isRandomMatching={isRandomMatching}
+              />
+            }
           />
         </div>
       </div>
@@ -120,7 +125,10 @@ function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
             <Modal.Title className="sr-only">{item.project.name}</Modal.Title>
-            <ProjectDetailCard projectId={item.projectId} />
+            <ProjectDetailCard
+              projectId={item.projectId}
+              hideMyApplication={isRandomMatching}
+            />
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
@@ -128,7 +136,7 @@ function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
   )
 }
 
-// TODO: API 연동 후 제거
+// TODO: 테스트용 목 데이터, 확인 후 제거
 const MOCK_DATA: MyProjectApplicationResponse[] = [
   {
     applicationId: 1,
@@ -149,45 +157,23 @@ const MOCK_DATA: MyProjectApplicationResponse[] = [
       ],
     },
     matchingRound: { id: 1, type: "PLAN_DESIGN", phase: "FIRST" },
-    status: "REJECTED",
+    status: "SUBMITTED",
   },
   {
     applicationId: 2,
-    projectId: 1,
+    projectId: 2,
     project: {
-      name: "UMC_Web",
+      name: "UMC_App",
       thumbnailImageUrl: null,
       productOwner: {
-        memberId: 1,
-        nickname: "이방토",
-        name: "이예원",
-        schoolName: "한양대 ERICA",
+        memberId: 2,
+        nickname: "김기획",
+        name: "김기획",
+        schoolName: "서울대학교",
       },
       partQuotas: [
-        { part: "DESIGN", currentCount: 1, quota: 1, status: "RECRUITING" },
-        { part: "WEB", currentCount: 1, quota: 1, status: "COMPLETED" },
-        { part: "SPRINGBOOT", currentCount: 1, quota: 1, status: "COMPLETED" },
-      ],
-    },
-    matchingRound: { id: 2, type: "PLAN_DESIGN", phase: "SECOND" },
-    status: "REJECTED",
-  },
-  {
-    applicationId: 3,
-    projectId: 1,
-    project: {
-      name: "UMC_Web",
-      thumbnailImageUrl: null,
-      productOwner: {
-        memberId: 1,
-        nickname: "이방토",
-        name: "이예원",
-        schoolName: "한양대 ERICA",
-      },
-      partQuotas: [
-        { part: "DESIGN", currentCount: 1, quota: 1, status: "RECRUITING" },
-        { part: "WEB", currentCount: 1, quota: 1, status: "COMPLETED" },
-        { part: "SPRINGBOOT", currentCount: 1, quota: 1, status: "COMPLETED" },
+        { part: "WEB", currentCount: 1, quota: 2, status: "RECRUITING" },
+        { part: "IOS", currentCount: 1, quota: 1, status: "COMPLETED" },
       ],
     },
     matchingRound: { id: null, type: "PLAN_DESIGN", phase: "RANDOM_MATCHING" },
@@ -196,15 +182,21 @@ const MOCK_DATA: MyProjectApplicationResponse[] = [
 ]
 
 export function MyApplicationView() {
-  // TODO: API 연동 시 아래 주석 해제 후 MOCK_DATA 제거
-  // const { data: gisuId } = useActiveGisuId()
-  // const { data: applications, isLoading } = useQuery({
-  //   queryKey: ["myApplications", gisuId],
-  //   queryFn: () => getMyApplications(gisuId!),
-  //   enabled: gisuId != null,
-  // })
-
+  const navigate = useNavigate()
   const applications = MOCK_DATA
+
+  if (!applications?.length) {
+    return (
+      <EmptyState
+        message="지원한 프로젝트가 없습니다."
+        subMessage="프로젝트 지원 후 확인할 수 있습니다."
+        button={{
+          label: "프로젝트 목록으로",
+          onClick: () => navigate({ to: "/matching/projects" }),
+        }}
+      />
+    )
+  }
 
   return (
     <div className="flex flex-col gap-10">

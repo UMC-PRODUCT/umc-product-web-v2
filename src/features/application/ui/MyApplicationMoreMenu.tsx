@@ -55,11 +55,13 @@ function toModalData(item: MyProjectApplicationResponse): MatchingProject {
 interface MyApplicationMoreMenuProps {
   item: MyProjectApplicationResponse
   onCancelled?: () => void
+  isRandomMatching?: boolean
 }
 
 export function MyApplicationMoreMenu({
   item,
   onCancelled,
+  isRandomMatching = false,
 }: MyApplicationMoreMenuProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
@@ -167,25 +169,29 @@ export function MyApplicationMoreMenu({
               바로가기
             </span>
             <div className="flex w-full flex-col">
-              <DropdownItem
-                label="내 지원서 보기"
-                onClick={() => {
-                  setPopoverOpen(false)
-                  setFormOpen(true)
-                }}
-              />
+              {!isRandomMatching && (
+                <DropdownItem
+                  label="내 지원서 보기"
+                  onClick={() => {
+                    setPopoverOpen(false)
+                    setFormOpen(true)
+                  }}
+                />
+              )}
               <DropdownItem
                 label="기획 보기"
                 onClick={() => void handlePlanViewClick()}
               />
-              <DropdownItem
-                label="지원 취소"
-                onClick={() => {
-                  setPopoverOpen(false)
-                  setCancelOpen(true)
-                }}
-                className="text-error-500"
-              />
+              {!isRandomMatching && (
+                <DropdownItem
+                  label="지원 취소"
+                  onClick={() => {
+                    setPopoverOpen(false)
+                    setCancelOpen(true)
+                  }}
+                  className="text-error-500"
+                />
+              )}
             </div>
           </Popover.Content>
         </Popover.Portal>
