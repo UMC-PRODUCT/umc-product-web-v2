@@ -31,7 +31,7 @@ const ALLOWED_PARTS_TO_SECTION_ID: Record<string, string> = {
 }
 
 function toQuestion(apiQ: ApplicationQuestionItem): Question {
-  const sortedOptions = [...apiQ.options].sort(
+  const sortedOptions = [...(apiQ.options ?? [])].sort(
     (a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0),
   )
   return {
