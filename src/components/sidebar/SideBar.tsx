@@ -28,11 +28,13 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
   })
 
   useEffect(() => {
+    const active = resolveNavigationFromPathname(pathname, visibleSections)
     const ids = new Set(visibleSections.map((section) => section.id))
-    setOpenSectionId((prev) =>
-      ids.has(prev) ? prev : (visibleSections[0]?.id ?? ""),
-    )
-  }, [visibleSections])
+    setOpenSectionId((prev) => {
+      if (active?.section.id) return active.section.id
+      return ids.has(prev) ? prev : (visibleSections[0]?.id ?? "")
+    })
+  }, [visibleSections, pathname])
 
   return (
     <nav
