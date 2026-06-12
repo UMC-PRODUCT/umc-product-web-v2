@@ -1,5 +1,23 @@
+type ProjectListQueryParams = {
+  gisuId: number | undefined
+  page: number
+  keyword: string
+  chapterId: string | undefined
+  schoolId: string | undefined
+  parts: readonly string[]
+  partQuotaStatus: string | undefined
+}
+
 export const projectKeys = {
   all: ["project"] as const,
+  lists: () => [...projectKeys.all, "list"] as const,
+  list: (params: ProjectListQueryParams) =>
+    [...projectKeys.lists(), params] as const,
+  managed: () => [...projectKeys.all, "managed"] as const,
+  managedMe: (gisuId: number | undefined) =>
+    [...projectKeys.managed(), "me", gisuId] as const,
+  managedCheck: (gisuId: number | undefined) =>
+    [...projectKeys.managedMe(gisuId), "check"] as const,
   draft: (gisuId: number) =>
     [...projectKeys.all, "draft", "me", gisuId] as const,
   detail: (projectId: number) =>
