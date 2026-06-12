@@ -86,11 +86,11 @@ export function useMatchingStatusData(chapterName?: string) {
     [roundsQuery.data],
   )
 
-  // 전체 프로젝트 조회 (매칭 결과 시트용 - admin만)
+  // 전체 프로젝트 조회 (매칭 결과 시트용)
   const projectsQuery = useQuery({
     queryKey: applicationKeys.matchingParts(gisuId, chapterId),
     queryFn: () => getAllProjects(gisuId, { chapterId }),
-    enabled: gisuId > 0 && isAdmin,
+    enabled: gisuId > 0,
   })
 
   const projects = useMemo(
