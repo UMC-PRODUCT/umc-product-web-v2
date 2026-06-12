@@ -17,9 +17,11 @@ import {
   summaryToStats,
   toRoundNumber,
 } from "@/features/application/model/mappers"
-import { getAllSchools } from "@/features/challenger/api/organization"
+import {
+  getAllSchools,
+  getChaptersWithSchools,
+} from "@/features/challenger/api/organization"
 import { getProjectMembers } from "@/features/project/list/api/matchingProject"
-import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 import { useViewModeStore } from "@/shared/view-mode"
 
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"
@@ -128,6 +130,21 @@ export function useMatchingStatusData(chapterName?: string) {
     return map
   }, [schoolsQuery.data])
 
+  // 지부별 학교 ID 조회 (schoolMatchingStatistics 필터링용)
+  const chaptersWithSchoolsQuery = useQuery({
+    queryKey: ["chapters-with-schools", gisuId],
+    queryFn: () => getChaptersWithSchools(String(gisuId)),
+    enabled: gisuId > 0,
+  })
+  const chapterSchoolIds = useMemo(() => {
+    if (!chapterName || !chaptersWithSchoolsQuery.data) return null
+    const chapter = chaptersWithSchoolsQuery.data.chapters.find(
+      (c) => c.chapterName === chapterName,
+    )
+    if (!chapter) return null
+    return new Set(chapter.schools.map((s) => String(s.schoolId)))
+  }, [chapterName, chaptersWithSchoolsQuery.data])
+
   // 지부 통계 조회 (rounds, totalMembers, projectRounds, topProjects)
   const chapterStatsQuery = useQuery({
     queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
@@ -214,25 +231,13 @@ export function useMatchingStatusData(chapterName?: string) {
       }
     }
 
-    const chapterSchools = chapterName
-      ? new Set<string>(
-          SCHOOLS_BY_BRANCH[chapterName as keyof typeof SCHOOLS_BY_BRANCH] ??
-            [],
-        )
-      : null
-
-    // 해당 챕터 소속 학교 + 프로젝트만 필터링 (서버가 챕터 필터링 없이 내려줌)
-    const filteredSummary = chapterSchools
+    // 해당 챕터 소속 학교 + 프로젝트만 필터링
+    const filteredSummary = chapterSchoolIds
       ? {
           ...chapterStatsQuery.data.summary,
           schoolMatchingStatistics:
             chapterStatsQuery.data.summary.schoolMatchingStatistics.filter(
-              (s) => {
-                const name = shortenSchoolName(
-                  schoolIdToName.get(String(s.schoolId)) ?? "",
-                )
-                return chapterSchools.has(name)
-              },
+              (s) => chapterSchoolIds.has(String(s.schoolId)),
             ),
           projectRoundStatistics:
             chapterStatsQuery.data.summary.projectRoundStatistics.filter((p) =>
