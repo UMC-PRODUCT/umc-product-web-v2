@@ -6,6 +6,7 @@ import { useToastStore } from "@/components/toast/useToastStore"
 import { Tooltip } from "@/components/tooltip/Tooltip"
 import {
   createMatchingRound,
+  deleteMatchingRound,
   getMatchingRounds,
   updateMatchingRound,
 } from "@/features/application/api/applicationApi"
@@ -263,7 +264,9 @@ function MatchingRoundsPage() {
 
       const promises = rounds.map((round, idx) => {
         const data = filledData[idx]
-        if (!data) return Promise.resolve()
+        // 기존 저장된 차수의 날짜를 비운 경우 삭제
+        if (!data)
+          return round.id ? deleteMatchingRound(round.id) : Promise.resolve()
 
         const { startsAt, endsAt } = data
 
@@ -347,21 +350,6 @@ function MatchingRoundsPage() {
     }
 
     const filledRounds = rounds.filter((r) => r.startDate || r.endDate)
-
-    // 기존 저장 차수의 날짜를 비워서 저장 시 서버-클라이언트 desync 방지
-    const hasClearedExisting = rounds.some(
-      (r) => r.id !== undefined && (!r.startDate || !r.endDate),
-    )
-    if (hasClearedExisting) {
-      addToast({
-        message: "기존에 저장된 일정은 빈 값으로 수정할 수 없습니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      return
-    }
 
     // 날짜/시간 포맷 불완전 시 toISODatetime 크래시 방지
     const datePattern = /^\d{4}-\d{2}-\d{2}$/
