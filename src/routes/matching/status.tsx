@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 
+import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { getViewerBranch, isOperator } from "@/features/auth/model/identity"
+import {
+  getViewerBranch,
+  isChapterPresident,
+  isOperator,
+} from "@/features/auth/model/identity"
 import { useMatchingStatusData } from "@/features/matching/hooks/useMatchingStatusData"
 import { MatchingPartSection } from "@/features/matching/ui/MatchingPartSection"
 import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"
@@ -22,16 +27,34 @@ export const Route = createFileRoute("/matching/status")({
 function MatchingStatusPage() {
   const { data: me } = useMe()
   const isAdmin = isOperator(me)
+  const chaptersQuery = useChapters()
+  const chapters = chaptersQuery.data?.chapters ?? []
 
-  // 챌린저(Plan/Others)는 본인 지부를 초기 탭으로, 운영진은 첫 번째 지부로
+  // challenger records에서 지부명 추출 (어드민 포함 모든 역할)
   const userChapter = getViewerBranch(me)
-  const defaultChapter: Chapter =
-    !isAdmin && CHAPTERS.includes(userChapter as Chapter)
-      ? (userChapter as Chapter)
-      : CHAPTERS[0]
+  const defaultChapter: Chapter = CHAPTERS.includes(userChapter as Chapter)
+    ? (userChapter as Chapter)
+    : CHAPTERS[0]
 
   const [selectedChapter, setSelectedChapter] =
     useState<Chapter>(defaultChapter)
+
+  // challenger records에 지부 정보가 없는 경우 chapters API로 폴백 (페인트 전 적용)
+  const hasAutoSelected = useRef(false)
+  useLayoutEffect(() => {
+    if (hasAutoSelected.current || !me || chapters.length === 0) return
+    if (!isChapterPresident(me)) return
+    if (CHAPTERS.includes(userChapter as Chapter)) return // 이미 records로 처리됨
+    const myChapterId = me.roles?.find(
+      (r) => r.roleType === "CHAPTER_PRESIDENT",
+    )?.organizationId
+    if (!myChapterId) return
+    const myChapter = chapters.find((c) => c.id === myChapterId)
+    if (myChapter && CHAPTERS.includes(myChapter.name as Chapter)) {
+      setSelectedChapter(myChapter.name as Chapter)
+      hasAutoSelected.current = true
+    }
+  }, [me, chapters, userChapter])
 
   const {
     matchingParts,
