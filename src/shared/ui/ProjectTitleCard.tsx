@@ -5,6 +5,7 @@ interface ProjectTitleCardProps {
   challengerName?: string
   challengerUniversity?: string
   subtitle?: string
+  thumbnailUrl?: string
   size?: "lg" | "md" | "sm"
   className?: string
 }
@@ -14,6 +15,7 @@ export function ProjectTitleCard({
   challengerName,
   challengerUniversity,
   subtitle,
+  thumbnailUrl,
   size = "lg",
   className,
 }: ProjectTitleCardProps) {
@@ -28,7 +30,15 @@ export function ProjectTitleCard({
     return (
       <div className={cn("flex items-end", className)}>
         <div className="clip-trapezoid-sm flex h-15 w-69.5 shrink-0 items-center gap-3.5 bg-teal-100 bg-linear-to-r py-2.5 pl-4">
-          <div className="bg-teal-gray-200 size-8 shrink-0 rounded-lg" />
+          {thumbnailUrl ? (
+            <img
+              src={thumbnailUrl}
+              alt={projectName}
+              className="size-8 shrink-0 rounded-lg object-cover"
+            />
+          ) : (
+            <div className="bg-teal-gray-200 size-8 shrink-0 rounded-lg" />
+          )}
           <div className="flex flex-col">
             <span className="text-subtitle-4-semibold text-teal-gray-800">
               {projectName}
@@ -50,7 +60,15 @@ export function ProjectTitleCard({
     return (
       <div className={cn("flex items-end", className)}>
         <div className="clip-trapezoid-md flex h-21.25 w-88 shrink-0 items-center gap-5 bg-teal-100 bg-linear-to-r px-5.5 py-4">
-          <div className="bg-teal-gray-200 size-12.5 shrink-0 rounded-lg" />
+          {thumbnailUrl ? (
+            <img
+              src={thumbnailUrl}
+              alt={projectName}
+              className="size-12.5 shrink-0 rounded-lg object-cover"
+            />
+          ) : (
+            <div className="bg-teal-gray-200 size-12.5 shrink-0 rounded-lg" />
+          )}
           <div className="flex flex-col gap-1">
             <span className="text-heading-6-semibold text-teal-gray-800">
               {projectName}
@@ -71,7 +89,15 @@ export function ProjectTitleCard({
   return (
     <div className={cn("flex items-end", className)}>
       <div className="clip-trapezoid-lg flex h-21.25 w-88 shrink-0 items-center gap-5 bg-teal-50 bg-linear-to-r px-5.5 py-4">
-        <div className="bg-teal-gray-200 size-12.5 shrink-0 rounded-lg" />
+        {thumbnailUrl ? (
+          <img
+            src={thumbnailUrl}
+            alt={projectName}
+            className="size-12.5 shrink-0 rounded-lg object-cover"
+          />
+        ) : (
+          <div className="bg-teal-gray-200 size-12.5 shrink-0 rounded-lg" />
+        )}
         <div className="flex flex-col gap-1">
           <span className="text-heading-6-semibold text-teal-gray-800">
             {projectName}

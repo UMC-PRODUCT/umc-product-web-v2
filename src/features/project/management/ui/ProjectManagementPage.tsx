@@ -82,8 +82,8 @@ function toMatchingProject(item: ProjectSummaryInput): MatchingProject {
       })
       .map((q) => ({
         part: PART_LABEL[q.part ?? ""] ?? q.part ?? "",
-        current: q.currentCount ?? 0,
-        total: q.quota ?? 0,
+        current: Number(q.currentCount) || 0,
+        total: Number(q.quota) || 0,
       })),
   }
 }

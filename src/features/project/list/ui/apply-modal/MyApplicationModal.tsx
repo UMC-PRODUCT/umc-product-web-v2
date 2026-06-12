@@ -164,7 +164,7 @@ export function MyApplicationModal({
               </div>
               <div className="flex w-full flex-col gap-5 pb-6">
                 {detail.formResponse.sections.map((section) => {
-                  const indexMap = new Map<number, number>()
+                  const indexMap = new Map<string, number>()
                   section.questions.forEach((q, i) =>
                     indexMap.set(q.questionId, i + 1),
                   )

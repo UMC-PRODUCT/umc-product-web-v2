@@ -9,6 +9,27 @@ export type Role =
   | "springboot"
   | "nodejs"
 
+export interface FormField {
+  label: string
+  question: string
+  answer: string
+  required?: boolean
+}
+
+export interface ApplicantFormData {
+  applicantId: string
+  chapter: string
+  role: Role
+  projectName: string
+  challengerName: string
+  challengerUniversity: string
+  commonFields: FormField[]
+  roleSection?: {
+    title: string
+    fields: FormField[]
+  }
+}
+
 export interface AssignmentCount {
   current: number
   total: number
@@ -21,7 +42,7 @@ export interface RoundCount {
 }
 
 export interface TopProject {
-  projectId: number
+  projectId: string
   name: string
   count: number
 }
@@ -63,6 +84,7 @@ export interface ProjectApplication {
   id: string
   projectName: string
   role: Role
+  parts: Role[] // 프로젝트에 할당된 파트 목록 (quota > 0)
   challengerName: string
   challengerUniversity: string
   statusLabel: string
