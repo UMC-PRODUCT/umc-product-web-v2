@@ -143,6 +143,7 @@ export function useMatchingProjectListFilters() {
         schoolIds: selectedSchool ? [Number(selectedSchool)] : undefined,
         parts: selectedParts.length > 0 ? selectedParts : undefined,
         partQuotaStatus: selectedRecruitStatus,
+        statuses: ["IN_PROGRESS"],
         page: page - 1,
         size: MATCHING_PROJECT_PAGE_SIZE,
       }),
