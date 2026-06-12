@@ -1,5 +1,6 @@
 import { useState } from "react"
 
+import { useSchoolChapterMap } from "@/shared/hooks/useSchoolChapterMap"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { cn } from "@/shared/lib/utils"
 import { Modal } from "@/shared/ui/Modal"
@@ -74,9 +75,14 @@ export function MatchingProjectsListPage() {
     filterDescriptors,
   } = useMatchingProjectListFilters()
 
+  const { getChapterIdBySchool } = useSchoolChapterMap()
+
   const [selectedProjectId, setSelectedProjectId] = useState<
     number | string | null
   >(null)
+  const [selectedProjectChapterId, setSelectedProjectChapterId] = useState<
+    number | undefined
+  >(undefined)
 
   return (
     <section className="relative isolate flex w-full flex-col items-start justify-start">
@@ -146,6 +152,9 @@ export function MatchingProjectsListPage() {
                   className="w-full text-left"
                   onClick={() => {
                     setSelectedProjectId(item.id)
+                    setSelectedProjectChapterId(
+                      getChapterIdBySchool(item.productOwner?.schoolName ?? ""),
+                    )
                   }}
                 >
                   <MatchingProjectCard variant="default" data={project} />
@@ -170,6 +179,7 @@ export function MatchingProjectsListPage() {
         onOpenChange={(open) => {
           if (!open) {
             setSelectedProjectId(null)
+            setSelectedProjectChapterId(undefined)
           }
         }}
       >
@@ -181,7 +191,10 @@ export function MatchingProjectsListPage() {
           >
             <Modal.Title className="sr-only">프로젝트 상세</Modal.Title>
             {selectedProjectId !== null && (
-              <ProjectDetailCard projectId={selectedProjectId} />
+              <ProjectDetailCard
+                projectId={selectedProjectId}
+                projectChapterId={selectedProjectChapterId}
+              />
             )}
           </Modal.Content>
         </Modal.Portal>
