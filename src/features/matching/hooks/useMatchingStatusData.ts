@@ -90,7 +90,7 @@ export function useMatchingStatusData(chapterName?: string) {
   const projectsQuery = useQuery({
     queryKey: applicationKeys.matchingParts(gisuId, chapterId),
     queryFn: () => getAllProjects(gisuId, { chapterId }),
-    enabled: gisuId > 0 && isAdmin,
+    enabled: gisuId > 0,
   })
 
   const projects = useMemo(
