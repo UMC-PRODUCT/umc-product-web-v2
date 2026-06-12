@@ -1,5 +1,6 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router"
 
+import Footer from "@/components/footer/Footer"
 import Header from "@/components/header/Header"
 import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
 import SideBar from "@/components/sidebar/SideBar"
@@ -13,20 +14,23 @@ export const Route = createFileRoute("/matching")({
 })
 
 function MatchingLayout() {
+  const matchRoute = useMatchRoute()
+  const isProjectsIndex = Boolean(matchRoute({ to: "/matching/projects" }))
   return (
     <main className="h-full min-h-screen w-full">
       <Header />
       <div className="flex w-full">
         <SideBar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="px-8.5 pt-14.5">
+          <div className={`${isProjectsIndex ? "px-9.5" : "px-11"} pt-12`}>
             <MatchingSegmentRegion />
-          </div>
-          <div className="flex min-h-screen min-w-0 flex-1 flex-col px-8.5 pt-8">
-            <Outlet />
+            <div className="flex min-w-0 flex-1 flex-col pt-8 pb-20">
+              <Outlet />
+            </div>
           </div>
         </div>
       </div>
+      <Footer />
     </main>
   )
 }
