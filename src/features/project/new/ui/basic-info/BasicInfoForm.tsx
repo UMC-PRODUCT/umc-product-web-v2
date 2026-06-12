@@ -12,7 +12,6 @@ import {
 import { useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { useMe } from "@/features/auth/hooks/useMe"
 import {
   getProjectPmSearchScope,
   isCentralStaff,
@@ -35,6 +34,7 @@ import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
 import { InputBox } from "@/shared/ui/input/InputBox"
+import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 import {
   type BasicInfoFormData,
@@ -73,7 +73,7 @@ export const BasicInfoForm = forwardRef<
   { canCreateProject = true, createPermissionLoading = false, onNext },
   ref,
 ) {
-  const { data: meData } = useMe()
+  const { viewMe: meData } = useViewMe()
   const isPm = isCurrentTermPm(meData)
   const activeGisuQuery = useQuery({
     queryKey: ["gisu"],

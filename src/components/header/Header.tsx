@@ -2,13 +2,13 @@ import { Link, useLocation } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 
 import { MobileSidebarDrawerContent } from "@/components/sidebar/MobileSidebarDrawerContent"
-import { useMe } from "@/features/auth/hooks/useMe"
 import { isOperator, isSchoolStaff } from "@/features/auth/model/identity"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { cn } from "@/shared/lib/utils"
 import Profile from "@/shared/ui/Profile"
+import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 import HeaderButton from "./HeaderButton"
 import NavigationButton from "./NavigationButton"
@@ -44,22 +44,22 @@ interface HeaderProps {
 
 export default function Header({ activePathname }: HeaderProps = {}) {
   const location = useLocation()
-  const { data: me } = useMe()
+  const { viewMe } = useViewMe()
   const pathname = activePathname ?? location.pathname
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navItems = useMemo(() => {
-    if (isOperator(me)) return [...BASE_NAV, MANAGE_NAV, SYSTEM_NAV]
-    if (isSchoolStaff(me)) return [...BASE_NAV, MANAGE_NAV]
+    if (isOperator(viewMe)) return [...BASE_NAV, MANAGE_NAV, SYSTEM_NAV]
+    if (isSchoolStaff(viewMe)) return [...BASE_NAV, MANAGE_NAV]
     return BASE_NAV
-  }, [me])
+  }, [viewMe])
 
   useEffect(() => {
     setIsMobileMenuOpen(false)
   }, [pathname])
 
   return (
-    <header className="bg-teal-gray-50 shadow-drop-neutral-3 relative z-30 flex min-h-16 w-full flex-col overflow-visible min-[960px]:h-20 min-[960px]:min-h-20 min-[960px]:flex-row min-[960px]:items-center min-[960px]:justify-between">
+    <header className="bg-teal-gray-50 shadow-drop-neutral-3 relative z-50 flex min-h-16 w-full flex-col overflow-visible min-[960px]:h-20 min-[960px]:min-h-20 min-[960px]:flex-row min-[960px]:items-center min-[960px]:justify-between">
       <div className="flex h-16 w-full items-center justify-between min-[960px]:h-20">
         <Link
           to="/"
