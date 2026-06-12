@@ -13,8 +13,15 @@ import { Segment, type SegmentItem } from "@/shared/ui/segment/Segment"
 
 import { filterSectionsByPermission } from "./utils"
 
-export function MatchingSegmentRegion() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname })
+interface MatchingSegmentRegionProps {
+  activePathname?: string
+}
+
+export function MatchingSegmentRegion({
+  activePathname,
+}: MatchingSegmentRegionProps = {}) {
+  const currentPathname = useRouterState({ select: (s) => s.location.pathname })
+  const pathname = activePathname ?? currentPathname
   const { data: me } = useMe()
   const canAccessSettings = canAccessProjectSettings(me)
   const canManage = canManageProjects(me)

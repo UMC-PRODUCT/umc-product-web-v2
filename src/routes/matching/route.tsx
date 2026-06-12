@@ -19,10 +19,10 @@ function MatchingLayout() {
       <div className="flex w-full">
         <SideBar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="px-8.5 pt-14.5">
+          <div className="px-4 pt-6 min-[960px]:px-8.5 min-[960px]:pt-14.5">
             <MatchingSegmentRegion />
           </div>
-          <div className="flex min-h-screen min-w-0 flex-1 flex-col px-8.5 pt-8">
+          <div className="flex min-h-screen min-w-0 flex-1 flex-col px-4 pt-6 min-[960px]:px-8.5 min-[960px]:pt-8">
             <Outlet />
           </div>
         </div>

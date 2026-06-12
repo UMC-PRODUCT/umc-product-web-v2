@@ -1,9 +1,13 @@
 import { Link, useLocation } from "@tanstack/react-router"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 
+import { MobileSidebarDrawerContent } from "@/components/sidebar/MobileSidebarDrawerContent"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { isOperator, isSchoolStaff } from "@/features/auth/model/identity"
+import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
+import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
+import { cn } from "@/shared/lib/utils"
 import Profile from "@/shared/ui/Profile"
 
 import HeaderButton from "./HeaderButton"
@@ -34,9 +38,15 @@ const SYSTEM_NAV: NavItem = {
   disabled: true,
 }
 
-export default function Header() {
+interface HeaderProps {
+  activePathname?: string
+}
+
+export default function Header({ activePathname }: HeaderProps = {}) {
   const location = useLocation()
   const { data: me } = useMe()
+  const pathname = activePathname ?? location.pathname
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navItems = useMemo(() => {
     if (isOperator(me)) return [...BASE_NAV, MANAGE_NAV, SYSTEM_NAV]
@@ -44,28 +54,95 @@ export default function Header() {
     return BASE_NAV
   }, [me])
 
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
+
   return (
-    <header className="bg-teal-gray-50 shadow-drop-neutral-3 flex h-20 w-full items-center justify-between overflow-visible">
-      <Link to="/" className="flex w-55 items-center pl-10">
-        <UmcLogo className="text-teal-gray-700 h-5.5 w-17.5" />
-      </Link>
+    <header className="bg-teal-gray-50 shadow-drop-neutral-3 relative z-30 flex min-h-16 w-full flex-col overflow-visible min-[960px]:h-20 min-[960px]:min-h-20 min-[960px]:flex-row min-[960px]:items-center min-[960px]:justify-between">
+      <div className="flex h-16 w-full items-center justify-between min-[960px]:h-20">
+        <Link
+          to="/"
+          className="flex w-36 items-center pl-10 xl:w-55"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <UmcLogo className="text-teal-gray-700 h-5.5 w-17.5" />
+        </Link>
 
-      <nav className="bg-teal-gray-50 border-teal-gray-100 flex items-center gap-1.5 rounded-full border p-1.5 drop-shadow-[0_0_8px_rgba(10,86,80,0.04)]">
-        {navItems.map((item) => (
-          <NavigationButton
-            key={item.to}
-            label={item.label}
-            to={item.to}
-            selected={location.pathname.startsWith(item.to)}
-            disabled={item.disabled}
-          />
-        ))}
-      </nav>
+        <nav className="bg-teal-gray-50 border-teal-gray-100 hidden shrink-0 items-center gap-1 rounded-full border p-1 drop-shadow-[0_0_8px_rgba(10,86,80,0.04)] min-[960px]:flex xl:gap-1.5 xl:p-1.5">
+          {navItems.map((item) => (
+            <NavigationButton
+              key={item.to}
+              label={item.label}
+              to={item.to}
+              selected={pathname.startsWith(item.to)}
+              disabled={item.disabled}
+              className="min-w-0 px-3 xl:min-w-18 xl:px-4.5"
+            />
+          ))}
+        </nav>
 
-      <div className="flex w-55 items-center justify-end gap-4 pr-8.5">
-        <HeaderButton label="문의사항" type="trailing-icon" />
-        <Profile />
+        <div className="hidden items-center justify-end gap-2 pr-6 min-[960px]:flex min-[960px]:w-40 xl:w-55 xl:gap-4 xl:pr-8.5">
+          <HeaderButton label="문의사항" type="trailing-icon" />
+          <Profile />
+        </div>
+
+        <div className="flex items-center gap-2 pr-5 min-[960px]:hidden">
+          <button
+            type="button"
+            aria-label={mobileMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-header-navigation"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            className="border-teal-gray-100 text-teal-gray-700 hover:bg-teal-gray-100 flex size-9 items-center justify-center rounded-full border bg-white transition-colors"
+          >
+            {mobileMenuOpen ? (
+              <CloseIcon className="size-5" />
+            ) : (
+              <HamburgerIcon className="size-5" />
+            )}
+          </button>
+        </div>
       </div>
+
+      <nav
+        id="mobile-header-navigation"
+        className={cn(
+          "border-teal-gray-100 bg-teal-gray-50 shadow-drop-neutral-3 absolute top-16 right-0 left-0 z-50 flex max-h-[calc(100dvh-64px)] w-full flex-col gap-4 overflow-y-auto border-t px-6 py-4 min-[960px]:hidden",
+          !mobileMenuOpen && "hidden",
+        )}
+      >
+        <div className="flex items-center justify-end gap-2">
+          <HeaderButton
+            label="문의사항"
+            type="trailing-icon"
+            className="text-body-1-medium h-11"
+          />
+          <Profile size={36} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-1">
+          {navItems.map((item) => {
+            const selected = pathname.startsWith(item.to)
+            return (
+              <NavigationButton
+                key={item.to}
+                label={item.label}
+                to={item.to}
+                selected={selected}
+                disabled={item.disabled}
+                className="text-body-1-medium h-11 w-full min-w-0 justify-center px-4"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+            )
+          })}
+        </div>
+
+        <MobileSidebarDrawerContent
+          activePathname={pathname}
+          onNavigate={() => setMobileMenuOpen(false)}
+        />
+      </nav>
     </header>
   )
 }

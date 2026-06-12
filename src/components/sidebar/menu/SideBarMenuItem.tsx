@@ -7,6 +7,7 @@ interface SideBarMenuItemProps {
   title: string
   to: string
   indicator?: React.ReactNode
+  activePathname?: string
 }
 
 const itemVariants = {
@@ -18,9 +19,12 @@ export function SideBarMenuItem({
   title,
   to,
   indicator,
+  activePathname,
 }: SideBarMenuItemProps) {
   const matchRoute = useMatchRoute()
-  const isActive = !!matchRoute({ to })
+  const isActive = activePathname
+    ? activePathname === to || activePathname.startsWith(`${to}/`)
+    : !!matchRoute({ to })
 
   return (
     <motion.div variants={itemVariants} transition={{ duration: 0.15 }}>

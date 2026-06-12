@@ -31,6 +31,7 @@ import { Route as TestQuestionFormRouteImport } from './routes/test/question-for
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
 import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
 import { Route as TestIconRouteImport } from './routes/test/icon'
+import { Route as TestHeaderRouteImport } from './routes/test/header'
 import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
 import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
 import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
@@ -166,6 +167,11 @@ const TestInputBoxRoute = TestInputBoxRouteImport.update({
 const TestIconRoute = TestIconRouteImport.update({
   id: '/test/icon',
   path: '/test/icon',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestHeaderRoute = TestHeaderRouteImport.update({
+  id: '/test/header',
+  path: '/test/header',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestFormHeaderRoute = TestFormHeaderRouteImport.update({
@@ -327,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
+  '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
+  '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
@@ -424,6 +432,7 @@ export interface FileRoutesById {
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/form-header': typeof TestFormHeaderRoute
+  '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
   '/test/option-button': typeof TestOptionButtonRoute
@@ -476,6 +485,7 @@ export interface FileRouteTypes {
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
+    | '/test/header'
     | '/test/icon'
     | '/test/input-box'
     | '/test/option-button'
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
+    | '/test/header'
     | '/test/icon'
     | '/test/input-box'
     | '/test/option-button'
@@ -572,6 +583,7 @@ export interface FileRouteTypes {
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/form-header'
+    | '/test/header'
     | '/test/icon'
     | '/test/input-box'
     | '/test/option-button'
@@ -619,6 +631,7 @@ export interface RootRouteChildren {
   TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
   TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
   TestFormHeaderRoute: typeof TestFormHeaderRoute
+  TestHeaderRoute: typeof TestHeaderRoute
   TestIconRoute: typeof TestIconRoute
   TestInputBoxRoute: typeof TestInputBoxRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
@@ -790,6 +803,13 @@ declare module '@tanstack/react-router' {
       path: '/test/icon'
       fullPath: '/test/icon'
       preLoaderRoute: typeof TestIconRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/header': {
+      id: '/test/header'
+      path: '/test/header'
+      fullPath: '/test/header'
+      preLoaderRoute: typeof TestHeaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/form-header': {
@@ -1096,6 +1116,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
   TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
   TestFormHeaderRoute: TestFormHeaderRoute,
+  TestHeaderRoute: TestHeaderRoute,
   TestIconRoute: TestIconRoute,
   TestInputBoxRoute: TestInputBoxRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,

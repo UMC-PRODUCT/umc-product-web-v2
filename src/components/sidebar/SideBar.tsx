@@ -1,41 +1,23 @@
 import { useRouterState } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
-import { useMe } from "@/features/auth/hooks/useMe"
-import {
-  canAccessProjectSettings,
-  canManageProjects,
-  isCurrentTermPm,
-  isOperator,
-} from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { cn } from "@/shared/lib/utils"
 
 import { SideBarMenu } from "./menu/SideBarMenu"
 import { SideBarMenuItem } from "./menu/SideBarMenuItem"
-import { filterSectionsByPermission } from "./utils"
+import { useVisibleSidebarSections } from "./useVisibleSidebarSections"
 
 interface SideBarProps {
   className?: string
+  activePathname?: string
 }
 
-export default function SideBar({ className }: SideBarProps) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname })
-  const { data: me, isLoading: isMeLoading } = useMe()
-  const canAccessSettings = canAccessProjectSettings(me)
-  const canManage = canManageProjects(me)
-  const canRecruit = isOperator(me) || isCurrentTermPm(me)
-
-  const visibleSections = useMemo(
-    () =>
-      filterSectionsByPermission(SIDEBAR_ITEMS, {
-        canAccessProjectSettings: canAccessSettings,
-        canManageProjects: canManage,
-        canManageRecruitment: canRecruit,
-      }),
-    [canAccessSettings, canManage, canRecruit],
-  )
+export default function SideBar({ className, activePathname }: SideBarProps) {
+  const currentPathname = useRouterState({ select: (s) => s.location.pathname })
+  const pathname = activePathname ?? currentPathname
+  const { visibleSections, isLoading } = useVisibleSidebarSections()
 
   // 현재 경로에 해당하는 섹션을 초기값으로 사용
   const [openSectionId, setOpenSectionId] = useState<string>(() => {
@@ -52,13 +34,11 @@ export default function SideBar({ className }: SideBarProps) {
     )
   }, [visibleSections])
 
-  const isLoading = isMeLoading
-
   return (
     <nav
       aria-label="사이드 메뉴"
       className={cn(
-        "border-teal-gray-200 flex w-55 shrink-0 flex-col items-center justify-start border-r pt-4",
+        "border-teal-gray-200 hidden w-55 shrink-0 flex-col items-center justify-start border-r pt-4 min-[960px]:flex",
         className,
       )}
     >
@@ -83,6 +63,7 @@ export default function SideBar({ className }: SideBarProps) {
                   key={menu.id}
                   title={menu.title}
                   to={menu.to}
+                  activePathname={activePathname}
                 />
               ))}
             </SideBarMenu>
