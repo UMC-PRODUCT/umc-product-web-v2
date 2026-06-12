@@ -46,7 +46,7 @@ export function AccountSettingsPage() {
         <div className="flex w-full flex-col items-start">
           {/* 프로필 헤더 */}
           <div className="flex items-center gap-4.5 px-3.5 py-0">
-            <div className="relative flex h-25 w-25 flex-shrink-0 items-center justify-center">
+            <div className="relative flex h-25 w-25 shrink-0 items-center justify-center">
               <div className="bg-teal-gray-100 flex h-25 w-25 items-center justify-center overflow-hidden rounded-full">
                 {me?.profileImageLink ? (
                   <img

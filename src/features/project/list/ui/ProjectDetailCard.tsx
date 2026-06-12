@@ -296,7 +296,7 @@ export function ProjectDetailCard({
     queryFn: (): Promise<ActiveMatchingRound | null> => {
       if (devMatchingRoundId)
         return Promise.resolve({
-          id: devMatchingRoundId,
+          id: String(devMatchingRoundId),
         } as ActiveMatchingRound)
       return getActiveMatchingRound(myChapterId!)
     },
