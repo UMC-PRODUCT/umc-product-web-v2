@@ -67,12 +67,12 @@ export function ChallengerApplicationView({
   const stats = useMemo(() => computeStats(projects), [projects])
 
   return (
-    <div className={cn("flex flex-col gap-[57px] pl-4", className)}>
+    <div className={cn("flex flex-col gap-14.25 pl-4", className)}>
       <ChallengerStatsSection stats={stats} />
       <ApplicationTableSection
         projects={projects}
         searchPlaceholder="닉네임/이름으로 검색하세요."
-        visibleFilters={["round", "part", "school", "appStatus"]}
+        visibleFilters={["part", "school"]}
         currentRound={currentRound}
       />
     </div>

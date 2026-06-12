@@ -14,13 +14,15 @@ import { ApplicantTableHead } from "./ApplicantTableHead"
 import { ApplicationDetailModal } from "./ApplicationDetailModal"
 import { ProjectStatusRow } from "./ProjectStatusRow"
 
-import type { ApplicantDetail, ProjectApplication } from "../model/types"
+import type { ProjectApplication } from "../model/types"
 
 const ITEMS_PER_PAGE = 15
 
 function buildSchoolOptions(projects: ProjectApplication[]) {
   const schools = new Set<string>()
   for (const p of projects) {
+    // PM 학교도 포함
+    if (p.challengerUniversity) schools.add(p.challengerUniversity)
     for (const a of p.applicants) {
       if (a.university) schools.add(a.university)
     }
@@ -48,26 +50,13 @@ const PART_OPTIONS = [
   { value: "nodejs", label: "Node.js" },
 ]
 
-const ROUND_OPTIONS = [
-  { value: "1", label: "1차" },
-  { value: "2", label: "2차" },
-  { value: "3", label: "3차" },
-]
-
 const RECRUIT_STATUS_OPTIONS = [
   { value: "all", label: "전체" },
   { value: "recruiting", label: "모집 중" },
   { value: "done", label: "모집 완료" },
 ]
 
-const APPLICATION_STATUS_OPTIONS = [
-  { value: "all", label: "전체" },
-  { value: "pass", label: "합격" },
-  { value: "pending", label: "대기" },
-  { value: "fail", label: "불합격" },
-]
-
-type FilterName = "round" | "part" | "school" | "recruit" | "appStatus"
+type FilterName = "part" | "school" | "recruit"
 
 interface ApplicationTableSectionProps {
   projects: ProjectApplication[]
@@ -80,13 +69,7 @@ interface ApplicationTableSectionProps {
   className?: string
 }
 
-const DEFAULT_FILTERS: FilterName[] = [
-  "school",
-  "part",
-  "round",
-  "recruit",
-  "appStatus",
-]
+const DEFAULT_FILTERS: FilterName[] = ["school", "part", "recruit"]
 
 export function ApplicationTableSection({
   projects,
@@ -109,9 +92,7 @@ export function ApplicationTableSection({
   const [openFilter, setOpenFilter] = useState<string | null>(null)
   const [schoolFilter, setSchoolFilter] = useState<string[]>([])
   const [partFilter, setPartFilter] = useState<string[]>([])
-  const [roundFilter, setRoundFilter] = useState<string[]>([])
   const [recruitFilter, setRecruitFilter] = useState("all")
-  const [appStatusFilter, setAppStatusFilter] = useState("all")
 
   const toggleExpand = useCallback((id: string) => {
     setExpandedIds((prev) => {
@@ -130,7 +111,7 @@ export function ApplicationTableSection({
 
   const closeFilter = useCallback(() => setOpenFilter(null), [])
 
-  // 프로젝트 필터링
+  // 프로젝트 필터링 (파트/학교도 프로젝트 행 레벨에서 처리)
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {
       if (
@@ -146,9 +127,24 @@ export function ApplicationTableSection({
             : p.statusLabel === "모집 완료"
         if (!match) return false
       }
+      // 파트 필터: 프로젝트에 해당 파트가 있어야 함
+      if (
+        partFilter.length > 0 &&
+        !p.parts.some((r) => partFilter.includes(r))
+      ) {
+        return false
+      }
+      // 학교 필터: PM 또는 지원자 중 한 명이라도 해당 학교면 표시
+      if (schoolFilter.length > 0) {
+        const projectSchools = new Set([
+          p.challengerUniversity,
+          ...p.applicants.map((a) => a.university),
+        ])
+        if (!schoolFilter.some((s) => projectSchools.has(s))) return false
+      }
       return true
     })
-  }, [projects, searchQuery, recruitFilter])
+  }, [projects, searchQuery, recruitFilter, partFilter, schoolFilter])
 
   const totalPages = Math.max(
     1,
@@ -166,23 +162,6 @@ export function ApplicationTableSection({
       setExpandedIds(new Set(pagedProjects.map((p) => p.id)))
     }
   }, [hasExpanded, pagedProjects])
-
-  // 펼친 행 내 지원자 필터링
-  const filterApplicants = useCallback(
-    (applicants: ApplicantDetail[]) => {
-      return applicants.filter((a) => {
-        if (partFilter.length > 0 && !partFilter.includes(a.role)) return false
-        if (roundFilter.length > 0 && !roundFilter.includes(String(a.round)))
-          return false
-        if (appStatusFilter !== "all" && a.status !== appStatusFilter)
-          return false
-        if (schoolFilter.length > 0 && !schoolFilter.includes(a.university))
-          return false
-        return true
-      })
-    },
-    [partFilter, roundFilter, appStatusFilter, schoolFilter],
-  )
 
   const schoolOptions = useMemo(() => buildSchoolOptions(projects), [projects])
 
@@ -230,25 +209,6 @@ export function ApplicationTableSection({
         dropdownClassName: "!min-w-[152px] w-[152px]",
       },
       {
-        name: "round",
-        label: "차수",
-        options: ROUND_OPTIONS,
-        multiSelect: true,
-        selectedValues: roundFilter,
-        selectedLabel: buildMultiSelectLabel(roundFilter, ROUND_OPTIONS),
-        open: openFilter === "round",
-        onClick: () => toggleFilter("round"),
-        onSelect: (v: string) => {
-          setRoundFilter((prev) =>
-            prev.includes(v) ? prev.filter((s) => s !== v) : [...prev, v],
-          )
-          setCurrentPage(1)
-        },
-        onRequestClose: closeFilter,
-        className: roundFilter.length > 0 ? "w-[94px]" : "w-20",
-        dropdownClassName: "!min-w-[94px] w-[94px]",
-      },
-      {
         name: "recruit",
         label: "모집 상태",
         options: RECRUIT_STATUS_OPTIONS,
@@ -268,35 +228,12 @@ export function ApplicationTableSection({
         className: "w-[114px]",
         dropdownClassName: "!min-w-[114px] w-[114px]",
       },
-      {
-        name: "appStatus",
-        label: "지원 상태",
-        options: APPLICATION_STATUS_OPTIONS,
-        selectedValue: appStatusFilter === "all" ? undefined : appStatusFilter,
-        selectedLabel:
-          appStatusFilter === "all"
-            ? undefined
-            : APPLICATION_STATUS_OPTIONS.find(
-                (o) => o.value === appStatusFilter,
-              )?.label,
-        open: openFilter === "appStatus",
-        onClick: () => toggleFilter("appStatus"),
-        onSelect: (v: string) => {
-          setAppStatusFilter(v)
-          setCurrentPage(1)
-        },
-        onRequestClose: closeFilter,
-        className: "w-[102px]",
-        dropdownClassName: "!min-w-[102px] w-[102px]",
-      },
     ],
     [
       schoolOptions,
       schoolFilter,
       partFilter,
-      roundFilter,
       recruitFilter,
-      appStatusFilter,
       openFilter,
       toggleFilter,
       closeFilter,
@@ -339,7 +276,6 @@ export function ApplicationTableSection({
 
         {pagedProjects.map((project) => {
           const isExpanded = expandedIds.has(project.id)
-          const applicants = filterApplicants(project.applicants)
 
           return (
             <div key={project.id}>
@@ -360,9 +296,9 @@ export function ApplicationTableSection({
                 }}
               />
 
-              {isExpanded && applicants.length > 0 && (
+              {isExpanded && project.applicants.length > 0 && (
                 <div className="border-teal-gray-150 border-b-[3px] py-1">
-                  {applicants.map((applicant) => (
+                  {project.applicants.map((applicant) => (
                     <ApplicantDetailRow
                       key={applicant.id}
                       round={applicant.round}

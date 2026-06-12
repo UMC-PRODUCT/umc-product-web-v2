@@ -145,10 +145,16 @@ export function toProjectApplication(
   const statusLabel =
     project.partQuotaStatus === "RECRUITING" ? "모집 중" : "모집 완료"
 
+  // quota > 0인 파트만 추출 (plan 제외 - PM은 항상 plan이므로)
+  const parts = project.partQuotas
+    .filter((q) => Number(q.quota) > 0 && q.part !== "PLAN")
+    .map((q) => toFrontRole(q.part))
+
   return {
     id: String(project.id),
     projectName: project.name,
     role: "plan", // PM 프로젝트이므로 기본값
+    parts,
     challengerName: project.productOwner.nickname
       ? `${project.productOwner.nickname}/${project.productOwner.name}`
       : project.productOwner.name,

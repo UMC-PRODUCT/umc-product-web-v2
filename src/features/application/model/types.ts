@@ -84,6 +84,7 @@ export interface ProjectApplication {
   id: string
   projectName: string
   role: Role
+  parts: Role[] // 프로젝트에 할당된 파트 목록 (quota > 0)
   challengerName: string
   challengerUniversity: string
   statusLabel: string
