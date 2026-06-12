@@ -40,7 +40,7 @@ export function MobileSidebarDrawerContent({
 
             <div className="grid grid-cols-2 gap-1">
               {menus.map((menu) => {
-                const selected = resolved?.menu.id === menu.id
+                const isSelected = resolved?.menu.id === menu.id
                 return (
                   <Link
                     key={menu.id}
@@ -48,7 +48,7 @@ export function MobileSidebarDrawerContent({
                     onClick={onNavigate}
                     className={cn(
                       "flex h-10 min-w-0 items-center justify-center rounded-[10px] px-4 whitespace-nowrap transition-colors",
-                      selected
+                      isSelected
                         ? "text-subtitle-4-semibold bg-teal-50 text-teal-700"
                         : "text-body-2-medium text-teal-gray-600 hover:bg-teal-gray-50",
                     )}
