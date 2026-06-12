@@ -34,6 +34,7 @@ import {
   getMyDraft,
   getProjectDetail,
   gisuKeys,
+  invalidateProjectSummaryQueries,
   projectKeys,
   submitProject,
   transferOwnership,
@@ -205,7 +206,7 @@ function ProjectRegisterPage() {
   }, [gisuId, setGisuId])
 
   const managedCheckQuery = useQuery({
-    queryKey: ["project", "managed", "me", gisuId, "check"],
+    queryKey: projectKeys.managedCheck(gisuId),
     queryFn: () => getManagedProjects(Number(gisuId)),
     enabled: isPm && !isEditMode && !!gisuId,
   })
@@ -316,7 +317,7 @@ function ProjectRegisterPage() {
     },
     onSuccess: () => {
       applicationFormRef.current?.resetDirty()
-      void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
+      invalidateProjectSummaryQueries(queryClient, projectId ?? undefined)
       setShowSuccessModal(true)
     },
     onError: (error) => {
@@ -456,7 +457,9 @@ function ProjectRegisterPage() {
   const handleSuccessConfirm = async () => {
     setShowSuccessModal(false)
     reset()
-    queryClient.removeQueries({ queryKey: ["project", "managed"] })
+    queryClient.removeQueries({ queryKey: projectKeys.managed() })
+    queryClient.removeQueries({ queryKey: projectKeys.lists() })
+    queryClient.removeQueries({ queryKey: ["matchingProjects"] })
     if (isEditMode && editProjectId) {
       queryClient.removeQueries({ queryKey: projectKeys.detail(editProjectId) })
       queryClient.removeQueries({

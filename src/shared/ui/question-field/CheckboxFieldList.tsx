@@ -3,9 +3,14 @@ import { cn } from "@/shared/lib/utils"
 
 import { AddOptionButton } from "../input/checkbox/AddOptionButton"
 
+interface CheckboxFieldListOption {
+  content: string
+  optionId?: number
+}
+
 interface CheckboxFieldListProps {
-  options: string[]
-  onOptionsChange: (options: string[]) => void
+  options: CheckboxFieldListOption[]
+  onOptionsChange: (options: CheckboxFieldListOption[]) => void
   className?: string
 }
 
@@ -15,11 +20,13 @@ export function CheckboxFieldList({
   className,
 }: CheckboxFieldListProps) {
   function updateOption(index: number, value: string) {
-    onOptionsChange(options.map((opt, i) => (i === index ? value : opt)))
+    onOptionsChange(
+      options.map((opt, i) => (i === index ? { ...opt, content: value } : opt)),
+    )
   }
 
   function addOption() {
-    onOptionsChange([...options, ""])
+    onOptionsChange([...options, { content: "" }])
   }
 
   function removeOption(index: number) {
@@ -44,7 +51,7 @@ export function CheckboxFieldList({
           />
           <input
             type="text"
-            value={opt}
+            value={opt.content}
             onChange={(e) => updateOption(i, e.target.value)}
             placeholder={`옵션 ${i + 1}`}
             className="text-body-2-regular text-teal-gray-700 placeholder:text-teal-gray-400 flex-1 bg-transparent outline-none"

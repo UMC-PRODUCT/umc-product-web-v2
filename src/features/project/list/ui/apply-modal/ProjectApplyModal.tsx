@@ -25,14 +25,19 @@ import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 import {
-  type ApplicationAnswerItem,
   createApplicationDraft,
   getMyApplications,
   saveApplicationDraft,
   submitApplication,
 } from "../../api/matchingProject"
 import {
-  type ApplyPortfolioValue,
+  type ApplyAnswerValue,
+  buildAnswerPayload,
+  getOptionValue,
+  isApplyPortfolioValue,
+  isUploadedFileValue,
+} from "../../model/applyAnswerPayload"
+import {
   buildApplyAnswersSchema,
   defaultByFieldType,
   type UploadedFileValue,
@@ -56,87 +61,9 @@ const FILE_ACCEPT = ".pdf,.docx,.zip"
 const FILE_ALLOWED_LABEL = "PDF, DOCX, ZIP"
 const PORTFOLIO_ALLOWED_LABEL = "PDF"
 
-type ApplyAnswerValue =
-  | string
-  | string[]
-  | UploadedFileValue
-  | ApplyPortfolioValue
-  | null
-
 const OPTION_LIST_CLASS =
   "border-teal-gray-150 flex flex-col gap-0.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] p-1"
 const COMMON_SECTION_ID = "common"
-
-function isUploadedFileValue(v: ApplyAnswerValue): v is UploadedFileValue {
-  return (
-    v !== null &&
-    typeof v === "object" &&
-    !Array.isArray(v) &&
-    "fileId" in v &&
-    !("kind" in v)
-  )
-}
-
-function isApplyPortfolioValue(v: ApplyAnswerValue): v is ApplyPortfolioValue {
-  return (
-    v !== null &&
-    typeof v === "object" &&
-    !Array.isArray(v) &&
-    "kind" in v &&
-    (v.kind === "link" || v.kind === "file")
-  )
-}
-
-function buildAnswerPayload(
-  formValues: Record<string, ApplyAnswerValue>,
-  sections: Section[],
-): ApplicationAnswerItem[] {
-  const questionMap = new Map<string, Question>()
-  sections.forEach((s) => s.questions.forEach((q) => questionMap.set(q.id, q)))
-
-  return Object.entries(formValues).flatMap(([questionId, value]) => {
-    const question = questionMap.get(questionId)
-    if (!question) return []
-
-    const base = { questionId: Number(questionId) }
-
-    if (question.fieldType === "text") {
-      return [{ ...base, textValue: typeof value === "string" ? value : "" }]
-    }
-
-    if (question.fieldType === "radio") {
-      if (typeof value !== "string" || !value) return [base]
-      const idx = question.options.indexOf(value)
-      const optionId = idx !== -1 ? question.optionIds?.[idx] : undefined
-      if (optionId == null) return [base]
-      return [{ ...base, selectedOptionIds: [optionId] }]
-    }
-
-    if (question.fieldType === "checkbox") {
-      if (!Array.isArray(value) || value.length === 0) return [base]
-      const selectedIds = value.flatMap((content) => {
-        const idx = question.options.indexOf(content)
-        const optionId = idx !== -1 ? question.optionIds?.[idx] : undefined
-        return optionId != null ? [optionId] : []
-      })
-      if (selectedIds.length === 0) return [base]
-      return [{ ...base, selectedOptionIds: selectedIds }]
-    }
-
-    if (question.fieldType === "file") {
-      if (!isUploadedFileValue(value)) return [base]
-      return [{ ...base, fileIds: [value.fileId] }]
-    }
-
-    if (question.fieldType === "portfolio") {
-      if (!isApplyPortfolioValue(value)) return [base]
-      if (value.kind === "link") return [{ ...base, textValue: value.url }]
-      return [{ ...base, fileIds: [value.fileId] }]
-    }
-
-    return [base]
-  })
-}
 
 function extractUploadErrorMessage(
   err: unknown,
@@ -446,22 +373,27 @@ export function ProjectApplyModal({
         return (
           <div className="flex flex-col gap-1">
             <div className={OPTION_LIST_CLASS}>
-              {q.options.map((opt) => (
-                <CheckboxList
-                  key={opt}
-                  checked={Array.isArray(value) && value.includes(opt)}
-                  onChange={(checked) => {
-                    const current = Array.isArray(value) ? value : []
-                    onChange(
-                      checked
-                        ? [...current, opt]
-                        : current.filter((o) => o !== opt),
-                    )
-                  }}
-                >
-                  {opt}
-                </CheckboxList>
-              ))}
+              {q.options.map((opt, index) => {
+                const optionValue = getOptionValue(q, index)
+                return (
+                  <CheckboxList
+                    key={`${optionValue}-${index}`}
+                    checked={
+                      Array.isArray(value) && value.includes(optionValue)
+                    }
+                    onChange={(checked) => {
+                      const current = Array.isArray(value) ? value : []
+                      onChange(
+                        checked
+                          ? [...current, optionValue]
+                          : current.filter((o) => o !== optionValue),
+                      )
+                    }}
+                  >
+                    {opt.content}
+                  </CheckboxList>
+                )
+              })}
             </div>
             {error && (
               <p className="text-caption-2-regular text-error-600 px-1">
@@ -474,17 +406,20 @@ export function ProjectApplyModal({
         return (
           <div className="flex flex-col gap-1">
             <div className={OPTION_LIST_CLASS}>
-              {q.options.map((opt) => (
-                <RadioList
-                  key={opt}
-                  checked={value === opt}
-                  onChange={(checked) => {
-                    if (checked) onChange(opt)
-                  }}
-                >
-                  {opt}
-                </RadioList>
-              ))}
+              {q.options.map((opt, index) => {
+                const optionValue = getOptionValue(q, index)
+                return (
+                  <RadioList
+                    key={`${optionValue}-${index}`}
+                    checked={value === optionValue}
+                    onChange={(checked) => {
+                      if (checked) onChange(optionValue)
+                    }}
+                  >
+                    {opt.content}
+                  </RadioList>
+                )
+              })}
             </div>
             {error && (
               <p className="text-caption-2-regular text-error-600 px-1">

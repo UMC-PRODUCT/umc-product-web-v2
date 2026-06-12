@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query"
 import {
   forwardRef,
   useEffect,
@@ -10,6 +11,7 @@ import { useToastStore } from "@/components/toast/useToastStore"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   buildPartQuotasEntries,
+  invalidateProjectSummaryQueries,
   updatePartQuotas,
 } from "@/features/project/new/api"
 import { Button } from "@/shared/ui/Button"
@@ -87,6 +89,7 @@ export const RecruitInfoForm = forwardRef<
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
   const savedSnapshotRef = useRef(JSON.stringify(storeRecruitInfo))
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (isHydrated) {
@@ -150,6 +153,7 @@ export const RecruitInfoForm = forwardRef<
         entries: buildPartQuotasEntries(roleStates),
       })
       setRecruitInfo(roleStates)
+      invalidateProjectSummaryQueries(queryClient, projectId)
       savedSnapshotRef.current = snapshotToSave
       setHasSavedOnce(true)
       if (!silent) {

@@ -25,6 +25,7 @@ export {
 
 export { publishProject } from "./projectPublish"
 
+export { invalidateProjectSummaryQueries } from "./queryInvalidation"
 export { gisuKeys, memberKeys, projectKeys } from "./queryKeys"
 
 export {

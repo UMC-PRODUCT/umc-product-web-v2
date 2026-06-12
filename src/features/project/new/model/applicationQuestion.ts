@@ -1,13 +1,18 @@
 export type FieldType = "text" | "radio" | "checkbox" | "file" | "portfolio"
 
+export interface QuestionOption {
+  content: string
+  optionId?: number
+}
+
 export interface Question {
   id: string
+  questionId?: number
   title: string
   caption: string
   fieldType: FieldType
   required: boolean
-  options: string[]
-  optionIds?: number[]
+  options: QuestionOption[]
 }
 
 export interface Section {
@@ -63,7 +68,7 @@ export function validateQuestion(
         questionId: question.id,
       }
     }
-    if (question.options.some((opt) => opt.trim() === "")) {
+    if (question.options.some((opt) => opt.content.trim() === "")) {
       return {
         message: `${locationLabel} ${questionNumber}번 질문에 비어있는 옵션이 있습니다.`,
         questionId: question.id,

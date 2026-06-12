@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
+import { ProjectStatusChip } from "@/shared/ui/chip/ProjectStatusChip"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
@@ -15,6 +16,7 @@ interface ProjectManagementCardProps {
   data: MatchingProject
   canDeleteProject: boolean
   canEditProject: boolean
+  canPublishProject: boolean
   isPermissionLoading: boolean
 }
 
@@ -22,6 +24,7 @@ export function ProjectManagementCard({
   data,
   canDeleteProject,
   canEditProject,
+  canPublishProject,
   isPermissionLoading,
 }: ProjectManagementCardProps) {
   const cover = data.coverImage
@@ -64,14 +67,18 @@ export function ProjectManagementCard({
                 <span className="text-heading-7-semibold text-teal-gray-900">
                   {data.title}
                 </span>
+                <ProjectStatusChip status={data.status} />
               </div>
               <div onClick={(e) => e.stopPropagation()}>
                 <ProjectManagementMoreMenu
                   projectId={data.id}
                   projectName={data.title}
                   chapterName={data.branch}
+                  status={data.status}
+                  recruitRows={data.recruitRows}
                   canDeleteProject={canDeleteProject}
                   canEditProject={canEditProject}
+                  canPublishProject={canPublishProject}
                   isPermissionLoading={isPermissionLoading}
                 />
               </div>

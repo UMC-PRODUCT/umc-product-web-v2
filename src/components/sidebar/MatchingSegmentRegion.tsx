@@ -26,8 +26,7 @@ export function MatchingSegmentRegion({
   const { viewMe } = useViewMe()
   const canAccessSettings = canAccessProjectSettings(viewMe)
   const canManage = canManageProjects(viewMe)
-  const canRecruit = isOperator(viewMe)
-  const canViewApplications = isOperator(viewMe) || isCurrentTermPm(viewMe)
+  const canRecruit = isOperator(viewMe) || isCurrentTermPm(viewMe)
 
   const visibleSections = useMemo(
     () =>
@@ -35,9 +34,8 @@ export function MatchingSegmentRegion({
         canAccessProjectSettings: canAccessSettings,
         canManageProjects: canManage,
         canManageRecruitment: canRecruit,
-        canViewApplications,
       }),
-    [canAccessSettings, canManage, canRecruit, canViewApplications],
+    [canAccessSettings, canManage, canRecruit],
   )
 
   const resolved = resolveNavigationFromPathname(pathname, visibleSections)

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { isOperator } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
+import { projectKeys } from "@/features/project/new/api"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { useViewMe } from "@/shared/view-mode/useViewMe"
 
@@ -125,16 +126,15 @@ export function useMatchingProjectListFilters() {
   )
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: [
-      "matchingProjects",
-      effectiveGisuId,
+    queryKey: projectKeys.list({
+      gisuId: effectiveGisuId,
       page,
-      debouncedSearchQuery,
-      selectedBranch,
-      selectedSchool,
-      selectedParts,
-      selectedRecruitStatus,
-    ],
+      keyword: debouncedSearchQuery,
+      chapterId: selectedBranch,
+      schoolId: selectedSchool,
+      parts: selectedParts,
+      partQuotaStatus: selectedRecruitStatus,
+    }),
     queryFn: () =>
       getMatchingProjects({
         gisuId: effectiveGisuId!,
@@ -143,6 +143,7 @@ export function useMatchingProjectListFilters() {
         schoolIds: selectedSchool ? [Number(selectedSchool)] : undefined,
         parts: selectedParts.length > 0 ? selectedParts : undefined,
         partQuotaStatus: selectedRecruitStatus,
+        statuses: ["IN_PROGRESS"],
         page: page - 1,
         size: MATCHING_PROJECT_PAGE_SIZE,
       }),

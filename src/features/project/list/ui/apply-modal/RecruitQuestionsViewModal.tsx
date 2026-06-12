@@ -144,8 +144,12 @@ function renderPreviewField(q: Question) {
       return (
         <div className={OPTION_LIST_CLASS}>
           {q.options.map((opt) => (
-            <CheckboxList key={opt} checked={false} onChange={() => {}}>
-              {opt}
+            <CheckboxList
+              key={opt.optionId ?? opt.content}
+              checked={false}
+              onChange={() => {}}
+            >
+              {opt.content}
             </CheckboxList>
           ))}
         </div>
@@ -154,8 +158,12 @@ function renderPreviewField(q: Question) {
       return (
         <div className={OPTION_LIST_CLASS}>
           {q.options.map((opt) => (
-            <RadioList key={opt} checked={false} onChange={() => {}}>
-              {opt}
+            <RadioList
+              key={opt.optionId ?? opt.content}
+              checked={false}
+              onChange={() => {}}
+            >
+              {opt.content}
             </RadioList>
           ))}
         </div>

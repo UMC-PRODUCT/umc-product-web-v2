@@ -16,7 +16,6 @@ export function useVisibleSidebarSections() {
   const canAccessSettings = canAccessProjectSettings(viewMe)
   const canManage = canManageProjects(viewMe)
   const canRecruit = isOperator(viewMe) || isCurrentTermPm(viewMe)
-  const canViewApplications = isOperator(viewMe) || isCurrentTermPm(viewMe)
 
   const visibleSections = useMemo(
     () =>
@@ -24,9 +23,8 @@ export function useVisibleSidebarSections() {
         canAccessProjectSettings: canAccessSettings,
         canManageProjects: canManage,
         canManageRecruitment: canRecruit,
-        canViewApplications,
       }),
-    [canAccessSettings, canManage, canRecruit, canViewApplications],
+    [canAccessSettings, canManage, canRecruit],
   )
 
   return { visibleSections, isLoading }

@@ -96,26 +96,25 @@ export function getProjectPmSearchScope(me: MemberInfoResponse | undefined): {
   if (isSchoolLeadership(me)) {
     return me?.schoolId != null ? { schoolId: String(me.schoolId) } : {}
   }
-  if (!me?.challengerRecords?.length) return {}
-  const latest = latestRecord(me.challengerRecords)
+  const latest = getLatestChallengerRecord(me)
   return latest?.chapterId ? { chapterId: latest.chapterId } : {}
 }
 
 export function isCurrentTermPm(me: MemberInfoResponse | undefined): boolean {
-  if (!me?.challengerRecords?.length) return false
-  const latest = latestRecord(me.challengerRecords)
+  const latest = getLatestChallengerRecord(me)
   return latest?.part === "PLAN"
 }
 
 export function getViewerBranch(
   me: MemberInfoResponse | undefined,
 ): string | undefined {
-  if (!me?.challengerRecords?.length) return undefined
-  return latestRecord(me.challengerRecords)?.chapterName
+  return getLatestChallengerRecord(me)?.chapterName
 }
 
-function latestRecord(
-  records: ChallengerInfoResponse[],
+export function getLatestChallengerRecord(
+  me: MemberInfoResponse | undefined,
 ): ChallengerInfoResponse | undefined {
+  const records = me?.challengerRecords
+  if (!records?.length) return undefined
   return [...records].sort((a, b) => Number(b.gisuId) - Number(a.gisuId))[0]
 }

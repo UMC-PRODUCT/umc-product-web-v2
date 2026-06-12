@@ -8,7 +8,6 @@ const ALL = {
   canAccessProjectSettings: true,
   canManageProjects: true,
   canManageRecruitment: true,
-  canViewApplications: true,
 }
 
 function sectionIds(sections: ReturnType<typeof filterSectionsByPermission>) {
@@ -46,7 +45,6 @@ describe("filterSectionsByPermission", () => {
       canAccessProjectSettings: false,
       canManageProjects: true,
       canManageRecruitment: true,
-      canViewApplications: true,
     })
     expect(sectionIds(result)).not.toContain("project-settings")
   })
@@ -67,17 +65,15 @@ describe("filterSectionsByPermission", () => {
     expect(menuIds(result, "team-matching")).not.toContain("matching-rounds")
   })
 
-  it("canViewApplications=false면 지원 현황 항목 제거", () => {
+  it("관리 권한이 없어도 지원 현황 항목 노출", () => {
     const result = filterSectionsByPermission(SIDEBAR_ITEMS, {
       ...ALL,
-      canViewApplications: false,
+      canManageRecruitment: false,
     })
-    expect(menuIds(result, "team-matching")).not.toContain(
-      "matching-applications",
-    )
+    expect(menuIds(result, "team-matching")).toContain("matching-applications")
   })
 
-  it("canViewApplications=true면 지원 현황 항목 노출", () => {
+  it("전부 허용이면 지원 현황 항목 노출", () => {
     const result = filterSectionsByPermission(SIDEBAR_ITEMS, ALL)
     expect(menuIds(result, "team-matching")).toContain("matching-applications")
   })

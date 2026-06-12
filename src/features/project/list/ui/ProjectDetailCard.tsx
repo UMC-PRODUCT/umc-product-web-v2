@@ -5,7 +5,11 @@ import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
-import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import {
+  getLatestChallengerRecord,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   getApplicationForm,
@@ -27,6 +31,7 @@ import {
   getMyApplications,
   getProjectDetail,
 } from "../api/matchingProject"
+import { filterApplicationSectionsByPart } from "../model/applicationSectionFilter"
 import { isRecruitDone } from "../model/matchingProject"
 import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import { resolveProjectDetailCtaMode } from "../model/projectDetailCta"
@@ -214,11 +219,7 @@ export function ProjectDetailCard({
   })
 
   const myChapterId = useMemo(() => {
-    const records = me?.challengerRecords
-    if (!records?.length) return null
-    const id = [...records].sort(
-      (a, b) => Number(b.gisuId) - Number(a.gisuId),
-    )[0]?.chapterId
+    const id = getLatestChallengerRecord(me)?.chapterId
     return id != null ? Number(id) : null
   }, [me])
 
@@ -262,6 +263,15 @@ export function ProjectDetailCard({
       applicationForm ? mapApplicationFormToSections(applicationForm) : [],
     [applicationForm],
   )
+
+  const latestChallengerPart = useMemo(() => {
+    return getLatestChallengerRecord(me)?.part
+  }, [me])
+
+  const visibleSections = useMemo(() => {
+    if (userIsOperator || userIsPm) return sections
+    return filterApplicationSectionsByPart(sections, latestChallengerPart)
+  }, [sections, userIsOperator, userIsPm, latestChallengerPart])
 
   useEffect(() => {
     if (!formError) return
@@ -442,10 +452,7 @@ export function ProjectDetailCard({
           <div className="mt-8.5 flex w-full items-start gap-2.5">
             <TeamMemberButton
               variant="weak"
-              onClick={
-                userIsOperator ? () => setIsTeamModalOpen(true) : undefined
-              }
-              disabled={!userIsOperator}
+              onClick={() => setIsTeamModalOpen(true)}
             />
             <Button
               variant="weak"
@@ -662,7 +669,10 @@ export function ProjectDetailCard({
                 </span>
               </div>
             ) : (
-              <RecruitQuestionsViewModal data={data} sections={sections} />
+              <RecruitQuestionsViewModal
+                data={data}
+                sections={visibleSections}
+              />
             )}
           </Modal.Content>
         </Modal.Portal>
@@ -689,7 +699,7 @@ export function ProjectDetailCard({
                 data={data}
                 projectId={projectId}
                 matchingRoundId={Number(activeMatchingRound.id)}
-                sections={sections}
+                sections={visibleSections}
                 canToggleSection={userIsOperator || userIsPm}
                 onBack={() => setIsApplyModalOpen(false)}
                 onSubmitSuccess={() => {

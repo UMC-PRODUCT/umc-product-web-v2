@@ -59,12 +59,17 @@ export function buildPartQuotasEntries(
 
 function toApiQuestion(q: Question, idx: number): ApplicationQuestionItem {
   return {
+    ...(q.questionId !== undefined && { questionId: q.questionId }),
     type: FIELD_TYPE_TO_API[q.fieldType],
     title: q.title,
     description: q.caption || undefined,
     isRequired: q.required,
     orderNo: idx,
-    options: q.options.map((content, i) => ({ content, orderNo: i })),
+    options: q.options.map((opt, i) => ({
+      content: opt.content,
+      orderNo: i,
+      ...(opt.optionId !== undefined && { optionId: opt.optionId }),
+    })),
   }
 }
 
@@ -108,7 +113,7 @@ export function mapApplicationFormToSections(
             )
 
       const questions: Question[] = apiSection.questions
-        .slice()
+        .filter((apiQ) => apiQ.questionId != null)
         .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
         .map((apiQ) => {
           const sortedOptions = apiQ.options
@@ -116,14 +121,15 @@ export function mapApplicationFormToSections(
             .sort((a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0))
           return {
             id: String(apiQ.questionId),
+            questionId: apiQ.questionId ?? undefined,
             title: apiQ.title,
             caption: apiQ.description ?? "",
             fieldType: API_FIELD_TYPE_TO_UI[apiQ.type],
             required: apiQ.isRequired ?? false,
-            options: sortedOptions.map((o) => o.content),
-            optionIds: sortedOptions
-              .map((o) => o.optionId)
-              .filter((id): id is number => id != null),
+            options: sortedOptions.map((o) => ({
+              content: o.content,
+              optionId: o.optionId ?? undefined,
+            })),
           }
         })
 

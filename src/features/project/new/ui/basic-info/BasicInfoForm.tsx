@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { isAxiosError } from "axios"
 import {
   forwardRef,
@@ -23,6 +23,7 @@ import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
   addProjectMember,
   createProjectDraft,
+  invalidateProjectSummaryQueries,
   removeProjectMember,
   updateProjectDraft,
   uploadFileFlow,
@@ -111,6 +112,7 @@ export const BasicInfoForm = forwardRef<
   const setBasicInfo = useProjectRegisterStore((s) => s.setBasicInfo)
   const basicDraftFields = useProjectRegisterStore((s) => s.basicDraftFields)
   const addToast = useToastStore((s) => s.addToast)
+  const queryClient = useQueryClient()
 
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
@@ -382,6 +384,7 @@ export const BasicInfoForm = forwardRef<
       }
 
       setPmInfo({ isMultiPm, pm1: pm1Member, pm2: pm2Member })
+      invalidateProjectSummaryQueries(queryClient, resolvedProjectId)
       reset(values, { keepValues: true, keepDirty: false })
       setSavedSnapshot({ pm1: pm1Member, pm2: pm2Member, isMultiPm })
       setHasSavedOnce(true)

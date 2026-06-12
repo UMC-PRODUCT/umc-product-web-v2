@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
+import { isAxiosError } from "axios"
 import { Popover } from "radix-ui"
 import { useMemo, useState } from "react"
 
@@ -12,9 +13,13 @@ import {
 } from "@/features/application/model/mappers"
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
+import { TeamMemberModal } from "@/features/project/list/ui/team-member-modal/TeamMemberModal"
 import { deleteProject } from "@/features/project/management/api"
+import { invalidateProjectSummaryQueries } from "@/features/project/new/api"
+import { publishProject } from "@/features/project/new/api/projectPublish"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
+import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import type { PartEnum } from "@/features/application/model/apiTypes"
@@ -23,13 +28,18 @@ import type {
   ProjectApplication,
   Role,
 } from "@/features/application/model/types"
+import type { ProjectStatus } from "@/features/project/list/api/matchingProject"
+import type { ProjectRecruitRow } from "@/features/project/list/model/matchingProject"
 
 interface ProjectManagementMoreMenuProps {
   projectId: string
   projectName: string
   chapterName: string
+  status?: ProjectStatus
+  recruitRows: ProjectRecruitRow[]
   canDeleteProject: boolean
   canEditProject: boolean
+  canPublishProject: boolean
   isPermissionLoading: boolean
 }
 
@@ -37,15 +47,20 @@ export function ProjectManagementMoreMenu({
   projectId,
   projectName,
   chapterName,
+  status,
+  recruitRows,
   canDeleteProject,
   canEditProject,
+  canPublishProject,
   isPermissionLoading,
 }: ProjectManagementMoreMenuProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [publishOpen, setPublishOpen] = useState(false)
   const [applicationOpen, setApplicationOpen] = useState(false)
+  const [teamModalOpen, setTeamModalOpen] = useState(false)
   const addToast = useToastStore((s) => s.addToast)
 
   const numericProjectId = Number(projectId)
@@ -104,7 +119,7 @@ export function ProjectManagementMoreMenu({
     mutationFn: () => deleteProject(Number(projectId)),
     onSuccess: () => {
       setDeleteOpen(false)
-      void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
+      invalidateProjectSummaryQueries(queryClient, Number(projectId))
       void queryClient.invalidateQueries({
         queryKey: [...applicationKeys.all, "managed"],
       })
@@ -127,10 +142,44 @@ export function ProjectManagementMoreMenu({
     },
   })
 
+  const publishMutation = useMutation({
+    mutationFn: () => publishProject(numericProjectId),
+    onSuccess: () => {
+      setPublishOpen(false)
+      invalidateProjectSummaryQueries(queryClient, numericProjectId)
+      addToast({
+        message: "프로젝트가 공개되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+    onError: (error) => {
+      const serverMessage = isAxiosError(error)
+        ? (error.response?.data as { message?: string } | undefined)?.message
+        : undefined
+      addToast({
+        message:
+          serverMessage ?? "프로젝트 공개에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+  })
+
   const handleDeleteClick = () => {
     if (!canDeleteProject || isPermissionLoading) return
     setPopoverOpen(false)
     setDeleteOpen(true)
+  }
+
+  const handlePublishClick = () => {
+    if (!canPublishProject || isPermissionLoading) return
+    setPopoverOpen(false)
+    setPublishOpen(true)
   }
 
   const handleApplicationClick = () => {
@@ -180,10 +229,15 @@ export function ProjectManagementMoreMenu({
     }
   }
 
+  const handleTeamViewClick = () => {
+    setPopoverOpen(false)
+    setTeamModalOpen(true)
+  }
+
   const menuItems = [
     { label: "지원 현황 확인하기", onClick: handleApplicationClick },
     { label: "기획 보기", onClick: () => void handlePlanViewClick() },
-    { label: "팀원 구성 보기", onClick: () => {} },
+    { label: "팀원 구성 보기", onClick: handleTeamViewClick },
   ]
 
   if (isPermissionLoading || canEditProject) {
@@ -224,6 +278,15 @@ export function ProjectManagementMoreMenu({
                   onClick={onClick}
                 />
               ))}
+              {status === "PENDING_REVIEW" &&
+                (isPermissionLoading || canPublishProject) && (
+                  <DropdownItem
+                    label="공개하기"
+                    disabled={isPermissionLoading}
+                    onClick={handlePublishClick}
+                    className="text-teal-500"
+                  />
+                )}
               {(isPermissionLoading || canDeleteProject) && (
                 <DropdownItem
                   label="삭제"
@@ -236,6 +299,20 @@ export function ProjectManagementMoreMenu({
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>
+
+      <Modal.Root open={teamModalOpen} onOpenChange={setTeamModalOpen}>
+        <Modal.Portal>
+          <Modal.Overlay tone="light" />
+          <Modal.Content aria-describedby={undefined}>
+            <Modal.Title className="sr-only">팀원 구성</Modal.Title>
+            <TeamMemberModal
+              projectId={numericProjectId}
+              recruitRows={recruitRows}
+              onClose={() => setTeamModalOpen(false)}
+            />
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
 
       {projectApplication && (
         <ApplicationDetailModal
@@ -262,6 +339,23 @@ export function ProjectManagementMoreMenu({
         onOpenChange={setDeleteOpen}
         onCancel={() => setDeleteOpen(false)}
         onConfirm={() => deleteMutation.mutate()}
+      />
+
+      <CtaModal
+        open={publishOpen}
+        title="프로젝트 공개"
+        content={
+          <>
+            공개하면 챌린저들이 지원할 수 있습니다. <br /> '{projectName}'을
+            공개하시겠습니까?
+          </>
+        }
+        cancelText="돌아가기"
+        confirmText="공개하기"
+        confirmLoading={publishMutation.isPending}
+        onOpenChange={setPublishOpen}
+        onCancel={() => setPublishOpen(false)}
+        onConfirm={() => publishMutation.mutate()}
       />
     </>
   )
