@@ -44,46 +44,56 @@ export default function Footer() {
           </div>
           <div className="text-teal-gray-400 flex flex-col items-center justify-center gap-2 pt-1 whitespace-nowrap max-[930px]:items-start">
             <div className="flex items-center gap-6">
-              <a
-                href="https://makeus-challenge.notion.site/300b57f4596b8018a2dfd38784478715"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body-3-regular transition-colors hover:text-gray-500 hover:underline"
+              <nav
+                aria-label="약관 및 정책"
+                className="flex items-center gap-6"
               >
-                서비스이용약관
-              </a>
-              <a
-                href="https://makeus-challenge.notion.site/300b57f4596b803f8c94dd4f4fb71960"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body-3-regular transition-colors hover:text-gray-500 hover:underline"
-              >
-                개인정보처리방침
-              </a>
-              <span className="text-body-3-regular">
+                <a
+                  href="https://makeus-challenge.notion.site/300b57f4596b8018a2dfd38784478715"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-body-3-regular transition-colors hover:text-gray-500 hover:underline"
+                >
+                  서비스이용약관
+                </a>
+                <a
+                  href="https://makeus-challenge.notion.site/300b57f4596b803f8c94dd4f4fb71960"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-body-3-regular transition-colors hover:text-gray-500 hover:underline"
+                >
+                  개인정보처리방침
+                </a>
+              </nav>
+              <small className="text-body-3-regular">
                 © 2026 UMC All rights reserved.
-              </span>
+              </small>
             </div>
           </div>
         </div>
 
-        <div className="w-full">
-          <p className="text-subtitle-4-semibold text-teal-gray-400">
+        <section aria-labelledby="footer-team-heading" className="w-full">
+          <h2
+            id="footer-team-heading"
+            className="text-subtitle-4-semibold text-teal-gray-400"
+          >
             UMC Product
-          </p>
-          <div className="mt-4 flex flex-col gap-1.75">
+          </h2>
+          <dl className="mt-4 flex flex-col gap-1.75">
             {TEAM_ROWS.map(({ role, members }) => (
               <div
                 key={role}
                 className="text-teal-gray-400 flex items-baseline gap-2.25"
               >
-                <div className="flex gap-2.25">
+                <dt className="flex gap-2.25">
                   <span className="text-body-3-medium w-10 shrink-0">
                     {role}
                   </span>
-                  <span className="text-body-3-regular">|</span>
-                </div>
-                <div className="max- flex gap-2.25 max-[930px]:flex-col max-[930px]:gap-1">
+                  <span className="text-body-3-regular" aria-hidden="true">
+                    |
+                  </span>
+                </dt>
+                <dd className="max- flex gap-2.25 max-[930px]:flex-col max-[930px]:gap-1">
                   <div className="text-body-3-regular shrink-0 tracking-[-0.02em]">
                     {members?.group_1.join("   ")}
                   </div>
@@ -99,13 +109,16 @@ export default function Footer() {
                       </div>
                     )}
                   </div>
-                </div>
+                </dd>
               </div>
             ))}
-          </div>
-        </div>
+          </dl>
+        </section>
 
-        <div className="flex w-full flex-wrap items-center gap-x-6 gap-y-3 max-[480px]:flex-col max-[480px]:items-center">
+        <nav
+          aria-label="앱 다운로드 및 소셜 미디어"
+          className="flex w-full flex-wrap items-center gap-x-6 gap-y-3 max-[480px]:flex-col max-[480px]:items-center"
+        >
           <div className="flex items-center gap-1.75">
             <UmcLogo className="text-teal-gray-400 h-3 w-auto" />
             <a
@@ -129,10 +142,12 @@ export default function Footer() {
               href="https://tech.university.neordinary.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-body-3-medium text-teal-gray-400 flex items-center gap-1.75 transition-colors hover:text-gray-500"
+              className="text-body-3-medium text-teal-gray-400 flex items-center gap-1.75 transition-colors"
             >
               <UmcLogo className="ml-4 h-3 w-auto" />
-              <span>Product Tech</span>
+              <span className="hover:text-gray-500 hover:underline">
+                Product Tech
+              </span>
             </a>
           </div>
           <div className="flex items-center gap-6">
@@ -155,7 +170,7 @@ export default function Footer() {
               <span className="hover:underline">Kakao</span>
             </a>
           </div>
-        </div>
+        </nav>
       </div>
     </footer>
   )
