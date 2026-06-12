@@ -214,16 +214,18 @@ export function MyApplicationMoreMenu({
       {/* 지원 취소 확인 모달 */}
       <CtaModal
         open={cancelOpen}
-        title="지원 취소"
+        title="프로젝트 지원 취소"
         content={
           <>
-            지원을 취소하면 작성한 답변이 모두 사라집니다.
+            {item.project.name} 지원을 취소하시겠습니까?
             <br />
-            정말 취소하시겠어요?
+            취소한 지원은 되돌릴 수 없으며, 완전히 삭제됩니다.
+            <br />
+            현재 차수 내에서만 프로젝트에 다시 지원할 수 있습니다.
           </>
         }
         cancelText="돌아가기"
-        confirmText="지원 취소하기"
+        confirmText="지원 취소"
         confirmLoading={cancelMutation.isPending}
         variant="error"
         onOpenChange={setCancelOpen}
