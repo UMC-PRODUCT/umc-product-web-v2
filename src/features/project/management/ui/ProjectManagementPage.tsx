@@ -9,6 +9,7 @@ import {
   isCurrentTermPm,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
+import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { gisuKeys, projectKeys } from "@/features/project/new/api/queryKeys"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { EmptyState } from "@/shared/ui/EmptyState"
@@ -126,15 +127,30 @@ export function ProjectManagementPage() {
     enabled: hasAccess && !!gisuId,
   })
 
+  const chaptersQuery = useQuery({
+    queryKey: ["chapters", "with-schools", gisuId],
+    queryFn: () => getChaptersWithSchools(String(gisuId!)),
+    enabled: useGroupedView && !!gisuId,
+  })
+
   const projects: MatchingProject[] = useMemo(
     () => (managedQuery.data ?? []).map(toMatchingProject),
     [managedQuery.data],
   )
 
+  const filteredProjects: MatchingProject[] = useMemo(() => {
+    if (!useGroupedView) return projects
+    const chapters = chaptersQuery.data?.chapters ?? []
+    const chapter = chapters.find((c) => c.chapterName === selectedChapter)
+    if (!chapter) return projects
+    const schoolNames = new Set(chapter.schools.map((s) => s.schoolName))
+    return projects.filter((p) => schoolNames.has(p.school))
+  }, [useGroupedView, projects, chaptersQuery.data, selectedChapter])
+
   const partGroups = useMemo(() => {
     if (!useGroupedView) return new Map<string, MatchingProject[]>()
     const map = new Map<string, MatchingProject[]>()
-    for (const project of projects) {
+    for (const project of filteredProjects) {
       for (const row of project.recruitRows) {
         if (!FE_PART_LABELS.has(row.part)) continue
         if (!map.has(row.part)) map.set(row.part, [])
@@ -142,7 +158,7 @@ export function ProjectManagementPage() {
       }
     }
     return map
-  }, [useGroupedView, projects])
+  }, [useGroupedView, filteredProjects])
 
   const permissionProjectIds = useMemo(() => {
     const ids = new Set<number>()
@@ -218,7 +234,7 @@ export function ProjectManagementPage() {
         </div>
 
         <div className="flex flex-col gap-10">
-          {isAdminScope && (
+          {useGroupedView && (
             <SegmentButton
               items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
               value={selectedChapter}
