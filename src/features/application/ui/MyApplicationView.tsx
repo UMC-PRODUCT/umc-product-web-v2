@@ -1,7 +1,12 @@
+import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
-import { type MyProjectApplicationResponse } from "@/features/project/list/api/matchingProject"
+import { useActiveGisuId } from "@/features/application/hooks/useApplicationPageData"
+import {
+  getMyApplications,
+  type MyProjectApplicationResponse,
+} from "@/features/project/list/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { ProjectManagementSubTitle } from "@/features/project/management/ui/ProjectManagementSubTitle"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
@@ -136,54 +141,15 @@ function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
   )
 }
 
-// TODO: 테스트용 목 데이터, 확인 후 제거
-const MOCK_DATA: MyProjectApplicationResponse[] = [
-  {
-    applicationId: 1,
-    projectId: 1,
-    project: {
-      name: "UMC_Web",
-      thumbnailImageUrl: null,
-      productOwner: {
-        memberId: 1,
-        nickname: "이방토",
-        name: "이예원",
-        schoolName: "한양대 ERICA",
-      },
-      partQuotas: [
-        { part: "DESIGN", currentCount: 1, quota: 1, status: "RECRUITING" },
-        { part: "WEB", currentCount: 1, quota: 1, status: "COMPLETED" },
-        { part: "SPRINGBOOT", currentCount: 1, quota: 1, status: "COMPLETED" },
-      ],
-    },
-    matchingRound: { id: 1, type: "PLAN_DESIGN", phase: "FIRST" },
-    status: "SUBMITTED",
-  },
-  {
-    applicationId: 2,
-    projectId: 2,
-    project: {
-      name: "UMC_App",
-      thumbnailImageUrl: null,
-      productOwner: {
-        memberId: 2,
-        nickname: "김기획",
-        name: "김기획",
-        schoolName: "서울대학교",
-      },
-      partQuotas: [
-        { part: "WEB", currentCount: 1, quota: 2, status: "RECRUITING" },
-        { part: "IOS", currentCount: 1, quota: 1, status: "COMPLETED" },
-      ],
-    },
-    matchingRound: { id: null, type: "PLAN_DESIGN", phase: "RANDOM_MATCHING" },
-    status: "APPROVED",
-  },
-]
-
 export function MyApplicationView() {
   const navigate = useNavigate()
-  const applications = MOCK_DATA
+  const { data: gisuId } = useActiveGisuId()
+  const { data: raw = [] } = useQuery({
+    queryKey: ["myApplications", gisuId],
+    queryFn: () => getMyApplications(gisuId!),
+    enabled: gisuId != null,
+  })
+  const applications = raw.filter((a) => a.status !== "CANCELLED")
 
   if (!applications?.length) {
     return (
