@@ -17,6 +17,7 @@ interface CtaModalProps {
   confirmLoading?: boolean
   variant?: CtaModalVariant
   overlayTone?: "light" | "deep"
+  descriptionClassName?: string
   cancelOnDismiss?: boolean
   onOpenChange: (open: boolean) => void
   onCancel?: () => void
@@ -32,6 +33,7 @@ export function CtaModal({
   confirmLoading = false,
   variant = "warning",
   overlayTone = "light",
+  descriptionClassName,
   cancelOnDismiss = true,
   onOpenChange,
   onCancel,
@@ -66,7 +68,12 @@ export function CtaModal({
                 {title}
               </Modal.Title>
             </div>
-            <Modal.Description className="text-subtitle-3-semibold text-teal-gray-800">
+            <Modal.Description
+              className={cn(
+                "text-subtitle-3-semibold text-teal-gray-800",
+                descriptionClassName,
+              )}
+            >
               {content}
             </Modal.Description>
           </div>

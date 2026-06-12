@@ -24,3 +24,7 @@ export async function getChallengerRecordByCode(
   )
   return data.result
 }
+
+export async function addChallengerRecordToMember(code: string): Promise<void> {
+  await api.post<ApiResponse<null>>("/v1/challenger-record/member", { code })
+}
