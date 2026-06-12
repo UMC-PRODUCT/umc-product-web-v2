@@ -11,7 +11,11 @@ import { ChallengerApplicationView } from "@/features/application/ui/ChallengerA
 import { MyApplicationView } from "@/features/application/ui/MyApplicationView"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
+import {
+  isAnyOperator,
+  isCurrentTermPm,
+  isOperator,
+} from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
@@ -29,8 +33,7 @@ function MatchingApplicationsPage() {
 
   const canApprove = isOperator(me)
   const isPm = isCurrentTermPm(me)
-  // TODO: 작업 완료 후 isOthers 조건으로 복구
-  // const isOthers = !canApprove && !isPm
+  const isOthers = !isAnyOperator(me) && !isPm
 
   const admin = useAdminPageData(selectedChapter)
   const adminStats = admin.stats
@@ -111,8 +114,7 @@ function MatchingApplicationsPage() {
             </>
           )}
 
-          {/* TODO: 테스트용 강제 렌더, 작업 완료 후 isOthers 조건으로 복구 */}
-          <MyApplicationView />
+          {isOthers && <MyApplicationView />}
         </div>
       </div>
     </section>
