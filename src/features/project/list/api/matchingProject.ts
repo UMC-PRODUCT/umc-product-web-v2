@@ -22,7 +22,7 @@ export type ProjectStatus =
   | "ABORTED"
 
 type ProjectMember = {
-  memberId: number
+  memberId: string
   nickname: string
   name: string
   schoolName: string
@@ -44,7 +44,7 @@ export type ProjectItem = {
 }
 
 export type ProjectDetail = {
-  id: number
+  id: string
   name: string
   description: string
   thumbnailImageUrl: string | null
@@ -54,20 +54,20 @@ export type ProjectDetail = {
   coProductOwners: ProjectMember[]
   partQuotas: {
     part: ProjectPart
-    currentCount: number
-    quota: number
+    currentCount: string
+    quota: string
     status: PartQuotaStatus
   }[]
   partQuotaStatus: PartQuotaStatus
-  applicationFormId: number | null
+  applicationFormId: string | null
 }
 
 export type ProjectPage = {
   content: ProjectItem[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
+  page: string
+  size: string
+  totalElements: string
+  totalPages: string
   hasNext: boolean
   hasPrevious: boolean
 }
@@ -171,7 +171,7 @@ export type ApplicationStatus =
   | "CANCELLED"
 
 export type ApplicationStatusResponse = {
-  applicationId: number
+  applicationId: string
   status: ApplicationStatus
 }
 
@@ -183,10 +183,10 @@ export type ApplicationAnswerItem = {
 }
 
 export type ActiveMatchingRound = {
-  id: number | string
+  id: string
   type: string
   phase: string
-  chapterId: number | string
+  chapterId: string
   startsAt: string
   endsAt: string
 }
@@ -233,7 +233,7 @@ export async function submitApplication(
 }
 
 export type AnswerView = {
-  answerId: number
+  answerId: string
   answeredAsType:
     | "SHORT_TEXT"
     | "LONG_TEXT"
@@ -244,40 +244,40 @@ export type AnswerView = {
     | "FILE"
     | "PORTFOLIO"
   textValue?: string
-  selectedOptions?: { questionOptionId: number; answeredAsContent: string }[]
+  selectedOptions?: { questionOptionId: string; answeredAsContent: string }[]
   files?: { fileId: string; originalFileName: string; url: string }[]
   times?: string[]
 }
 
 export type QuestionView = {
-  questionId: number
+  questionId: string
   type: AnswerView["answeredAsType"]
   title: string
   description?: string
   isRequired: boolean
-  orderNo: number
+  orderNo: string
   options: {
-    optionId: number
+    optionId: string
     content: string
-    orderNo: number
+    orderNo: string
     isOther?: boolean
   }[]
   answer?: AnswerView
 }
 
 export type ApplicationDetailSectionView = {
-  sectionId: number
+  sectionId: string
   type: "COMMON" | "PART"
   allowedParts: ProjectPart[]
   title: string
   description?: string
-  orderNo: number
+  orderNo: string
   questions: QuestionView[]
 }
 
 export type FormResponseView = {
-  formResponseId: number
-  formId: number
+  formResponseId: string
+  formId: string
   status: "DRAFT" | "SUBMITTED"
   submittedAt?: string
   lastSavedAt?: string
@@ -285,15 +285,15 @@ export type FormResponseView = {
 }
 
 export type ApplicationDetail = {
-  applicationId: number
+  applicationId: string
   applicant: {
-    memberId: number
+    memberId: string
     nickname: string
     name: string
     schoolName: string
     part: ProjectPart
   }
-  matchingRound: { id: number; type: string; phase: string }
+  matchingRound: { id: string; type: string; phase: string }
   status: MyApplicationStatus
   submittedAt?: string
   statusChangedAt?: string

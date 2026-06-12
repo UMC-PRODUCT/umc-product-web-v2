@@ -56,7 +56,7 @@ export interface FormSection {
   allowedParts: PartEnum[]
   title: string
   description: string
-  orderNo: number
+  orderNo: string
   questions: FormQuestion[]
 }
 
@@ -74,7 +74,7 @@ export interface FormQuestion {
   title: string
   description: string
   isRequired: boolean
-  orderNo: number
+  orderNo: string
   options: FormQuestionOption[]
   answer: FormAnswer | null
 }
@@ -82,7 +82,7 @@ export interface FormQuestion {
 export interface FormQuestionOption {
   optionId: string
   content: string
-  orderNo: number
+  orderNo: string
   isOther: boolean
 }
 
@@ -228,7 +228,7 @@ export interface ProjectStatisticsResponse {
 
 // GET /api/v1/projects/statistics 응답
 export interface ChapterStatisticsResponse {
-  chapterId: number
+  chapterId: string
   projects: ProjectStatisticsResponse[]
   summary: {
     // N차 매칭 지원 현황 카드

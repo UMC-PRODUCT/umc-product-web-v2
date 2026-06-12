@@ -291,7 +291,7 @@ export function toApplicantFormData(
 
   const toFormFields = (questions: FormQuestion[]): FormField[] =>
     questions
-      .sort((a, b) => a.orderNo - b.orderNo)
+      .sort((a, b) => Number(a.orderNo) - Number(b.orderNo))
       .map((q, i) => ({
         label: `Q${i + 1}`,
         question: q.title,
