@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import {
   canAccessProjectSettings,
   canManageProjects,
+  isCurrentTermPm,
   isOperator,
 } from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
@@ -25,7 +26,7 @@ export function MatchingSegmentRegion({
   const { viewMe } = useViewMe()
   const canAccessSettings = canAccessProjectSettings(viewMe)
   const canManage = canManageProjects(viewMe)
-  const canRecruit = isOperator(viewMe)
+  const canRecruit = isOperator(viewMe) || isCurrentTermPm(viewMe)
 
   const visibleSections = useMemo(
     () =>
