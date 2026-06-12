@@ -97,7 +97,7 @@ export default function Footer() {
                   <div className="text-body-3-regular shrink-0 tracking-[-0.02em]">
                     {members.group_1.join("   ")}
                   </div>
-                  <div className="flex gap-1.5 max-[480px]:flex-col">
+                  <div className="max-bp1:flex-col flex gap-1.5">
                     {members.group_2 && (
                       <div className="text-body-3-regular shrink-0 tracking-[-0.02em]">
                         {members.group_2.join("   ")}
@@ -117,7 +117,7 @@ export default function Footer() {
 
         <nav
           aria-label="앱 다운로드 및 소셜 미디어"
-          className="flex w-full flex-wrap items-center gap-x-6 gap-y-3 max-[480px]:flex-col max-[480px]:items-center"
+          className="max-bp1:flex-col max-bp1:items-center flex w-full flex-wrap items-center gap-x-6 gap-y-3"
         >
           <div className="flex items-center gap-1.75">
             <UmcLogo className="text-teal-gray-400 h-3 w-auto" />
