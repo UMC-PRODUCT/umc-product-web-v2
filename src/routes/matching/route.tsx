@@ -5,6 +5,7 @@ import Header from "@/components/header/Header"
 import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
 import SideBar from "@/components/sidebar/SideBar"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { cn } from "@/shared/lib/utils"
 
 export const Route = createFileRoute("/matching")({
   beforeLoad: async ({ context }) => {
@@ -22,7 +23,7 @@ function MatchingLayout() {
       <div className="flex w-full">
         <SideBar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className={`${isProjectsIndex ? "px-9.5" : "px-11"} pt-12`}>
+          <div className={cn(isProjectsIndex ? "px-9.5" : "px-11", "pt-12")}>
             <MatchingSegmentRegion />
             <div className="flex min-w-0 flex-1 flex-col pt-8 pb-20">
               <Outlet />
