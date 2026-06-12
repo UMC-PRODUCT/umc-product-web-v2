@@ -31,13 +31,20 @@ const ALLOWED_PARTS_TO_SECTION_ID: Record<string, string> = {
 }
 
 function toQuestion(apiQ: ApplicationQuestionItem): Question {
+  const sortedOptions = [...(apiQ.options ?? [])].sort(
+    (a, b) => (a.orderNo ?? 0) - (b.orderNo ?? 0),
+  )
   return {
     id: genId(),
+    questionId: apiQ.questionId ?? undefined,
     title: apiQ.title,
     caption: apiQ.description ?? "",
     fieldType: API_TYPE_TO_FIELD[apiQ.type] ?? "text",
     required: apiQ.isRequired ?? false,
-    options: apiQ.options.map((o) => o.content),
+    options: sortedOptions.map((o) => ({
+      content: o.content,
+      optionId: o.optionId ?? undefined,
+    })),
   }
 }
 

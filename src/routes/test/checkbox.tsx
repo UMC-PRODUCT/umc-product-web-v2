@@ -82,7 +82,10 @@ function CheckboxListRow({
 }
 
 function CheckboxFieldListSection() {
-  const [options, setOptions] = useState(["옵션 1", "옵션 2"])
+  const [options, setOptions] = useState([
+    { content: "옵션 1" },
+    { content: "옵션 2" },
+  ])
   return <CheckboxFieldList options={options} onOptionsChange={setOptions} />
 }
 

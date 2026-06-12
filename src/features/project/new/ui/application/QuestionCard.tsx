@@ -14,7 +14,7 @@ import type { Question } from "@/features/project/new/model/applicationQuestion"
 
 interface QuestionFieldRendererProps {
   question: Question
-  onOptionsChange: (opts: string[]) => void
+  onOptionsChange: (opts: Question["options"]) => void
 }
 
 function QuestionFieldRenderer({

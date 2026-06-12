@@ -68,7 +68,7 @@ const DEFAULT_SECTIONS: Section[] = [
         caption: "",
         fieldType: "checkbox",
         required: true,
-        options: ["Figma", "Illustration"],
+        options: [{ content: "Figma" }, { content: "Illustration" }],
       },
       {
         id: "q-d2",
@@ -92,7 +92,7 @@ const DEFAULT_SECTIONS: Section[] = [
         caption: "",
         fieldType: "checkbox",
         required: true,
-        options: ["Figma", "Github"],
+        options: [{ content: "Figma" }, { content: "GitHub" }],
       },
       {
         id: "q-f2",
@@ -116,7 +116,13 @@ const DEFAULT_SECTIONS: Section[] = [
         caption: "",
         fieldType: "radio",
         required: true,
-        options: ["Java", "Kotlin", "Python", "Node.js", "Go"],
+        options: [
+          { content: "Java" },
+          { content: "Kotlin" },
+          { content: "Python" },
+          { content: "Node.js" },
+          { content: "Go" },
+        ],
       },
       {
         id: "q-b2",
@@ -125,12 +131,12 @@ const DEFAULT_SECTIONS: Section[] = [
         fieldType: "checkbox",
         required: true,
         options: [
-          "Spring Boot",
-          "Django",
-          "FastAPI",
-          "NestJS",
-          "Docker",
-          "AWS",
+          { content: "Spring Boot" },
+          { content: "Django" },
+          { content: "FastAPI" },
+          { content: "NestJS" },
+          { content: "Docker" },
+          { content: "AWS" },
         ],
       },
       {
