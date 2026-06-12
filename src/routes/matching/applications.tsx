@@ -8,23 +8,27 @@ import {
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
-import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { isCurrentTermPm, isOperator } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
+import { useViewModeStore } from "@/shared/view-mode"
+import { projectViewMe } from "@/shared/view-mode/projectViewMe"
+import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 export const Route = createFileRoute("/matching/applications")({
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
-    if (!isOperator(me) && !isCurrentTermPm(me)) throw redirect({ to: "/" })
+    const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
+    if (!isOperator(viewMe) && !isCurrentTermPm(viewMe))
+      throw redirect({ to: "/" })
   },
   component: MatchingApplicationsPage,
 })
 
 function MatchingApplicationsPage() {
-  const { data: me } = useMe()
+  const { viewMe: me } = useViewMe()
   const [selectedChapter, setSelectedChapter] = useState("Chromium")
 
   const canApprove = isOperator(me)

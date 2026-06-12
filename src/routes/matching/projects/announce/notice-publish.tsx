@@ -8,6 +8,8 @@ import {
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { isOperator } from "@/features/auth/model/identity"
 import { NoticePublishForm } from "@/features/notice"
+import { useViewModeStore } from "@/shared/view-mode"
+import { projectViewMe } from "@/shared/view-mode/projectViewMe"
 
 import type { PartEnum } from "@/features/notice/model/apiTypes"
 
@@ -20,7 +22,8 @@ export const Route = createFileRoute(
 )({
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
-    if (!isOperator(me)) throw redirect({ to: "/" })
+    const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
+    if (!isOperator(viewMe)) throw redirect({ to: "/" })
   },
   validateSearch: (search: Record<string, unknown>): NoticePublishSearch => {
     return {
