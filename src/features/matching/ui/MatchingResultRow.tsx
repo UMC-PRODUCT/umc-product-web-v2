@@ -11,6 +11,7 @@ import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { Modal } from "@/shared/ui/Modal"
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import { AssignmentModal } from "./AssignmentModal"
 import { MatchingBlock } from "./MatchingBlock"
@@ -87,6 +88,10 @@ export function MatchingResultRow({
     rowIdx: number
     blockIdx: number
     role: string
+  } | null>(null)
+  const [manualUnmatchTarget, setManualUnmatchTarget] = useState<{
+    memberId: string
+    name: string
   } | null>(null)
   const [localRoleRows, setLocalRoleRows] = useState(roleRows)
   // 수동 배정 후 서버 refetch 시 멤버를 클릭한 슬롯 위치로 재배치
@@ -237,7 +242,17 @@ export function MatchingResultRow({
                             setSelectedApplicantId(block.applicantId!)
                             setSelectedMemberId(block.memberId ?? null)
                           }
-                        : undefined
+                        : isEditable &&
+                            !block.applicantId &&
+                            block.memberId &&
+                            block.type === "filled"
+                          ? () => {
+                              setManualUnmatchTarget({
+                                memberId: block.memberId!,
+                                name: block.name ?? "",
+                              })
+                            }
+                          : undefined
                     }
                     onAssignClick={
                       isEditable && block.type === "none"
@@ -333,6 +348,32 @@ export function MatchingResultRow({
             ? () => unmatchMutation.mutate(selectedMemberId)
             : undefined
         }
+      />
+
+      <CtaModal
+        open={manualUnmatchTarget !== null}
+        variant="error"
+        overlayTone="light"
+        title="매칭을 해제하시겠습니까?"
+        content={
+          <>
+            수동 배정된 챌린저 <strong>{manualUnmatchTarget?.name}</strong>의
+            <br />
+            매칭을 해제합니다.
+          </>
+        }
+        cancelText="돌아가기"
+        confirmText="매칭 해제"
+        confirmLoading={unmatchMutation.isPending}
+        onOpenChange={() => setManualUnmatchTarget(null)}
+        onCancel={() => setManualUnmatchTarget(null)}
+        onConfirm={() => {
+          if (manualUnmatchTarget && projectId) {
+            unmatchMutation.mutate(manualUnmatchTarget.memberId, {
+              onSuccess: () => setManualUnmatchTarget(null),
+            })
+          }
+        }}
       />
 
       {isEditable && (
