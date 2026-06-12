@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { CheckIcon, Info } from "lucide-react"
+import { CircleAlert, Info } from "lucide-react"
 import { useState } from "react"
 
 import { addChallengerRecordToMember } from "@/features/challenger/api/challengerRecord"
@@ -71,7 +71,7 @@ export function ChallengerVerification() {
 
           {hasError && (
             <div className="text-error-500 text-caption-2-medium flex gap-1">
-              <CheckIcon className="size-4" />
+              <CircleAlert className="size-4" />
               <p>올바르지 않은 인증코드입니다</p>
             </div>
           )}
