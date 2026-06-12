@@ -95,7 +95,7 @@ export function MyApplicationMoreMenu({
     onSuccess: () => {
       setCancelOpen(false)
       addToast({
-        message: "지원이 취소되었습니다.",
+        message: "프로젝트 지원이 취소되었습니다.",
         color: "primary",
         variant: "deep",
         type: "default",
@@ -105,7 +105,7 @@ export function MyApplicationMoreMenu({
     },
     onError: () => {
       addToast({
-        message: "지원 취소에 실패했습니다. 다시 시도해주세요.",
+        message: "프로젝트 지원 취소에 실패했습니다. 다시 시도해주세요.",
         color: "red",
         variant: "deep",
         type: "default",
