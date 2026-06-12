@@ -283,13 +283,13 @@ export function useAdminPageData(chapterName?: string) {
       }
     }
 
-    // 해당 챕터 소속 학교 + 프로젝트만 필터링
-    const filteredSummary = chapterSchoolIds
+    // 해당 챕터 소속 학교 + 프로젝트만 필터링 (로딩 중엔 빈 Set으로 필터링해 flicker 방지)
+    const filteredSummary = chapterName
       ? {
           ...chapterStatsQuery.data.summary,
           schoolMatchingStatistics:
             chapterStatsQuery.data.summary.schoolMatchingStatistics.filter(
-              (s) => chapterSchoolIds.has(String(s.schoolId)),
+              (s) => (chapterSchoolIds ?? new Set()).has(String(s.schoolId)),
             ),
           projectRoundStatistics:
             chapterStatsQuery.data.summary.projectRoundStatistics.filter((p) =>
@@ -311,7 +311,13 @@ export function useAdminPageData(chapterName?: string) {
         .sort((a, b) => b.applied - a.applied)
         .slice(0, 5)
     return { ...partial, universities }
-  }, [chapterStatsQuery.data, projectIdToName, schoolIdToName, chapterName])
+  }, [
+    chapterStatsQuery.data,
+    projectIdToName,
+    schoolIdToName,
+    chapterName,
+    chapterSchoolIds,
+  ])
 
   return {
     projects: transformed,
