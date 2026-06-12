@@ -27,6 +27,7 @@ import {
   getMyApplications,
   getProjectDetail,
 } from "../api/matchingProject"
+import { filterApplicationSectionsByPart } from "../model/applicationSectionFilter"
 import { isRecruitDone } from "../model/matchingProject"
 import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import { resolveProjectDetailCtaMode } from "../model/projectDetailCta"
@@ -263,6 +264,18 @@ export function ProjectDetailCard({
     [applicationForm],
   )
 
+  const latestChallengerPart = useMemo(() => {
+    const records = me?.challengerRecords
+    if (!records?.length) return undefined
+    return [...records].sort((a, b) => Number(b.gisuId) - Number(a.gisuId))[0]
+      ?.part
+  }, [me])
+
+  const visibleSections = useMemo(() => {
+    if (userIsOperator || userIsPm) return sections
+    return filterApplicationSectionsByPart(sections, latestChallengerPart)
+  }, [sections, userIsOperator, userIsPm, latestChallengerPart])
+
   useEffect(() => {
     if (!formError) return
     addToast({
@@ -442,10 +455,7 @@ export function ProjectDetailCard({
           <div className="mt-8.5 flex w-full items-start gap-2.5">
             <TeamMemberButton
               variant="weak"
-              onClick={
-                userIsOperator ? () => setIsTeamModalOpen(true) : undefined
-              }
-              disabled={!userIsOperator}
+              onClick={() => setIsTeamModalOpen(true)}
             />
             <Button
               variant="weak"
@@ -662,7 +672,10 @@ export function ProjectDetailCard({
                 </span>
               </div>
             ) : (
-              <RecruitQuestionsViewModal data={data} sections={sections} />
+              <RecruitQuestionsViewModal
+                data={data}
+                sections={visibleSections}
+              />
             )}
           </Modal.Content>
         </Modal.Portal>
@@ -689,7 +702,7 @@ export function ProjectDetailCard({
                 data={data}
                 projectId={projectId}
                 matchingRoundId={Number(activeMatchingRound.id)}
-                sections={sections}
+                sections={visibleSections}
                 canToggleSection={userIsOperator || userIsPm}
                 onBack={() => setIsApplyModalOpen(false)}
                 onSubmitSuccess={() => {

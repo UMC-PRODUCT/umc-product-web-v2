@@ -44,7 +44,19 @@ export function TeamMemberModal({
           팀원 구성
         </h2>
 
-        {isLoading || isError ? null : (
+        {isLoading ? (
+          <p className="text-body-2-regular text-teal-gray-400 py-10 text-center">
+            팀원 정보를 불러오는 중...
+          </p>
+        ) : isError ? (
+          <p className="text-body-2-regular text-error-600 py-10 text-center">
+            팀원 정보를 불러오지 못했습니다.
+          </p>
+        ) : (data?.partGroups ?? []).length === 0 ? (
+          <p className="text-body-2-regular text-teal-gray-400 py-10 text-center">
+            아직 매칭된 팀원이 없습니다.
+          </p>
+        ) : (
           <div className="flex flex-col gap-8">
             {(data?.partGroups ?? []).map((group) => {
               const recruitRow = recruitRows.find((r) => r.part === group.part)

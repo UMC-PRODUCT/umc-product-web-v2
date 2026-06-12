@@ -4,7 +4,6 @@ export interface SidebarPermissions {
   canAccessProjectSettings: boolean
   canManageProjects: boolean
   canManageRecruitment: boolean
-  canViewApplications: boolean
 }
 
 export function filterSectionsByPermission(
@@ -13,7 +12,6 @@ export function filterSectionsByPermission(
     canAccessProjectSettings,
     canManageProjects,
     canManageRecruitment,
-    canViewApplications,
   }: SidebarPermissions,
 ): SideBarSection[] {
   return sections
@@ -40,8 +38,6 @@ export function filterSectionsByPermission(
           menus: section.menus.filter((menu) => {
             if (menu.id === SIDEBAR_ID.item.matchingRounds)
               return canManageRecruitment
-            if (menu.id === SIDEBAR_ID.item.matchingApplications)
-              return canViewApplications
             return true
           }),
         }
