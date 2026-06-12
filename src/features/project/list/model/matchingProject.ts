@@ -1,3 +1,5 @@
+import type { ProjectStatus } from "../api/matchingProject"
+
 export type ProjectRecruitRow = {
   part: string
   current: number
@@ -28,4 +30,5 @@ export type MatchingProject = {
   partQuotaStatus?: PartQuotaStatus
   isApplied?: boolean
   externalLink?: string | null
+  status?: ProjectStatus
 }
