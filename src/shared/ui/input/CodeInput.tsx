@@ -87,8 +87,12 @@ export const CodeInput = forwardRef<HTMLDivElement, CodeInputProps>(
     }
 
     const handleChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
-      const char = e.target.value.toUpperCase().replace(SANITIZE, "").slice(-1)
-      if (!char) return
+      const sanitized = e.target.value.toUpperCase().replace(SANITIZE, "")
+      if (sanitized === "") {
+        commit(setCharAt(index, ""))
+        return
+      }
+      const char = sanitized.slice(-1)
       commit(setCharAt(index, char))
       if (index < length - 1) focusCell(index + 1)
     }
