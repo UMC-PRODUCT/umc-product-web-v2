@@ -33,6 +33,7 @@ import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
 import { Route as TestIconRouteImport } from './routes/test/icon'
 import { Route as TestHeaderRouteImport } from './routes/test/header'
 import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
+import { Route as TestFooterRouteImport } from './routes/test/footer'
 import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
 import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
 import { Route as TestCounterLabelRouteImport } from './routes/test/counter-label'
@@ -177,6 +178,11 @@ const TestHeaderRoute = TestHeaderRouteImport.update({
 const TestFormHeaderRoute = TestFormHeaderRouteImport.update({
   id: '/test/form-header',
   path: '/test/form-header',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestFooterRoute = TestFooterRouteImport.update({
+  id: '/test/footer',
+  path: '/test/footer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestFloatingActionButtonRoute =
@@ -332,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/test/counter-label': typeof TestCounterLabelRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
+  '/test/footer': typeof TestFooterRoute
   '/test/form-header': typeof TestFormHeaderRoute
   '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
@@ -380,6 +387,7 @@ export interface FileRoutesByTo {
   '/test/counter-label': typeof TestCounterLabelRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
+  '/test/footer': typeof TestFooterRoute
   '/test/form-header': typeof TestFormHeaderRoute
   '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
@@ -431,6 +439,7 @@ export interface FileRoutesById {
   '/test/counter-label': typeof TestCounterLabelRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
+  '/test/footer': typeof TestFooterRoute
   '/test/form-header': typeof TestFormHeaderRoute
   '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
@@ -484,6 +493,7 @@ export interface FileRouteTypes {
     | '/test/counter-label'
     | '/test/field-type-button'
     | '/test/floating-action-button'
+    | '/test/footer'
     | '/test/form-header'
     | '/test/header'
     | '/test/icon'
@@ -532,6 +542,7 @@ export interface FileRouteTypes {
     | '/test/counter-label'
     | '/test/field-type-button'
     | '/test/floating-action-button'
+    | '/test/footer'
     | '/test/form-header'
     | '/test/header'
     | '/test/icon'
@@ -582,6 +593,7 @@ export interface FileRouteTypes {
     | '/test/counter-label'
     | '/test/field-type-button'
     | '/test/floating-action-button'
+    | '/test/footer'
     | '/test/form-header'
     | '/test/header'
     | '/test/icon'
@@ -630,6 +642,7 @@ export interface RootRouteChildren {
   TestCounterLabelRoute: typeof TestCounterLabelRoute
   TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
   TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
+  TestFooterRoute: typeof TestFooterRoute
   TestFormHeaderRoute: typeof TestFormHeaderRoute
   TestHeaderRoute: typeof TestHeaderRoute
   TestIconRoute: typeof TestIconRoute
@@ -817,6 +830,13 @@ declare module '@tanstack/react-router' {
       path: '/test/form-header'
       fullPath: '/test/form-header'
       preLoaderRoute: typeof TestFormHeaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/footer': {
+      id: '/test/footer'
+      path: '/test/footer'
+      fullPath: '/test/footer'
+      preLoaderRoute: typeof TestFooterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/floating-action-button': {
@@ -1115,6 +1135,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestCounterLabelRoute: TestCounterLabelRoute,
   TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
   TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
+  TestFooterRoute: TestFooterRoute,
   TestFormHeaderRoute: TestFormHeaderRoute,
   TestHeaderRoute: TestHeaderRoute,
   TestIconRoute: TestIconRoute,
