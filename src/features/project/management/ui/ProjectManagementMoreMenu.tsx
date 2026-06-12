@@ -137,10 +137,10 @@ export function ProjectManagementMoreMenu({
   })
 
   const publishMutation = useMutation({
-    mutationFn: () => publishProject(Number(projectId)),
+    mutationFn: () => publishProject(numericProjectId),
     onSuccess: () => {
       setPublishOpen(false)
-      invalidateProjectSummaryQueries(queryClient, Number(projectId))
+      invalidateProjectSummaryQueries(queryClient, numericProjectId)
       addToast({
         message: "프로젝트가 공개되었습니다.",
         color: "primary",
