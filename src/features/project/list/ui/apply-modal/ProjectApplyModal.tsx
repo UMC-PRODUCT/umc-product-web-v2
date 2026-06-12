@@ -106,8 +106,9 @@ function buildAnswerPayload(
 
     if (question.fieldType === "radio") {
       if (typeof value !== "string" || !value) return [base]
-      const idx = question.options.indexOf(value)
-      const optionId = idx !== -1 ? question.optionIds?.[idx] : undefined
+      const optionId = question.options.find(
+        (o) => o.content === value,
+      )?.optionId
       if (optionId == null) return [base]
       return [{ ...base, selectedOptionIds: [optionId] }]
     }
@@ -115,8 +116,9 @@ function buildAnswerPayload(
     if (question.fieldType === "checkbox") {
       if (!Array.isArray(value) || value.length === 0) return [base]
       const selectedIds = value.flatMap((content) => {
-        const idx = question.options.indexOf(content)
-        const optionId = idx !== -1 ? question.optionIds?.[idx] : undefined
+        const optionId = question.options.find(
+          (o) => o.content === content,
+        )?.optionId
         return optionId != null ? [optionId] : []
       })
       if (selectedIds.length === 0) return [base]
@@ -448,18 +450,18 @@ export function ProjectApplyModal({
             <div className={OPTION_LIST_CLASS}>
               {q.options.map((opt) => (
                 <CheckboxList
-                  key={opt}
-                  checked={Array.isArray(value) && value.includes(opt)}
+                  key={opt.optionId ?? opt.content}
+                  checked={Array.isArray(value) && value.includes(opt.content)}
                   onChange={(checked) => {
                     const current = Array.isArray(value) ? value : []
                     onChange(
                       checked
-                        ? [...current, opt]
-                        : current.filter((o) => o !== opt),
+                        ? [...current, opt.content]
+                        : current.filter((o) => o !== opt.content),
                     )
                   }}
                 >
-                  {opt}
+                  {opt.content}
                 </CheckboxList>
               ))}
             </div>
@@ -476,13 +478,13 @@ export function ProjectApplyModal({
             <div className={OPTION_LIST_CLASS}>
               {q.options.map((opt) => (
                 <RadioList
-                  key={opt}
-                  checked={value === opt}
+                  key={opt.optionId ?? opt.content}
+                  checked={value === opt.content}
                   onChange={(checked) => {
-                    if (checked) onChange(opt)
+                    if (checked) onChange(opt.content)
                   }}
                 >
-                  {opt}
+                  {opt.content}
                 </RadioList>
               ))}
             </div>

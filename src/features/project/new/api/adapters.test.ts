@@ -136,7 +136,7 @@ describe("buildUpsertApplicationFormBody", () => {
       ...commonQ,
       id: "q-r",
       fieldType: "radio" as const,
-      options: ["A", "B"],
+      options: [{ content: "A" }, { content: "B" }],
     }
     const result = buildUpsertApplicationFormBody([radioQ], [])
     expect(result.sections[0]!.questions[0]!.type).toBe("RADIO")
@@ -153,5 +153,41 @@ describe("buildUpsertApplicationFormBody", () => {
     const qs = result.sections[0]!.questions
     expect(qs[0]!.orderNo).toBe(0)
     expect(qs[1]!.orderNo).toBe(1)
+  })
+
+  it("기존 질문 수정 시 questionId를 payload에 포함", () => {
+    const editedQ = {
+      id: "q-1",
+      questionId: 42,
+      title: "수정된 질문",
+      caption: "",
+      fieldType: "text" as const,
+      required: true,
+      options: [],
+    }
+    const result = buildUpsertApplicationFormBody([editedQ], [])
+    expect(result.sections[0]!.questions[0]!.questionId).toBe(42)
+  })
+
+  it("신규 질문은 questionId 없이 전송 (생략)", () => {
+    const result = buildUpsertApplicationFormBody([commonQ], [])
+    expect(result.sections[0]!.questions[0]!.questionId).toBeUndefined()
+  })
+
+  it("옵션의 optionId를 보존하여 전송하고, 없는 옵션은 생략", () => {
+    const radioQ = {
+      id: "q-r",
+      questionId: 7,
+      title: "단일 선택",
+      caption: "",
+      fieldType: "radio" as const,
+      required: false,
+      options: [{ content: "A", optionId: 100 }, { content: "B" }],
+    }
+    const result = buildUpsertApplicationFormBody([radioQ], [])
+    const opts = result.sections[0]!.questions[0]!.options
+    expect(opts[0]).toMatchObject({ content: "A", orderNo: 0, optionId: 100 })
+    expect(opts[1]).toMatchObject({ content: "B", orderNo: 1 })
+    expect(opts[1]!.optionId).toBeUndefined()
   })
 })

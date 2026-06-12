@@ -66,7 +66,7 @@ function TextFormSection({
 function RadioFormSection() {
   const [title, setTitle] = useState("단일 선택 질문을 작성하세요")
   const [caption, setCaption] = useState("")
-  const [options, setOptions] = useState(["옵션 1"])
+  const [options, setOptions] = useState([{ content: "옵션 1" }])
   const [required, setRequired] = useState(false)
 
   return (
@@ -89,7 +89,7 @@ function RadioFormSection() {
 function CheckboxFormSection() {
   const [title, setTitle] = useState("복수 선택 질문을 작성하세요")
   const [caption, setCaption] = useState("")
-  const [options, setOptions] = useState(["옵션 1"])
+  const [options, setOptions] = useState([{ content: "옵션 1" }])
   const [required, setRequired] = useState(false)
 
   return (
