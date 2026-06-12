@@ -182,7 +182,7 @@ export function MyApplicationMoreMenu({
                 label="기획 보기"
                 onClick={() => void handlePlanViewClick()}
               />
-              {!isRandomMatching && (
+              {!isRandomMatching && isRoundOpen && (
                 <DropdownItem
                   label="지원 취소"
                   onClick={() => {
