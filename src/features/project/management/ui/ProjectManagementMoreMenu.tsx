@@ -14,8 +14,8 @@ import {
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { deleteProject } from "@/features/project/management/api"
-import { publishProject } from "@/features/project/new/api/projectPublish"
 import { invalidateProjectSummaryQueries } from "@/features/project/new/api"
+import { publishProject } from "@/features/project/new/api/projectPublish"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -140,8 +140,7 @@ export function ProjectManagementMoreMenu({
     mutationFn: () => publishProject(Number(projectId)),
     onSuccess: () => {
       setPublishOpen(false)
-      void queryClient.invalidateQueries({ queryKey: ["project", "managed"] })
-      void queryClient.invalidateQueries({ queryKey: ["project"] })
+      invalidateProjectSummaryQueries(queryClient, Number(projectId))
       addToast({
         message: "프로젝트가 공개되었습니다.",
         color: "primary",
