@@ -142,12 +142,10 @@ export default function Footer() {
               href="https://tech.university.neordinary.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-body-3-medium text-teal-gray-400 flex items-center gap-1.75 transition-colors"
+              className="text-body-3-medium text-teal-gray-400 flex items-center gap-1.75 transition-colors hover:text-gray-500"
             >
               <UmcLogo className="ml-4 h-3 w-auto" />
-              <span className="hover:text-gray-500 hover:underline">
-                Product Tech
-              </span>
+              <span className="hover:underline">Product Tech</span>
             </a>
           </div>
           <div className="flex items-center gap-6">
