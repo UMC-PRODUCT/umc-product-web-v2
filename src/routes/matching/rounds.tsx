@@ -642,7 +642,7 @@ function MatchingRoundsPage() {
                 variant="weak"
                 color="neutral"
                 size="lg"
-                onClick={() => window.history.back()}
+                onClick={() => setIsDirty(false)}
               >
                 취소하기
               </Button>
