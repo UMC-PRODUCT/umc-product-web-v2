@@ -11,8 +11,8 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 interface MatchingDetailModalProps {
   applicantId: string | null
-  projectId?: number
-  memberId?: number
+  projectId?: string
+  memberId?: string
   chapterName: string
   projectName: string
   challengerName: string
@@ -38,7 +38,10 @@ export function MatchingDetailModal({
   const [showUnmatchConfirm, setShowUnmatchConfirm] = useState(false)
 
   const applicationId = applicantId ? Number(applicantId) : 0
-  const detailQuery = useApplicationDetail(projectId ?? 0, applicationId)
+  const detailQuery = useApplicationDetail(
+    Number(projectId) || 0,
+    applicationId,
+  )
 
   const applicant = useMemo(() => {
     if (!detailQuery.data) return null
@@ -80,7 +83,10 @@ export function MatchingDetailModal({
     <Modal.Root open={open} onOpenChange={(next) => !next && handleClose()}>
       <Modal.Portal>
         <Modal.Overlay tone="deep" />
-        <Modal.Content className="flex max-h-[calc(100vh-60px)] items-start">
+        <Modal.Content
+          className="flex max-h-[calc(100vh-60px)] items-start"
+          aria-describedby={undefined}
+        >
           <Modal.Title className="sr-only">
             {applicant.name} 지원서 상세
           </Modal.Title>

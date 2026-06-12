@@ -86,8 +86,8 @@ function toMatchingProject(item: ProjectSummaryInput): MatchingProject {
       })
       .map((q) => ({
         part: PART_LABEL[q.part ?? ""] ?? q.part ?? "",
-        current: q.currentCount ?? 0,
-        total: q.quota ?? 0,
+        current: Number(q.currentCount) || 0,
+        total: Number(q.quota) || 0,
       })),
   }
 }
@@ -100,7 +100,7 @@ function toValidProjectId(project: MatchingProject): number | null {
 export function ProjectManagementPage() {
   const navigate = useNavigate()
   const { data: me } = useMe()
-  const [selectedChapter, setSelectedChapter] = useState(CHAPTERS[0])
+  const [selectedChapter, setSelectedChapter] = useState<string>(CHAPTERS[0])
 
   const isAdminScope = isAnyOperator(me)
   const isPm = isCurrentTermPm(me)

@@ -6,7 +6,10 @@ import { useMemo, useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { getProjectApplications } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
-import { toApplicantDetail } from "@/features/application/model/mappers"
+import {
+  toApplicantDetail,
+  toFrontRole,
+} from "@/features/application/model/mappers"
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { deleteProject } from "@/features/project/management/api"
@@ -14,6 +17,7 @@ import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
+import type { PartEnum } from "@/features/application/model/apiTypes"
 import type {
   AssignmentCount,
   ProjectApplication,
@@ -68,8 +72,8 @@ export function ProjectManagementMoreMenu({
       let total = 0
       for (const q of detail.partQuotas ?? []) {
         if (parts.includes(q.part)) {
-          current += q.currentCount
-          total += q.quota
+          current += Number(q.currentCount)
+          total += Number(q.quota)
         }
       }
       return { current, total }
@@ -79,6 +83,11 @@ export function ProjectManagementMoreMenu({
       id: String(detail.id),
       projectName: detail.name,
       role: "plan" as Role,
+      parts: (detail.partQuotas ?? [])
+        .filter(
+          (q) => Number(q.quota) > 0 && q.part !== "PLAN" && q.part !== "ADMIN",
+        )
+        .map((q) => toFrontRole(q.part as PartEnum)),
       challengerName:
         detail.productOwner?.nickname || detail.productOwner?.name || "",
       challengerUniversity: detail.productOwner?.schoolName || "",
@@ -198,7 +207,7 @@ export function ProjectManagementMoreMenu({
             sideOffset={10}
             avoidCollisions={false}
             onOpenAutoFocus={(e) => e.preventDefault()}
-            className="shadow-drop-neutral-1 border-teal-gray-50 z-[1100] flex w-[9.5rem] flex-col items-start gap-1 rounded-lg border bg-white px-0.5 pt-2.5 pb-0.5"
+            className="shadow-drop-neutral-1 border-teal-gray-50 z-1100 flex w-38 flex-col items-start gap-1 rounded-lg border bg-white px-0.5 pt-2.5 pb-0.5"
           >
             <span className="text-label-3-semibold text-teal-gray-400 px-4">
               바로가기

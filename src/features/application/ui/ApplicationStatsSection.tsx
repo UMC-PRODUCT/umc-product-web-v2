@@ -21,6 +21,8 @@ interface ApplicationStatsSectionProps {
   dataUpdatedAt?: number
   variant?: "application" | "matching"
   currentRound?: number
+  /** 실제 활성 차수. undefined이면 오프시즌/랜덤매칭 기간 (강조 없음) */
+  activeRound?: number
   className?: string
 }
 
@@ -55,6 +57,7 @@ export function ApplicationStatsSection({
   dataUpdatedAt,
   variant = "application",
   currentRound = 1,
+  activeRound,
   className,
 }: ApplicationStatsSectionProps) {
   const labels = VARIANT_LABELS[variant]
@@ -136,25 +139,40 @@ export function ApplicationStatsSection({
             }}
           >
             <div className="flex flex-col gap-1.25 text-[12px]">
-              {stats.rounds.map((r) => (
-                <div key={r.round} className="flex items-center gap-7">
-                  <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-normal">
-                    <span className="w-4.5">{r.round}차</span>
-                    <span className="whitespace-nowrap">
-                      {labels.roundSuffix}
-                    </span>
-                  </div>
-                  <div className="flex w-20 items-center justify-end gap-2 leading-[1.4]">
-                    <span className="text-label-3-semibold whitespace-nowrap text-teal-500">
-                      {r.applied}명
-                    </span>
-                    <div className="text-label-4-medium text-teal-gray-500 flex items-center justify-end gap-0.5">
-                      <span>/</span>
-                      <span className="w-8">{r.total}명</span>
+              {stats.rounds.map((r) => {
+                const isActive = activeRound === r.round
+                return (
+                  <div key={r.round} className="flex items-center gap-7">
+                    <div
+                      className={cn(
+                        "flex items-center gap-0.75 leading-normal",
+                        isActive
+                          ? "text-body-3-semibold text-teal-600"
+                          : "text-body-3-medium text-teal-gray-600",
+                      )}
+                    >
+                      <span className="w-4.5">{r.round}차</span>
+                      <span className="whitespace-nowrap">
+                        {labels.roundSuffix}
+                      </span>
+                    </div>
+                    <div className="flex w-20 items-center justify-end gap-2 leading-[1.4]">
+                      <span
+                        className={cn(
+                          "text-label-3-semibold whitespace-nowrap",
+                          isActive ? "text-teal-500" : "text-teal-gray-500",
+                        )}
+                      >
+                        {r.applied}명
+                      </span>
+                      <div className="text-label-4-medium text-teal-gray-500 flex items-center justify-end gap-0.5">
+                        <span>/</span>
+                        <span className="w-8">{r.total}명</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>
@@ -164,32 +182,41 @@ export function ApplicationStatsSection({
           <h3 className="text-heading-6-semibold text-teal-700">
             {currentRound}차 매칭 {labels.roundSuffix} Top 4
           </h3>
-          <div className="mt-10 flex items-end gap-2.5 px-2.5">
-            {stats.topProjects.slice(0, 4).map((project, i) => {
-              const rank = (i + 1) as 1 | 2 | 3 | 4
-              const maxCount = stats.topProjects[0]?.count ?? 1
-              const topSlice = stats.topProjects.slice(0, 4)
-              const isLastBar = i === topSlice.length - 1
-              const minHeight =
-                stats.topProjects.length <= 3 && isLastBar ? 5 : 30
-              const heightPx =
-                maxCount > 0
-                  ? Math.max(
-                      minHeight,
-                      Math.round((project.count / maxCount) * 120),
-                    )
-                  : minHeight
-              return (
-                <RankBar
-                  key={project.name}
-                  rank={rank}
-                  count={project.count}
-                  label={project.name}
-                  heightPx={heightPx}
-                />
-              )
-            })}
-          </div>
+          {stats.topProjects.some((p) => p.count > 0) ? (
+            <div className="mt-10 flex items-end gap-2.5 px-2.5">
+              {stats.topProjects
+                .filter((p) => p.count > 0)
+                .slice(0, 4)
+                .map((project, i) => {
+                  const topSlice = stats.topProjects
+                    .filter((p) => p.count > 0)
+                    .slice(0, 4)
+                  const rank = (i + 1) as 1 | 2 | 3 | 4
+                  const maxCount = topSlice[0]?.count ?? 1
+                  const isLastBar = i === topSlice.length - 1
+                  const minHeight = topSlice.length <= 3 && isLastBar ? 5 : 30
+                  const heightPx = Math.max(
+                    minHeight,
+                    Math.round((project.count / maxCount) * 120),
+                  )
+                  return (
+                    <RankBar
+                      key={project.name}
+                      rank={rank}
+                      count={project.count}
+                      label={project.name}
+                      heightPx={heightPx}
+                    />
+                  )
+                })}
+            </div>
+          ) : (
+            <div className="mt-10 flex flex-1 items-center justify-center">
+              <p className="text-body-2-regular text-teal-gray-400">
+                아직 지원자가 없습니다.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* 우: 총원 N명 */}

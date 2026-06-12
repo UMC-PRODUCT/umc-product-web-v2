@@ -79,7 +79,7 @@ export function useMatchingProjectListFilters() {
   const userIsOperator = isOperator(me)
 
   const { data: gisuData } = useQuery({
-    queryKey: ["gisu", "active"],
+    queryKey: ["gisu"],
     queryFn: getActiveGisu,
   })
 
@@ -238,7 +238,7 @@ export function useMatchingProjectListFilters() {
     openFilterId,
     setOpenFilterId,
     projects: data?.content ?? ([] as ProjectItem[]),
-    totalPages: Math.max(1, data?.totalPages ?? 1),
+    totalPages: Math.max(1, Number(data?.totalPages ?? 1)),
     page,
     setPage,
     isLoading,

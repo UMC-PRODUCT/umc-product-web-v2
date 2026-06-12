@@ -18,7 +18,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
   return (
-    <div className="bg-teal-gray-50 h-full min-h-screen max-w-full min-w-fit pb-12">
+    <div className="bg-teal-gray-50 h-full min-h-screen max-w-full min-w-fit">
       <Outlet />
       <ToastProvider />
     </div>

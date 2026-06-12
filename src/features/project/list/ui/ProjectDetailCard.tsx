@@ -128,14 +128,14 @@ function toMatchingProject(detail: ProjectDetail): MatchingProject {
       : null,
     recruitRows: [...detail.partQuotas]
       .sort((a, b) => {
-        const ai = PART_ORDER.indexOf(a.part ?? "")
-        const bi = PART_ORDER.indexOf(b.part ?? "")
+        const ai = PART_ORDER.indexOf(a.part)
+        const bi = PART_ORDER.indexOf(b.part)
         return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi)
       })
       .map((q) => ({
         part: PART_LABEL[q.part] ?? q.part,
-        current: q.currentCount,
-        total: q.quota,
+        current: Number(q.currentCount) || 0,
+        total: Number(q.quota) || 0,
         done: q.status === "COMPLETED",
       })),
     externalLink: detail.externalLink,
@@ -200,11 +200,13 @@ export function ProjectDetailCard({
     staleTime: 5 * 60 * 1000,
   })
 
-  const { data: gisuData } = useQuery({
+  const { data: activeGisuId } = useQuery({
     queryKey: ["gisu", "active"],
-    queryFn: getActiveGisu,
+    queryFn: async () => {
+      const res = await getActiveGisu()
+      return res.gisuId ?? null
+    },
   })
-  const activeGisuId = gisuData?.gisuId ?? null
 
   const { data: myApplications } = useQuery({
     queryKey: ["myApplications", activeGisuId],
@@ -315,7 +317,7 @@ export function ProjectDetailCard({
     queryFn: (): Promise<ActiveMatchingRound | null> => {
       if (devMatchingRoundId)
         return Promise.resolve({
-          id: devMatchingRoundId,
+          id: String(devMatchingRoundId),
         } as ActiveMatchingRound)
       return getActiveMatchingRound(myChapterId!)
     },
@@ -634,7 +636,7 @@ export function ProjectDetailCard({
       <Modal.Root open={isTeamModalOpen} onOpenChange={setIsTeamModalOpen}>
         <Modal.Portal>
           <Modal.Overlay tone="light" />
-          <Modal.Content>
+          <Modal.Content aria-describedby={undefined}>
             <Modal.Title className="sr-only">팀원 구성</Modal.Title>
             <TeamMemberModal
               projectId={projectId}
@@ -651,7 +653,7 @@ export function ProjectDetailCard({
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content>
+          <Modal.Content aria-describedby={undefined}>
             {showFormSkeleton ? (
               <ApplyFormSkeleton />
             ) : applicationForm == null ? (
@@ -671,6 +673,7 @@ export function ProjectDetailCard({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content
+            aria-describedby={undefined}
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
@@ -708,7 +711,7 @@ export function ProjectDetailCard({
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content>
+          <Modal.Content aria-describedby={undefined}>
             {myApplicationForProject ? (
               <MyApplicationModal
                 data={data}

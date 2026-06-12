@@ -35,7 +35,7 @@ export interface MatchingBlockData {
   name?: string
   tagVariant?: NumberTagVariant
   applicantId?: string
-  memberId?: number
+  memberId?: string
 }
 
 export interface MatchingRoleRow {
@@ -44,7 +44,7 @@ export interface MatchingRoleRow {
 }
 
 interface MatchingResultRowProps {
-  projectId?: number
+  projectId?: string
   projectName: string
   challengerName: string
   challengerUniversity: string
@@ -57,7 +57,6 @@ interface MatchingResultRowProps {
   gisuId?: number
   chapterId?: number
   assignedMemberIds?: Set<string>
-  currentRound?: number
   chapterName?: string
   className?: string
 }
@@ -76,14 +75,13 @@ export function MatchingResultRow({
   gisuId,
   chapterId,
   assignedMemberIds,
-  currentRound,
   chapterName,
   className,
 }: MatchingResultRowProps) {
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
     null,
   )
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null)
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null)
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
   const [assignTarget, setAssignTarget] = useState<{
     rowIdx: number
@@ -93,16 +91,19 @@ export function MatchingResultRow({
   const [localRoleRows, setLocalRoleRows] = useState(roleRows)
   // 수동 배정 후 서버 refetch 시 멤버를 클릭한 슬롯 위치로 재배치
   const lastAssignRef = useRef<{
-    projectId?: number
+    projectId?: string
     rowIdx: number
     blockIdx: number
-    memberId: number
+    memberId: string
   } | null>(null)
   const queryClient = useQueryClient()
 
   const assignMutation = useMutation({
-    mutationFn: ({ memberId, part }: { memberId: number; part: string }) =>
-      addProjectMember(projectId!, { memberId, part }),
+    mutationFn: ({ memberId, part }: { memberId: string; part: string }) =>
+      addProjectMember(Number(projectId!), {
+        memberId: Number(memberId),
+        part,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: applicationKeys.all })
     },
@@ -114,7 +115,8 @@ export function MatchingResultRow({
   })
 
   const unmatchMutation = useMutation({
-    mutationFn: (memberId: number) => removeProjectMember(projectId!, memberId),
+    mutationFn: (memberId: string) =>
+      removeProjectMember(Number(projectId!), Number(memberId)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: applicationKeys.all })
     },
@@ -295,7 +297,10 @@ export function MatchingResultRow({
       >
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
-          <Modal.Content className="shadow-drop-neutral-3 rounded-2xl">
+          <Modal.Content
+            className="shadow-drop-neutral-3 rounded-2xl"
+            aria-describedby={undefined}
+          >
             {projectId && (
               <ProjectDetailCard
                 projectId={projectId}
@@ -355,9 +360,16 @@ export function MatchingResultRow({
               projectId,
               rowIdx: assignTarget.rowIdx,
               blockIdx: assignTarget.blockIdx,
-              memberId: Number(challenger.id),
+              memberId: String(challenger.id),
             }
             // 로컬 UI 즉시 반영 (optimistic update)
+            // 수동 배정은 항상 랜덤 매칭으로 표시
+            const optimisticBlock: MatchingBlockData = {
+              type: "filled" as const,
+              name: challenger.nickname,
+              tagVariant: "random" as NumberTagVariant,
+              memberId: String(challenger.id),
+            }
             setLocalRoleRows((prev) =>
               prev.map((row, rIdx) =>
                 rIdx === assignTarget.rowIdx
@@ -365,17 +377,7 @@ export function MatchingResultRow({
                       ...row,
                       blocks: row.blocks.map((block, bIdx) =>
                         bIdx === assignTarget.blockIdx
-                          ? {
-                              type: "filled" as const,
-                              name: challenger.nickname,
-                              tagVariant: (currentRound === 2
-                                ? "round2"
-                                : currentRound === 3
-                                  ? "round3"
-                                  : "random") as NumberTagVariant,
-                              applicantId: challenger.id,
-                              memberId: Number(challenger.id),
-                            }
+                          ? optimisticBlock
                           : block,
                       ),
                     }
@@ -385,7 +387,7 @@ export function MatchingResultRow({
             // 서버 API 호출 - 실패 시 throw해서 AssignmentModal에서 완료 모달 미표시
             const part = roleToPart(assignTarget.role, backendPart)
             await assignMutation.mutateAsync({
-              memberId: Number(challenger.id),
+              memberId: String(challenger.id),
               part,
             })
           }}
