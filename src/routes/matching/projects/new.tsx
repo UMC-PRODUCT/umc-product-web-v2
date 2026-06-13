@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createFileRoute,
+  isRedirect,
   redirect,
   useBlocker,
   useNavigate,
@@ -16,6 +17,7 @@ import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   canManageProjects,
   isCurrentTermPm,
+  isProjectRegistrationQuotaLimited,
 } from "@/features/auth/model/identity"
 import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
@@ -65,6 +67,7 @@ export const Route = createFileRoute("/matching/projects/new")({
       return
     }
 
+    let hasWritePermission = false
     try {
       const permission = await context.queryClient.ensureQueryData({
         queryKey: [
@@ -81,13 +84,38 @@ export const Route = createFileRoute("/matching/projects/new")({
           }),
         staleTime: 0,
       })
-
-      if (hasGrantedPermission(permission, "WRITE")) return
+      hasWritePermission = hasGrantedPermission(permission, "WRITE")
     } catch {
       throw redirect({ to: "/matching/projects" })
     }
 
-    throw redirect({ to: "/matching/projects" })
+    if (!hasWritePermission) {
+      throw redirect({ to: "/matching/projects" })
+    }
+
+    if (isProjectRegistrationQuotaLimited(viewMe)) {
+      try {
+        const gisu = await context.queryClient.ensureQueryData({
+          queryKey: gisuKeys.active,
+          queryFn: getActiveGisu,
+        })
+        const gisuId = gisu?.gisuId ? Number(gisu.gisuId) : undefined
+        if (gisuId) {
+          const managed = await context.queryClient.ensureQueryData({
+            queryKey: projectKeys.managedCheck(gisuId),
+            queryFn: () => getManagedProjects(gisuId),
+          })
+          if (managed.length > 0) {
+            throw redirect({
+              to: "/matching/projects/management",
+              search: { notice: "duplicate" },
+            })
+          }
+        }
+      } catch (error) {
+        if (isRedirect(error)) throw error
+      }
+    }
   },
   validateSearch: (search: Record<string, unknown>) => ({
     projectId:
@@ -204,26 +232,6 @@ function ProjectRegisterPage() {
   useEffect(() => {
     if (gisuId) setGisuId(Number(gisuId))
   }, [gisuId, setGisuId])
-
-  const managedCheckQuery = useQuery({
-    queryKey: projectKeys.managedCheck(gisuId),
-    queryFn: () => getManagedProjects(Number(gisuId)),
-    enabled: isPm && !isEditMode && !!gisuId,
-  })
-
-  useEffect(() => {
-    if (!isPm || isEditMode) return
-    if (managedCheckQuery.data && managedCheckQuery.data.length > 0) {
-      addToast({
-        message: "등록된 프로젝트가 이미 존재 합니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      navigate({ to: "/matching/projects/management", replace: true })
-    }
-  }, [isPm, isEditMode, managedCheckQuery.data, addToast, navigate])
 
   useEffect(() => {
     if (isEditMode && editProjectId && projectId !== editProjectId) {
@@ -428,8 +436,6 @@ function ProjectRegisterPage() {
   })
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
-
-  if (isPm && !isEditMode && managedCheckQuery.isPending) return null
 
   const handleRegister = () => {
     submitMutation.mutate()
