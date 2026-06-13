@@ -307,9 +307,27 @@ export function ProjectApplyModal({
         await submitApplication(projectId)
       }
       setIsCompleteModalOpen(true)
-    } catch {
+    } catch (err) {
+      const status =
+        err instanceof AxiosError ? err.response?.status : undefined
+      const failedUrl = err instanceof AxiosError ? err.config?.url : undefined
+      const serverData =
+        err instanceof AxiosError
+          ? (err.response?.data as
+              | { code?: string; message?: string }
+              | undefined)
+          : undefined
+      console.error("[apply submit] 지원서 제출 실패", {
+        status,
+        url: failedUrl,
+        code: serverData?.code,
+        message: serverData?.message,
+        error: err,
+      })
+      const serverMessage = serverData?.message
       addToast({
-        message: "지원서 제출에 실패했습니다. 다시 시도해 주세요.",
+        message:
+          serverMessage ?? "지원서 제출에 실패했습니다. 다시 시도해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
