@@ -88,7 +88,15 @@ export function ProfileDropdown({
           )}
         >
           <div className="flex flex-col gap-2.5 px-2.5">
-            <div className="h-11.5 w-11.5 shrink-0 overflow-hidden rounded-full">
+            <button
+              type="button"
+              className="h-11.5 w-11.5 shrink-0 overflow-hidden rounded-full"
+              aria-label="프로필 이미지"
+              onClick={() => {
+                navigate({ to: "/settings" })
+                handleOpenChange(false)
+              }}
+            >
               {me?.profileImageLink ? (
                 <img
                   src={me.profileImageLink}
@@ -98,7 +106,7 @@ export function ProfileDropdown({
               ) : (
                 <ProfileIcon className="size-full" />
               )}
-            </div>
+            </button>
 
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center justify-between gap-4">
