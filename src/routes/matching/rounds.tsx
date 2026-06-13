@@ -260,8 +260,8 @@ function MatchingRoundsPage() {
         if (!round.startDate || !round.endDate) return null
         return {
           round,
-          startsAt: toISODatetime(round.startDate, round.startTime),
-          endsAt: toISODatetime(round.endDate, round.endTime),
+          startsAt: toISODatetime(round.startDate, round.startTime, "start"),
+          endsAt: toISODatetime(round.endDate, round.endTime, "end"),
         }
       })
 
