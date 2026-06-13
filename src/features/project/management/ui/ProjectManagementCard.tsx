@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 
-import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { ProjectStatusChip } from "@/shared/ui/chip/ProjectStatusChip"
@@ -22,20 +20,6 @@ interface ProjectManagementCardProps {
   isPermissionLoading: boolean
 }
 
-function withImageCacheKey(
-  src: string | null | undefined,
-  cacheKey: number,
-): string | null {
-  if (!src) return null
-
-  const hashIndex = src.indexOf("#")
-  const baseUrl = hashIndex >= 0 ? src.slice(0, hashIndex) : src
-  const hash = hashIndex >= 0 ? src.slice(hashIndex + 1) : ""
-  const separator = baseUrl.includes("?") ? "&" : "?"
-  const versionedUrl = `${baseUrl}${separator}v=${cacheKey}`
-  return hash ? `${versionedUrl}#${hash}` : versionedUrl
-}
-
 export function ProjectManagementCard({
   data,
   canDeleteProject,
@@ -46,17 +30,11 @@ export function ProjectManagementCard({
   const cover = data.coverImage
   const [open, setOpen] = useState(false)
   const projectId = Number(data.id)
-  const shouldFetchLogo = !data.logoImage?.src && Number.isFinite(projectId)
-  const { data: projectDetail, dataUpdatedAt: projectDetailDataUpdatedAt } =
-    useQuery({
-      queryKey: ["projectDetail", projectId],
-      queryFn: () => getProjectDetail(projectId),
-      enabled: shouldFetchLogo,
-      staleTime: 5 * 60 * 1000,
-    })
-  const logoSrc =
-    data.logoImage?.src ??
-    withImageCacheKey(projectDetail?.logoImageUrl, projectDetailDataUpdatedAt)
+  const hasValidProjectId = Number.isFinite(projectId) && projectId > 0
+  const openDetailModal = () => {
+    if (!hasValidProjectId) return
+    setOpen(true)
+  }
 
   return (
     <>
@@ -64,9 +42,9 @@ export function ProjectManagementCard({
         className="border-teal-gray-100 [&:hover:not(:has(button:hover))]:bg-teal-gray-100 shadow-drop-neutral-2 bp1:p-4 flex w-full max-w-[56.25rem] min-w-0 cursor-pointer flex-col gap-4 rounded-2xl border bg-white p-3 transition-colors min-[960px]:flex-row min-[960px]:items-center min-[960px]:gap-7 min-[960px]:py-2.5 min-[960px]:pr-5 min-[960px]:pl-2.5"
         role="button"
         tabIndex={0}
-        onClick={() => setOpen(true)}
+        onClick={openDetailModal}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") setOpen(true)
+          if (e.key === "Enter" || e.key === " ") openDetailModal()
         }}
       >
         <div className="bg-teal-gray-200 flex aspect-[320/169] w-full shrink-0 overflow-hidden rounded-[0.625rem] min-[960px]:h-[10.5625rem] min-[960px]:w-[clamp(13rem,28vw,20rem)]">
@@ -92,7 +70,7 @@ export function ProjectManagementCard({
             <div className="flex min-w-0 items-start justify-between gap-3 self-stretch">
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
                 <div className="shrink-0">
-                  <ProjectLogo src={logoSrc ?? undefined} size={30} />
+                  <ProjectLogo src={data.logoImage?.src} size={30} />
                 </div>
                 <span className="text-heading-7-semibold text-teal-gray-900 bp1:line-clamp-1 line-clamp-2 min-w-0">
                   {data.title}
@@ -156,12 +134,14 @@ export function ProjectManagementCard({
             aria-describedby={undefined}
           >
             <Modal.Title className="sr-only">{data.title}</Modal.Title>
-            <ProjectDetailCard
-              projectId={projectId}
-              showEditCta
-              canEditProject={canEditProject}
-              editPermissionLoading={isPermissionLoading}
-            />
+            {hasValidProjectId && (
+              <ProjectDetailCard
+                projectId={projectId}
+                showEditCta
+                canEditProject={canEditProject}
+                editPermissionLoading={isPermissionLoading}
+              />
+            )}
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
