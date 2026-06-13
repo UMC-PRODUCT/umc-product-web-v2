@@ -4,6 +4,7 @@ export type ProjectDetailCtaMode =
   | "apply"
   | "apply-blocked-other"
   | "apply-blocked-approved"
+  | "apply-blocked-part"
   | "plan-only"
 
 interface ResolveCtaParams {
@@ -13,6 +14,7 @@ interface ResolveCtaParams {
   isApplied: boolean
   hasOtherActiveApplication: boolean
   isAlreadyApproved: boolean
+  isPartIneligible: boolean
 }
 
 export function resolveProjectDetailCtaMode({
@@ -22,6 +24,7 @@ export function resolveProjectDetailCtaMode({
   isApplied,
   hasOtherActiveApplication,
   isAlreadyApproved,
+  isPartIneligible,
 }: ResolveCtaParams): ProjectDetailCtaMode {
   if (isOperator) return "recruit-questions"
   if (!isSameBranch) return "plan-only"
@@ -29,6 +32,7 @@ export function resolveProjectDetailCtaMode({
   if (isApplied) return "my-application"
   if (isAlreadyApproved) return "apply-blocked-approved"
   if (hasOtherActiveApplication) return "apply-blocked-other"
+  if (isPartIneligible) return "apply-blocked-part"
   return "apply"
 }
 
@@ -55,5 +59,39 @@ export function isApplyButtonDisabled({
     isWritePermissionLoading ||
     !canWriteApplication ||
     !hasActiveRound
+  )
+}
+
+type ApplicationForSelection = {
+  projectId: string
+  status: string
+  applicationId: string | null
+  matchingRound: { id: string | null }
+}
+
+interface SelectCurrentApplicationParams<T extends ApplicationForSelection> {
+  applications: T[] | undefined
+  projectId: number
+  activeMatchingRoundId: string | null | undefined
+}
+
+export function selectCurrentApplicationForProject<
+  T extends ApplicationForSelection,
+>({
+  applications,
+  projectId,
+  activeMatchingRoundId,
+}: SelectCurrentApplicationParams<T>): T | undefined {
+  const candidates = applications?.filter(
+    (a) =>
+      Number(a.projectId) === projectId &&
+      a.status !== "CANCELLED" &&
+      a.applicationId != null,
+  )
+  if (candidates == null || candidates.length === 0) return undefined
+  if (activeMatchingRoundId === undefined) return undefined
+  if (activeMatchingRoundId === null) return candidates[0]
+  return candidates.find(
+    (a) => Number(a.matchingRound?.id) === Number(activeMatchingRoundId),
   )
 }
