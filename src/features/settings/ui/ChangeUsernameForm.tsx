@@ -68,6 +68,7 @@ export function ChangeUsernameForm({
               value={next}
               onChange={(e) => setNext(e.target.value)}
               placeholder="이메일 형식의 아이디"
+              state={isDuplicated ? "error" : "default"}
               className="w-full"
             />
             <Button
@@ -86,7 +87,7 @@ export function ChangeUsernameForm({
             <div className="flex items-center gap-1">
               <CheckIcon className="text-error-500 h-4 w-4" />
               <p className="text-error-500 text-body-2-medium">
-                이미 사용 중인 아이디입니다.
+                이미 가입된 아이디입니다.
               </p>
             </div>
           )}
