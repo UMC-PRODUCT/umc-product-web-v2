@@ -25,6 +25,7 @@ export type MatchingProject = {
   title: string
   description: string
   authorSchoolLine: string
+  logoImage?: ProjectCoverImage | null
   coverImage?: ProjectCoverImage | null
   recruitRows: ProjectRecruitRow[]
   partQuotaStatus?: PartQuotaStatus

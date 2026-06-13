@@ -31,3 +31,29 @@ export function resolveProjectDetailCtaMode({
   if (hasOtherActiveApplication) return "apply-blocked-other"
   return "apply"
 }
+
+interface ApplyButtonDisabledParams {
+  isPmReadonly: boolean
+  isDetailLoading: boolean
+  hasApplicationForm: boolean
+  isWritePermissionLoading: boolean
+  canWriteApplication: boolean
+  hasActiveRound: boolean
+}
+
+export function isApplyButtonDisabled({
+  isPmReadonly,
+  isDetailLoading,
+  hasApplicationForm,
+  isWritePermissionLoading,
+  canWriteApplication,
+  hasActiveRound,
+}: ApplyButtonDisabledParams): boolean {
+  if (isPmReadonly) return false
+  return (
+    (!isDetailLoading && !hasApplicationForm) ||
+    isWritePermissionLoading ||
+    !canWriteApplication ||
+    !hasActiveRound
+  )
+}

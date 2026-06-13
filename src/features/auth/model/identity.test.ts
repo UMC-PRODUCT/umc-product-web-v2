@@ -55,14 +55,15 @@ function makeMe(
   }))
 
   return {
-    id: 0,
+    id: "0",
     name: "테스트",
     nickname: "테스트",
     email: "test@test.com",
-    schoolId: 0,
+    schoolId: "0",
     schoolName: "테스트 학교",
-    profileImageLink: "",
+    profileImageLink: null,
     status: "ACTIVE",
+    hasLocalCredential: false,
     roles,
     challengerRecords,
     ...overrides,
@@ -187,7 +188,7 @@ describe("getProjectPmSearchScope", () => {
   it("SCHOOL_PRESIDENT는 schoolId를 문자열로 반환", () => {
     expect(
       getProjectPmSearchScope(
-        makeMe(["SCHOOL_PRESIDENT"], [], { schoolId: 12 }),
+        makeMe(["SCHOOL_PRESIDENT"], [], { schoolId: "12" }),
       ),
     ).toEqual({ schoolId: "12" })
   })
@@ -195,7 +196,7 @@ describe("getProjectPmSearchScope", () => {
   it("SCHOOL_VICE_PRESIDENT도 schoolId를 문자열로 반환", () => {
     expect(
       getProjectPmSearchScope(
-        makeMe(["SCHOOL_VICE_PRESIDENT"], [], { schoolId: 5 }),
+        makeMe(["SCHOOL_VICE_PRESIDENT"], [], { schoolId: "5" }),
       ),
     ).toEqual({ schoolId: "5" })
   })
