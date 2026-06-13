@@ -56,7 +56,7 @@ export function ApplicationStatsSection({
   stats,
   dataUpdatedAt,
   variant = "application",
-  currentRound = 1,
+  currentRound,
   activeRound,
   className,
 }: ApplicationStatsSectionProps) {
@@ -89,7 +89,7 @@ export function ApplicationStatsSection({
         <div className="shadow-drop-neutral-3 border-teal-gray-100 relative h-70 w-102 shrink-0 overflow-hidden rounded-lg border bg-white">
           <h3 className="text-heading-6-semibold absolute top-7 left-8 text-teal-700">
             {variant === "application"
-              ? `${currentRound}차 매칭 지원 현황`
+              ? `${currentRound ?? "N"}차 매칭 지원 현황`
               : "지부 프로젝트 매칭률"}
           </h3>
 
@@ -187,7 +187,7 @@ export function ApplicationStatsSection({
         {/* 1차 매칭 지원 Top 4 */}
         <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-100.5 shrink-0 flex-col rounded-xl border bg-white px-8 pt-7 pb-8">
           <h3 className="text-heading-6-semibold text-teal-700">
-            {stats.rounds.length > 0
+            {stats.rounds.length > 0 && currentRound
               ? `${currentRound}차 매칭 ${labels.roundSuffix} Top 4 `
               : `N차 매칭 완료 Top 4 `}
           </h3>
