@@ -63,17 +63,17 @@ export default function Header({ activePathname }: HeaderProps = {}) {
   }, [isMobileMenuOpen])
 
   return (
-    <header className="bg-teal-gray-50 shadow-drop-neutral-3 relative z-50 flex min-h-16 w-full flex-col overflow-visible min-[960px]:h-20 min-[960px]:min-h-20 min-[960px]:flex-row min-[960px]:items-center min-[960px]:justify-between">
-      <div className="flex h-16 w-full items-center justify-between min-[960px]:h-20">
+    <header className="bg-teal-gray-50 shadow-drop-neutral-3 bp2:h-20 bp2:min-h-20 bp2:flex-row bp2:items-center bp2:justify-between relative z-50 flex min-h-16 w-full flex-col overflow-visible">
+      <div className="bp2:h-20 flex h-16 w-full items-center justify-between">
         <Link
           to="/"
-          className="flex w-36 items-center pl-10 xl:w-55"
+          className="flex w-55 items-center pl-10"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <UmcLogo className="text-teal-gray-700 h-5.5 w-17.5" />
         </Link>
 
-        <nav className="bg-teal-gray-50 border-teal-gray-100 hidden shrink-0 items-center gap-1 rounded-full border p-1 drop-shadow-[0_0_8px_rgba(10,86,80,0.04)] min-[960px]:flex xl:gap-1.5 xl:p-1.5">
+        <nav className="bg-teal-gray-50 border-teal-gray-100 bp2:flex hidden shrink-0 items-center gap-1.5 rounded-full border p-1.5 drop-shadow-[0_0_8px_rgba(10,86,80,0.04)]">
           {navItems.map((item) => (
             <NavigationButton
               key={item.to}
@@ -86,19 +86,19 @@ export default function Header({ activePathname }: HeaderProps = {}) {
                   ? () => handleDisabledClick(item.label)
                   : undefined
               }
-              className="min-w-0 px-3 xl:min-w-18 xl:px-4.5"
+              className="min-w-18 px-4.5"
             />
           ))}
         </nav>
 
-        <div className="hidden items-center justify-end gap-2 pr-6 min-[960px]:flex min-[960px]:w-40 xl:w-55 xl:gap-4 xl:pr-8.5">
+        <div className="bp2:flex bp2:w-40 hidden w-55 items-center justify-end gap-4 pr-8.5">
           <HeaderButton label="문의사항" type="trailing-icon" />
           <Profile />
         </div>
 
-        <div className="flex min-w-0 items-center gap-2 pr-5 min-[960px]:hidden">
+        <div className="bp2:hidden flex min-w-0 items-center gap-2 pr-5">
           <SideBarViewSwitcher
-            className="relative z-[70] min-w-0"
+            className="relative z-70 min-w-0"
             dropdownClassName="w-28 bp1:w-43"
             menuClassName="shadow-drop-neutral-2 absolute top-full right-0 z-[80] mt-1 w-full rounded-[8px]"
           />
@@ -123,7 +123,7 @@ export default function Header({ activePathname }: HeaderProps = {}) {
         <button
           type="button"
           aria-label="모바일 메뉴 닫기"
-          className="fixed inset-x-0 top-16 bottom-0 z-40 bg-neutral-900/40 min-[960px]:hidden"
+          className="bp2:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-neutral-900/40"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -131,7 +131,7 @@ export default function Header({ activePathname }: HeaderProps = {}) {
       <nav
         id="mobile-header-navigation"
         className={cn(
-          "border-teal-gray-100 bg-teal-gray-50 shadow-drop-neutral-3 absolute top-16 right-0 left-0 z-50 flex max-h-[calc(100dvh-64px)] w-full flex-col gap-4 overflow-y-auto border-t px-6 py-4 min-[960px]:hidden",
+          "border-teal-gray-100 bg-teal-gray-50 shadow-drop-neutral-3 bp2:hidden absolute top-16 right-0 left-0 z-50 flex max-h-[calc(100dvh-64px)] w-full flex-col gap-4 overflow-y-auto border-t px-6 py-4",
           !isMobileMenuOpen && "hidden",
         )}
       >
