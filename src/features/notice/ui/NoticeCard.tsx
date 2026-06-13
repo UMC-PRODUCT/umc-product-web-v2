@@ -14,7 +14,7 @@ import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 const noticeCardVariants = cva(
-  "flex w-full scroll-mt-6 items-center justify-between gap-2.5 px-4 text-left",
+  "flex w-full scroll-mt-6 items-center justify-between gap-2.5 px-4 text-left bg-white",
   {
     variants: {
       hasChip: {
@@ -152,8 +152,9 @@ export function NoticeCard({
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            exit={{ height: 0, opacity: 1 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="overflow-hidden"
           >
             <div className="w-full overflow-hidden pb-4">
               <div
