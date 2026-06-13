@@ -303,6 +303,19 @@ function ProjectRegisterPage() {
     }
   }, [draftQuery.data, projectId])
 
+  useEffect(() => {
+    return () => {
+      const { gisuId: storedGisuId } = useProjectRegisterStore.getState()
+
+      reset()
+      if (storedGisuId) {
+        queryClient.removeQueries({
+          queryKey: projectKeys.draft(storedGisuId),
+        })
+      }
+    }
+  }, [queryClient, reset])
+
   const applicationFormQuery = useQuery({
     queryKey: projectKeys.applicationForm(projectId ?? 0),
     queryFn: () => getApplicationForm(projectId!),
