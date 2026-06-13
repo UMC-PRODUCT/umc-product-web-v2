@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 
 import { MobileSidebarDrawerContent } from "@/components/sidebar/MobileSidebarDrawerContent"
+import { useToastStore } from "@/components/toast/useToastStore"
 import { isOperator, isSchoolStaff } from "@/features/auth/model/identity"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
@@ -45,6 +46,7 @@ interface HeaderProps {
 export default function Header({ activePathname }: HeaderProps = {}) {
   const location = useLocation()
   const { viewMe } = useViewMe()
+  const addToast = useToastStore((s) => s.addToast)
   const pathname = activePathname ?? location.pathname
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -53,6 +55,16 @@ export default function Header({ activePathname }: HeaderProps = {}) {
     if (isSchoolStaff(viewMe)) return [...BASE_NAV, MANAGE_NAV]
     return BASE_NAV
   }, [viewMe])
+
+  const handleDisabledClick = (label: string) => {
+    addToast({
+      message: `${label} 서비스는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!`,
+      color: "primary",
+      variant: "deep",
+      type: "notice",
+      duration: 3000,
+    })
+  }
 
   useEffect(() => {
     setIsMobileMenuOpen(false)
@@ -77,6 +89,11 @@ export default function Header({ activePathname }: HeaderProps = {}) {
               to={item.to}
               selected={pathname.startsWith(item.to)}
               disabled={item.disabled}
+              onClick={
+                item.disabled
+                  ? () => handleDisabledClick(item.label)
+                  : undefined
+              }
               className="min-w-0 px-3 xl:min-w-18 xl:px-4.5"
             />
           ))}
@@ -132,7 +149,10 @@ export default function Header({ activePathname }: HeaderProps = {}) {
                 selected={selected}
                 disabled={item.disabled}
                 className="text-body-1-medium h-11 w-full min-w-0 justify-center px-4"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => {
+                  if (item.disabled) handleDisabledClick(item.label)
+                  setIsMobileMenuOpen(false)
+                }}
               />
             )
           })}
