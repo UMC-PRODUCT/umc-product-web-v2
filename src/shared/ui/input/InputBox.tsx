@@ -154,7 +154,7 @@ export const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
         return <span className="shrink-0 text-teal-600">{icon}</span>
       }
 
-      if (state === "error") {
+      if (state === "error" && type !== "password") {
         return (
           <span className="text-error-500 shrink-0">
             <CircleBang width={24} height={24} aria-hidden="true" />
