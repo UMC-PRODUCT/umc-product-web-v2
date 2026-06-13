@@ -17,6 +17,14 @@ import type {
   StatusValue,
 } from "../../model/types"
 
+// 파트별 할당 정원 추출 (지원자 없는 빈 상태에서 0/n 표시용)
+function getRoleTotalCount(role: Role, project: ProjectApplication): number {
+  if (role === "design") return project.designCount.total
+  if (role === "web") return project.feCount.total
+  if (role === "springboot" || role === "nodejs") return project.beCount.total
+  return 0
+}
+
 interface ModalApplicantPanelProps {
   project: ProjectApplication
   chapterName: string
@@ -174,16 +182,25 @@ export function ModalApplicantPanel({
             <OptionButtonGroup
               type="multiple"
               variant="segmented"
-              value={roundFilter}
-              onValueChange={onRoundFilterChange}
+              value={roundFilter.length === 0 ? ["all"] : roundFilter}
+              onValueChange={(newValues) => {
+                if (newValues.includes("all") && roundFilter.length > 0) {
+                  onRoundFilterChange([])
+                } else {
+                  onRoundFilterChange(newValues.filter((v) => v !== "all"))
+                }
+              }}
             >
-              <OptionButton value="1" className="h-7">
+              <OptionButton value="all" size="sm">
+                전체
+              </OptionButton>
+              <OptionButton value="1" size="sm">
                 1차
               </OptionButton>
-              <OptionButton value="2" className="h-7">
+              <OptionButton value="2" size="sm">
                 2차
               </OptionButton>
-              <OptionButton value="3" className="h-7">
+              <OptionButton value="3" size="sm">
                 3차
               </OptionButton>
             </OptionButtonGroup>
@@ -191,16 +208,25 @@ export function ModalApplicantPanel({
             <OptionButtonGroup
               type="multiple"
               variant="segmented"
-              value={statusFilter}
-              onValueChange={onStatusFilterChange}
+              value={statusFilter.length === 0 ? ["all"] : statusFilter}
+              onValueChange={(newValues) => {
+                if (newValues.includes("all") && statusFilter.length > 0) {
+                  onStatusFilterChange([])
+                } else {
+                  onStatusFilterChange(newValues.filter((v) => v !== "all"))
+                }
+              }}
             >
-              <OptionButton value="pass" className="h-7">
+              <OptionButton value="all" size="sm">
+                전체
+              </OptionButton>
+              <OptionButton value="pass" size="sm">
                 합격
               </OptionButton>
-              <OptionButton value="fail" className="h-7">
+              <OptionButton value="fail" size="sm">
                 불합격
               </OptionButton>
-              <OptionButton value="pending" className="h-7">
+              <OptionButton value="pending" size="sm">
                 대기
               </OptionButton>
             </OptionButtonGroup>
@@ -210,27 +236,47 @@ export function ModalApplicantPanel({
 
       {/* 스크롤 가능 리스트 */}
       <div className="scrollbar-none flex flex-1 flex-col gap-12.5 overflow-y-auto px-12.5 pt-4.5 pb-8.5">
-        {Array.from(grouped.entries()).map(([role, applicants]) => (
-          <ApplicantRoleSection
-            key={role}
-            role={role}
-            applicants={applicants}
-            totalCount={totalByRole.get(role) ?? 0}
-            selectedApplicantId={selectedApplicantId}
-            onApplicantClick={onApplicantClick}
-            onStatusChange={onStatusChange}
-            currentRound={currentRound}
-            canApproveApplicant={canApproveApplicant}
-            approvePermissionLoading={approvePermissionLoading}
-          />
-        ))}
+        {project.applicants.length === 0 ? (
+          // 지원자 없는 빈 상태: 파트별 헤더만 표시
+          project.parts.map((role) => (
+            <ApplicantRoleSection
+              key={role}
+              role={role}
+              applicants={[]}
+              totalCount={getRoleTotalCount(role, project)}
+              selectedApplicantId={selectedApplicantId}
+              onApplicantClick={onApplicantClick}
+              onStatusChange={onStatusChange}
+              currentRound={currentRound}
+              canApproveApplicant={canApproveApplicant}
+              approvePermissionLoading={approvePermissionLoading}
+            />
+          ))
+        ) : (
+          <>
+            {Array.from(grouped.entries()).map(([role, applicants]) => (
+              <ApplicantRoleSection
+                key={role}
+                role={role}
+                applicants={applicants}
+                totalCount={totalByRole.get(role) ?? 0}
+                selectedApplicantId={selectedApplicantId}
+                onApplicantClick={onApplicantClick}
+                onStatusChange={onStatusChange}
+                currentRound={currentRound}
+                canApproveApplicant={canApproveApplicant}
+                approvePermissionLoading={approvePermissionLoading}
+              />
+            ))}
 
-        {grouped.size === 0 && (
-          <div className="flex h-40 items-center justify-center">
-            <span className="text-body-2-regular text-teal-gray-400">
-              해당 조건의 지원자가 없습니다.
-            </span>
-          </div>
+            {grouped.size === 0 && (
+              <div className="flex h-40 items-center justify-center">
+                <span className="text-body-2-regular text-teal-gray-400">
+                  해당 조건의 지원자가 없습니다.
+                </span>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
