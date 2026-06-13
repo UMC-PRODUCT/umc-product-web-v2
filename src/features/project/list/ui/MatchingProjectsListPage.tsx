@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useSchoolChapterMap } from "@/shared/hooks/useSchoolChapterMap"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
@@ -91,9 +91,11 @@ export function MatchingProjectsListPage({
     number | undefined
   >(undefined)
   const filterAreaRef = useRef<HTMLDivElement>(null)
-  const visibleProjects = useMockData
-    ? MOCK_MATCHING_PROJECTS
-    : projects.map(toMatchingProject)
+  const visibleProjects = useMemo(
+    () =>
+      useMockData ? MOCK_MATCHING_PROJECTS : projects.map(toMatchingProject),
+    [useMockData, projects],
+  )
 
   useEffect(() => {
     if (!openFilterId) return
