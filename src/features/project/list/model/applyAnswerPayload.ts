@@ -56,7 +56,7 @@ function parseOptionId(value: string): number | null {
 function getValidOptionId(question: Question, value: string): number | null {
   const optionId = parseOptionId(value)
   if (optionId === null) return null
-  return question.options.some((option) => option.optionId === optionId)
+  return question.options.some((option) => Number(option.optionId) === optionId)
     ? optionId
     : null
 }

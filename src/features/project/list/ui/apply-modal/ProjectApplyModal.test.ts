@@ -171,3 +171,52 @@ describe("buildAnswerPayload - 값 없는 항목 제외", () => {
     expect(payload).toEqual([{ questionId: 203, fileIds: ["pf-1"] }])
   })
 })
+
+const stringIdSections: Section[] = [
+  {
+    id: "common",
+    name: "공통 문항",
+    isEnabled: true,
+    questions: [
+      {
+        id: "301",
+        title: "단일 선택",
+        caption: "",
+        fieldType: "radio",
+        required: true,
+        options: [
+          { content: "11", optionId: "104" as unknown as number },
+          { content: "22", optionId: "105" as unknown as number },
+        ],
+      },
+      {
+        id: "302",
+        title: "복수 선택",
+        caption: "",
+        fieldType: "checkbox",
+        required: true,
+        options: [
+          { content: "1111", optionId: "107" as unknown as number },
+          { content: "2222", optionId: "108" as unknown as number },
+        ],
+      },
+    ],
+  },
+]
+
+describe("buildAnswerPayload - optionId 문자열 직렬화", () => {
+  it("백엔드가 optionId를 문자열로 내려줘도 selectedOptionIds로 매칭한다", () => {
+    const payload = buildAnswerPayload(
+      {
+        "301": "104",
+        "302": ["107", "108"],
+      },
+      stringIdSections,
+    )
+
+    expect(payload).toEqual([
+      { questionId: 301, selectedOptionIds: [104] },
+      { questionId: 302, selectedOptionIds: [107, 108] },
+    ])
+  })
+})
