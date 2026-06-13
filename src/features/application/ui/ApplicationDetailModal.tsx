@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { isAxiosError } from "axios"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -146,9 +147,9 @@ export function ApplicationDetailModal({
     },
     onError: (error, variables) => {
       // 서버 에러 메시지 토스트
-      const serverMessage = (
-        error as { response?: { data?: { message?: string } } }
-      )?.response?.data?.message
+      const serverMessage = isAxiosError(error)
+        ? error.response?.data?.message
+        : undefined
       addToast({
         message: serverMessage ?? "배정 상태 변경에 실패했습니다.",
         color: "red",
