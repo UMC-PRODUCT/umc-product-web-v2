@@ -64,7 +64,7 @@ export function Counter({
       </button>
       <span
         aria-live="polite"
-        className="text-label-1-semibold flex w-8.5 min-w-6 items-center justify-center self-center pt-1 text-teal-500"
+        className="text-label-1-semibold flex w-8.5 min-w-6 items-center justify-center self-center pt-1 pr-0.5 text-teal-500"
       >
         {value}
       </span>
