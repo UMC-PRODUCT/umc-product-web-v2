@@ -10,7 +10,7 @@ function isValidPassword(pw: string): boolean {
   if (pw.length < 8) return false
   const hasLetter = /[a-zA-Z]/.test(pw)
   const hasNumber = /[0-9]/.test(pw)
-  const hasSpecial = /[^a-zA-Z0-9]/.test(pw)
+  const hasSpecial = /[!#$&*@?]/.test(pw)
   return [hasLetter, hasNumber, hasSpecial].filter(Boolean).length >= 2
 }
 
@@ -28,7 +28,10 @@ export function ChangePasswordForm({
   const [confirm, setConfirm] = useState("")
   const addToast = useToastStore((s) => s.addToast)
 
-  const isNextValid = isValidPassword(next)
+  const isSameAsCurrent = next.length > 0 && next === current
+  const hasInvalidSpecial = /[^a-zA-Z0-9!#$&*@?]/.test(next)
+  const isNextValid =
+    isValidPassword(next) && !isSameAsCurrent && !hasInvalidSpecial
   const isConfirmMatch = confirm.length > 0 && next === confirm
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -105,22 +108,39 @@ export function ChangePasswordForm({
             />
             {/* TODO: API 연결 후 서버 응답 메시지로 대체 */}
             {next.length > 0 && (
-              <div className="flex items-center gap-1">
-                {isNextValid ? (
-                  <>
+              <div className="flex flex-col gap-1">
+                {isSameAsCurrent ? (
+                  <div className="flex items-center gap-1">
+                    <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                    <p className="text-body-3-medium text-error-500">
+                      새 비밀번호는 현재 비밀번호와 다르게 설정해 주세요
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1">
                     <CheckIcon
                       width={16}
                       height={16}
-                      className="text-success-500 shrink-0"
+                      className={
+                        isNextValid
+                          ? "text-success-500 shrink-0"
+                          : "text-error-500 shrink-0"
+                      }
                     />
-                    <span className="text-body-3-medium text-success-500">
+                    <p
+                      className={`text-body-3-medium ${isNextValid ? "text-success-500" : "text-error-500"}`}
+                    >
                       영문, 숫자, 특수문자 중 2종류 이상 포함한 8자 이상
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-body-3-medium text-error-500">
-                    영문, 숫자, 특수문자 중 2종류 이상 포함한 8자 이상
-                  </span>
+                    </p>
+                  </div>
+                )}
+                {!isSameAsCurrent && hasInvalidSpecial && (
+                  <div className="flex items-center gap-1">
+                    <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                    <p className="text-body-3-medium text-error-500">
+                      사용 가능한 특수문자 !#$&*@?
+                    </p>
+                  </div>
                 )}
               </div>
             )}
