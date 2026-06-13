@@ -4,6 +4,7 @@ import type {
   ChallengerInfoResponse,
   ChallengerPointInfo,
   ChallengerRoleResponse,
+  Part,
 } from "@/features/challenger/model/types"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
@@ -14,6 +15,18 @@ export interface MemberProfileInfo {
   github: string | null
   blog: string | null
   personal: string | null
+}
+
+export interface CurrentGisuMemberInfo {
+  gisuId: string
+  generation: string
+  challenger?: {
+    challengerId: string
+    part: Part
+    challengerStatus: string
+  } | null
+  isAdmin?: boolean
+  roleTypes?: string[]
 }
 
 export interface MemberInfoResponse {
@@ -28,6 +41,7 @@ export interface MemberInfoResponse {
   hasLocalCredential: boolean
   profile?: MemberProfileInfo | null
   totalActivityDays?: string
+  currentGisuMemberInfo?: CurrentGisuMemberInfo | null
   roles: ChallengerRoleResponse[]
   challengerRecords?: ChallengerInfoResponse[]
 }
@@ -56,7 +70,7 @@ interface MemberInfoV2Raw {
     generation: string
     challenger?: {
       challengerId: string
-      part: string
+      part: Part
       challengerStatus: string
     } | null
     isAdmin?: boolean
@@ -103,6 +117,20 @@ export async function getMyInfo(): Promise<MemberInfoResponse> {
 
   return {
     ...(raw as unknown as MemberInfoResponse),
+    currentGisuMemberInfo: currentGisu
+      ? {
+          ...currentGisu,
+          gisuId: String(currentGisu.gisuId),
+          generation: String(currentGisu.generation),
+          challenger: currentGisu.challenger
+            ? {
+                ...currentGisu.challenger,
+                challengerId: String(currentGisu.challenger.challengerId),
+                part: currentGisu.challenger.part,
+              }
+            : null,
+        }
+      : null,
     challengerRecords,
     roles,
   }
