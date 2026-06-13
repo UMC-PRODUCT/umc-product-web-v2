@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { changePassword } from "@/features/auth/api/credentials"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
@@ -26,16 +27,31 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
   const isNextValid = isValidPassword(next)
   const isConfirmMatch = confirm.length > 0 && next === confirm
 
-  const handleSubmit = () => {
-    // TODO: API 연결 후 실제 비밀번호 변경 요청으로 교체
-    addToast({
-      message: "비밀번호가 변경되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3000,
-    })
-    onSuccess()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    try {
+      await changePassword({ currentPassword: current, newPassword: next })
+      addToast({
+        message: "비밀번호가 변경되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      onSuccess()
+    } catch {
+      addToast({
+        message: "비밀번호 변경에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -141,8 +157,9 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
         variant="fill"
         color="primary"
         size="s"
-        disabled={!current || !isNextValid || !isConfirmMatch}
-        onClick={handleSubmit}
+        disabled={!current || !isNextValid || !isConfirmMatch || isSubmitting}
+        isLoading={isSubmitting}
+        onClick={() => void handleSubmit()}
         className="h-11 w-full bg-teal-300 disabled:bg-teal-200"
       >
         변경하기

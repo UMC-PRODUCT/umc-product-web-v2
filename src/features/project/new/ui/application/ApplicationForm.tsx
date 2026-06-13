@@ -38,6 +38,7 @@ interface ApplicationFormProps {
   onPrev?: () => void
   onNext?: () => void
   isEditMode?: boolean
+  readOnly?: boolean
   isHydrated?: boolean
   isSubmitting?: boolean
   canCreateProject?: boolean
@@ -52,6 +53,7 @@ export const ApplicationForm = forwardRef<
     onPrev,
     onNext,
     isEditMode = false,
+    readOnly = false,
     isHydrated = true,
     isSubmitting = false,
     canCreateProject = true,
@@ -214,7 +216,17 @@ export const ApplicationForm = forwardRef<
 
   return (
     <div className={cn("flex flex-col gap-4 py-4")}>
-      <div className="mx-auto flex w-full max-w-225 flex-col gap-6">
+      {readOnly && (
+        <div className="text-body-2-medium mx-auto w-full max-w-225 rounded-[8px] border border-yellow-300 bg-yellow-50 px-4 py-3 text-yellow-700">
+          매칭 기간 중에는 지원 폼을 수정할 수 없습니다.
+        </div>
+      )}
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-225 flex-col gap-6",
+          readOnly && "pointer-events-none opacity-60 select-none",
+        )}
+      >
         <div className="flex flex-col">
           <FormHeader variant="common" />
           <QuestionListContainer
@@ -338,15 +350,17 @@ export const ApplicationForm = forwardRef<
       </div>
 
       <div className="flex justify-between">
-        <Button
-          type="button"
-          variant="weak"
-          color="primary"
-          disabled={!canTempSave}
-          onClick={handleTempSave}
-        >
-          {tempSaveLabel}
-        </Button>
+        {!readOnly && (
+          <Button
+            type="button"
+            variant="weak"
+            color="primary"
+            disabled={!canTempSave}
+            onClick={handleTempSave}
+          >
+            {tempSaveLabel}
+          </Button>
+        )}
         <div className="flex items-center gap-4">
           <Button
             type="button"
@@ -356,16 +370,18 @@ export const ApplicationForm = forwardRef<
           >
             이전
           </Button>
-          <Button
-            type="button"
-            variant="fill"
-            color="primary"
-            isLoading={isSubmitting}
-            disabled={isSubmitting}
-            onClick={handleNext}
-          >
-            {isEditMode ? "수정 완료" : "등록하기"}
-          </Button>
+          {!readOnly && (
+            <Button
+              type="button"
+              variant="fill"
+              color="primary"
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+              onClick={handleNext}
+            >
+              {isEditMode ? "수정 완료" : "등록하기"}
+            </Button>
+          )}
         </div>
       </div>
     </div>

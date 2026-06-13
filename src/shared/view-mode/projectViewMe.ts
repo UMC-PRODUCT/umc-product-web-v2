@@ -1,3 +1,5 @@
+import { getCurrentGisuChallengerRecords } from "./currentGisuRecords"
+
 import type { MemberInfoResponse } from "@/features/auth/api/me"
 
 import type { ViewMode } from "."
@@ -7,7 +9,7 @@ export function projectViewMe(
   mode: ViewMode,
 ): MemberInfoResponse | undefined {
   if (!me) return me
-  const records = me.challengerRecords ?? []
+  const records = getCurrentGisuChallengerRecords(me)
   switch (mode) {
     case "admin":
       return { ...me, challengerRecords: [] }

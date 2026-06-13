@@ -2,12 +2,13 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import SvgCircleCheckIcon from "@/shared/assets/icon/check/CircleCheckIcon"
 import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
+import RubberConeIcon from "@/shared/assets/icon/RubberConeIcon"
 import { cn } from "@/shared/lib/utils"
 
 export const FADE_OUT_DURATION = 300
 
 const toastVariants = cva(
-  "w-fit h-12.5 px-4 py-1 gap-2.5 rounded-[12px] flex justify-between items-center whitespace-nowrap text-label-1-medium shadow-drop-neutral-2 transition-opacity",
+  "w-max min-w-[min(400px,90vw)] max-w-[min(90vw,600px)] min-h-12.5 px-4 py-1 gap-2.5 rounded-[12px] flex items-center text-label-1-medium transition-opacity",
   {
     variants: {
       variant: {
@@ -17,6 +18,11 @@ const toastVariants = cva(
       color: {
         primary: "",
         red: "",
+      },
+      type: {
+        default: "justify-between shadow-drop-neutral-2",
+        time: "justify-between shadow-drop-neutral-2",
+        notice: "justify-center shadow-drop-neutral-1",
       },
     },
     compoundVariants: [
@@ -28,6 +34,7 @@ const toastVariants = cva(
     defaultVariants: {
       variant: "deep",
       color: "primary",
+      type: "default",
     },
   },
 )
@@ -49,11 +56,9 @@ const countdownColorMap = {
 
 interface ToastProps extends VariantProps<typeof toastVariants> {
   message: string
-  type?: "default" | "time"
   remaining: number
   isDismissing: boolean
   onDismiss: () => void
-  sideImage?: string
 }
 
 export function Toast({
@@ -64,7 +69,6 @@ export function Toast({
   remaining,
   isDismissing,
   onDismiss,
-  sideImage,
 }: ToastProps) {
   const resolvedColor = color ?? "primary"
 
@@ -73,33 +77,48 @@ export function Toast({
       role={resolvedColor === "red" ? "alert" : "status"}
       aria-atomic="true"
       className={cn(
-        toastVariants({ variant, color }),
-        !sideImage && "min-w-100",
+        toastVariants({ variant, color, type }),
         isDismissing && "opacity-0",
       )}
       style={{ transitionDuration: `${FADE_OUT_DURATION}ms` }}
     >
-      {sideImage ? (
+      {type === "notice" ? (
         <>
-          <img
-            src={sideImage}
-            alt=""
-            className="size-6 -scale-x-100"
+          <RubberConeIcon
             aria-hidden="true"
+            width={24}
+            height={24}
+            className="shrink-0"
           />
-          <span className={textColorMap[resolvedColor]}>{message}</span>
-          <img src={sideImage} alt="" className="size-6" aria-hidden="true" />
+          <span
+            className={cn(
+              "text-center wrap-break-word",
+              textColorMap[resolvedColor],
+            )}
+          >
+            {message}
+          </span>
+          <RubberConeIcon
+            aria-hidden="true"
+            width={24}
+            height={24}
+            className="shrink-0"
+          />
         </>
       ) : (
         <>
-          <div className="flex items-center gap-2.5">
+          <div className="flex min-w-0 items-center gap-2.5">
             <SvgCircleCheckIcon
               aria-hidden="true"
               width={20}
               height={20}
-              className={iconColorMap[resolvedColor]}
+              className={cn("shrink-0", iconColorMap[resolvedColor])}
             />
-            <span className={textColorMap[resolvedColor]}>{message}</span>
+            <span
+              className={cn("wrap-break-word", textColorMap[resolvedColor])}
+            >
+              {message}
+            </span>
           </div>
           {type === "time" ? (
             <span

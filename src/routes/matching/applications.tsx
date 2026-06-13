@@ -106,7 +106,8 @@ function MatchingApplicationsPage() {
                 items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
                 value={selectedChapter}
                 onValueChange={(v) => setSelectedChapter(v)}
-                itemClassName="flex-1"
+                className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
+                itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
               />
               {admin.isLoading ? (
                 <div className="flex items-center justify-center py-20">

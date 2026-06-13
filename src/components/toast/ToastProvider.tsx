@@ -102,7 +102,6 @@ export function ToastProvider() {
   // 최신 MAX_VISIBLE개 표시, newest가 front
   const visible = toasts.slice(-MAX_VISIBLE)
 
-  /** 토스트가 없을 때도 고정 래퍼가 남으면 하단 중앙 400×50 영역이 투명 클릭 레이어가 됨 */
   if (visible.length === 0) return null
 
   return (
@@ -121,14 +120,13 @@ export function ToastProvider() {
         return (
           <div
             key={toast.id}
-            className="pointer-events-auto absolute bottom-0 origin-bottom transition-all duration-300"
-            style={{
-              transform: `translateY(${translateY}px) scale(${scale})`,
-              zIndex,
-            }}
+            className="pointer-events-auto absolute bottom-0 left-1/2 -translate-x-1/2"
+            style={{ zIndex }}
           >
             <div
+              className="origin-bottom transition-all duration-300"
               style={{
+                transform: `translateY(${translateY}px) scale(${scale})`,
                 animation: isFront ? "toast-shake 0.4s ease-in-out" : undefined,
               }}
             >
@@ -140,7 +138,6 @@ export function ToastProvider() {
                 remaining={remainingMap.get(toast.id) ?? toast.duration}
                 isDismissing={dismissingIds.has(toast.id)}
                 onDismiss={() => dismiss(toast.id)}
-                sideImage={toast.sideImage}
               />
             </div>
           </div>

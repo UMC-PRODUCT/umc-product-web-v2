@@ -4,7 +4,11 @@ import { computeAvailableViewModes } from "./availableViewModes"
 
 import type { MemberInfoResponse } from "@/features/auth/api/me"
 
-function makeMe(roleTypes: string[], parts: string[]): MemberInfoResponse {
+function makeMe(
+  roleTypes: string[],
+  parts: string[],
+  currentIndex: number | null = parts.length > 0 ? 0 : null,
+): MemberInfoResponse {
   return {
     roles: roleTypes.map((roleType) => ({ roleType })),
     challengerRecords: parts.map((part, i) => ({
@@ -12,6 +16,20 @@ function makeMe(roleTypes: string[], parts: string[]): MemberInfoResponse {
       gisuId: String(10 - i),
       part,
     })),
+    currentGisuMemberInfo:
+      currentIndex === null
+        ? null
+        : {
+            gisuId: String(10 - currentIndex),
+            generation: String(10 - currentIndex),
+            challenger: {
+              challengerId: String(currentIndex),
+              part: parts[currentIndex],
+              challengerStatus: "ACTIVE",
+            },
+            isAdmin: roleTypes.length > 0,
+            roleTypes,
+          },
   } as unknown as MemberInfoResponse
 }
 
@@ -26,9 +44,9 @@ describe("computeAvailableViewModes", () => {
     expect(computeAvailableViewModes(me)).toEqual(["admin", "pm"])
   })
 
-  it("PLAN + 비-PLAN만 → [pm, others]", () => {
+  it("현재 PLAN + 과거 비-PLAN 챌린저 → [pm]", () => {
     const me = makeMe([], ["PLAN", "WEB"])
-    expect(computeAvailableViewModes(me)).toEqual(["pm", "others"])
+    expect(computeAvailableViewModes(me)).toEqual(["pm"])
   })
 
   it("비-PLAN 챌린저만 → [others]", () => {
@@ -38,6 +56,11 @@ describe("computeAvailableViewModes", () => {
 
   it("학교 운영진 단일 → [admin]", () => {
     const me = makeMe(["SCHOOL_PRESIDENT"], [])
+    expect(computeAvailableViewModes(me)).toEqual(["admin"])
+  })
+
+  it("운영진 + 과거 비-PLAN 챌린저 → [admin]", () => {
+    const me = makeMe(["CENTRAL_OPERATING_TEAM_MEMBER"], ["WEB"], null)
     expect(computeAvailableViewModes(me)).toEqual(["admin"])
   })
 

@@ -154,3 +154,9 @@ export interface EmailRegisterMemberRequest {
   schoolId: number
   termsAgreements: TermConsentStatus[]
 }
+
+export interface MemberOAuthItem {
+  memberId: number
+  memberOAuthId: number
+  provider: OAuthProvider
+}

@@ -20,7 +20,6 @@ import {
 import {
   type Chapter,
   CHAPTERS,
-  ChapterSelector,
   NoticeCardList,
   NoticeDetailContent,
   type NoticeItem,
@@ -29,6 +28,7 @@ import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { Pagination } from "@/shared/ui/Pagination"
+import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { useViewModeStore } from "@/shared/view-mode"
 import { projectViewMe } from "@/shared/view-mode/projectViewMe"
 import { useViewMe } from "@/shared/view-mode/useViewMe"
@@ -108,6 +108,12 @@ function readPendingNotice() {
   }
 }
 
+function readHashNoticeId() {
+  if (typeof window === "undefined") return null
+  const id = window.location.hash.match(/^#notice-(.+)$/)?.[1]
+  return id ? decodeURIComponent(id) : null
+}
+
 /** 프로젝트 설정 공지 페이지 (/matching/projects/announce) */
 export const Route = createFileRoute("/matching/projects/announce/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
@@ -138,6 +144,7 @@ function ProjectSettingsAnnouncePage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
   const [pendingNotice] = useState(readPendingNotice)
+  const [hashNoticeId] = useState(readHashNoticeId)
 
   const { data: me } = useMe()
   const { viewMe } = useViewMe()
@@ -226,7 +233,7 @@ function ProjectSettingsAnnouncePage() {
 
   const totalPages = noticesData?.totalPages || 1
   const safePage = Math.min(Math.max(1, page), totalPages)
-  const focusedNoticeId = pendingNotice?.id ?? null
+  const focusedNoticeId = pendingNotice?.id ?? hashNoticeId ?? null
 
   const queryClient = useQueryClient()
 
@@ -310,7 +317,7 @@ function ProjectSettingsAnnouncePage() {
 
   return (
     <section className="w-full">
-      <div className="border-teal-gray-100 flex min-h-213 w-full max-w-242 flex-col items-center justify-between rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
+      <div className="border-teal-gray-100 bp1:min-h-213 bp1:px-6 bp1:pt-6 bp1:pb-8 flex w-full max-w-242 min-w-0 flex-col items-center justify-between rounded-[12px] border bg-white px-4 pt-5 pb-6 min-[960px]:px-8.5 min-[960px]:pt-8 min-[960px]:pb-10">
         <div className="flex w-full flex-col gap-6 pb-10">
           <div className="flex w-full flex-col items-start gap-1.5">
             <span className="text-heading-6-semibold text-teal-gray-900">
@@ -324,10 +331,13 @@ function ProjectSettingsAnnouncePage() {
           </div>
 
           <div className="flex w-full flex-col items-center gap-2.5">
-            <div className="flex w-full items-center gap-2.5">
-              <ChapterSelector
-                selectedChapter={chapter}
-                onChapterChange={handleChapterChange}
+            <div className="bp1:flex-row bp1:items-center flex w-full flex-col gap-2.5">
+              <SegmentButton
+                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+                value={chapter}
+                onValueChange={(v) => handleChapterChange(v as Chapter)}
+                className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
+                itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
               />
 
               {canWrite ? (
@@ -337,7 +347,7 @@ function ProjectSettingsAnnouncePage() {
                   color="primary"
                   size="m"
                   onClick={handleNoticePublishClick}
-                  className="w-26.5 items-center gap-1 py-3 pr-4 pl-3"
+                  className="bp1:w-26.5 w-full items-center justify-center gap-1 py-3 pr-4 pl-3"
                 >
                   <PlusIcon className="h-4 w-4" />
                   <span className="text-label-1-medium text-white">

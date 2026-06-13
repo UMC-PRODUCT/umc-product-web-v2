@@ -14,6 +14,17 @@ const baseMe = {
   profileImageLink: "",
   status: "ACTIVE",
   roles: [{ roleType: "CENTRAL_OPERATING_TEAM_MEMBER" }],
+  currentGisuMemberInfo: {
+    gisuId: "10",
+    generation: "10",
+    challenger: {
+      challengerId: "1",
+      part: "PLAN",
+      challengerStatus: "ACTIVE",
+    },
+    isAdmin: true,
+    roleTypes: ["CENTRAL_OPERATING_TEAM_MEMBER"],
+  },
   challengerRecords: [
     { challengerId: "1", gisuId: "10", part: "PLAN" },
     { challengerId: "2", gisuId: "9", part: "WEB" },
@@ -34,9 +45,29 @@ describe("projectViewMe", () => {
   })
 
   it("others: roles를 비우고 비-PLAN 기록만 남긴다", () => {
-    const v = projectViewMe(baseMe, "others")
+    const me = {
+      ...baseMe,
+      currentGisuMemberInfo: {
+        gisuId: "9",
+        generation: "9",
+        challenger: {
+          challengerId: "2",
+          part: "WEB",
+          challengerStatus: "ACTIVE",
+        },
+        isAdmin: true,
+        roleTypes: ["CENTRAL_OPERATING_TEAM_MEMBER"],
+      },
+    } as unknown as MemberInfoResponse
+    const v = projectViewMe(me, "others")
     expect(v?.roles).toEqual([])
     expect(v?.challengerRecords?.map((r) => r.part)).toEqual(["WEB"])
+  })
+
+  it("현재 기수가 아닌 기록은 viewMe에서 제외한다", () => {
+    const v = projectViewMe(baseMe, "others")
+    expect(v?.roles).toEqual([])
+    expect(v?.challengerRecords).toEqual([])
   })
 
   it("me가 undefined면 undefined 반환", () => {

@@ -1,21 +1,26 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createFileRoute,
+  isRedirect,
   redirect,
   useBlocker,
   useNavigate,
 } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { getMatchingRounds } from "@/features/application/api/applicationApi"
+import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { getResourcePermission } from "@/features/auth/api/permissions"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   canManageProjects,
+  getLatestChallengerRecord,
   isCurrentTermPm,
+  isProjectRegistrationQuotaLimited,
 } from "@/features/auth/model/identity"
 import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
@@ -42,6 +47,7 @@ import {
 } from "@/features/project/new/api"
 import { hydrateApplicationFormIntoStore } from "@/features/project/new/model/applicationFormHydrator"
 import { hydrateDraftIntoStore } from "@/features/project/new/model/draftHydrator"
+import { isWithinMatchingPeriod } from "@/features/project/new/model/matchingPeriod"
 import { hydrateProjectDetailIntoStore } from "@/features/project/new/model/projectDetailHydrator"
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { getActiveGisu } from "@/shared/api/gisu"
@@ -65,6 +71,7 @@ export const Route = createFileRoute("/matching/projects/new")({
       return
     }
 
+    let hasWritePermission = false
     try {
       const permission = await context.queryClient.ensureQueryData({
         queryKey: [
@@ -81,13 +88,38 @@ export const Route = createFileRoute("/matching/projects/new")({
           }),
         staleTime: 0,
       })
-
-      if (hasGrantedPermission(permission, "WRITE")) return
+      hasWritePermission = hasGrantedPermission(permission, "WRITE")
     } catch {
       throw redirect({ to: "/matching/projects" })
     }
 
-    throw redirect({ to: "/matching/projects" })
+    if (!hasWritePermission) {
+      throw redirect({ to: "/matching/projects" })
+    }
+
+    if (isProjectRegistrationQuotaLimited(viewMe)) {
+      try {
+        const gisu = await context.queryClient.ensureQueryData({
+          queryKey: gisuKeys.active,
+          queryFn: getActiveGisu,
+        })
+        const gisuId = gisu?.gisuId ? Number(gisu.gisuId) : undefined
+        if (gisuId) {
+          const managed = await context.queryClient.ensureQueryData({
+            queryKey: projectKeys.managedCheck(gisuId),
+            queryFn: () => getManagedProjects(gisuId),
+          })
+          if (managed.length > 0) {
+            throw redirect({
+              to: "/matching/projects/management",
+              search: { notice: "duplicate" },
+            })
+          }
+        }
+      } catch (error) {
+        if (isRedirect(error)) throw error
+      }
+    }
   },
   validateSearch: (search: Record<string, unknown>) => ({
     projectId:
@@ -120,6 +152,21 @@ function ProjectRegisterPage() {
   const queryClient = useQueryClient()
   const { data: me } = useMe()
   const isPm = isCurrentTermPm(me)
+  const myChapterId = getLatestChallengerRecord(me)?.chapterId
+  const matchingRoundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(
+      myChapterId ? Number(myChapterId) : undefined,
+    ),
+    queryFn: () =>
+      getMatchingRounds(myChapterId ? Number(myChapterId) : undefined),
+    enabled: isEditMode && myChapterId !== undefined,
+  })
+  const isApplicationReadOnly = useMemo(
+    () =>
+      isEditMode &&
+      isWithinMatchingPeriod(matchingRoundsQuery.data, new Date()),
+    [isEditMode, matchingRoundsQuery.data],
+  )
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
   const recruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
@@ -204,26 +251,6 @@ function ProjectRegisterPage() {
   useEffect(() => {
     if (gisuId) setGisuId(Number(gisuId))
   }, [gisuId, setGisuId])
-
-  const managedCheckQuery = useQuery({
-    queryKey: projectKeys.managedCheck(gisuId),
-    queryFn: () => getManagedProjects(Number(gisuId)),
-    enabled: isPm && !isEditMode && !!gisuId,
-  })
-
-  useEffect(() => {
-    if (!isPm || isEditMode) return
-    if (managedCheckQuery.data && managedCheckQuery.data.length > 0) {
-      addToast({
-        message: "등록된 프로젝트가 이미 존재 합니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      navigate({ to: "/matching/projects/management", replace: true })
-    }
-  }, [isPm, isEditMode, managedCheckQuery.data, addToast, navigate])
 
   useEffect(() => {
     if (isEditMode && editProjectId && projectId !== editProjectId) {
@@ -322,14 +349,19 @@ function ProjectRegisterPage() {
     },
     onError: (error) => {
       const status = isAxiosError(error) ? error.response?.status : undefined
+      const code = isAxiosError(error)
+        ? (error.response?.data as { code?: string } | undefined)?.code
+        : undefined
       const message =
-        status === 403
-          ? isEditMode
-            ? "프로젝트를 수정할 권한이 없습니다."
-            : "프로젝트를 등록할 권한이 없습니다."
-          : isEditMode
-            ? "프로젝트 수정에 실패했습니다. 다시 시도해주세요."
-            : "프로젝트 등록에 실패했습니다. 다시 시도해주세요."
+        code === "PROJECT-0009"
+          ? "매칭 기간 중에는 지원 폼을 수정할 수 없습니다."
+          : status === 403
+            ? isEditMode
+              ? "프로젝트를 수정할 권한이 없습니다."
+              : "프로젝트를 등록할 권한이 없습니다."
+            : isEditMode
+              ? "프로젝트 수정에 실패했습니다. 다시 시도해주세요."
+              : "프로젝트 등록에 실패했습니다. 다시 시도해주세요."
       addToast({
         message,
         color: "red",
@@ -428,8 +460,6 @@ function ProjectRegisterPage() {
   })
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
-
-  if (isPm && !isEditMode && managedCheckQuery.isPending) return null
 
   const handleRegister = () => {
     submitMutation.mutate()
@@ -530,6 +560,7 @@ function ProjectRegisterPage() {
           <ApplicationForm
             ref={applicationFormRef}
             isEditMode={isEditMode}
+            readOnly={isApplicationReadOnly}
             isHydrated={isEditMode ? applicationFormHydrated : true}
             isSubmitting={submitMutation.isPending || isCreatePermissionLoading}
             canCreateProject={canCreateProject}

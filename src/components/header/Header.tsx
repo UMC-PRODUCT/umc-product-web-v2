@@ -2,9 +2,9 @@ import { Link, useLocation } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
 import { MobileSidebarDrawerContent } from "@/components/sidebar/MobileSidebarDrawerContent"
+import { SideBarViewSwitcher } from "@/components/sidebar/SideBarViewSwitcher"
 import { useToastStore } from "@/components/toast/useToastStore"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
-import errorCone from "@/shared/assets/icon/error/error-cone.svg"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { cn } from "@/shared/lib/utils"
@@ -17,8 +17,6 @@ interface NavItem {
   label: string
   to: string
   disabled?: boolean
-  /** 클릭 시 네비게이션 대신 실행할 핸들러 */
-  onClick?: () => void
 }
 
 interface HeaderProps {
@@ -34,25 +32,35 @@ export default function Header({ activePathname }: HeaderProps = {}) {
   const navItems: NavItem[] = [
     { label: "소개", to: "/intro", disabled: true },
     { label: "데모데이 매칭", to: "/matching" },
-    {
-      label: "리크루팅",
-      to: "/recruiting",
-      onClick: () =>
-        addToast({
-          message:
-            "리크루팅 서비스는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!",
-          color: "primary",
-          variant: "deep",
-          type: "time",
-          duration: 3000,
-          sideImage: errorCone,
-        }),
-    },
+    { label: "리크루팅", to: "/recruiting", disabled: true },
   ]
+
+  const handleDisabledClick = (label: string) => {
+    addToast({
+      message: `${label} 서비스는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!`,
+      color: "primary",
+      variant: "deep",
+      type: "notice",
+      duration: 3000,
+    })
+  }
 
   useEffect(() => {
     setIsMobileMenuOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false)
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape)
+    return () => window.removeEventListener("keydown", handleEscape)
+  }, [isMobileMenuOpen])
 
   return (
     <header className="bg-teal-gray-50 shadow-drop-neutral-3 relative z-50 flex min-h-16 w-full flex-col overflow-visible min-[960px]:h-20 min-[960px]:min-h-20 min-[960px]:flex-row min-[960px]:items-center min-[960px]:justify-between">
@@ -73,7 +81,11 @@ export default function Header({ activePathname }: HeaderProps = {}) {
               to={item.to}
               selected={pathname.startsWith(item.to)}
               disabled={item.disabled}
-              onClick={item.onClick}
+              onClick={
+                item.disabled
+                  ? () => handleDisabledClick(item.label)
+                  : undefined
+              }
               className="min-w-0 px-3 xl:min-w-18 xl:px-4.5"
             />
           ))}
@@ -84,7 +96,12 @@ export default function Header({ activePathname }: HeaderProps = {}) {
           <Profile />
         </div>
 
-        <div className="flex items-center gap-2 pr-5 min-[960px]:hidden">
+        <div className="flex min-w-0 items-center gap-2 pr-5 min-[960px]:hidden">
+          <SideBarViewSwitcher
+            className="relative z-[70] min-w-0"
+            dropdownClassName="w-28 bp1:w-43"
+            menuClassName="shadow-drop-neutral-2 absolute top-full right-0 z-[80] mt-1 w-full rounded-[8px]"
+          />
           <button
             type="button"
             aria-label={isMobileMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
@@ -101,6 +118,15 @@ export default function Header({ activePathname }: HeaderProps = {}) {
           </button>
         </div>
       </div>
+
+      {isMobileMenuOpen && (
+        <button
+          type="button"
+          aria-label="모바일 메뉴 닫기"
+          className="fixed inset-x-0 top-16 bottom-0 z-40 bg-neutral-900/40 min-[960px]:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       <nav
         id="mobile-header-navigation"
@@ -129,7 +155,10 @@ export default function Header({ activePathname }: HeaderProps = {}) {
                 selected={selected}
                 disabled={item.disabled}
                 className="text-body-1-medium h-11 w-full min-w-0 justify-center px-4"
-                onClick={item.onClick ?? (() => setIsMobileMenuOpen(false))}
+                onClick={() => {
+                  if (item.disabled) handleDisabledClick(item.label)
+                  setIsMobileMenuOpen(false)
+                }}
               />
             )
           })}
