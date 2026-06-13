@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import SvgCircleCheckIcon from "@/shared/assets/icon/check/CircleCheckIcon"
 import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
-import errorCone from "@/shared/assets/icon/error/error-cone.svg"
+import RubberConeIcon from "@/shared/assets/icon/RubberConeIcon"
 import { cn } from "@/shared/lib/utils"
 
 export const FADE_OUT_DURATION = 300
@@ -84,9 +84,8 @@ export function Toast({
     >
       {type === "notice" ? (
         <>
-          <img
-            src={errorCone}
-            alt=""
+          <RubberConeIcon
+            aria-hidden="true"
             width={24}
             height={24}
             className="shrink-0"
@@ -99,9 +98,8 @@ export function Toast({
           >
             {message}
           </span>
-          <img
-            src={errorCone}
-            alt=""
+          <RubberConeIcon
+            aria-hidden="true"
             width={24}
             height={24}
             className="shrink-0"
