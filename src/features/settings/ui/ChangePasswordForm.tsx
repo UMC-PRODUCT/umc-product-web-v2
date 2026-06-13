@@ -55,7 +55,7 @@ export function ChangePasswordForm({
       onSuccess()
     } catch {
       addToast({
-        message: "비밀번호 변경에 실패했습니다. 다시 시도해주세요.",
+        message: "잠시 후 다시 시도해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
