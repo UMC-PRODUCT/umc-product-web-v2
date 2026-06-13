@@ -130,7 +130,7 @@ export function ProfileDropdown({
             />
 
             {/* 기수 */}
-            <div className="flex w-full flex-col gap-0.5 px-2.5">
+            <div className="flex w-full flex-col gap-0.5 px-1.5">
               <span className="text-caption-3-medium text-teal-gray-400 flex h-5.5 w-13 items-center justify-center">
                 기수 변경
               </span>
@@ -164,7 +164,7 @@ export function ProfileDropdown({
           />
 
           {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결/로그아웃 API 연동 */}
-          <div className="flex flex-col gap-1 px-2.5">
+          <div className="flex flex-col gap-1 px-1.5">
             {canManageMembers && (
               <button
                 type="button"
