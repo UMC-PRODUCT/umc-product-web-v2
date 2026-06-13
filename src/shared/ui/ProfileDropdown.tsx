@@ -127,7 +127,7 @@ export function ProfileDropdown({
                 기수 변경
               </span>
 
-              <div className="border-teal-gray-100 flex w-full flex-col gap-0.5 rounded-[10px] border px-0.5 py-0.5">
+              <div className="border-teal-gray-100 flex w-full flex-col gap-0.5 rounded-[10px] border px-[1px] py-[1px]">
                 {me?.challengerRecords && me.challengerRecords.length > 0 ? (
                   me.challengerRecords
                     .slice()
@@ -158,7 +158,10 @@ export function ProfileDropdown({
           {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결/로그아웃 API 연동 */}
           <div className="flex flex-col gap-1 px-2.5">
             {canManageMembers && (
-              <button type="button" className="h-6 w-15">
+              <button
+                type="button"
+                className="hover:decoration-teal-gray-700 h-6 w-15 text-left hover:underline"
+              >
                 <span className="text-body-2-medium text-teal-gray-700">
                   기수 관리
                 </span>
@@ -166,14 +169,18 @@ export function ProfileDropdown({
             )}
             <button
               type="button"
-              className="h-6 w-15"
+              className="hover:decoration-teal-gray-700 h-6 w-15 text-left hover:underline"
               onClick={() => navigate({ to: "/settings" })}
             >
               <span className="text-body-2-medium text-teal-gray-700">
                 계정 설정
               </span>
             </button>
-            <button type="button" onClick={logout} className="h-6 w-15">
+            <button
+              type="button"
+              onClick={logout}
+              className="hover:decoration-error-500 h-6 w-15 text-left hover:underline"
+            >
               <span className="text-body-2-medium text-error-500">
                 로그아웃
               </span>

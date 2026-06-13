@@ -18,7 +18,7 @@ export default function GenerationListItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex h-6.5 w-31.5 items-center rounded-lg py-1 pr-2 transition-colors",
+        "flex h-6.5 w-31.5 items-center rounded-[8px] py-1 pr-2 transition-colors",
         active ? "bg-teal-50 pl-1.5" : "hover:bg-teal-gray-50 bg-white pl-3",
         className,
       )}

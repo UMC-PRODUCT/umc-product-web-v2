@@ -31,7 +31,7 @@ export function Input({
       <input
         type={inputType}
         className={cn(
-          "border-teal-gray-300 shadow-inner-neutral-1 text-label-1-medium text-teal-gray-700 placeholder:text-teal-gray-400 w-90 rounded-[12px] border bg-white py-3 pl-4 outline-none focus:border-teal-400 focus:bg-teal-50 focus:text-teal-600",
+          "border-teal-gray-300 shadow-inner-neutral-1 text-label-1-medium text-teal-gray-700 placeholder:text-teal-gray-400 h-11 w-90 rounded-[12px] border bg-white py-3 pl-4 outline-none focus:border-teal-400 focus:bg-teal-50 focus:text-teal-600",
           paddingRightClass,
         )}
         placeholder={placeholder}
