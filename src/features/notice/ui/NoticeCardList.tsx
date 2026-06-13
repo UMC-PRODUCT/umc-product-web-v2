@@ -105,6 +105,15 @@ export function NoticeCardList({
               data-notice-id={notice.id}
               onExpandedChange={(nextExpanded) => {
                 setExpandedIndex(nextExpanded ? index : null)
+                if (!nextExpanded) return
+                const targetId = notice.id
+                requestAnimationFrame(() => {
+                  document
+                    .querySelector<HTMLElement>(
+                      `[data-notice-id="${targetId}"]`,
+                    )
+                    ?.scrollIntoView({ block: "start", behavior: "smooth" })
+                })
               }}
               onEdit={() => {
                 onEditNotice?.(notice.id)
