@@ -7,7 +7,7 @@ import { filterSectionsByPermission } from "./utils"
 const ALL = {
   canAccessProjectSettings: true,
   canManageProjects: true,
-  canManageRecruitment: true,
+  canManageMatchingRounds: true,
 }
 
 function sectionIds(sections: ReturnType<typeof filterSectionsByPermission>) {
@@ -44,7 +44,7 @@ describe("filterSectionsByPermission", () => {
     const result = filterSectionsByPermission(SIDEBAR_ITEMS, {
       canAccessProjectSettings: false,
       canManageProjects: true,
-      canManageRecruitment: true,
+      canManageMatchingRounds: true,
     })
     expect(sectionIds(result)).not.toContain("project-settings")
   })
@@ -57,10 +57,10 @@ describe("filterSectionsByPermission", () => {
     expect(menuIds(result, "project-settings")).toEqual(["project-announce"])
   })
 
-  it("recruitment 불가면 매칭 차수 설정 항목 제거", () => {
+  it("매칭 차수 관리 불가면 매칭 차수 설정 항목 제거", () => {
     const result = filterSectionsByPermission(SIDEBAR_ITEMS, {
       ...ALL,
-      canManageRecruitment: false,
+      canManageMatchingRounds: false,
     })
     expect(menuIds(result, "team-matching")).not.toContain("matching-rounds")
   })
@@ -68,7 +68,7 @@ describe("filterSectionsByPermission", () => {
   it("관리 권한이 없어도 지원 현황 항목 노출", () => {
     const result = filterSectionsByPermission(SIDEBAR_ITEMS, {
       ...ALL,
-      canManageRecruitment: false,
+      canManageMatchingRounds: false,
     })
     expect(menuIds(result, "team-matching")).toContain("matching-applications")
   })

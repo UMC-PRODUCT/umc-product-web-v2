@@ -3,9 +3,8 @@ import { useMemo } from "react"
 
 import {
   canAccessProjectSettings,
+  canManageMatchingRounds,
   canManageProjects,
-  isCurrentTermPm,
-  isOperator,
 } from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
@@ -26,16 +25,16 @@ export function MatchingSegmentRegion({
   const { viewMe } = useViewMe()
   const canAccessSettings = canAccessProjectSettings(viewMe)
   const canManage = canManageProjects(viewMe)
-  const canRecruit = isOperator(viewMe) || isCurrentTermPm(viewMe)
+  const canManageRounds = canManageMatchingRounds(viewMe)
 
   const visibleSections = useMemo(
     () =>
       filterSectionsByPermission(SIDEBAR_ITEMS, {
         canAccessProjectSettings: canAccessSettings,
         canManageProjects: canManage,
-        canManageRecruitment: canRecruit,
+        canManageMatchingRounds: canManageRounds,
       }),
-    [canAccessSettings, canManage, canRecruit],
+    [canAccessSettings, canManage, canManageRounds],
   )
 
   const resolved = resolveNavigationFromPathname(pathname, visibleSections)
