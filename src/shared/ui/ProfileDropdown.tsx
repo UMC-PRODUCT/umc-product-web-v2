@@ -160,7 +160,7 @@ export function ProfileDropdown({
             {canManageMembers && (
               <button
                 type="button"
-                className="hover:decoration-teal-gray-700 h-6 w-15 hover:underline"
+                className="hover:decoration-teal-gray-700 h-6 w-15 text-left hover:underline"
               >
                 <span className="text-body-2-medium text-teal-gray-700">
                   기수 관리
@@ -169,7 +169,7 @@ export function ProfileDropdown({
             )}
             <button
               type="button"
-              className="hover:decoration-teal-gray-700 h-6 w-15 hover:underline"
+              className="hover:decoration-teal-gray-700 h-6 w-15 text-left hover:underline"
               onClick={() => navigate({ to: "/settings" })}
             >
               <span className="text-body-2-medium text-teal-gray-700">
@@ -179,7 +179,7 @@ export function ProfileDropdown({
             <button
               type="button"
               onClick={logout}
-              className="hover:decoration-error-500 h-6 w-15 hover:underline"
+              className="hover:decoration-error-500 h-6 w-15 text-left hover:underline"
             >
               <span className="text-body-2-medium text-error-500">
                 로그아웃
