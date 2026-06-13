@@ -114,7 +114,11 @@ export function QuestionForm({
                       질문을 작성하세요
                     </span>
                   )}
-                  {required && <span className="text-error-600 ml-1.5">*</span>}
+                  {required && (
+                    <span className="text-error-600 inline-block w-0">
+                      <span className="pl-1.5">*</span>
+                    </span>
+                  )}
                 </div>
                 {!readonlyTitle && (
                   <textarea
@@ -122,7 +126,7 @@ export function QuestionForm({
                     rows={1}
                     value={title}
                     onChange={(e) => onTitleChange?.(e.target.value)}
-                    className="text-heading-7-semibold caret-teal-gray-900 absolute inset-0 h-full w-full resize-none overflow-hidden bg-transparent text-transparent outline-none"
+                    className="text-heading-7-semibold caret-teal-gray-900 absolute inset-0 h-full w-full resize-none overflow-hidden bg-transparent wrap-break-word whitespace-pre-wrap text-transparent outline-none"
                   />
                 )}
               </div>
