@@ -23,6 +23,10 @@ interface ApplicationDetailModalProps {
   onOpenChange: (open: boolean) => void
   /** 현재 활성 차수 (이전 차수의 상태 칩 disabled 처리) */
   currentRound?: number
+  /** APPLY-102 권한 없는 역할(SCHOOL_PRESIDENT 등) - 지원자 행 클릭 시 폼 패널 열리지 않음 */
+  disableFormPanel?: boolean
+  /** 플랜 챌린저(PM) 뷰: 대기 상태 옵션 숨김 */
+  hidePendingStatus?: boolean
 }
 
 function toApplicationId(applicantId: string): number | null {
@@ -36,6 +40,8 @@ export function ApplicationDetailModal({
   open,
   onOpenChange,
   currentRound,
+  disableFormPanel = false,
+  hidePendingStatus = false,
 }: ApplicationDetailModalProps) {
   const addToast = useToastStore((s) => s.addToast)
 
@@ -130,7 +136,19 @@ export function ApplicationDetailModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: applicationKeys.all })
     },
-    onError: (_error, variables) => {
+    onError: (error, variables) => {
+      // 서버 에러 메시지 토스트
+      const serverMessage = (
+        error as { response?: { data?: { message?: string } } }
+      )?.response?.data?.message
+      addToast({
+        message: serverMessage ?? "배정 상태 변경에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      // 낙관적 업데이트 롤백
       setStatusOverrides((prev) => {
         const next = { ...prev }
         delete next[variables.appId]
@@ -223,12 +241,15 @@ export function ApplicationDetailModal({
               onRoundFilterChange={setRoundFilter}
               onStatusFilterChange={setStatusFilter}
               selectedApplicantId={selectedApplicantId}
-              onApplicantClick={setSelectedApplicantId}
+              onApplicantClick={
+                disableFormPanel ? () => {} : setSelectedApplicantId
+              }
               onStatusChange={handleApplicantStatusChange}
               onClose={handleClose}
               currentRound={currentRound}
               canApproveApplicant={canApproveApplicant}
               approvePermissionLoading={isApprovePermissionLoading}
+              statusOptions={hidePendingStatus ? ["pass", "fail"] : undefined}
               className="w-full"
             />
           </div>
@@ -251,6 +272,7 @@ export function ApplicationDetailModal({
                   selectedApplicant.round,
                 )
               }
+              hidePendingStatus={hidePendingStatus}
               className="max-h-[calc(100vh-60px)] shadow-xl"
             />
           )}
