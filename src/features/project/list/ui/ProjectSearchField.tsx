@@ -1,16 +1,24 @@
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
+import { cn } from "@/shared/lib/utils"
 
 interface ProjectSearchFieldProps {
   value: string
   onChange: (value: string) => void
+  className?: string
 }
 
 export function ProjectSearchField({
   value,
   onChange,
+  className,
 }: ProjectSearchFieldProps) {
   return (
-    <div className="bg-teal-gray-100 flex h-11 w-[28.5rem] items-center justify-between rounded-xl px-4">
+    <div
+      className={cn(
+        "bg-teal-gray-100 flex h-11 w-full items-center justify-between rounded-xl px-4",
+        className,
+      )}
+    >
       <input
         type="text"
         value={value}

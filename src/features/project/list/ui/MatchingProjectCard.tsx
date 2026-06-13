@@ -48,7 +48,7 @@ function CardBody({ data }: { data: MatchingProject }) {
 
   return (
     <div className="flex w-full min-w-0 flex-col items-stretch self-stretch">
-      <div className="bg-teal-gray-200 relative z-0 h-[11.5rem] w-full min-w-0 shrink-0 self-stretch overflow-hidden">
+      <div className="bg-teal-gray-200 relative z-0 aspect-[348/184] w-full min-w-0 shrink-0 self-stretch overflow-hidden">
         {cover?.src ? (
           <img
             src={cover.src}
@@ -112,7 +112,7 @@ export function MatchingProjectCard({
   return (
     <div
       className={cn(
-        "flex w-full max-w-[21.75rem] min-w-0 flex-col items-center justify-end transition-[padding] duration-200 ease-out",
+        "bp2:max-w-[21.75rem] flex w-full min-w-0 flex-col items-center justify-end transition-[padding] duration-200 ease-out",
         forcedHover && "pt-0 pb-1",
         interactiveHover && "group pt-1 pb-0 hover:pt-0 hover:pb-1",
       )}

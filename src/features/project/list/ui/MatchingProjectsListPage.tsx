@@ -6,6 +6,7 @@ import { cn } from "@/shared/lib/utils"
 import { Modal } from "@/shared/ui/Modal"
 import { Pagination } from "@/shared/ui/Pagination"
 
+import { MOCK_MATCHING_PROJECTS } from "../model/matchingProject.mock"
 import { useMatchingProjectListFilters } from "../model/matchingProjectList"
 import { FilterDropdown } from "./FilterDropDown"
 import { MatchingProjectCard } from "./MatchingProjectCard"
@@ -62,7 +63,13 @@ function toMatchingProject(project: ProjectItem): MatchingProject {
   }
 }
 
-export function MatchingProjectsListPage() {
+interface MatchingProjectsListPageProps {
+  useMockData?: boolean
+}
+
+export function MatchingProjectsListPage({
+  useMockData = false,
+}: MatchingProjectsListPageProps) {
   const {
     openFilterId,
     setOpenFilterId,
@@ -84,6 +91,9 @@ export function MatchingProjectsListPage() {
     number | undefined
   >(undefined)
   const filterAreaRef = useRef<HTMLDivElement>(null)
+  const visibleProjects = useMockData
+    ? MOCK_MATCHING_PROJECTS
+    : projects.map(toMatchingProject)
 
   useEffect(() => {
     if (!openFilterId) return
@@ -100,7 +110,7 @@ export function MatchingProjectsListPage() {
   }, [openFilterId, setOpenFilterId])
 
   return (
-    <section className="relative isolate flex w-full flex-col items-start justify-start">
+    <section className="relative isolate flex w-full min-w-0 flex-col items-stretch justify-start">
       {openFilterId && (
         <button
           type="button"
@@ -109,7 +119,7 @@ export function MatchingProjectsListPage() {
           onClick={() => setOpenFilterId(null)}
         />
       )}
-      <div className="border-teal-gray-100 relative z-30 flex h-full w-288 flex-col gap-5 rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
+      <div className="border-teal-gray-100 bp1:rounded-[12px] bp1:border bp1:px-6 bp1:pt-8 bp1:pb-10 bp2:max-w-288 bp2:px-8.5 relative z-30 flex h-full w-full min-w-0 flex-col gap-5 bg-white px-4 pt-6 pb-8">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 목록
@@ -119,9 +129,16 @@ export function MatchingProjectsListPage() {
           </span>
         </div>
 
-        <div className="relative z-30 mb-3 flex items-start justify-between self-stretch">
-          <ProjectSearchField value={searchQuery} onChange={setSearchQuery} />
-          <div ref={filterAreaRef} className="flex items-center gap-2">
+        <div className="bp2:flex-row bp2:items-start bp2:justify-between relative z-30 mb-3 flex min-w-0 flex-col gap-3 self-stretch">
+          <ProjectSearchField
+            value={searchQuery}
+            onChange={setSearchQuery}
+            className="bp2:w-[28.5rem]"
+          />
+          <div
+            ref={filterAreaRef}
+            className="scrollbar-none bp2:w-auto bp2:overflow-visible bp2:pb-0 flex w-full min-w-0 items-center gap-2 overflow-x-auto pb-1"
+          >
             {filterDescriptors.map((filter) => (
               <FilterDropdown
                 key={filter.id}
@@ -154,18 +171,23 @@ export function MatchingProjectsListPage() {
 
         <div
           className={cn(
-            "grid min-w-0 grid-cols-1 gap-5 md:grid-cols-3",
+            "bp1:grid-cols-2 bp2:grid-cols-3 grid min-w-0 grid-cols-1 gap-5",
             openFilterId && "pointer-events-none",
           )}
         >
-          {projects.map((item) => {
-            const project = toMatchingProject(item)
+          {visibleProjects.map((project, index) => {
             return (
               <div key={project.id} className="min-w-0">
                 <button
                   type="button"
-                  className="w-full text-left"
+                  className={cn(
+                    "w-full text-left",
+                    useMockData && "cursor-default",
+                  )}
                   onClick={() => {
+                    if (useMockData) return
+                    const item = projects[index]
+                    if (!item) return
                     setSelectedProjectId(item.id)
                     setSelectedProjectChapterId(
                       getChapterIdBySchool(item.productOwner?.schoolName ?? ""),
@@ -179,7 +201,7 @@ export function MatchingProjectsListPage() {
           })}
         </div>
 
-        {projects.length > 0 && (
+        {!useMockData && projects.length > 0 && (
           <Pagination
             className="mt-5 self-center"
             currentPage={page}
