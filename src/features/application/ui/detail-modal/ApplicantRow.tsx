@@ -15,6 +15,7 @@ interface ApplicantRowProps {
   onClick?: () => void
   onStatusChange?: (status: StatusValue) => void
   statusDisabled?: boolean
+  statusOptions?: StatusValue[]
 }
 
 export function ApplicantRow({
@@ -28,6 +29,7 @@ export function ApplicantRow({
   onClick,
   onStatusChange,
   statusDisabled = false,
+  statusOptions,
 }: ApplicantRowProps) {
   return (
     <div
@@ -64,6 +66,7 @@ export function ApplicantRow({
               <StatusChipDropdown
                 value={status}
                 onValueChange={onStatusChange}
+                options={statusOptions}
               />
             )}
           </div>

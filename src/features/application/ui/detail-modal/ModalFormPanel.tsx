@@ -55,6 +55,7 @@ interface ModalFormPanelProps {
   onUnmatch?: () => void
   onClose: () => void
   statusDisabled?: boolean
+  hidePendingStatus?: boolean
   className?: string
 }
 
@@ -70,6 +71,7 @@ export function ModalFormPanel({
   onUnmatch,
   onClose,
   statusDisabled = false,
+  hidePendingStatus = false,
   className,
 }: ModalFormPanelProps) {
   const roleLabel = ROLE_LABEL[applicant.role] ?? applicant.role
@@ -151,13 +153,15 @@ export function ModalFormPanel({
                   >
                     불합격
                   </OptionButton>
-                  <OptionButton
-                    value="pending"
-                    disabled={statusDisabled}
-                    className="h-7.5 gap-0.5 font-normal!"
-                  >
-                    대기
-                  </OptionButton>
+                  {!hidePendingStatus && (
+                    <OptionButton
+                      value="pending"
+                      disabled={statusDisabled}
+                      className="h-7.5 gap-0.5 font-normal!"
+                    >
+                      대기
+                    </OptionButton>
+                  )}
                 </OptionButtonGroup>
               )}
             </div>
@@ -172,6 +176,7 @@ export function ModalFormPanel({
                 <StatusChipDropdown
                   value={applicant.status}
                   onValueChange={onStatusChange}
+                  options={hidePendingStatus ? ["pass", "fail"] : undefined}
                 />
               )}
             </div>
