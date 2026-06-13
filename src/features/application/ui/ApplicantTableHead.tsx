@@ -3,9 +3,9 @@ import ExpandAllIcon from "@/shared/assets/icon/expand-collapse/ExpandAllIcon"
 import { cn } from "@/shared/lib/utils"
 
 const COLUMNS = [
-  { label: "프로젝트", width: "w-[12.5rem]", align: "justify-center pr-4" },
-  { label: "파트", width: "w-[7.625rem]", align: "px-4" },
-  { label: "챌린저", width: "w-[12.5rem]", align: "px-16" },
+  { label: "프로젝트", width: "w-[184px]", align: "justify-center pr-4" },
+  { label: "파트", width: "w-[7.625rem]", align: "px-4 justify-center" },
+  { label: "챌린저", width: "w-[12.5rem]", align: "pl-4" },
   { label: "상태", width: "w-[8.5rem]", align: "px-[1.625rem] justify-center" },
   { label: "Design 배정", width: "w-[6.5rem]", align: "justify-center" },
   { label: "FE 배정", width: "w-[6.5625rem]", align: "justify-center" },
