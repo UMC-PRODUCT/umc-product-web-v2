@@ -16,9 +16,13 @@ function isValidPassword(pw: string): boolean {
 
 interface ChangePasswordFormProps {
   onSuccess: () => void
+  onBack: () => void
 }
 
-export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
+export function ChangePasswordForm({
+  onSuccess,
+  onBack,
+}: ChangePasswordFormProps) {
   const [current, setCurrent] = useState("")
   const [next, setNext] = useState("")
   const [confirm, setConfirm] = useState("")
@@ -163,6 +167,16 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
         className="h-11 w-full bg-teal-300 disabled:bg-teal-200"
       >
         변경하기
+      </Button>
+      <Button
+        type="button"
+        variant="weak"
+        color="neutral"
+        size="s"
+        onClick={onBack}
+        className="absolute right-11 bottom-10 h-11"
+      >
+        이전
       </Button>
     </div>
   )
