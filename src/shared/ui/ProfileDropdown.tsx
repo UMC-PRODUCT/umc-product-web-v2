@@ -6,6 +6,7 @@ import { useMe } from "@/features/auth/hooks/useMe"
 import { logout } from "@/features/auth/lib/logout"
 import { isCentralStaff, isSuperAdmin } from "@/features/auth/model/identity"
 import { toRoleTag } from "@/features/auth/model/mappers"
+import { useSelectedChallengerStore } from "@/features/auth/store/selectedChallengerStore"
 import { cn } from "@/shared/lib/utils"
 
 import ProfileIcon from "../assets/icon/people/ProfileIcon"
@@ -33,6 +34,17 @@ export function ProfileDropdown({
 
   const { data: me } = useMe()
   const canManageMembers = isSuperAdmin(me) || isCentralStaff(me)
+
+  const { selectedGisuId, setSelectedGisuId } = useSelectedChallengerStore()
+
+  // TODO: GET /api/v2/member/me 연동 후 challengerRecords → challengerHistory, record.gisu → record.generation 으로 교체
+  useEffect(() => {
+    if (selectedGisuId || !me?.challengerRecords?.length) return
+    const latest = [...me.challengerRecords].sort(
+      (a, b) => Number(b.gisuId) - Number(a.gisuId),
+    )[0]
+    if (latest) setSelectedGisuId(latest.gisuId)
+  }, [me, selectedGisuId, setSelectedGisuId])
 
   useEffect(() => {
     if (!isOpen) return
@@ -116,16 +128,19 @@ export function ProfileDropdown({
               </span>
 
               <div className="border-teal-gray-100 flex w-full flex-col gap-0.5 rounded-[10px] border px-0.5 py-0.5">
-                {/* TODO: 기수 선택 시 글로벌 상태 변경 */}
                 {me?.challengerRecords && me.challengerRecords.length > 0 ? (
-                  me.challengerRecords.map((record, index) => (
-                    <GenerationListItem
-                      key={record.challengerId}
-                      generation={Number(record.gisu)}
-                      active={index === 0} // 현재는 첫 번째 항목을 활성 상태로 표시
-                      className="w-full"
-                    />
-                  ))
+                  me.challengerRecords
+                    .slice()
+                    .sort((a, b) => Number(b.gisuId) - Number(a.gisuId))
+                    .map((record) => (
+                      <GenerationListItem
+                        key={record.challengerId}
+                        generation={Number(record.gisu)}
+                        active={record.gisuId === selectedGisuId}
+                        onClick={() => setSelectedGisuId(record.gisuId)}
+                        className="w-full"
+                      />
+                    ))
                 ) : (
                   <div className="text-caption-3-medium text-teal-gray-400 py-2 text-center">
                     참여 기록이 없습니다.

@@ -116,12 +116,12 @@ export function useMatchingProjectListFilters() {
     () =>
       selectedBranch
         ? (
-            chaptersData?.chapters.find((ch) => ch.chapterId === selectedBranch)
-              ?.schools ?? []
-          ).map((s) => ({ value: s.schoolId, label: s.schoolName }))
+          chaptersData?.chapters.find((ch) => ch.chapterId === selectedBranch)
+            ?.schools ?? []
+        ).map((s) => ({ value: s.schoolId, label: s.schoolName }))
         : (chaptersData?.chapters ?? []).flatMap((ch) =>
-            ch.schools.map((s) => ({ value: s.schoolId, label: s.schoolName })),
-          ),
+          ch.schools.map((s) => ({ value: s.schoolId, label: s.schoolName })),
+        ),
     [chaptersData, selectedBranch],
   )
 

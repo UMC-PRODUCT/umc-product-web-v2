@@ -1,5 +1,6 @@
 const KAKAO_REDIRECT_PATH = "/oauth/kakao/callback"
 const KAKAO_STATE_STORAGE_KEY = "kakao_oauth_state"
+const KAKAO_LINK_INTENT_KEY = "kakao_link_intent"
 
 function generateSecureState(): string {
   if (typeof crypto?.randomUUID === "function") {
@@ -21,6 +22,16 @@ export function consumeKakaoState(received: string | null): boolean {
   const saved = sessionStorage.getItem(KAKAO_STATE_STORAGE_KEY)
   sessionStorage.removeItem(KAKAO_STATE_STORAGE_KEY)
   return Boolean(saved) && saved === received
+}
+
+export function setKakaoLinkIntent(): void {
+  sessionStorage.setItem(KAKAO_LINK_INTENT_KEY, "link")
+}
+
+export function consumeKakaoLinkIntent(): boolean {
+  const intent = sessionStorage.getItem(KAKAO_LINK_INTENT_KEY)
+  sessionStorage.removeItem(KAKAO_LINK_INTENT_KEY)
+  return intent === "link"
 }
 
 export function startKakaoSignIn(): void {
