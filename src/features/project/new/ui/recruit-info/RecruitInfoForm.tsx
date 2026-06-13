@@ -47,6 +47,7 @@ interface RecruitInfoFormProps {
   onNext: () => void
   readOnly?: boolean
   isHydrated?: boolean
+  canUpdatePartQuotasOverride?: boolean
 }
 
 function buildSummaryText(
@@ -67,7 +68,13 @@ export const RecruitInfoForm = forwardRef<
   RecruitInfoFormHandle,
   RecruitInfoFormProps
 >(function RecruitInfoForm(
-  { onPrev, onNext, readOnly = false, isHydrated = true },
+  {
+    onPrev,
+    onNext,
+    readOnly = false,
+    isHydrated = true,
+    canUpdatePartQuotasOverride,
+  },
   ref,
 ) {
   const addToast = useToastStore((s) => s.addToast)
@@ -77,12 +84,15 @@ export const RecruitInfoForm = forwardRef<
   const projectPermissionsQuery = useProjectPermissions(
     projectId ?? undefined,
     {
-      enabled: projectId !== null,
+      enabled: projectId !== null && canUpdatePartQuotasOverride !== true,
     },
   )
-  const canUpdatePartQuotas = projectPermissionsQuery.canManage
+  const canUpdatePartQuotas =
+    canUpdatePartQuotasOverride ?? projectPermissionsQuery.canManage
   const isPartQuotaPermissionLoading =
-    projectId !== null && projectPermissionsQuery.isPending
+    canUpdatePartQuotasOverride !== true &&
+    projectId !== null &&
+    projectPermissionsQuery.isPending
   const isReadOnly =
     readOnly || isPartQuotaPermissionLoading || !canUpdatePartQuotas
 
