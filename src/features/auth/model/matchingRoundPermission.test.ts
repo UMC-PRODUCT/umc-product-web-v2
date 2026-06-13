@@ -85,4 +85,9 @@ describe("canManageMatchingRounds", () => {
       ),
     ).toBe(false)
   })
+
+  it("유저 정보가 없거나(undefined) 역할이 없는 경우 false", () => {
+    expect(canManageMatchingRounds(undefined)).toBe(false)
+    expect(canManageMatchingRounds(makeMe([]))).toBe(false)
+  })
 })
