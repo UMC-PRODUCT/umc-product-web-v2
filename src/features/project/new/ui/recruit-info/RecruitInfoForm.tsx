@@ -291,9 +291,9 @@ export const RecruitInfoForm = forwardRef<
         </div>
         <div className="bg-teal-gray-100 mt-4 mb-21 flex w-full items-center rounded-[8px] px-7 py-2.5">
           <div className="text-subtitle-3-semibold border-teal-gray-200 flex border-r pr-7.5 text-teal-600">
-            <span className="mr-17">총 모집 인원</span>
-            <span className="mr-1">{totalCount}</span>
-            <span>명</span>
+            <div className="mr-17">총 모집 인원</div>
+            <div className="mr-1">{totalCount}</div>
+            <div>명</div>
           </div>
           <span className="text-teal-gray-700 text-body-1-regular ml-7.5">
             {summaryText || "직군별 인원을 선택해 주세요"}
