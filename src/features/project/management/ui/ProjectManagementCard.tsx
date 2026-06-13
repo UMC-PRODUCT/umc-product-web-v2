@@ -1,7 +1,10 @@
+import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 
+import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
+import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { ProjectStatusChip } from "@/shared/ui/chip/ProjectStatusChip"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
@@ -31,6 +34,17 @@ export function ProjectManagementCard({
   const [open, setOpen] = useState(false)
   const projectId = Number(data.id)
   const hasValidProjectId = Number.isFinite(projectId) && projectId > 0
+  const shouldFetchLogo = hasValidProjectId && !data.logoImage?.src
+  const { data: projectDetail, dataUpdatedAt: projectDetailDataUpdatedAt } =
+    useQuery({
+      queryKey: ["projectDetail", projectId],
+      queryFn: () => getProjectDetail(projectId),
+      enabled: shouldFetchLogo,
+      staleTime: 5 * 60 * 1000,
+    })
+  const logoSrc =
+    data.logoImage?.src ??
+    withImageCacheKey(projectDetail?.logoImageUrl, projectDetailDataUpdatedAt)
   const openDetailModal = () => {
     if (!hasValidProjectId) return
     setOpen(true)
@@ -70,7 +84,7 @@ export function ProjectManagementCard({
             <div className="flex min-w-0 items-start justify-between gap-3 self-stretch">
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
                 <div className="shrink-0">
-                  <ProjectLogo src={data.logoImage?.src} size={30} />
+                  <ProjectLogo src={logoSrc ?? undefined} size={30} />
                 </div>
                 <span className="text-heading-7-semibold text-teal-gray-900 bp1:line-clamp-1 line-clamp-2 min-w-0">
                   {data.title}
