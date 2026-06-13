@@ -7,8 +7,8 @@ import { cn } from "@/shared/lib/utils"
 type ImageUploaderVariant = "thumbnail" | "logo"
 
 const variantSize: Record<ImageUploaderVariant, string> = {
-  thumbnail: "h-71.5 w-135",
-  logo: "h-50 w-50",
+  thumbnail: "aspect-[540/286] w-full",
+  logo: "aspect-square w-40 max-w-full bp1:w-50",
 }
 
 const variantRound: Record<ImageUploaderVariant, string> = {

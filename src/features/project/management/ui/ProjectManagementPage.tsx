@@ -244,7 +244,7 @@ export function ProjectManagementPage() {
 
   return (
     <section className="relative isolate flex w-full min-w-0 flex-col items-stretch justify-start">
-      <div className="border-teal-gray-100 bp1:gap-6 bp1:px-6 bp1:pt-6 bp1:pb-8 relative z-30 flex h-full w-full max-w-242 min-w-0 flex-col gap-5 rounded-[12px] border bg-white px-4 pt-5 pb-6 min-[960px]:px-8.5 min-[960px]:pt-8 min-[960px]:pb-10">
+      <div className="border-teal-gray-100 bp1:gap-6 bp1:px-6 bp1:pt-6 bp1:pb-8 bp2:px-8.5 bp2:pt-8 bp2:pb-10 relative z-30 flex h-full w-full max-w-242 min-w-0 flex-col gap-5 rounded-[12px] border bg-white px-4 pt-5 pb-6">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 관리
@@ -256,7 +256,7 @@ export function ProjectManagementPage() {
           </span>
         </div>
 
-        <div className="bp1:gap-8 flex min-w-0 flex-col gap-6 min-[960px]:gap-10">
+        <div className="bp1:gap-8 bp2:gap-10 flex min-w-0 flex-col gap-6">
           {useGroupedView && (
             <div className="min-w-0">
               <SegmentButton
@@ -277,7 +277,7 @@ export function ProjectManagementPage() {
               Array.from(partGroups.entries()).map(([part, partProjects]) => (
                 <div key={part} className="flex min-w-0 flex-col">
                   <ProjectManagementSubTitle title={part} className="pb-2" />
-                  <div className="grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2 min-[960px]:grid-cols-1 min-[960px]:gap-4">
+                  <div className="bp2:grid-cols-1 bp2:gap-4 grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2">
                     {partProjects.map((project) => {
                       const permissions = getProjectActionPermissions(project)
                       return (
@@ -293,7 +293,7 @@ export function ProjectManagementPage() {
                 </div>
               ))
             ) : !useGroupedView && projects.length > 0 ? (
-              <div className="grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2 min-[960px]:grid-cols-1">
+              <div className="bp2:grid-cols-1 grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2">
                 {projects.map((project) => {
                   const permissions = getProjectActionPermissions(project)
                   return (
@@ -313,7 +313,7 @@ export function ProjectManagementPage() {
               />
             )
           ) : projects.length > 0 ? (
-            <div className="grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2 min-[960px]:grid-cols-1">
+            <div className="bp2:grid-cols-1 grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2">
               {projects.map((project) => {
                 const permissions = getProjectActionPermissions(project)
                 return (

@@ -53,7 +53,7 @@ export function ProjectManagementCard({
   return (
     <>
       <div
-        className="border-teal-gray-100 [&:hover:not(:has(button:hover))]:bg-teal-gray-100 shadow-drop-neutral-2 bp1:p-4 flex w-full max-w-[56.25rem] min-w-0 cursor-pointer flex-col gap-4 rounded-2xl border bg-white p-3 transition-colors min-[960px]:flex-row min-[960px]:items-center min-[960px]:gap-7 min-[960px]:py-2.5 min-[960px]:pr-5 min-[960px]:pl-2.5"
+        className="border-teal-gray-100 [&:hover:not(:has(button:hover))]:bg-teal-gray-100 shadow-drop-neutral-2 bp1:p-4 bp2:flex-row bp2:items-center bp2:gap-7 bp2:py-2.5 bp2:pr-5 bp2:pl-2.5 flex w-full max-w-[56.25rem] min-w-0 cursor-pointer flex-col gap-4 rounded-2xl border bg-white p-3 transition-colors"
         role="button"
         tabIndex={0}
         onClick={openDetailModal}
@@ -61,7 +61,7 @@ export function ProjectManagementCard({
           if (e.key === "Enter" || e.key === " ") openDetailModal()
         }}
       >
-        <div className="bg-teal-gray-200 flex aspect-[320/169] w-full shrink-0 overflow-hidden rounded-[0.625rem] min-[960px]:h-[10.5625rem] min-[960px]:w-[clamp(13rem,28vw,20rem)]">
+        <div className="bg-teal-gray-200 bp2:h-[10.5625rem] bp2:w-[clamp(13rem,28vw,20rem)] flex aspect-[320/169] w-full shrink-0 overflow-hidden rounded-[0.625rem]">
           {cover?.src ? (
             <img
               src={cover.src}
@@ -79,7 +79,7 @@ export function ProjectManagementCard({
           )}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col items-stretch gap-4 min-[960px]:items-end">
+        <div className="bp2:items-end flex min-w-0 flex-1 flex-col items-stretch gap-4">
           <div className="flex min-w-0 flex-col items-start gap-2 self-stretch">
             <div className="flex min-w-0 items-start justify-between gap-3 self-stretch">
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
@@ -117,9 +117,9 @@ export function ProjectManagementCard({
               return (
                 <div
                   key={row.part}
-                  className="flex min-w-0 items-center justify-between gap-2 self-stretch min-[960px]:gap-3"
+                  className="bp2:gap-3 flex min-w-0 items-center justify-between gap-2 self-stretch"
                 >
-                  <div className="flex min-w-0 flex-1 items-center justify-between gap-2 min-[960px]:w-[7.3125rem] min-[960px]:flex-none min-[960px]:shrink-0">
+                  <div className="bp2:w-[7.3125rem] bp2:flex-none bp2:shrink-0 flex min-w-0 flex-1 items-center justify-between gap-2">
                     <span className="text-body-2-medium text-teal-gray-700 truncate">
                       {row.part}
                     </span>

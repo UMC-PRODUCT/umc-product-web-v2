@@ -26,10 +26,10 @@ function HeaderTestPage() {
       <div className="flex w-full">
         <SideBar activePathname={HEADER_PREVIEW_PATHNAME} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="px-4 pt-6 min-[960px]:px-8.5 min-[960px]:pt-14.5">
+          <div className="bp2:px-8.5 bp2:pt-14.5 px-4 pt-6">
             <MatchingSegmentRegion activePathname={HEADER_PREVIEW_PATHNAME} />
           </div>
-          <div className="flex min-h-screen min-w-0 flex-1 flex-col px-4 pt-6 min-[960px]:px-8.5 min-[960px]:pt-8">
+          <div className="bp2:px-8.5 bp2:pt-8 flex min-h-screen min-w-0 flex-1 flex-col px-4 pt-6">
             <section className="border-teal-gray-100 flex flex-col gap-3 rounded-lg border bg-white p-6">
               <h1 className="text-heading-6-semibold text-teal-gray-900">
                 Header Test Page

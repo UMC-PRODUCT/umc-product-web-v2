@@ -84,7 +84,7 @@ export function PortfolioField({
   const displayError = linkError || fileError || errorProp
 
   return (
-    <div className={cn("flex w-full max-w-203 flex-col gap-1", className)}>
+    <div className={cn("flex w-full flex-col gap-1", className)}>
       <div className="border-teal-gray-150 flex h-15 w-full items-center justify-between gap-1.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] px-5 py-4">
         <input
           type="file"
