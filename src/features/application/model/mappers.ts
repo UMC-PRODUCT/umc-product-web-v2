@@ -15,7 +15,7 @@ import type {
   FormQuestion,
   FormResponseData,
   ManagedProjectSummaryResponse,
-  MatchingPhase,
+  MatchingRoundPhaseView,
   PartEnum,
   ProjectApplicantResponse,
 } from "./apiTypes"
@@ -75,14 +75,15 @@ export function toFrontRole(serverPart: PartEnum): Role {
   return PART_MAP[serverPart] ?? "plan"
 }
 
-// 서버 phase -> 프론트 라운드 번호
-const PHASE_MAP: Record<MatchingPhase, number> = {
+// 서버 phase -> 프론트 라운드 번호 (RANDOM_MATCHING은 0으로 처리 - 실제로 응답에 오지 않음)
+const PHASE_MAP: Record<MatchingRoundPhaseView, number> = {
   FIRST: 1,
   SECOND: 2,
   THIRD: 3,
+  RANDOM_MATCHING: 0,
 }
 
-export function toRoundNumber(phase: MatchingPhase): number {
+export function toRoundNumber(phase: MatchingRoundPhaseView): number {
   return PHASE_MAP[phase] ?? 1
 }
 
@@ -172,14 +173,16 @@ export function toProjectApplication(
 export function summaryToStats(
   summary: ChapterStatisticsResponse["summary"],
   projectIdToName: Map<string, string>,
-  filterRound?: number, // 미지정 시 전 차수 합산
+  filterRound?: number, // 미지정 시 전 차수 합산, 0 = 완료된 차수 없음, N = N차까지 표시
 ): Omit<ApplicationStats, "universities"> {
-  // 차수별 지원 현황
-  const rounds = summary.roundApplicationStatistics.map((r) => ({
-    round: toRoundNumber(r.matchingRound.phase),
-    applied: Number(r.appliedMemberCount),
-    total: Number(r.availableMemberCount),
-  }))
+  // 차수별 지원 현황 (완료된 차수만)
+  const rounds = summary.roundApplicationStatistics
+    .map((r) => ({
+      round: toRoundNumber(r.matchingRound.phase),
+      applied: Number(r.appliedMemberCount),
+      total: Number(r.availableMemberCount),
+    }))
+    .filter((r) => filterRound === undefined || r.round <= filterRound)
 
   // 총원 / 매칭 완료 (schoolMatchingStatistics 합산)
   // 서버가 숫자 필드를 문자열로 내려주므로 Number() 변환 필요
@@ -195,48 +198,60 @@ export function summaryToStats(
   const completionRate =
     totalMembers > 0 ? Math.round((completedCount / totalMembers) * 100) : 0
 
-  // 프로젝트별 차수별 지원 현황
+  // 프로젝트별 차수별 지원 현황 (완료된 차수만)
   const projectRounds: ProjectRoundData[] = summary.projectRoundStatistics.map(
     (p) => ({
       name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
       rounds: [
-        Number(
-          p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
-            ?.appliedMemberCount ?? 0,
-        ),
-        Number(
-          p.matchingRounds.find((r) => r.matchingRound.phase === "SECOND")
-            ?.appliedMemberCount ?? 0,
-        ),
-        Number(
-          p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")
-            ?.appliedMemberCount ?? 0,
-        ),
+        filterRound === undefined || filterRound >= 1
+          ? Number(
+              p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
+                ?.appliedMemberCount ?? 0,
+            )
+          : 0,
+        filterRound === undefined || filterRound >= 2
+          ? Number(
+              p.matchingRounds.find((r) => r.matchingRound.phase === "SECOND")
+                ?.appliedMemberCount ?? 0,
+            )
+          : 0,
+        filterRound === undefined || filterRound >= 3
+          ? Number(
+              p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")
+                ?.appliedMemberCount ?? 0,
+            )
+          : 0,
       ],
     }),
   )
 
-  // Top 4 프로젝트 (filterRound 지정 시 해당 차수, 미지정 시 전 차수 합산)
+  // Top 4 프로젝트 (filterRound 지정 시 해당 차수, 미지정 시 전 차수 합산, 0이면 전체 0)
   const phaseMap: Record<number, "FIRST" | "SECOND" | "THIRD"> = {
     1: "FIRST",
     2: "SECOND",
     3: "THIRD",
   }
-  const targetPhase = filterRound ? phaseMap[filterRound] : undefined
   const topProjects: TopProject[] = summary.projectRoundStatistics
-    .map((p) => ({
-      projectId: p.projectId,
-      name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
-      count: targetPhase
-        ? Number(
-            p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)
-              ?.appliedMemberCount ?? 0,
-          )
-        : p.matchingRounds.reduce(
-            (s, r) => s + Number(r.appliedMemberCount),
-            0,
-          ),
-    }))
+    .map((p) => {
+      let count = 0
+      if (filterRound === undefined) {
+        count = p.matchingRounds.reduce(
+          (s, r) => s + Number(r.appliedMemberCount),
+          0,
+        )
+      } else if (filterRound > 0) {
+        const targetPhase = phaseMap[filterRound]
+        count = Number(
+          p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)
+            ?.appliedMemberCount ?? 0,
+        )
+      }
+      return {
+        projectId: p.projectId,
+        name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
+        count,
+      }
+    })
     .sort(
       (a, b) => b.count - a.count || Number(a.projectId) - Number(b.projectId),
     )

@@ -35,7 +35,7 @@ import type {
 // 매칭 라운드 목록에서 현재 활성 차수 번호 계산
 // PM 결정 기간(endsAt ~ decisionDeadline)도 "활성"으로 판별
 function getCurrentRound(rounds: MatchingRoundResponse[]): {
-  currentRound: number
+  currentRound: number | undefined
   activeRound: number | undefined
 } {
   const now = Date.now()
@@ -48,11 +48,16 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): {
     const round = toRoundNumber(active.phase)
     return { currentRound: round, activeRound: round }
   }
-  // 없으면 가장 최근 라운드 (타이틀용), activeRound는 undefined
-  const sorted = [...rounds].sort(
-    (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
-  )
-  const fallback = sorted.length > 0 ? toRoundNumber(sorted[0]!.phase) : 1
+  // 완료된 차수(decisionDeadline 지남) 중 가장 최근, 없으면 1차 기본값
+  const completed = [...rounds]
+    .filter((r) => new Date(r.decisionDeadline).getTime() < now)
+    .sort(
+      (a, b) =>
+        new Date(b.decisionDeadline).getTime() -
+        new Date(a.decisionDeadline).getTime(),
+    )
+  const fallback =
+    completed.length > 0 ? toRoundNumber(completed[0]!.phase) : undefined
   return { currentRound: fallback, activeRound: undefined }
 }
 
@@ -246,10 +251,13 @@ export function useMatchingStatusData(chapterName?: string) {
         }
       : chapterStatsQuery.data.summary
 
+    // activeRound가 있으면 해당 차수는 진행 중 → 이전 차수까지만 표시
+    const completedRound =
+      activeRound !== undefined ? activeRound - 1 : undefined
     const partial = summaryToStats(
       filteredSummary,
       projectIdToName,
-      currentRound,
+      completedRound,
     )
     const universities: UniversityCount[] =
       filteredSummary.schoolMatchingStatistics
@@ -267,6 +275,7 @@ export function useMatchingStatusData(chapterName?: string) {
     chapterStatsQuery.data,
     projectIdToName,
     currentRound,
+    activeRound,
     schoolIdToName,
     chapterName,
     chapterSchoolIds,

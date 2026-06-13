@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
 import { Modal } from "@/shared/ui/Modal"
 
@@ -36,6 +37,8 @@ export function ApplicationDetailModal({
   onOpenChange,
   currentRound,
 }: ApplicationDetailModalProps) {
+  const addToast = useToastStore((s) => s.addToast)
+
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
     null,
   )
@@ -44,6 +47,19 @@ export function ApplicationDetailModal({
   const [statusOverrides, setStatusOverrides] = useState<
     Record<string, StatusValue>
   >({})
+
+  // 지원자 없는 프로젝트 모달 오픈 시 토스트 노출
+  useEffect(() => {
+    if (open && project.applicants.length === 0) {
+      addToast({
+        message: "아직 지원자가 없습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const applicationIds = useMemo(() => {
     const ids = new Set<number>()
@@ -213,6 +229,7 @@ export function ApplicationDetailModal({
               currentRound={currentRound}
               canApproveApplicant={canApproveApplicant}
               approvePermissionLoading={isApprovePermissionLoading}
+              className="w-full"
             />
           </div>
 

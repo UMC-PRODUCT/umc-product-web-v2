@@ -32,7 +32,7 @@ import type {
 // 매칭 라운드 목록에서 현재 활성 차수 번호 계산
 // PM 결정 기간(endsAt ~ decisionDeadline)도 "활성"으로 판별
 function getCurrentRound(rounds: MatchingRoundResponse[]): {
-  currentRound: number
+  currentRound: number | undefined
   activeRound: number | undefined
 } {
   const now = Date.now()
@@ -46,12 +46,22 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): {
       active.phase === "FIRST" ? 1 : active.phase === "SECOND" ? 2 : 3
     return { currentRound: round, activeRound: round }
   }
-  const sorted = [...rounds].sort(
-    (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
-  )
-  if (!sorted[0]) return { currentRound: 1, activeRound: undefined }
+  // 완료된 차수(decisionDeadline 지남) 중 가장 최근, 없으면 undefined
+  const completed = [...rounds]
+    .filter((r) => new Date(r.decisionDeadline).getTime() < now)
+    .sort(
+      (a, b) =>
+        new Date(b.decisionDeadline).getTime() -
+        new Date(a.decisionDeadline).getTime(),
+    )
   const fallback =
-    sorted[0].phase === "FIRST" ? 1 : sorted[0].phase === "SECOND" ? 2 : 3
+    completed.length > 0
+      ? completed[0]!.phase === "FIRST"
+        ? 1
+        : completed[0]!.phase === "SECOND"
+          ? 2
+          : 3
+      : undefined
   return { currentRound: fallback, activeRound: undefined }
 }
 

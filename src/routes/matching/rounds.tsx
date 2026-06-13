@@ -193,6 +193,22 @@ function MatchingRoundsPage() {
 
   // 지부 변경 시 dirty 초기화
   const handleBranchChange = (branch: Branch) => {
+    if (isChapterPresident(me)) {
+      const myChapterId = me?.roles?.find(
+        (r) => r.roleType === "CHAPTER_PRESIDENT",
+      )?.organizationId
+      const targetChapter = chapters.find((c) => c.name === branch)
+      if (!targetChapter || String(targetChapter.id) !== myChapterId) {
+        addToast({
+          message: "소속된 지부의 매칭 기간만 설정할 수 있습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
+    }
     setSelectedBranch(branch)
     setIsDirty(false)
     setSaveState("idle")
@@ -299,7 +315,7 @@ function MatchingRoundsPage() {
           })
         }
         return createMatchingRound({
-          name: `${round.roundLabel} ${matchingType}`,
+          name: `${selectedBranch} ${round.roundLabel} Plan-Developer 매칭`,
           type: serverType,
           phase: round.phase,
           chapterId: chapterId!,
@@ -345,7 +361,7 @@ function MatchingRoundsPage() {
       )?.organizationId
       if (!chapterId || String(chapterId) !== myChapterId) {
         addToast({
-          message: "다른 지부의 매칭 일정은 설정할 수 없습니다.",
+          message: "소속된 지부의 매칭 기간만 설정할 수 있습니다.",
           color: "red",
           variant: "deep",
           type: "default",
@@ -487,8 +503,13 @@ function MatchingRoundsPage() {
     saveMutation.mutate()
   }
 
+  const hasExistingRounds = rounds.some((r) => !!r.id)
   const saveButtonText =
-    saveState === "completed" ? "저장 완료" : isDirty ? "수정하기" : "저장하기"
+    saveState === "completed"
+      ? "저장 완료"
+      : isDirty && hasExistingRounds
+        ? "수정하기"
+        : "저장하기"
   const saveButtonDisabled =
     !isDirty || saveState === "completed" || isFirstRoundStarted
 

@@ -274,6 +274,14 @@ export function ApplicationTableSection({
       <div role="table" className="flex flex-col">
         <ApplicantTableHead hasExpanded={hasExpanded} onToggleAll={toggleAll} />
 
+        {pagedProjects.length === 0 && (
+          <div className="border-teal-gray-100 flex min-h-18 items-center justify-center rounded-b-[12px] border-r border-b border-l">
+            <p className="text-body-2-medium text-teal-gray-300">
+              등록된 프로젝트와 지원자가 없습니다
+            </p>
+          </div>
+        )}
+
         {pagedProjects.map((project) => {
           const isExpanded = expandedIds.has(project.id)
 
