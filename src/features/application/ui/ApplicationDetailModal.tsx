@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
@@ -54,9 +54,17 @@ export function ApplicationDetailModal({
     Record<string, StatusValue>
   >({})
 
+  // 이중 실행 방지용 ref (Strict Mode 대응)
+  const emptyToastShownRef = useRef(false)
+
   // 지원자 없는 프로젝트 모달 오픈 시 토스트 노출
   useEffect(() => {
-    if (open && project.applicants.length === 0) {
+    if (!open) {
+      emptyToastShownRef.current = false
+      return
+    }
+    if (project.applicants.length === 0 && !emptyToastShownRef.current) {
+      emptyToastShownRef.current = true
       addToast({
         message: "아직 지원자가 없습니다.",
         color: "primary",
@@ -65,7 +73,7 @@ export function ApplicationDetailModal({
         duration: 3000,
       })
     }
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, addToast])
 
   const applicationIds = useMemo(() => {
     const ids = new Set<number>()
