@@ -82,8 +82,11 @@ function MatchingApplicationsPage() {
     }
   }, [me, chapters, userChapter])
 
-  // SCHOOL_PRESIDENT는 챕터 필터 없이 조회 (서버가 학교 단위로 APPLY-101 결과를 필터링)
-  const admin = useAdminPageData(isSchoolView ? undefined : selectedChapter)
+  // SCHOOL_PRESIDENT: 챕터 필터 없이 조회 후 프론트에서 본인 학교 프로젝트만 필터링
+  const admin = useAdminPageData(
+    isSchoolView ? undefined : selectedChapter,
+    isSchoolView ? (me?.schoolName ?? undefined) : undefined,
+  )
   const adminStats = admin.stats
   const adminProjects = admin.projects
 

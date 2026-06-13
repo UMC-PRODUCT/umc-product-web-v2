@@ -167,7 +167,7 @@ export function useChapters() {
 }
 
 // Admin 뷰용 데이터
-export function useAdminPageData(chapterName?: string) {
+export function useAdminPageData(chapterName?: string, schoolName?: string) {
   const gisuQuery = useActiveGisuId()
   const gisuId = gisuQuery.data ?? 0
 
@@ -202,14 +202,16 @@ export function useAdminPageData(chapterName?: string) {
   // 전체 프로젝트 목록 조회 (지원자 테이블용)
   const projectsQuery = useQuery({
     queryKey: applicationKeys.allProjects(gisuId, chapterId),
-    queryFn: () => getAllProjects(gisuId, { chapterId }),
+    queryFn: () => getAllProjects(gisuId, { chapterId, size: 100 }),
     enabled: gisuId > 0,
   })
 
-  const projects = useMemo(
-    () => projectsQuery.data?.content ?? [],
-    [projectsQuery.data],
-  )
+  const projects = useMemo(() => {
+    const content = projectsQuery.data?.content ?? []
+    // SCHOOL_PRESIDENT: 본인 학교 소속 PM의 프로젝트만 표시
+    if (!schoolName) return content
+    return content.filter((p) => p.productOwner.schoolName === schoolName)
+  }, [projectsQuery.data, schoolName])
 
   // 각 프로젝트의 지원자 목록 조회 (테이블 + 학교별 통계용)
   const applicantsQuery = useQuery({
