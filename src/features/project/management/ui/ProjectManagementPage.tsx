@@ -12,6 +12,7 @@ import {
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { gisuKeys, projectKeys } from "@/features/project/new/api/queryKeys"
 import { getActiveGisu } from "@/shared/api/gisu"
+import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
@@ -46,6 +47,7 @@ type ProjectSummaryInput = {
   name?: string | null
   description?: string | null
   thumbnailImageUrl?: string | null
+  logoImageUrl?: string | null
   status?: ProjectStatus | null
   productOwner?: {
     nickname?: string | null
@@ -61,7 +63,10 @@ type ProjectSummaryInput = {
     | null
 }
 
-function toMatchingProject(item: ProjectSummaryInput): MatchingProject {
+function toMatchingProject(
+  item: ProjectSummaryInput,
+  imageCacheKey: number,
+): MatchingProject {
   const owner = item.productOwner
   const ownerLine = [
     owner?.nickname && owner?.name
@@ -80,7 +85,22 @@ function toMatchingProject(item: ProjectSummaryInput): MatchingProject {
     description: item.description ?? "",
     authorSchoolLine: ownerLine,
     status: item.status ?? undefined,
-    coverImage: item.thumbnailImageUrl ? { src: item.thumbnailImageUrl } : null,
+    logoImage: item.logoImageUrl
+      ? {
+          src:
+            withImageCacheKey(item.logoImageUrl, imageCacheKey) ??
+            item.logoImageUrl,
+          alt: `${item.name ?? "프로젝트"} 로고`,
+        }
+      : null,
+    coverImage: item.thumbnailImageUrl
+      ? {
+          src:
+            withImageCacheKey(item.thumbnailImageUrl, imageCacheKey) ??
+            item.thumbnailImageUrl,
+          alt: `${item.name ?? "프로젝트"} 대표 이미지`,
+        }
+      : null,
     recruitRows: (item.partQuotas ?? [])
       .slice()
       .sort((a, b) => {
@@ -134,8 +154,11 @@ export function ProjectManagementPage() {
   })
 
   const projects: MatchingProject[] = useMemo(
-    () => (managedQuery.data ?? []).map(toMatchingProject),
-    [managedQuery.data],
+    () =>
+      (managedQuery.data ?? []).map((project) =>
+        toMatchingProject(project, managedQuery.dataUpdatedAt),
+      ),
+    [managedQuery.data, managedQuery.dataUpdatedAt],
   )
 
   const filteredProjects: MatchingProject[] = useMemo(() => {
@@ -220,27 +243,30 @@ export function ProjectManagementPage() {
   if (!hasAccess) return null
 
   return (
-    <section className="relative isolate flex w-full flex-col items-start justify-start">
-      <div className="border-teal-gray-100 relative z-30 flex h-full min-w-242 flex-col gap-6 rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
+    <section className="relative isolate flex w-full min-w-0 flex-col items-stretch justify-start">
+      <div className="border-teal-gray-100 bp1:gap-6 bp1:px-6 bp1:pt-6 bp1:pb-8 relative z-30 flex h-full w-full max-w-242 min-w-0 flex-col gap-5 rounded-[12px] border bg-white px-4 pt-5 pb-6 min-[960px]:px-8.5 min-[960px]:pt-8 min-[960px]:pb-10">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 관리
           </span>
           <span className="text-body-2-regular text-teal-gray-600">
             모든 프로젝트의 상세 정보를 확인하고 수정할 수 있습니다.
-            <br />
-            단, 매칭 중에는 일부 수정이 제한됩니다.
+            <br className="bp1:hidden block" /> 단, 매칭 중에는 일부 수정이
+            제한됩니다.
           </span>
         </div>
 
-        <div className="flex flex-col gap-10">
+        <div className="bp1:gap-8 flex min-w-0 flex-col gap-6 min-[960px]:gap-10">
           {useGroupedView && (
-            <SegmentButton
-              items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
-              value={selectedChapter}
-              onValueChange={setSelectedChapter}
-              itemClassName="flex-1"
-            />
+            <div className="min-w-0">
+              <SegmentButton
+                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+                value={selectedChapter}
+                onValueChange={setSelectedChapter}
+                className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
+                itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
+              />
+            </div>
           )}
           {managedQuery.isLoading ? (
             <p className="text-body-2-regular text-teal-gray-400 py-10 text-center">
@@ -249,9 +275,9 @@ export function ProjectManagementPage() {
           ) : isAdminScope ? (
             useGroupedView && partGroups.size > 0 ? (
               Array.from(partGroups.entries()).map(([part, partProjects]) => (
-                <div key={part} className="flex flex-col">
+                <div key={part} className="flex min-w-0 flex-col">
                   <ProjectManagementSubTitle title={part} className="pb-2" />
-                  <div className="flex flex-col gap-4">
+                  <div className="grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2 min-[960px]:grid-cols-1 min-[960px]:gap-4">
                     {partProjects.map((project) => {
                       const permissions = getProjectActionPermissions(project)
                       return (
@@ -267,7 +293,7 @@ export function ProjectManagementPage() {
                 </div>
               ))
             ) : !useGroupedView && projects.length > 0 ? (
-              <div className="flex flex-col gap-3">
+              <div className="grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2 min-[960px]:grid-cols-1">
                 {projects.map((project) => {
                   const permissions = getProjectActionPermissions(project)
                   return (
@@ -287,7 +313,7 @@ export function ProjectManagementPage() {
               />
             )
           ) : projects.length > 0 ? (
-            <div className="flex flex-col gap-3">
+            <div className="grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2 min-[960px]:grid-cols-1">
               {projects.map((project) => {
                 const permissions = getProjectActionPermissions(project)
                 return (

@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { cn } from "@/shared/lib/utils"
 
-import { SideBarViewSwitcher } from "./SideBarViewSwitcher"
 import { useVisibleSidebarSections } from "./useVisibleSidebarSections"
 
 interface MobileSidebarDrawerContentProps {
@@ -25,22 +24,21 @@ export function MobileSidebarDrawerContent({
 
   return (
     <section className="border-teal-gray-100 flex flex-col gap-3 border-t pt-4">
-      <SideBarViewSwitcher className="px-0 pt-0" onSelect={onNavigate} />
-      <span className="text-caption-2-medium text-teal-gray-400 px-1">
+      <span className="text-caption-2-medium text-teal-gray-400 px-1 text-center">
         Demo Day
       </span>
 
-      <div className="flex flex-col gap-4">
+      <div className="bp1:grid-cols-2 grid grid-cols-1 gap-4">
         {visibleSections.map(({ id, title, icon: Icon, menus }) => (
           <div key={id} className="flex flex-col gap-1.5">
-            <div className="flex h-8 items-center gap-2 px-1">
+            <div className="flex h-8 items-center justify-center gap-2 px-1">
               <Icon className="text-teal-gray-500 size-4" />
-              <span className="text-body-2-medium text-teal-gray-600">
+              <span className="text-subtitle-4-semibold text-teal-gray-600">
                 {title}
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-1 gap-1">
               {menus.map((menu) => {
                 const isSelected = resolved?.menu.id === menu.id
                 return (

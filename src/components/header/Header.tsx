@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 
 import { MobileSidebarDrawerContent } from "@/components/sidebar/MobileSidebarDrawerContent"
+import { SideBarViewSwitcher } from "@/components/sidebar/SideBarViewSwitcher"
 import { isOperator, isSchoolStaff } from "@/features/auth/model/identity"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
@@ -58,6 +59,19 @@ export default function Header({ activePathname }: HeaderProps = {}) {
     setIsMobileMenuOpen(false)
   }, [pathname])
 
+  useEffect(() => {
+    if (!isMobileMenuOpen) return
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false)
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape)
+    return () => window.removeEventListener("keydown", handleEscape)
+  }, [isMobileMenuOpen])
+
   return (
     <header className="bg-teal-gray-50 shadow-drop-neutral-3 relative z-50 flex min-h-16 w-full flex-col overflow-visible min-[960px]:h-20 min-[960px]:min-h-20 min-[960px]:flex-row min-[960px]:items-center min-[960px]:justify-between">
       <div className="flex h-16 w-full items-center justify-between min-[960px]:h-20">
@@ -87,7 +101,12 @@ export default function Header({ activePathname }: HeaderProps = {}) {
           <Profile />
         </div>
 
-        <div className="flex items-center gap-2 pr-5 min-[960px]:hidden">
+        <div className="flex min-w-0 items-center gap-2 pr-5 min-[960px]:hidden">
+          <SideBarViewSwitcher
+            className="relative z-[70] min-w-0"
+            dropdownClassName="w-28 bp1:w-43"
+            menuClassName="shadow-drop-neutral-2 absolute top-full right-0 z-[80] mt-1 w-full rounded-[8px]"
+          />
           <button
             type="button"
             aria-label={isMobileMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
@@ -104,6 +123,15 @@ export default function Header({ activePathname }: HeaderProps = {}) {
           </button>
         </div>
       </div>
+
+      {isMobileMenuOpen && (
+        <button
+          type="button"
+          aria-label="모바일 메뉴 닫기"
+          className="fixed inset-x-0 top-16 bottom-0 z-40 bg-neutral-900/40 min-[960px]:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       <nav
         id="mobile-header-navigation"

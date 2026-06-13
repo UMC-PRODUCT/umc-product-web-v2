@@ -10,11 +10,15 @@ import { SideBarDropDown } from "./dropdown/SideBarDropDown"
 interface SideBarViewSwitcherProps {
   onSelect?: (mode: ViewMode) => void
   className?: string
+  dropdownClassName?: string
+  menuClassName?: string
 }
 
 export function SideBarViewSwitcher({
   onSelect,
   className,
+  dropdownClassName,
+  menuClassName,
 }: SideBarViewSwitcherProps) {
   const { availableModes } = useAvailableViewModes()
   const mode = useViewModeStore((s) => s.mode)
@@ -35,6 +39,8 @@ export function SideBarViewSwitcher({
       <SideBarDropDown
         options={options}
         selectedIdx={selectedIdx}
+        className={dropdownClassName}
+        menuClassName={menuClassName}
         onSelect={(idx) => {
           const next = options[idx]?.mode
           if (!next || next === mode) return
