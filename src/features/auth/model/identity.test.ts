@@ -5,6 +5,7 @@ import {
   canManageProjects,
   getProjectPmSearchScope,
   isAnyOperator,
+  isProjectRegistrationQuotaLimited,
   isSchoolLeadership,
 } from "./identity"
 
@@ -209,5 +210,73 @@ describe("getProjectPmSearchScope", () => {
 
   it("undefined는 빈 객체 반환", () => {
     expect(getProjectPmSearchScope(undefined)).toEqual({})
+  })
+})
+
+describe("isProjectRegistrationQuotaLimited", () => {
+  it("순수 PM(현기수 PLAN, 운영 역할 없음)은 1개 제한 대상 true", () => {
+    expect(
+      isProjectRegistrationQuotaLimited(
+        makeMe(["CHALLENGER"], [{ gisuId: "10", part: "PLAN" }]),
+      ),
+    ).toBe(true)
+  })
+  it("Plan + 지부장은 운영 권한 우선으로 제한 제외 false", () => {
+    expect(
+      isProjectRegistrationQuotaLimited(
+        makeMe(["CHAPTER_PRESIDENT"], [{ gisuId: "10", part: "PLAN" }]),
+      ),
+    ).toBe(false)
+  })
+  it("Plan + 최고관리자도 제한 제외 false", () => {
+    expect(
+      isProjectRegistrationQuotaLimited(
+        makeMe(["SUPER_ADMIN"], [{ gisuId: "10", part: "PLAN" }]),
+      ),
+    ).toBe(false)
+  })
+  it("Plan + 학교 회장도 제한 제외 false", () => {
+    expect(
+      isProjectRegistrationQuotaLimited(
+        makeMe(["SCHOOL_PRESIDENT"], [{ gisuId: "10", part: "PLAN" }]),
+      ),
+    ).toBe(false)
+  })
+  it("Plan + 학교 기타운영진도 제한 제외 false", () => {
+    expect(
+      isProjectRegistrationQuotaLimited(
+        makeMe(["SCHOOL_ETC_ADMIN"], [{ gisuId: "10", part: "PLAN" }]),
+      ),
+    ).toBe(false)
+  })
+  it("운영진이지만 현기수 비PM(비PLAN)이면 false", () => {
+    expect(
+      isProjectRegistrationQuotaLimited(
+        makeMe(["SUPER_ADMIN"], [{ gisuId: "10", part: "IOS" }]),
+      ),
+    ).toBe(false)
+  })
+  it("비PM 일반 챌린저는 false", () => {
+    expect(
+      isProjectRegistrationQuotaLimited(
+        makeMe(["CHALLENGER"], [{ gisuId: "10", part: "IOS" }]),
+      ),
+    ).toBe(false)
+  })
+  it("최신 기수가 PLAN이 아니면(이전 기수 PLAN 무시) false", () => {
+    expect(
+      isProjectRegistrationQuotaLimited(
+        makeMe(
+          ["CHALLENGER"],
+          [
+            { gisuId: "9", part: "PLAN" },
+            { gisuId: "10", part: "IOS" },
+          ],
+        ),
+      ),
+    ).toBe(false)
+  })
+  it("undefined는 false", () => {
+    expect(isProjectRegistrationQuotaLimited(undefined)).toBe(false)
   })
 })

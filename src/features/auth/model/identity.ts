@@ -105,6 +105,13 @@ export function isCurrentTermPm(me: MemberInfoResponse | undefined): boolean {
   return latest?.part === "PLAN"
 }
 
+export function isProjectRegistrationQuotaLimited(
+  me: MemberInfoResponse | undefined,
+): boolean {
+  if (isAnyOperator(me)) return false
+  return isCurrentTermPm(me)
+}
+
 export function getViewerBranch(
   me: MemberInfoResponse | undefined,
 ): string | undefined {
