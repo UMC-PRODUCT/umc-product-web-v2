@@ -70,6 +70,27 @@ describe("projectViewMe", () => {
     expect(v?.challengerRecords).toEqual([])
   })
 
+  it("ADMIN record는 others viewMe에서 제외한다", () => {
+    const me = {
+      ...baseMe,
+      currentGisuMemberInfo: {
+        gisuId: "10",
+        generation: "10",
+        challenger: {
+          challengerId: "1",
+          part: "ADMIN",
+          challengerStatus: "ACTIVE",
+        },
+        isAdmin: true,
+        roleTypes: ["SUPER_ADMIN"],
+      },
+      challengerRecords: [{ challengerId: "1", gisuId: "10", part: "ADMIN" }],
+    } as unknown as MemberInfoResponse
+    const v = projectViewMe(me, "others")
+    expect(v?.roles).toEqual([])
+    expect(v?.challengerRecords).toEqual([])
+  })
+
   it("me가 undefined면 undefined 반환", () => {
     expect(projectViewMe(undefined, "admin")).toBeUndefined()
   })

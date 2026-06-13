@@ -59,6 +59,11 @@ describe("computeAvailableViewModes", () => {
     expect(computeAvailableViewModes(me)).toEqual(["admin"])
   })
 
+  it("운영진 + 현재 ADMIN record → [admin]", () => {
+    const me = makeMe(["SUPER_ADMIN"], ["ADMIN"])
+    expect(computeAvailableViewModes(me)).toEqual(["admin"])
+  })
+
   it("운영진 + 과거 비-PLAN 챌린저 → [admin]", () => {
     const me = makeMe(["CENTRAL_OPERATING_TEAM_MEMBER"], ["WEB"], null)
     expect(computeAvailableViewModes(me)).toEqual(["admin"])

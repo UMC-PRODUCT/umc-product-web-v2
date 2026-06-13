@@ -1,6 +1,7 @@
 import { isAnyOperator } from "@/features/auth/model/identity"
 
 import { getCurrentGisuChallengerRecords } from "./currentGisuRecords"
+import { isOtherChallengerPart, isPmPart } from "./viewModeParts"
 
 import type { MemberInfoResponse } from "@/features/auth/api/me"
 
@@ -13,7 +14,7 @@ export function computeAvailableViewModes(
   const modes: ViewMode[] = []
   if (isAnyOperator(me)) modes.push("admin")
   const records = getCurrentGisuChallengerRecords(me)
-  if (records.some((r) => r.part === "PLAN")) modes.push("pm")
-  if (records.some((r) => r.part !== "PLAN")) modes.push("others")
+  if (records.some((r) => isPmPart(r.part))) modes.push("pm")
+  if (records.some((r) => isOtherChallengerPart(r.part))) modes.push("others")
   return modes
 }

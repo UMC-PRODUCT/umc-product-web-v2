@@ -1,4 +1,5 @@
 import { getCurrentGisuChallengerRecords } from "./currentGisuRecords"
+import { isOtherChallengerPart, isPmPart } from "./viewModeParts"
 
 import type { MemberInfoResponse } from "@/features/auth/api/me"
 
@@ -17,13 +18,13 @@ export function projectViewMe(
       return {
         ...me,
         roles: [],
-        challengerRecords: records.filter((r) => r.part === "PLAN"),
+        challengerRecords: records.filter((r) => isPmPart(r.part)),
       }
     case "others":
       return {
         ...me,
         roles: [],
-        challengerRecords: records.filter((r) => r.part !== "PLAN"),
+        challengerRecords: records.filter((r) => isOtherChallengerPart(r.part)),
       }
   }
 }
