@@ -224,7 +224,10 @@ export function ProjectDetailCard({
   }, [me])
 
   const myApplicationForProject = myApplications?.find(
-    (a) => Number(a.projectId) === projectId && a.status !== "CANCELLED",
+    (a) =>
+      Number(a.projectId) === projectId &&
+      a.status !== "CANCELLED" &&
+      a.applicationId != null,
   )
   const isApplied = myApplicationForProject != null
 
