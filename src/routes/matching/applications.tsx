@@ -107,7 +107,7 @@ function MatchingApplicationsPage() {
 
         <div className="mt-6 flex flex-col gap-13">
           {canApprove && (
-            <div className="ml-4 flex w-263 flex-col gap-13">
+            <div className="flex w-263 flex-col gap-13">
               <SegmentButton
                 items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
                 value={selectedChapter}
@@ -152,7 +152,7 @@ function MatchingApplicationsPage() {
           )}
 
           {isSchoolView && (
-            <div className="ml-4 flex w-263 flex-col gap-13">
+            <div className="flex w-263 flex-col gap-13">
               <SegmentButton
                 items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
                 value={selectedChapter}
