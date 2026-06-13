@@ -3,7 +3,7 @@ import { SIDEBAR_ID, type SideBarSection } from "@/shared/config/navigation"
 export interface SidebarPermissions {
   canAccessProjectSettings: boolean
   canManageProjects: boolean
-  canManageRecruitment: boolean
+  canManageMatchingRounds: boolean
 }
 
 export function filterSectionsByPermission(
@@ -11,7 +11,7 @@ export function filterSectionsByPermission(
   {
     canAccessProjectSettings,
     canManageProjects,
-    canManageRecruitment,
+    canManageMatchingRounds,
   }: SidebarPermissions,
 ): SideBarSection[] {
   return sections
@@ -37,7 +37,7 @@ export function filterSectionsByPermission(
           ...section,
           menus: section.menus.filter((menu) => {
             if (menu.id === SIDEBAR_ID.item.matchingRounds)
-              return canManageRecruitment
+              return canManageMatchingRounds
             return true
           }),
         }

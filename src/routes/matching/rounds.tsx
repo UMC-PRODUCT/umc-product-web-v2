@@ -14,7 +14,10 @@ import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isChapterPresident, isOperator } from "@/features/auth/model/identity"
+import {
+  canManageMatchingRounds,
+  isChapterPresident,
+} from "@/features/auth/model/identity"
 import {
   type Branch,
   emptyRoundSchedules,
@@ -43,7 +46,7 @@ export const Route = createFileRoute("/matching/rounds")({
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
     const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
-    if (!isOperator(viewMe)) throw redirect({ to: "/" })
+    if (!canManageMatchingRounds(viewMe)) throw redirect({ to: "/" })
   },
   component: MatchingRoundsPage,
 })
