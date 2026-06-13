@@ -246,10 +246,13 @@ export function useMatchingStatusData(chapterName?: string) {
         }
       : chapterStatsQuery.data.summary
 
+    // activeRound가 있으면 해당 차수는 진행 중 → 이전 차수까지만 표시
+    const completedRound =
+      activeRound !== undefined ? activeRound - 1 : undefined
     const partial = summaryToStats(
       filteredSummary,
       projectIdToName,
-      currentRound,
+      completedRound,
     )
     const universities: UniversityCount[] =
       filteredSummary.schoolMatchingStatistics
@@ -267,6 +270,7 @@ export function useMatchingStatusData(chapterName?: string) {
     chapterStatsQuery.data,
     projectIdToName,
     currentRound,
+    activeRound,
     schoolIdToName,
     chapterName,
     chapterSchoolIds,
