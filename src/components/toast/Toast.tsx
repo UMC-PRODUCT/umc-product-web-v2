@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import SvgCircleCheckIcon from "@/shared/assets/icon/check/CircleCheckIcon"
 import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
-import RubberConeIcon from "@/shared/assets/icon/RubberConeIcon"
+import RubberConeIcon from "@/shared/assets/icon/error/RubberConeIcon"
 import { cn } from "@/shared/lib/utils"
 
 export const FADE_OUT_DURATION = 300
