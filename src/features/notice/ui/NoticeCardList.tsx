@@ -66,7 +66,7 @@ export function NoticeCardList({
     if (!targetButton) return
 
     targetButton.focus()
-    targetButton.scrollIntoView({ block: "center", behavior: "smooth" })
+    targetButton.scrollIntoView({ block: "start", behavior: "smooth" })
   }, [expandedIndex, focusedNoticeId, notices])
 
   if (isLoading) {

@@ -109,6 +109,12 @@ function readPendingNotice() {
   }
 }
 
+function readHashNoticeId() {
+  if (typeof window === "undefined") return null
+  const id = window.location.hash.match(/^#notice-(.+)$/)?.[1]
+  return id ? decodeURIComponent(id) : null
+}
+
 /** 팀 매칭 공지 페이지 (/matching) */
 export const Route = createFileRoute("/matching/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
@@ -139,6 +145,7 @@ function TeamMatchingAnnouncePage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
   const [pendingNotice] = useState(readPendingNotice)
+  const [hashNoticeId] = useState(readHashNoticeId)
 
   const { data: me } = useMe()
   const { viewMe } = useViewMe()
@@ -227,7 +234,7 @@ function TeamMatchingAnnouncePage() {
 
   const totalPages = noticesData?.totalPages || 1
   const safePage = Math.min(Math.max(1, page), totalPages)
-  const focusedNoticeId = pendingNotice?.id ?? null
+  const focusedNoticeId = pendingNotice?.id ?? hashNoticeId ?? null
 
   const queryClient = useQueryClient()
 
