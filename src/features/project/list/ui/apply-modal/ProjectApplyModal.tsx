@@ -304,12 +304,22 @@ export function ProjectApplyModal({
     const formValues = pendingFormValuesRef.current
     if (!formValues) return
     setIsSubmitConfirmModalOpen(false)
+    if (!isDevMatchingRound && applicationId === null) {
+      addToast({
+        message: "지원서 정보를 불러오지 못했습니다. 다시 시도해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
     setIsSubmitting(true)
     try {
-      if (!isDevMatchingRound) {
+      if (!isDevMatchingRound && applicationId !== null) {
         const answers = buildAnswerPayload(formValues, sections, sectionEnabled)
-        await saveApplicationDraft(projectId, answers)
-        await submitApplication(projectId)
+        await saveApplicationDraft(projectId, applicationId, answers)
+        await submitApplication(projectId, applicationId)
       }
       setIsCompleteModalOpen(true)
     } catch (err) {
