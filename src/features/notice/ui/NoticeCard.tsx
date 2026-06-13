@@ -14,7 +14,7 @@ import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 const noticeCardVariants = cva(
-  "flex w-full items-center justify-between gap-2.5 px-4 text-left",
+  "flex w-full scroll-mt-6 items-center justify-between gap-2.5 px-4 text-left",
   {
     variants: {
       hasChip: {

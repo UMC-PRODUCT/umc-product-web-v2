@@ -12,12 +12,16 @@ interface SideBarDropDownProps {
   options: ReadonlyArray<{ mode: ViewMode; label: string }>
   selectedIdx: number
   onSelect: (idx: number) => void
+  className?: string
+  menuClassName?: string
 }
 
 export function SideBarDropDown({
   options,
   selectedIdx,
   onSelect,
+  className,
+  menuClassName,
 }: SideBarDropDownProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -37,17 +41,17 @@ export function SideBarDropDown({
   }, [])
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className={cn("relative w-43", className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="menu"
         className={cn(
-          "flex h-6.5 w-43 justify-between rounded-[8px] py-1 pr-2 pl-3",
+          "flex h-6.5 w-full min-w-0 justify-between rounded-[8px] py-1 pr-2 pl-3",
           isOpen ? "bg-teal-gray-200" : "bg-teal-gray-150",
         )}
       >
-        <span className="text-teal-gray-600 text-body-3-regular">
+        <span className="text-body-3-regular text-teal-gray-600 min-w-0 truncate">
           {selectedLabel}
         </span>
         <DownChevronIcon
@@ -64,7 +68,7 @@ export function SideBarDropDown({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="overflow-hidden"
+            className={cn("overflow-hidden", menuClassName)}
           >
             <SideBarDropDownMenu
               items={options.map((item) => item.label)}

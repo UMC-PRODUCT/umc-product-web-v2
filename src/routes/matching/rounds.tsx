@@ -514,8 +514,8 @@ function MatchingRoundsPage() {
             }))}
             value={matchingType}
             onValueChange={(v) => handleMatchingTypeChange(v as MatchingType)}
-            className="w-183.5"
-            itemClassName="flex-1"
+            className="w-full max-w-183.5 min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
+            itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
           />
 
           {/* 01 매칭 기간 설정 */}
