@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useLayoutEffect, useRef, useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import {
   useAdminPageData,
   useChallengerPageData,
@@ -15,10 +16,12 @@ import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   getViewerBranch,
   isAnyOperator,
+  isCentralStaff,
   isChapterPresident,
   isCurrentTermPm,
   isOperator,
   isSchoolStaff,
+  isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
@@ -35,6 +38,7 @@ export const Route = createFileRoute("/matching/applications")({
 function MatchingApplicationsPage() {
   const { data: me } = useMe()
   const { viewMe } = useViewMe()
+  const addToast = useToastStore((s) => s.addToast)
   const chaptersQuery = useChapters()
   const chapters = chaptersQuery.data?.chapters ?? []
 
@@ -48,7 +52,13 @@ function MatchingApplicationsPage() {
 
   const [selectedChapter, setSelectedChapter] = useState(defaultChapter)
 
+  // 지부장 본인 지부 추적 (auto-select 후 갱신)
+  const ownChapter = useRef<string>(defaultChapter)
+
   const canApprove = isOperator(viewMe)
+  // 지부장 본인 지부만 조회 가능 (SUPER_ADMIN/중앙 운영진 제외)
+  const isRestrictedToChapter =
+    isChapterPresident(me) && !isSuperAdmin(me) && !isCentralStaff(me)
   // SCHOOL_PRESIDENT 등 학교 운영진: APPLY-101 목록 조회 가능, APPLY-102 상세 불가
   const isSchoolView = !canApprove && isSchoolStaff(viewMe)
   const isPm = isCurrentTermPm(viewMe)
@@ -67,6 +77,7 @@ function MatchingApplicationsPage() {
     const myChapter = chapters.find((c) => c.id === myChapterId)
     if (myChapter) {
       setSelectedChapter(myChapter.name)
+      ownChapter.current = myChapter.name
       hasAutoSelected.current = true
     }
   }, [me, chapters, userChapter])
@@ -97,7 +108,19 @@ function MatchingApplicationsPage() {
               <SegmentButton
                 items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
                 value={selectedChapter}
-                onValueChange={(v) => setSelectedChapter(v)}
+                onValueChange={(v) => {
+                  if (isRestrictedToChapter && v !== ownChapter.current) {
+                    addToast({
+                      message: "본인 지부의 지원 현황만 조회할 수 있습니다.",
+                      color: "red",
+                      variant: "deep",
+                      type: "default",
+                      duration: 3000,
+                    })
+                    return
+                  }
+                  setSelectedChapter(v)
+                }}
                 className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
                 itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
               />
