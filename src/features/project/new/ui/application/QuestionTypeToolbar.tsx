@@ -29,10 +29,11 @@ export function QuestionTypeToolbar({
   onAddAfter,
 }: QuestionTypeToolbarProps) {
   return (
-    <div className="flex items-center justify-center gap-3 py-4">
+    <div className="flex flex-wrap items-center justify-center gap-3 py-4">
       <FieldTypeButtonGroup
         options={FIELD_TYPE_OPTIONS}
         selected={selected}
+        className="max-w-full flex-wrap justify-center"
         onChange={(key) => onChange(key as FieldType)}
       />
       <FloatingActionButton aria-label="질문 추가" onClick={onAddAfter} />

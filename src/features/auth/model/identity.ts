@@ -11,6 +11,12 @@ const CENTRAL_ROLE_TYPES: RoleType[] = [
   "CENTRAL_EDUCATION_TEAM_MEMBER",
 ]
 
+const CENTRAL_CORE_ROLE_TYPES: RoleType[] = [
+  "SUPER_ADMIN",
+  "CENTRAL_PRESIDENT",
+  "CENTRAL_VICE_PRESIDENT",
+]
+
 const ADMIN_ROLE_TYPES: RoleType[] = [
   "SUPER_ADMIN",
   "CENTRAL_PRESIDENT",
@@ -80,6 +86,12 @@ export function canAccessProjectSettings(
 
 export function canManageProjects(me: MemberInfoResponse | undefined): boolean {
   return isOperator(me) || isSchoolLeadership(me) || isCurrentTermPm(me)
+}
+
+export function canManageProjectRecruitInfo(
+  me: MemberInfoResponse | undefined,
+): boolean {
+  return hasAnyRoleType(me, [...CENTRAL_CORE_ROLE_TYPES, "CHAPTER_PRESIDENT"])
 }
 
 export function canManageMatchingRounds(

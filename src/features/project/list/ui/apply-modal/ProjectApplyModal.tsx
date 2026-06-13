@@ -43,6 +43,7 @@ import {
   type UploadedFileValue,
 } from "../../model/applyValidation"
 import { isRecruitDone } from "../../model/matchingProject"
+import { selectCurrentApplicationForProject } from "../../model/projectDetailCta"
 import { ApplyProjectTitleCard } from "./ApplyProjectTitleCard"
 
 import type { FieldErrors, Resolver } from "react-hook-form"
@@ -52,6 +53,7 @@ import type {
   Section,
 } from "@/features/project/new/model/applicationQuestion"
 
+import type { MyProjectApplicationResponse } from "../../api/matchingProject"
 import type { MatchingProject } from "../../model/matchingProject"
 
 const FILE_UPLOAD_CATEGORY = "POST_ATTACHMENT" as const
@@ -212,10 +214,13 @@ export function ProjectApplyModal({
         if (err instanceof AxiosError && err.response?.status === 409) {
           const gisu = await getActiveGisu().catch(() => null)
           if (gisu) {
-            const apps = await getMyApplications(Number(gisu.gisuId)).catch(
-              () => [],
-            )
-            const existing = apps.find((a) => Number(a.projectId) === projectId)
+            const apps: MyProjectApplicationResponse[] =
+              await getMyApplications(Number(gisu.gisuId)).catch(() => [])
+            const existing = selectCurrentApplicationForProject({
+              applications: apps,
+              projectId,
+              activeMatchingRoundId: String(matchingRoundId),
+            })
             if (existing) setApplicationId(Number(existing.applicationId))
           }
           return
@@ -299,12 +304,22 @@ export function ProjectApplyModal({
     const formValues = pendingFormValuesRef.current
     if (!formValues) return
     setIsSubmitConfirmModalOpen(false)
+    if (!isDevMatchingRound && applicationId === null) {
+      addToast({
+        message: "지원서 정보를 불러오지 못했습니다. 다시 시도해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
     setIsSubmitting(true)
     try {
-      if (!isDevMatchingRound) {
+      if (!isDevMatchingRound && applicationId !== null) {
         const answers = buildAnswerPayload(formValues, sections, sectionEnabled)
-        await saveApplicationDraft(projectId, answers)
-        await submitApplication(projectId)
+        await saveApplicationDraft(projectId, applicationId, answers)
+        await submitApplication(projectId, applicationId)
       }
       setIsCompleteModalOpen(true)
     } catch (err) {

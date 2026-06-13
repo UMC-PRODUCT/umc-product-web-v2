@@ -55,7 +55,7 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
     <nav
       aria-label="사이드 메뉴"
       className={cn(
-        "border-teal-gray-200 hidden w-55 shrink-0 flex-col items-center justify-start border-r pt-4 min-[960px]:flex",
+        "border-teal-gray-200 bp2:flex hidden w-55 shrink-0 flex-col items-center justify-start border-r pt-4",
         className,
       )}
     >

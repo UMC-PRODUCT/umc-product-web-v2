@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   canAccessProjectSettings,
+  canManageProjectRecruitInfo,
   canManageProjects,
   getProjectPmSearchScope,
   isAnyOperator,
@@ -168,6 +169,38 @@ describe("canManageProjects", () => {
   })
 })
 
+describe("canManageProjectRecruitInfo", () => {
+  it("슈퍼어드민·중앙 총괄단·지부장은 true", () => {
+    expect(canManageProjectRecruitInfo(makeMe(["SUPER_ADMIN"]))).toBe(true)
+    expect(canManageProjectRecruitInfo(makeMe(["CENTRAL_PRESIDENT"]))).toBe(
+      true,
+    )
+    expect(
+      canManageProjectRecruitInfo(makeMe(["CENTRAL_VICE_PRESIDENT"])),
+    ).toBe(true)
+    expect(canManageProjectRecruitInfo(makeMe(["CHAPTER_PRESIDENT"]))).toBe(
+      true,
+    )
+  })
+
+  it("중앙 일반 운영진·학교 회장단·PM은 false", () => {
+    expect(
+      canManageProjectRecruitInfo(makeMe(["CENTRAL_OPERATING_TEAM_MEMBER"])),
+    ).toBe(false)
+    expect(canManageProjectRecruitInfo(makeMe(["SCHOOL_PRESIDENT"]))).toBe(
+      false,
+    )
+    expect(canManageProjectRecruitInfo(makeMe(["SCHOOL_VICE_PRESIDENT"]))).toBe(
+      false,
+    )
+    expect(
+      canManageProjectRecruitInfo(
+        makeMe(["CHALLENGER"], [{ gisuId: "10", part: "PLAN" }]),
+      ),
+    ).toBe(false)
+  })
+})
+
 describe("getProjectPmSearchScope", () => {
   it("SUPER_ADMIN은 빈 객체 반환", () => {
     expect(getProjectPmSearchScope(makeMe(["SUPER_ADMIN"]))).toEqual({})
@@ -201,12 +234,12 @@ describe("getProjectPmSearchScope", () => {
     ).toEqual({ schoolId: "5" })
   })
 
-  it("순수 PM(현기수 PLAN, 운영 역할 없음)은 빈 객체 반환", () => {
+  it("순수 PM(현기수 PLAN, 운영 역할 없음)은 본인 지부 scope를 반환", () => {
     expect(
       getProjectPmSearchScope(
         makeMe(["CHALLENGER"], [{ gisuId: "10", part: "PLAN" }]),
       ),
-    ).toEqual({})
+    ).toEqual({ chapterId: "0" })
   })
 
   it("undefined는 빈 객체 반환", () => {

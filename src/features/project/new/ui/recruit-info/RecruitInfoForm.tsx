@@ -47,6 +47,7 @@ interface RecruitInfoFormProps {
   onNext: () => void
   readOnly?: boolean
   isHydrated?: boolean
+  canUpdatePartQuotasOverride?: boolean
 }
 
 function buildSummaryText(
@@ -67,7 +68,13 @@ export const RecruitInfoForm = forwardRef<
   RecruitInfoFormHandle,
   RecruitInfoFormProps
 >(function RecruitInfoForm(
-  { onPrev, onNext, readOnly = false, isHydrated = true },
+  {
+    onPrev,
+    onNext,
+    readOnly = false,
+    isHydrated = true,
+    canUpdatePartQuotasOverride,
+  },
   ref,
 ) {
   const addToast = useToastStore((s) => s.addToast)
@@ -77,12 +84,15 @@ export const RecruitInfoForm = forwardRef<
   const projectPermissionsQuery = useProjectPermissions(
     projectId ?? undefined,
     {
-      enabled: projectId !== null,
+      enabled: projectId !== null && canUpdatePartQuotasOverride !== true,
     },
   )
-  const canUpdatePartQuotas = projectPermissionsQuery.canManage
+  const canUpdatePartQuotas =
+    canUpdatePartQuotasOverride ?? projectPermissionsQuery.canManage
   const isPartQuotaPermissionLoading =
-    projectId !== null && projectPermissionsQuery.isPending
+    canUpdatePartQuotasOverride !== true &&
+    projectId !== null &&
+    projectPermissionsQuery.isPending
   const isReadOnly =
     readOnly || isPartQuotaPermissionLoading || !canUpdatePartQuotas
 
@@ -242,23 +252,29 @@ export const RecruitInfoForm = forwardRef<
     <div className="flex flex-col gap-6 pt-4">
       <div className="px-4">
         <SectionHeader index={2} title="모집 인원 및 스택" />
-        <div className="border-teal-gray-200 mx-8.5 flex w-full flex-col gap-11.5 border-b pt-6 pb-11">
+        <div className="border-teal-gray-200 bp2:gap-11.5 bp2:pb-11 mx-8.5 flex flex-col gap-8 border-b pt-6 pb-10">
           {ROLES.map(({ key, label, stacks }) => (
-            <div key={key} className="flex items-center gap-6">
-              <span className="text-body-1-regular text-teal-gray-700 w-16 shrink-0">
-                {label}
-              </span>
-              <Counter
-                value={roleStates[key].count}
-                onChange={(v) => updateCount(key, v)}
-                disabled={isReadOnly}
-                aria-label={`${label} 인원`}
-              />
+            <div
+              key={key}
+              className="bp1:flex-row bp1:flex-wrap bp1:items-center bp1:gap-6 flex min-w-0 flex-col items-start gap-3"
+            >
+              <div className="bp1:gap-6 flex items-center gap-3">
+                <span className="text-body-1-regular text-teal-gray-700 w-16 shrink-0">
+                  {label}
+                </span>
+                <Counter
+                  value={roleStates[key].count}
+                  onChange={(v) => updateCount(key, v)}
+                  disabled={isReadOnly}
+                  aria-label={`${label} 인원`}
+                />
+              </div>
               {stacks.length > 0 && (
                 <OptionButtonGroup
                   variant="segmented"
                   allowDeselect
                   value={roleStates[key].stack}
+                  className="max-w-full flex-wrap"
                   onValueChange={(v) =>
                     isReadOnly
                       ? undefined
@@ -279,18 +295,18 @@ export const RecruitInfoForm = forwardRef<
             </div>
           ))}
         </div>
-        <div className="bg-teal-gray-100 mt-4 mb-21 flex w-full items-center rounded-[8px] px-7 py-2.5">
-          <div className="text-subtitle-3-semibold border-teal-gray-200 flex border-r pr-7.5 text-teal-600">
-            <span className="mr-17">총 모집 인원</span>
+        <div className="bg-teal-gray-100 bp1:mb-21 bp1:flex-row bp1:items-center bp1:px-7 bp1:py-2.5 mt-4 mb-14 flex w-full flex-col gap-2 rounded-[8px] px-4 py-3">
+          <div className="text-subtitle-3-semibold border-teal-gray-200 bp1:border-r bp1:pr-7.5 flex shrink-0 whitespace-nowrap text-teal-600">
+            <span className="bp2:mr-17 mr-6">총 모집 인원</span>
             <span className="mr-1">{totalCount}</span>
             <span>명</span>
           </div>
-          <span className="text-teal-gray-700 text-body-1-regular ml-7.5">
+          <span className="text-teal-gray-700 text-body-1-regular bp1:ml-7.5">
             {summaryText || "직군별 인원을 선택해 주세요"}
           </span>
         </div>
       </div>
-      <div className="flex justify-between">
+      <div className="flex items-center justify-between gap-3">
         {!readOnly ? (
           <Button
             type="button"
@@ -305,7 +321,7 @@ export const RecruitInfoForm = forwardRef<
         ) : (
           <span />
         )}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-end gap-4">
           <Button type="button" variant="weak" color="neutral" onClick={onPrev}>
             이전
           </Button>

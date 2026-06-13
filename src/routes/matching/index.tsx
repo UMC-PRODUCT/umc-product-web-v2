@@ -318,7 +318,7 @@ function TeamMatchingAnnouncePage() {
 
   return (
     <section className="w-full">
-      <div className="border-teal-gray-100 bp1:min-h-213 bp1:px-6 bp1:pt-6 bp1:pb-8 flex w-full max-w-242 min-w-0 flex-col items-center justify-between rounded-[12px] border bg-white px-4 pt-5 pb-6 min-[960px]:px-8.5 min-[960px]:pt-8 min-[960px]:pb-10">
+      <div className="border-teal-gray-100 bp1:min-h-213 bp1:px-6 bp1:pt-6 bp1:pb-8 bp2:px-8.5 bp2:pt-8 bp2:pb-10 flex w-full max-w-242 min-w-0 flex-col items-center justify-between rounded-[12px] border bg-white px-4 pt-5 pb-6">
         <div className="flex w-full flex-col gap-6 pb-10">
           <div className="flex w-full flex-col items-start gap-1.5">
             <span className="text-heading-6-semibold text-teal-gray-900">

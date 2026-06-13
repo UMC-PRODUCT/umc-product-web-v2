@@ -25,7 +25,7 @@ export function Stepper({
     <section
       role="tablist"
       aria-label="등록 단계"
-      className="bg-teal-gray-100 flex h-11.5 min-w-225 items-center gap-2 rounded-[14px] p-1"
+      className="bg-teal-gray-100 bp1:gap-2 flex h-11.5 w-full min-w-0 items-center gap-1 rounded-[14px] p-1"
     >
       {ITEMS.map((item) => (
         <StepperTab

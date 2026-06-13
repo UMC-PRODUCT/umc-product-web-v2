@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { isApplyButtonDisabled } from "./projectDetailCta"
+import {
+  isApplyButtonDisabled,
+  resolveProjectDetailCtaMode,
+  selectCurrentApplicationForProject,
+} from "./projectDetailCta"
 
 const applicable = {
   isPmReadonly: false,
@@ -60,5 +64,145 @@ describe("isApplyButtonDisabled", () => {
         hasApplicationForm: false,
       }),
     ).toBe(false)
+  })
+})
+
+const application = (
+  over: Partial<{
+    applicationId: string | null
+    projectId: string
+    status: string
+    matchingRound: { id: string | null }
+  }> = {},
+) => ({
+  applicationId: "1",
+  projectId: "100",
+  status: "SUBMITTED",
+  matchingRound: { id: "1" },
+  ...over,
+})
+
+const ctaParams = {
+  isOperator: false,
+  isPm: false,
+  isSameBranch: true,
+  isApplied: false,
+  hasOtherActiveApplication: false,
+  isAlreadyApproved: false,
+  isPartIneligible: false,
+}
+
+describe("resolveProjectDetailCtaMode", () => {
+  it("기본 조건이면 apply를 반환한다", () => {
+    expect(resolveProjectDetailCtaMode(ctaParams)).toBe("apply")
+  })
+
+  it("내 파트를 모집하지 않는 프로젝트면 apply-blocked-part를 반환한다", () => {
+    expect(
+      resolveProjectDetailCtaMode({ ...ctaParams, isPartIneligible: true }),
+    ).toBe("apply-blocked-part")
+  })
+
+  it("이미 지원한 프로젝트면 파트 부적격이어도 my-application을 우선한다", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isApplied: true,
+        isPartIneligible: true,
+      }),
+    ).toBe("my-application")
+  })
+
+  it("다른 프로젝트에 지원 중이면 파트 부적격이어도 apply-blocked-other를 반환한다", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        hasOtherActiveApplication: true,
+        isPartIneligible: true,
+      }),
+    ).toBe("apply-blocked-other")
+  })
+})
+
+describe("selectCurrentApplicationForProject", () => {
+  it("활성 차수가 있을 때 이전 차수 지원서는 현재 지원 상태로 보지 않는다", () => {
+    const result = selectCurrentApplicationForProject({
+      applications: [application({ matchingRound: { id: "1" } })],
+      projectId: 100,
+      activeMatchingRoundId: "2",
+    })
+    expect(result).toBeUndefined()
+  })
+
+  it("활성 차수의 지원서가 있으면 해당 지원서를 반환한다", () => {
+    const current = application({
+      applicationId: "9",
+      matchingRound: { id: "2" },
+    })
+    const result = selectCurrentApplicationForProject({
+      applications: [application({ matchingRound: { id: "1" } }), current],
+      projectId: 100,
+      activeMatchingRoundId: "2",
+    })
+    expect(result).toBe(current)
+  })
+
+  it("활성 차수가 없으면(차수 사이) 취소되지 않은 지원서를 조회용으로 반환한다", () => {
+    const past = application({
+      matchingRound: { id: "1" },
+      status: "REJECTED",
+    })
+    const result = selectCurrentApplicationForProject({
+      applications: [past],
+      projectId: 100,
+      activeMatchingRoundId: null,
+    })
+    expect(result).toBe(past)
+  })
+
+  it("활성 차수 조회 중(undefined)이면 폴백 없이 undefined를 반환해 CTA 깜빡임을 막는다", () => {
+    const past = application({
+      matchingRound: { id: "1" },
+      status: "SUBMITTED",
+    })
+    const result = selectCurrentApplicationForProject({
+      applications: [past],
+      projectId: 100,
+      activeMatchingRoundId: undefined,
+    })
+    expect(result).toBeUndefined()
+  })
+
+  it("applicationId가 없는 지원서는 무시한다", () => {
+    const result = selectCurrentApplicationForProject({
+      applications: [
+        application({ applicationId: null, matchingRound: { id: "2" } }),
+      ],
+      projectId: 100,
+      activeMatchingRoundId: "2",
+    })
+    expect(result).toBeUndefined()
+  })
+
+  it("취소된 지원서는 무시한다", () => {
+    const result = selectCurrentApplicationForProject({
+      applications: [
+        application({ status: "CANCELLED", matchingRound: { id: "2" } }),
+      ],
+      projectId: 100,
+      activeMatchingRoundId: "2",
+    })
+    expect(result).toBeUndefined()
+  })
+
+  it("다른 프로젝트의 지원서는 선택하지 않는다", () => {
+    const result = selectCurrentApplicationForProject({
+      applications: [
+        application({ projectId: "999", matchingRound: { id: "2" } }),
+      ],
+      projectId: 100,
+      activeMatchingRoundId: "2",
+    })
+    expect(result).toBeUndefined()
   })
 })

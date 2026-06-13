@@ -45,7 +45,7 @@ export function TextQuestionField({
     <div className="flex w-full flex-col gap-1">
       <QuestionFieldBox
         state={state}
-        className={cn("w-full min-w-200", className)}
+        className={cn("w-full min-w-0", className)}
       >
         <textarea
           ref={textareaRef}

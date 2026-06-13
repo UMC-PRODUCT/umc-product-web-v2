@@ -53,6 +53,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   --breakpoint-bp1: 480px;
+  --breakpoint-bp2: 960px;
 
   --color-white: var(--color-white);
   --color-teal-gray-50: var(--color-teal-gray-50);

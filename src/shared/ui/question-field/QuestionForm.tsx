@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react"
+
 import DragAndDrop from "@/shared/assets/icon/drag-and-drop/DragAndDrop"
 import TrashCan from "@/shared/assets/icon/garbage/TrashCan"
 import { cn } from "@/shared/lib/utils"
@@ -49,10 +51,23 @@ export function QuestionForm({
   className,
   dragHandleProps,
 }: QuestionFormProps) {
+  const titleTextareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (!focused || readonlyTitle) return
+
+    const titleTextarea = titleTextareaRef.current
+    if (!titleTextarea) return
+
+    titleTextarea.focus()
+    const cursorPosition = titleTextarea.value.length
+    titleTextarea.setSelectionRange(cursorPosition, cursorPosition)
+  }, [focused, readonlyTitle])
+
   return (
     <article
       className={cn(
-        "relative flex w-full flex-col items-center gap-2.5 px-6 pb-6",
+        "bp1:px-6 bp1:pb-6 relative flex w-full flex-col items-center gap-2.5 px-4 pb-5",
         focused ? "" : "mt-4 pt-4",
         className,
       )}
@@ -68,7 +83,7 @@ export function QuestionForm({
         />
       )}
 
-      {dragHandleProps && (
+      {focused && dragHandleProps && (
         <button
           type="button"
           className="mt-4 inline-flex cursor-grab items-center justify-center active:cursor-grabbing"
@@ -83,7 +98,7 @@ export function QuestionForm({
       <div className="flex w-full flex-col items-end gap-4">
         {focused ? (
           <div className="flex w-full items-start gap-2">
-            <span className="text-heading-7-semibold w-7 shrink-0 text-teal-600">
+            <span className="text-heading-7-semibold bp1:w-7 w-6 shrink-0 text-teal-600">
               {index}
             </span>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -99,14 +114,19 @@ export function QuestionForm({
                       질문을 작성하세요
                     </span>
                   )}
-                  {required && <span className="text-error-600 ml-1.5">*</span>}
+                  {required && (
+                    <span className="text-error-600 inline-block w-0">
+                      <span className="pl-1.5">*</span>
+                    </span>
+                  )}
                 </div>
                 {!readonlyTitle && (
                   <textarea
+                    ref={titleTextareaRef}
                     rows={1}
                     value={title}
                     onChange={(e) => onTitleChange?.(e.target.value)}
-                    className="text-heading-7-semibold caret-teal-gray-900 absolute inset-0 h-full w-full resize-none overflow-hidden bg-transparent text-transparent outline-none"
+                    className="text-heading-7-semibold caret-teal-gray-900 absolute inset-0 h-full w-full resize-none overflow-hidden bg-transparent wrap-break-word whitespace-pre-wrap text-transparent outline-none"
                   />
                 )}
               </div>
@@ -133,7 +153,7 @@ export function QuestionForm({
           />
         )}
 
-        <div className="flex w-full flex-col items-start gap-2.5 px-1.5">
+        <div className="bp1:px-1.5 flex w-full min-w-0 flex-col items-start gap-2.5 px-0">
           {children}
         </div>
 

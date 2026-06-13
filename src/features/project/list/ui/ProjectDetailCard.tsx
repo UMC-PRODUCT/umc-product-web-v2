@@ -38,6 +38,7 @@ import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import {
   isApplyButtonDisabled,
   resolveProjectDetailCtaMode,
+  selectCurrentApplicationForProject,
 } from "../model/projectDetailCta"
 import { ApplyFormSkeleton } from "./apply-modal/ApplyFormSkeleton"
 import { MyApplicationModal } from "./apply-modal/MyApplicationModal"
@@ -244,14 +245,6 @@ export function ProjectDetailCard({
     return id != null ? Number(id) : null
   }, [me])
 
-  const myApplicationForProject = myApplications?.find(
-    (a) =>
-      Number(a.projectId) === projectId &&
-      a.status !== "CANCELLED" &&
-      a.applicationId != null,
-  )
-  const isApplied = myApplicationForProject != null
-
   const isAlreadyApproved =
     myApplications?.some((a) => a.status === "APPROVED") ?? false
 
@@ -345,19 +338,29 @@ export function ProjectDetailCard({
   const devMatchingRoundId =
     Number(import.meta.env.VITE_DEV_MATCHING_ROUND_ID) || null
 
-  const { data: activeMatchingRound } = useQuery({
-    queryKey: ["activeMatchingRound", myChapterId],
-    queryFn: (): Promise<ActiveMatchingRound | null> => {
-      if (devMatchingRoundId)
-        return Promise.resolve({
-          id: String(devMatchingRoundId),
-        } as ActiveMatchingRound)
-      return getActiveMatchingRound(myChapterId!)
-    },
-    enabled:
-      isChallengerView && (myChapterId != null || devMatchingRoundId != null),
-    staleTime: 60 * 1000,
+  const { data: activeMatchingRound, isLoading: isActiveMatchingRoundLoading } =
+    useQuery({
+      queryKey: ["activeMatchingRound", myChapterId],
+      queryFn: (): Promise<ActiveMatchingRound | null> => {
+        if (devMatchingRoundId)
+          return Promise.resolve({
+            id: String(devMatchingRoundId),
+          } as ActiveMatchingRound)
+        return getActiveMatchingRound(myChapterId!)
+      },
+      enabled:
+        isChallengerView && (myChapterId != null || devMatchingRoundId != null),
+      staleTime: 60 * 1000,
+    })
+
+  const myApplicationForProject = selectCurrentApplicationForProject({
+    applications: myApplications,
+    projectId,
+    activeMatchingRoundId: isActiveMatchingRoundLoading
+      ? undefined
+      : (activeMatchingRound?.id ?? null),
   })
+  const isApplied = myApplicationForProject != null
 
   const hasOtherActiveApplication = useMemo(() => {
     if (!myApplications || !activeMatchingRound) return false
@@ -370,6 +373,12 @@ export function ProjectDetailCard({
     )
   }, [myApplications, activeMatchingRound, projectId])
 
+  const isPartIneligible =
+    isChallengerView &&
+    detail != null &&
+    latestChallengerPart != null &&
+    !detail.partQuotas.some((q) => q.part === latestChallengerPart)
+
   const ctaMode =
     viewOnly && !userIsOperator
       ? resolveProjectDetailCtaMode({
@@ -379,6 +388,7 @@ export function ProjectDetailCard({
           isApplied,
           hasOtherActiveApplication,
           isAlreadyApproved,
+          isPartIneligible,
         })
       : resolveProjectDetailCtaMode({
           isOperator: userIsOperator,
@@ -387,6 +397,7 @@ export function ProjectDetailCard({
           isApplied,
           hasOtherActiveApplication,
           isAlreadyApproved,
+          isPartIneligible,
         })
 
   const cover = data.coverImage
@@ -607,7 +618,8 @@ export function ProjectDetailCard({
                     </Button>
                   )}
                 {(ctaMode === "apply-blocked-other" ||
-                  ctaMode === "apply-blocked-approved") && (
+                  ctaMode === "apply-blocked-approved" ||
+                  ctaMode === "apply-blocked-part") && (
                   <Button className="flex-1" disabled>
                     지원하기
                   </Button>
@@ -623,6 +635,11 @@ export function ProjectDetailCard({
           {!viewOnly && ctaMode === "apply-blocked-approved" && (
             <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
               이미 합격한 챌린저는 추가로 지원할 수 없습니다.
+            </p>
+          )}
+          {!viewOnly && ctaMode === "apply-blocked-part" && (
+            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
+              지원 가능한 파트가 아니어서 지원할 수 없습니다.
             </p>
           )}
         </div>
