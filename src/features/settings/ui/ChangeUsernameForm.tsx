@@ -1,7 +1,13 @@
+import { useState } from "react"
+
+import { useToastStore } from "@/components/toast/useToastStore"
+import { changeEmail } from "@/features/auth/api/me"
 import { useEmailVerification } from "@/features/auth/hooks/useEmailVerification"
+import CircleBang from "@/shared/assets/icon/bang/CircleBang"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 interface ChangeUsernameFormProps {
   currentEmail: string
@@ -11,7 +17,7 @@ interface ChangeUsernameFormProps {
 
 export function ChangeUsernameForm({
   currentEmail,
-  onSuccess: _,
+  onSuccess,
   onBack: _2,
 }: ChangeUsernameFormProps) {
   const {
@@ -26,10 +32,40 @@ export function ChangeUsernameForm({
     isCodeInvalid,
     isExpired,
     isEmailValid,
-    verificationToken,
     handleVerificationClick,
+    handleResend,
     handleCodeVerify,
-  } = useEmailVerification("REGISTER")
+  } = useEmailVerification("CHANGE_EMAIL")
+  const [openResendModal, setOpenResendModal] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const addToast = useToastStore((s) => s.addToast)
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    try {
+      const token = await handleCodeVerify()
+      if (!token) return
+      await changeEmail({ newEmail: next, emailVerificationToken: token })
+      addToast({
+        message: "아이디가 변경되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      onSuccess()
+    } catch {
+      addToast({
+        message: "아이디 변경에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -75,7 +111,12 @@ export function ChangeUsernameForm({
               variant="weak"
               color="neutral"
               size="s"
-              disabled={!isEmailValid || isLoading || isDuplicated}
+              disabled={
+                !isEmailValid ||
+                isLoading ||
+                isDuplicated ||
+                (isCodeVisible && !isExpired)
+              }
               isLoading={isLoading}
               onClick={() => void handleVerificationClick()}
               className="h-11"
@@ -91,6 +132,18 @@ export function ChangeUsernameForm({
               </p>
             </div>
           )}
+          {isCodeVisible && (
+            <button
+              type="button"
+              onClick={() => setOpenResendModal(true)}
+              className="flex items-center gap-1"
+            >
+              <CircleBang className="text-teal-gray-300 h-4 w-4" />
+              <p className="text-teal-gray-300 text-body-2-medium underline">
+                인증 메일을 받지 못하셨나요?
+              </p>
+            </button>
+          )}
         </div>
 
         {/* 인증번호 */}
@@ -102,35 +155,23 @@ export function ChangeUsernameForm({
               </span>
               <span className="text-body-1-medium text-error-500">*</span>
             </div>
-            <div className="flex h-11 w-full items-start justify-between gap-1.5">
-              <InputBox
-                type="verification"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="숫자 6자리 입력"
-                remainingSeconds={remainingSeconds}
-                inputMode="numeric"
-                maxLength={6}
-                state={isCodeInvalid ? "error" : "default"}
-                className="w-full"
-              />
-              <Button
-                variant="weak"
-                color="neutral"
-                size="s"
-                disabled={code.length !== 6 || isExpired || !!verificationToken}
-                onClick={() => void handleCodeVerify()}
-                className="h-11"
-              >
-                확인
-              </Button>
-            </div>
+            <InputBox
+              type="verification"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="숫자 6자리 입력"
+              remainingSeconds={remainingSeconds}
+              inputMode="numeric"
+              maxLength={6}
+              state={isCodeInvalid ? "error" : "default"}
+              className="w-full"
+            />
             <div className="flex h-5.5 items-center gap-1">
               {isCodeInvalid && !isExpired && (
                 <>
                   <CheckIcon className="text-error-500 h-4 w-4" />
                   <p className="text-error-500 text-body-2-medium">
-                    인증번호가 일치하지 않아요.
+                    인증번호가 일치하지 않습니다.
                   </p>
                 </>
               )}
@@ -138,15 +179,7 @@ export function ChangeUsernameForm({
                 <>
                   <CheckIcon className="text-error-500 h-4 w-4" />
                   <p className="text-error-500 text-body-2-medium">
-                    인증번호 입력 시간이 지났어요.
-                  </p>
-                </>
-              )}
-              {verificationToken && (
-                <>
-                  <CheckIcon className="text-success-500 h-4 w-4" />
-                  <p className="text-success-500 text-body-2-medium">
-                    인증이 완료되었습니다.
+                    인증번호 입력 시간이 지났습니다.
                   </p>
                 </>
               )}
@@ -160,11 +193,36 @@ export function ChangeUsernameForm({
         variant="fill"
         color="primary"
         size="s"
-        disabled={!verificationToken}
+        disabled={
+          !isCodeVisible || code.length !== 6 || isExpired || isSubmitting
+        }
+        isLoading={isSubmitting}
+        onClick={() => void handleSubmit()}
         className="h-11 w-full bg-teal-300 disabled:bg-teal-200"
       >
         변경하기
       </Button>
+
+      <CtaModal
+        open={openResendModal}
+        variant="success"
+        title="인증 메일을 받지 못하셨나요?"
+        content={
+          <>
+            인증 메일이 스팸 메일함으로 분류되었을 수 있습니다.
+            <br />
+            스팸 메일함을 먼저 확인한 뒤 다시 보내기를 눌러주세요.
+          </>
+        }
+        cancelText="닫기"
+        confirmText="다시 보내기"
+        onOpenChange={setOpenResendModal}
+        onCancel={() => setOpenResendModal(false)}
+        onConfirm={() => {
+          setOpenResendModal(false)
+          void handleResend()
+        }}
+      />
     </div>
   )
 }
