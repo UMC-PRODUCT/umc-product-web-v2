@@ -21,7 +21,9 @@ import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
 import { InputBox } from "@/shared/ui/input/InputBox"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
+import { ChangeEmailForm } from "./ChangeEmailForm"
 import { ChangePasswordForm } from "./ChangePasswordForm"
+import { ChangeUsernameForm } from "./ChangeUsernameForm"
 import { SocialButton } from "./SocialButton"
 
 import type { OAuthProvider } from "@/features/auth/model/types"
@@ -38,6 +40,8 @@ export function AccountSettingsPage() {
   const { data: me } = useMe()
   const { data: oauths = [] } = useMemberOAuthList()
   const role = me?.roles?.[0] ? toRoleTag(me.roles[0].roleType) : "challenger"
+  const [showEmailChange, setShowEmailChange] = useState(false)
+  const [showUsernameChange, setShowUsernameChange] = useState(false)
   const [showPasswordChange, setShowPasswordChange] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
@@ -201,21 +205,21 @@ export function AccountSettingsPage() {
 
           {/* 설정 카드 */}
           <div className="border-teal-gray-100 relative mt-8 flex w-full items-start gap-2.5 rounded-xl border bg-white py-9 pl-11">
-            {showPasswordChange ? (
-              <>
-                <ChangePasswordForm
-                  onSuccess={() => setShowPasswordChange(false)}
-                />
-                <Button
-                  variant="weak"
-                  color="neutral"
-                  size="s"
-                  className="absolute right-11 bottom-10 h-11"
-                  onClick={() => setShowPasswordChange(false)}
-                >
-                  이전
-                </Button>
-              </>
+            {showEmailChange ? (
+              <ChangeEmailForm
+                onSuccess={() => setShowEmailChange(false)}
+                onBack={() => setShowEmailChange(false)}
+              />
+            ) : !isSocialOnly && showUsernameChange ? (
+              <ChangeUsernameForm
+                onSuccess={() => setShowUsernameChange(false)}
+                onBack={() => setShowUsernameChange(false)}
+              />
+            ) : !isSocialOnly && showPasswordChange ? (
+              <ChangePasswordForm
+                onSuccess={() => setShowPasswordChange(false)}
+                onBack={() => setShowPasswordChange(false)}
+              />
             ) : (
               <div className="flex w-full max-w-100 flex-col items-start gap-20">
                 <div className="flex w-full flex-col items-start gap-14">
@@ -240,45 +244,72 @@ export function AccountSettingsPage() {
                     </div>
                   </div>
 
-                  {/* 아이디 */}
-                  <div className="flex w-full flex-col items-start gap-4">
-                    <span className="text-heading-7-semibold text-teal-gray-900">
-                      아이디
-                    </span>
-                    <div className="flex h-11 w-full items-start justify-between gap-1.5">
-                      <InputBox
-                        state="disabled"
-                        value={me?.email ?? ""}
-                        onChange={() => {}}
-                        inputClassName={emailInputClass}
-                      />
-                      <Button
-                        variant="weak"
-                        color="neutral"
-                        size="s"
-                        className="h-11"
-                      >
-                        변경하기
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* 비밀번호: 소셜 전용 로그인 유저는 표시하지 않음 */}
-                  {!isSocialOnly && (
+                  {/* 소셜 로그인: 이메일 변경란 */}
+                  {isSocialOnly && (
                     <div className="flex w-full flex-col items-start gap-4">
                       <span className="text-heading-7-semibold text-teal-gray-900">
-                        비밀번호
+                        이메일
                       </span>
-                      <Button
-                        variant="weak"
-                        color="neutral"
-                        size="s"
-                        onClick={() => setShowPasswordChange(true)}
-                        className="w-full"
-                      >
-                        비밀번호 변경
-                      </Button>
+                      <div className="flex h-11 w-full items-start justify-between gap-1.5">
+                        <InputBox
+                          state="disabled"
+                          value={me?.email ?? ""}
+                          onChange={() => {}}
+                          inputClassName={emailInputClass}
+                        />
+                        <Button
+                          variant="weak"
+                          color="neutral"
+                          size="s"
+                          onClick={() => setShowEmailChange(true)}
+                          className="h-11"
+                        >
+                          변경하기
+                        </Button>
+                      </div>
                     </div>
+                  )}
+
+                  {/* 로컬 로그인: 아이디 변경란 + 비밀번호 */}
+                  {!isSocialOnly && (
+                    <>
+                      <div className="flex w-full flex-col items-start gap-4">
+                        <span className="text-heading-7-semibold text-teal-gray-900">
+                          아이디
+                        </span>
+                        <div className="flex h-11 w-full items-start justify-between gap-1.5">
+                          <InputBox
+                            state="disabled"
+                            value={me?.email ?? ""}
+                            onChange={() => {}}
+                            inputClassName={emailInputClass}
+                          />
+                          <Button
+                            variant="weak"
+                            color="neutral"
+                            size="s"
+                            onClick={() => setShowUsernameChange(true)}
+                            className="h-11"
+                          >
+                            변경하기
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex w-full flex-col items-start gap-4">
+                        <span className="text-heading-7-semibold text-teal-gray-900">
+                          비밀번호
+                        </span>
+                        <Button
+                          variant="weak"
+                          color="neutral"
+                          size="s"
+                          onClick={() => setShowPasswordChange(true)}
+                          className="w-full"
+                        >
+                          비밀번호 변경
+                        </Button>
+                      </div>
+                    </>
                   )}
                 </div>
 
