@@ -507,7 +507,10 @@ function ProjectRegisterPage() {
     }
   }
 
+  const successHandledRef = useRef(false)
   const handleSuccessConfirm = async () => {
+    if (successHandledRef.current) return
+    successHandledRef.current = true
     setShowSuccessModal(false)
     reset()
     queryClient.removeQueries({ queryKey: projectKeys.managed() })
@@ -598,7 +601,9 @@ function ProjectRegisterPage() {
             : "프로젝트 등록이 완료되었습니다."
         }
         confirmText="확인"
-        onOpenChange={setShowSuccessModal}
+        onOpenChange={(open) => {
+          if (!open) void handleSuccessConfirm()
+        }}
         onConfirm={handleSuccessConfirm}
       />
       <CtaModal
