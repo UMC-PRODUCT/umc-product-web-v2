@@ -32,11 +32,16 @@ export function ChangePasswordForm({
   const hasInvalidSpecial = /[^a-zA-Z0-9!#$&*@?]/.test(next)
   const isNextValid =
     isValidPassword(next) && !isSameAsCurrent && !hasInvalidSpecial
-  const isConfirmMatch = confirm.length > 0 && next === confirm
+  const isConfirmMatch = next === confirm
 
+  const [showConfirmError, setShowConfirmError] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async () => {
+    if (!isConfirmMatch) {
+      setShowConfirmError(true)
+      return
+    }
     setIsSubmitting(true)
     try {
       await changePassword({ currentPassword: current, newPassword: next })
@@ -156,21 +161,21 @@ export function ChangePasswordForm({
             </div>
             <InputBox
               type="password"
-              state={
-                confirm.length > 0
-                  ? isConfirmMatch
-                    ? "success"
-                    : "error"
-                  : "default"
-              }
+              state={showConfirmError && !isConfirmMatch ? "error" : "default"}
               value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
+              onChange={(e) => {
+                setConfirm(e.target.value)
+                setShowConfirmError(false)
+              }}
               className="w-full"
             />
-            {confirm.length > 0 && !isConfirmMatch && (
-              <span className="text-body-3-medium text-error-500">
-                비밀번호가 일치하지 않습니다
-              </span>
+            {showConfirmError && !isConfirmMatch && (
+              <div className="flex items-center gap-1">
+                <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                <p className="text-body-3-medium text-error-500">
+                  비밀번호가 일치하지 않습니다
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -181,7 +186,7 @@ export function ChangePasswordForm({
         variant="fill"
         color="primary"
         size="s"
-        disabled={!current || !isNextValid || !isConfirmMatch || isSubmitting}
+        disabled={!current || !isNextValid || !confirm || isSubmitting}
         isLoading={isSubmitting}
         onClick={() => void handleSubmit()}
         className="h-11 w-full bg-teal-300 disabled:bg-teal-200"
