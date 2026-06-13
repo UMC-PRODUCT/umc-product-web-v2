@@ -302,10 +302,11 @@ function ProjectRegisterPage() {
   const applicationFormQuery = useQuery({
     queryKey: projectKeys.applicationForm(projectId ?? 0),
     queryFn: () => getApplicationForm(projectId!),
-    enabled: !!projectId,
+    enabled: isEditMode && !!projectId,
   })
 
   useEffect(() => {
+    if (!isEditMode) return
     if (applicationFormQuery.data) {
       hydrateApplicationFormIntoStore(applicationFormQuery.data)
       setApplicationFormHydrated(true)
@@ -317,7 +318,7 @@ function ProjectRegisterPage() {
       })
       setApplicationFormHydrated(true)
     }
-  }, [applicationFormQuery.data, setApplication])
+  }, [isEditMode, applicationFormQuery.data, setApplication])
 
   const submitMutation = useMutation({
     mutationFn: async () => {
