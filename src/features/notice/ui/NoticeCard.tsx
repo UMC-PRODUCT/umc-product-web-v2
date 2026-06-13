@@ -152,8 +152,9 @@ export function NoticeCard({
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            exit={{ height: 0, opacity: 1 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="overflow-hidden"
           >
             <div className="w-full overflow-hidden pb-4">
               <div
