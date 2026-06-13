@@ -64,9 +64,14 @@ function getValidOptionId(question: Question, value: string): number | null {
 export function buildAnswerPayload(
   formValues: Record<string, ApplyAnswerValue>,
   sections: Section[],
+  sectionEnabled: Record<string, boolean> = {},
 ): ApplicationAnswerItem[] {
   const questionMap = new Map<string, Question>()
-  sections.forEach((s) => s.questions.forEach((q) => questionMap.set(q.id, q)))
+  sections.forEach((s) => {
+    const enabled = sectionEnabled[s.id] ?? s.isEnabled
+    if (!enabled) return
+    s.questions.forEach((q) => questionMap.set(q.id, q))
+  })
 
   return Object.entries(formValues).flatMap(([questionId, value]) => {
     const question = questionMap.get(questionId)
@@ -79,19 +84,19 @@ export function buildAnswerPayload(
     }
 
     if (question.fieldType === "radio") {
-      if (typeof value !== "string" || !value) return [base]
+      if (typeof value !== "string" || !value) return []
       const optionId = getValidOptionId(question, value)
-      if (optionId === null) return [base]
+      if (optionId === null) return []
       return [{ ...base, selectedOptionIds: [optionId] }]
     }
 
     if (question.fieldType === "checkbox") {
-      if (!Array.isArray(value) || value.length === 0) return [base]
+      if (!Array.isArray(value) || value.length === 0) return []
       const selectedIds = value.flatMap((optionValue) => {
         const optionId = getValidOptionId(question, optionValue)
         return optionId === null ? [] : [optionId]
       })
-      if (selectedIds.length === 0) return [base]
+      if (selectedIds.length === 0) return []
       return [{ ...base, selectedOptionIds: selectedIds }]
     }
 

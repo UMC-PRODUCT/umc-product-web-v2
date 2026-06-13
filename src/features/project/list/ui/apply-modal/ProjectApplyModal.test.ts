@@ -53,7 +53,7 @@ describe("buildAnswerPayload", () => {
     ])
   })
 
-  it("선택형 문항 값이 content이면 selectedOptionIds에 포함하지 않는다", () => {
+  it("선택형 문항 값이 content이면 답변 payload에서 제외한다", () => {
     const payload = buildAnswerPayload(
       {
         "101": "두 번째",
@@ -62,10 +62,10 @@ describe("buildAnswerPayload", () => {
       sections,
     )
 
-    expect(payload).toEqual([{ questionId: 101 }, { questionId: 102 }])
+    expect(payload).toEqual([])
   })
 
-  it("현재 옵션에 없는 option id는 selectedOptionIds에 포함하지 않는다", () => {
+  it("현재 옵션에 없는 option id는 답변 payload에서 제외한다", () => {
     const payload = buildAnswerPayload(
       {
         "101": "9999",
@@ -74,9 +74,19 @@ describe("buildAnswerPayload", () => {
       sections,
     )
 
-    expect(payload).toEqual([
-      { questionId: 101 },
-      { questionId: 102, selectedOptionIds: [2001] },
-    ])
+    expect(payload).toEqual([{ questionId: 102, selectedOptionIds: [2001] }])
+  })
+
+  it("비활성 섹션의 답변은 전송하지 않는다", () => {
+    const payload = buildAnswerPayload(
+      {
+        "101": "1001",
+        "102": ["2001"],
+      },
+      sections,
+      { common: false },
+    )
+
+    expect(payload).toEqual([])
   })
 })
