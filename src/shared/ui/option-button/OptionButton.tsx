@@ -30,7 +30,7 @@ const optionButtonVariants = cva(
       {
         selected: true,
         class:
-          "disabled:border-teal-200 disabled:text-teal-300 disabled:bg-teal-50",
+          "disabled:border-teal-gray-150 disabled:bg-white disabled:text-teal-gray-400",
       },
       {
         selected: true,
@@ -112,8 +112,8 @@ export function OptionButton({
       : "text-body-2-medium h-9.5 gap-2.5"
 
     const selectedClass = isSm
-      ? "border border-teal-200 bg-teal-100 py-1 pr-2.5 pl-1.5 text-teal-500 disabled:border-teal-200 disabled:bg-teal-50 disabled:text-teal-300"
-      : "border border-teal-200 bg-teal-100 pr-5 pl-3 text-teal-600 disabled:border-teal-200 disabled:bg-teal-50 disabled:text-teal-300"
+      ? "border border-teal-200 bg-teal-100 py-1 pr-2.5 pl-1.5 text-teal-500 disabled:border-teal-gray-150 disabled:bg-white disabled:text-teal-gray-400"
+      : "border border-teal-200 bg-teal-100 pr-5 pl-3 text-teal-600 disabled:border-teal-gray-150 disabled:bg-white disabled:text-teal-gray-400"
 
     const unselectedPadding = isSm ? "px-2.5" : "px-5"
 

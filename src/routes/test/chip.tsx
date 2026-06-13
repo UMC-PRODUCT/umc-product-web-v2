@@ -77,6 +77,9 @@ function ChipTestPage() {
               <th className="text-caption-2-regular text-teal-gray-400 px-6 pb-3 text-center font-normal">
                 default
               </th>
+              <th className="text-caption-2-regular text-teal-gray-400 px-6 pb-3 text-center font-normal">
+                lg
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -87,6 +90,9 @@ function ChipTestPage() {
                 </td>
                 <td className="px-6 py-2 text-center align-middle">
                   <RoleTagChip role={role} />
+                </td>
+                <td className="px-6 py-2 text-center align-middle">
+                  <RoleTagChip role={role} size="lg" />
                 </td>
               </tr>
             ))}

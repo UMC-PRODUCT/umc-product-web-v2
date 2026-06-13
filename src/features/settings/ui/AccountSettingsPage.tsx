@@ -191,7 +191,7 @@ export function AccountSettingsPage() {
                 <span className="text-heading-4-semibold text-teal-gray-900">
                   {me ? `${me.nickname}/${me.name}` : ""}
                 </span>
-                <RoleTagChip role={role} />
+                <RoleTagChip size="lg" role={role} />
               </div>
               <span className="text-body-1-medium text-teal-gray-500">
                 {me?.schoolName ?? ""}

@@ -80,6 +80,13 @@ function OptionButtonTestPage() {
                 Backend
               </OptionButton>
             </OptionButtonGroup>
+            <OptionButtonGroup variant="segmented" defaultValue="frontend">
+              <OptionButton value="design">Design</OptionButton>
+              <OptionButton value="frontend" disabled>
+                Frontend
+              </OptionButton>
+              <OptionButton value="backend">Backend</OptionButton>
+            </OptionButtonGroup>
           </div>
         </Section>
 
@@ -168,6 +175,17 @@ function OptionButtonTestPage() {
                 Frontend
               </OptionButton>
               <OptionButton size="sm" value="backend" disabled>
+                Backend
+              </OptionButton>
+            </OptionButtonGroup>
+            <OptionButtonGroup variant="segmented" defaultValue="frontend">
+              <OptionButton size="sm" value="design">
+                Design
+              </OptionButton>
+              <OptionButton size="sm" value="frontend" disabled>
+                Frontend
+              </OptionButton>
+              <OptionButton size="sm" value="backend">
                 Backend
               </OptionButton>
             </OptionButtonGroup>
