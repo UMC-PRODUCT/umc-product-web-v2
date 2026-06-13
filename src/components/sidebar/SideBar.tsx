@@ -24,22 +24,23 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
   const mode = useViewModeStore((s) => s.mode)
   const prevModeRef = useRef(mode)
 
-  // 현재 경로에 해당하는 섹션을 초기값으로 사용
-  const [openSectionId, setOpenSectionId] = useState<string>(() => {
+  const [manualOpenSectionId, setManualOpenSectionId] = useState<string>(() => {
     const active = resolveNavigationFromPathname(pathname, visibleSections)
-    return (
-      active?.section.id ?? visibleSections[0]?.id ?? SIDEBAR_ITEMS[0]?.id ?? ""
-    )
+    const initialSectionId =
+      active?.section.id ?? visibleSections[0]?.id ?? SIDEBAR_ITEMS[0]?.id
+
+    return initialSectionId ?? ""
   })
+  const active = resolveNavigationFromPathname(pathname, visibleSections)
+  const activeSectionId = active?.section.id
 
   useEffect(() => {
-    const active = resolveNavigationFromPathname(pathname, visibleSections)
     const ids = new Set(visibleSections.map((section) => section.id))
-    setOpenSectionId((prev) => {
-      if (active?.section.id) return active.section.id
-      return ids.has(prev) ? prev : (visibleSections[0]?.id ?? "")
+    setManualOpenSectionId((prev) => {
+      if (ids.has(prev)) return prev
+      return activeSectionId ?? visibleSections[0]?.id ?? ""
     })
-  }, [visibleSections, pathname])
+  }, [visibleSections, activeSectionId])
 
   useEffect(() => {
     if (prevModeRef.current === mode) return
@@ -63,7 +64,7 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
       {!isLoading && (
         <div className="flex flex-col py-4">
           <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
-            Demo Day
+            10th Demo Day
           </span>
           {visibleSections.map(({ id, title, icon, menus }) => (
             <SideBarMenu
@@ -71,10 +72,12 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
               id={id}
               title={title}
               icon={icon}
-              isOpen={openSectionId === id}
-              onToggle={() =>
-                setOpenSectionId((prev) => (prev === id ? "" : id))
-              }
+              isActive={activeSectionId === id}
+              isOpen={activeSectionId === id || manualOpenSectionId === id}
+              onToggle={() => {
+                if (activeSectionId === id) return
+                setManualOpenSectionId((prev) => (prev === id ? "" : id))
+              }}
             >
               {menus.map((menu) => (
                 <SideBarMenuItem
