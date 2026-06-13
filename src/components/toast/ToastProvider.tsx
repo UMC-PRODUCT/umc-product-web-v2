@@ -122,22 +122,28 @@ export function ToastProvider() {
           return (
             <div
               key={toast.id}
-              className="pointer-events-auto absolute bottom-0 left-0 origin-bottom transition-all duration-300"
-              style={{
-                transform: `translateX(-50%) translateY(${translateY}px) scale(${scale})`,
-                zIndex,
-                animation: isFront ? "toast-shake 0.4s ease-in-out" : undefined,
-              }}
+              className="pointer-events-auto absolute bottom-0 left-1/2 -translate-x-1/2"
+              style={{ zIndex }}
             >
-              <Toast
-                message={toast.message}
-                color={toast.color}
-                variant={toast.variant}
-                type={toast.type}
-                remaining={remainingMap.get(toast.id) ?? toast.duration}
-                isDismissing={dismissingIds.has(toast.id)}
-                onDismiss={() => dismiss(toast.id)}
-              />
+              <div
+                className="origin-bottom transition-all duration-300"
+                style={{
+                  transform: `translateY(${translateY}px) scale(${scale})`,
+                  animation: isFront
+                    ? "toast-shake 0.4s ease-in-out"
+                    : undefined,
+                }}
+              >
+                <Toast
+                  message={toast.message}
+                  color={toast.color}
+                  variant={toast.variant}
+                  type={toast.type}
+                  remaining={remainingMap.get(toast.id) ?? toast.duration}
+                  isDismissing={dismissingIds.has(toast.id)}
+                  onDismiss={() => dismiss(toast.id)}
+                />
+              </div>
             </div>
           )
         })}
