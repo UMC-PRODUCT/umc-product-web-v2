@@ -250,20 +250,21 @@ export function ProjectManagementPage() {
             프로젝트 관리
           </span>
           <span className="text-body-2-regular text-teal-gray-600">
-            모든 프로젝트의 상세 정보를 확인하고 수정할 수 있습니다. 단, 매칭
-            중에는 일부 수정이 제한됩니다.
+            모든 프로젝트의 상세 정보를 확인하고 수정할 수 있습니다.
+            <br className="bp1:hidden block" /> 단, 매칭 중에는 일부 수정이
+            제한됩니다.
           </span>
         </div>
 
         <div className="bp1:gap-8 flex min-w-0 flex-col gap-6 min-[960px]:gap-10">
           {useGroupedView && (
-            <div className="scrollbar-none bp1:-mx-6 bp1:px-6 -mx-4 overflow-x-auto px-4 min-[960px]:mx-0 min-[960px]:px-0">
+            <div className="min-w-0">
               <SegmentButton
                 items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
                 value={selectedChapter}
                 onValueChange={setSelectedChapter}
-                className="min-w-max min-[960px]:w-full min-[960px]:min-w-0"
-                itemClassName="min-[960px]:flex-1"
+                className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
+                itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
               />
             </div>
           )}
