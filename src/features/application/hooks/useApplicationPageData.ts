@@ -277,8 +277,9 @@ export function useAdminPageData(chapterName?: string) {
     [projects, applicantsQuery.data],
   )
 
-  // 통계: summary 기반 (universities는 schoolMatchingStatistics + schools API로 계산)
-  // 서버가 schoolMatchingStatistics를 챕터 필터링 없이 내려주므로 프론트에서 필터링
+  // 통계: summary 기반
+  // universities.applied = roundSchoolRankings 전 차수 지원자 수 합산 (매칭 완료 수 아님)
+  // 서버가 schoolMatchingStatistics/roundSchoolRankings를 챕터 필터링 없이 내려주므로 프론트에서 필터링
   const stats: ApplicationStats = useMemo(() => {
     if (!chapterStatsQuery.data) {
       return {
@@ -309,13 +310,28 @@ export function useAdminPageData(chapterName?: string) {
       : chapterStatsQuery.data.summary
 
     const partial = summaryToStats(filteredSummary, projectIdToName)
+
+    // 학교별 지원자 수 집계 (roundSchoolRankings 전 차수 합산, 챕터 소속 학교만)
+    const schoolApplicantCounts = new Map<string, number>()
+    for (const ranking of chapterStatsQuery.data.summary.roundSchoolRankings ??
+      []) {
+      for (const s of ranking.schools) {
+        const id = String(s.schoolId)
+        if (chapterSchoolIds && !chapterSchoolIds.has(id)) continue
+        schoolApplicantCounts.set(
+          id,
+          (schoolApplicantCounts.get(id) ?? 0) + Number(s.applicantCount),
+        )
+      }
+    }
+
     const universities: UniversityCount[] =
       filteredSummary.schoolMatchingStatistics
         .map((s) => ({
           name: shortenSchoolName(
             schoolIdToName.get(String(s.schoolId)) ?? String(s.schoolId),
           ),
-          applied: Number(s.matchedMemberCount),
+          applied: schoolApplicantCounts.get(String(s.schoolId)) ?? 0,
           total: Number(s.totalMemberCount),
         }))
         .sort((a, b) => b.applied - a.applied)

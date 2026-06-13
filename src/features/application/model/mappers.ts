@@ -160,6 +160,7 @@ export function toProjectApplication(
       ? `${project.productOwner.nickname}/${project.productOwner.name}`
       : project.productOwner.name,
     challengerUniversity: project.productOwner.schoolName,
+    thumbnailUrl: project.thumbnailImageUrl || undefined,
     statusLabel,
     designCount: getQuotaCount(project.partQuotas, "DESIGN"),
     feCount: getQuotaCount(project.partQuotas, "WEB"),
@@ -175,14 +176,17 @@ export function summaryToStats(
   projectIdToName: Map<string, string>,
   filterRound?: number, // 미지정 시 전 차수 합산, 0 = 완료된 차수 없음, N = N차까지 표시
 ): Omit<ApplicationStats, "universities"> {
-  // 차수별 지원 현황 (완료된 차수만)
+  // 차수별 지원 현황 (완료 차수 + 1차 최소 표시)
+  // filterRound=0(1차 진행 중)이어도 r.total(availableMemberCount)이 표시되도록 최소 1차 포함
   const rounds = summary.roundApplicationStatistics
     .map((r) => ({
       round: toRoundNumber(r.matchingRound.phase),
       applied: Number(r.appliedMemberCount),
       total: Number(r.availableMemberCount),
     }))
-    .filter((r) => filterRound === undefined || r.round <= filterRound)
+    .filter(
+      (r) => filterRound === undefined || r.round <= Math.max(1, filterRound),
+    )
 
   // 총원 / 매칭 완료 (schoolMatchingStatistics 합산)
   // 서버가 숫자 필드를 문자열로 내려주므로 Number() 변환 필요
