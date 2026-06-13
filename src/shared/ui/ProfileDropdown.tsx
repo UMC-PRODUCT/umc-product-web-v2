@@ -91,7 +91,11 @@ export function ProfileDropdown({
             <button
               type="button"
               className="h-11.5 w-11.5 shrink-0 overflow-hidden rounded-full"
-              onClick={() => navigate({ to: "/settings" })}
+              aria-label="프로필 이미지"
+              onClick={() => {
+                navigate({ to: "/settings" })
+                handleOpenChange(false)
+              }}
             >
               {me?.profileImageLink ? (
                 <img
