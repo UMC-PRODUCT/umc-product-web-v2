@@ -564,7 +564,7 @@ export const BasicInfoForm = forwardRef<
           className="w-full"
         />
       </div>
-      <div className="bp1:flex-row bp1:justify-between flex flex-col-reverse gap-3">
+      <div className="flex items-center justify-between gap-3">
         <Button
           type="button"
           variant="weak"

@@ -252,21 +252,23 @@ export const RecruitInfoForm = forwardRef<
     <div className="flex flex-col gap-6 pt-4">
       <div className="px-4">
         <SectionHeader index={2} title="모집 인원 및 스택" />
-        <div className="border-teal-gray-200 bp1:mx-8.5 bp2:gap-11.5 bp2:pb-11 mx-0 flex flex-col gap-8 border-b pt-6 pb-10">
+        <div className="border-teal-gray-200 bp2:gap-11.5 bp2:pb-11 mx-8.5 flex flex-col gap-8 border-b pt-6 pb-10">
           {ROLES.map(({ key, label, stacks }) => (
             <div
               key={key}
               className="bp1:flex-row bp1:flex-wrap bp1:items-center bp1:gap-6 flex min-w-0 flex-col items-start gap-3"
             >
-              <span className="text-body-1-regular text-teal-gray-700 w-16 shrink-0">
-                {label}
-              </span>
-              <Counter
-                value={roleStates[key].count}
-                onChange={(v) => updateCount(key, v)}
-                disabled={isReadOnly}
-                aria-label={`${label} 인원`}
-              />
+              <div className="bp1:gap-6 flex items-center gap-3">
+                <span className="text-body-1-regular text-teal-gray-700 w-16 shrink-0">
+                  {label}
+                </span>
+                <Counter
+                  value={roleStates[key].count}
+                  onChange={(v) => updateCount(key, v)}
+                  disabled={isReadOnly}
+                  aria-label={`${label} 인원`}
+                />
+              </div>
               {stacks.length > 0 && (
                 <OptionButtonGroup
                   variant="segmented"
@@ -294,8 +296,8 @@ export const RecruitInfoForm = forwardRef<
           ))}
         </div>
         <div className="bg-teal-gray-100 bp1:mb-21 bp1:flex-row bp1:items-center bp1:px-7 bp1:py-2.5 mt-4 mb-14 flex w-full flex-col gap-2 rounded-[8px] px-4 py-3">
-          <div className="text-subtitle-3-semibold border-teal-gray-200 bp1:border-r bp1:pr-7.5 flex text-teal-600">
-            <span className="bp1:mr-17 mr-6">총 모집 인원</span>
+          <div className="text-subtitle-3-semibold border-teal-gray-200 bp1:border-r bp1:pr-7.5 flex shrink-0 whitespace-nowrap text-teal-600">
+            <span className="bp2:mr-17 mr-6">총 모집 인원</span>
             <span className="mr-1">{totalCount}</span>
             <span>명</span>
           </div>
@@ -304,7 +306,7 @@ export const RecruitInfoForm = forwardRef<
           </span>
         </div>
       </div>
-      <div className="bp1:flex-row bp1:justify-between flex flex-col-reverse gap-3">
+      <div className="flex items-center justify-between gap-3">
         {!readOnly ? (
           <Button
             type="button"
