@@ -33,39 +33,40 @@ export function ApplicantDetailRow({
     <div
       role="row"
       className={cn(
-        "border-teal-gray-150/60 flex h-[60px] items-center border-b bg-white pr-[64px] pl-[136px]",
+        "border-teal-gray-150/60 flex h-15 items-center border-b bg-white pr-16 pl-30",
         className,
       )}
     >
       <div className="flex items-center">
         {/* 차수 */}
-        <div className="flex h-[50px] w-[74px] items-center justify-center">
+        <div className="flex h-12.5 w-18.5 items-center justify-center">
           <span className="text-body-2-medium text-teal-gray-800">
             {round}차
           </span>
         </div>
 
         {/* 파트 */}
-        <div className="flex h-[50px] w-[122px] items-center px-2.5">
+        <div className="flex h-12.5 w-30.5 items-center px-2.5">
           <PartTagChip role={role} />
         </div>
 
         {/* 챌린저 */}
-        <div className="w-[200px] px-0.5">
+        <div className="w-50 px-0.5">
           <ChallengerLinkButton
             name={name}
             university={university}
             onClick={onChallengerClick}
+            className="hover:bg-transparent"
           />
         </div>
 
         {/* 합불 상태 */}
-        <div className="flex h-[50px] w-[136px] items-center px-2.5">
+        <div className="flex h-12.5 w-34 items-center px-2.5">
           <StatusChipTag value={status} type="tag" />
         </div>
 
         {/* 처리 시간 */}
-        <div className="flex h-[50px] w-[160px] items-center justify-center">
+        <div className="flex h-12.5 w-40 items-center justify-center">
           {processedAt ? (
             <TimestampLabel
               date={processedAt.date}
@@ -78,7 +79,7 @@ export function ApplicantDetailRow({
         </div>
 
         {/* 지원 시간 */}
-        <div className="flex h-[50px] w-[160px] items-center justify-center">
+        <div className="flex h-12.5 w-40 items-center justify-center">
           <TimestampLabel
             date={appliedAt.date}
             time={appliedAt.time}
