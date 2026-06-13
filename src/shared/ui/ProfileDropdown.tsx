@@ -127,7 +127,7 @@ export function ProfileDropdown({
                 기수 변경
               </span>
 
-              <div className="border-teal-gray-100 flex w-full flex-col gap-0.5 rounded-[10px] border px-0.5 py-0.5">
+              <div className="border-teal-gray-100 flex w-full flex-col gap-0.5 rounded-[10px] border px-[1px] py-[1px]">
                 {me?.challengerRecords && me.challengerRecords.length > 0 ? (
                   me.challengerRecords
                     .slice()
