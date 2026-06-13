@@ -324,8 +324,7 @@ export function ProjectApplyModal({
         message: serverData?.message,
         error: err,
       })
-      const serverMessage =
-        serverData?.message ?? (err instanceof Error ? err.message : undefined)
+      const serverMessage = serverData?.message
       addToast({
         message:
           serverMessage ?? "지원서 제출에 실패했습니다. 다시 시도해 주세요.",
