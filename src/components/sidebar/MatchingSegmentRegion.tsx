@@ -48,5 +48,9 @@ export function MatchingSegmentRegion({
     to: m.to,
   }))
 
-  return <Segment title={section.title} items={items} value={menu.id} />
+  return (
+    <div id="matching-segment-region">
+      <Segment title={section.title} items={items} value={menu.id} />
+    </div>
+  )
 }

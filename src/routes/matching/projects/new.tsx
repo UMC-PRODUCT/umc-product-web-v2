@@ -17,9 +17,9 @@ import { useMe } from "@/features/auth/hooks/useMe"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
+  canManageProjectRecruitInfo,
   canManageProjects,
   getLatestChallengerRecord,
-  isCurrentTermPm,
   isProjectRegistrationQuotaLimited,
 } from "@/features/auth/model/identity"
 import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
@@ -148,10 +148,10 @@ function ProjectRegisterPage() {
   const basicInfoRef = useRef<BasicInfoFormHandle>(null)
   const recruitInfoRef = useRef<RecruitInfoFormHandle>(null)
   const applicationFormRef = useRef<ApplicationFormHandle>(null)
+  const formTopRef = useRef<HTMLDivElement>(null)
 
   const queryClient = useQueryClient()
   const { data: me } = useMe()
-  const isPm = isCurrentTermPm(me)
   const myChapterId = getLatestChallengerRecord(me)?.chapterId
   const matchingRoundsQuery = useQuery({
     queryKey: applicationKeys.matchingRounds(
@@ -169,7 +169,6 @@ function ProjectRegisterPage() {
   )
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
-  const recruitInfo = useProjectRegisterStore((s) => s.recruitInfo)
   const pmInfo = useProjectRegisterStore((s) => s.pmInfo)
   const reset = useProjectRegisterStore((s) => s.reset)
   const setProjectId = useProjectRegisterStore((s) => s.setProjectId)
@@ -195,11 +194,16 @@ function ProjectRegisterPage() {
   const isCreatePermissionLoading =
     !isEditMode && projectWritePermissionQuery.isPending
   const canManageProject = projectPermissionsQuery.canManage
-  const canEditRecruitStep = projectId !== null ? canManageProject : !isPm
+  const canManageRecruitInfoByRole = canManageProjectRecruitInfo(me)
+  const canEditRecruitStep = isEditMode
+    ? canManageProject
+    : canManageRecruitInfoByRole
 
   const resolveCanEditRecruitStep = async (): Promise<boolean> => {
+    if (!isEditMode) return canManageRecruitInfoByRole
+
     const pid = useProjectRegisterStore.getState().projectId
-    if (pid === null) return !isPm
+    if (pid === null) return false
     try {
       const permission = await queryClient.ensureQueryData({
         queryKey: [
@@ -215,7 +219,7 @@ function ProjectRegisterPage() {
       })
       return hasGrantedPermission(permission, "MANAGE")
     } catch {
-      return !isPm
+      return false
     }
   }
 
@@ -298,6 +302,19 @@ function ProjectRegisterPage() {
       hydrateDraftIntoStore(draftQuery.data)
     }
   }, [draftQuery.data, projectId])
+
+  useEffect(() => {
+    return () => {
+      const { gisuId: storedGisuId } = useProjectRegisterStore.getState()
+
+      reset()
+      if (storedGisuId) {
+        queryClient.removeQueries({
+          queryKey: projectKeys.draft(storedGisuId),
+        })
+      }
+    }
+  }, [queryClient, reset])
 
   const applicationFormQuery = useQuery({
     queryKey: projectKeys.applicationForm(projectId ?? 0),
@@ -388,52 +405,57 @@ function ProjectRegisterPage() {
     )
   }
 
+  const moveToStep = (targetStep: number) => {
+    setStep(targetStep)
+    requestAnimationFrame(() => {
+      const scrollTarget =
+        document.getElementById("matching-segment-region") ?? formTopRef.current
+
+      scrollTarget?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    })
+  }
+
   const handleBasicInfoNext = async () => {
     const canEdit = await resolveCanEditRecruitStep()
-    setStep(canEdit ? 2 : 3)
+    moveToStep(canEdit ? 2 : 3)
   }
 
   const handleApplicationFormPrev = async () => {
     const canEdit = await resolveCanEditRecruitStep()
-    setStep(canEdit ? 2 : 1)
+    moveToStep(canEdit ? 2 : 1)
   }
 
-  const handleStepChange = async (idx: number) => {
-    if (isEditMode) return
-    if (!canEditRecruitStep && idx === 2) {
-      setStep(2)
-      triggerStepTooltip(2)
-      return
-    }
-    if (idx <= step) {
-      setStep(idx)
-      return
-    }
+  const guardForwardStepMove = async (targetStep: number) => {
+    if (targetStep < step) return true
+
     if (step === 1) {
       const ok = await basicInfoRef.current?.validate()
       if (!ok) {
-        triggerStepTooltip(idx)
-        return
+        triggerStepTooltip(targetStep)
+        return false
       }
-      const saved = await basicInfoRef.current?.save()
-      if (!saved) return
-    } else if (step === 2 && canEditRecruitStep) {
-      const total = Object.values(recruitInfo).reduce(
-        (sum, { count }) => sum + count,
-        0,
-      )
-      if (total === 0) {
-        addToast({
-          message: "모집 인원을 1명 이상 입력해 주세요.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-        return
-      }
+      return (await basicInfoRef.current?.save()) ?? true
     }
-    setStep(idx)
+
+    if (step === 2) {
+      return (await recruitInfoRef.current?.save()) ?? true
+    }
+
+    return true
+  }
+
+  const handleStepChange = async (targetStep: number) => {
+    if (targetStep === step) return
+    if (!canEditRecruitStep && targetStep === 2) {
+      triggerStepTooltip(2)
+      return
+    }
+    const canMove = await guardForwardStepMove(targetStep)
+    if (!canMove) return
+    moveToStep(targetStep)
   }
 
   const isEditModeDirty = useCallback(
@@ -507,7 +529,7 @@ function ProjectRegisterPage() {
   return (
     <section className="flex w-full flex-col items-start justify-start">
       <div className="border-teal-gray-100 flex h-full w-242 flex-col gap-2.5 rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
-        <div className="flex flex-col items-start gap-1.5">
+        <div ref={formTopRef} className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 등록
           </span>
@@ -518,25 +540,17 @@ function ProjectRegisterPage() {
         <Stepper
           step={step}
           onStepChange={handleStepChange}
-          disabledSteps={
-            isEditMode
-              ? [1, 2, 3].filter((idx) => idx !== step)
-              : !canEditRecruitStep
-                ? [2]
-                : []
-          }
+          disabledSteps={!canEditRecruitStep ? [2] : []}
           disabledTooltips={
-            isEditMode
-              ? {}
-              : !canEditRecruitStep
-                ? {
-                    2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
-                    3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                  }
-                : {
-                    2: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                    3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                  }
+            !canEditRecruitStep
+              ? {
+                  2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
+                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                }
+              : {
+                  2: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                }
           }
           openTooltipStep={tooltipTriggerStep}
         />
@@ -552,9 +566,12 @@ function ProjectRegisterPage() {
           <RecruitInfoForm
             ref={recruitInfoRef}
             readOnly={!canEditRecruitStep}
+            canUpdatePartQuotasOverride={
+              isEditMode ? undefined : canManageRecruitInfoByRole
+            }
             isHydrated={isEditMode ? detailQuery.isSuccess : true}
-            onPrev={() => setStep(1)}
-            onNext={() => setStep(3)}
+            onPrev={() => moveToStep(1)}
+            onNext={() => moveToStep(3)}
           />
         )}
         {step === 3 && (

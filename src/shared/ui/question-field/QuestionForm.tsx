@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react"
+
 import DragAndDrop from "@/shared/assets/icon/drag-and-drop/DragAndDrop"
 import TrashCan from "@/shared/assets/icon/garbage/TrashCan"
 import { cn } from "@/shared/lib/utils"
@@ -49,6 +51,19 @@ export function QuestionForm({
   className,
   dragHandleProps,
 }: QuestionFormProps) {
+  const titleTextareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (!focused || readonlyTitle) return
+
+    const titleTextarea = titleTextareaRef.current
+    if (!titleTextarea) return
+
+    titleTextarea.focus()
+    const cursorPosition = titleTextarea.value.length
+    titleTextarea.setSelectionRange(cursorPosition, cursorPosition)
+  }, [focused, readonlyTitle])
+
   return (
     <article
       className={cn(
@@ -68,7 +83,7 @@ export function QuestionForm({
         />
       )}
 
-      {dragHandleProps && (
+      {focused && dragHandleProps && (
         <button
           type="button"
           className="mt-4 inline-flex cursor-grab items-center justify-center active:cursor-grabbing"
@@ -103,6 +118,7 @@ export function QuestionForm({
                 </div>
                 {!readonlyTitle && (
                   <textarea
+                    ref={titleTextareaRef}
                     rows={1}
                     value={title}
                     onChange={(e) => onTitleChange?.(e.target.value)}

@@ -83,6 +83,7 @@ export function StepperTab({
           side="bottom"
           hoverOnly
           open={tooltipOpenProp}
+          autoHideDuration={3000}
           triggerClassName="block w-full h-full"
         >
           {button}
