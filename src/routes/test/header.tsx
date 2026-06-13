@@ -47,13 +47,14 @@ function HeaderTestPage() {
 }
 
 export const HEADER_PREVIEW_USER: MemberInfoResponse = {
-  id: 1,
+  id: "1",
   name: "김운영",
   nickname: "운영자",
   email: "operator@example.com",
-  schoolId: 1,
+  hasLocalCredential: false,
+  schoolId: "1",
   schoolName: "UMC 대학교",
-  profileImageLink: "",
+  profileImageLink: null,
   status: "ACTIVE",
   roles: [
     {
@@ -93,7 +94,7 @@ export function useHeaderPreviewUser() {
 
   useEffect(() => {
     const previousAuthState = useAuthStore.getState()
-    const previousAuthQuery = queryClient.getQueryData(["auth"])
+    const previousAuthQuery = queryClient.getQueryData(["auth", "me"])
 
     useAuthStore.setState({
       accessToken: null,
@@ -101,7 +102,7 @@ export function useHeaderPreviewUser() {
       memberId: null,
       isAuthed: false,
     })
-    queryClient.setQueryData(["auth"], HEADER_PREVIEW_USER)
+    queryClient.setQueryData(["auth", "me"], HEADER_PREVIEW_USER)
     setIsReady(true)
 
     return () => {
@@ -111,7 +112,7 @@ export function useHeaderPreviewUser() {
         memberId: previousAuthState.memberId,
         isAuthed: previousAuthState.isAuthed,
       })
-      queryClient.setQueryData(["auth"], previousAuthQuery)
+      queryClient.setQueryData(["auth", "me"], previousAuthQuery)
     }
   }, [queryClient])
 
