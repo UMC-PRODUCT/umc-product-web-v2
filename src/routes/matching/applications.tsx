@@ -153,6 +153,23 @@ function MatchingApplicationsPage() {
 
           {isSchoolView && (
             <div className="ml-4 flex w-263 flex-col gap-13">
+              <SegmentButton
+                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+                value={selectedChapter}
+                onValueChange={(v) => {
+                  if (v !== selectedChapter) {
+                    addToast({
+                      message: "본인 학교의 지원 현황만 조회할 수 있습니다.",
+                      color: "red",
+                      variant: "deep",
+                      type: "default",
+                      duration: 3000,
+                    })
+                  }
+                }}
+                className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
+                itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
+              />
               {admin.isLoading ? (
                 <div className="flex items-center justify-center py-20">
                   <p className="text-body-2-regular text-teal-gray-400">
