@@ -34,7 +34,10 @@ import {
 import { filterApplicationSectionsByPart } from "../model/applicationSectionFilter"
 import { isRecruitDone } from "../model/matchingProject"
 import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
-import { resolveProjectDetailCtaMode } from "../model/projectDetailCta"
+import {
+  isApplyButtonDisabled,
+  resolveProjectDetailCtaMode,
+} from "../model/projectDetailCta"
 import { ApplyFormSkeleton } from "./apply-modal/ApplyFormSkeleton"
 import { MyApplicationModal } from "./apply-modal/MyApplicationModal"
 import { ProjectApplyModal } from "./apply-modal/ProjectApplyModal"
@@ -528,12 +531,15 @@ export function ProjectDetailCard({
                         !(viewOnly && userIsPm) &&
                         (isDetailLoading || isApplicationWritePermissionLoading)
                       }
-                      disabled={
-                        !(viewOnly && userIsPm) &&
-                        ((!isDetailLoading && !detail?.applicationFormId) ||
-                          isApplicationWritePermissionLoading ||
-                          !canWriteProjectApplication)
-                      }
+                      disabled={isApplyButtonDisabled({
+                        isPmReadonly: viewOnly && userIsPm,
+                        isDetailLoading,
+                        hasApplicationForm: !!detail?.applicationFormId,
+                        isWritePermissionLoading:
+                          isApplicationWritePermissionLoading,
+                        canWriteApplication: canWriteProjectApplication,
+                        hasActiveRound: activeMatchingRound != null,
+                      })}
                       onClick={() => {
                         if (viewOnly && userIsPm) {
                           // PM 읽기 전용: 모집 문항 보기 모달로 열기
