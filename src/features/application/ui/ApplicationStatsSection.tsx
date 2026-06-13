@@ -61,8 +61,11 @@ export function ApplicationStatsSection({
   className,
 }: ApplicationStatsSectionProps) {
   const labels = VARIANT_LABELS[variant]
+  const activeProjectRounds = stats.projectRounds.filter((p) =>
+    p.rounds.some((v) => v > 0),
+  )
   const maxRoundValue = Math.max(
-    ...stats.projectRounds.flatMap((p) => p.rounds),
+    ...activeProjectRounds.flatMap((p) => p.rounds),
     1,
   )
 
@@ -292,17 +295,27 @@ export function ApplicationStatsSection({
             ))}
           </div>
         </div>
-        <div className="flex items-end gap-1.5 overflow-x-auto pb-2">
-          {stats.projectRounds.map((project) => (
-            <ProjectRoundBar
-              key={project.name}
-              projectName={project.name}
-              rounds={project.rounds}
-              maxValue={maxRoundValue}
-              maxHeightPx={100}
-            />
-          ))}
-        </div>
+        {activeProjectRounds.length > 0 ? (
+          <div className="flex items-end gap-1.5 overflow-x-auto pb-2">
+            {activeProjectRounds.map((project) => (
+              <ProjectRoundBar
+                key={project.name}
+                projectName={project.name}
+                rounds={project.rounds}
+                maxValue={maxRoundValue}
+                maxHeightPx={100}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex h-30 items-center justify-center">
+            <p className="text-body-2-medium text-teal-gray-300">
+              {variant === "matching"
+                ? "현재 매칭된 프로젝트가 없습니다"
+                : "현재 지원된 프로젝트가 없습니다"}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
