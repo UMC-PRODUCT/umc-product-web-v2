@@ -12,6 +12,7 @@ import {
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { gisuKeys, projectKeys } from "@/features/project/new/api/queryKeys"
 import { getActiveGisu } from "@/shared/api/gisu"
+import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
@@ -62,20 +63,6 @@ type ProjectSummaryInput = {
     | null
 }
 
-function withImageCacheKey(
-  src: string | null | undefined,
-  cacheKey: number,
-): string | null {
-  if (!src) return null
-
-  const hashIndex = src.indexOf("#")
-  const baseUrl = hashIndex >= 0 ? src.slice(0, hashIndex) : src
-  const hash = hashIndex >= 0 ? src.slice(hashIndex + 1) : ""
-  const separator = baseUrl.includes("?") ? "&" : "?"
-  const versionedUrl = `${baseUrl}${separator}v=${cacheKey}`
-  return hash ? `${versionedUrl}#${hash}` : versionedUrl
-}
-
 function toMatchingProject(
   item: ProjectSummaryInput,
   imageCacheKey: number,
@@ -100,13 +87,17 @@ function toMatchingProject(
     status: item.status ?? undefined,
     logoImage: item.logoImageUrl
       ? {
-          src: withImageCacheKey(item.logoImageUrl, imageCacheKey)!,
+          src:
+            withImageCacheKey(item.logoImageUrl, imageCacheKey) ??
+            item.logoImageUrl,
           alt: `${item.name ?? "프로젝트"} 로고`,
         }
       : null,
     coverImage: item.thumbnailImageUrl
       ? {
-          src: withImageCacheKey(item.thumbnailImageUrl, imageCacheKey)!,
+          src:
+            withImageCacheKey(item.thumbnailImageUrl, imageCacheKey) ??
+            item.thumbnailImageUrl,
           alt: `${item.name ?? "프로젝트"} 대표 이미지`,
         }
       : null,

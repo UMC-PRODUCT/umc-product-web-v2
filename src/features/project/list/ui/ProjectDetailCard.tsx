@@ -19,6 +19,7 @@ import {
 import { getActiveGisu } from "@/shared/api/gisu"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
+import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { Button } from "@/shared/ui/Button"
 import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
@@ -42,10 +43,7 @@ import { RecruitQuestionsViewModal } from "./apply-modal/RecruitQuestionsViewMod
 import { TeamMemberModal } from "./team-member-modal/TeamMemberModal"
 
 import type { ActiveMatchingRound, ProjectDetail } from "../api/matchingProject"
-import type {
-  MatchingProject,
-  ProjectCoverImage,
-} from "../model/matchingProject"
+import type { MatchingProject } from "../model/matchingProject"
 
 type ProjectDetailCardLogo = "on" | "off"
 
@@ -110,20 +108,6 @@ const PART_LABEL: Record<string, string> = {
 }
 const PART_ORDER = Object.keys(PART_LABEL)
 
-function withImageCacheKey(
-  src: string | null | undefined,
-  cacheKey: number,
-): string | null {
-  if (!src) return null
-
-  const hashIndex = src.indexOf("#")
-  const baseUrl = hashIndex >= 0 ? src.slice(0, hashIndex) : src
-  const hash = hashIndex >= 0 ? src.slice(hashIndex + 1) : ""
-  const separator = baseUrl.includes("?") ? "&" : "?"
-  const versionedUrl = `${baseUrl}${separator}v=${cacheKey}`
-  return hash ? `${versionedUrl}#${hash}` : versionedUrl
-}
-
 function toMatchingProject(
   detail: ProjectDetail,
   imageCacheKey: number,
@@ -147,13 +131,17 @@ function toMatchingProject(
     authorSchoolLine,
     logoImage: detail.logoImageUrl
       ? {
-          src: withImageCacheKey(detail.logoImageUrl, imageCacheKey)!,
+          src:
+            withImageCacheKey(detail.logoImageUrl, imageCacheKey) ??
+            detail.logoImageUrl,
           alt: `${detail.name} 로고`,
         }
       : null,
     coverImage: detail.thumbnailImageUrl
       ? {
-          src: withImageCacheKey(detail.thumbnailImageUrl, imageCacheKey)!,
+          src:
+            withImageCacheKey(detail.thumbnailImageUrl, imageCacheKey) ??
+            detail.thumbnailImageUrl,
           alt: `${detail.name} 대표 이미지`,
         }
       : null,
@@ -398,9 +386,7 @@ export function ProjectDetailCard({
           isAlreadyApproved,
         })
 
-  const cover: ProjectCoverImage | null = detail?.thumbnailImageUrl
-    ? { src: detail.thumbnailImageUrl }
-    : null
+  const cover = data.coverImage
   const showLogo = logo === "on"
   const shouldShowEditCta =
     showEditCta && (resolvedEditPermissionLoading || resolvedCanEditProject)
