@@ -152,14 +152,14 @@ export function AccountSettingsPage() {
 
   return (
     <div className="flex w-full justify-center pt-14 pb-33.75">
-      <div className="flex w-full max-w-250 flex-col items-start gap-11">
+      <div className="flex w-full max-w-lg flex-col items-start gap-11">
         <h1 className="text-heading-5-semibold text-teal-gray-900 self-stretch">
           계정 설정
         </h1>
 
-        <div className="flex w-full flex-col items-start">
+        <div className="flex w-full flex-col items-center">
           {/* 프로필 헤더 */}
-          <div className="flex items-center gap-4.5 px-3.5 py-0">
+          <div className="flex w-full max-w-lg items-center gap-4.5 px-3.5 py-0">
             <div className="relative flex h-25 w-25 shrink-0 items-center justify-center">
               <div className="bg-teal-gray-100 flex h-25 w-25 items-center justify-center overflow-hidden rounded-full">
                 {me?.profileImageLink ? (
@@ -204,7 +204,7 @@ export function AccountSettingsPage() {
           </div>
 
           {/* 설정 카드 */}
-          <div className="border-teal-gray-100 relative mt-8 flex w-full items-start gap-2.5 rounded-xl border bg-white py-9 pl-11">
+          <div className="border-teal-gray-100 relative mt-8 flex w-full max-w-lg items-start gap-2.5 rounded-xl border bg-white px-11 pt-8 pb-10">
             {showEmailChange ? (
               <ChangeEmailForm
                 onSuccess={() => setShowEmailChange(false)}
@@ -324,6 +324,25 @@ export function AccountSettingsPage() {
               </div>
             )}
           </div>
+
+          {/* 이전 버튼 추가 */}
+          {(showEmailChange ||
+            (!isSocialOnly && showUsernameChange) ||
+            (!isSocialOnly && showPasswordChange)) && (
+            <Button
+              variant="weak"
+              color="neutral"
+              size="s"
+              className="mt-4 h-11 self-end"
+              onClick={() => {
+                if (showEmailChange) setShowEmailChange(false)
+                else if (showUsernameChange) setShowUsernameChange(false)
+                else if (showPasswordChange) setShowPasswordChange(false)
+              }}
+            >
+              이전
+            </Button>
+          )}
         </div>
       </div>
 
