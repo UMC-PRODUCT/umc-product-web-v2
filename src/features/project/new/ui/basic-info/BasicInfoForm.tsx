@@ -18,7 +18,7 @@ import {
   isCurrentTermPm,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
-import { searchMembers } from "@/features/challenger/api/member"
+import { searchAllMembers } from "@/features/challenger/api/member"
 import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
   addProjectMember,
@@ -92,7 +92,7 @@ export const BasicInfoForm = forwardRef<
       { part: "PLAN", gisuId: activeGisuId, ...pmSearchScope },
     ],
     queryFn: () =>
-      searchMembers({
+      searchAllMembers({
         part: "PLAN",
         gisuId: activeGisuId != null ? String(activeGisuId) : undefined,
         size: 200,
