@@ -527,8 +527,8 @@ function ProjectRegisterPage() {
   }
 
   return (
-    <section className="flex w-full flex-col items-start justify-start">
-      <div className="border-teal-gray-100 flex h-full w-242 flex-col gap-2.5 rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
+    <section className="flex w-full min-w-0 flex-col items-start justify-start">
+      <div className="border-teal-gray-100 bp1:px-6 bp2:px-8.5 bp2:pt-8 bp2:pb-10 flex h-full w-full max-w-242 min-w-0 flex-col gap-2.5 rounded-[12px] border bg-white px-4 pt-6 pb-8">
         <div ref={formTopRef} className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 등록

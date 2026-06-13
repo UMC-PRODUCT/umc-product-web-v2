@@ -94,18 +94,24 @@ export default function Footer() {
                   </span>
                 </dt>
                 <dd className="flex gap-2.25 max-[930px]:flex-col max-[930px]:gap-1">
-                  <div className="text-body-3-regular shrink-0 tracking-[-0.02em]">
-                    {members.group_1.join("   ")}
+                  <div className="text-body-3-regular flex shrink-0 gap-2.5 tracking-[-0.02em]">
+                    {members.group_1.map((item) => (
+                      <span key={item}>{item}</span>
+                    ))}
                   </div>
                   <div className="max-bp1:flex-col flex gap-1.5">
                     {members.group_2 && (
-                      <div className="text-body-3-regular shrink-0 tracking-[-0.02em]">
-                        {members.group_2.join("   ")}
+                      <div className="text-body-3-regular flex shrink-0 gap-2.5 tracking-[-0.02em]">
+                        {members.group_2.map((item) => (
+                          <span key={item}>{item}</span>
+                        ))}
                       </div>
                     )}
                     {members.group_3 && (
-                      <div className="text-body-3-regular shrink-0 tracking-[-0.02em]">
-                        {members.group_3.join("   ")}
+                      <div className="text-body-3-regular flex shrink-0 gap-2.5 tracking-[-0.02em]">
+                        {members.group_3.map((item) => (
+                          <span key={item}>{item}</span>
+                        ))}
                       </div>
                     )}
                   </div>

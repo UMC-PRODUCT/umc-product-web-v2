@@ -342,14 +342,14 @@ export const ApplicationForm = forwardRef<
           </div>
         ))}
 
-        <div className="mb-21 flex flex-col gap-1">
-          <p className="text-body-2-regular text-teal-gray-500 whitespace-pre">
+        <div className="bp1:mb-21 mb-14 flex flex-col gap-1">
+          <p className="text-body-2-regular text-teal-gray-500 whitespace-pre-wrap">
             {`* 지원자의 파트에 따라 해당하는 섹션의 질문만 노출됩니다.\n* 개발(FE/BE) 섹션의 문항은 추후 기획-개발자 매칭 전 수정이 가능합니다.`}
           </p>
         </div>
       </div>
 
-      <div className="flex justify-between">
+      <div className="bp1:flex-row bp1:justify-between flex flex-col-reverse gap-3">
         {!readOnly && (
           <Button
             type="button"
@@ -361,7 +361,7 @@ export const ApplicationForm = forwardRef<
             {tempSaveLabel}
           </Button>
         )}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-end gap-4">
           <Button
             type="button"
             variant="weak"

@@ -447,11 +447,11 @@ export const BasicInfoForm = forwardRef<
     <form
       noValidate
       onSubmit={handleFormSubmit}
-      className="flex flex-col justify-start gap-14 px-4 pt-4"
+      className="bp1:px-4 bp2:gap-14 flex flex-col justify-start gap-10 px-0 pt-4"
     >
       <div className="flex flex-col gap-4">
         <SectionHeader index={1} title="프로젝트 카드" />
-        <div className="flex items-start gap-6">
+        <div className="flex min-w-0 flex-col items-start gap-6 xl:flex-row xl:items-start">
           <ProjectCardForm
             nickname={displayNickname}
             name={displayName}
@@ -467,7 +467,7 @@ export const BasicInfoForm = forwardRef<
             thumbnailUrl={uploaded.thumbnailUrl ?? undefined}
             logoUrl={uploaded.logoUrl ?? undefined}
           />
-          <div className="flex w-78 shrink-0 flex-col gap-2">
+          <div className="flex w-4/5 max-w-full min-w-0 flex-col gap-2 xl:w-78 xl:shrink-0">
             <Dropdown<string>
               id="pm1-select"
               value={pm1Member?.id}
@@ -564,7 +564,7 @@ export const BasicInfoForm = forwardRef<
           className="w-full"
         />
       </div>
-      <div className="flex justify-between">
+      <div className="bp1:flex-row bp1:justify-between flex flex-col-reverse gap-3">
         <Button
           type="button"
           variant="weak"
