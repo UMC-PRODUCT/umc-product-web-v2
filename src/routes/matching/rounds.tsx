@@ -312,7 +312,7 @@ function MatchingRoundsPage() {
           })
         }
         return createMatchingRound({
-          name: `${round.roundLabel} ${matchingType}`,
+          name: `${selectedBranch} ${round.roundLabel} Plan-Developer 매칭`,
           type: serverType,
           phase: round.phase,
           chapterId: chapterId!,
