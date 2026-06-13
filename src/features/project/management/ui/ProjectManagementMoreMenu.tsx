@@ -16,11 +16,14 @@ import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { TeamMemberModal } from "@/features/project/list/ui/team-member-modal/TeamMemberModal"
 import { deleteProject } from "@/features/project/management/api"
 import { invalidateProjectSummaryQueries } from "@/features/project/new/api"
+import { abortProject } from "@/features/project/new/api/projectAbort"
 import { publishProject } from "@/features/project/new/api/projectPublish"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+
+import { AbortProjectModal } from "./AbortProjectModal"
 
 import type { PartEnum } from "@/features/application/model/apiTypes"
 import type {
@@ -59,6 +62,7 @@ export function ProjectManagementMoreMenu({
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [publishOpen, setPublishOpen] = useState(false)
+  const [abortOpen, setAbortOpen] = useState(false)
   const [applicationOpen, setApplicationOpen] = useState(false)
   const [teamModalOpen, setTeamModalOpen] = useState(false)
   const addToast = useToastStore((s) => s.addToast)
@@ -170,10 +174,47 @@ export function ProjectManagementMoreMenu({
     },
   })
 
+  const abortMutation = useMutation({
+    mutationFn: (reason: string) => abortProject(numericProjectId, reason),
+    onSuccess: () => {
+      setAbortOpen(false)
+      invalidateProjectSummaryQueries(queryClient, numericProjectId)
+      void queryClient.invalidateQueries({
+        queryKey: [...applicationKeys.all, "managed"],
+      })
+      addToast({
+        message: "프로젝트가 중단되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+    onError: (error) => {
+      const serverMessage = isAxiosError(error)
+        ? (error.response?.data as { message?: string } | undefined)?.message
+        : undefined
+      addToast({
+        message:
+          serverMessage ?? "프로젝트 중단에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+  })
+
   const handleDeleteClick = () => {
     if (!canDeleteProject || isPermissionLoading) return
     setPopoverOpen(false)
     setDeleteOpen(true)
+  }
+
+  const handleAbortClick = () => {
+    if (!canPublishProject || isPermissionLoading) return
+    setPopoverOpen(false)
+    setAbortOpen(true)
   }
 
   const handlePublishClick = () => {
@@ -287,6 +328,15 @@ export function ProjectManagementMoreMenu({
                     className="text-teal-500"
                   />
                 )}
+              {status === "IN_PROGRESS" &&
+                (isPermissionLoading || canPublishProject) && (
+                  <DropdownItem
+                    label="중단하기"
+                    disabled={isPermissionLoading}
+                    onClick={handleAbortClick}
+                    className="text-error-500"
+                  />
+                )}
               {(isPermissionLoading || canDeleteProject) && (
                 <DropdownItem
                   label="삭제"
@@ -356,6 +406,15 @@ export function ProjectManagementMoreMenu({
         onOpenChange={setPublishOpen}
         onCancel={() => setPublishOpen(false)}
         onConfirm={() => publishMutation.mutate()}
+      />
+
+      <AbortProjectModal
+        open={abortOpen}
+        projectName={projectName}
+        confirmLoading={abortMutation.isPending}
+        onOpenChange={setAbortOpen}
+        onCancel={() => setAbortOpen(false)}
+        onConfirm={(reason) => abortMutation.mutate(reason)}
       />
     </>
   )

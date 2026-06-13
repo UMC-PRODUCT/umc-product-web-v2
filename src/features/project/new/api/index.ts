@@ -9,6 +9,8 @@ export { getApplicationForm, upsertApplicationForm } from "./applicationForm"
 
 export { memberBriefToItem, toMemberItem } from "./memberAdapter"
 export { updatePartQuotas } from "./partQuotas"
+export { abortProject } from "./projectAbort"
+
 export {
   createProjectDraft,
   getMyDraft,
@@ -22,7 +24,6 @@ export {
   removeProjectMember,
   transferOwnership,
 } from "./projectMembers"
-
 export { publishProject } from "./projectPublish"
 
 export { invalidateProjectSummaryQueries } from "./queryInvalidation"
