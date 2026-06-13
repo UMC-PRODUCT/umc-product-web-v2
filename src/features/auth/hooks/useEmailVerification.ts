@@ -7,11 +7,11 @@ import {
   resendEmailVerification,
   sendEmailVerification,
 } from "@/features/auth/api/emailVerification"
+import { emailSchema } from "@/features/signup/validation"
 
 import type { EmailVerificationPurpose } from "@/features/auth/model/types"
 
 const VERIFICATION_SECONDS = 600
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /**
  * 이메일 인증 플로우를 관리하는 훅
@@ -54,7 +54,7 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
     }
   }, [])
 
-  const isEmailValid = EMAIL_REGEX.test(email)
+  const isEmailValid = emailSchema.safeParse(email).success
   /** 타이머가 만료된 상태 (코드 입력 불가) */
   const isExpired = isCodeVisible && remainingSeconds === 0
 
