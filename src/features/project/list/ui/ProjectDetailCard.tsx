@@ -224,7 +224,10 @@ export function ProjectDetailCard({
   }, [me])
 
   const myApplicationForProject = myApplications?.find(
-    (a) => Number(a.projectId) === projectId && a.status !== "CANCELLED",
+    (a) =>
+      Number(a.projectId) === projectId &&
+      a.status !== "CANCELLED" &&
+      a.applicationId != null,
   )
   const isApplied = myApplicationForProject != null
 
@@ -582,46 +585,9 @@ export function ProjectDetailCard({
                   )}
                 {(ctaMode === "apply-blocked-other" ||
                   ctaMode === "apply-blocked-approved") && (
-                  <>
-                    {!viewOnly && (
-                      <Button
-                        variant="weak"
-                        color="primary"
-                        className="flex-1"
-                        isLoading={isDetailLoading}
-                        disabled={
-                          !isDetailLoading && !detail?.applicationFormId
-                        }
-                        onClick={() => setIsRecruitQuestionsModalOpen(true)}
-                      >
-                        모집 문항 보기
-                      </Button>
-                    )}
-                    <Button
-                      className="flex-1"
-                      disabled={!viewOnly}
-                      onClick={
-                        viewOnly
-                          ? () => {
-                              if (!detail?.applicationFormId) {
-                                addToast({
-                                  message:
-                                    "지원 양식이 등록되지 않은 프로젝트입니다.",
-                                  color: "red",
-                                  variant: "deep",
-                                  type: "default",
-                                  duration: 3000,
-                                })
-                                return
-                              }
-                              setIsRecruitQuestionsModalOpen(true)
-                            }
-                          : undefined
-                      }
-                    >
-                      지원하기
-                    </Button>
-                  </>
+                  <Button className="flex-1" disabled>
+                    지원하기
+                  </Button>
                 )}
               </>
             )}

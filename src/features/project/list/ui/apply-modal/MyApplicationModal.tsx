@@ -52,7 +52,7 @@ export function MyApplicationModal({
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false)
   const deletePermissionQuery = useResourcePermission(
     "PROJECT_APPLICATION",
-    applicationId,
+    applicationId > 0 ? applicationId : undefined,
     { permissionType: "DELETE" },
   )
 
@@ -63,6 +63,7 @@ export function MyApplicationModal({
   } = useQuery({
     queryKey: ["myApplicationDetail", projectId, applicationId],
     queryFn: () => getApplicationDetail(projectId, applicationId),
+    enabled: applicationId > 0,
     staleTime: 60 * 1000,
   })
 
@@ -141,7 +142,7 @@ export function MyApplicationModal({
             </div>
           </div>
 
-          {isError ? (
+          {isError || applicationId === 0 ? (
             <div className="text-body-2-regular py-20 text-center text-red-400">
               지원 정보를 불러오지 못했습니다.
             </div>
