@@ -274,15 +274,15 @@ function MatchingRoundsPage() {
         const { startsAt, endsAt } = data
 
         // decisionDeadline 자동 계산:
-        // 1차 -> 2차 startsAt, 2차 -> 3차 startsAt, 3차 -> 3차 endsAt + 12h
+        // 다음 차수 있음 -> 다음 차수 startsAt - 5분
+        // 마지막 차수 -> endsAt + 12시간
         let decisionDeadline: string
         const nextData = filledData[idx + 1]
         if (nextData) {
           decisionDeadline = new Date(
-            new Date(nextData.startsAt).getTime() - 1000,
+            new Date(nextData.startsAt).getTime() - 5 * 60 * 1000,
           ).toISOString()
         } else {
-          // 마지막 차수(또는 다음 차수 미입력): endsAt + 12시간
           decisionDeadline = new Date(
             new Date(endsAt).getTime() + 12 * 60 * 60 * 1000,
           ).toISOString()

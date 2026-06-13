@@ -99,9 +99,9 @@ function MatchingApplicationsPage() {
           />
         )}
 
-        <div className="mt-6 flex flex-col gap-24.75">
+        <div className="mt-6 flex flex-col gap-13">
           {canApprove && (
-            <>
+            <div className="ml-4 flex w-263 flex-col gap-13">
               <SegmentButton
                 items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
                 value={selectedChapter}
@@ -116,7 +116,7 @@ function MatchingApplicationsPage() {
                   </p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-14.25 pl-4">
+                <div className="flex flex-col gap-14.25">
                   <ApplicationStatsSection
                     stats={adminStats}
                     dataUpdatedAt={admin.dataUpdatedAt}
@@ -130,7 +130,7 @@ function MatchingApplicationsPage() {
                   />
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {isPm && (

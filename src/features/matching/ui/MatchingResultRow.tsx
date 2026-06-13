@@ -185,6 +185,12 @@ export function MatchingResultRow({
     )
   }, [roleRows])
 
+  // 각 행의 usable(비 blocked) 슬롯 수
+  const usableCounts = localRoleRows.map((row) => {
+    const idx = row.blocks.findIndex((b) => b.type === "blocked")
+    return idx === -1 ? row.blocks.length : idx
+  })
+
   return (
     <div
       className={cn(
@@ -229,7 +235,7 @@ export function MatchingResultRow({
               <span className="text-body-2-medium w-14.5 tracking-[-0.14px] text-teal-900">
                 {row.role}
               </span>
-              <div className="flex items-center overflow-clip">
+              <div className="flex items-center">
                 {row.blocks.map((block, blockIdx) => (
                   <MatchingBlock
                     key={blockIdx}
@@ -264,19 +270,50 @@ export function MatchingResultRow({
                             })
                         : undefined
                     }
-                    className={cn(
-                      "-mr-px",
-                      rowIdx === 0 && blockIdx === 0 && "rounded-tl-[6px]",
-                      rowIdx === 0 &&
-                        blockIdx === row.blocks.length - 1 &&
-                        "rounded-tr-[6px]",
-                      rowIdx === localRoleRows.length - 1 &&
-                        blockIdx === 0 &&
-                        "rounded-bl-[6px]",
-                      rowIdx === localRoleRows.length - 1 &&
-                        blockIdx === row.blocks.length - 1 &&
-                        "rounded-br-[6px]",
-                    )}
+                    className={(() => {
+                      const isLastUsable =
+                        block.type !== "blocked" &&
+                        blockIdx === usableCounts[rowIdx]! - 1 &&
+                        usableCounts[rowIdx]! < row.blocks.length
+                      const isFirstBlocked =
+                        block.type === "blocked" &&
+                        blockIdx === usableCounts[rowIdx]
+                      return cn(
+                        // 경계 블록은 -mr-px 제거 (겹침 방지)
+                        !isLastUsable && "-mr-px",
+                        // 외곽 그리드 모서리
+                        rowIdx === 0 && blockIdx === 0 && "rounded-tl-[6px]",
+                        rowIdx === 0 &&
+                          blockIdx === row.blocks.length - 1 &&
+                          "rounded-tr-[6px]",
+                        rowIdx === localRoleRows.length - 1 &&
+                          blockIdx === 0 &&
+                          "rounded-bl-[6px]",
+                        rowIdx === localRoleRows.length - 1 &&
+                          blockIdx === row.blocks.length - 1 &&
+                          "rounded-br-[6px]",
+                        // usable 마지막 슬롯 경계 모서리
+                        isLastUsable &&
+                          (rowIdx === 0 ||
+                            usableCounts[rowIdx - 1] !==
+                              usableCounts[rowIdx]) &&
+                          "rounded-tr-[6px]",
+                        isLastUsable &&
+                          (rowIdx === localRoleRows.length - 1 ||
+                            usableCounts[rowIdx + 1] !==
+                              usableCounts[rowIdx]) &&
+                          "rounded-br-[6px]",
+                        // blocked 첫 슬롯 경계 모서리
+                        isFirstBlocked &&
+                          rowIdx > 0 &&
+                          usableCounts[rowIdx - 1]! > usableCounts[rowIdx]! &&
+                          "rounded-tl-[6px]",
+                        isFirstBlocked &&
+                          rowIdx < localRoleRows.length - 1 &&
+                          usableCounts[rowIdx + 1]! > usableCounts[rowIdx]! &&
+                          "rounded-bl-[6px]",
+                      )
+                    })()}
                   />
                 ))}
               </div>

@@ -85,7 +85,7 @@ function MatchingStatusPage() {
         </div>
 
         {/* 지부 선택 + 콘텐츠 */}
-        <div className="mt-6 flex flex-col gap-24.75">
+        <div className="mt-6 ml-4 flex w-263 flex-col gap-13">
           <SegmentButton
             items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
             value={selectedChapter}
@@ -101,7 +101,7 @@ function MatchingStatusPage() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-14.25 pl-4">
+            <div className="flex flex-col gap-14.25">
               {/* 01 매칭 통계 */}
               <ApplicationStatsSection
                 stats={displayStats}
@@ -123,26 +123,38 @@ function MatchingStatusPage() {
                       key={part.partName}
                       partName={part.partName}
                     >
-                      <MatchingTableHead />
-                      {part.projects.map((project) => (
-                        <MatchingResultRow
-                          key={project.projectName}
-                          projectId={project.projectId}
-                          projectName={project.projectName}
-                          challengerName={project.challengerName}
-                          challengerUniversity={project.challengerUniversity}
-                          backendPart={project.backendPart}
-                          roleRows={project.roleRows}
-                          status={project.status}
-                          currentCount={project.currentCount}
-                          totalCount={project.totalCount}
-                          isEditable={isAdmin}
-                          gisuId={gisuId}
-                          chapterId={chapterId}
-                          assignedMemberIds={assignedMemberIds}
-                          chapterName={selectedChapter}
-                        />
-                      ))}
+                      {part.projects.length > 0 ? (
+                        <>
+                          <MatchingTableHead />
+                          {part.projects.map((project) => (
+                            <MatchingResultRow
+                              key={project.projectName}
+                              projectId={project.projectId}
+                              projectName={project.projectName}
+                              challengerName={project.challengerName}
+                              challengerUniversity={
+                                project.challengerUniversity
+                              }
+                              backendPart={project.backendPart}
+                              roleRows={project.roleRows}
+                              status={project.status}
+                              currentCount={project.currentCount}
+                              totalCount={project.totalCount}
+                              isEditable={isAdmin}
+                              gisuId={gisuId}
+                              chapterId={chapterId}
+                              assignedMemberIds={assignedMemberIds}
+                              chapterName={selectedChapter}
+                            />
+                          ))}
+                        </>
+                      ) : (
+                        <div className="flex h-30 items-center justify-center">
+                          <p className="text-body-2-medium text-teal-gray-300">
+                            매칭이 이루어진 프로젝트가 없습니다
+                          </p>
+                        </div>
+                      )}
                     </MatchingPartSection>
                   ))}
                 </div>
