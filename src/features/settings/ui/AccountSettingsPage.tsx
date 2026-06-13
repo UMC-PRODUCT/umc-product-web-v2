@@ -212,6 +212,7 @@ export function AccountSettingsPage() {
               />
             ) : !isSocialOnly && showUsernameChange ? (
               <ChangeUsernameForm
+                currentEmail={me?.email ?? ""}
                 onSuccess={() => setShowUsernameChange(false)}
                 onBack={() => setShowUsernameChange(false)}
               />
