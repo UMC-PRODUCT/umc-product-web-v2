@@ -46,7 +46,7 @@ export function ApplicantDetailRow({
         </div>
 
         {/* 파트 */}
-        <div className="flex h-12.5 w-30.5 items-center px-2.5">
+        <div className="flex h-12.5 w-30.5 items-center justify-center px-2.5">
           <PartTagChip role={role} />
         </div>
 
@@ -61,7 +61,7 @@ export function ApplicantDetailRow({
         </div>
 
         {/* 합불 상태 */}
-        <div className="flex h-12.5 w-34 items-center px-2.5">
+        <div className="flex h-12.5 w-34 items-center justify-center px-2.5">
           <StatusChipTag value={status} type="tag" />
         </div>
 
