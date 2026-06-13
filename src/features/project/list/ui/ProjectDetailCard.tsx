@@ -65,13 +65,13 @@ interface ProjectDetailCardProps {
 
 function ProjectDetailCardSkeleton() {
   return (
-    <div className="flex w-135 flex-col items-start overflow-hidden rounded-2xl bg-white">
-      <div className="bg-teal-gray-200 h-71.5 w-135 animate-pulse" />
-      <div className="flex w-full flex-col items-start p-5">
+    <div className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-135 min-w-0 flex-col items-start overflow-x-hidden overflow-y-auto rounded-2xl bg-white">
+      <div className="bg-teal-gray-200 aspect-[540/286] w-full shrink-0 animate-pulse" />
+      <div className="bp1:p-5 flex w-full flex-col items-start p-4">
         <div className="flex w-full flex-col items-start gap-6">
           <div className="flex w-full flex-col items-start gap-2.5">
-            <div className="flex w-full items-center justify-between gap-4">
-              <div className="bg-teal-gray-150 h-6 w-52 animate-pulse rounded-md" />
+            <div className="bp1:flex-row bp1:items-center bp1:justify-between bp1:gap-4 flex w-full flex-col items-start gap-2.5">
+              <div className="bg-teal-gray-150 h-6 w-full max-w-52 animate-pulse rounded-md" />
               <div className="bg-teal-gray-150 h-4 w-32 animate-pulse rounded-md" />
             </div>
             <div className="flex w-full flex-col gap-1.5">
@@ -89,8 +89,8 @@ function ProjectDetailCardSkeleton() {
             ))}
           </div>
         </div>
-        <div className="mt-8.5 flex w-full items-start gap-2.5">
-          <div className="bg-teal-gray-150 h-11 w-11 animate-pulse rounded-xl" />
+        <div className="bp1:mt-8.5 bp1:flex-row bp1:items-start mt-6 flex w-full flex-col items-stretch gap-2.5">
+          <div className="bg-teal-gray-150 bp1:w-11 h-11 w-full animate-pulse rounded-xl" />
           <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
           <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
         </div>
@@ -110,7 +110,24 @@ const PART_LABEL: Record<string, string> = {
 }
 const PART_ORDER = Object.keys(PART_LABEL)
 
-function toMatchingProject(detail: ProjectDetail): MatchingProject {
+function withImageCacheKey(
+  src: string | null | undefined,
+  cacheKey: number,
+): string | null {
+  if (!src) return null
+
+  const hashIndex = src.indexOf("#")
+  const baseUrl = hashIndex >= 0 ? src.slice(0, hashIndex) : src
+  const hash = hashIndex >= 0 ? src.slice(hashIndex + 1) : ""
+  const separator = baseUrl.includes("?") ? "&" : "?"
+  const versionedUrl = `${baseUrl}${separator}v=${cacheKey}`
+  return hash ? `${versionedUrl}#${hash}` : versionedUrl
+}
+
+function toMatchingProject(
+  detail: ProjectDetail,
+  imageCacheKey: number,
+): MatchingProject {
   const owner = detail.productOwner
   const authorSchoolLine = [
     owner.nickname && owner.name
@@ -128,8 +145,17 @@ function toMatchingProject(detail: ProjectDetail): MatchingProject {
     title: detail.name,
     description: detail.description,
     authorSchoolLine,
+    logoImage: detail.logoImageUrl
+      ? {
+          src: withImageCacheKey(detail.logoImageUrl, imageCacheKey)!,
+          alt: `${detail.name} 로고`,
+        }
+      : null,
     coverImage: detail.thumbnailImageUrl
-      ? { src: detail.thumbnailImageUrl }
+      ? {
+          src: withImageCacheKey(detail.thumbnailImageUrl, imageCacheKey)!,
+          alt: `${detail.name} 대표 이미지`,
+        }
       : null,
     recruitRows: [...detail.partQuotas]
       .sort((a, b) => {
@@ -199,7 +225,11 @@ export function ProjectDetailCard({
     useState(false)
   const [isRecruitQuestionsModalOpen, setIsRecruitQuestionsModalOpen] =
     useState(false)
-  const { data: detail, isLoading: isDetailLoading } = useQuery({
+  const {
+    data: detail,
+    dataUpdatedAt: detailDataUpdatedAt,
+    isLoading: isDetailLoading,
+  } = useQuery({
     queryKey: ["projectDetail", projectId],
     queryFn: () => getProjectDetail(projectId),
     staleTime: 5 * 60 * 1000,
@@ -235,7 +265,7 @@ export function ProjectDetailCard({
     myApplications?.some((a) => a.status === "APPROVED") ?? false
 
   const data = detail
-    ? toMatchingProject(detail)
+    ? toMatchingProject(detail, detailDataUpdatedAt)
     : DEFAULT_MATCHING_PROJECT_MOCK
 
   const isShowingFormModal = isApplyModalOpen || isRecruitQuestionsModalOpen
@@ -381,8 +411,8 @@ export function ProjectDetailCard({
 
   return (
     <>
-      <div className="flex w-135 flex-col items-start overflow-hidden rounded-2xl bg-white">
-        <div className="bg-teal-gray-200 flex h-71.5 w-135 items-center justify-center overflow-hidden">
+      <div className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-135 min-w-0 flex-col items-start overflow-x-hidden overflow-y-auto rounded-2xl bg-white">
+        <div className="bg-teal-gray-200 flex aspect-[540/286] w-full shrink-0 items-center justify-center overflow-hidden">
           {cover?.src ? (
             <img
               src={cover.src}
@@ -400,24 +430,24 @@ export function ProjectDetailCard({
           )}
         </div>
 
-        <div className="flex w-full flex-col items-start p-5">
+        <div className="bp1:p-5 flex w-full flex-col items-start p-4">
           <div className="flex w-full flex-col items-start gap-6">
             <div className="flex w-full flex-col items-start gap-2.5">
-              <div className="flex w-full items-center justify-between gap-4">
+              <div className="bp1:flex-row bp1:items-center bp1:justify-between bp1:gap-4 flex w-full min-w-0 flex-col items-start gap-2.5">
                 {showLogo ? (
-                  <div className="flex min-w-0 items-center gap-2">
-                    <ProjectLogo />
-                    <h2 className="text-heading-6-semibold text-teal-gray-900 line-clamp-1 w-60 min-w-0">
+                  <div className="bp1:w-auto flex w-full min-w-0 items-center gap-2">
+                    <ProjectLogo src={data.logoImage?.src} />
+                    <h2 className="text-heading-6-semibold text-teal-gray-900 bp1:line-clamp-1 bp1:w-60 line-clamp-2 w-full min-w-0">
                       {data.title}
                     </h2>
                   </div>
                 ) : (
-                  <h2 className="text-heading-6-semibold text-teal-gray-900 w-60 min-w-0">
+                  <h2 className="text-heading-6-semibold text-teal-gray-900 bp1:line-clamp-1 bp1:w-60 line-clamp-2 w-full min-w-0">
                     {data.title}
                   </h2>
                 )}
 
-                <p className="text-body-2-regular text-teal-gray-500 shrink-0 text-right">
+                <p className="text-body-2-regular text-teal-gray-500 bp1:w-auto bp1:shrink-0 bp1:text-right line-clamp-1 w-full text-left">
                   {data.authorSchoolLine}
                 </p>
               </div>
@@ -433,10 +463,10 @@ export function ProjectDetailCard({
                 return (
                   <div
                     key={row.part}
-                    className="flex w-full items-center justify-between"
+                    className="flex w-full min-w-0 items-center justify-between gap-3"
                   >
-                    <div className="flex w-30.5 items-center justify-between">
-                      <span className="text-body-2-medium text-teal-gray-700">
+                    <div className="flex w-30.5 min-w-0 shrink-0 items-center justify-between gap-2">
+                      <span className="text-body-2-medium text-teal-gray-700 truncate">
                         {row.part}
                       </span>
                       <MemberCount
@@ -452,9 +482,10 @@ export function ProjectDetailCard({
             </div>
           </div>
 
-          <div className="mt-8.5 flex w-full items-start gap-2.5">
+          <div className="bp1:mt-8.5 bp1:flex-row bp1:items-start mt-6 flex w-full flex-col items-stretch gap-2.5">
             <TeamMemberButton
               variant="weak"
+              className="bp1:w-auto w-full"
               onClick={() => setIsTeamModalOpen(true)}
             />
             <Button
@@ -629,7 +660,7 @@ export function ProjectDetailCard({
             {showFormSkeleton ? (
               <ApplyFormSkeleton />
             ) : applicationForm == null ? (
-              <div className="shadow-drop-neutral-3 flex h-40 w-232 items-center justify-center rounded-2xl bg-white">
+              <div className="shadow-drop-neutral-3 flex h-40 w-[calc(100vw-2rem)] max-w-232 items-center justify-center rounded-2xl bg-white">
                 <span className="text-body-2-regular text-teal-gray-500">
                   등록된 모집 문항이 없습니다.
                 </span>
@@ -655,7 +686,7 @@ export function ProjectDetailCard({
             {showFormSkeleton ? (
               <ApplyFormSkeleton />
             ) : applicationForm == null ? (
-              <div className="shadow-drop-neutral-3 flex h-40 w-232 items-center justify-center rounded-2xl bg-white">
+              <div className="shadow-drop-neutral-3 flex h-40 w-[calc(100vw-2rem)] max-w-232 items-center justify-center rounded-2xl bg-white">
                 <span className="text-body-2-regular text-teal-gray-500">
                   등록된 지원 양식이 없습니다.
                 </span>
@@ -706,7 +737,7 @@ export function ProjectDetailCard({
                 }}
               />
             ) : (
-              <div className="shadow-drop-neutral-3 flex h-40 w-232 items-center justify-center rounded-2xl bg-white">
+              <div className="shadow-drop-neutral-3 flex h-40 w-[calc(100vw-2rem)] max-w-232 items-center justify-center rounded-2xl bg-white">
                 <span className="text-body-2-regular text-teal-gray-500">
                   지원 내역을 찾을 수 없습니다.
                 </span>
