@@ -18,6 +18,7 @@ import {
   isChapterPresident,
   isCurrentTermPm,
   isOperator,
+  isSchoolStaff,
 } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
@@ -48,6 +49,8 @@ function MatchingApplicationsPage() {
   const [selectedChapter, setSelectedChapter] = useState(defaultChapter)
 
   const canApprove = isOperator(viewMe)
+  // SCHOOL_PRESIDENT 등 학교 운영진: APPLY-101 목록 조회 가능, APPLY-102 상세 불가
+  const isSchoolView = !canApprove && isSchoolStaff(viewMe)
   const isPm = isCurrentTermPm(viewMe)
   const isOthers = !isAnyOperator(viewMe) && !isPm
 
@@ -68,13 +71,13 @@ function MatchingApplicationsPage() {
     }
   }, [me, chapters, userChapter])
 
-  const admin = useAdminPageData(selectedChapter)
+  // SCHOOL_PRESIDENT는 챕터 필터 없이 조회 (서버가 학교 단위로 APPLY-101 결과를 필터링)
+  const admin = useAdminPageData(isSchoolView ? undefined : selectedChapter)
   const adminStats = admin.stats
   const adminProjects = admin.projects
 
   const challenger = useChallengerPageData()
   const pmProjects = challenger.projects
-  const pmProjectInfo = challenger.projectInfo
 
   return (
     <section className="flex w-full flex-col">
@@ -87,17 +90,6 @@ function MatchingApplicationsPage() {
             프로젝트 지원 내역을 통합 관리합니다.
           </p>
         </div>
-
-        {isPm && pmProjectInfo && (
-          <ProjectTitleCard
-            className="mt-6"
-            projectName={pmProjectInfo.projectName}
-            challengerName={pmProjectInfo.pmName}
-            challengerUniversity={pmProjectInfo.pmUniversity}
-            thumbnailUrl={pmProjectInfo.thumbnailUrl}
-            size="lg"
-          />
-        )}
 
         <div className="mt-6 flex flex-col gap-13">
           {canApprove && (
@@ -133,6 +125,32 @@ function MatchingApplicationsPage() {
             </div>
           )}
 
+          {isSchoolView && (
+            <div className="ml-4 flex w-263 flex-col gap-13">
+              {admin.isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-body-2-regular text-teal-gray-400">
+                    데이터를 불러오는 중...
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-14.25">
+                  <ApplicationStatsSection
+                    stats={adminStats}
+                    dataUpdatedAt={admin.dataUpdatedAt}
+                    currentRound={admin.currentRound}
+                    activeRound={admin.activeRound}
+                  />
+                  <ApplicationTableSection
+                    projects={adminProjects}
+                    currentRound={admin.currentRound}
+                    disableFormPanel
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
           {isPm && (
             <>
               {challenger.isLoading ? (
@@ -141,11 +159,27 @@ function MatchingApplicationsPage() {
                     데이터를 불러오는 중...
                   </p>
                 </div>
-              ) : (
+              ) : pmProjects.length === 0 ? (
                 <ChallengerApplicationView
-                  projects={pmProjects}
+                  projects={[]}
                   currentRound={challenger.currentRound}
                 />
+              ) : (
+                pmProjects.map((project) => (
+                  <div key={project.id} className="flex flex-col gap-6">
+                    <ProjectTitleCard
+                      projectName={project.projectName}
+                      challengerName={project.challengerName}
+                      challengerUniversity={project.challengerUniversity}
+                      thumbnailUrl={project.thumbnailUrl}
+                      size="lg"
+                    />
+                    <ChallengerApplicationView
+                      projects={[project]}
+                      currentRound={challenger.currentRound}
+                    />
+                  </div>
+                ))
               )}
             </>
           )}
