@@ -36,14 +36,14 @@ export default function Footer() {
     <footer className="bg-teal-gray-100 max-bp1:px-9 max-bp1:py-10 flex flex-col items-center gap-2.5 self-stretch py-16 pr-14 pl-15">
       <div className="flex flex-col items-start gap-6 self-stretch">
         <div className="flex w-full justify-between gap-4 max-[930px]:flex-col">
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 items-center gap-4">
             <UmcLogoFilled className="text-teal-gray-300 h-5.5 w-auto shrink-0" />
-            <span className="text-heading-7-semibold text-teal-gray-400 shrink-0">
+            <span className="text-heading-7-semibold text-teal-gray-400">
               University Make us Challenge
             </span>
           </div>
           <div className="text-teal-gray-400 flex flex-col items-center justify-center gap-2 pt-1 whitespace-nowrap max-[930px]:items-start">
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
               <nav
                 aria-label="약관 및 정책"
                 className="flex items-center gap-6"
@@ -94,21 +94,21 @@ export default function Footer() {
                   </span>
                 </dt>
                 <dd className="flex gap-2.25 max-[930px]:flex-col max-[930px]:gap-1">
-                  <div className="text-body-3-regular flex shrink-0 gap-2.5 tracking-[-0.02em]">
+                  <div className="text-body-3-regular flex shrink-0 flex-wrap gap-x-2.5 gap-y-0.5 tracking-[-0.02em]">
                     {members.group_1.map((item) => (
                       <span key={item}>{item}</span>
                     ))}
                   </div>
                   <div className="max-bp1:flex-col flex gap-1.5">
                     {members.group_2 && (
-                      <div className="text-body-3-regular flex shrink-0 gap-2.5 tracking-[-0.02em]">
+                      <div className="text-body-3-regular flex shrink-0 flex-wrap gap-x-2.5 gap-y-0.5 tracking-[-0.02em]">
                         {members.group_2.map((item) => (
                           <span key={item}>{item}</span>
                         ))}
                       </div>
                     )}
                     {members.group_3 && (
-                      <div className="text-body-3-regular flex shrink-0 gap-2.5 tracking-[-0.02em]">
+                      <div className="text-body-3-regular flex shrink-0 flex-wrap gap-x-2.5 gap-y-0.5 tracking-[-0.02em]">
                         {members.group_3.map((item) => (
                           <span key={item}>{item}</span>
                         ))}
