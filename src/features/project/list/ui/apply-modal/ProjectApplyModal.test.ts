@@ -90,3 +90,84 @@ describe("buildAnswerPayload", () => {
     expect(payload).toEqual([])
   })
 })
+
+const valueSections: Section[] = [
+  {
+    id: "common",
+    name: "공통 문항",
+    isEnabled: true,
+    questions: [
+      {
+        id: "201",
+        title: "단답",
+        caption: "",
+        fieldType: "text",
+        required: false,
+        options: [],
+      },
+      {
+        id: "202",
+        title: "파일 첨부",
+        caption: "",
+        fieldType: "file",
+        required: false,
+        options: [],
+      },
+      {
+        id: "203",
+        title: "포트폴리오",
+        caption: "",
+        fieldType: "portfolio",
+        required: false,
+        options: [],
+      },
+    ],
+  },
+]
+
+describe("buildAnswerPayload - 값 없는 항목 제외", () => {
+  it("미작성 text/file/portfolio는 bare 항목으로 전송하지 않는다", () => {
+    const payload = buildAnswerPayload(
+      {
+        "201": "",
+        "202": null,
+        "203": null,
+      },
+      valueSections,
+    )
+
+    expect(payload).toEqual([])
+  })
+
+  it("공백만 입력한 text는 제외한다", () => {
+    const payload = buildAnswerPayload({ "201": "   " }, valueSections)
+
+    expect(payload).toEqual([])
+  })
+
+  it("값이 있는 text/file/portfolio는 정상 전송한다", () => {
+    const payload = buildAnswerPayload(
+      {
+        "201": "답변",
+        "202": { fileId: "file-1", fileName: "a.pdf" },
+        "203": { kind: "link", url: "https://example.com" },
+      },
+      valueSections,
+    )
+
+    expect(payload).toEqual([
+      { questionId: 201, textValue: "답변" },
+      { questionId: 202, fileIds: ["file-1"] },
+      { questionId: 203, textValue: "https://example.com" },
+    ])
+  })
+
+  it("포트폴리오 파일은 fileIds로 전송한다", () => {
+    const payload = buildAnswerPayload(
+      { "203": { kind: "file", fileId: "pf-1", fileName: "p.pdf" } },
+      valueSections,
+    )
+
+    expect(payload).toEqual([{ questionId: 203, fileIds: ["pf-1"] }])
+  })
+})

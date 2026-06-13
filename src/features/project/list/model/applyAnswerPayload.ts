@@ -80,7 +80,9 @@ export function buildAnswerPayload(
     const base = { questionId: Number(questionId) }
 
     if (question.fieldType === "text") {
-      return [{ ...base, textValue: typeof value === "string" ? value : "" }]
+      const text = typeof value === "string" ? value : ""
+      if (text.trim() === "") return []
+      return [{ ...base, textValue: text }]
     }
 
     if (question.fieldType === "radio") {
@@ -101,16 +103,16 @@ export function buildAnswerPayload(
     }
 
     if (question.fieldType === "file") {
-      if (!isUploadedFileValue(value)) return [base]
+      if (!isUploadedFileValue(value)) return []
       return [{ ...base, fileIds: [value.fileId] }]
     }
 
     if (question.fieldType === "portfolio") {
-      if (!isApplyPortfolioValue(value)) return [base]
+      if (!isApplyPortfolioValue(value)) return []
       if (value.kind === "link") return [{ ...base, textValue: value.url }]
       return [{ ...base, fileIds: [value.fileId] }]
     }
 
-    return [base]
+    return []
   })
 }
