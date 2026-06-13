@@ -302,7 +302,7 @@ export function ProjectApplyModal({
     setIsSubmitting(true)
     try {
       if (!isDevMatchingRound) {
-        const answers = buildAnswerPayload(formValues, sections)
+        const answers = buildAnswerPayload(formValues, sections, sectionEnabled)
         await saveApplicationDraft(projectId, answers)
         await submitApplication(projectId)
       }
