@@ -13,6 +13,9 @@ export type ApplicationStatusEnum = "SUBMITTED" | "APPROVED" | "REJECTED"
 
 export type MatchingPhase = "FIRST" | "SECOND" | "THIRD"
 
+// 응답 전용 - 랜덤 매칭/강제 배정 케이스 포함 (APPLY-101/102 matchingRound.phase)
+export type MatchingRoundPhaseView = MatchingPhase | "RANDOM_MATCHING"
+
 export type MatchingType = "PLAN_DESIGN" | "PLAN_DEVELOPER"
 
 // GET /api/v1/projects/{projectId}/applications 응답 항목
@@ -28,7 +31,7 @@ export interface ProjectApplicantResponse {
   matchingRound: {
     id: string
     type: MatchingType
-    phase: MatchingPhase
+    phase: MatchingRoundPhaseView
   }
   status: ApplicationStatusEnum
   submittedAt: string

@@ -15,7 +15,7 @@ import type {
   FormQuestion,
   FormResponseData,
   ManagedProjectSummaryResponse,
-  MatchingPhase,
+  MatchingRoundPhaseView,
   PartEnum,
   ProjectApplicantResponse,
 } from "./apiTypes"
@@ -75,14 +75,15 @@ export function toFrontRole(serverPart: PartEnum): Role {
   return PART_MAP[serverPart] ?? "plan"
 }
 
-// 서버 phase -> 프론트 라운드 번호
-const PHASE_MAP: Record<MatchingPhase, number> = {
+// 서버 phase -> 프론트 라운드 번호 (RANDOM_MATCHING은 0으로 처리 - 실제로 응답에 오지 않음)
+const PHASE_MAP: Record<MatchingRoundPhaseView, number> = {
   FIRST: 1,
   SECOND: 2,
   THIRD: 3,
+  RANDOM_MATCHING: 0,
 }
 
-export function toRoundNumber(phase: MatchingPhase): number {
+export function toRoundNumber(phase: MatchingRoundPhaseView): number {
   return PHASE_MAP[phase] ?? 1
 }
 
