@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { useSchoolChapterMap } from "@/shared/hooks/useSchoolChapterMap"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
@@ -24,7 +24,7 @@ const PART_LABEL: Record<string, string> = {
   SPRINGBOOT: "SpringBoot",
   NODEJS: "Node.js",
 }
-const PART_ORDER = Object.keys(PART_LABEL)
+const PART_ORDER = ["DESIGN", "WEB", "IOS", "ANDROID", "SPRINGBOOT", "NODEJS"]
 
 function toMatchingProject(project: ProjectItem): MatchingProject {
   const owner = project.productOwner
@@ -83,6 +83,21 @@ export function MatchingProjectsListPage() {
   const [selectedProjectChapterId, setSelectedProjectChapterId] = useState<
     number | undefined
   >(undefined)
+  const filterAreaRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!openFilterId) return
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target
+      if (!(target instanceof Node)) return
+      if (filterAreaRef.current?.contains(target)) return
+      setOpenFilterId(null)
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown)
+    return () => document.removeEventListener("pointerdown", handlePointerDown)
+  }, [openFilterId, setOpenFilterId])
 
   return (
     <section className="relative isolate flex w-full flex-col items-start justify-start">
@@ -106,7 +121,7 @@ export function MatchingProjectsListPage() {
 
         <div className="relative z-30 mb-3 flex items-start justify-between self-stretch">
           <ProjectSearchField value={searchQuery} onChange={setSearchQuery} />
-          <div className="flex items-center gap-2">
+          <div ref={filterAreaRef} className="flex items-center gap-2">
             {filterDescriptors.map((filter) => (
               <FilterDropdown
                 key={filter.id}

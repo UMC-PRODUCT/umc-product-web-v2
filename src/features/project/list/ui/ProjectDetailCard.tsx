@@ -110,7 +110,7 @@ const PART_LABEL: Record<string, string> = {
   SPRINGBOOT: "SpringBoot",
   NODEJS: "Node.js",
 }
-const PART_ORDER = Object.keys(PART_LABEL)
+const PART_ORDER = ["DESIGN", "WEB", "IOS", "ANDROID", "SPRINGBOOT", "NODEJS"]
 
 function toMatchingProject(
   detail: ProjectDetail,

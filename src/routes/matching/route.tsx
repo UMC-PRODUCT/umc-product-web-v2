@@ -25,7 +25,7 @@ function MatchingLayout() {
         <div className="flex min-w-0 flex-1 flex-col">
           <div
             className={cn(
-              "bp2:pt-12 px-4 pt-6",
+              "bp2:pt-12 min-h-[800px] px-4 pt-6",
               isProjectsIndex ? "bp2:px-9.5" : "bp2:px-11",
             )}
           >

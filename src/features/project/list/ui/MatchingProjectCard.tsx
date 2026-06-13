@@ -39,6 +39,12 @@ function RecruitRowItem(row: ProjectRecruitRow) {
 
 function CardBody({ data }: { data: MatchingProject }) {
   const cover = data.coverImage
+  const recruitRows = data.recruitRows.slice(0, 3)
+  const recruitRowCount =
+    recruitRows.length > 0 ? recruitRows.length : data.partQuotaStatus ? 1 : 0
+  const placeholderRows = Array.from({
+    length: Math.max(0, 3 - recruitRowCount),
+  })
 
   return (
     <div className="flex w-full min-w-0 flex-col items-stretch self-stretch">
@@ -62,10 +68,10 @@ function CardBody({ data }: { data: MatchingProject }) {
 
       <div className="flex w-full min-w-0 flex-col items-start gap-4 p-5">
         <div className="flex w-full min-w-0 flex-col items-start justify-center gap-1.5 self-stretch">
-          <h3 className="text-heading-7-semibold text-teal-gray-900 line-clamp-1 w-full min-w-0">
+          <h3 className="text-heading-7-semibold text-teal-gray-900 h-[1.575rem] w-full min-w-0 truncate">
             {data.title}
           </h3>
-          <p className="text-body-2-medium text-teal-gray-600 line-clamp-2 w-full min-w-0">
+          <p className="text-body-2-medium text-teal-gray-600 h-[1.3125rem] w-full min-w-0 truncate">
             {data.description}
           </p>
           <p className="text-caption-2-regular text-teal-gray-500 line-clamp-1 w-full min-w-0">
@@ -73,9 +79,9 @@ function CardBody({ data }: { data: MatchingProject }) {
           </p>
         </div>
 
-        <div className="flex w-full min-w-0 flex-col items-start gap-1 self-stretch">
-          {data.recruitRows.length > 0
-            ? data.recruitRows.map((row) => (
+        <div className="flex h-20 w-full min-w-0 flex-col items-start gap-1 self-stretch">
+          {recruitRows.length > 0
+            ? recruitRows.map((row) => (
                 <RecruitRowItem key={row.part} {...row} />
               ))
             : data.partQuotaStatus != null && (
@@ -85,6 +91,9 @@ function CardBody({ data }: { data: MatchingProject }) {
                   />
                 </div>
               )}
+          {placeholderRows.map((_, index) => (
+            <div key={index} aria-hidden className="h-6 w-full shrink-0" />
+          ))}
         </div>
       </div>
     </div>
