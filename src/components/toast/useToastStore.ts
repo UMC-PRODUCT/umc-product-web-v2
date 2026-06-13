@@ -5,7 +5,7 @@ export interface ToastItem {
   message: string
   color: "primary" | "red"
   variant: "deep" | "weak"
-  type: "default" | "time"
+  type: "default" | "time" | "notice"
   duration: number
 }
 
