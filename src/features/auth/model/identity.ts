@@ -82,6 +82,17 @@ export function canManageProjects(me: MemberInfoResponse | undefined): boolean {
   return isOperator(me) || isSchoolLeadership(me) || isCurrentTermPm(me)
 }
 
+export function canManageMatchingRounds(
+  me: MemberInfoResponse | undefined,
+): boolean {
+  return hasAnyRoleType(me, [
+    "SUPER_ADMIN",
+    "CENTRAL_PRESIDENT",
+    "CENTRAL_VICE_PRESIDENT",
+    "CHAPTER_PRESIDENT",
+  ])
+}
+
 export function getProjectPmSearchScope(me: MemberInfoResponse | undefined): {
   chapterId?: string
   schoolId?: string
