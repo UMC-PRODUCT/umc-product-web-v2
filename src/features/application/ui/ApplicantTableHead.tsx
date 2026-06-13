@@ -51,7 +51,7 @@ export function ApplicantTableHead({
         type="button"
         aria-label={hasExpanded ? "모두 접기" : "모두 펼치기"}
         onClick={onToggleAll}
-        className="shadow-inner-neutral-2 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-teal-200 transition-colors hover:bg-teal-300"
+        className="shadow-inner-neutral-2 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-teal-100 transition-colors hover:bg-teal-200"
       >
         {hasExpanded ? (
           <CollapseAllIcon width={24} height={24} className="text-teal-700" />
