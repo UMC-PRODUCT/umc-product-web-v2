@@ -59,21 +59,20 @@ export function ProjectStatusRow({
     >
       <div className="flex flex-1 items-center">
         {/* 프로젝트 */}
-        <div className="w-50 pr-4">
-          <ProjectLinkButton
-            name={projectName}
-            isSelected={isExpanded}
-            onClick={onProjectClick}
-          />
-        </div>
+        <ProjectLinkButton
+          name={projectName}
+          isSelected={isExpanded}
+          onClick={onProjectClick}
+          className="w-46 px-2.5"
+        />
 
         {/* 파트 */}
-        <div className="flex h-12.5 w-30.5 items-center px-2.5">
+        <div className="flex h-12.5 w-30.5 items-center justify-center px-2.5">
           <PartTagChip role={role} />
         </div>
 
         {/* 챌린저 */}
-        <div className="flex h-12.5 w-50 items-center rounded-lg px-16">
+        <div className="flex h-12.5 w-50 items-center px-4">
           <div className="flex flex-col whitespace-nowrap">
             <span className="text-body-2-medium text-teal-gray-900">
               {challengerName}

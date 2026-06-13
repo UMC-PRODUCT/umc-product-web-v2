@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useEffect, useMemo, useState } from "react"
+import { isAxiosError } from "axios"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
@@ -23,6 +24,10 @@ interface ApplicationDetailModalProps {
   onOpenChange: (open: boolean) => void
   /** 현재 활성 차수 (이전 차수의 상태 칩 disabled 처리) */
   currentRound?: number
+  /** APPLY-102 권한 없는 역할(SCHOOL_PRESIDENT 등) - 지원자 행 클릭 시 폼 패널 열리지 않음 */
+  disableFormPanel?: boolean
+  /** 플랜 챌린저(PM) 뷰: 대기 상태 옵션 숨김 */
+  hidePendingStatus?: boolean
 }
 
 function toApplicationId(applicantId: string): number | null {
@@ -36,6 +41,8 @@ export function ApplicationDetailModal({
   open,
   onOpenChange,
   currentRound,
+  disableFormPanel = false,
+  hidePendingStatus = false,
 }: ApplicationDetailModalProps) {
   const addToast = useToastStore((s) => s.addToast)
 
@@ -48,9 +55,17 @@ export function ApplicationDetailModal({
     Record<string, StatusValue>
   >({})
 
+  // 이중 실행 방지용 ref (Strict Mode 대응)
+  const emptyToastShownRef = useRef(false)
+
   // 지원자 없는 프로젝트 모달 오픈 시 토스트 노출
   useEffect(() => {
-    if (open && project.applicants.length === 0) {
+    if (!open) {
+      emptyToastShownRef.current = false
+      return
+    }
+    if (project.applicants.length === 0 && !emptyToastShownRef.current) {
+      emptyToastShownRef.current = true
       addToast({
         message: "아직 지원자가 없습니다.",
         color: "primary",
@@ -59,7 +74,7 @@ export function ApplicationDetailModal({
         duration: 3000,
       })
     }
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, addToast])
 
   const applicationIds = useMemo(() => {
     const ids = new Set<number>()
@@ -130,7 +145,19 @@ export function ApplicationDetailModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: applicationKeys.all })
     },
-    onError: (_error, variables) => {
+    onError: (error, variables) => {
+      // 서버 에러 메시지 토스트
+      const serverMessage = isAxiosError(error)
+        ? error.response?.data?.message
+        : undefined
+      addToast({
+        message: serverMessage ?? "배정 상태 변경에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      // 낙관적 업데이트 롤백
       setStatusOverrides((prev) => {
         const next = { ...prev }
         delete next[variables.appId]
@@ -223,12 +250,15 @@ export function ApplicationDetailModal({
               onRoundFilterChange={setRoundFilter}
               onStatusFilterChange={setStatusFilter}
               selectedApplicantId={selectedApplicantId}
-              onApplicantClick={setSelectedApplicantId}
+              onApplicantClick={
+                disableFormPanel ? () => {} : setSelectedApplicantId
+              }
               onStatusChange={handleApplicantStatusChange}
               onClose={handleClose}
               currentRound={currentRound}
               canApproveApplicant={canApproveApplicant}
               approvePermissionLoading={isApprovePermissionLoading}
+              statusOptions={hidePendingStatus ? ["pass", "fail"] : undefined}
               className="w-full"
             />
           </div>
@@ -251,6 +281,7 @@ export function ApplicationDetailModal({
                   selectedApplicant.round,
                 )
               }
+              hidePendingStatus={hidePendingStatus}
               className="max-h-[calc(100vh-60px)] shadow-xl"
             />
           )}

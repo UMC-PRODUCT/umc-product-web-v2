@@ -15,6 +15,7 @@ interface ApplicantRoleSectionProps {
   currentRound?: number
   canApproveApplicant: (applicantId: string) => boolean
   approvePermissionLoading: boolean
+  statusOptions?: StatusValue[]
   className?: string
 }
 
@@ -28,6 +29,7 @@ export function ApplicantRoleSection({
   currentRound,
   canApproveApplicant,
   approvePermissionLoading,
+  statusOptions,
   className,
 }: ApplicantRoleSectionProps) {
   const roundCounts = applicants.reduce<Record<number, number>>((acc, a) => {
@@ -84,6 +86,7 @@ export function ApplicantRoleSection({
               onClick={() => onApplicantClick(applicant.id)}
               onStatusChange={(s) => onStatusChange?.(applicant.id, s)}
               statusDisabled={statusDisabled}
+              statusOptions={statusOptions}
             />
           )
         })}

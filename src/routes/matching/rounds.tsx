@@ -434,24 +434,6 @@ function MatchingRoundsPage() {
       return
     }
 
-    // 시작 또는 종료 일시가 현재 시각보다 이전인 경우
-    const now = new Date()
-    const hasPastDate = filledRounds.some((r) => {
-      const start = new Date(`${r.startDate}T${r.startTime}:00`)
-      const end = new Date(`${r.endDate}T${r.endTime}:00`)
-      return start < now || end < now
-    })
-    if (hasPastDate) {
-      addToast({
-        message: "매칭 날짜를 다시 확인해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      return
-    }
-
     // Case 4: 단일 차수 기간 3일 초과
     const hasExceededMaxDays = filledRounds.some((r) => {
       if (!r.startDate || !r.endDate) return false

@@ -21,7 +21,7 @@ export function MatchingPartSection({
       </div>
 
       {/* 테이블 영역 */}
-      <div className="border-teal-gray-300 overflow-clip rounded-b-xl border-x border-b">
+      <div className="overflow-clip rounded-b-xl border-x border-b border-teal-200">
         {children}
       </div>
     </div>

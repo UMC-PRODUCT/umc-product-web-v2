@@ -66,6 +66,10 @@ interface ApplicationTableSectionProps {
   currentRound?: number
   /** 현재 선택된 챕터 이름 (상세 모달 전달용) */
   chapterName?: string
+  /** APPLY-102 단건 상세 권한 없는 역할(SCHOOL_PRESIDENT 등)일 때 true - 모달은 열리지만 폼 패널 비활성 */
+  disableFormPanel?: boolean
+  /** 플랜 챌린저(PM) 뷰: 대기 상태 옵션 숨김 */
+  hidePendingStatus?: boolean
   className?: string
 }
 
@@ -77,6 +81,8 @@ export function ApplicationTableSection({
   visibleFilters = DEFAULT_FILTERS,
   currentRound,
   chapterName,
+  disableFormPanel = false,
+  hidePendingStatus = false,
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -342,6 +348,8 @@ export function ApplicationTableSection({
           open={detailModalOpen}
           onOpenChange={setDetailModalOpen}
           currentRound={currentRound}
+          disableFormPanel={disableFormPanel}
+          hidePendingStatus={hidePendingStatus}
         />
       )}
     </div>

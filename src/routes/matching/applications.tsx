@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useLayoutEffect, useRef, useState } from "react"
 
+import { useToastStore } from "@/components/toast/useToastStore"
 import {
   useAdminPageData,
   useChallengerPageData,
@@ -15,9 +16,12 @@ import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   getViewerBranch,
   isAnyOperator,
+  isCentralStaff,
   isChapterPresident,
   isCurrentTermPm,
   isOperator,
+  isSchoolStaff,
+  isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
@@ -34,6 +38,7 @@ export const Route = createFileRoute("/matching/applications")({
 function MatchingApplicationsPage() {
   const { data: me } = useMe()
   const { viewMe } = useViewMe()
+  const addToast = useToastStore((s) => s.addToast)
   const chaptersQuery = useChapters()
   const chapters = chaptersQuery.data?.chapters ?? []
 
@@ -47,7 +52,15 @@ function MatchingApplicationsPage() {
 
   const [selectedChapter, setSelectedChapter] = useState(defaultChapter)
 
+  // 지부장 본인 지부 추적 (auto-select 후 갱신)
+  const ownChapter = useRef<string>(defaultChapter)
+
   const canApprove = isOperator(viewMe)
+  // 지부장 본인 지부만 조회 가능 (SUPER_ADMIN/중앙 운영진 제외)
+  const isRestrictedToChapter =
+    isChapterPresident(me) && !isSuperAdmin(me) && !isCentralStaff(me)
+  // SCHOOL_PRESIDENT 등 학교 운영진: APPLY-101 목록 조회 가능, APPLY-102 상세 불가
+  const isSchoolView = !canApprove && isSchoolStaff(viewMe)
   const isPm = isCurrentTermPm(viewMe)
   const isOthers = !isAnyOperator(viewMe) && !isPm
 
@@ -64,17 +77,21 @@ function MatchingApplicationsPage() {
     const myChapter = chapters.find((c) => c.id === myChapterId)
     if (myChapter) {
       setSelectedChapter(myChapter.name)
+      ownChapter.current = myChapter.name
       hasAutoSelected.current = true
     }
   }, [me, chapters, userChapter])
 
-  const admin = useAdminPageData(selectedChapter)
+  // SCHOOL_PRESIDENT: 챕터 필터 없이 조회 후 프론트에서 본인 학교 프로젝트만 필터링
+  const admin = useAdminPageData(
+    isSchoolView ? undefined : selectedChapter,
+    isSchoolView ? (me?.schoolName ?? undefined) : undefined,
+  )
   const adminStats = admin.stats
   const adminProjects = admin.projects
 
   const challenger = useChallengerPageData()
   const pmProjects = challenger.projects
-  const pmProjectInfo = challenger.projectInfo
 
   return (
     <section className="flex w-full flex-col">
@@ -88,24 +105,25 @@ function MatchingApplicationsPage() {
           </p>
         </div>
 
-        {isPm && pmProjectInfo && (
-          <ProjectTitleCard
-            className="mt-6"
-            projectName={pmProjectInfo.projectName}
-            challengerName={pmProjectInfo.pmName}
-            challengerUniversity={pmProjectInfo.pmUniversity}
-            thumbnailUrl={pmProjectInfo.thumbnailUrl}
-            size="lg"
-          />
-        )}
-
         <div className="mt-6 flex flex-col gap-13">
           {canApprove && (
-            <div className="ml-4 flex w-263 flex-col gap-13">
+            <div className="flex w-263 flex-col gap-13">
               <SegmentButton
                 items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
                 value={selectedChapter}
-                onValueChange={(v) => setSelectedChapter(v)}
+                onValueChange={(v) => {
+                  if (isRestrictedToChapter && v !== ownChapter.current) {
+                    addToast({
+                      message: "본인 지부의 지원 현황만 조회할 수 있습니다.",
+                      color: "red",
+                      variant: "deep",
+                      type: "default",
+                      duration: 3000,
+                    })
+                    return
+                  }
+                  setSelectedChapter(v)
+                }}
                 className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
                 itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
               />
@@ -133,6 +151,49 @@ function MatchingApplicationsPage() {
             </div>
           )}
 
+          {isSchoolView && (
+            <div className="flex w-263 flex-col gap-13">
+              <SegmentButton
+                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+                value={selectedChapter}
+                onValueChange={(v) => {
+                  if (v !== selectedChapter) {
+                    addToast({
+                      message: "본인 학교의 지원 현황만 조회할 수 있습니다.",
+                      color: "red",
+                      variant: "deep",
+                      type: "default",
+                      duration: 3000,
+                    })
+                  }
+                }}
+                className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
+                itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
+              />
+              {admin.isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-body-2-regular text-teal-gray-400">
+                    데이터를 불러오는 중...
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-14.25">
+                  <ApplicationStatsSection
+                    stats={adminStats}
+                    dataUpdatedAt={admin.dataUpdatedAt}
+                    currentRound={admin.currentRound}
+                    activeRound={admin.activeRound}
+                  />
+                  <ApplicationTableSection
+                    projects={adminProjects}
+                    currentRound={admin.currentRound}
+                    disableFormPanel
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
           {isPm && (
             <>
               {challenger.isLoading ? (
@@ -141,11 +202,27 @@ function MatchingApplicationsPage() {
                     데이터를 불러오는 중...
                   </p>
                 </div>
-              ) : (
+              ) : pmProjects.length === 0 ? (
                 <ChallengerApplicationView
-                  projects={pmProjects}
+                  projects={[]}
                   currentRound={challenger.currentRound}
                 />
+              ) : (
+                pmProjects.map((project) => (
+                  <div key={project.id} className="flex flex-col gap-6">
+                    <ProjectTitleCard
+                      projectName={project.projectName}
+                      challengerName={project.challengerName}
+                      challengerUniversity={project.challengerUniversity}
+                      thumbnailUrl={project.thumbnailUrl}
+                      size="lg"
+                    />
+                    <ChallengerApplicationView
+                      projects={[project]}
+                      currentRound={challenger.currentRound}
+                    />
+                  </div>
+                ))
               )}
             </>
           )}

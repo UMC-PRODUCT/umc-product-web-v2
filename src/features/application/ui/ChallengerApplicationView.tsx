@@ -74,6 +74,7 @@ export function ChallengerApplicationView({
         searchPlaceholder="닉네임/이름으로 검색하세요."
         visibleFilters={["part", "school"]}
         currentRound={currentRound}
+        hidePendingStatus
       />
     </div>
   )

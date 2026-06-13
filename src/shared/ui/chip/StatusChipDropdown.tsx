@@ -13,6 +13,7 @@ interface StatusChipDropdownProps {
   value: StatusValue
   onValueChange?: (value: StatusValue) => void
   disabled?: boolean
+  options?: StatusValue[]
   children?: ReactNode
   className?: string
 }
@@ -21,6 +22,7 @@ export function StatusChipDropdown({
   value,
   onValueChange,
   disabled = false,
+  options = STATUS_OPTIONS,
   children,
   className,
 }: StatusChipDropdownProps) {
@@ -55,7 +57,7 @@ export function StatusChipDropdown({
               배정 상태 변경
             </span>
             <div className="flex flex-col gap-2.5">
-              {STATUS_OPTIONS.map((status) => (
+              {options.map((status) => (
                 <button
                   key={status}
                   type="button"
