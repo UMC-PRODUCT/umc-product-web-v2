@@ -14,6 +14,7 @@ const applicable = {
   isWritePermissionLoading: false,
   canWriteApplication: true,
   hasActiveRound: true,
+  applicationsPending: false,
 }
 
 describe("isApplyButtonDisabled", () => {
@@ -66,6 +67,22 @@ describe("isApplyButtonDisabled", () => {
       }),
     ).toBe(false)
   })
+
+  it("내 지원 내역이 아직 로딩 중이면 비활성화한다", () => {
+    expect(
+      isApplyButtonDisabled({ ...applicable, applicationsPending: true }),
+    ).toBe(true)
+  })
+
+  it("PM 읽기 전용 컨텍스트에서는 지원 내역 로딩과 무관하게 비활성화하지 않는다", () => {
+    expect(
+      isApplyButtonDisabled({
+        ...applicable,
+        isPmReadonly: true,
+        applicationsPending: true,
+      }),
+    ).toBe(false)
+  })
 })
 
 const application = (
@@ -91,6 +108,7 @@ const ctaParams = {
   hasOtherActiveApplication: false,
   isAlreadyApproved: false,
   isPartIneligible: false,
+  isPartRecruitClosed: false,
 }
 
 describe("resolveProjectDetailCtaMode", () => {
@@ -122,6 +140,22 @@ describe("resolveProjectDetailCtaMode", () => {
         isPartIneligible: true,
       }),
     ).toBe("apply-blocked-other")
+  })
+
+  it("내 파트 모집이 마감된 프로젝트면 apply-blocked-closed를 반환한다", () => {
+    expect(
+      resolveProjectDetailCtaMode({ ...ctaParams, isPartRecruitClosed: true }),
+    ).toBe("apply-blocked-closed")
+  })
+
+  it("내 파트 모집이 마감되어도 이미 지원한 프로젝트면 my-application을 우선한다", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isApplied: true,
+        isPartRecruitClosed: true,
+      }),
+    ).toBe("my-application")
   })
 })
 
