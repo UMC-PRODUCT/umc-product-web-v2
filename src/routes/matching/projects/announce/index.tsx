@@ -50,6 +50,12 @@ const DEFAULT_PROJECT_NOTICES: NoticeItem[] = [
     date: "2003.03.16",
     chip: "필독",
   },
+  {
+    id: "default-project-2",
+    title: "필독!!",
+    date: "2003.03.16",
+    chip: "필독",
+  },
 ]
 
 const DEFAULT_PROJECT_CONTENTS: Record<string, string> = {
@@ -64,6 +70,10 @@ Plan 챌린저가 문항을 수정하면 차수에 따라 지원자에게 보이
 
 4. **지원자가 아무도 없는 파트는 어떻게 처리되나요?**
 1차, 2차, 3차 매칭을 거쳐도 TO가 채워지지 않은 파트는 랜덤으로 팀원이 배정될 예정이에요.`,
+  "default-project-2": `**본 공지사항을 숙지하지 않아 발생하는 불이익에 대해서는 프로덕트 팀이 책임지지 않으니 반드시 확인 부탁드립니다.**
+
+1. 각 PM들은 다음 매칭 차수 시작 5분 전까지 지원서 합/불 결정을 완료해야 합니다.
+2. 기획-개발자 3차 매칭은 종료 후 12시간 내에 지원서 합/불 결정을 완료해야 합니다.`,
 }
 
 type PendingNotice = {
