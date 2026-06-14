@@ -3,13 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { ProjectApplyModal } from "./ProjectApplyModal"
 
+import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 import type { Section } from "@/features/project/new/model/applicationQuestion"
-
-import type { MatchingProject } from "../../model/matchingProject"
 
 vi.mock("@/features/auth/hooks/useResourcePermission", () => ({
   useResourcePermission: () => ({ isPending: false }),
 }))
+
+const originalScrollIntoView = HTMLElement.prototype.scrollIntoView
 
 const project: MatchingProject = {
   id: "1",
@@ -43,7 +44,13 @@ const sections: Section[] = [
 ]
 
 beforeEach(() => {
-  HTMLElement.prototype.scrollIntoView = vi.fn()
+  if (!originalScrollIntoView) {
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: () => undefined,
+    })
+  }
+  vi.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(vi.fn())
 })
 
 describe("ProjectApplyModal radio answer", () => {
@@ -80,4 +87,7 @@ describe("ProjectApplyModal radio answer", () => {
 afterEach(() => {
   vi.unstubAllEnvs()
   vi.restoreAllMocks()
+  if (!originalScrollIntoView) {
+    Reflect.deleteProperty(HTMLElement.prototype, "scrollIntoView")
+  }
 })

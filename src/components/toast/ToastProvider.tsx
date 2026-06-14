@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { cn } from "@/shared/lib/utils"
+
 import { FADE_OUT_DURATION, Toast } from "./Toast"
 import { type ToastItem, useToastStore } from "./useToastStore"
 
@@ -7,11 +9,9 @@ const MAX_VISIBLE = 3
 const STACK_OFFSET = 8
 const STACK_SCALE = 0.04
 
-function getToastAnimation(color: ToastItem["color"], isFront: boolean) {
+function getToastAnimationClass(color: ToastItem["color"], isFront: boolean) {
   if (!isFront) return undefined
-  return color === "red"
-    ? "toast-shake 0.4s ease-in-out"
-    : "toast-resolve 0.24s ease-out"
+  return color === "red" ? "animate-shake" : "animate-toast-resolve"
 }
 
 export function ToastProvider() {
@@ -131,10 +131,12 @@ export function ToastProvider() {
             style={{ zIndex }}
           >
             <div
-              className="origin-bottom transition-all duration-300"
+              className={cn(
+                "origin-bottom transition-all duration-300",
+                getToastAnimationClass(toast.color, isFront),
+              )}
               style={{
                 transform: `translateY(${translateY}px) scale(${scale})`,
-                animation: getToastAnimation(toast.color, isFront),
               }}
             >
               <Toast
