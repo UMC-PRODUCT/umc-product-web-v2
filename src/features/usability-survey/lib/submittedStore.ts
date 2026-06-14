@@ -28,3 +28,11 @@ export function markTemplateSubmitted(templateId: number): void {
     // localStorage 접근 불가(프라이빗 모드 등) 시 무시
   }
 }
+
+export function clearSubmittedTemplates(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // localStorage 접근 불가 시 무시
+  }
+}
