@@ -616,8 +616,7 @@ export function ProjectDetailCard({
                       variant="weak"
                       color="primary"
                       className="min-w-32 flex-1 whitespace-nowrap"
-                      isLoading={isDetailLoading}
-                      disabled={!isDetailLoading && !detail?.applicationFormId}
+                      disabled={!detail?.applicationFormId}
                       onClick={() => setIsRecruitQuestionsModalOpen(true)}
                     >
                       모집 문항 보기
