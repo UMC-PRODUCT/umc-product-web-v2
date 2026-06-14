@@ -225,8 +225,8 @@ export function NoticePublishForm({
       const textarea = textareaRef.current
       if (!textarea) return
 
-      const selectionStart = textarea.selectionStart
-      const selectionEnd = textarea.selectionEnd
+      const selectionStart = textarea.selectionStart ?? 0
+      const selectionEnd = textarea.selectionEnd ?? 0
       const text = textarea.value
 
       const textBefore = text.substring(0, selectionStart)
