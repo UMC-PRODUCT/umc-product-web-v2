@@ -23,6 +23,14 @@ interface HeaderProps {
   activePathname?: string
 }
 
+function getDisabledNavMessage(label: string) {
+  if (label === "리크루팅") {
+    return "리크루팅 서비스는 11기 모집 때 공개됩니다. 많은 관심 부탁드립니다!"
+  }
+
+  return `${label} 서비스는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!`
+}
+
 export default function Header({ activePathname }: HeaderProps = {}) {
   const location = useLocation()
   const pathname = activePathname ?? location.pathname
@@ -37,7 +45,7 @@ export default function Header({ activePathname }: HeaderProps = {}) {
 
   const handleDisabledClick = (label: string) => {
     addToast({
-      message: `${label} 서비스는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!`,
+      message: getDisabledNavMessage(label),
       color: "primary",
       variant: "deep",
       type: "notice",
