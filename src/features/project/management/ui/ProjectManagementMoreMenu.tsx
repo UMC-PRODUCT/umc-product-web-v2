@@ -65,7 +65,7 @@ export function ProjectManagementMoreMenu({
   const [abortOpen, setAbortOpen] = useState(false)
   const [applicationOpen, setApplicationOpen] = useState(false)
   const [teamModalOpen, setTeamModalOpen] = useState(false)
-  const willOpenModalOnCloseRef = useRef(false)
+  const shouldPreventFocusRestoreRef = useRef(false)
   const addToast = useToastStore((s) => s.addToast)
 
   const numericProjectId = Number(projectId)
@@ -212,27 +212,27 @@ export function ProjectManagementMoreMenu({
 
   const handleDeleteClick = () => {
     if (!canDeleteProject || isPermissionLoading) return
-    willOpenModalOnCloseRef.current = true
+    shouldPreventFocusRestoreRef.current = true
     setPopoverOpen(false)
     setDeleteOpen(true)
   }
 
   const handleAbortClick = () => {
     if (!canPublishProject || isPermissionLoading) return
-    willOpenModalOnCloseRef.current = true
+    shouldPreventFocusRestoreRef.current = true
     setPopoverOpen(false)
     setAbortOpen(true)
   }
 
   const handlePublishClick = () => {
     if (!canPublishProject || isPermissionLoading) return
-    willOpenModalOnCloseRef.current = true
+    shouldPreventFocusRestoreRef.current = true
     setPopoverOpen(false)
     setPublishOpen(true)
   }
 
   const handleApplicationClick = () => {
-    willOpenModalOnCloseRef.current = true
+    shouldPreventFocusRestoreRef.current = true
     setPopoverOpen(false)
     setApplicationOpen(true)
   }
@@ -254,7 +254,7 @@ export function ProjectManagementMoreMenu({
   }
 
   const handleTeamViewClick = () => {
-    willOpenModalOnCloseRef.current = true
+    shouldPreventFocusRestoreRef.current = true
     setPopoverOpen(false)
     setTeamModalOpen(true)
   }
@@ -296,9 +296,9 @@ export function ProjectManagementMoreMenu({
             avoidCollisions={false}
             onOpenAutoFocus={(e) => e.preventDefault()}
             onCloseAutoFocus={(e) => {
-              if (willOpenModalOnCloseRef.current) {
+              if (shouldPreventFocusRestoreRef.current) {
                 e.preventDefault()
-                willOpenModalOnCloseRef.current = false
+                shouldPreventFocusRestoreRef.current = false
               }
             }}
             className="shadow-drop-neutral-1 border-teal-gray-50 z-1100 flex w-38 flex-col items-start gap-1 rounded-lg border bg-white px-0.5 pt-2.5 pb-0.5"
