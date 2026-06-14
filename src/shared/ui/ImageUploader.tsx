@@ -105,10 +105,12 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
       setIsProcessing(true)
       setCropError(null)
       try {
-        const croppedFile = await cropImageFile(file, variantCropSize[variant])
-        if (previewUrl) URL.revokeObjectURL(previewUrl)
-        setPreviewUrl(URL.createObjectURL(croppedFile))
-        onChange(croppedFile)
+        const processedFile =
+          file.type === "image/svg+xml"
+            ? file
+            : await cropImageFile(file, variantCropSize[variant])
+        setPreviewUrl(URL.createObjectURL(processedFile))
+        onChange(processedFile)
       } catch {
         setCropError("이미지를 처리할 수 없습니다.")
         if (fileInputRef.current) fileInputRef.current.value = ""
@@ -118,7 +120,6 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
     }
 
     const handleRemove = () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl)
       setPreviewUrl(null)
       setCropError(null)
       if (fileInputRef.current) fileInputRef.current.value = ""

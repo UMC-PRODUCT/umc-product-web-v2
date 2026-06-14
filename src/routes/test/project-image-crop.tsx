@@ -19,22 +19,21 @@ function ProjectImageCropTestPage() {
   useEffect(() => {
     return () => {
       if (thumbnail) URL.revokeObjectURL(thumbnail.url)
+    }
+  }, [thumbnail])
+
+  useEffect(() => {
+    return () => {
       if (logo) URL.revokeObjectURL(logo.url)
     }
-  }, [thumbnail, logo])
+  }, [logo])
 
   const handleThumbnailChange = (file: File) => {
-    setThumbnail((prev) => {
-      if (prev) URL.revokeObjectURL(prev.url)
-      return { file, url: URL.createObjectURL(file) }
-    })
+    setThumbnail({ file, url: URL.createObjectURL(file) })
   }
 
   const handleLogoChange = (file: File) => {
-    setLogo((prev) => {
-      if (prev) URL.revokeObjectURL(prev.url)
-      return { file, url: URL.createObjectURL(file) }
-    })
+    setLogo({ file, url: URL.createObjectURL(file) })
   }
 
   return (
