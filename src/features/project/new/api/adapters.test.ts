@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildPartQuotasEntries,
   buildUpsertApplicationFormBody,
+  mapApplicationFormToSections,
   uiRoleToPart,
 } from "./adapters"
 
@@ -189,5 +190,48 @@ describe("buildUpsertApplicationFormBody", () => {
     expect(opts[0]).toMatchObject({ content: "A", orderNo: 0, optionId: 100 })
     expect(opts[1]).toMatchObject({ content: "B", orderNo: 1 })
     expect(opts[1]!.optionId).toBeUndefined()
+  })
+
+  it("선택형이 아닌 문항의 임시 옵션은 전송하지 않음", () => {
+    const textQ = {
+      ...commonQ,
+      options: [{ content: "임시 옵션" }],
+      draftOptions: [{ content: "임시 옵션" }],
+    }
+    const result = buildUpsertApplicationFormBody([textQ], [])
+
+    expect(result.sections[0]!.questions[0]!.options).toEqual([])
+  })
+})
+
+describe("mapApplicationFormToSections", () => {
+  it("backend allowedParts 섹션은 API title 대신 Backend로 표시", () => {
+    const result = mapApplicationFormToSections({
+      sections: [
+        {
+          sectionId: 1,
+          type: "PART",
+          title: "SPRINGBOOT, NODEJS",
+          orderNo: 1,
+          allowedParts: ["SPRINGBOOT", "NODEJS"],
+          questions: [
+            {
+              questionId: 10,
+              type: "LONG_TEXT",
+              title: "백엔드 질문",
+              description: "",
+              isRequired: true,
+              orderNo: 0,
+              options: [],
+            },
+          ],
+        },
+      ],
+    })
+
+    expect(result[0]).toMatchObject({
+      id: "backend",
+      name: "Backend",
+    })
   })
 })

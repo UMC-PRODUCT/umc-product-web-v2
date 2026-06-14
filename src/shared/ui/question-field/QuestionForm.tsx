@@ -24,6 +24,7 @@ interface QuestionFormProps {
   onDelete?: () => void
   children: ReactNode
   className?: string
+  showFocusIndicator?: boolean
   dragHandleProps?: HTMLAttributes<HTMLButtonElement>
 }
 
@@ -49,6 +50,7 @@ export function QuestionForm({
   onDelete,
   children,
   className,
+  showFocusIndicator = true,
   dragHandleProps,
 }: QuestionFormProps) {
   const titleTextareaRef = useRef<HTMLTextAreaElement>(null)
@@ -72,7 +74,7 @@ export function QuestionForm({
         className,
       )}
     >
-      {(focused || isError) && (
+      {((focused && showFocusIndicator) || isError) && (
         <span
           aria-hidden
           className={cn(

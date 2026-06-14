@@ -27,7 +27,7 @@ export function FileUploadField({
     <div className="flex w-full flex-col gap-1">
       <div
         className={cn(
-          "border-teal-gray-150 flex min-h-15 w-full min-w-0 items-center justify-between gap-1.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] py-4 pr-3.5 pl-5",
+          "border-teal-gray-150 flex h-15 w-full min-w-0 items-center justify-between gap-1.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] py-4 pr-4 pl-5",
           error && "border-error-500",
           className,
         )}

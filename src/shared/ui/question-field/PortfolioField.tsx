@@ -85,7 +85,7 @@ export function PortfolioField({
 
   return (
     <div className={cn("flex w-full flex-col gap-1", className)}>
-      <div className="border-teal-gray-150 flex h-15 w-full items-center justify-between gap-1.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] px-5 py-4">
+      <div className="border-teal-gray-150 flex h-15 w-full items-center justify-between gap-1.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] py-4 pr-4 pl-5">
         <input
           type="file"
           ref={fileInputRef}

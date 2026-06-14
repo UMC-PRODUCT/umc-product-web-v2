@@ -68,6 +68,7 @@ interface QuestionCardProps {
   focused: boolean
   isError?: boolean
   canDelete?: boolean
+  showFocusIndicator?: boolean
   onFocus: () => void
   onUpdate: (patch: Partial<Question>) => void
   onDelete: () => void
@@ -79,6 +80,7 @@ export function QuestionCard({
   focused,
   isError = false,
   canDelete = true,
+  showFocusIndicator = true,
   onFocus,
   onUpdate,
   onDelete,
@@ -126,6 +128,7 @@ export function QuestionCard({
           isFirst={index === 0}
           isError={isError}
           readonlyTitle={question.fieldType === "portfolio"}
+          showFocusIndicator={showFocusIndicator}
           required={question.required}
           onRequiredChange={(required) => onUpdate({ required })}
           canDelete={canDelete}
