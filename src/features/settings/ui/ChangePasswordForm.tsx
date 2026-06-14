@@ -36,14 +36,9 @@ export function ChangePasswordForm({
   const isConfirmMatch = next === confirm
 
   const [isCurrentPasswordWrong, setIsCurrentPasswordWrong] = useState(false)
-  const [showConfirmError, setShowConfirmError] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async () => {
-    if (!isConfirmMatch) {
-      setShowConfirmError(true)
-      return
-    }
     setIsSubmitting(true)
     try {
       await changePassword({ currentPassword: current, newPassword: next })
@@ -183,15 +178,18 @@ export function ChangePasswordForm({
             </div>
             <InputBox
               type="password"
-              state={showConfirmError && !isConfirmMatch ? "error" : "default"}
+              state={
+                confirm.length > 0
+                  ? isConfirmMatch
+                    ? "success"
+                    : "error"
+                  : "default"
+              }
               value={confirm}
-              onChange={(e) => {
-                setConfirm(e.target.value)
-                setShowConfirmError(false)
-              }}
+              onChange={(e) => setConfirm(e.target.value)}
               className="w-full"
             />
-            {showConfirmError && !isConfirmMatch && (
+            {confirm.length > 0 && !isConfirmMatch && (
               <div className="flex items-center gap-1">
                 <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
                 <p className="text-body-3-medium text-error-500">
@@ -208,10 +206,10 @@ export function ChangePasswordForm({
         variant="fill"
         color="primary"
         size="s"
-        disabled={!current || !isNextValid || !confirm || isSubmitting}
+        disabled={!current || !isNextValid || !isConfirmMatch || isSubmitting}
         isLoading={isSubmitting}
         onClick={() => void handleSubmit()}
-        className="h-11 w-full bg-teal-300 disabled:bg-teal-200"
+        className="h-11 w-full"
       >
         변경하기
       </Button>

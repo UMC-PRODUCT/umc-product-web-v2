@@ -133,7 +133,7 @@ export const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
         )
       }
 
-      if (state === "success") {
+      if (state === "success" && type !== "password") {
         const icon = <CheckIcon width={20} height={20} aria-hidden="true" />
         if (onClear) {
           return (
