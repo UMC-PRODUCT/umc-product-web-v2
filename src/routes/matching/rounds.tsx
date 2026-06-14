@@ -33,6 +33,7 @@ import { BranchSelector } from "@/features/matching/ui/BranchSelector"
 import { Calendar } from "@/features/matching/ui/Calendar"
 import { CalendarScheduleList } from "@/features/matching/ui/CalendarScheduleList"
 import { RoundForm } from "@/features/matching/ui/RoundForm"
+import { UsabilitySurvey } from "@/features/usability-survey"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -93,6 +94,7 @@ function MatchingRoundsPage() {
     "idle",
   )
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [isSurveyActive, setIsSurveyActive] = useState(false)
   const [roundErrors, setRoundErrors] = useState(() =>
     PHASES.map(() => ({ startDate: false, endDate: false })),
   )
@@ -666,7 +668,15 @@ function MatchingRoundsPage() {
         title="저장 완료"
         content="매칭 설정이 완료되었습니다."
         confirmText="확인"
-        onConfirm={() => setShowSaveModal(false)}
+        onConfirm={() => {
+          setShowSaveModal(false)
+          setIsSurveyActive(true)
+        }}
+      />
+
+      <UsabilitySurvey
+        context="APPLICATION_MONITORING"
+        active={isSurveyActive}
       />
 
       {/* 페이지 이탈 모달 */}

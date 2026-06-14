@@ -5,12 +5,14 @@ import { useToastStore } from "@/components/toast/useToastStore"
 import {
   SURVEY_VARIANTS,
   SurveyQuestionList,
+  UsabilitySurvey,
   UsabilitySurveyModal,
   useMultistepSurvey,
 } from "@/features/usability-survey"
 import { Button } from "@/shared/ui/Button"
 
 import type {
+  FeedbackContext,
   SurveyAnswers,
   SurveyVariantKey,
 } from "@/features/usability-survey"
@@ -27,8 +29,16 @@ const VARIANT_LABELS: Record<SurveyVariantKey, string> = {
   "admin-matching": "운영진·매칭(멀티스텝)",
 }
 
+const LIVE_CONTEXTS: { context: FeedbackContext; label: string }[] = [
+  { context: "APPLICATION_SUBMITTED", label: "지원 완료" },
+  { context: "MATCHING_COMPLETED", label: "매칭 완료" },
+  { context: "APPLICATION_MONITORING", label: "운영진 모니터링" },
+]
+
 function UsabilitySurveyTestPage() {
   const [open, setOpen] = useState(false)
+  const [liveContext, setLiveContext] = useState<FeedbackContext | null>(null)
+  const [liveNonce, setLiveNonce] = useState(0)
   const [variant, setVariant] = useState<SurveyVariantKey>(
     "prev-gisu-general-apply",
   )
@@ -116,7 +126,36 @@ function UsabilitySurveyTestPage() {
         ))}
       </div>
 
-      <Button onClick={handleOpen}>모달 열기</Button>
+      <Button onClick={handleOpen}>모달 열기 (목업 디자인)</Button>
+
+      <div className="flex flex-col items-center gap-2">
+        <h2 className="text-label-1-medium text-teal-gray-700">
+          실서버 연동 (context별 템플릿 조회 → 제출)
+        </h2>
+        <div className="flex flex-wrap justify-center gap-2">
+          {LIVE_CONTEXTS.map(({ context, label }) => (
+            <Button
+              key={context}
+              variant="weak"
+              color="neutral"
+              onClick={() => {
+                setLiveContext(context)
+                setLiveNonce((n) => n + 1)
+              }}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {liveContext && (
+        <UsabilitySurvey
+          key={`${liveContext}-${liveNonce}`}
+          context={liveContext}
+          active
+        />
+      )}
 
       <UsabilitySurveyModal
         open={open}
