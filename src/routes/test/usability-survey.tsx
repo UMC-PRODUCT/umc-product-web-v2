@@ -3,6 +3,7 @@ import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
+  clearSubmittedTemplates,
   SURVEY_VARIANTS,
   SurveyQuestionList,
   UsabilitySurvey,
@@ -147,6 +148,17 @@ function UsabilitySurveyTestPage() {
             </Button>
           ))}
         </div>
+        <Button
+          variant="weak"
+          color="neutral"
+          onClick={() => {
+            clearSubmittedTemplates()
+            setLiveContext(null)
+            surveyToast("제출 기록을 초기화했어요. 다시 테스트할 수 있어요.")
+          }}
+        >
+          제출 기록 초기화
+        </Button>
       </div>
 
       {liveContext && (

@@ -1,5 +1,6 @@
 export type { FeedbackContext } from "./api/types"
 export { useFeedbackTemplate, useSubmitFeedback } from "./hooks/useUserFeedback"
+export { clearSubmittedTemplates } from "./lib/submittedStore"
 export { resolveVariantKey, toAnswerItems } from "./model/mappers"
 export type {
   SurveyAnswers,
