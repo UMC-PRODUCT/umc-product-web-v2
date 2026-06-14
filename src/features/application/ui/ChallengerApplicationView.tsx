@@ -9,15 +9,19 @@ import type { ChallengerStats, ProjectApplication } from "../model/types"
 
 interface ChallengerApplicationViewProps {
   projects: ProjectApplication[]
+  availablePerRound?: Map<number, number>
   currentRound?: number
   className?: string
 }
 
 // 프로젝트 데이터에서 PM 통계 계산
-function computeStats(projects: ProjectApplication[]): ChallengerStats {
+function computeStats(
+  projects: ProjectApplication[],
+  availablePerRound?: Map<number, number>,
+): ChallengerStats {
   const allApplicants = projects.flatMap((p) => p.applicants)
 
-  // 지원 가용자 = 전체 파트 quota 합산
+  // 지원 가용자 = 전체 파트 quota 합산 (availablePerRound 없을 때 폴백용)
   const totalQuota = projects.reduce(
     (sum, p) => sum + p.designCount.total + p.feCount.total + p.beCount.total,
     0,
@@ -34,7 +38,7 @@ function computeStats(projects: ProjectApplication[]): ChallengerStats {
     .map(([round, applied]) => ({
       round,
       applied,
-      total: totalQuota,
+      total: availablePerRound?.get(round) ?? totalQuota,
     }))
 
   // 대학별 지원자 수 (상위 5개)
@@ -61,10 +65,14 @@ function computeStats(projects: ProjectApplication[]): ChallengerStats {
 
 export function ChallengerApplicationView({
   projects,
+  availablePerRound,
   currentRound,
   className,
 }: ChallengerApplicationViewProps) {
-  const stats = useMemo(() => computeStats(projects), [projects])
+  const stats = useMemo(
+    () => computeStats(projects, availablePerRound),
+    [projects, availablePerRound],
+  )
 
   return (
     <div className={cn("flex flex-col gap-14.25 pl-4", className)}>

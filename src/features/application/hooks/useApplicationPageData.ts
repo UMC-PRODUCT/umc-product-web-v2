@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
+import { useMe } from "@/features/auth/hooks/useMe"
+import { getProjectPmSearchScope } from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllSchools,
@@ -20,6 +22,7 @@ import {
   shortenSchoolName,
   summaryToStats,
   toProjectApplication,
+  toRoundNumber,
 } from "../model/mappers"
 
 import type { MatchingRoundResponse } from "../model/apiTypes"
@@ -79,6 +82,31 @@ export function useActiveGisuId() {
 export function useChallengerPageData() {
   const gisuQuery = useActiveGisuId()
   const gisuId = gisuQuery.data ?? 0
+
+  const meQuery = useMe()
+  const chapterId = useMemo(
+    () => getProjectPmSearchScope(meQuery.data).chapterId,
+    [meQuery.data],
+  )
+
+  const challengerStatsQuery = useQuery({
+    queryKey: applicationKeys.chapterStatistics(Number(chapterId) || 0),
+    queryFn: () => getChapterStatistics(Number(chapterId)!),
+    enabled: !!chapterId,
+  })
+
+  // 차수별 지원 가용 인원 맵 (1차: 챕터 전체, 2차~: 이전 매칭 인원 차감)
+  const availablePerRound = useMemo(() => {
+    const map = new Map<number, number>()
+    for (const r of challengerStatsQuery.data?.summary
+      .roundApplicationStatistics ?? []) {
+      map.set(
+        toRoundNumber(r.matchingRound.phase),
+        Number(r.availableMemberCount),
+      )
+    }
+    return map
+  }, [challengerStatsQuery.data])
 
   const projectsQuery = useQuery({
     queryKey: applicationKeys.managedProjects(gisuId),
@@ -148,6 +176,7 @@ export function useChallengerPageData() {
     projectInfo,
     currentRound,
     activeRound,
+    availablePerRound,
     isLoading:
       gisuQuery.isLoading ||
       roundsQuery.isLoading ||
