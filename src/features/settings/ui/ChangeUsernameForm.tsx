@@ -32,6 +32,8 @@ export function ChangeUsernameForm({
     isCodeInvalid,
     isExpired,
     isEmailValid,
+    isRateLimited,
+    isAttemptsExceeded,
     handleVerificationClick,
     handleResend,
     handleCodeVerify,
@@ -112,10 +114,7 @@ export function ChangeUsernameForm({
               color="neutral"
               size="s"
               disabled={
-                !isEmailValid ||
-                isLoading ||
-                isDuplicated ||
-                (isCodeVisible && !isExpired)
+                !isEmailValid || isLoading || isDuplicated || isRateLimited
               }
               isLoading={isLoading}
               onClick={() => void handleVerificationClick()}
@@ -163,11 +162,26 @@ export function ChangeUsernameForm({
               remainingSeconds={remainingSeconds}
               inputMode="numeric"
               maxLength={6}
-              state={isCodeInvalid ? "error" : "default"}
+              state={
+                isAttemptsExceeded
+                  ? "disabled"
+                  : isCodeInvalid
+                    ? "error"
+                    : "default"
+              }
               className="w-full"
             />
             <div className="flex h-5.5 items-center gap-1">
-              {isCodeInvalid && !isExpired && (
+              {isAttemptsExceeded && (
+                <>
+                  <CheckIcon className="text-error-500 h-4 w-4" />
+                  <p className="text-error-500 text-body-2-medium">
+                    인증번호 입력 횟수(5회)를 초과했습니다. 인증번호를 재발송해
+                    주세요.
+                  </p>
+                </>
+              )}
+              {isCodeInvalid && !isExpired && !isAttemptsExceeded && (
                 <>
                   <CheckIcon className="text-error-500 h-4 w-4" />
                   <p className="text-error-500 text-body-2-medium">
@@ -194,7 +208,11 @@ export function ChangeUsernameForm({
         color="primary"
         size="s"
         disabled={
-          !isCodeVisible || code.length !== 6 || isExpired || isSubmitting
+          !isCodeVisible ||
+          code.length !== 6 ||
+          isExpired ||
+          isAttemptsExceeded ||
+          isSubmitting
         }
         isLoading={isSubmitting}
         onClick={() => void handleSubmit()}

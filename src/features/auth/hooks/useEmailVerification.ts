@@ -12,6 +12,7 @@ import { emailSchema } from "@/features/signup/validation"
 import type { EmailVerificationPurpose } from "@/features/auth/model/types"
 
 const VERIFICATION_SECONDS = 600
+const RATE_LIMIT_SECONDS = 60
 
 /**
  * 이메일 인증 플로우를 관리하는 훅
@@ -30,8 +31,11 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const [isDuplicated, setIsDuplicated] = useState(false)
   const [isCodeInvalid, setIsCodeInvalid] = useState(false)
+  const [attemptCount, setAttemptCount] = useState(0)
+  const [rateLimitSeconds, setRateLimitSeconds] = useState(0)
   const addToast = useToastStore((s) => s.addToast)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const rateLimitTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   /** 10분 카운트다운 타이머 시작 (재발송 시 리셋) */
   const startTimer = () => {
@@ -48,15 +52,35 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
     }, 1000)
   }
 
+  /** 1분 쿨다운 타이머 시작 (발송/재발송 시 호출) */
+  const startRateLimitTimer = () => {
+    if (rateLimitTimerRef.current) clearInterval(rateLimitTimerRef.current)
+    setRateLimitSeconds(RATE_LIMIT_SECONDS)
+    rateLimitTimerRef.current = setInterval(() => {
+      setRateLimitSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(rateLimitTimerRef.current!)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
+      if (rateLimitTimerRef.current) clearInterval(rateLimitTimerRef.current)
     }
   }, [])
 
   const isEmailValid = emailSchema.safeParse(email).success
   /** 타이머가 만료된 상태 (코드 입력 불가) */
   const isExpired = isCodeVisible && remainingSeconds === 0
+  /** 발송 후 1분 쿨다운 중 (인증하기 버튼 비활성) */
+  const isRateLimited = rateLimitSeconds > 0
+  /** 인증번호 입력 5회 초과 */
+  const isAttemptsExceeded = attemptCount >= 5
 
   /**
    * 이메일 입력 변경 시 호출
@@ -96,7 +120,9 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
       setVerificationId(Number(res.emailVerificationId))
       setIsCodeVisible(true)
       setCodeState("")
+      setAttemptCount(0)
       startTimer()
+      startRateLimitTimer()
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "인증 메일 발송에 실패했습니다."
@@ -121,7 +147,9 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
     try {
       await resendEmailVerification({ emailVerificationId: verificationId })
       setCodeState("")
+      setAttemptCount(0)
       startTimer()
+      startRateLimitTimer()
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "인증 메일 재발송에 실패했습니다."
@@ -151,6 +179,7 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
       return res.emailVerificationToken
     } catch {
       setIsCodeInvalid(true)
+      setAttemptCount((prev) => prev + 1)
       return null
     }
   }
@@ -167,6 +196,8 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
     isCodeInvalid,
     isExpired,
     isEmailValid,
+    isRateLimited,
+    isAttemptsExceeded,
     handleVerificationClick,
     handleResend,
     handleCodeVerify,
