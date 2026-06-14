@@ -9,6 +9,7 @@ import { ProjectStatusChip } from "@/shared/ui/chip/ProjectStatusChip"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
+import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 
 import { isRecruitDone } from "../../list/model/matchingProject"
 import { ProjectManagementMoreMenu } from "./ProjectManagementMoreMenu"
@@ -62,21 +63,10 @@ export function ProjectManagementCard({
         }}
       >
         <div className="bg-teal-gray-200 bp2:h-[10.5625rem] bp2:w-[clamp(13rem,28vw,20rem)] flex aspect-[320/169] w-full shrink-0 overflow-hidden rounded-[0.625rem]">
-          {cover?.src ? (
-            <img
-              src={cover.src}
-              alt={cover.alt ?? `${data.title} 대표 이미지`}
-              className="h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <div className="text-body-2-medium text-teal-gray-400 flex h-full w-full items-center justify-center text-center">
-              프로젝트 대표 이미지
-              <br />
-              320*169
-            </div>
-          )}
+          <ProjectThumbnail
+            src={cover?.src}
+            alt={cover?.alt ?? `${data.title} 대표 이미지`}
+          />
         </div>
 
         <div className="bp2:items-end flex min-w-0 flex-1 flex-col items-stretch gap-4">
