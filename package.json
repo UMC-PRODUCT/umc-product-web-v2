@@ -14,9 +14,13 @@
     "test": "vitest",
     "test:run": "vitest run",
     "prepare": "husky",
-    "generate:api-types": "openapi-typescript ./openapi.yaml -o ./src/types/api.d.ts"
+    "generate:api-types": "openapi-typescript ./openapi.yaml -o ./src/types/api.d.ts",
+    "svgr": "npx @svgr/cli -d src/shared/assets --ignore-existing --typescript --no-dimensions --no-index public"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.2.2",
     "@tanstack/react-query": "^5.90.0",
     "@tanstack/react-router": "^1.159.0",
@@ -25,10 +29,16 @@
     "clsx": "^2.1.0",
     "dayjs": "^1.11.19",
     "lucide-react": "^0.545.0",
+    "motion": "^12.38.0",
+    "pretendard": "^1.3.9",
+    "radix-ui": "^1.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.69.0",
+    "react-markdown": "^10.1.0",
+    "shadcn": "^4.2.0",
     "tailwind-merge": "^2.5.0",
+    "tw-animate-css": "^1.4.0",
     "zod": "^4.3.4",
     "zustand": "^5.0.9"
   },
@@ -37,6 +47,7 @@
     "@commitlint/config-conventional": "^20.2.0",
     "@eslint/js": "^9.39.2",
     "@tailwindcss/vite": "^4.0.0",
+    "@tanstack/react-query-devtools": "^5.101.0",
     "@tanstack/router-plugin": "^1.159.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -45,6 +56,7 @@
     "@vitejs/plugin-react": "^4.5.2",
     "commitlint-config-gitmoji": "^2.3.1",
     "eslint": "^9.39.2",
+    "eslint-plugin-perfectionist": "^5.8.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.3.0",
     "husky": "^9.1.7",
@@ -68,5 +80,6 @@
     "*.{json,md,css}": [
       "prettier --write"
     ]
-  }
+  },
+  "packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48"
 }

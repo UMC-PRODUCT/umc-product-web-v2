@@ -1,0 +1,125 @@
+/* 최종 수정 : 2026.04.12 */
+
+:root {
+  /* -------------------------
+   * Color / Neutrals
+   * ------------------------- */
+  --color-white: #ffffff;
+  --color-teal-gray-50: #fbfcfc;
+  --color-teal-gray-100: #f6f7f7;
+  --color-teal-gray-150: #eceeee;
+  --color-teal-gray-200: #e9ecec;
+  --color-teal-gray-300: #d3d8d8;
+  --color-teal-gray-400: #9ca3a3;
+  --color-teal-gray-500: #6f7878;
+  --color-teal-gray-600: #656b6b;
+  --color-teal-gray-700: #404443;
+  --color-teal-gray-800: #2e302f;
+  --color-teal-gray-900: #161919;
+  --color-neutral-900: #111111;
+
+  /* -------------------------
+   * Color / Primary (Teal)
+   * ------------------------- */
+  --color-teal-50: #f4fbfa;
+  --color-teal-100: #e5f5f2;
+  --color-teal-200: #c7ebe6;
+  --color-teal-300: #9fdcd4;
+  --color-teal-400: #63c4b8;
+  --color-teal-500: #0e8179;
+  --color-teal-600: #0b6b64; /* Primary brand color */
+  --color-teal-700: #0a5650;
+  --color-teal-800: #083f3c;
+  --color-teal-900: #062b29;
+
+  /* -------------------------
+   * Color / Semantic / Error
+   * ------------------------- */
+  --color-error-50: #fef2f1;
+  --color-error-100: #ffeceb;
+  --color-error-200: #fed7d7;
+  --color-error-300: #f9a3a3;
+  --color-error-400: #ee6868;
+  --color-error-500: #db3939;
+  --color-error-600: #c21f14;
+  --color-error-700: #b00303;
+  --color-error-800: #8d0202;
+  --color-error-900: #690101;
+
+  /* -------------------------
+   * Color / Semantic / Warning
+   * ------------------------- */
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-200: #fedf89;
+  --color-warning-300: #fec84b;
+  --color-warning-400: #fdb022;
+  --color-warning-500: #f79009;
+  --color-warning-600: #dc6803;
+  --color-warning-700: #b54708;
+  --color-warning-800: #93370d;
+  --color-warning-900: #53230a;
+
+  /* -------------------------
+   * Color / Semantic / Success
+   * ------------------------- */
+  --color-success-50: #ecfdf3;
+  --color-success-100: #dcfae6;
+  --color-success-200: #abefc6;
+  --color-success-300: #75e0a7;
+  --color-success-400: #47cd89;
+  --color-success-500: #17b26a;
+  --color-success-600: #079455;
+  --color-success-700: #067647;
+  --color-success-800: #085d3a;
+  --color-success-900: #063926;
+
+  /* -------------------------
+   * Color / Semantic / Chip / Part
+   * ------------------------- */
+  --color-chip-plan-100: #f3ebff;
+  --color-chip-plan-300: #e8d8fc;
+  --color-chip-plan-500: #b887ea;
+
+  --color-chip-design-100: #ffebf4;
+  --color-chip-design-300: #ffe0f1;
+  --color-chip-design-500: #ee8fbf;
+
+  --color-chip-android-100: #ecf8f2;
+  --color-chip-android-300: #daf1e5;
+  --color-chip-android-500: #72b98e;
+
+  --color-chip-ios-100: #f0f4ff;
+  --color-chip-ios-300: #e5ebff;
+  --color-chip-ios-500: #8ea5f6;
+
+  --color-chip-web-100: #fff6e0;
+  --color-chip-web-300: #fff4db;
+  --color-chip-web-500: #e3c36a;
+
+  --color-chip-nodejs-100: #ffebeb;
+  --color-chip-nodejs-300: #ffe1e1;
+  --color-chip-nodejs-500: #ed8e8e;
+
+  --color-chip-springboot-100: #f5f0ea;
+  --color-chip-springboot-300: #ede3d9;
+  --color-chip-springboot-500: #b79778;
+
+  /* -------------------------
+   * Color / Semantic / Chip / Role
+   * ------------------------- */
+  --color-role-central-200: #eae4ff;
+  --color-role-central-600: #5a43b8;
+
+  --color-role-campus-200: #e4edff;
+  --color-role-campus-600: #3b63c7;
+
+  --color-role-challenger-200: #e1f4f1;
+  --color-role-challenger-600: #0b6b64;
+
+  /* -------------------------
+   * Color / Accent Teal
+   * ------------------------- */
+  --color-accent-teal-normal: #00856f;
+  --color-accent-teal-bright: #0eb27a;
+}

@@ -1,0 +1,96 @@
+import { AnimatePresence, motion } from "motion/react"
+
+import { Tooltip } from "@/components/tooltip/Tooltip"
+import { cn } from "@/shared/lib/utils"
+
+interface StepperTabProps {
+  idx: number
+  label: string
+  isSelected: boolean
+  disabled?: boolean
+  disabledTooltip?: string
+  tooltipOpen?: boolean
+  onClick: () => void
+}
+
+export function StepperTab({
+  idx,
+  label,
+  isSelected = false,
+  disabled = false,
+  disabledTooltip,
+  tooltipOpen = false,
+  onClick,
+}: StepperTabProps) {
+  const button = (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={isSelected}
+      aria-disabled={disabled}
+      tabIndex={isSelected ? 0 : -1}
+      onClick={onClick}
+      className={cn(
+        "bp1:justify-start bp1:gap-2 bp1:pr-5 bp1:pl-3 relative flex h-full w-full items-center justify-center gap-1.5 rounded-[12px] px-2 py-1",
+        disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
+      )}
+    >
+      <AnimatePresence>
+        {isSelected && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 rounded-[12px] bg-white shadow-[13px_0_14px_rgba(211,216,216,0.4),0_1px_2px_rgba(99,196,184,0.2),0_0_10px_rgba(156,163,163,0.3)]"
+          />
+        )}
+      </AnimatePresence>
+      <div
+        aria-hidden="true"
+        className={cn(
+          "text-label-3-semibold text-teal-gray-600 relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
+          isSelected ? "bg-teal-gray-150" : "bg-teal-gray-200",
+        )}
+      >
+        {idx}
+      </div>
+      <span
+        className={cn(
+          "text-label-1-semibold relative truncate",
+          isSelected ? "text-teal-gray-800" : "text-teal-600",
+        )}
+      >
+        {label}
+      </span>
+    </button>
+  )
+
+  const tooltipOpenProp = tooltipOpen ? true : disabled ? undefined : false
+
+  return (
+    <div
+      className={cn(
+        "relative flex h-9.5 w-full flex-1",
+        disabled && "cursor-not-allowed",
+      )}
+    >
+      {disabledTooltip ? (
+        <Tooltip
+          content={disabledTooltip}
+          size="small"
+          dark={true}
+          side="bottom"
+          hoverOnly
+          open={tooltipOpenProp}
+          autoHideDuration={3000}
+          triggerClassName="block w-full h-full"
+        >
+          {button}
+        </Tooltip>
+      ) : (
+        button
+      )}
+    </div>
+  )
+}

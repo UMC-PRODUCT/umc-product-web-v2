@@ -1,0 +1,396 @@
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+
+/* 최종 편집 : 2026.04.12 */
+/* 가장 하단의 정의된 유틸리티 클래스(29개)로 사용하시면 됩니다! */
+
+:root {
+  /* -------------------------
+   * Display
+   * ------------------------- */
+  --text-display-1-bold-size: 3rem;
+  --text-display-1-bold-weight: 600;
+  --text-display-1-bold-leading: 1.2;
+  --text-display-1-bold-tracking: -0.03em;
+
+  --text-display-medium-2-size: 2.5rem;
+  --text-display-medium-2-weight: 400;
+  --text-display-medium-2-leading: 1.2;
+  --text-display-medium-2-tracking: -0.02em;
+
+  /* -------------------------
+   * Heading
+   * ------------------------- */
+  --text-heading-1-bold-size: 2.25rem;
+  --text-heading-1-bold-weight: 600;
+  --text-heading-1-bold-leading: 1.25;
+  --text-heading-1-bold-tracking: -0.02em;
+
+  --text-heading-2-bold-size: 2rem;
+  --text-heading-2-bold-weight: 600;
+  --text-heading-2-bold-leading: 1.25;
+  --text-heading-2-bold-tracking: -0.02em;
+
+  --text-heading-3-semibold-size: 1.75rem;
+  --text-heading-3-semibold-weight: 500;
+  --text-heading-3-semibold-leading: 1.3;
+  --text-heading-3-semibold-tracking: -0.02em;
+
+  --text-heading-4-semibold-size: 1.625rem;
+  --text-heading-4-semibold-weight: 500;
+  --text-heading-4-semibold-leading: 1.35;
+  --text-heading-4-semibold-tracking: -0.02em;
+
+  --text-heading-5-semibold-size: 1.5rem;
+  --text-heading-5-semibold-weight: 500;
+  --text-heading-5-semibold-leading: 1.35;
+  --text-heading-5-semibold-tracking: -0.02em;
+
+  --text-heading-5-bold-size: 1.5rem;
+  --text-heading-5-bold-weight: 600;
+  --text-heading-5-bold-leading: 1.35;
+  --text-heading-5-bold-tracking: -0.02em;
+
+  --text-heading-6-semibold-size: 1.25rem;
+  --text-heading-6-semibold-weight: 500;
+  --text-heading-6-semibold-leading: 1.4;
+  --text-heading-6-semibold-tracking: -0.01em;
+
+  --text-heading-7-semibold-size: 1.125rem;
+  --text-heading-7-semibold-weight: 500;
+  --text-heading-7-semibold-leading: 1.4;
+  --text-heading-7-semibold-tracking: -0.01em;
+
+  /* -------------------------
+   * Subtitle
+   * ------------------------- */
+  --text-subtitle-1-semibold-size: 1.25rem;
+  --text-subtitle-1-semibold-weight: 500;
+  --text-subtitle-1-semibold-leading: 1.5;
+  --text-subtitle-1-semibold-tracking: -0.01em;
+
+  --text-subtitle-1-medium-size: 1.25rem;
+  --text-subtitle-1-medium-weight: 400;
+  --text-subtitle-1-medium-leading: 1.5;
+  --text-subtitle-1-medium-tracking: -0.01em;
+
+  --text-subtitle-2-medium-size: 1.125rem;
+  --text-subtitle-2-medium-weight: 400;
+  --text-subtitle-2-medium-leading: 1.5;
+  --text-subtitle-2-medium-tracking: -0.01em;
+
+  --text-subtitle-3-semibold-size: 1rem;
+  --text-subtitle-3-semibold-weight: 500;
+  --text-subtitle-3-semibold-leading: 1.5;
+  --text-subtitle-3-semibold-tracking: -0.01em;
+
+  --text-subtitle-4-semibold-size: 0.875rem;
+  --text-subtitle-4-semibold-weight: 500;
+  --text-subtitle-4-semibold-leading: 1.5;
+  --text-subtitle-4-semibold-tracking: -0.01em;
+
+  /* -------------------------
+   * Body
+   * ------------------------- */
+  --text-body-1-medium-size: 1rem;
+  --text-body-1-medium-weight: 400;
+  --text-body-1-medium-leading: 1.45;
+  --text-body-1-medium-tracking: -0.01em;
+
+  --text-body-1-regular-size: 1rem;
+  --text-body-1-regular-weight: 300;
+  --text-body-1-regular-leading: 1.45;
+  --text-body-1-regular-tracking: -0.01em;
+
+  --text-body-2-medium-size: 0.875rem;
+  --text-body-2-medium-weight: 400;
+  --text-body-2-medium-leading: 1.5;
+  --text-body-2-medium-tracking: -0.01em;
+
+  --text-body-2-regular-size: 0.875rem;
+  --text-body-2-regular-weight: 300;
+  --text-body-2-regular-leading: 1.6;
+  --text-body-2-regular-tracking: -0.01em;
+
+  --text-body-3-medium-size: 0.75rem;
+  --text-body-3-medium-weight: 400;
+  --text-body-3-medium-leading: 1.5;
+  --text-body-3-medium-tracking: 0em;
+
+  --text-body-3-regular-size: 0.75rem;
+  --text-body-3-regular-weight: 300;
+  --text-body-3-regular-leading: 1.5;
+  --text-body-3-regular-tracking: 0em;
+
+  /* -------------------------
+   * Label
+   * ------------------------- */
+  --text-label-1-semibold-size: 1rem;
+  --text-label-1-semibold-weight: 500;
+  --text-label-1-semibold-leading: 1.4;
+  --text-label-1-semibold-tracking: -0.02em;
+
+  --text-label-1-medium-size: 1rem;
+  --text-label-1-medium-weight: 400;
+  --text-label-1-medium-leading: 1.4;
+  --text-label-1-medium-tracking: -0.02em;
+
+  --text-label-2-medium-size: 0.875rem;
+  --text-label-2-medium-weight: 400;
+  --text-label-2-medium-leading: 1.45;
+  --text-label-2-medium-tracking: 0em;
+
+  --text-label-3-semibold-size: 0.75rem;
+  --text-label-3-semibold-weight: 500;
+  --text-label-3-semibold-leading: 1.4;
+  --text-label-3-semibold-tracking: 0em;
+
+  --text-label-4-medium-size: 0.75rem;
+  --text-label-4-medium-weight: 400;
+  --text-label-4-medium-leading: 1.4;
+  --text-label-4-medium-tracking: 0em;
+
+  /* -------------------------
+   * Caption
+   * ------------------------- */
+  --text-caption-1-medium-size: 0.8125rem;
+  --text-caption-1-medium-weight: 400;
+  --text-caption-1-medium-leading: 1.45;
+  --text-caption-1-medium-tracking: 0em;
+
+  --text-caption-2-medium-size: 0.75rem;
+  --text-caption-2-medium-weight: 400;
+  --text-caption-2-medium-leading: 1.5;
+  --text-caption-2-medium-tracking: 0em;
+
+  --text-caption-2-regular-size: 0.75rem;
+  --text-caption-2-regular-weight: 300;
+  --text-caption-2-regular-leading: 1.5;
+  --text-caption-2-regular-tracking: 0em;
+
+  --text-caption-3-regular-size: 0.6875rem;
+  --text-caption-3-regular-weight: 300;
+  --text-caption-3-regular-leading: 1.6;
+  --text-caption-3-regular-tracking: -0.02em;
+
+  --text-caption-3-medium-size: 0.6875rem;
+  --text-caption-3-medium-weight: 500;
+  --text-caption-3-medium-leading: 1.6;
+  --text-caption-3-medium-tracking: -0.02em;
+}
+
+@utility text-display-1-bold {
+  font-size: var(--text-display-1-bold-size);
+  font-weight: var(--text-display-1-bold-weight);
+  line-height: var(--text-display-1-bold-leading);
+  letter-spacing: var(--text-display-1-bold-tracking);
+}
+
+@utility text-display-2-medium {
+  font-size: var(--text-display-medium-2-size);
+  font-weight: var(--text-display-medium-2-weight);
+  line-height: var(--text-display-medium-2-leading);
+  letter-spacing: var(--text-display-medium-2-tracking);
+}
+
+@utility text-heading-1-bold {
+  font-size: var(--text-heading-1-bold-size);
+  font-weight: var(--text-heading-1-bold-weight);
+  line-height: var(--text-heading-1-bold-leading);
+  letter-spacing: var(--text-heading-1-bold-tracking);
+}
+
+@utility text-heading-2-bold {
+  font-size: var(--text-heading-2-bold-size);
+  font-weight: var(--text-heading-2-bold-weight);
+  line-height: var(--text-heading-2-bold-leading);
+  letter-spacing: var(--text-heading-2-bold-tracking);
+}
+
+@utility text-heading-3-semibold {
+  font-size: var(--text-heading-3-semibold-size);
+  font-weight: var(--text-heading-3-semibold-weight);
+  line-height: var(--text-heading-3-semibold-leading);
+  letter-spacing: var(--text-heading-3-semibold-tracking);
+}
+
+@utility text-heading-4-semibold {
+  font-size: var(--text-heading-4-semibold-size);
+  font-weight: var(--text-heading-4-semibold-weight);
+  line-height: var(--text-heading-4-semibold-leading);
+  letter-spacing: var(--text-heading-4-semibold-tracking);
+}
+
+@utility text-heading-5-semibold {
+  font-size: var(--text-heading-5-semibold-size);
+  font-weight: var(--text-heading-5-semibold-weight);
+  line-height: var(--text-heading-5-semibold-leading);
+  letter-spacing: var(--text-heading-5-semibold-tracking);
+}
+
+@utility text-heading-5-bold {
+  font-size: var(--text-heading-5-bold-size);
+  font-weight: var(--text-heading-5-bold-weight);
+  line-height: var(--text-heading-5-bold-leading);
+  letter-spacing: var(--text-heading-5-bold-tracking);
+}
+
+@utility text-heading-6-semibold {
+  font-size: var(--text-heading-6-semibold-size);
+  font-weight: var(--text-heading-6-semibold-weight);
+  line-height: var(--text-heading-6-semibold-leading);
+  letter-spacing: var(--text-heading-6-semibold-tracking);
+}
+
+@utility text-heading-7-semibold {
+  font-size: var(--text-heading-7-semibold-size);
+  font-weight: var(--text-heading-7-semibold-weight);
+  line-height: var(--text-heading-7-semibold-leading);
+  letter-spacing: var(--text-heading-7-semibold-tracking);
+}
+
+@utility text-subtitle-1-semibold {
+  font-size: var(--text-subtitle-1-semibold-size);
+  font-weight: var(--text-subtitle-1-semibold-weight);
+  line-height: var(--text-subtitle-1-semibold-leading);
+  letter-spacing: var(--text-subtitle-1-semibold-tracking);
+}
+
+@utility text-subtitle-1-medium {
+  font-size: var(--text-subtitle-1-medium-size);
+  font-weight: var(--text-subtitle-1-medium-weight);
+  line-height: var(--text-subtitle-1-medium-leading);
+  letter-spacing: var(--text-subtitle-1-medium-tracking);
+}
+
+@utility text-subtitle-2-medium {
+  font-size: var(--text-subtitle-2-medium-size);
+  font-weight: var(--text-subtitle-2-medium-weight);
+  line-height: var(--text-subtitle-2-medium-leading);
+  letter-spacing: var(--text-subtitle-2-medium-tracking);
+}
+
+@utility text-subtitle-3-semibold {
+  font-size: var(--text-subtitle-3-semibold-size);
+  font-weight: var(--text-subtitle-3-semibold-weight);
+  line-height: var(--text-subtitle-3-semibold-leading);
+  letter-spacing: var(--text-subtitle-3-semibold-tracking);
+}
+
+@utility text-subtitle-4-semibold {
+  font-size: var(--text-subtitle-4-semibold-size);
+  font-weight: var(--text-subtitle-4-semibold-weight);
+  line-height: var(--text-subtitle-4-semibold-leading);
+  letter-spacing: var(--text-subtitle-4-semibold-tracking);
+}
+
+@utility text-body-1-medium {
+  font-size: var(--text-body-1-medium-size);
+  font-weight: var(--text-body-1-medium-weight);
+  line-height: var(--text-body-1-medium-leading);
+  letter-spacing: var(--text-body-1-medium-tracking);
+}
+
+@utility text-body-1-regular {
+  font-size: var(--text-body-1-regular-size);
+  font-weight: var(--text-body-1-regular-weight);
+  line-height: var(--text-body-1-regular-leading);
+  letter-spacing: var(--text-body-1-regular-tracking);
+}
+
+@utility text-body-2-medium {
+  font-size: var(--text-body-2-medium-size);
+  font-weight: var(--text-body-2-medium-weight);
+  line-height: var(--text-body-2-medium-leading);
+  letter-spacing: var(--text-body-2-medium-tracking);
+}
+
+@utility text-body-2-regular {
+  font-size: var(--text-body-2-regular-size);
+  font-weight: var(--text-body-2-regular-weight);
+  line-height: var(--text-body-2-regular-leading);
+  letter-spacing: var(--text-body-2-regular-tracking);
+}
+
+@utility text-body-3-medium {
+  font-size: var(--text-body-3-medium-size);
+  font-weight: var(--text-body-3-medium-weight);
+  line-height: var(--text-body-3-medium-leading);
+  letter-spacing: var(--text-body-3-medium-tracking);
+}
+
+@utility text-body-3-regular {
+  font-size: var(--text-body-3-regular-size);
+  font-weight: var(--text-body-3-regular-weight);
+  line-height: var(--text-body-3-regular-leading);
+  letter-spacing: var(--text-body-3-regular-tracking);
+}
+
+@utility text-label-1-semibold {
+  font-size: var(--text-label-1-semibold-size);
+  font-weight: var(--text-label-1-semibold-weight);
+  line-height: var(--text-label-1-semibold-leading);
+  letter-spacing: var(--text-label-1-semibold-tracking);
+}
+
+@utility text-label-1-medium {
+  font-size: var(--text-label-1-medium-size);
+  font-weight: var(--text-label-1-medium-weight);
+  line-height: var(--text-label-1-medium-leading);
+  letter-spacing: var(--text-label-1-medium-tracking);
+}
+
+@utility text-label-2-medium {
+  font-size: var(--text-label-2-medium-size);
+  font-weight: var(--text-label-2-medium-weight);
+  line-height: var(--text-label-2-medium-leading);
+  letter-spacing: var(--text-label-2-medium-tracking);
+}
+
+@utility text-label-3-semibold {
+  font-size: var(--text-label-3-semibold-size);
+  font-weight: var(--text-label-3-semibold-weight);
+  line-height: var(--text-label-3-semibold-leading);
+  letter-spacing: var(--text-label-3-semibold-tracking);
+}
+
+@utility text-label-4-medium {
+  font-size: var(--text-label-4-medium-size);
+  font-weight: var(--text-label-4-medium-weight);
+  line-height: var(--text-label-4-medium-leading);
+  letter-spacing: var(--text-label-4-medium-tracking);
+}
+
+@utility text-caption-1-medium {
+  font-size: var(--text-caption-1-medium-size);
+  font-weight: var(--text-caption-1-medium-weight);
+  line-height: var(--text-caption-1-medium-leading);
+  letter-spacing: var(--text-caption-1-medium-tracking);
+}
+
+@utility text-caption-2-medium {
+  font-size: var(--text-caption-2-medium-size);
+  font-weight: var(--text-caption-2-medium-weight);
+  line-height: var(--text-caption-2-medium-leading);
+  letter-spacing: var(--text-caption-2-medium-tracking);
+}
+
+@utility text-caption-2-regular {
+  font-size: var(--text-caption-2-regular-size);
+  font-weight: var(--text-caption-2-regular-weight);
+  line-height: var(--text-caption-2-regular-leading);
+  letter-spacing: var(--text-caption-2-regular-tracking);
+}
+
+@utility text-caption-3-regular {
+  font-size: var(--text-caption-3-regular-size);
+  font-weight: var(--text-caption-3-regular-weight);
+  line-height: var(--text-caption-3-regular-leading);
+  letter-spacing: var(--text-caption-3-regular-tracking);
+}
+
+@utility text-caption-3-medium {
+  font-size: var(--text-caption-3-medium-size);
+  font-weight: var(--text-caption-3-medium-weight);
+  line-height: var(--text-caption-3-medium-leading);
+  letter-spacing: var(--text-caption-3-medium-tracking);
+}

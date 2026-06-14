@@ -18,14 +18,17 @@ assignees: ""
 
 <!-- 구현 방향을 자유롭게 설명해주세요 -->
 
-## 🧱 FSD Layer
+## 🏷 관련 영역
 
-<!-- 이 기능이 속하는 FSD 레이어를 선택해주세요 -->
-
-- [ ] `app` — 라우트/레이아웃 변경
-- [ ] `widgets` — 복합 UI 블록
-- [ ] `entities` — 비즈니스 엔티티 (user, menu, restaurant)
-- [ ] `shared` — 공용 코드 (ui, api, lib, config, store)
+- [ ] UI/UX
+- [ ] Routing
+- [ ] API / Network
+- [ ] State Management
+- [ ] Build / Tooling
+- [ ] Performance
+- [ ] Accessibility
+- [ ] CI/CD
+- [ ] Docs
 
 ## 🔄 대안
 
