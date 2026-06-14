@@ -294,6 +294,11 @@ export function useMatchingStatusData(chapterName?: string) {
         .slice(0, 4)
     }
 
+    // 도넛 차트 총원을 필터링된 schoolMatchingStatistics 기준으로 보정
+    for (const r of partial.rounds) {
+      r.total = partial.totalMembers
+    }
+
     const universities: UniversityCount[] =
       filteredSummary.schoolMatchingStatistics
         .map((s) => ({
