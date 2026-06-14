@@ -23,6 +23,7 @@ import {
   UmcLogoButton,
 } from "@/features/login"
 import { Button } from "@/shared/ui/Button"
+import { TextButton } from "@/shared/ui/button/TextButton"
 
 export const Route = createFileRoute("/login/")({
   component: SocialLoginPage,
@@ -116,18 +117,18 @@ function SocialLoginPage() {
 
             <div className="flex h-7 items-center gap-3">
               {/* TODO: 아이디/비밀번호 찾기 연동 */}
-              <button className="text-body-1-regular text-teal-gray-500 flex items-center justify-center px-1 py-0.5">
+              <TextButton className="text-body-1-regular text-teal-gray-500 flex items-center justify-center px-1 py-0.5">
                 아이디/비밀번호 찾기
-              </button>
+              </TextButton>
 
               <SmallDivider />
 
-              <button
+              <TextButton
                 onClick={() => navigate({ to: "/signup" })}
                 className="text-body-1-regular flex items-center justify-center px-1 py-0.5 text-teal-500"
               >
                 회원가입
-              </button>
+              </TextButton>
             </div>
           </div>
         </div>

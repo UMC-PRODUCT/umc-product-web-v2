@@ -10,6 +10,7 @@ import { useSelectedChallengerStore } from "@/features/auth/store/selectedChalle
 import { cn } from "@/shared/lib/utils"
 
 import ProfileIcon from "../assets/icon/people/ProfileIcon"
+import { TextButton } from "./button/TextButton"
 import { RoleTagChip } from "./chip/RoleTagChip"
 
 interface ProfileDropdownProps {
@@ -166,33 +167,22 @@ export function ProfileDropdown({
           {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결/로그아웃 API 연동 */}
           <div className="flex flex-col gap-1 px-1.5">
             {canManageMembers && (
-              <button
-                type="button"
-                className="hover:decoration-teal-gray-700 h-6 w-15 text-left hover:underline"
-              >
-                <span className="text-body-2-medium text-teal-gray-700">
-                  기수 관리
-                </span>
-              </button>
+              <TextButton className="text-body-2-medium text-teal-gray-700 hover:decoration-teal-gray-700 h-6 w-15">
+                기수 관리
+              </TextButton>
             )}
-            <button
-              type="button"
-              className="hover:decoration-teal-gray-700 h-6 w-15 text-left hover:underline"
+            <TextButton
               onClick={() => navigate({ to: "/settings" })}
+              className="text-body-2-medium text-teal-gray-700 hover:decoration-teal-gray-700 h-6 w-15"
             >
-              <span className="text-body-2-medium text-teal-gray-700">
-                계정 설정
-              </span>
-            </button>
-            <button
-              type="button"
+              계정 설정
+            </TextButton>
+            <TextButton
               onClick={logout}
-              className="hover:decoration-error-500 h-6 w-15 text-left hover:underline"
+              className="text-body-2-medium text-error-500 hover:decoration-error-500 h-6 w-15"
             >
-              <span className="text-body-2-medium text-error-500">
-                로그아웃
-              </span>
-            </button>
+              로그아웃
+            </TextButton>
           </div>
         </div>
       )}
