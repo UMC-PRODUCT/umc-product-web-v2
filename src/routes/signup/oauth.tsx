@@ -331,9 +331,8 @@ function OAuthSignupPage() {
       })
       setValue("code", "")
       startVerificationTimer()
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "인증 메일 발송에 실패했습니다."
+    } catch {
+      const message = "잠시 후에 다시 시도해주세요"
       addToast({
         message,
         color: "red",
