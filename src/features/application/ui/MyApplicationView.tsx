@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
@@ -88,9 +88,13 @@ function toParts(
 
 interface MyApplicationRoundSectionProps {
   item: MyProjectApplicationResponse
+  onCancelled?: () => void
 }
 
-function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
+function MyApplicationRoundSection({
+  item,
+  onCancelled,
+}: MyApplicationRoundSectionProps) {
   const [detailOpen, setDetailOpen] = useState(false)
 
   const isRandomMatching = item.matchingRound.phase === "RANDOM_MATCHING"
@@ -119,6 +123,7 @@ function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
               <MyApplicationMoreMenu
                 item={item}
                 isRandomMatching={isRandomMatching}
+                onCancelled={onCancelled}
               />
             }
           />
@@ -144,6 +149,7 @@ function MyApplicationRoundSection({ item }: MyApplicationRoundSectionProps) {
 
 export function MyApplicationView() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { data: gisuId } = useActiveGisuId()
   const { data: raw = [] } = useQuery({
     queryKey: ["myApplications", gisuId],
@@ -171,7 +177,15 @@ export function MyApplicationView() {
   return (
     <div className="flex flex-col gap-10">
       {applications.map((item) => (
-        <MyApplicationRoundSection key={item.applicationId} item={item} />
+        <MyApplicationRoundSection
+          key={item.applicationId}
+          item={item}
+          onCancelled={() =>
+            void queryClient.invalidateQueries({
+              queryKey: ["myApplications", gisuId],
+            })
+          }
+        />
       ))}
 
       <UsabilitySurvey
