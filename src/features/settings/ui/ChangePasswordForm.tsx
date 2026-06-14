@@ -1,3 +1,4 @@
+import { AxiosError } from "axios"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -34,6 +35,7 @@ export function ChangePasswordForm({
     isValidPassword(next) && !isSameAsCurrent && !hasInvalidSpecial
   const isConfirmMatch = next === confirm
 
+  const [isCurrentPasswordWrong, setIsCurrentPasswordWrong] = useState(false)
   const [showConfirmError, setShowConfirmError] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -53,14 +55,22 @@ export function ChangePasswordForm({
         duration: 3000,
       })
       onSuccess()
-    } catch {
-      addToast({
-        message: "잠시 후 다시 시도해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
+    } catch (err) {
+      const code =
+        err instanceof AxiosError
+          ? (err.response?.data as { code?: string })?.code
+          : undefined
+      if (code === "AUTHENTICATION-0022") {
+        setIsCurrentPasswordWrong(true)
+      } else {
+        addToast({
+          message: "잠시 후 다시 시도해 주세요.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -85,9 +95,21 @@ export function ChangePasswordForm({
             <InputBox
               type="password"
               value={current}
-              onChange={(e) => setCurrent(e.target.value)}
+              state={isCurrentPasswordWrong ? "error" : "default"}
+              onChange={(e) => {
+                setCurrent(e.target.value)
+                setIsCurrentPasswordWrong(false)
+              }}
               className="w-full"
             />
+            {isCurrentPasswordWrong && (
+              <div className="flex items-center gap-1">
+                <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                <p className="text-body-3-medium text-error-500">
+                  현재 비밀번호가 올바르지 않습니다
+                </p>
+              </div>
+            )}
           </div>
 
           {/* 새 비밀번호 */}
