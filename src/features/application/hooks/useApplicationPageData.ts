@@ -276,6 +276,15 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
     return map
   }, [schoolsQuery.data])
 
+  // SCHOOL_PRESIDENT: 본인 학교 schoolId 역매핑
+  const mySchoolId = useMemo(() => {
+    if (!schoolName) return undefined
+    for (const [id, name] of schoolIdToName) {
+      if (name === schoolName) return id
+    }
+    return undefined
+  }, [schoolName, schoolIdToName])
+
   // 매칭 차수 조회 (현재 진행 차수 계산용)
   const roundsQuery = useQuery({
     queryKey: applicationKeys.matchingRounds(chapterId),
@@ -326,12 +335,16 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
     }
 
     // 해당 챕터 소속 학교 + 프로젝트만 필터링 (로딩 중엔 빈 Set으로 필터링해 flicker 방지)
+    // SCHOOL_PRESIDENT: mySchoolId가 있으면 본인 학교만 필터링
+    const schoolFilter = mySchoolId
+      ? (id: string) => id === mySchoolId
+      : (id: string) => (chapterSchoolIds ?? new Set()).has(id)
     const filteredSummary = chapterName
       ? {
           ...chapterStatsQuery.data.summary,
           schoolMatchingStatistics:
             chapterStatsQuery.data.summary.schoolMatchingStatistics.filter(
-              (s) => (chapterSchoolIds ?? new Set()).has(String(s.schoolId)),
+              (s) => schoolFilter(String(s.schoolId)),
             ),
           projectRoundStatistics:
             chapterStatsQuery.data.summary.projectRoundStatistics.filter((p) =>
@@ -342,13 +355,25 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
 
     const partial = summaryToStats(filteredSummary, projectIdToName)
 
+    // SCHOOL_PRESIDENT: 도넛 차트 총원을 본인 학교 인원으로 대체
+    // roundApplicationStatistics.availableMemberCount는 지부 전체이므로 학교별 totalMemberCount 사용
+    if (mySchoolId) {
+      const schoolTotal = filteredSummary.schoolMatchingStatistics.reduce(
+        (s, x) => s + Number(x.totalMemberCount),
+        0,
+      )
+      for (const r of partial.rounds) {
+        r.total = schoolTotal
+      }
+    }
+
     // 학교별 지원자 수 집계 (roundSchoolRankings 전 차수 합산, 챕터 소속 학교만)
     const schoolApplicantCounts = new Map<string, number>()
     for (const ranking of chapterStatsQuery.data.summary.roundSchoolRankings ??
       []) {
       for (const s of ranking.schools) {
         const id = String(s.schoolId)
-        if (chapterSchoolIds && !chapterSchoolIds.has(id)) continue
+        if (!schoolFilter(id)) continue
         schoolApplicantCounts.set(
           id,
           (schoolApplicantCounts.get(id) ?? 0) + Number(s.applicantCount),
@@ -374,6 +399,7 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
     schoolIdToName,
     chapterName,
     chapterSchoolIds,
+    mySchoolId,
   ])
 
   return {

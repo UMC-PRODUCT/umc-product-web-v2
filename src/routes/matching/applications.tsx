@@ -84,7 +84,7 @@ function MatchingApplicationsPage() {
 
   // SCHOOL_PRESIDENT: 챕터 필터 없이 조회 후 프론트에서 본인 학교 프로젝트만 필터링
   const admin = useAdminPageData(
-    isSchoolView ? undefined : selectedChapter,
+    selectedChapter,
     isSchoolView ? (me?.schoolName ?? undefined) : undefined,
   )
   const adminStats = admin.stats
