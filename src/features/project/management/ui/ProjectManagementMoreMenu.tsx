@@ -72,8 +72,11 @@ export function ProjectManagementMoreMenu({
   const projectDetailQuery = useQuery({
     queryKey: ["projectDetail", numericProjectId],
     queryFn: () => getProjectDetail(numericProjectId),
-    enabled: applicationOpen && numericProjectId > 0,
+    enabled: (applicationOpen || popoverOpen) && numericProjectId > 0,
   })
+
+  const hasNoPlanLink =
+    projectDetailQuery.isSuccess && !projectDetailQuery.data.externalLink
 
   const applicantsQuery = useQuery({
     queryKey: applicationKeys.applicants(numericProjectId),
@@ -275,9 +278,17 @@ export function ProjectManagementMoreMenu({
     setTeamModalOpen(true)
   }
 
-  const menuItems = [
+  const menuItems: {
+    label: string
+    onClick: () => void
+    disabled?: boolean
+  }[] = [
     { label: "지원 현황 확인하기", onClick: handleApplicationClick },
-    { label: "기획 보기", onClick: () => void handlePlanViewClick() },
+    {
+      label: "기획 보기",
+      onClick: () => void handlePlanViewClick(),
+      disabled: hasNoPlanLink,
+    },
     { label: "팀원 구성 보기", onClick: handleTeamViewClick },
   ]
 
@@ -285,6 +296,7 @@ export function ProjectManagementMoreMenu({
     menuItems.splice(2, 0, {
       label: "프로젝트 수정하기",
       onClick: handleEditClick,
+      disabled: isPermissionLoading,
     })
   }
 
@@ -309,13 +321,11 @@ export function ProjectManagementMoreMenu({
             </span>
 
             <div className="flex w-full flex-col">
-              {menuItems.map(({ label, onClick }) => (
+              {menuItems.map(({ label, onClick, disabled }) => (
                 <DropdownItem
                   key={label}
                   label={label}
-                  disabled={
-                    label === "프로젝트 수정하기" && isPermissionLoading
-                  }
+                  disabled={disabled}
                   onClick={onClick}
                 />
               ))}
