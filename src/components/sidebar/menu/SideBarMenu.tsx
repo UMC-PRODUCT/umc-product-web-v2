@@ -8,6 +8,7 @@ interface SideBarMenuProps {
   id: string
   title: string
   icon: ComponentType<SVGProps<SVGSVGElement>>
+  isActive: boolean
   isOpen: boolean
   onToggle: () => void
   children: React.ReactNode
@@ -22,6 +23,7 @@ export function SideBarMenu({
   id,
   title,
   icon,
+  isActive,
   isOpen,
   onToggle,
   children,
@@ -32,6 +34,7 @@ export function SideBarMenu({
         id={id}
         title={title}
         icon={icon}
+        isActive={isActive}
         isOpen={isOpen}
         onToggle={onToggle}
       />

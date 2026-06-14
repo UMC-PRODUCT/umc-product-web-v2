@@ -5,6 +5,7 @@ import { isOperator } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { projectKeys } from "@/features/project/new/api"
 import { getActiveGisu } from "@/shared/api/gisu"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 import { getMatchingProjects, type ProjectItem } from "../api/matchingProject"
@@ -41,7 +42,8 @@ const FILTER_LAYOUT = {
   branch: { className: "w-fit min-w-20", dropdownClassName: "w-[9.5rem]" },
   school: {
     className: "w-fit min-w-20",
-    dropdownClassName: "w-[9.5rem] max-h-[25.25rem] overflow-y-auto",
+    dropdownClassName:
+      "scrollbar-none w-[9.5rem] max-h-[25.25rem] overflow-y-auto",
   },
   part: { className: "w-fit min-w-20", dropdownClassName: "w-[9.125rem]" },
   status: {
@@ -112,18 +114,19 @@ export function useMatchingProjectListFilters() {
     [chaptersData],
   )
 
-  const schoolOptions: ProjectFilterOption[] = useMemo(
-    () =>
-      selectedBranch
-        ? (
-            chaptersData?.chapters.find((ch) => ch.chapterId === selectedBranch)
-              ?.schools ?? []
-          ).map((s) => ({ value: s.schoolId, label: s.schoolName }))
-        : (chaptersData?.chapters ?? []).flatMap((ch) =>
-            ch.schools.map((s) => ({ value: s.schoolId, label: s.schoolName })),
-          ),
-    [chaptersData, selectedBranch],
-  )
+  const schoolOptions: ProjectFilterOption[] = useMemo(() => {
+    const schools = selectedBranch
+      ? (chaptersData?.chapters.find((ch) => ch.chapterId === selectedBranch)
+          ?.schools ?? [])
+      : (chaptersData?.chapters ?? []).flatMap((ch) => ch.schools)
+
+    return schools
+      .map((s) => ({
+        value: s.schoolId,
+        label: formatSchoolName(s.schoolName),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, "ko"))
+  }, [chaptersData, selectedBranch])
 
   const { data, isLoading, isError } = useQuery({
     queryKey: projectKeys.list({

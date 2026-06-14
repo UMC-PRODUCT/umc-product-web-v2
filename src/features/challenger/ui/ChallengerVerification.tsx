@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { CircleAlert, Info } from "lucide-react"
+import { Info } from "lucide-react"
 import { useState } from "react"
 
 import { addChallengerRecordToMember } from "@/features/challenger/api/challengerRecord"
+import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { CodeInput } from "@/shared/ui/input/CodeInput"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -57,7 +58,9 @@ export function ChallengerVerification() {
         <div className="flex w-full flex-col gap-2">
           <p className="text-body-1-medium text-teal-gray-600">
             개별 인증코드
-            <span className="text-error-600">*</span>
+            <span className="text-error-600 text-body-1-medium pl-[1px]">
+              *
+            </span>
           </p>
 
           <CodeInput
@@ -70,8 +73,8 @@ export function ChallengerVerification() {
           />
 
           {hasError && (
-            <div className="text-error-500 text-caption-2-medium flex gap-1">
-              <CircleAlert className="size-4" />
+            <div className="text-error-500 text-body-2-medium flex items-center gap-1">
+              <CheckIcon className="size-4" />
               <p>올바르지 않은 인증코드입니다</p>
             </div>
           )}

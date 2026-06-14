@@ -2,11 +2,17 @@ import js from "@eslint/js"
 import perfectionist from "eslint-plugin-perfectionist"
 import reactHooks from "eslint-plugin-react-hooks"
 import globals from "globals"
+import { dirname } from "node:path"
+import { fileURLToPath } from "node:url"
 import tseslint from "typescript-eslint"
+
+const tsconfigRootDir = dirname(fileURLToPath(import.meta.url))
 
 export default tseslint.config(
   {
     ignores: [
+      ".claude/**",
+      ".playwright-mcp/**",
       "dist",
       "src/routeTree.gen.ts",
       "src/assets/svg/**",
@@ -63,6 +69,9 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...globals.browser,
+      },
+      parserOptions: {
+        tsconfigRootDir,
       },
     },
   },

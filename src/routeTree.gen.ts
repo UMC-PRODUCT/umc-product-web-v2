@@ -30,6 +30,7 @@ import { Route as TestSocialButtonRouteImport } from './routes/test/social-butto
 import { Route as TestRatingFaceRouteImport } from './routes/test/rating-face'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
+import { Route as TestMatchingProjectsRouteImport } from './routes/test/matching-projects'
 import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
 import { Route as TestIconRouteImport } from './routes/test/icon'
 import { Route as TestHeaderRouteImport } from './routes/test/header'
@@ -166,6 +167,11 @@ const TestQuestionFormRoute = TestQuestionFormRouteImport.update({
 const TestOptionButtonRoute = TestOptionButtonRouteImport.update({
   id: '/test/option-button',
   path: '/test/option-button',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestMatchingProjectsRoute = TestMatchingProjectsRouteImport.update({
+  id: '/test/matching-projects',
+  path: '/test/matching-projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestInputBoxRoute = TestInputBoxRouteImport.update({
@@ -365,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
+  '/test/matching-projects': typeof TestMatchingProjectsRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
@@ -417,6 +424,7 @@ export interface FileRoutesByTo {
   '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
+  '/test/matching-projects': typeof TestMatchingProjectsRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
@@ -472,6 +480,7 @@ export interface FileRoutesById {
   '/test/header': typeof TestHeaderRoute
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
+  '/test/matching-projects': typeof TestMatchingProjectsRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
@@ -529,6 +538,7 @@ export interface FileRouteTypes {
     | '/test/header'
     | '/test/icon'
     | '/test/input-box'
+    | '/test/matching-projects'
     | '/test/option-button'
     | '/test/question-form'
     | '/test/rating-face'
@@ -581,6 +591,7 @@ export interface FileRouteTypes {
     | '/test/header'
     | '/test/icon'
     | '/test/input-box'
+    | '/test/matching-projects'
     | '/test/option-button'
     | '/test/question-form'
     | '/test/rating-face'
@@ -635,6 +646,7 @@ export interface FileRouteTypes {
     | '/test/header'
     | '/test/icon'
     | '/test/input-box'
+    | '/test/matching-projects'
     | '/test/option-button'
     | '/test/question-form'
     | '/test/rating-face'
@@ -687,6 +699,7 @@ export interface RootRouteChildren {
   TestHeaderRoute: typeof TestHeaderRoute
   TestIconRoute: typeof TestIconRoute
   TestInputBoxRoute: typeof TestInputBoxRoute
+  TestMatchingProjectsRoute: typeof TestMatchingProjectsRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
   TestQuestionFormRoute: typeof TestQuestionFormRoute
   TestRatingFaceRoute: typeof TestRatingFaceRoute
@@ -849,6 +862,13 @@ declare module '@tanstack/react-router' {
       path: '/test/option-button'
       fullPath: '/test/option-button'
       preLoaderRoute: typeof TestOptionButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/matching-projects': {
+      id: '/test/matching-projects'
+      path: '/test/matching-projects'
+      fullPath: '/test/matching-projects'
+      preLoaderRoute: typeof TestMatchingProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/input-box': {
@@ -1204,6 +1224,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestHeaderRoute: TestHeaderRoute,
   TestIconRoute: TestIconRoute,
   TestInputBoxRoute: TestInputBoxRoute,
+  TestMatchingProjectsRoute: TestMatchingProjectsRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
   TestRatingFaceRoute: TestRatingFaceRoute,
