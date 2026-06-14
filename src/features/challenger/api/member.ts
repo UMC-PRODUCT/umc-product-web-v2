@@ -2,6 +2,8 @@ import { api } from "@/shared/lib/axios"
 
 import type {
   MemberInfoResponse,
+  SearchChallengerCursorParams,
+  SearchChallengerCursorResponse,
   SearchMemberParams,
   SearchMemberResponse,
 } from "@/features/challenger/model/types"
@@ -12,6 +14,16 @@ export async function searchMembers(
 ): Promise<SearchMemberResponse> {
   const { data } = await api.get<ApiResponse<SearchMemberResponse>>(
     "/v1/member/search",
+    { params },
+  )
+  return data.result
+}
+
+export async function searchChallengersByCursor(
+  params: SearchChallengerCursorParams,
+): Promise<SearchChallengerCursorResponse> {
+  const { data } = await api.get<ApiResponse<SearchChallengerCursorResponse>>(
+    "/v1/challenger/search/cursor",
     { params },
   )
   return data.result
