@@ -43,7 +43,6 @@ export interface MatchingRoleRow {
   role: string
   blocks: MatchingBlockData[]
   colsPerRow: number
-  firstRowCols: number
 }
 
 interface MatchingResultRowProps {
@@ -187,14 +186,11 @@ export function MatchingResultRow({
     )
   }, [roleRows])
 
-  // 블록 배열을 firstRowCols / colsPerRow 단위로 청크 분할
+  // 블록 배열을 colsPerRow 단위로 청크 분할
   const chunkedRows = localRoleRows.map((row) => {
-    const chunks: MatchingBlockData[][] = []
     if (row.blocks.length === 0) return [[]]
-    // 첫 청크: firstRowCols 개
-    chunks.push(row.blocks.slice(0, row.firstRowCols))
-    // 이후 청크: colsPerRow 개씩
-    for (let i = row.firstRowCols; i < row.blocks.length; i += row.colsPerRow) {
+    const chunks: MatchingBlockData[][] = []
+    for (let i = 0; i < row.blocks.length; i += row.colsPerRow) {
       chunks.push(row.blocks.slice(i, i + row.colsPerRow))
     }
     return chunks
@@ -247,10 +243,7 @@ export function MatchingResultRow({
           return chunks.map((chunk, chunkIdx) => {
             const vIdx = visualBase + chunkIdx
             // 플랫 블록 인덱스 오프셋 (수동 배정용)
-            const flatOffset =
-              chunkIdx === 0
-                ? 0
-                : row.firstRowCols + (chunkIdx - 1) * row.colsPerRow
+            const flatOffset = chunkIdx * row.colsPerRow
             // 연속 행은 라벨 없이 우측 정렬
             const isContinuation = chunkIdx > 0
 
