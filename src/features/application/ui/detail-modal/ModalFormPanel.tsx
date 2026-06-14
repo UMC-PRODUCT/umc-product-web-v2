@@ -20,6 +20,33 @@ const ROLE_LABEL: Record<string, string> = {
   nodejs: "Node.js",
 }
 
+// 텍스트 내 URL을 클릭 가능한 링크로 변환
+const URL_REGEX = /(https?:\/\/[^\s<]+)/g
+
+function Linkify({ text }: { text: string }) {
+  const parts = text.split(URL_REGEX)
+  if (parts.length === 1) return <>{text}</>
+  return (
+    <>
+      {parts.map((part, i) =>
+        URL_REGEX.test(part) ? (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="break-all text-teal-600 underline"
+          >
+            {part}
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  )
+}
+
 function FormFieldItem({ field }: { field: FormField }) {
   return (
     <div className="flex flex-col gap-2.5 px-1.5">
@@ -34,9 +61,25 @@ function FormFieldItem({ field }: { field: FormField }) {
       </div>
       <div className="pl-3.5">
         <div className="border-teal-gray-100 rounded-xl border bg-white px-4 py-3">
-          <span className="text-body-2-medium text-neutral-800">
-            {field.answer}
-          </span>
+          {field.links && field.links.length > 0 ? (
+            <div className="flex flex-col gap-1.5">
+              {field.links.map((link, i) => (
+                <a
+                  key={i}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-body-2-medium break-all text-teal-600 underline"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          ) : (
+            <span className="text-body-2-medium text-neutral-800">
+              <Linkify text={field.answer} />
+            </span>
+          )}
         </div>
       </div>
     </div>

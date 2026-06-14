@@ -84,7 +84,7 @@ function MatchingApplicationsPage() {
 
   // SCHOOL_PRESIDENT: 챕터 필터 없이 조회 후 프론트에서 본인 학교 프로젝트만 필터링
   const admin = useAdminPageData(
-    isSchoolView ? undefined : selectedChapter,
+    selectedChapter,
     isSchoolView ? (me?.schoolName ?? undefined) : undefined,
   )
   const adminStats = admin.stats
@@ -92,6 +92,7 @@ function MatchingApplicationsPage() {
 
   const challenger = useChallengerPageData()
   const pmProjects = challenger.projects
+  const availablePerRound = challenger.availablePerRound
 
   return (
     <section className="flex w-full flex-col">
@@ -205,6 +206,7 @@ function MatchingApplicationsPage() {
               ) : pmProjects.length === 0 ? (
                 <ChallengerApplicationView
                   projects={[]}
+                  availablePerRound={availablePerRound}
                   currentRound={challenger.currentRound}
                 />
               ) : (
@@ -219,6 +221,7 @@ function MatchingApplicationsPage() {
                     />
                     <ChallengerApplicationView
                       projects={[project]}
+                      availablePerRound={availablePerRound}
                       currentRound={challenger.currentRound}
                     />
                   </div>

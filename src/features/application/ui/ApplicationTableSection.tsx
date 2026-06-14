@@ -192,7 +192,7 @@ export function ApplicationTableSection({
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
-        className: schoolFilter.length > 0 ? "w-[156px]" : "w-20",
+        className: schoolFilter.length > 0 ? "w-fit" : "w-20",
         dropdownClassName: "!min-w-[156px] w-[156px]",
       },
       {
@@ -211,7 +211,7 @@ export function ApplicationTableSection({
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
-        className: partFilter.length > 0 ? "w-[152px]" : "w-20",
+        className: partFilter.length > 0 ? "w-fit" : "w-20",
         dropdownClassName: "!min-w-[152px] w-[152px]",
       },
       {
@@ -231,7 +231,7 @@ export function ApplicationTableSection({
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
-        className: "w-[114px]",
+        className: "w-fit",
         dropdownClassName: "!min-w-[114px] w-[114px]",
       },
     ],

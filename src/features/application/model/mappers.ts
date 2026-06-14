@@ -175,13 +175,31 @@ export function summaryToStats(
   summary: ChapterStatisticsResponse["summary"],
   projectIdToName: Map<string, string>,
   filterRound?: number, // 미지정 시 전 차수 합산, 0 = 완료된 차수 없음, N = N차까지 표시
+  variant: "application" | "matching" = "application",
 ): Omit<ApplicationStats, "universities"> {
-  // 차수별 지원 현황 (완료 차수 + 1차 최소 표시)
+  // 차수별 매칭 완료 수 (projectRoundStatistics에서 합산)
+  const matchedByPhase = new Map<string, number>()
+  if (variant === "matching") {
+    for (const p of summary.projectRoundStatistics) {
+      for (const r of p.matchingRounds) {
+        const phase = r.matchingRound.phase
+        matchedByPhase.set(
+          phase,
+          (matchedByPhase.get(phase) ?? 0) + Number(r.matchedMemberCount),
+        )
+      }
+    }
+  }
+
+  // 차수별 지원/매칭 현황 (완료 차수 + 1차 최소 표시)
   // filterRound=0(1차 진행 중)이어도 r.total(availableMemberCount)이 표시되도록 최소 1차 포함
   const rounds = summary.roundApplicationStatistics
     .map((r) => ({
       round: toRoundNumber(r.matchingRound.phase),
-      applied: Number(r.appliedMemberCount),
+      applied:
+        variant === "matching"
+          ? (matchedByPhase.get(r.matchingRound.phase) ?? 0)
+          : Number(r.appliedMemberCount),
       total: Number(r.availableMemberCount),
     }))
     .filter(
@@ -202,27 +220,32 @@ export function summaryToStats(
   const completionRate =
     totalMembers > 0 ? Math.round((completedCount / totalMembers) * 100) : 0
 
-  // 프로젝트별 차수별 지원 현황 (완료된 차수만)
+  // 프로젝트별 차수별 지원/매칭 현황 (완료된 차수만)
+  const projectRoundField =
+    variant === "matching" ? "matchedMemberCount" : "appliedMemberCount"
   const projectRounds: ProjectRoundData[] = summary.projectRoundStatistics.map(
     (p) => ({
       name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
       rounds: [
         filterRound === undefined || filterRound >= 1
           ? Number(
-              p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
-                ?.appliedMemberCount ?? 0,
+              p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")?.[
+                projectRoundField
+              ] ?? 0,
             )
           : 0,
         filterRound === undefined || filterRound >= 2
           ? Number(
-              p.matchingRounds.find((r) => r.matchingRound.phase === "SECOND")
-                ?.appliedMemberCount ?? 0,
+              p.matchingRounds.find(
+                (r) => r.matchingRound.phase === "SECOND",
+              )?.[projectRoundField] ?? 0,
             )
           : 0,
         filterRound === undefined || filterRound >= 3
           ? Number(
-              p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")
-                ?.appliedMemberCount ?? 0,
+              p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")?.[
+                projectRoundField
+              ] ?? 0,
             )
           : 0,
       ],
@@ -235,19 +258,19 @@ export function summaryToStats(
     2: "SECOND",
     3: "THIRD",
   }
+  const countField =
+    variant === "matching" ? "matchedMemberCount" : "appliedMemberCount"
   const topProjects: TopProject[] = summary.projectRoundStatistics
     .map((p) => {
       let count = 0
       if (filterRound === undefined) {
-        count = p.matchingRounds.reduce(
-          (s, r) => s + Number(r.appliedMemberCount),
-          0,
-        )
+        count = p.matchingRounds.reduce((s, r) => s + Number(r[countField]), 0)
       } else if (filterRound > 0) {
         const targetPhase = phaseMap[filterRound]
         count = Number(
-          p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)
-            ?.appliedMemberCount ?? 0,
+          p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)?.[
+            countField
+          ] ?? 0,
         )
       }
       return {
@@ -300,6 +323,17 @@ function extractAnswerText(question: FormQuestion): string {
   return ""
 }
 
+// 질문의 파일 링크 추출
+function extractAnswerLinks(
+  question: FormQuestion,
+): Array<{ label: string; url: string }> {
+  const { answer } = question
+  if (!answer) return []
+  return answer.files
+    .filter((f) => f.url)
+    .map((f) => ({ label: f.originalFileName, url: f.url }))
+}
+
 // 서버 formResponse -> 프론트 ApplicantFormData
 export function toApplicantFormData(
   formResponse: FormResponseData,
@@ -311,12 +345,16 @@ export function toApplicantFormData(
   const toFormFields = (questions: FormQuestion[]): FormField[] =>
     questions
       .sort((a, b) => Number(a.orderNo) - Number(b.orderNo))
-      .map((q, i) => ({
-        label: `Q${i + 1}`,
-        question: q.title,
-        answer: extractAnswerText(q),
-        required: q.isRequired,
-      }))
+      .map((q, i) => {
+        const links = extractAnswerLinks(q)
+        return {
+          label: `Q${i + 1}`,
+          question: q.title,
+          answer: extractAnswerText(q),
+          ...(links.length > 0 && { links }),
+          required: q.isRequired,
+        }
+      })
 
   return {
     applicantId,
