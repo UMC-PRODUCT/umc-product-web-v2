@@ -161,15 +161,17 @@ export function QuestionForm({
 
         {focused && (
           <div className="flex items-center gap-4">
-            <Checkbox
-              variant="primary"
-              checked={required}
-              onChange={onRequiredChange ?? (() => {})}
-              aria-label="필수 항목 여부"
-            />
-            <span className="text-body-1-medium text-teal-gray-600">
-              필수 항목
-            </span>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                variant="primary"
+                checked={required}
+                onChange={onRequiredChange ?? (() => {})}
+                aria-label="필수 항목 여부"
+              />
+              <span className="text-body-1-medium text-teal-gray-600">
+                필수 항목
+              </span>
+            </div>
             {canDelete && (
               <button
                 type="button"
