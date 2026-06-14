@@ -368,10 +368,11 @@ export function AccountSettingsPage() {
           if (!open) setUnlinkTarget(null)
         }}
         onCancel={() => setUnlinkTarget(null)}
-        onConfirm={() =>
-          unlinkTarget !== null &&
+        onConfirm={() => {
+          if (unlinkTarget === null) return
           void handleUnlink(unlinkTarget.id, unlinkTarget.social)
-        }
+          setUnlinkTarget(null)
+        }}
       />
 
       <CtaModal
