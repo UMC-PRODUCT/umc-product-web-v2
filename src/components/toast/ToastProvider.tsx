@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { FADE_OUT_DURATION, Toast } from "./Toast"
-import { useToastStore } from "./useToastStore"
+import { type ToastItem, useToastStore } from "./useToastStore"
 
 const MAX_VISIBLE = 3
 const STACK_OFFSET = 8
 const STACK_SCALE = 0.04
+
+function getToastAnimation(color: ToastItem["color"], isFront: boolean) {
+  if (!isFront) return undefined
+  return color === "red"
+    ? "toast-shake 0.4s ease-in-out"
+    : "toast-resolve 0.24s ease-out"
+}
 
 export function ToastProvider() {
   const { toasts, removeToast } = useToastStore()
@@ -127,7 +134,7 @@ export function ToastProvider() {
               className="origin-bottom transition-all duration-300"
               style={{
                 transform: `translateY(${translateY}px) scale(${scale})`,
-                animation: isFront ? "toast-shake 0.4s ease-in-out" : undefined,
+                animation: getToastAnimation(toast.color, isFront),
               }}
             >
               <Toast
