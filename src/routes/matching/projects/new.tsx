@@ -68,6 +68,31 @@ export const Route = createFileRoute("/matching/projects/new")({
     }
 
     if (search.projectId !== undefined) {
+      let hasEditPermission = false
+      try {
+        const permission = await context.queryClient.ensureQueryData({
+          queryKey: [
+            "authorization",
+            "resource-permission",
+            "PROJECT",
+            String(search.projectId),
+            "EDIT",
+          ],
+          queryFn: () =>
+            getResourcePermission({
+              resourceType: "PROJECT",
+              resourceId: search.projectId,
+              permissionType: "EDIT",
+            }),
+          staleTime: 0,
+        })
+        hasEditPermission = hasGrantedPermission(permission, "EDIT")
+      } catch {
+        throw redirect({ to: "/matching/projects" })
+      }
+      if (!hasEditPermission) {
+        throw redirect({ to: "/matching/projects" })
+      }
       return
     }
 
@@ -109,7 +134,10 @@ export const Route = createFileRoute("/matching/projects/new")({
             queryKey: projectKeys.managedCheck(gisuId),
             queryFn: () => getManagedProjects(gisuId),
           })
-          if (managed.length > 0) {
+          const blockingProjects = managed.filter(
+            (project) => project.status !== "PENDING_REVIEW",
+          )
+          if (blockingProjects.length > 0) {
             throw redirect({
               to: "/matching/projects/management",
               search: { notice: "duplicate" },
@@ -161,12 +189,11 @@ function ProjectRegisterPage() {
       getMatchingRounds(myChapterId ? Number(myChapterId) : undefined),
     enabled: isEditMode && myChapterId !== undefined,
   })
-  const isApplicationReadOnly = useMemo(
-    () =>
-      isEditMode &&
-      isWithinMatchingPeriod(matchingRoundsQuery.data, new Date()),
-    [isEditMode, matchingRoundsQuery.data],
-  )
+  const isApplicationReadOnly = useMemo(() => {
+    if (!isEditMode) return false
+    if (!matchingRoundsQuery.isSuccess) return true
+    return isWithinMatchingPeriod(matchingRoundsQuery.data, new Date())
+  }, [isEditMode, matchingRoundsQuery.isSuccess, matchingRoundsQuery.data])
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
   const pmInfo = useProjectRegisterStore((s) => s.pmInfo)
