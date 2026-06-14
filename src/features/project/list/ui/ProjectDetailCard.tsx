@@ -379,6 +379,9 @@ export function ProjectDetailCard({
     )
   }, [myApplications, activeMatchingRound, projectId])
 
+  const isApplicationStatusResolving =
+    isChallengerView && (myApplications == null || activeMatchingRound == null)
+
   const isPartIneligible =
     isChallengerView &&
     detail != null &&
@@ -562,6 +565,7 @@ export function ProjectDetailCard({
                           isApplicationWritePermissionLoading,
                         canWriteApplication: canWriteProjectApplication,
                         hasActiveRound: activeMatchingRound != null,
+                        isApplicationStatusResolving,
                       })}
                       onClick={() => {
                         if (viewOnly && userIsPm) {
