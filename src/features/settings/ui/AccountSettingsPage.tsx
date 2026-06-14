@@ -21,7 +21,9 @@ import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
 import { InputBox } from "@/shared/ui/input/InputBox"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
+import { ChangeEmailForm } from "./ChangeEmailForm"
 import { ChangePasswordForm } from "./ChangePasswordForm"
+import { ChangeUsernameForm } from "./ChangeUsernameForm"
 import { SocialButton } from "./SocialButton"
 
 import type { OAuthProvider } from "@/features/auth/model/types"
@@ -38,10 +40,15 @@ export function AccountSettingsPage() {
   const { data: me } = useMe()
   const { data: oauths = [] } = useMemberOAuthList()
   const role = me?.roles?.[0] ? toRoleTag(me.roles[0].roleType) : "challenger"
+  const [showEmailChange, setShowEmailChange] = useState(false)
+  const [showUsernameChange, setShowUsernameChange] = useState(false)
   const [showPasswordChange, setShowPasswordChange] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
-  const [unlinkTarget, setUnlinkTarget] = useState<number | null>(null)
+  const [unlinkTarget, setUnlinkTarget] = useState<{
+    id: number
+    social: Social
+  } | null>(null)
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
   const queryClient = useQueryClient()
@@ -136,7 +143,7 @@ export function AccountSettingsPage() {
         : social === "google"
           ? handleGoogleLink
           : handleAppleLink
-    const onUnlink = () => setUnlinkTarget(memberOAuthId!)
+    const onUnlink = () => setUnlinkTarget({ id: memberOAuthId!, social })
     return { linked, onClick: linked ? onUnlink : onLink }
   }
 
@@ -148,14 +155,14 @@ export function AccountSettingsPage() {
 
   return (
     <div className="flex w-full justify-center pt-14 pb-33.75">
-      <div className="flex w-full max-w-250 flex-col items-start gap-11">
+      <div className="flex w-full max-w-lg flex-col items-start gap-11">
         <h1 className="text-heading-5-semibold text-teal-gray-900 self-stretch">
           계정 설정
         </h1>
 
-        <div className="flex w-full flex-col items-start">
+        <div className="flex w-full flex-col items-center">
           {/* 프로필 헤더 */}
-          <div className="flex items-center gap-4.5 px-3.5 py-0">
+          <div className="flex w-full max-w-lg items-center gap-4.5 px-3.5 py-0">
             <div className="relative flex h-25 w-25 shrink-0 items-center justify-center">
               <div className="bg-teal-gray-100 flex h-25 w-25 items-center justify-center overflow-hidden rounded-full">
                 {me?.profileImageLink ? (
@@ -200,22 +207,23 @@ export function AccountSettingsPage() {
           </div>
 
           {/* 설정 카드 */}
-          <div className="border-teal-gray-100 relative mt-8 flex w-full items-start gap-2.5 rounded-xl border bg-white py-9 pl-11">
-            {showPasswordChange ? (
-              <>
-                <ChangePasswordForm
-                  onSuccess={() => setShowPasswordChange(false)}
-                />
-                <Button
-                  variant="weak"
-                  color="neutral"
-                  size="s"
-                  className="absolute right-11 bottom-10 h-11"
-                  onClick={() => setShowPasswordChange(false)}
-                >
-                  이전
-                </Button>
-              </>
+          <div className="border-teal-gray-100 relative mt-8 flex w-full max-w-lg items-start gap-2.5 rounded-xl border bg-white px-11 pt-8 pb-10">
+            {showEmailChange ? (
+              <ChangeEmailForm
+                onSuccess={() => setShowEmailChange(false)}
+                onBack={() => setShowEmailChange(false)}
+              />
+            ) : !isSocialOnly && showUsernameChange ? (
+              <ChangeUsernameForm
+                currentEmail={me?.email ?? ""}
+                onSuccess={() => setShowUsernameChange(false)}
+                onBack={() => setShowUsernameChange(false)}
+              />
+            ) : !isSocialOnly && showPasswordChange ? (
+              <ChangePasswordForm
+                onSuccess={() => setShowPasswordChange(false)}
+                onBack={() => setShowPasswordChange(false)}
+              />
             ) : (
               <div className="flex w-full max-w-100 flex-col items-start gap-20">
                 <div className="flex w-full flex-col items-start gap-14">
@@ -240,45 +248,72 @@ export function AccountSettingsPage() {
                     </div>
                   </div>
 
-                  {/* 아이디 */}
-                  <div className="flex w-full flex-col items-start gap-4">
-                    <span className="text-heading-7-semibold text-teal-gray-900">
-                      아이디
-                    </span>
-                    <div className="flex h-11 w-full items-start justify-between gap-1.5">
-                      <InputBox
-                        state="disabled"
-                        value={me?.email ?? ""}
-                        onChange={() => {}}
-                        inputClassName={emailInputClass}
-                      />
-                      <Button
-                        variant="weak"
-                        color="neutral"
-                        size="s"
-                        className="h-11"
-                      >
-                        변경하기
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* 비밀번호: 소셜 전용 로그인 유저는 표시하지 않음 */}
-                  {!isSocialOnly && (
+                  {/* 소셜 로그인: 이메일 변경란 */}
+                  {isSocialOnly && (
                     <div className="flex w-full flex-col items-start gap-4">
                       <span className="text-heading-7-semibold text-teal-gray-900">
-                        비밀번호
+                        이메일
                       </span>
-                      <Button
-                        variant="weak"
-                        color="neutral"
-                        size="s"
-                        onClick={() => setShowPasswordChange(true)}
-                        className="w-full"
-                      >
-                        비밀번호 변경
-                      </Button>
+                      <div className="flex h-11 w-full items-start justify-between gap-1.5">
+                        <InputBox
+                          state="disabled"
+                          value={me?.email ?? ""}
+                          onChange={() => {}}
+                          inputClassName={emailInputClass}
+                        />
+                        <Button
+                          variant="weak"
+                          color="neutral"
+                          size="s"
+                          onClick={() => setShowEmailChange(true)}
+                          className="h-11"
+                        >
+                          변경하기
+                        </Button>
+                      </div>
                     </div>
+                  )}
+
+                  {/* 로컬 로그인: 아이디 변경란 + 비밀번호 */}
+                  {!isSocialOnly && (
+                    <>
+                      <div className="flex w-full flex-col items-start gap-4">
+                        <span className="text-heading-7-semibold text-teal-gray-900">
+                          아이디
+                        </span>
+                        <div className="flex h-11 w-full items-start justify-between gap-1.5">
+                          <InputBox
+                            state="disabled"
+                            value={me?.email ?? ""}
+                            onChange={() => {}}
+                            inputClassName={emailInputClass}
+                          />
+                          <Button
+                            variant="weak"
+                            color="neutral"
+                            size="s"
+                            onClick={() => setShowUsernameChange(true)}
+                            className="h-11"
+                          >
+                            변경하기
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex w-full flex-col items-start gap-4">
+                        <span className="text-heading-7-semibold text-teal-gray-900">
+                          비밀번호
+                        </span>
+                        <Button
+                          variant="weak"
+                          color="neutral"
+                          size="s"
+                          onClick={() => setShowPasswordChange(true)}
+                          className="w-full"
+                        >
+                          비밀번호 변경
+                        </Button>
+                      </div>
+                    </>
                   )}
                 </div>
 
@@ -293,6 +328,25 @@ export function AccountSettingsPage() {
               </div>
             )}
           </div>
+
+          {/* 이전 버튼 추가 */}
+          {(showEmailChange ||
+            (!isSocialOnly && showUsernameChange) ||
+            (!isSocialOnly && showPasswordChange)) && (
+            <Button
+              variant="weak"
+              color="neutral"
+              size="s"
+              className="mt-4 h-11 self-end"
+              onClick={() => {
+                if (showEmailChange) setShowEmailChange(false)
+                else if (showUsernameChange) setShowUsernameChange(false)
+                else if (showPasswordChange) setShowPasswordChange(false)
+              }}
+            >
+              이전
+            </Button>
+          )}
         </div>
       </div>
 
@@ -300,8 +354,14 @@ export function AccountSettingsPage() {
       <CtaModal
         open={unlinkTarget !== null}
         variant="error"
-        title="연동을 해제하시겠습니까?"
-        content="해제하면 해당 소셜 계정으로 로그인할 수 없게 됩니다."
+        title={`${unlinkTarget?.social === "kakao" ? "카카오" : unlinkTarget?.social === "apple" ? "애플" : "구글"} 계정 연동을 해제하시겠습니까?`}
+        content={
+          <>
+            계정 연동을 해제하더라도 기존 데이터는 안전하게 유지됩니다.
+            <br />
+            필요할 때 언제든 다시 연동하여 이용하실 수 있습니다.
+          </>
+        }
         cancelText="돌아가기"
         confirmText="연동 해제"
         onOpenChange={(open) => {
@@ -309,7 +369,8 @@ export function AccountSettingsPage() {
         }}
         onCancel={() => setUnlinkTarget(null)}
         onConfirm={() =>
-          unlinkTarget !== null && void handleUnlink(unlinkTarget)
+          unlinkTarget !== null &&
+          void handleUnlink(unlinkTarget.id, unlinkTarget.social)
         }
       />
 

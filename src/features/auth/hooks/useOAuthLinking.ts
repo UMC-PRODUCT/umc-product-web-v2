@@ -121,9 +121,32 @@ export function useOAuthLinking() {
     startKakaoSignIn()
   }
 
-  const handleUnlink = async (memberOAuthId: number) => {
+  const handleUnlink = async (
+    memberOAuthId: number,
+    social: "google" | "kakao" | "apple",
+  ) => {
+    let googleAccessToken: string | undefined
+
+    if (social === "google") {
+      try {
+        const result = await signInWithGoogle()
+        googleAccessToken = result.accessToken
+      } catch (err) {
+        if (!isGooglePopupCancelled(err)) {
+          addToast({
+            message: "Google 인증에 실패했습니다. 다시 시도해주세요.",
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+        }
+        return
+      }
+    }
+
     try {
-      await removeMemberOAuth(memberOAuthId)
+      await removeMemberOAuth(memberOAuthId, { googleAccessToken })
       await queryClient.invalidateQueries({ queryKey: MEMBER_OAUTH_QUERY_KEY })
       addToast({
         message: "소셜 연동이 해제되었습니다.",
@@ -132,9 +155,12 @@ export function useOAuthLinking() {
         type: "default",
         duration: 3000,
       })
-    } catch {
+    } catch (err) {
       addToast({
-        message: "연동 해제에 실패했습니다. 다시 시도해주세요.",
+        message:
+          err instanceof Error
+            ? err.message
+            : "연동 해제에 실패했습니다. 다시 시도해주세요.",
         color: "red",
         variant: "deep",
         type: "default",

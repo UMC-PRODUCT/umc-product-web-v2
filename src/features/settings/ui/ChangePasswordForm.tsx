@@ -10,26 +10,38 @@ function isValidPassword(pw: string): boolean {
   if (pw.length < 8) return false
   const hasLetter = /[a-zA-Z]/.test(pw)
   const hasNumber = /[0-9]/.test(pw)
-  const hasSpecial = /[^a-zA-Z0-9]/.test(pw)
+  const hasSpecial = /[!#$&*@?]/.test(pw)
   return [hasLetter, hasNumber, hasSpecial].filter(Boolean).length >= 2
 }
 
 interface ChangePasswordFormProps {
   onSuccess: () => void
+  onBack: () => void
 }
 
-export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
+export function ChangePasswordForm({
+  onSuccess,
+  onBack: _,
+}: ChangePasswordFormProps) {
   const [current, setCurrent] = useState("")
   const [next, setNext] = useState("")
   const [confirm, setConfirm] = useState("")
   const addToast = useToastStore((s) => s.addToast)
 
-  const isNextValid = isValidPassword(next)
-  const isConfirmMatch = confirm.length > 0 && next === confirm
+  const isSameAsCurrent = next.length > 0 && next === current
+  const hasInvalidSpecial = /[^a-zA-Z0-9!#$&*@?]/.test(next)
+  const isNextValid =
+    isValidPassword(next) && !isSameAsCurrent && !hasInvalidSpecial
+  const isConfirmMatch = next === confirm
 
+  const [showConfirmError, setShowConfirmError] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async () => {
+    if (!isConfirmMatch) {
+      setShowConfirmError(true)
+      return
+    }
     setIsSubmitting(true)
     try {
       await changePassword({ currentPassword: current, newPassword: next })
@@ -43,7 +55,7 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
       onSuccess()
     } catch {
       addToast({
-        message: "비밀번호 변경에 실패했습니다. 다시 시도해주세요.",
+        message: "잠시 후 다시 시도해 주세요.",
         color: "red",
         variant: "deep",
         type: "default",
@@ -101,22 +113,39 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
             />
             {/* TODO: API 연결 후 서버 응답 메시지로 대체 */}
             {next.length > 0 && (
-              <div className="flex items-center gap-1">
-                {isNextValid ? (
-                  <>
+              <div className="flex flex-col gap-1">
+                {isSameAsCurrent ? (
+                  <div className="flex items-center gap-1">
+                    <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                    <p className="text-body-3-medium text-error-500">
+                      새 비밀번호는 현재 비밀번호와 다르게 설정해 주세요
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1">
                     <CheckIcon
                       width={16}
                       height={16}
-                      className="text-success-500 shrink-0"
+                      className={
+                        isNextValid
+                          ? "text-success-500 shrink-0"
+                          : "text-error-500 shrink-0"
+                      }
                     />
-                    <span className="text-body-3-medium text-success-500">
+                    <p
+                      className={`text-body-3-medium ${isNextValid ? "text-success-500" : "text-error-500"}`}
+                    >
                       영문, 숫자, 특수문자 중 2종류 이상 포함한 8자 이상
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-body-3-medium text-error-500">
-                    영문, 숫자, 특수문자 중 2종류 이상 포함한 8자 이상
-                  </span>
+                    </p>
+                  </div>
+                )}
+                {!isSameAsCurrent && hasInvalidSpecial && (
+                  <div className="flex items-center gap-1">
+                    <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                    <p className="text-body-3-medium text-error-500">
+                      사용 가능한 특수문자 !#$&*@?
+                    </p>
+                  </div>
                 )}
               </div>
             )}
@@ -132,21 +161,21 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
             </div>
             <InputBox
               type="password"
-              state={
-                confirm.length > 0
-                  ? isConfirmMatch
-                    ? "success"
-                    : "error"
-                  : "default"
-              }
+              state={showConfirmError && !isConfirmMatch ? "error" : "default"}
               value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
+              onChange={(e) => {
+                setConfirm(e.target.value)
+                setShowConfirmError(false)
+              }}
               className="w-full"
             />
-            {confirm.length > 0 && !isConfirmMatch && (
-              <span className="text-body-3-medium text-error-500">
-                비밀번호가 일치하지 않습니다
-              </span>
+            {showConfirmError && !isConfirmMatch && (
+              <div className="flex items-center gap-1">
+                <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                <p className="text-body-3-medium text-error-500">
+                  비밀번호가 일치하지 않습니다
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -157,7 +186,7 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
         variant="fill"
         color="primary"
         size="s"
-        disabled={!current || !isNextValid || !isConfirmMatch || isSubmitting}
+        disabled={!current || !isNextValid || !confirm || isSubmitting}
         isLoading={isSubmitting}
         onClick={() => void handleSubmit()}
         className="h-11 w-full bg-teal-300 disabled:bg-teal-200"

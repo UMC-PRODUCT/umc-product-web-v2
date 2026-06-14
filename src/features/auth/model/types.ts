@@ -32,7 +32,10 @@ export interface AppleLoginRequest {
   clientType: ClientType
 }
 
-export type EmailVerificationPurpose = "REGISTER" | "PASSWORD_RESET"
+export type EmailVerificationPurpose =
+  | "REGISTER"
+  | "PASSWORD_RESET"
+  | "CHANGE_EMAIL"
 
 export interface SendEmailVerificationRequest {
   email: string

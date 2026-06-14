@@ -146,6 +146,14 @@ export async function updateMemberInfo(body: {
   return data.result
 }
 
+// TODO: API CI 반영 후 확인 필요
+export async function changeEmail(body: {
+  newEmail: string
+  emailVerificationToken: string
+}): Promise<void> {
+  await api.patch("/v1/member/email", body)
+}
+
 export interface DeleteMemberRequest {
   googleAccessToken?: string
   kakaoAccessToken?: string
