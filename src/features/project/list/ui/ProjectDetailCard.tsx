@@ -381,7 +381,7 @@ export function ProjectDetailCard({
 
   const isApplicationStatusResolving =
     isChallengerView &&
-    (myApplications == null || activeMatchingRound == null) &&
+    (myApplications === undefined || activeMatchingRound === undefined) &&
     !isMyApplicationsError
 
   const isPartIneligible =
