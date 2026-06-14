@@ -611,7 +611,12 @@ function SignUpPage() {
         confirmText="로그인하기"
         variant="success"
         overlayTone="light"
-        onOpenChange={setIsSuccessModalOpen}
+        onOpenChange={(open) => {
+          setIsSuccessModalOpen(open)
+          if (!open) {
+            navigate({ to: "/login" })
+          }
+        }}
         onConfirm={() => {
           setIsSuccessModalOpen(false)
           navigate({ to: "/login" })
