@@ -75,7 +75,7 @@ export const Route = createFileRoute("/matching/projects/new")({
             "authorization",
             "resource-permission",
             "PROJECT",
-            String(search.projectId),
+            search.projectId,
             "EDIT",
           ],
           queryFn: () =>
