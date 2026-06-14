@@ -178,7 +178,7 @@ export function ApplicationStatsSection({
                       </span>
                       <div className="text-label-4-medium text-teal-gray-500 flex items-center justify-end gap-0.5">
                         <span>/</span>
-                        <span className="w-8">{r.total}명</span>
+                        <span className="shrink-0">{r.total}명</span>
                       </div>
                     </div>
                   </div>
@@ -271,7 +271,7 @@ export function ApplicationStatsSection({
                 </span>
                 <div className="flex items-center gap-1 text-[12px] leading-[1.4]">
                   <span className="text-label-3-semibold text-teal-500">
-                    {String(u.applied).padStart(2, "0")}명
+                    {u.applied}명
                   </span>
                   <span className="text-label-4-medium text-teal-gray-500">
                     / {u.total}명
