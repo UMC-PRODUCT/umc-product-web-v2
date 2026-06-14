@@ -4,6 +4,8 @@ import {
   canAccessProjectSettings,
   canManageMatchingRounds,
   canManageProjects,
+  isAnyOperator,
+  isCurrentTermPm,
 } from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { useViewMe } from "@/shared/view-mode/useViewMe"
@@ -15,6 +17,7 @@ export function useVisibleSidebarSections() {
   const canAccessSettings = canAccessProjectSettings(viewMe)
   const canManage = canManageProjects(viewMe)
   const canManageRounds = canManageMatchingRounds(viewMe)
+  const isRegularChallenger = !isAnyOperator(viewMe) && !isCurrentTermPm(viewMe)
 
   const visibleSections = useMemo(
     () =>
@@ -22,8 +25,9 @@ export function useVisibleSidebarSections() {
         canAccessProjectSettings: canAccessSettings,
         canManageProjects: canManage,
         canManageMatchingRounds: canManageRounds,
+        isRegularChallenger,
       }),
-    [canAccessSettings, canManage, canManageRounds],
+    [canAccessSettings, canManage, canManageRounds, isRegularChallenger],
   )
 
   return { visibleSections, isLoading }
