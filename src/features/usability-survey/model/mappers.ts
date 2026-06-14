@@ -104,6 +104,7 @@ export function toAnswerItems(
 
   slots.forEach((slot, index) => {
     const question = questions[index]
+    if (!question) return
     const questionId = Number(question.questionId)
     const options = sortedOptions(question)
     const raw = answers[slot.id]
