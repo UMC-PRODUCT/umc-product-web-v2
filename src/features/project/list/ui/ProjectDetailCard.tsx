@@ -753,6 +753,11 @@ export function ProjectDetailCard({
                 matchingRoundId={Number(activeMatchingRound.id)}
                 sections={visibleSections}
                 canToggleSection={userIsOperator || userIsPm}
+                initialApplicationId={
+                  isDraftApplication && myApplicationForProject
+                    ? Number(myApplicationForProject.applicationId)
+                    : undefined
+                }
                 onBack={() => setIsApplyModalOpen(false)}
                 onDraftSaved={() => {
                   void queryClient.invalidateQueries({

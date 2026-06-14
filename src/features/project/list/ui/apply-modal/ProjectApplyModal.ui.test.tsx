@@ -171,6 +171,52 @@ describe("ProjectApplyModal draft hydration", () => {
       "false",
     )
   })
+
+  it("initialApplicationId가 있으면 createApplicationDraft 없이 바로 복원한다", async () => {
+    vi.mocked(createApplicationDraft).mockClear()
+    vi.mocked(getApplicationDetail).mockResolvedValue({
+      applicationId: "9",
+      status: "DRAFT",
+      formResponse: {
+        sections: [
+          {
+            sectionId: "common",
+            questions: [
+              {
+                questionId: "101",
+                type: "RADIO",
+                answer: {
+                  answerId: "1",
+                  answeredAsType: "RADIO",
+                  selectedOptions: [
+                    { questionOptionId: "1002", answeredAsContent: "두 번째" },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    } as never)
+
+    render(
+      <ProjectApplyModal
+        data={project}
+        projectId={1}
+        matchingRoundId={1}
+        sections={sections}
+        initialApplicationId={9}
+        onBack={vi.fn()}
+        onSubmitSuccess={vi.fn()}
+      />,
+    )
+
+    const secondOption = await screen.findByRole("radio", { name: "두 번째" })
+    await waitFor(() => {
+      expect(secondOption).toHaveAttribute("aria-checked", "true")
+    })
+    expect(createApplicationDraft).not.toHaveBeenCalled()
+  })
 })
 
 const textSections: Section[] = [

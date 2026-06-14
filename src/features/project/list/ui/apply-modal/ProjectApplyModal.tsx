@@ -171,6 +171,7 @@ interface ProjectApplyModalProps {
   onBack: () => void
   onDraftSaved?: () => void
   onSubmitSuccess: () => void
+  initialApplicationId?: number
 }
 
 export interface ProjectApplyModalHandle {
@@ -190,6 +191,7 @@ export const ProjectApplyModal = forwardRef<
     onBack,
     onDraftSaved,
     onSubmitSuccess,
+    initialApplicationId,
   },
   ref,
 ) {
@@ -229,9 +231,21 @@ export const ProjectApplyModal = forwardRef<
   useEffect(() => {
     if (draftInitializedRef.current) return
     draftInitializedRef.current = true
+    async function hydrateDraft(id: number) {
+      const detail = await getApplicationDetail(projectId, id).catch(() => null)
+      if (!detail) return
+      const values = buildFormValuesFromDetail(detail, sections)
+      reset(values)
+      savedSnapshotRef.current = JSON.stringify(values)
+    }
     async function initDraft() {
       if (isDevMatchingRound) return
       try {
+        if (initialApplicationId != null) {
+          setApplicationId(initialApplicationId)
+          await hydrateDraft(initialApplicationId)
+          return
+        }
         const draft = await createApplicationDraft(projectId, matchingRoundId)
         setApplicationId(Number(draft.applicationId))
       } catch (err) {
@@ -250,15 +264,7 @@ export const ProjectApplyModal = forwardRef<
             if (existing) {
               const existingId = Number(existing.applicationId)
               setApplicationId(existingId)
-              const detail = await getApplicationDetail(
-                projectId,
-                existingId,
-              ).catch(() => null)
-              if (detail) {
-                const values = buildFormValuesFromDetail(detail, sections)
-                reset(values)
-                savedSnapshotRef.current = JSON.stringify(values)
-              }
+              await hydrateDraft(existingId)
             }
           }
           return
