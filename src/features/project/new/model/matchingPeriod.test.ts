@@ -142,6 +142,14 @@ describe("getNextMatchingBoundary", () => {
     ).toBeNull()
   })
 
+  it("현재 시각과 같은 경계는 제외하고 다음 미래 경계를 반환한다", () => {
+    const boundary = getNextMatchingBoundary(
+      [makeRound("2026-06-13T12:00:00Z", "2026-06-14T00:00:00Z")],
+      now,
+    )
+    expect(boundary?.toISOString()).toBe("2026-06-14T00:00:00.000Z")
+  })
+
   it("빈 배열/undefined는 null", () => {
     expect(getNextMatchingBoundary([], now)).toBeNull()
     expect(getNextMatchingBoundary(undefined, now)).toBeNull()

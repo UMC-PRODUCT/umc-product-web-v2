@@ -27,7 +27,7 @@ export function getNextMatchingBoundary(
     for (const ts of [round.startsAt, round.endsAt]) {
       if (!ts) continue
       const ms = dayjs(ts).valueOf()
-      if (!Number.isFinite(ms) || ms < currentMs) continue
+      if (!Number.isFinite(ms) || ms <= currentMs) continue
       if (nextMs === null || ms < nextMs) nextMs = ms
     }
   }
