@@ -33,6 +33,7 @@ const VARIANT_LABELS = {
     pendingLabel: "지원 전",
     roundSuffix: "지원",
     top4Suffix: "지원",
+    projectSectionTitle: "프로젝트별 지원 현황",
   },
   matching: {
     sectionTitle: "01 매칭 통계",
@@ -40,6 +41,7 @@ const VARIANT_LABELS = {
     pendingLabel: "매칭 전",
     roundSuffix: "매칭",
     top4Suffix: "완료",
+    projectSectionTitle: "프로젝트별 매칭 현황",
   },
 } as const
 
@@ -281,11 +283,11 @@ export function ApplicationStatsSection({
         </div>
       </div>
 
-      {/* 프로젝트별 지원 현황 */}
+      {/* 프로젝트별 지원/매칭 현황 */}
       <div className="flex flex-col gap-4 px-8 pt-7">
         <div className="flex items-center justify-between">
           <h3 className="text-heading-6-semibold text-teal-700">
-            프로젝트별 지원 현황
+            {labels.projectSectionTitle}
           </h3>
           <div className="flex items-center gap-2">
             {ROUND_LABELS.map((label, i) => (
