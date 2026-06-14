@@ -32,33 +32,42 @@ import type {
   UniversityCount,
 } from "@/features/application/model/types"
 
-// 매칭 라운드 목록에서 현재 활성 차수 번호 계산
-// PM 결정 기간(endsAt ~ decisionDeadline)도 "활성"으로 판별
-function getCurrentRound(rounds: MatchingRoundResponse[]): {
+// 매칭 결과 공개 기준 차수 계산 (지원 현황과 생명주기 다름)
+// - s2 이전: 0 (아무것도 표시 안 함)
+// - s2 ~ s3 직전: 1 (1차 결과 공개)
+// - s3 ~ d3: 2 (2차 결과 공개)
+// - d3 이후: 3 (3차 결과 공개)
+function getMatchingVisibleRound(rounds: MatchingRoundResponse[]): {
+  visibleUpToRound: number
   currentRound: number | undefined
-  activeRound: number | undefined
 } {
+  if (rounds.length === 0)
+    return { visibleUpToRound: 0, currentRound: undefined }
+
   const now = Date.now()
-  const active = rounds.find(
-    (r) =>
-      new Date(r.startsAt).getTime() <= now &&
-      now <= new Date(r.decisionDeadline).getTime(),
+  const sorted = [...rounds].sort(
+    (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
   )
-  if (active) {
-    const round = toRoundNumber(active.phase)
-    return { currentRound: round, activeRound: round }
+
+  // 마지막 차수 decisionDeadline 이후 → 전 차수 공개
+  const last = sorted[sorted.length - 1]!
+  if (now > new Date(last.decisionDeadline).getTime()) {
+    const round = toRoundNumber(last.phase)
+    return { visibleUpToRound: round, currentRound: round }
   }
-  // 완료된 차수(decisionDeadline 지남) 중 가장 최근, 없으면 1차 기본값
-  const completed = [...rounds]
-    .filter((r) => new Date(r.decisionDeadline).getTime() < now)
-    .sort(
-      (a, b) =>
-        new Date(b.decisionDeadline).getTime() -
-        new Date(a.decisionDeadline).getTime(),
-    )
-  const fallback =
-    completed.length > 0 ? toRoundNumber(completed[0]!.phase) : undefined
-  return { currentRound: fallback, activeRound: undefined }
+
+  // 다음 차수 startsAt을 지날 때마다 이전 차수 결과 공개
+  let visible = 0
+  for (let i = 1; i < sorted.length; i++) {
+    if (now >= new Date(sorted[i]!.startsAt).getTime()) {
+      visible = i
+    }
+  }
+
+  return {
+    visibleUpToRound: visible,
+    currentRound: visible > 0 ? visible : undefined,
+  }
 }
 
 export function useMatchingStatusData(chapterName?: string) {
@@ -86,8 +95,8 @@ export function useMatchingStatusData(chapterName?: string) {
     queryKey: applicationKeys.matchingRounds(chapterId),
     queryFn: () => getMatchingRounds(chapterId),
   })
-  const { currentRound, activeRound } = useMemo(
-    () => getCurrentRound(roundsQuery.data ?? []),
+  const { visibleUpToRound, currentRound } = useMemo(
+    () => getMatchingVisibleRound(roundsQuery.data ?? []),
     [roundsQuery.data],
   )
 
@@ -222,19 +231,20 @@ export function useMatchingStatusData(chapterName?: string) {
 
   // 통계: summary 기반 (universities는 schoolMatchingStatistics + schools API로 계산)
   // 서버가 schoolMatchingStatistics를 챕터 필터링 없이 내려주므로 프론트에서 필터링
+  const emptyStats: ApplicationStats = {
+    totalMembers: 0,
+    completionRate: 0,
+    completedCount: 0,
+    pendingCount: 0,
+    rounds: [],
+    topProjects: [],
+    universities: [],
+    projectRounds: [],
+  }
+
   const stats: ApplicationStats = useMemo(() => {
-    if (!chapterStatsQuery.data) {
-      return {
-        totalMembers: 0,
-        completionRate: 0,
-        completedCount: 0,
-        pendingCount: 0,
-        rounds: [],
-        topProjects: [],
-        universities: [],
-        projectRounds: [],
-      }
-    }
+    // s2 이전: 아무 정보도 표시하지 않음
+    if (!chapterStatsQuery.data || visibleUpToRound === 0) return emptyStats
 
     // 해당 챕터 소속 학교 + 프로젝트만 필터링 (로딩 중엔 빈 Set으로 필터링해 flicker 방지)
     const filteredSummary = chapterName
@@ -251,14 +261,44 @@ export function useMatchingStatusData(chapterName?: string) {
         }
       : chapterStatsQuery.data.summary
 
-    // activeRound가 있으면 해당 차수는 진행 중 → 이전 차수까지만 표시
-    const completedRound =
-      activeRound !== undefined ? activeRound - 1 : undefined
+    // visibleUpToRound 차수까지의 결과만 표시
+    // Top4는 d3 이후에도 1차 기준
+    const topProjectsRound = visibleUpToRound === 3 ? 1 : visibleUpToRound
     const partial = summaryToStats(
       filteredSummary,
       projectIdToName,
-      completedRound,
+      visibleUpToRound,
+      "matching",
     )
+
+    if (topProjectsRound !== visibleUpToRound) {
+      const phaseKey =
+        topProjectsRound === 1
+          ? "FIRST"
+          : topProjectsRound === 2
+            ? "SECOND"
+            : "THIRD"
+      partial.topProjects = filteredSummary.projectRoundStatistics
+        .map((p) => ({
+          projectId: p.projectId,
+          name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
+          count: Number(
+            p.matchingRounds.find((r) => r.matchingRound.phase === phaseKey)
+              ?.matchedMemberCount ?? 0,
+          ),
+        }))
+        .sort(
+          (a, b) =>
+            b.count - a.count || Number(a.projectId) - Number(b.projectId),
+        )
+        .slice(0, 4)
+    }
+
+    // 도넛 차트 총원을 필터링된 schoolMatchingStatistics 기준으로 보정
+    for (const r of partial.rounds) {
+      r.total = partial.totalMembers
+    }
+
     const universities: UniversityCount[] =
       filteredSummary.schoolMatchingStatistics
         .map((s) => ({
@@ -274,8 +314,7 @@ export function useMatchingStatusData(chapterName?: string) {
   }, [
     chapterStatsQuery.data,
     projectIdToName,
-    currentRound,
-    activeRound,
+    visibleUpToRound,
     schoolIdToName,
     chapterName,
     chapterSchoolIds,
@@ -285,7 +324,7 @@ export function useMatchingStatusData(chapterName?: string) {
     matchingParts,
     stats,
     currentRound,
-    activeRound,
+    activeRound: visibleUpToRound > 0 ? visibleUpToRound : undefined,
     gisuId,
     chapterId,
     assignedMemberIds,

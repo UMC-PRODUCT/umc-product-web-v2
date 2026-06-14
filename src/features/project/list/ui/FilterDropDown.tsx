@@ -82,6 +82,14 @@ export function FilterDropdown(props: FilterDropdownProps) {
 
   return (
     <div className="relative shrink-0">
+      {/* 배경 클릭 시 드롭다운 닫기 */}
+      {open && hasDropdown && (
+        <div
+          className="fixed inset-0 z-20"
+          onClick={onRequestClose}
+          aria-hidden
+        />
+      )}
       <button
         type="button"
         aria-expanded={open}

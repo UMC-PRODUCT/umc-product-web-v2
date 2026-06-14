@@ -47,7 +47,7 @@ interface ApplyButtonDisabledParams {
   isWritePermissionLoading: boolean
   canWriteApplication: boolean
   hasActiveRound: boolean
-  applicationsPending: boolean
+  isApplicationStatusResolving: boolean
 }
 
 export function isApplyButtonDisabled({
@@ -57,7 +57,7 @@ export function isApplyButtonDisabled({
   isWritePermissionLoading,
   canWriteApplication,
   hasActiveRound,
-  applicationsPending,
+  isApplicationStatusResolving,
 }: ApplyButtonDisabledParams): boolean {
   if (isPmReadonly) return false
   return (
@@ -65,7 +65,7 @@ export function isApplyButtonDisabled({
     isWritePermissionLoading ||
     !canWriteApplication ||
     !hasActiveRound ||
-    applicationsPending
+    isApplicationStatusResolving
   )
 }
 

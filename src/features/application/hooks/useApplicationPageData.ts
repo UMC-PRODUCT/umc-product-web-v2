@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
+import { useMe } from "@/features/auth/hooks/useMe"
+import { getViewerBranch } from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllSchools,
@@ -14,12 +16,14 @@ import {
   getManagedProjects,
   getMatchingRounds,
   getProjectApplications,
+  getProjectStatistics,
 } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
 import {
   shortenSchoolName,
   summaryToStats,
   toProjectApplication,
+  toRoundNumber,
 } from "../model/mappers"
 
 import type { MatchingRoundResponse } from "../model/apiTypes"
@@ -36,32 +40,26 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): {
   activeRound: number | undefined
 } {
   const now = Date.now()
+  const toRound = (phase: string) =>
+    phase === "FIRST" ? 1 : phase === "SECOND" ? 2 : 3
+
+  // 지원현황 기준: startsAt ~ endsAt (지원 마감 시점)
   const active = rounds.find(
     (r) =>
       new Date(r.startsAt).getTime() <= now &&
-      now <= new Date(r.decisionDeadline).getTime(),
+      now <= new Date(r.endsAt).getTime(),
   )
   if (active) {
-    const round =
-      active.phase === "FIRST" ? 1 : active.phase === "SECOND" ? 2 : 3
+    const round = toRound(active.phase)
     return { currentRound: round, activeRound: round }
   }
-  // 완료된 차수(decisionDeadline 지남) 중 가장 최근, 없으면 undefined
+
+  // endsAt이 지난 차수 중 가장 최근
   const completed = [...rounds]
-    .filter((r) => new Date(r.decisionDeadline).getTime() < now)
-    .sort(
-      (a, b) =>
-        new Date(b.decisionDeadline).getTime() -
-        new Date(a.decisionDeadline).getTime(),
-    )
+    .filter((r) => new Date(r.endsAt).getTime() < now)
+    .sort((a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime())
   const fallback =
-    completed.length > 0
-      ? completed[0]!.phase === "FIRST"
-        ? 1
-        : completed[0]!.phase === "SECOND"
-          ? 2
-          : 3
-      : undefined
+    completed.length > 0 ? toRound(completed[0]!.phase) : undefined
   return { currentRound: fallback, activeRound: undefined }
 }
 
@@ -79,6 +77,54 @@ export function useActiveGisuId() {
 export function useChallengerPageData() {
   const gisuQuery = useActiveGisuId()
   const gisuId = gisuQuery.data ?? 0
+
+  const meQuery = useMe()
+  const chapterName = useMemo(
+    () => getViewerBranch(meQuery.data),
+    [meQuery.data],
+  )
+
+  // 지부 소속 학교 -> 지부 총원 계산 (availableMemberCount 보정용)
+  const chaptersWithSchoolsQuery = useQuery({
+    queryKey: ["chapters-with-schools", gisuId],
+    queryFn: () => getChaptersWithSchools(String(gisuId)),
+    enabled: gisuId > 0,
+  })
+  const chapterSchoolIds = useMemo(() => {
+    if (!chapterName || !chaptersWithSchoolsQuery.data) return null
+    const chapter = chaptersWithSchoolsQuery.data.chapters.find(
+      (c) => c.chapterName === chapterName,
+    )
+    if (!chapter) return null
+    return new Set(chapter.schools.map((s) => String(s.schoolId)))
+  }, [chapterName, chaptersWithSchoolsQuery.data])
+
+  // chapterName -> chapterId 매핑
+  const chaptersQuery = useChapters()
+  const chapterId = useMemo(() => {
+    if (!chapterName) return undefined
+    const found = (chaptersQuery.data?.chapters ?? []).find(
+      (c) => c.name === chapterName,
+    )
+    return found ? Number(found.id) : undefined
+  }, [chapterName, chaptersQuery.data])
+
+  // 지부 통계 조회 (지부 총원 계산용)
+  const chapterStatsQuery = useQuery({
+    queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
+    queryFn: () => getChapterStatistics(chapterId!),
+    enabled: !!chapterId,
+  })
+
+  // 지부 총원 = 지부 소속 학교의 schoolMatchingStatistics.totalMemberCount 합산
+  const chapterTotal = useMemo(() => {
+    const stats = chapterStatsQuery.data?.summary.schoolMatchingStatistics
+    if (!stats) return undefined
+    const filtered = chapterSchoolIds
+      ? stats.filter((s) => chapterSchoolIds.has(String(s.schoolId)))
+      : stats
+    return filtered.reduce((s, x) => s + Number(x.totalMemberCount), 0)
+  }, [chapterStatsQuery.data, chapterSchoolIds])
 
   const projectsQuery = useQuery({
     queryKey: applicationKeys.managedProjects(gisuId),
@@ -121,6 +167,34 @@ export function useChallengerPageData() {
     enabled: projects.length > 0,
   })
 
+  // 프로젝트별 통계 조회 (차수별 지원률, 학교별 지원자 수)
+  const projectStatsQuery = useQuery({
+    queryKey: [
+      ...applicationKeys.all,
+      "project-statistics",
+      projects.map((p) => p.id),
+    ],
+    queryFn: async () => {
+      const results = await Promise.all(
+        projects.map((p) => getProjectStatistics(Number(p.id))),
+      )
+      return results
+    },
+    enabled: projects.length > 0,
+  })
+
+  // 차수별 지원 가용 인원 (지부 총원 기준)
+  const availablePerRound = useMemo(() => {
+    const map = new Map<number, number>()
+    if (chapterTotal === undefined) return map
+    const firstStat = (projectStatsQuery.data ?? [])[0]
+    if (!firstStat) return map
+    for (const r of firstStat.roundApplicationStatistics) {
+      map.set(toRoundNumber(r.matchingRound.phase), chapterTotal)
+    }
+    return map
+  }, [projectStatsQuery.data, chapterTotal])
+
   // 서버 데이터 -> 프론트 타입으로 변환
   const transformed: ProjectApplication[] = useMemo(
     () =>
@@ -148,11 +222,14 @@ export function useChallengerPageData() {
     projectInfo,
     currentRound,
     activeRound,
+    availablePerRound,
+    projectStats: projectStatsQuery.data ?? [],
     isLoading:
       gisuQuery.isLoading ||
       roundsQuery.isLoading ||
       projectsQuery.isLoading ||
-      applicantsQuery.isLoading,
+      applicantsQuery.isLoading ||
+      projectStatsQuery.isLoading,
     isError: gisuQuery.isError || projectsQuery.isError,
     error: gisuQuery.error ?? projectsQuery.error ?? applicantsQuery.error,
   }
@@ -247,6 +324,15 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
     return map
   }, [schoolsQuery.data])
 
+  // SCHOOL_PRESIDENT: 본인 학교 schoolId 역매핑
+  const mySchoolId = useMemo(() => {
+    if (!schoolName) return undefined
+    for (const [id, name] of schoolIdToName) {
+      if (name === schoolName) return id
+    }
+    return undefined
+  }, [schoolName, schoolIdToName])
+
   // 매칭 차수 조회 (현재 진행 차수 계산용)
   const roundsQuery = useQuery({
     queryKey: applicationKeys.matchingRounds(chapterId),
@@ -297,12 +383,16 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
     }
 
     // 해당 챕터 소속 학교 + 프로젝트만 필터링 (로딩 중엔 빈 Set으로 필터링해 flicker 방지)
+    // SCHOOL_PRESIDENT: mySchoolId가 있으면 본인 학교만 필터링
+    const schoolFilter = mySchoolId
+      ? (id: string) => id === mySchoolId
+      : (id: string) => (chapterSchoolIds ?? new Set()).has(id)
     const filteredSummary = chapterName
       ? {
           ...chapterStatsQuery.data.summary,
           schoolMatchingStatistics:
             chapterStatsQuery.data.summary.schoolMatchingStatistics.filter(
-              (s) => (chapterSchoolIds ?? new Set()).has(String(s.schoolId)),
+              (s) => schoolFilter(String(s.schoolId)),
             ),
           projectRoundStatistics:
             chapterStatsQuery.data.summary.projectRoundStatistics.filter((p) =>
@@ -311,7 +401,67 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
         }
       : chapterStatsQuery.data.summary
 
-    const partial = summaryToStats(filteredSummary, projectIdToName)
+    // Top4를 현재 차수 단일 기준으로 표시, 3차 이후에는 1차 기준
+    const topProjectsRound =
+      currentRound !== undefined && currentRound >= 3 ? 1 : currentRound
+    const partial = summaryToStats(
+      filteredSummary,
+      projectIdToName,
+      currentRound,
+    )
+
+    // 3차 이후 Top4를 1차 기준으로 재계산
+    if (topProjectsRound !== undefined && topProjectsRound !== currentRound) {
+      const phaseKey =
+        topProjectsRound === 1
+          ? "FIRST"
+          : topProjectsRound === 2
+            ? "SECOND"
+            : "THIRD"
+      partial.topProjects = filteredSummary.projectRoundStatistics
+        .map((p) => ({
+          projectId: p.projectId,
+          name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
+          count: Number(
+            p.matchingRounds.find((r) => r.matchingRound.phase === phaseKey)
+              ?.appliedMemberCount ?? 0,
+          ),
+        }))
+        .sort(
+          (a, b) =>
+            b.count - a.count || Number(a.projectId) - Number(b.projectId),
+        )
+        .slice(0, 4)
+    }
+
+    // 도넛: 지원 완료율로 보정 (completedCount = 현재 차수 appliedMemberCount, 분모 = totalMembers)
+    const currentPhase =
+      currentRound === 1
+        ? "FIRST"
+        : currentRound === 2
+          ? "SECOND"
+          : currentRound === 3
+            ? "THIRD"
+            : undefined
+    const appliedCount = currentPhase
+      ? Number(
+          filteredSummary.roundApplicationStatistics.find(
+            (r) => r.matchingRound.phase === currentPhase,
+          )?.appliedMemberCount ?? 0,
+        )
+      : 0
+    partial.completedCount = appliedCount
+    partial.pendingCount = Math.max(0, partial.totalMembers - appliedCount)
+    partial.completionRate =
+      partial.totalMembers > 0
+        ? Math.round((appliedCount / partial.totalMembers) * 100)
+        : 0
+
+    // 도넛 차트 총원을 필터링된 schoolMatchingStatistics 기준으로 보정
+    // roundApplicationStatistics.availableMemberCount는 전체 기준이므로 지부/학교 필터링 반영 안 됨
+    for (const r of partial.rounds) {
+      r.total = partial.totalMembers
+    }
 
     // 학교별 지원자 수 집계 (roundSchoolRankings 전 차수 합산, 챕터 소속 학교만)
     const schoolApplicantCounts = new Map<string, number>()
@@ -319,7 +469,7 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
       []) {
       for (const s of ranking.schools) {
         const id = String(s.schoolId)
-        if (chapterSchoolIds && !chapterSchoolIds.has(id)) continue
+        if (!schoolFilter(id)) continue
         schoolApplicantCounts.set(
           id,
           (schoolApplicantCounts.get(id) ?? 0) + Number(s.applicantCount),
@@ -345,6 +495,8 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
     schoolIdToName,
     chapterName,
     chapterSchoolIds,
+    mySchoolId,
+    currentRound,
   ])
 
   return {

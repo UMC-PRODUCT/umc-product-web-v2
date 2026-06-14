@@ -33,6 +33,7 @@ const VARIANT_LABELS = {
     pendingLabel: "지원 전",
     roundSuffix: "지원",
     top4Suffix: "지원",
+    projectSectionTitle: "프로젝트별 지원 현황",
   },
   matching: {
     sectionTitle: "01 매칭 통계",
@@ -40,6 +41,7 @@ const VARIANT_LABELS = {
     pendingLabel: "매칭 전",
     roundSuffix: "매칭",
     top4Suffix: "완료",
+    projectSectionTitle: "프로젝트별 매칭 현황",
   },
 } as const
 
@@ -190,7 +192,7 @@ export function ApplicationStatsSection({
         <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-100.5 shrink-0 flex-col rounded-xl border bg-white px-8 pt-7 pb-8">
           <h3 className="text-heading-6-semibold text-teal-700">
             {stats.rounds.length > 0 && currentRound
-              ? `${currentRound}차 매칭 ${labels.top4Suffix} Top 4 `
+              ? `${currentRound >= 3 ? 1 : currentRound}차 매칭 ${labels.top4Suffix} Top 4 `
               : `N차 매칭 ${labels.top4Suffix} Top 4 `}
           </h3>
           {stats.topProjects.some((p) => p.count > 0) ? (
@@ -226,7 +228,7 @@ export function ApplicationStatsSection({
               <div className="flex flex-1 items-center justify-center">
                 <p className="text-body-2-medium text-teal-gray-300">
                   {variant === "matching"
-                    ? "아직 매칭 완료된 챌린저가 없습니다"
+                    ? "현재 매칭 완료된 챌린저가 없습니다"
                     : "아직 지원자가 없습니다"}
                 </p>
               </div>
@@ -281,11 +283,11 @@ export function ApplicationStatsSection({
         </div>
       </div>
 
-      {/* 프로젝트별 지원 현황 */}
-      <div className="flex flex-col gap-4 px-8 pt-7">
+      {/* 프로젝트별 지원/매칭 현황 */}
+      <div className="shadow-drop-neutral-3 border-teal-gray-100 flex flex-col gap-4 rounded-xl border bg-white px-8 py-7">
         <div className="flex items-center justify-between">
           <h3 className="text-heading-6-semibold text-teal-700">
-            프로젝트별 지원 현황
+            {labels.projectSectionTitle}
           </h3>
           <div className="flex items-center gap-2">
             {ROUND_LABELS.map((label, i) => (

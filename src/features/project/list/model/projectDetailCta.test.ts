@@ -14,7 +14,7 @@ const applicable = {
   isWritePermissionLoading: false,
   canWriteApplication: true,
   hasActiveRound: true,
-  applicationsPending: false,
+  isApplicationStatusResolving: false,
 }
 
 describe("isApplyButtonDisabled", () => {
@@ -46,6 +46,25 @@ describe("isApplyButtonDisabled", () => {
     ).toBe(true)
   })
 
+  it("지원 이력 조회 중에는 비활성화한다(타 프로젝트 활성 지원서 판단 보류)", () => {
+    expect(
+      isApplyButtonDisabled({
+        ...applicable,
+        isApplicationStatusResolving: true,
+      }),
+    ).toBe(true)
+  })
+
+  it("PM 읽기 전용 컨텍스트에서는 지원 이력 조회 중이어도 비활성화하지 않는다", () => {
+    expect(
+      isApplyButtonDisabled({
+        ...applicable,
+        isPmReadonly: true,
+        isApplicationStatusResolving: true,
+      }),
+    ).toBe(false)
+  })
+
   it("PM 읽기 전용 컨텍스트에서는 라운드가 없어도 비활성화하지 않는다", () => {
     expect(
       isApplyButtonDisabled({
@@ -64,22 +83,6 @@ describe("isApplyButtonDisabled", () => {
         ...applicable,
         isDetailLoading: true,
         hasApplicationForm: false,
-      }),
-    ).toBe(false)
-  })
-
-  it("내 지원 내역이 아직 로딩 중이면 비활성화한다", () => {
-    expect(
-      isApplyButtonDisabled({ ...applicable, applicationsPending: true }),
-    ).toBe(true)
-  })
-
-  it("PM 읽기 전용 컨텍스트에서는 지원 내역 로딩과 무관하게 비활성화하지 않는다", () => {
-    expect(
-      isApplyButtonDisabled({
-        ...applicable,
-        isPmReadonly: true,
-        applicationsPending: true,
       }),
     ).toBe(false)
   })
