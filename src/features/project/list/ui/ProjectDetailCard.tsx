@@ -26,6 +26,7 @@ import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
+import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 import {
@@ -415,21 +416,10 @@ export function ProjectDetailCard({
     <>
       <div className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-135 min-w-0 flex-col items-start overflow-x-hidden overflow-y-auto rounded-2xl bg-white">
         <div className="bg-teal-gray-200 flex aspect-[540/286] w-full shrink-0 items-center justify-center overflow-hidden">
-          {cover?.src ? (
-            <img
-              src={cover.src}
-              alt={cover.alt ?? `${data.title} 대표 이미지`}
-              className="h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <div className="text-body-2-regular text-teal-gray-400 text-center">
-              프로젝트 대표 이미지
-              <br />
-              540*286
-            </div>
-          )}
+          <ProjectThumbnail
+            src={cover?.src}
+            alt={cover?.alt ?? `${data.title} 대표 이미지`}
+          />
         </div>
 
         <div className="bp1:p-5 flex w-full flex-col items-start p-4">
