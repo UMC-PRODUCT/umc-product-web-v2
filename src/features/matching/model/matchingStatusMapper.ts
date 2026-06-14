@@ -149,24 +149,34 @@ function toMatchingProject(
     .filter((q) => q.part === "SPRINGBOOT" || q.part === "NODEJS")
     .reduce((sum, q) => sum + Number(q.quota), 0)
 
-  // firstRowCols: 프로젝트 첫 행은 4칸 (상태 텍스트 공간), 나머지 행은 5칸
-  function buildRoleRow(
-    role: string,
-    quota: number,
-    isFirstRole: boolean,
-  ): MatchingRoleRow {
+  // Design: blocked 없음, 슬롯 수 = max(quota, filled), 최대 4
+  function buildDesignRow(quota: number): MatchingRoleRow {
+    const filledBlocks = blocksByRole.get("Design") ?? []
+    const totalSlots = Math.min(Math.max(filledBlocks.length, quota), 4)
+    const emptyCount = Math.max(
+      0,
+      Math.min(quota, totalSlots) - filledBlocks.length,
+    )
+    const emptyBlocks: MatchingBlockData[] = Array.from(
+      { length: emptyCount },
+      () => ({ type: "none" }),
+    )
+    return {
+      role: "Design",
+      blocks: [...filledBlocks.slice(0, totalSlots), ...emptyBlocks],
+      colsPerRow: totalSlots,
+    }
+  }
+
+  // FE/BE: 5칸 단위 행, 빈 칸은 blocked
+  function buildRoleRow(role: string, quota: number): MatchingRoleRow {
     const filledBlocks = blocksByRole.get(role) ?? []
     const effectiveCount = Math.max(filledBlocks.length, quota)
     const colsPerRow = 5
-    const firstRowCols = isFirstRole ? 4 : colsPerRow
-
-    let totalSlots: number
-    if (effectiveCount <= firstRowCols) {
-      totalSlots = firstRowCols
-    } else {
-      const remaining = effectiveCount - firstRowCols
-      totalSlots = firstRowCols + Math.ceil(remaining / colsPerRow) * colsPerRow
-    }
+    const totalSlots = Math.max(
+      colsPerRow,
+      Math.ceil(effectiveCount / colsPerRow) * colsPerRow,
+    )
 
     const emptyCount = Math.max(0, quota - filledBlocks.length)
     const emptyBlocks: MatchingBlockData[] = Array.from(
@@ -182,14 +192,13 @@ function toMatchingProject(
       role,
       blocks: [...filledBlocks, ...emptyBlocks, ...blockedBlocks],
       colsPerRow,
-      firstRowCols,
     }
   }
 
   const roleRows = [
-    buildRoleRow("Design", designQuota, true),
-    buildRoleRow("Frontend", feQuota, false),
-    buildRoleRow("Backend", beQuota, false),
+    buildDesignRow(designQuota),
+    buildRoleRow("Frontend", feQuota),
+    buildRoleRow("Backend", beQuota),
   ]
 
   const hasNodejs = project.partQuotas.some(
