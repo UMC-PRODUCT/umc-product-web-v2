@@ -56,7 +56,7 @@ export function ChangeUsernameForm({
       onSuccess()
     } catch {
       addToast({
-        message: "아이디 변경에 실패했습니다. 다시 시도해주세요.",
+        message: "잠시 후 다시 시도해주세요.",
         color: "red",
         variant: "deep",
         type: "default",
