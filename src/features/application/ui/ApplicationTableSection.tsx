@@ -328,7 +328,7 @@ export function ApplicationTableSection({
                     ))}
                   </div>
                 ) : (
-                  <div className="border-teal-gray-150 flex h-17 items-center justify-center border-b-[3px]">
+                  <div className="border-teal-gray-150 flex h-17 items-center justify-center">
                     <p className="text-body-2-medium text-teal-gray-400">
                       아직 지원자가 없습니다
                     </p>
