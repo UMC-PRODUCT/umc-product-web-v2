@@ -208,10 +208,7 @@ export function MatchingResultRow({
 
   return (
     <div
-      className={cn(
-        "border-teal-gray-300 flex items-start gap-1.75 border-b py-3 pr-5.5 pl-1.75",
-        className,
-      )}
+      className={cn("flex items-start gap-1.75 py-3 pr-5.5 pl-1.75", className)}
     >
       {/* 프로젝트 이동 버튼 */}
       <div className="w-42.5 shrink-0">
