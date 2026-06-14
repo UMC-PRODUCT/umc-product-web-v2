@@ -83,7 +83,7 @@ export function ProjectManagementMoreMenu({
   const applicantsQuery = useQuery({
     queryKey: applicationKeys.applicants(numericProjectId),
     queryFn: () => getProjectApplications(numericProjectId),
-    enabled: applicationOpen && numericProjectId > 0,
+    enabled: (applicationOpen || popoverOpen) && numericProjectId > 0,
   })
 
   const projectApplication = useMemo((): ProjectApplication | null => {
