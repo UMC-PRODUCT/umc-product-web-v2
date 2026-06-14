@@ -160,6 +160,8 @@ function MatchingApplicationsPage() {
                 <ChallengerApplicationView
                   projects={[]}
                   availablePerRound={availablePerRound}
+                  projectStats={challenger.projectStats}
+                  schoolIdToName={challenger.schoolIdToName}
                   currentRound={challenger.currentRound}
                 />
               ) : (
@@ -175,6 +177,10 @@ function MatchingApplicationsPage() {
                     <ChallengerApplicationView
                       projects={[project]}
                       availablePerRound={availablePerRound}
+                      projectStats={challenger.projectStats.filter(
+                        (s) => s.projectId === String(project.id),
+                      )}
+                      schoolIdToName={challenger.schoolIdToName}
                       currentRound={challenger.currentRound}
                     />
                   </div>

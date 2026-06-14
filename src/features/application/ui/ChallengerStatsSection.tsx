@@ -14,11 +14,13 @@ const ROUND_COLORS = [
 
 interface ChallengerStatsSectionProps {
   stats: ChallengerStats
+  currentRound?: number
   className?: string
 }
 
 export function ChallengerStatsSection({
   stats,
+  currentRound,
   className,
 }: ChallengerStatsSectionProps) {
   return (
@@ -62,24 +64,27 @@ export function ChallengerStatsSection({
 
           {/* 우측 범례: 1차 17명 / 2차 2명 */}
           <div className="absolute top-20.5 left-53.25 flex w-27.5 flex-col gap-0.5">
-            {stats.rounds.slice(0, 2).map((r) => (
-              <div
-                key={r.round}
-                className="flex items-center justify-between px-0.5"
-              >
-                <span className="text-subtitle-3-semibold text-teal-gray-800 w-7">
-                  {r.round}차
-                </span>
-                <div className="flex items-center gap-px whitespace-nowrap">
-                  <span className="text-subtitle-3-semibold text-teal-500">
-                    {r.applied}
+            {[...stats.rounds]
+              .sort((a, b) => b.applied - a.applied)
+              .slice(0, 2)
+              .map((r) => (
+                <div
+                  key={r.round}
+                  className="flex items-center justify-between px-0.5"
+                >
+                  <span className="text-subtitle-3-semibold text-teal-gray-800 w-7">
+                    {r.round}차
                   </span>
-                  <span className="text-subtitle-3-semibold text-teal-500">
-                    명
-                  </span>
+                  <div className="flex items-center gap-px whitespace-nowrap">
+                    <span className="text-subtitle-3-semibold text-teal-500">
+                      {r.applied}
+                    </span>
+                    <span className="text-subtitle-3-semibold text-teal-500">
+                      명
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
 
           {/* 하단 차수별 breakdown */}
@@ -97,7 +102,7 @@ export function ChallengerStatsSection({
                     </span>
                     <div className="text-label-4-medium text-teal-gray-500 flex items-center justify-end gap-0.5">
                       <span>/</span>
-                      <span className="w-8">{r.total}명</span>
+                      <span className="shrink-0">{r.total}명</span>
                     </div>
                   </div>
                 </div>
@@ -110,7 +115,7 @@ export function ChallengerStatsSection({
         <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-121 shrink-0 flex-col gap-9.5 rounded-xl border bg-white px-8 pt-7 pb-8">
           <div className="flex items-center justify-between px-2.5">
             <h3 className="text-heading-6-semibold text-teal-700">
-              1차 매칭 지원
+              {currentRound ?? 1}차 매칭 지원
             </h3>
             <div className="flex items-center gap-2.5">
               <PersonGraphicIcon

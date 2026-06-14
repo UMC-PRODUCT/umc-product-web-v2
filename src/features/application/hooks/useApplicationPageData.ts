@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
-import { useMe } from "@/features/auth/hooks/useMe"
-import { getViewerBranch } from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllSchools,
@@ -78,69 +76,11 @@ export function useChallengerPageData() {
   const gisuQuery = useActiveGisuId()
   const gisuId = gisuQuery.data ?? 0
 
-  const meQuery = useMe()
-  const chapterName = useMemo(
-    () => getViewerBranch(meQuery.data),
-    [meQuery.data],
-  )
-
-  // 지부 소속 학교 -> 지부 총원 계산 (availableMemberCount 보정용)
-  const chaptersWithSchoolsQuery = useQuery({
-    queryKey: ["chapters-with-schools", gisuId],
-    queryFn: () => getChaptersWithSchools(String(gisuId)),
-    enabled: gisuId > 0,
-  })
-  const chapterSchoolIds = useMemo(() => {
-    if (!chapterName || !chaptersWithSchoolsQuery.data) return null
-    const chapter = chaptersWithSchoolsQuery.data.chapters.find(
-      (c) => c.chapterName === chapterName,
-    )
-    if (!chapter) return null
-    return new Set(chapter.schools.map((s) => String(s.schoolId)))
-  }, [chapterName, chaptersWithSchoolsQuery.data])
-
-  // chapterName -> chapterId 매핑
-  const chaptersQuery = useChapters()
-  const chapterId = useMemo(() => {
-    if (!chapterName) return undefined
-    const found = (chaptersQuery.data?.chapters ?? []).find(
-      (c) => c.name === chapterName,
-    )
-    return found ? Number(found.id) : undefined
-  }, [chapterName, chaptersQuery.data])
-
-  // 지부 통계 조회 (지부 총원 계산용)
-  const chapterStatsQuery = useQuery({
-    queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
-    queryFn: () => getChapterStatistics(chapterId!),
-    enabled: !!chapterId,
-  })
-
-  // 지부 총원 = 지부 소속 학교의 schoolMatchingStatistics.totalMemberCount 합산
-  const chapterTotal = useMemo(() => {
-    const stats = chapterStatsQuery.data?.summary.schoolMatchingStatistics
-    if (!stats) return undefined
-    const filtered = chapterSchoolIds
-      ? stats.filter((s) => chapterSchoolIds.has(String(s.schoolId)))
-      : stats
-    return filtered.reduce((s, x) => s + Number(x.totalMemberCount), 0)
-  }, [chapterStatsQuery.data, chapterSchoolIds])
-
   const projectsQuery = useQuery({
     queryKey: applicationKeys.managedProjects(gisuId),
     queryFn: () => getManagedProjects(gisuId),
     enabled: gisuId > 0,
   })
-
-  // 매칭 차수 조회 (PM은 챕터 선택 없으므로 전체 조회)
-  const roundsQuery = useQuery({
-    queryKey: applicationKeys.matchingRounds(undefined),
-    queryFn: () => getMatchingRounds(),
-  })
-  const { currentRound, activeRound } = useMemo(
-    () => getCurrentRound(roundsQuery.data ?? []),
-    [roundsQuery.data],
-  )
 
   // 프로젝트 목록이 로드되면 각 프로젝트의 지원자 목록도 함께 조회
   const projects = useMemo(
@@ -183,17 +123,44 @@ export function useChallengerPageData() {
     enabled: projects.length > 0,
   })
 
-  // 차수별 지원 가용 인원 (지부 총원 기준)
+  // 현재 차수: 서버 통계에 존재하는 가장 높은 차수
+  const currentRound = useMemo(() => {
+    const firstStat = (projectStatsQuery.data ?? [])[0]
+    if (!firstStat) return undefined
+    let max = 0
+    for (const r of firstStat.roundApplicationStatistics) {
+      const n = toRoundNumber(r.matchingRound.phase)
+      if (n > max) max = n
+    }
+    return max || undefined
+  }, [projectStatsQuery.data])
+
+  // 차수별 지원 가용 인원 (서버 roundApplicationStatistics 직접 사용)
   const availablePerRound = useMemo(() => {
     const map = new Map<number, number>()
-    if (chapterTotal === undefined) return map
     const firstStat = (projectStatsQuery.data ?? [])[0]
     if (!firstStat) return map
     for (const r of firstStat.roundApplicationStatistics) {
-      map.set(toRoundNumber(r.matchingRound.phase), chapterTotal)
+      map.set(
+        toRoundNumber(r.matchingRound.phase),
+        Number(r.availableMemberCount),
+      )
     }
     return map
-  }, [projectStatsQuery.data, chapterTotal])
+  }, [projectStatsQuery.data])
+
+  // schoolId -> schoolName 매핑 (학교별 지원 통계 표시용)
+  const schoolsQuery = useQuery({
+    queryKey: ["schools", "all"],
+    queryFn: getAllSchools,
+  })
+  const schoolIdToName = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const s of schoolsQuery.data?.schools ?? []) {
+      map.set(s.schoolId, s.schoolName)
+    }
+    return map
+  }, [schoolsQuery.data])
 
   // 서버 데이터 -> 프론트 타입으로 변환
   const transformed: ProjectApplication[] = useMemo(
@@ -221,12 +188,11 @@ export function useChallengerPageData() {
     projects: transformed,
     projectInfo,
     currentRound,
-    activeRound,
     availablePerRound,
     projectStats: projectStatsQuery.data ?? [],
+    schoolIdToName,
     isLoading:
       gisuQuery.isLoading ||
-      roundsQuery.isLoading ||
       projectsQuery.isLoading ||
       applicantsQuery.isLoading ||
       projectStatsQuery.isLoading,
