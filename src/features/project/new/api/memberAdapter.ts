@@ -20,7 +20,7 @@ export function challengerSearchItemToMemberItem(
 ): MemberItem | null {
   if (!item.memberId) return null
   return {
-    id: item.memberId,
+    id: String(item.memberId),
     nickname: item.nickname ?? "",
     name: item.name ?? "",
     university: formatSchoolName(item.schoolName),
