@@ -40,7 +40,12 @@ export function ApplicantRoleSection({
   return (
     <div className={cn("flex flex-col", className)}>
       {/* 섹션 헤더 */}
-      <div className="flex h-6.5 items-center justify-between pr-0.5 pl-2.5">
+      <div
+        className={cn(
+          "flex items-center justify-between pr-0.5 pl-2.5",
+          applicants.length === 0 ? "h-20" : "h-6.5",
+        )}
+      >
         <div className="flex items-center gap-2.25">
           <PartTagChip role={role} />
           <span className="text-body-1-medium text-teal-gray-400 flex items-center gap-0.5">

@@ -5,6 +5,7 @@ import {
   FilterDropdown,
   type FilterDropdownProps,
 } from "@/features/project/list/ui/FilterDropDown"
+import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
 import { cn } from "@/shared/lib/utils"
 import { Pagination } from "@/shared/ui/Pagination"
 
@@ -249,7 +250,7 @@ export function ApplicationTableSection({
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       {/* 섹션 헤더 */}
-      <h2 className="text-heading-6-semibold text-teal-700">02 지원자 목록</h2>
+      <SectionHeader index={2} title="지원자 목록" level={2} />
 
       {/* 검색 + 필터 */}
       <div className="flex items-center justify-between">
@@ -310,22 +311,29 @@ export function ApplicationTableSection({
                 }}
               />
 
-              {isExpanded && project.applicants.length > 0 && (
-                <div className="border-teal-gray-150 border-b-[3px] py-1">
-                  {project.applicants.map((applicant) => (
-                    <ApplicantDetailRow
-                      key={applicant.id}
-                      round={applicant.round}
-                      role={applicant.role}
-                      name={applicant.name}
-                      university={applicant.university}
-                      status={applicant.status}
-                      processedAt={applicant.processedAt}
-                      appliedAt={applicant.appliedAt}
-                    />
-                  ))}
-                </div>
-              )}
+              {isExpanded &&
+                (project.applicants.length > 0 ? (
+                  <div className="border-teal-gray-150 py-1">
+                    {project.applicants.map((applicant) => (
+                      <ApplicantDetailRow
+                        key={applicant.id}
+                        round={applicant.round}
+                        role={applicant.role}
+                        name={applicant.name}
+                        university={applicant.university}
+                        status={applicant.status}
+                        processedAt={applicant.processedAt}
+                        appliedAt={applicant.appliedAt}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border-teal-gray-150 flex h-17 items-center justify-center">
+                    <p className="text-body-2-medium text-teal-gray-400">
+                      아직 지원자가 없습니다
+                    </p>
+                  </div>
+                ))}
             </div>
           )
         })}

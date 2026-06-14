@@ -1,3 +1,4 @@
+import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
 import PersonGraphicIcon from "@/shared/assets/icon/people/PersonGraphicIcon"
 import { cn } from "@/shared/lib/utils"
 
@@ -28,7 +29,6 @@ interface ApplicationStatsSectionProps {
 
 const VARIANT_LABELS = {
   application: {
-    sectionTitle: "01 지원 통계",
     completedLabel: "지원 완료",
     pendingLabel: "지원 전",
     roundSuffix: "지원",
@@ -36,7 +36,6 @@ const VARIANT_LABELS = {
     projectSectionTitle: "프로젝트별 지원 현황",
   },
   matching: {
-    sectionTitle: "01 매칭 통계",
     completedLabel: "매칭 완료",
     pendingLabel: "매칭 전",
     roundSuffix: "매칭",
@@ -77,9 +76,11 @@ export function ApplicationStatsSection({
     <div className={cn("flex flex-col gap-4", className)}>
       {/* 섹션 헤더 */}
       <div className="flex items-center justify-between">
-        <h2 className="text-heading-6-semibold text-teal-700">
-          {labels.sectionTitle}
-        </h2>
+        <SectionHeader
+          index={1}
+          title={variant === "application" ? "지원 통계" : "매칭 통계"}
+          level={2}
+        />
         {dataUpdatedAt ? (
           <span className="text-caption-1-regular text-teal-gray-400">
             {formatUpdatedAt(dataUpdatedAt)}

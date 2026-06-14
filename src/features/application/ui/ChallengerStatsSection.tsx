@@ -1,3 +1,4 @@
+import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
 import PersonGraphicIcon from "@/shared/assets/icon/people/PersonGraphicIcon"
 import { cn } from "@/shared/lib/utils"
 
@@ -25,9 +26,7 @@ export function ChallengerStatsSection({
 }: ChallengerStatsSectionProps) {
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      <h2 className="text-heading-6-semibold text-teal-700">
-        01 내 프로젝트 지원 통계
-      </h2>
+      <SectionHeader index={1} title="내 프로젝트 지원 통계" level={2} />
 
       <div className="flex gap-4">
         {/* 매칭 차수별 지원률 */}
@@ -48,7 +47,7 @@ export function ChallengerStatsSection({
             />
           </div>
 
-          {/* 커넥터 라인 (도넛 -> 1차 범례) */}
+          {/* 커넥터 라인 (도넛 -> 범례) */}
           <svg
             width="40"
             height="12"
@@ -62,7 +61,7 @@ export function ChallengerStatsSection({
             />
           </svg>
 
-          {/* 우측 범례: 1차 17명 / 2차 2명 */}
+          {/* 우측 범례: 지원자 수 상위 2개 차수 */}
           <div className="absolute top-20.5 left-53.25 flex w-27.5 flex-col gap-0.5">
             {[...stats.rounds]
               .sort((a, b) => b.applied - a.applied)
@@ -111,7 +110,7 @@ export function ChallengerStatsSection({
           </div>
         </div>
 
-        {/* 1차 매칭 지원 */}
+        {/* N차 매칭 지원 */}
         <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-121 shrink-0 flex-col gap-9.5 rounded-xl border bg-white px-8 pt-7 pb-8">
           <div className="flex items-center justify-between px-2.5">
             <h3 className="text-heading-6-semibold text-teal-700">

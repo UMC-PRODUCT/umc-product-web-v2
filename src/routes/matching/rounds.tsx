@@ -33,6 +33,7 @@ import { BranchSelector } from "@/features/matching/ui/BranchSelector"
 import { Calendar } from "@/features/matching/ui/Calendar"
 import { CalendarScheduleList } from "@/features/matching/ui/CalendarScheduleList"
 import { RoundForm } from "@/features/matching/ui/RoundForm"
+import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
 import { UsabilitySurvey } from "@/features/usability-survey"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { Button } from "@/shared/ui/Button"
@@ -532,9 +533,7 @@ function MatchingRoundsPage() {
             <div className="flex flex-col gap-8.5 pl-4">
               {/* 헤딩 + 지부 선택 */}
               <div className="flex flex-col gap-4">
-                <h2 className="text-heading-6-semibold text-teal-700">
-                  <span className="text-teal-600">01</span> 매칭 기간 설정
-                </h2>
+                <SectionHeader index={1} title="매칭 기간 설정" level={2} />
                 <div className="pl-8.5">
                   <div className="flex items-center gap-6">
                     <span className="text-label-1-semibold text-teal-gray-700">

@@ -67,7 +67,7 @@ export function ApplicationDetailModal({
     if (project.applicants.length === 0 && !emptyToastShownRef.current) {
       emptyToastShownRef.current = true
       addToast({
-        message: "아직 지원자가 없습니다.",
+        message: "아직 지원자한 챌린저가 없습니다.",
         color: "primary",
         variant: "deep",
         type: "default",
@@ -146,12 +146,15 @@ export function ApplicationDetailModal({
       queryClient.invalidateQueries({ queryKey: applicationKeys.all })
     },
     onError: (error, variables) => {
-      // 서버 에러 메시지 토스트
+      // 서버 에러 메시지 -> 사용자 친화 문구 변환
       const serverMessage = isAxiosError(error)
         ? error.response?.data?.message
         : undefined
+      const displayMessage = serverMessage?.includes("최소 선발 인원")
+        ? "팀 인원이 부족해 지금은 불합격 처리할 수 없습니다."
+        : (serverMessage ?? "배정 상태 변경에 실패했습니다.")
       addToast({
-        message: serverMessage ?? "배정 상태 변경에 실패했습니다.",
+        message: displayMessage,
         color: "red",
         variant: "deep",
         type: "default",
@@ -218,7 +221,7 @@ export function ApplicationDetailModal({
       <Modal.Portal>
         <Modal.Overlay tone="deep" />
         <Modal.Content
-          className="flex max-h-[calc(100vh-60px)] items-start gap-4"
+          className="top-20! bottom-7.5! flex h-[calc(100vh-110px)]! translate-y-0! items-start gap-4"
           aria-describedby={undefined}
           onOpenAutoFocus={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => {
@@ -241,7 +244,7 @@ export function ApplicationDetailModal({
             {project.projectName} 지원 현황 상세
           </Modal.Title>
 
-          <div className="flex w-185 shrink-0 overflow-hidden rounded-xl bg-white shadow-xl">
+          <div className="flex h-full w-185 shrink-0 overflow-hidden rounded-xl bg-white shadow-xl">
             <ModalApplicantPanel
               project={projectWithOverrides}
               chapterName={chapterName}
