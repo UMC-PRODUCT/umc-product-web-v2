@@ -146,7 +146,7 @@ export function ProfileDropdown({
 
             {/* 기수 */}
             <div className="flex w-full flex-col gap-0.5 px-1.5">
-              <span className="text-caption-3-medium text-teal-gray-400 h-5.5 w-13 px-1.5 py-0.5">
+              <span className="text-caption-3-medium text-teal-gray-400 flex h-5.5 w-13 items-center px-1.5">
                 {/* TODO: "기수 변경"으로 롤백 */}
                 기수
               </span>
