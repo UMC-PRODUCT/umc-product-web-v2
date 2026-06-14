@@ -516,6 +516,14 @@ function OAuthSignupPage() {
               .some((t) => !watch("termsAgreements")?.[t.id])
           : false
 
+  // 이메일 인증 단계를 벗어나면 타이머 정지
+  useEffect(() => {
+    if (currentStep !== "EMAIL" && intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }, [currentStep])
+
   return (
     <FormProvider {...methods}>
       <section className="-mb-12 flex h-screen min-h-74 w-full min-w-90 items-center justify-center">
