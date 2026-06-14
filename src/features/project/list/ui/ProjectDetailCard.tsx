@@ -66,6 +66,8 @@ interface ProjectDetailCardProps {
   viewOnly?: boolean
   /** 랜덤 매칭 항목: 내 지원서 보기 버튼 미노출 */
   hideMyApplication?: boolean
+  /** 매칭 기간 중 수정하기 버튼 숨김 */
+  isMatchingPeriod?: boolean
 }
 
 function ProjectDetailCardSkeleton() {
@@ -177,6 +179,7 @@ export function ProjectDetailCard({
   projectChapterId,
   viewOnly = false,
   hideMyApplication = false,
+  isMatchingPeriod = false,
 }: ProjectDetailCardProps) {
   const projectId = Number(projectIdProp)
   const navigate = useNavigate()
@@ -496,7 +499,7 @@ export function ProjectDetailCard({
             >
               기획 보기
             </Button>
-            {showEditCta ? (
+            {showEditCta && !isMatchingPeriod ? (
               shouldShowEditCta ? (
                 <Button
                   className="min-w-36 flex-1 whitespace-nowrap"

@@ -44,6 +44,7 @@ interface ProjectManagementMoreMenuProps {
   canEditProject: boolean
   canPublishProject: boolean
   isPermissionLoading: boolean
+  isMatchingPeriod?: boolean
 }
 
 export function ProjectManagementMoreMenu({
@@ -56,6 +57,7 @@ export function ProjectManagementMoreMenu({
   canEditProject,
   canPublishProject,
   isPermissionLoading,
+  isMatchingPeriod = false,
 }: ProjectManagementMoreMenuProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -273,7 +275,7 @@ export function ProjectManagementMoreMenu({
     { label: "팀원 구성 보기", onClick: handleTeamViewClick },
   ]
 
-  if (isPermissionLoading || canEditProject) {
+  if (!isMatchingPeriod && (isPermissionLoading || canEditProject)) {
     menuItems.splice(2, 0, {
       label: "프로젝트 수정하기",
       onClick: handleEditClick,
