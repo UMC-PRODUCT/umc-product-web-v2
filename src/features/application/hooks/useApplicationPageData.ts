@@ -39,32 +39,26 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): {
   activeRound: number | undefined
 } {
   const now = Date.now()
+  const toRound = (phase: string) =>
+    phase === "FIRST" ? 1 : phase === "SECOND" ? 2 : 3
+
+  // 지원현황 기준: startsAt ~ endsAt (지원 마감 시점)
   const active = rounds.find(
     (r) =>
       new Date(r.startsAt).getTime() <= now &&
-      now <= new Date(r.decisionDeadline).getTime(),
+      now <= new Date(r.endsAt).getTime(),
   )
   if (active) {
-    const round =
-      active.phase === "FIRST" ? 1 : active.phase === "SECOND" ? 2 : 3
+    const round = toRound(active.phase)
     return { currentRound: round, activeRound: round }
   }
-  // 완료된 차수(decisionDeadline 지남) 중 가장 최근, 없으면 undefined
+
+  // endsAt이 지난 차수 중 가장 최근
   const completed = [...rounds]
-    .filter((r) => new Date(r.decisionDeadline).getTime() < now)
-    .sort(
-      (a, b) =>
-        new Date(b.decisionDeadline).getTime() -
-        new Date(a.decisionDeadline).getTime(),
-    )
+    .filter((r) => new Date(r.endsAt).getTime() < now)
+    .sort((a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime())
   const fallback =
-    completed.length > 0
-      ? completed[0]!.phase === "FIRST"
-        ? 1
-        : completed[0]!.phase === "SECOND"
-          ? 2
-          : 3
-      : undefined
+    completed.length > 0 ? toRound(completed[0]!.phase) : undefined
   return { currentRound: fallback, activeRound: undefined }
 }
 
@@ -353,18 +347,66 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
         }
       : chapterStatsQuery.data.summary
 
-    const partial = summaryToStats(filteredSummary, projectIdToName)
+    // Top4를 현재 차수 단일 기준으로 표시, 3차 이후에는 1차 기준
+    const topProjectsRound =
+      currentRound !== undefined && currentRound >= 3 ? 1 : currentRound
+    const partial = summaryToStats(
+      filteredSummary,
+      projectIdToName,
+      currentRound,
+    )
 
-    // SCHOOL_PRESIDENT: 도넛 차트 총원을 본인 학교 인원으로 대체
-    // roundApplicationStatistics.availableMemberCount는 지부 전체이므로 학교별 totalMemberCount 사용
-    if (mySchoolId) {
-      const schoolTotal = filteredSummary.schoolMatchingStatistics.reduce(
-        (s, x) => s + Number(x.totalMemberCount),
-        0,
-      )
-      for (const r of partial.rounds) {
-        r.total = schoolTotal
-      }
+    // 3차 이후 Top4를 1차 기준으로 재계산
+    if (topProjectsRound !== undefined && topProjectsRound !== currentRound) {
+      const phaseKey =
+        topProjectsRound === 1
+          ? "FIRST"
+          : topProjectsRound === 2
+            ? "SECOND"
+            : "THIRD"
+      partial.topProjects = filteredSummary.projectRoundStatistics
+        .map((p) => ({
+          projectId: p.projectId,
+          name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
+          count: Number(
+            p.matchingRounds.find((r) => r.matchingRound.phase === phaseKey)
+              ?.appliedMemberCount ?? 0,
+          ),
+        }))
+        .sort(
+          (a, b) =>
+            b.count - a.count || Number(a.projectId) - Number(b.projectId),
+        )
+        .slice(0, 4)
+    }
+
+    // 도넛: 지원 완료율로 보정 (completedCount = 현재 차수 appliedMemberCount, 분모 = totalMembers)
+    const currentPhase =
+      currentRound === 1
+        ? "FIRST"
+        : currentRound === 2
+          ? "SECOND"
+          : currentRound === 3
+            ? "THIRD"
+            : undefined
+    const appliedCount = currentPhase
+      ? Number(
+          filteredSummary.roundApplicationStatistics.find(
+            (r) => r.matchingRound.phase === currentPhase,
+          )?.appliedMemberCount ?? 0,
+        )
+      : 0
+    partial.completedCount = appliedCount
+    partial.pendingCount = Math.max(0, partial.totalMembers - appliedCount)
+    partial.completionRate =
+      partial.totalMembers > 0
+        ? Math.round((appliedCount / partial.totalMembers) * 100)
+        : 0
+
+    // 도넛 차트 총원을 필터링된 schoolMatchingStatistics 기준으로 보정
+    // roundApplicationStatistics.availableMemberCount는 전체 기준이므로 지부/학교 필터링 반영 안 됨
+    for (const r of partial.rounds) {
+      r.total = partial.totalMembers
     }
 
     // 학교별 지원자 수 집계 (roundSchoolRankings 전 차수 합산, 챕터 소속 학교만)
@@ -400,6 +442,7 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
     chapterName,
     chapterSchoolIds,
     mySchoolId,
+    currentRound,
   ])
 
   return {
