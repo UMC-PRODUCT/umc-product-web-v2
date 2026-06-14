@@ -5,6 +5,7 @@ import {
   FilterDropdown,
   type FilterDropdownProps,
 } from "@/features/project/list/ui/FilterDropDown"
+import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
 import { cn } from "@/shared/lib/utils"
 import { Pagination } from "@/shared/ui/Pagination"
 
@@ -249,7 +250,7 @@ export function ApplicationTableSection({
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       {/* 섹션 헤더 */}
-      <h2 className="text-heading-6-semibold text-teal-700">02 지원자 목록</h2>
+      <SectionHeader index={2} title="지원자 목록" level={2} />
 
       {/* 검색 + 필터 */}
       <div className="flex items-center justify-between">
