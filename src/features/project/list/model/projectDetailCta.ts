@@ -106,7 +106,7 @@ export function selectIsAlreadyApproved<T extends ApplicationForApprovalCheck>(
 ): boolean {
   return (
     applications?.some(
-      (a) => a.status === "APPROVED" && a.matchingRound?.id != null,
+      (a) => a.status === "APPROVED" && a.matchingRound.id != null,
     ) ?? false
   )
 }
