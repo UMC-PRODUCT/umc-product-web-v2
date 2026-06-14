@@ -99,7 +99,7 @@ function MatchingApplicationsPage() {
       <div className="border-teal-gray-100 flex w-6xl flex-col rounded-[12px] border bg-white px-8.5 pt-8 pb-10">
         <div className="flex flex-col gap-1.5">
           <h1 className="text-heading-6-semibold text-teal-gray-900">
-            지원 현황
+            {isOthers ? "내 지원 현황" : "지원 현황"}
           </h1>
           <p className="text-body-2-regular text-teal-gray-600">
             프로젝트 지원 내역을 통합 관리합니다.

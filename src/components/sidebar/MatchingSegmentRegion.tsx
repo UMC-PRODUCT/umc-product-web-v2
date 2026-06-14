@@ -5,6 +5,8 @@ import {
   canAccessProjectSettings,
   canManageMatchingRounds,
   canManageProjects,
+  isAnyOperator,
+  isCurrentTermPm,
 } from "@/features/auth/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
@@ -26,6 +28,7 @@ export function MatchingSegmentRegion({
   const canAccessSettings = canAccessProjectSettings(viewMe)
   const canManage = canManageProjects(viewMe)
   const canManageRounds = canManageMatchingRounds(viewMe)
+  const isRegularChallenger = !isAnyOperator(viewMe) && !isCurrentTermPm(viewMe)
 
   const visibleSections = useMemo(
     () =>
@@ -33,8 +36,9 @@ export function MatchingSegmentRegion({
         canAccessProjectSettings: canAccessSettings,
         canManageProjects: canManage,
         canManageMatchingRounds: canManageRounds,
+        isRegularChallenger,
       }),
-    [canAccessSettings, canManage, canManageRounds],
+    [canAccessSettings, canManage, canManageRounds, isRegularChallenger],
   )
 
   const resolved = resolveNavigationFromPathname(pathname, visibleSections)
