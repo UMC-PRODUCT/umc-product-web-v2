@@ -331,9 +331,8 @@ function OAuthSignupPage() {
       })
       setValue("code", "")
       startVerificationTimer()
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "인증 메일 발송에 실패했습니다."
+    } catch {
+      const message = "잠시 후에 다시 시도해주세요"
       addToast({
         message,
         color: "red",
@@ -515,6 +514,14 @@ function OAuthSignupPage() {
               .filter((t) => t.isMandatory)
               .some((t) => !watch("termsAgreements")?.[t.id])
           : false
+
+  // 이메일 인증 단계를 벗어나면 타이머 정지
+  useEffect(() => {
+    if (currentStep !== "EMAIL" && intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }, [currentStep])
 
   return (
     <FormProvider {...methods}>

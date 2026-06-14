@@ -16,7 +16,7 @@ export function TextButton({
       className={cn(
         "text-left transition-colors",
         !disabled && "hover:underline",
-        disabled && "pointer-events-none",
+        disabled && "opacity-50",
         className,
       )}
       {...props}

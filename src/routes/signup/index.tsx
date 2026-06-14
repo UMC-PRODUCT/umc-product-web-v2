@@ -237,6 +237,7 @@ function SignUpPage() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const isEmailVerified = !!state.signupData.emailVerificationToken
 
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((s) => s.addToast)
@@ -288,6 +289,14 @@ function SignUpPage() {
 
   // 인증번호 타이머
   useEffect(() => {
+    if (isEmailVerified) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+      return
+    }
+
     if (state.email.remainingSeconds <= 0 && intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
@@ -295,7 +304,7 @@ function SignUpPage() {
         dispatch({ type: "EMAIL_EXPIRED" })
       }
     }
-  }, [state.email.remainingSeconds, state.email.isCodeVisible])
+  }, [isEmailVerified, state.email.remainingSeconds, state.email.isCodeVisible])
 
   const startVerificationTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -358,9 +367,8 @@ function SignUpPage() {
         startVerificationTimer()
         dispatch({ type: "EMAIL_SET_SPAM_MODAL", payload: false })
       }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "인증 메일 재발송에 실패했습니다."
+    } catch {
+      const message = "잠시 후에 다시 시도해주세요"
       addToast({
         message,
         color: "red",
@@ -484,7 +492,6 @@ function SignUpPage() {
   const isNicknameValid = nickname !== "" && !errors.nickname
 
   // 단계별 완료 여부 (상태 A에서 유도)
-  const isEmailVerified = !!state.signupData.emailVerificationToken
   const isAccountCreated =
     !!state.oAuthVerificationToken || !!state.signupData.rawPassword
 
@@ -511,6 +518,14 @@ function SignUpPage() {
                 .filter((t) => t.isMandatory)
                 .some((t) => !watch("termsAgreements")?.[t.id])
             : false
+
+  // 이메일 인증 단계를 벗어나면 타이머 정지
+  useEffect(() => {
+    if (currentStep !== "EMAIL" && intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }, [currentStep])
 
   return (
     <FormProvider {...methods}>
@@ -611,7 +626,12 @@ function SignUpPage() {
         confirmText="로그인하기"
         variant="success"
         overlayTone="light"
-        onOpenChange={setIsSuccessModalOpen}
+        onOpenChange={(open) => {
+          setIsSuccessModalOpen(open)
+          if (!open) {
+            navigate({ to: "/login" })
+          }
+        }}
         onConfirm={() => {
           setIsSuccessModalOpen(false)
           navigate({ to: "/login" })
