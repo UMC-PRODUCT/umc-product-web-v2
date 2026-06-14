@@ -6,6 +6,7 @@ export type ProjectDetailCtaMode =
   | "apply-blocked-approved"
   | "apply-blocked-part"
   | "apply-blocked-closed"
+  | "no-active-round"
   | "plan-only"
 
 interface ResolveCtaParams {
@@ -18,6 +19,7 @@ interface ResolveCtaParams {
   isAlreadyApproved: boolean
   isPartIneligible: boolean
   isPartRecruitClosed: boolean
+  hasActiveRound?: boolean
 }
 
 export function resolveProjectDetailCtaMode({
@@ -30,6 +32,7 @@ export function resolveProjectDetailCtaMode({
   isAlreadyApproved,
   isPartIneligible,
   isPartRecruitClosed,
+  hasActiveRound,
 }: ResolveCtaParams): ProjectDetailCtaMode {
   if (isOperator) return "recruit-questions"
   if (!isSameBranch) return "plan-only"
@@ -37,6 +40,7 @@ export function resolveProjectDetailCtaMode({
   if (isApplied && isDraftApplication) return "apply"
   if (isApplied) return "my-application"
   if (isAlreadyApproved) return "apply-blocked-approved"
+  if (hasActiveRound === false) return "no-active-round"
   if (hasOtherActiveApplication) return "apply-blocked-other"
   if (isPartIneligible) return "apply-blocked-part"
   if (isPartRecruitClosed) return "apply-blocked-closed"

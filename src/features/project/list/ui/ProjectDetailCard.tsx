@@ -18,6 +18,7 @@ import {
 } from "@/features/project/new/api"
 import { UsabilitySurvey } from "@/features/usability-survey"
 import { getActiveGisu } from "@/shared/api/gisu"
+import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
@@ -403,6 +404,11 @@ export function ProjectDetailCard({
       (q) => q.part === latestChallengerPart && q.status === "COMPLETED",
     )
 
+  const hasActiveRoundForCtaMode: boolean | undefined =
+    isChallengerView && !isActiveMatchingRoundLoading
+      ? activeMatchingRound != null
+      : undefined
+
   const ctaMode =
     viewOnly && !userIsOperator
       ? resolveProjectDetailCtaMode({
@@ -426,6 +432,7 @@ export function ProjectDetailCard({
           isAlreadyApproved,
           isPartIneligible,
           isPartRecruitClosed,
+          hasActiveRound: hasActiveRoundForCtaMode,
         })
 
   const cover = data.coverImage
@@ -509,14 +516,23 @@ export function ProjectDetailCard({
               variant="weak"
               color="primary"
               className="min-w-28 flex-1 whitespace-nowrap"
-              disabled={!data.externalLink}
+              disabled={
+                ctaMode !== "apply-blocked-approved" && !data.externalLink
+              }
               onClick={() => {
-                if (data.externalLink)
-                  window.open(
-                    data.externalLink,
-                    "_blank",
-                    "noopener,noreferrer",
-                  )
+                if (!data.externalLink) {
+                  if (ctaMode === "apply-blocked-approved") {
+                    addToast({
+                      message: "업로드된 기획안이 없습니다.",
+                      color: "primary",
+                      variant: "deep",
+                      type: "default",
+                      duration: 3000,
+                    })
+                  }
+                  return
+                }
+                window.open(data.externalLink, "_blank", "noopener,noreferrer")
               }}
             >
               기획 보기
@@ -634,8 +650,18 @@ export function ProjectDetailCard({
                       {isDraftApplication ? "이어서 작성하기" : "지원하기"}
                     </Button>
                   )}
+                {ctaMode === "apply-blocked-approved" && (
+                  <Button
+                    variant="weak"
+                    color="primary"
+                    className="min-w-32 flex-1 whitespace-nowrap"
+                    disabled={!detail?.applicationFormId}
+                    onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                  >
+                    모집 문항 보기
+                  </Button>
+                )}
                 {(ctaMode === "apply-blocked-other" ||
-                  ctaMode === "apply-blocked-approved" ||
                   ctaMode === "apply-blocked-part" ||
                   ctaMode === "apply-blocked-closed") && (
                   <>
@@ -678,6 +704,14 @@ export function ProjectDetailCard({
             <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
               모집이 마감된 파트라 지원할 수 없습니다.
             </p>
+          )}
+          {!viewOnly && ctaMode === "no-active-round" && (
+            <div className="mt-2 flex w-full items-center justify-center gap-1">
+              <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
+              <p className="text-caption-2-regular text-teal-gray-500 text-center">
+                현재 지원할 수 있는 매칭 기간이 아닙니다.
+              </p>
+            </div>
           )}
         </div>
       </div>
