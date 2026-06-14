@@ -26,6 +26,7 @@ import {
   SmallDivider,
   UmcLogoButton,
 } from "@/features/login"
+import { emailSchema } from "@/features/signup/validation"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
@@ -101,6 +102,12 @@ function DefaultLoginPage() {
   const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (isDisabled || isLoading) return
+
+    if (!emailSchema.safeParse(email).success) {
+      setLoginError("@를 포함한 이메일 형식의 아이디를 입력해 주세요")
+      return
+    }
+
     setIsLoading(true)
     setLoginError("")
 
@@ -146,6 +153,16 @@ function DefaultLoginPage() {
                   onChange={(e) => {
                     setEmail(e.target.value)
                     if (loginError) setLoginError("")
+                  }}
+                  onBlur={() => {
+                    if (
+                      email.trim() !== "" &&
+                      !emailSchema.safeParse(email).success
+                    ) {
+                      setLoginError(
+                        "@를 포함한 이메일 형식의 아이디를 입력해 주세요",
+                      )
+                    }
                   }}
                 />
 
