@@ -7,6 +7,7 @@ import {
 } from "@/features/project/list/ui/FilterDropDown"
 import { cn } from "@/shared/lib/utils"
 import { Pagination } from "@/shared/ui/Pagination"
+import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 
 import { shortenSchoolName } from "../model/mappers"
 import { ApplicantDetailRow } from "./ApplicantDetailRow"
@@ -249,7 +250,7 @@ export function ApplicationTableSection({
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       {/* 섹션 헤더 */}
-      <h2 className="text-heading-6-semibold text-teal-700">02 지원자 목록</h2>
+      <QuestionItemTitle index="02" title="지원자 목록" />
 
       {/* 검색 + 필터 */}
       <div className="flex items-center justify-between">

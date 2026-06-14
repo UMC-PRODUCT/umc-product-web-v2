@@ -1,5 +1,6 @@
 import PersonGraphicIcon from "@/shared/assets/icon/people/PersonGraphicIcon"
 import { cn } from "@/shared/lib/utils"
+import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 
 import { RankBar } from "./RankBar"
 import { RoundDonutChart } from "./RoundDonutChart"
@@ -23,9 +24,7 @@ export function ChallengerStatsSection({
 }: ChallengerStatsSectionProps) {
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      <h2 className="text-heading-6-semibold text-teal-700">
-        01 내 프로젝트 지원 통계
-      </h2>
+      <QuestionItemTitle index="01" title="내 프로젝트 지원 통계" />
 
       <div className="flex gap-4">
         {/* 매칭 차수별 지원률 */}

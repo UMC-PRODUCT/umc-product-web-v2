@@ -14,6 +14,7 @@ import { useMatchingStatusData } from "@/features/matching/hooks/useMatchingStat
 import { MatchingPartSection } from "@/features/matching/ui/MatchingPartSection"
 import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"
 import { MatchingTableHead } from "@/features/matching/ui/MatchingTableHead"
+import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 
@@ -123,9 +124,7 @@ function MatchingStatusPage() {
 
               {/* 02 매칭 결과 시트 */}
               <div className="flex flex-col gap-4">
-                <h2 className="text-heading-6-semibold text-teal-700">
-                  <span className="text-teal-600">02</span> 매칭 결과 시트
-                </h2>
+                <QuestionItemTitle index="02" title="매칭 결과 시트" />
 
                 <div className="flex w-263 flex-col gap-6">
                   {displayParts.map((part) => (
