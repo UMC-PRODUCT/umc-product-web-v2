@@ -241,7 +241,7 @@ export function ProjectDetailCard({
   })
   const activeGisuId = activeGisuData?.gisuId ?? null
 
-  const { data: myApplications } = useQuery({
+  const { data: myApplications, isError: isMyApplicationsError } = useQuery({
     queryKey: ["myApplications", activeGisuId],
     queryFn: () => getMyApplications(activeGisuId!),
     enabled: activeGisuId != null && !userIsOperator && !userIsPm,
@@ -385,6 +385,14 @@ export function ProjectDetailCard({
     latestChallengerPart != null &&
     !detail.partQuotas.some((q) => q.part === latestChallengerPart)
 
+  const isPartRecruitClosed =
+    isChallengerView &&
+    detail != null &&
+    latestChallengerPart != null &&
+    detail.partQuotas.some(
+      (q) => q.part === latestChallengerPart && q.status === "COMPLETED",
+    )
+
   const ctaMode =
     viewOnly && !userIsOperator
       ? resolveProjectDetailCtaMode({
@@ -395,6 +403,7 @@ export function ProjectDetailCard({
           hasOtherActiveApplication,
           isAlreadyApproved,
           isPartIneligible,
+          isPartRecruitClosed,
         })
       : resolveProjectDetailCtaMode({
           isOperator: userIsOperator,
@@ -404,6 +413,7 @@ export function ProjectDetailCard({
           hasOtherActiveApplication,
           isAlreadyApproved,
           isPartIneligible,
+          isPartRecruitClosed,
         })
 
   const cover = data.coverImage
@@ -562,6 +572,10 @@ export function ProjectDetailCard({
                           isApplicationWritePermissionLoading,
                         canWriteApplication: canWriteProjectApplication,
                         hasActiveRound: activeMatchingRound != null,
+                        applicationsPending:
+                          isChallengerView &&
+                          myApplications === undefined &&
+                          !isMyApplicationsError,
                       })}
                       onClick={() => {
                         if (viewOnly && userIsPm) {
@@ -613,7 +627,8 @@ export function ProjectDetailCard({
                   )}
                 {(ctaMode === "apply-blocked-other" ||
                   ctaMode === "apply-blocked-approved" ||
-                  ctaMode === "apply-blocked-part") && (
+                  ctaMode === "apply-blocked-part" ||
+                  ctaMode === "apply-blocked-closed") && (
                   <>
                     <Button
                       variant="weak"
@@ -648,6 +663,11 @@ export function ProjectDetailCard({
           {!viewOnly && ctaMode === "apply-blocked-part" && (
             <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
               지원 가능한 파트가 아니어서 지원할 수 없습니다.
+            </p>
+          )}
+          {!viewOnly && ctaMode === "apply-blocked-closed" && (
+            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
+              모집이 마감된 파트라 지원할 수 없습니다.
             </p>
           )}
         </div>
