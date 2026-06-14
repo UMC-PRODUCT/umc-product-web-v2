@@ -1,5 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 import { isAxiosError } from "axios"
 import {
   forwardRef,
@@ -18,7 +22,7 @@ import {
   isCurrentTermPm,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
-import { searchAllMembers } from "@/features/challenger/api/member"
+import { searchChallengersByCursor } from "@/features/challenger/api/member"
 import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
   addProjectMember,
@@ -28,7 +32,7 @@ import {
   updateProjectDraft,
   uploadFileFlow,
 } from "@/features/project/new/api"
-import { toMemberItem } from "@/features/project/new/api/memberAdapter"
+import { challengerSearchItemToMemberItem } from "@/features/project/new/api/memberAdapter"
 import { getActiveGisu } from "@/shared/api/gisu"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
@@ -53,6 +57,25 @@ function extractApiErrorCode(error: unknown): string | undefined {
   if (typeof data !== "object" || data === null) return undefined
   const code = (data as { code?: unknown }).code
   return typeof code === "string" ? code : undefined
+}
+
+function isMemberItem(
+  member: MemberItem | null | undefined,
+): member is MemberItem {
+  return member != null
+}
+
+function mergeMemberItems(
+  ...groups: ReadonlyArray<ReadonlyArray<MemberItem | null | undefined>>
+): MemberItem[] {
+  const members = new Map<string, MemberItem>()
+  groups
+    .flat()
+    .filter(isMemberItem)
+    .forEach((member) => {
+      members.set(member.id, member)
+    })
+  return Array.from(members.values())
 }
 
 export interface BasicInfoFormHandle {
@@ -85,20 +108,24 @@ export const BasicInfoForm = forwardRef<
 
   const pmSearchScope = useMemo(() => getProjectPmSearchScope(meData), [meData])
 
-  const pmListQuery = useQuery({
+  const pmListQuery = useInfiniteQuery({
     queryKey: [
       "member",
-      "list",
+      "cursor",
       { part: "PLAN", gisuId: activeGisuId, ...pmSearchScope },
     ],
-    queryFn: () =>
-      searchAllMembers({
+    queryFn: ({ pageParam }) =>
+      searchChallengersByCursor({
+        cursor: pageParam,
         part: "PLAN",
         gisuId: activeGisuId != null ? String(activeGisuId) : undefined,
-        size: 200,
+        size: 50,
         ...pmSearchScope,
       }),
     enabled: activeGisuId != null,
+    getNextPageParam: (lastPage) =>
+      lastPage.cursor.hasNext ? lastPage.cursor.nextCursor : undefined,
+    initialPageParam: undefined as string | undefined,
     staleTime: 60 * 1000,
   })
 
@@ -130,13 +157,48 @@ export const BasicInfoForm = forwardRef<
 
   const isCentral = isCentralStaff(meData) || isSuperAdmin(meData)
 
+  const selfPmMember = useMemo<MemberItem | null>(() => {
+    if (!isPm || !meData) return null
+    return {
+      id: String(meData.id),
+      nickname: meData.nickname,
+      name: meData.name,
+      university: formatSchoolName(meData.schoolName),
+    }
+  }, [isPm, meData])
+
+  const loadedPmMembers = useMemo(
+    () =>
+      (pmListQuery.data?.pages ?? [])
+        .flatMap((page) => page.cursor.content)
+        .map(challengerSearchItemToMemberItem)
+        .filter(isMemberItem),
+    [pmListQuery.data],
+  )
+
   const allPmMembers = useMemo(() => {
-    const members = (pmListQuery.data?.page.content ?? []).map(toMemberItem)
+    const members = mergeMemberItems(loadedPmMembers, [
+      pm1Member,
+      pm2Member,
+      storePmInfo.pm1,
+      storePmInfo.pm2,
+      selfPmMember,
+    ])
     if (isCentral) {
-      return members.sort((a, b) => a.nickname.localeCompare(b.nickname, "ko"))
+      return [...members].sort((a, b) =>
+        a.nickname.localeCompare(b.nickname, "ko"),
+      )
     }
     return members
-  }, [pmListQuery.data, isCentral])
+  }, [
+    isCentral,
+    loadedPmMembers,
+    pm1Member,
+    pm2Member,
+    selfPmMember,
+    storePmInfo.pm1,
+    storePmInfo.pm2,
+  ])
 
   const pm1Options = useMemo(
     () =>
@@ -285,8 +347,7 @@ export const BasicInfoForm = forwardRef<
   }, [storePmInfo])
 
   useEffect(() => {
-    if (!isPm || !meData || pm1Member !== null || allPmMembers.length === 0)
-      return
+    if (!isPm || !meData || pm1Member !== null) return
     const self = allPmMembers.find((m) => m.id === String(meData.id))
     if (self) {
       setPm1Member(self)
@@ -442,6 +503,10 @@ export const BasicInfoForm = forwardRef<
     formatSchoolName(pm1Member?.university ?? meData?.schoolName) || "-"
 
   const pmDropdownDisabled = activeGisuId == null || pmListQuery.isLoading
+  const handlePmDropdownReachEnd = () => {
+    if (!pmListQuery.hasNextPage || pmListQuery.isFetchingNextPage) return
+    void pmListQuery.fetchNextPage()
+  }
 
   return (
     <form
@@ -484,6 +549,9 @@ export const BasicInfoForm = forwardRef<
               }
               error={pm1Error}
               disabled={pmDropdownDisabled}
+              hasMore={pmListQuery.hasNextPage}
+              isLoadingMore={pmListQuery.isFetchingNextPage}
+              onReachEnd={handlePmDropdownReachEnd}
             />
             {isMultiPm && (
               <Dropdown<string>
@@ -499,6 +567,9 @@ export const BasicInfoForm = forwardRef<
                 placeholder="PM 닉네임/이름을 선택하세요."
                 error={pm2Error}
                 disabled={pmDropdownDisabled}
+                hasMore={pmListQuery.hasNextPage}
+                isLoadingMore={pmListQuery.isFetchingNextPage}
+                onReachEnd={handlePmDropdownReachEnd}
               />
             )}
             <button
