@@ -6,7 +6,9 @@ import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePe
 import {
   isAnyOperator,
   isCentralStaff,
+  isChapterPresident,
   isCurrentTermPm,
+  isSchoolStaff,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
@@ -131,6 +133,14 @@ export function ProjectManagementPage() {
   const hasAccess = isAdminScope || isPm
   const useGroupedView = isCentralStaff(me) || isSuperAdmin(me)
 
+  const descriptionText = useGroupedView
+    ? "전체 지부의 프로젝트 정보를 확인하고 수정할 수 있습니다. 팀 매칭 진행 중에는 수정이 제한됩니다."
+    : isChapterPresident(me)
+      ? "내 지부의 프로젝트 정보를 확인하고 수정할 수 있습니다. 팀 매칭 진행 중에는 수정이 제한됩니다."
+      : isSchoolStaff(me)
+        ? "내 지부의 프로젝트 정보를 확인합니다."
+        : "내 프로젝트 정보를 확인하고 수정할 수 있습니다. 팀 매칭 진행 중에는 수정할 수 없습니다."
+
   const gisuQuery = useQuery({
     queryKey: gisuKeys.active,
     queryFn: getActiveGisu,
@@ -250,9 +260,7 @@ export function ProjectManagementPage() {
             프로젝트 관리
           </span>
           <span className="text-body-2-regular text-teal-gray-600">
-            모든 프로젝트의 상세 정보를 확인하고 수정할 수 있습니다.
-            <br className="bp1:hidden block" /> 단, 매칭 중에는 일부 수정이
-            제한됩니다.
+            {descriptionText}
           </span>
         </div>
 
