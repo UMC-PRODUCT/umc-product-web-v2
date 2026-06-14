@@ -51,9 +51,10 @@ function computeStats(
     .slice(0, 5)
     .map(([name, count]) => ({ name, count }))
 
-  // 지원률 = 지원자 / 지원 가용자
+  // 지원률 = 지원자 / 지원 가용자 (지부 총원)
+  const available = availablePerRound?.values().next().value ?? totalQuota
   const completionRate =
-    totalQuota > 0 ? Math.round((allApplicants.length / totalQuota) * 100) : 0
+    available > 0 ? Math.round((allApplicants.length / available) * 100) : 0
 
   return {
     completionRate,
