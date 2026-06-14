@@ -20,7 +20,7 @@ describe("saveApplicationDraft", () => {
     putMock.mockReset()
   })
 
-  it("me 경로로 PUT 호출하고 body는 answers", async () => {
+  it("applicationId 기반 경로로 PUT 호출하고 body는 answers", async () => {
     putMock.mockResolvedValue({
       data: { result: { applicationId: "10", status: "DRAFT" } },
     })
@@ -28,24 +28,22 @@ describe("saveApplicationDraft", () => {
       { questionId: 1, textValue: "answer" },
     ]
 
-    const result = await saveApplicationDraft(7, answers)
+    const result = await saveApplicationDraft(7, 10, answers)
 
-    expect(putMock).toHaveBeenCalledWith("/v1/projects/7/applications/me", {
+    expect(putMock).toHaveBeenCalledWith("/v1/projects/7/applications/10", {
       answers,
     })
     expect(result).toEqual({ applicationId: "10", status: "DRAFT" })
   })
 
-  it("applicationId 기반 레거시 경로를 호출하지 않는다", async () => {
+  it("me 레거시 경로를 호출하지 않는다", async () => {
     putMock.mockResolvedValue({
       data: { result: { applicationId: "10", status: "DRAFT" } },
     })
 
-    await saveApplicationDraft(7, [])
+    await saveApplicationDraft(7, 10, [])
 
-    const calledUrl = putMock.mock.calls[0]?.[0]
-    expect(calledUrl).toMatch(/\/applications\/me$/)
-    expect(calledUrl).not.toMatch(/\/applications\/\d+$/)
+    expect(putMock.mock.calls[0]?.[0]).not.toContain("/applications/me")
   })
 })
 
@@ -54,28 +52,26 @@ describe("submitApplication", () => {
     postMock.mockReset()
   })
 
-  it("me 기반 submit 경로로 POST 호출", async () => {
+  it("applicationId 기반 submit 경로로 POST 호출", async () => {
     postMock.mockResolvedValue({
       data: { result: { applicationId: "10", status: "SUBMITTED" } },
     })
 
-    const result = await submitApplication(7)
+    const result = await submitApplication(7, 10)
 
     expect(postMock).toHaveBeenCalledWith(
-      "/v1/projects/7/applications/me/submit",
+      "/v1/projects/7/applications/10/submit",
     )
     expect(result).toEqual({ applicationId: "10", status: "SUBMITTED" })
   })
 
-  it("applicationId 기반 레거시 경로를 호출하지 않는다", async () => {
+  it("me 레거시 경로를 호출하지 않는다", async () => {
     postMock.mockResolvedValue({
       data: { result: { applicationId: "10", status: "SUBMITTED" } },
     })
 
-    await submitApplication(7)
+    await submitApplication(7, 10)
 
-    const calledUrl = postMock.mock.calls[0]?.[0]
-    expect(calledUrl).toMatch(/\/applications\/me\/submit$/)
-    expect(calledUrl).not.toMatch(/\/applications\/\d+\/submit$/)
+    expect(postMock.mock.calls[0]?.[0]).not.toContain("/applications/me")
   })
 })
