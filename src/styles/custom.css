@@ -25,3 +25,11 @@
     animation: none;
   }
 }
+
+@utility animate-toast-resolve {
+  animation: toast-resolve 0.24s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}

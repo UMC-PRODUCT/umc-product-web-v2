@@ -448,7 +448,7 @@ export function ProjectApplyModal({
                     key={`${optionValue}-${index}`}
                     checked={value === optionValue}
                     onChange={(checked) => {
-                      if (checked) onChange(optionValue)
+                      onChange(checked ? optionValue : "")
                     }}
                   >
                     {opt.content}
