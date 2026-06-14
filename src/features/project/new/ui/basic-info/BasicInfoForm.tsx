@@ -348,7 +348,7 @@ export const BasicInfoForm = forwardRef<
 
   useEffect(() => {
     if (!isPm || !meData || pm1Member !== null) return
-    const self = allPmMembers.find((m) => m.id === String(meData.id))
+    const self = allPmMembers.find((m) => m.id === meData.id)
     if (self) {
       setPm1Member(self)
       setPm1Error(false)
