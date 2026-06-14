@@ -160,7 +160,7 @@ export const BasicInfoForm = forwardRef<
   const selfPmMember = useMemo<MemberItem | null>(() => {
     if (!isPm || !meData) return null
     return {
-      id: String(meData.id),
+      id: meData.id,
       nickname: meData.nickname,
       name: meData.name,
       university: formatSchoolName(meData.schoolName),
