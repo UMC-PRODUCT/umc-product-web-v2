@@ -2,10 +2,12 @@ import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
 import GenerationListItem from "@/components/header/GenerationListItem"
+import { logout as apiLogout } from "@/features/auth/api/credentials"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { logout } from "@/features/auth/lib/logout"
+import { logout as localLogout } from "@/features/auth/lib/logout"
 import { isCentralStaff, isSuperAdmin } from "@/features/auth/model/identity"
 import { toRoleTag } from "@/features/auth/model/mappers"
+import { useAuthStore } from "@/features/auth/store/authStore"
 import { useSelectedChallengerStore } from "@/features/auth/store/selectedChallengerStore"
 import { cn } from "@/shared/lib/utils"
 
@@ -66,6 +68,18 @@ export function ProfileDropdown({
 
   const navigate = useNavigate()
   const role = me?.roles?.[0] ? toRoleTag(me.roles[0].roleType) : "challenger"
+
+  const handleLogout = async () => {
+    const refreshToken = useAuthStore.getState().refreshToken
+    if (refreshToken) {
+      try {
+        await apiLogout(refreshToken)
+      } catch (error) {
+        console.error("Failed to call logout API", error)
+      }
+    }
+    localLogout()
+  }
 
   return (
     <div ref={containerRef} className="relative">
@@ -178,7 +192,7 @@ export function ProfileDropdown({
               계정 설정
             </TextButton>
             <TextButton
-              onClick={logout}
+              onClick={() => void handleLogout()}
               className="text-body-2-medium text-error-500 hover:decoration-error-500 h-6 w-15"
             >
               로그아웃
