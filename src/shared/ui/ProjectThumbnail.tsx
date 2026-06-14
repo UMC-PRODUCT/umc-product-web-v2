@@ -27,9 +27,9 @@ export function ProjectThumbnail({
 
   return (
     <img
-      src={src}
-      alt={alt}
-      onError={() => setErroredSrc(src)}
+      src={src ?? undefined}
+      alt={alt ?? ""}
+      onError={() => setErroredSrc(src ?? null)}
       className={cn("h-full w-full object-cover", className)}
       loading="lazy"
       decoding="async"
