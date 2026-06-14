@@ -26,6 +26,7 @@ import {
   SmallDivider,
   UmcLogoButton,
 } from "@/features/login"
+import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
@@ -173,8 +174,13 @@ function DefaultLoginPage() {
               </div>
 
               <div className="flex w-full flex-col gap-2">
-                <p className="text-body-2-medium text-error-500 h-5.5 text-left">
-                  {loginError}
+                <p className="text-body-2-medium text-error-500 flex h-5.5 items-center gap-1 text-left">
+                  {loginError && (
+                    <>
+                      <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                      {loginError}
+                    </>
+                  )}
                 </p>
 
                 <Button
