@@ -241,37 +241,11 @@ export function ProjectManagementMoreMenu({
     })
   }
 
-  const handlePlanViewClick = async () => {
+  const handlePlanViewClick = () => {
     setPopoverOpen(false)
-    const newWindow = window.open(
-      "about:blank",
-      "_blank",
-      "noopener,noreferrer",
-    )
-    try {
-      const detail = await getProjectDetail(Number(projectId))
-      if (detail.externalLink) {
-        if (newWindow) newWindow.location.href = detail.externalLink
-      } else {
-        if (newWindow) newWindow.close()
-        addToast({
-          message: "등록된 기획안 링크가 없습니다.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-      }
-    } catch {
-      if (newWindow) newWindow.close()
-      addToast({
-        message: "기획 보기를 불러오는 데 실패했습니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    }
+    const externalLink = projectDetailQuery.data?.externalLink
+    if (!externalLink) return
+    window.open(externalLink, "_blank", "noopener,noreferrer")
   }
 
   const handleTeamViewClick = () => {
@@ -287,7 +261,7 @@ export function ProjectManagementMoreMenu({
     { label: "지원 현황 확인하기", onClick: handleApplicationClick },
     {
       label: "기획 보기",
-      onClick: () => void handlePlanViewClick(),
+      onClick: handlePlanViewClick,
       disabled: isPlanViewDisabled,
     },
     { label: "팀원 구성 보기", onClick: handleTeamViewClick },
