@@ -611,12 +611,24 @@ export function ProjectDetailCard({
                 {(ctaMode === "apply-blocked-other" ||
                   ctaMode === "apply-blocked-approved" ||
                   ctaMode === "apply-blocked-part") && (
-                  <Button
-                    className="min-w-28 flex-1 whitespace-nowrap"
-                    disabled
-                  >
-                    지원하기
-                  </Button>
+                  <>
+                    <Button
+                      variant="weak"
+                      color="primary"
+                      className="min-w-32 flex-1 whitespace-nowrap"
+                      isLoading={isDetailLoading}
+                      disabled={!isDetailLoading && !detail?.applicationFormId}
+                      onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                    >
+                      모집 문항 보기
+                    </Button>
+                    <Button
+                      className="min-w-28 flex-1 whitespace-nowrap"
+                      disabled
+                    >
+                      지원하기
+                    </Button>
+                  </>
                 )}
               </>
             )}
