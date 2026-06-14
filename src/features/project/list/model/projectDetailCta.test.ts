@@ -4,6 +4,7 @@ import {
   isApplyButtonDisabled,
   resolveProjectDetailCtaMode,
   selectCurrentApplicationForProject,
+  selectIsAlreadyApproved,
 } from "./projectDetailCta"
 
 const applicable = {
@@ -204,5 +205,46 @@ describe("selectCurrentApplicationForProject", () => {
       activeMatchingRoundId: "2",
     })
     expect(result).toBeUndefined()
+  })
+})
+
+describe("selectIsAlreadyApproved", () => {
+  it("정규 차수에서 합격(APPROVED)한 지원서가 있으면 true", () => {
+    expect(
+      selectIsAlreadyApproved([
+        { status: "APPROVED", matchingRound: { id: "1" } },
+      ]),
+    ).toBe(true)
+  })
+
+  it("이전 차수에서 합격했으면 후속 차수에서도 true (합격자 후속 차수 차단 유지)", () => {
+    expect(
+      selectIsAlreadyApproved([
+        { status: "APPROVED", matchingRound: { id: "1" } },
+        { status: "SUBMITTED", matchingRound: { id: "2" } },
+      ]),
+    ).toBe(true)
+  })
+
+  it("랜덤매칭 카드(matchingRound.id=null)의 APPROVED는 차단 대상에서 제외하여 false", () => {
+    expect(
+      selectIsAlreadyApproved([
+        { status: "APPROVED", matchingRound: { id: null } },
+      ]),
+    ).toBe(false)
+  })
+
+  it("합격 이력이 없으면 false", () => {
+    expect(
+      selectIsAlreadyApproved([
+        { status: "SUBMITTED", matchingRound: { id: "1" } },
+        { status: "CANCELLED", matchingRound: { id: "2" } },
+      ]),
+    ).toBe(false)
+  })
+
+  it("빈 배열과 undefined는 false", () => {
+    expect(selectIsAlreadyApproved([])).toBe(false)
+    expect(selectIsAlreadyApproved(undefined)).toBe(false)
   })
 })

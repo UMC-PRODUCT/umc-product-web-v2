@@ -95,3 +95,18 @@ export function selectCurrentApplicationForProject<
     (a) => Number(a.matchingRound?.id) === Number(activeMatchingRoundId),
   )
 }
+
+type ApplicationForApprovalCheck = {
+  status: string
+  matchingRound: { id: string | null }
+}
+
+export function selectIsAlreadyApproved<T extends ApplicationForApprovalCheck>(
+  applications: T[] | undefined,
+): boolean {
+  return (
+    applications?.some(
+      (a) => a.status === "APPROVED" && a.matchingRound?.id != null,
+    ) ?? false
+  )
+}
