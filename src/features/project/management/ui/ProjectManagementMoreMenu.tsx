@@ -72,8 +72,12 @@ export function ProjectManagementMoreMenu({
   const projectDetailQuery = useQuery({
     queryKey: ["projectDetail", numericProjectId],
     queryFn: () => getProjectDetail(numericProjectId),
-    enabled: applicationOpen && numericProjectId > 0,
+    enabled: (applicationOpen || popoverOpen) && numericProjectId > 0,
+    staleTime: 5 * 60 * 1000,
   })
+
+  const isPlanViewDisabled =
+    !projectDetailQuery.isSuccess || !projectDetailQuery.data.externalLink
 
   const applicantsQuery = useQuery({
     queryKey: applicationKeys.applicants(numericProjectId),
@@ -237,37 +241,11 @@ export function ProjectManagementMoreMenu({
     })
   }
 
-  const handlePlanViewClick = async () => {
+  const handlePlanViewClick = () => {
     setPopoverOpen(false)
-    const newWindow = window.open(
-      "about:blank",
-      "_blank",
-      "noopener,noreferrer",
-    )
-    try {
-      const detail = await getProjectDetail(Number(projectId))
-      if (detail.externalLink) {
-        if (newWindow) newWindow.location.href = detail.externalLink
-      } else {
-        if (newWindow) newWindow.close()
-        addToast({
-          message: "등록된 기획안 링크가 없습니다.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-      }
-    } catch {
-      if (newWindow) newWindow.close()
-      addToast({
-        message: "기획 보기를 불러오는 데 실패했습니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    }
+    const externalLink = projectDetailQuery.data?.externalLink
+    if (!externalLink) return
+    window.open(externalLink, "_blank", "noopener,noreferrer")
   }
 
   const handleTeamViewClick = () => {
@@ -275,9 +253,17 @@ export function ProjectManagementMoreMenu({
     setTeamModalOpen(true)
   }
 
-  const menuItems = [
+  const menuItems: {
+    label: string
+    onClick: () => void
+    disabled?: boolean
+  }[] = [
     { label: "지원 현황 확인하기", onClick: handleApplicationClick },
-    { label: "기획 보기", onClick: () => void handlePlanViewClick() },
+    {
+      label: "기획 보기",
+      onClick: handlePlanViewClick,
+      disabled: isPlanViewDisabled,
+    },
     { label: "팀원 구성 보기", onClick: handleTeamViewClick },
   ]
 
@@ -285,6 +271,7 @@ export function ProjectManagementMoreMenu({
     menuItems.splice(2, 0, {
       label: "프로젝트 수정하기",
       onClick: handleEditClick,
+      disabled: isPermissionLoading,
     })
   }
 
@@ -309,13 +296,11 @@ export function ProjectManagementMoreMenu({
             </span>
 
             <div className="flex w-full flex-col">
-              {menuItems.map(({ label, onClick }) => (
+              {menuItems.map(({ label, onClick, disabled }) => (
                 <DropdownItem
                   key={label}
                   label={label}
-                  disabled={
-                    label === "프로젝트 수정하기" && isPermissionLoading
-                  }
+                  disabled={disabled}
                   onClick={onClick}
                 />
               ))}

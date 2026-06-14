@@ -5,6 +5,7 @@ import { DEFAULT_MATCHING_PROJECT_MOCK } from "@/features/project/list/model/mat
 import { cn } from "@/shared/lib/utils"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
+import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 
 import type {
   MatchingProject,
@@ -49,21 +50,10 @@ function CardBody({ data }: { data: MatchingProject }) {
   return (
     <div className="flex w-full min-w-0 flex-col items-stretch self-stretch">
       <div className="bg-teal-gray-200 relative z-0 aspect-[348/184] w-full min-w-0 shrink-0 self-stretch overflow-hidden">
-        {cover?.src ? (
-          <img
-            src={cover.src}
-            alt={cover.alt ?? `${data.title} 대표 이미지`}
-            className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="text-body-2-medium text-teal-gray-400 flex h-full w-full items-center justify-center py-1 text-center">
-            프로젝트 대표 이미지
-            <br />
-            348*184
-          </div>
-        )}
+        <ProjectThumbnail
+          src={cover?.src}
+          alt={cover?.alt ?? `${data.title} 대표 이미지`}
+        />
       </div>
 
       <div className="flex w-full min-w-0 flex-col items-start gap-4 p-5">
