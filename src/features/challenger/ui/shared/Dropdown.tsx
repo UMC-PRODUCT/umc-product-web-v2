@@ -157,7 +157,10 @@ export function Dropdown<T extends string | number>({
             })
           )}
           {isLoadingMore && (
-            <li className="text-body-2-medium text-teal-gray-400 px-4 py-3">
+            <li
+              role="presentation"
+              className="text-body-2-medium text-teal-gray-400 px-4 py-3"
+            >
               불러오는 중입니다.
             </li>
           )}
