@@ -12,6 +12,7 @@ import {
 } from "../model/matchingPeriod"
 
 const MAX_TIMER_DELAY_MS = 24 * 60 * 60 * 1000
+const BOUNDARY_PASS_MS = 50
 
 export function useIsMatchingPeriod() {
   const { data: me } = useMe()
@@ -32,7 +33,7 @@ export function useIsMatchingPeriod() {
     const boundary = getNextMatchingBoundary(rounds, now)
     if (!boundary) return
     const delay = Math.min(
-      Math.max(0, boundary.getTime() - now.getTime()) + 1000,
+      Math.max(0, boundary.getTime() - now.getTime()) + BOUNDARY_PASS_MS,
       MAX_TIMER_DELAY_MS,
     )
     const timer = setTimeout(() => setNow(new Date()), delay)
