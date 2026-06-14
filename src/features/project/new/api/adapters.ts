@@ -35,6 +35,10 @@ const SECTION_DISPLAY_NAME: Record<UiRoleKey, string> = {
   backend: "Backend",
 }
 
+function isUiRoleKey(id: string): id is UiRoleKey {
+  return id in SECTION_DISPLAY_NAME
+}
+
 const FIELD_TYPE_TO_API: Record<FieldType, ApplicationQuestionItem["type"]> = {
   text: "LONG_TEXT",
   radio: "RADIO",
@@ -107,7 +111,7 @@ function allowedPartsToSectionId(
 }
 
 function getSectionDisplayName(id: string, fallbackName: string): string {
-  return SECTION_DISPLAY_NAME[id as UiRoleKey] ?? fallbackName
+  return isUiRoleKey(id) ? SECTION_DISPLAY_NAME[id] : fallbackName
 }
 
 export function mapApplicationFormToSections(
