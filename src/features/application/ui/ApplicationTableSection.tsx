@@ -311,22 +311,29 @@ export function ApplicationTableSection({
                 }}
               />
 
-              {isExpanded && project.applicants.length > 0 && (
-                <div className="border-teal-gray-150 border-b-[3px] py-1">
-                  {project.applicants.map((applicant) => (
-                    <ApplicantDetailRow
-                      key={applicant.id}
-                      round={applicant.round}
-                      role={applicant.role}
-                      name={applicant.name}
-                      university={applicant.university}
-                      status={applicant.status}
-                      processedAt={applicant.processedAt}
-                      appliedAt={applicant.appliedAt}
-                    />
-                  ))}
-                </div>
-              )}
+              {isExpanded &&
+                (project.applicants.length > 0 ? (
+                  <div className="border-teal-gray-150 py-1">
+                    {project.applicants.map((applicant) => (
+                      <ApplicantDetailRow
+                        key={applicant.id}
+                        round={applicant.round}
+                        role={applicant.role}
+                        name={applicant.name}
+                        university={applicant.university}
+                        status={applicant.status}
+                        processedAt={applicant.processedAt}
+                        appliedAt={applicant.appliedAt}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border-teal-gray-150 flex h-17 items-center justify-center border-b-[3px]">
+                    <p className="text-body-2-medium text-teal-gray-400">
+                      아직 지원자가 없습니다
+                    </p>
+                  </div>
+                ))}
             </div>
           )
         })}
