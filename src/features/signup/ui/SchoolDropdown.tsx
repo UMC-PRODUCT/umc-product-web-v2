@@ -24,6 +24,7 @@ export function SchoolDropdown({
   const [searchQuery, setSearchQuery] = useState("")
   const containerRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const { schools, isLoading } = useSchools({ nameType: "short" })
 
@@ -41,6 +42,7 @@ export function SchoolDropdown({
   useEffect(() => {
     if (open) {
       setIsFocused(false)
+      inputRef.current?.focus()
     }
   }, [open])
 
@@ -133,6 +135,7 @@ export function SchoolDropdown({
           <div className="bg-teal-gray-50 shadow-inner-neutral-1 flex w-full items-center gap-2 rounded-[8px] py-3 pr-3.5 pl-3">
             <SearchIcon className="text-teal-gray-400 h-5 w-5" />
             <input
+              ref={inputRef}
               type="text"
               placeholder="검색"
               value={searchQuery}
