@@ -175,13 +175,31 @@ export function summaryToStats(
   summary: ChapterStatisticsResponse["summary"],
   projectIdToName: Map<string, string>,
   filterRound?: number, // 미지정 시 전 차수 합산, 0 = 완료된 차수 없음, N = N차까지 표시
+  variant: "application" | "matching" = "application",
 ): Omit<ApplicationStats, "universities"> {
-  // 차수별 지원 현황 (완료 차수 + 1차 최소 표시)
+  // 차수별 매칭 완료 수 (projectRoundStatistics에서 합산)
+  const matchedByPhase = new Map<string, number>()
+  if (variant === "matching") {
+    for (const p of summary.projectRoundStatistics) {
+      for (const r of p.matchingRounds) {
+        const phase = r.matchingRound.phase
+        matchedByPhase.set(
+          phase,
+          (matchedByPhase.get(phase) ?? 0) + Number(r.matchedMemberCount),
+        )
+      }
+    }
+  }
+
+  // 차수별 지원/매칭 현황 (완료 차수 + 1차 최소 표시)
   // filterRound=0(1차 진행 중)이어도 r.total(availableMemberCount)이 표시되도록 최소 1차 포함
   const rounds = summary.roundApplicationStatistics
     .map((r) => ({
       round: toRoundNumber(r.matchingRound.phase),
-      applied: Number(r.appliedMemberCount),
+      applied:
+        variant === "matching"
+          ? (matchedByPhase.get(r.matchingRound.phase) ?? 0)
+          : Number(r.appliedMemberCount),
       total: Number(r.availableMemberCount),
     }))
     .filter(
@@ -235,19 +253,19 @@ export function summaryToStats(
     2: "SECOND",
     3: "THIRD",
   }
+  const countField =
+    variant === "matching" ? "matchedMemberCount" : "appliedMemberCount"
   const topProjects: TopProject[] = summary.projectRoundStatistics
     .map((p) => {
       let count = 0
       if (filterRound === undefined) {
-        count = p.matchingRounds.reduce(
-          (s, r) => s + Number(r.appliedMemberCount),
-          0,
-        )
+        count = p.matchingRounds.reduce((s, r) => s + Number(r[countField]), 0)
       } else if (filterRound > 0) {
         const targetPhase = phaseMap[filterRound]
         count = Number(
-          p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)
-            ?.appliedMemberCount ?? 0,
+          p.matchingRounds.find((r) => r.matchingRound.phase === targetPhase)?.[
+            countField
+          ] ?? 0,
         )
       }
       return {

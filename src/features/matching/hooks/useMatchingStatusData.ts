@@ -268,6 +268,7 @@ export function useMatchingStatusData(chapterName?: string) {
       filteredSummary,
       projectIdToName,
       visibleUpToRound,
+      "matching",
     )
 
     if (topProjectsRound !== visibleUpToRound) {
@@ -283,7 +284,7 @@ export function useMatchingStatusData(chapterName?: string) {
           name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
           count: Number(
             p.matchingRounds.find((r) => r.matchingRound.phase === phaseKey)
-              ?.appliedMemberCount ?? 0,
+              ?.matchedMemberCount ?? 0,
           ),
         }))
         .sort(
