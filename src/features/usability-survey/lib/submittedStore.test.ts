@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest"
 
-import { hasSubmittedTemplate, markTemplateSubmitted } from "./submittedStore"
+import {
+  clearSubmittedTemplates,
+  hasSubmittedTemplate,
+  markTemplateSubmitted,
+} from "./submittedStore"
 
 const STORAGE_KEY = "usability-survey:submitted-templates"
 
@@ -35,5 +39,16 @@ describe("submittedStore", () => {
   it("손상된 JSON이 저장돼 있어도 안전하게 false를 반환한다", () => {
     localStorage.setItem(STORAGE_KEY, "not-json")
     expect(hasSubmittedTemplate(5)).toBe(false)
+  })
+
+  it("clearSubmittedTemplates는 기록을 모두 삭제한다", () => {
+    markTemplateSubmitted(1)
+    markTemplateSubmitted(3)
+
+    clearSubmittedTemplates()
+
+    expect(hasSubmittedTemplate(1)).toBe(false)
+    expect(hasSubmittedTemplate(3)).toBe(false)
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
   })
 })
