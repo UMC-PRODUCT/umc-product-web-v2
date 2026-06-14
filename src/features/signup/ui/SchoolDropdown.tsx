@@ -132,7 +132,7 @@ export function SchoolDropdown({
 
       {open && (
         <div className="border-teal-gray-50 shadow-drop-neutral-1 absolute top-full left-0 z-30 flex max-h-67.5 w-full flex-col items-center gap-0.5 rounded-[8px] border bg-white p-0.5">
-          <div className="bg-teal-gray-50 shadow-inner-neutral-1 flex w-full items-center gap-2 rounded-[8px] py-3 pr-3.5 pl-3">
+          <div className="bg-teal-gray-50 shadow-inner-neutral-1 flex h-11 w-full items-center gap-2 rounded-[8px] py-3 pr-3.5 pl-3">
             <SearchIcon className="text-teal-gray-400 h-5 w-5" />
             <input
               ref={inputRef}
