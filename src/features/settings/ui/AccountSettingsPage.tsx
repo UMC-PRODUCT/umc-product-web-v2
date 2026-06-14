@@ -45,7 +45,10 @@ export function AccountSettingsPage() {
   const [showPasswordChange, setShowPasswordChange] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
-  const [unlinkTarget, setUnlinkTarget] = useState<number | null>(null)
+  const [unlinkTarget, setUnlinkTarget] = useState<{
+    id: number
+    social: Social
+  } | null>(null)
   const navigate = useNavigate()
   const addToast = useToastStore((s) => s.addToast)
   const queryClient = useQueryClient()
@@ -140,7 +143,7 @@ export function AccountSettingsPage() {
         : social === "google"
           ? handleGoogleLink
           : handleAppleLink
-    const onUnlink = () => setUnlinkTarget(memberOAuthId!)
+    const onUnlink = () => setUnlinkTarget({ id: memberOAuthId!, social })
     return { linked, onClick: linked ? onUnlink : onLink }
   }
 
@@ -351,8 +354,14 @@ export function AccountSettingsPage() {
       <CtaModal
         open={unlinkTarget !== null}
         variant="error"
-        title="연동을 해제하시겠습니까?"
-        content="해제하면 해당 소셜 계정으로 로그인할 수 없게 됩니다."
+        title={`${unlinkTarget?.social === "kakao" ? "카카오" : unlinkTarget?.social === "apple" ? "애플" : "구글"} 계정 연동을 해제하시겠습니까?`}
+        content={
+          <>
+            계정 연동을 해제하더라도 기존 데이터는 안전하게 유지됩니다.
+            <br />
+            필요할 때 언제든 다시 연동하여 이용하실 수 있습니다.
+          </>
+        }
         cancelText="돌아가기"
         confirmText="연동 해제"
         onOpenChange={(open) => {
@@ -360,7 +369,8 @@ export function AccountSettingsPage() {
         }}
         onCancel={() => setUnlinkTarget(null)}
         onConfirm={() =>
-          unlinkTarget !== null && void handleUnlink(unlinkTarget)
+          unlinkTarget !== null &&
+          void handleUnlink(unlinkTarget.id, unlinkTarget.social)
         }
       />
 
