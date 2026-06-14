@@ -74,8 +74,8 @@ export function ProfileDropdown({
     if (refreshToken) {
       try {
         await apiLogout(refreshToken)
-      } catch (error) {
-        console.error("Failed to call logout API", error)
+      } catch {
+        console.error("Failed to call logout API")
       }
     }
     localLogout()
