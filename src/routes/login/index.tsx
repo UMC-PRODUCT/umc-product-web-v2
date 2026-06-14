@@ -19,7 +19,7 @@ import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
 import {
   Divider,
   LoginButton,
-  SmallDivider,
+  // SmallDivider,
   UmcLogoButton,
 } from "@/features/login"
 import { Button } from "@/shared/ui/Button"
@@ -117,11 +117,11 @@ function SocialLoginPage() {
 
             <div className="flex h-7 items-center gap-3">
               {/* TODO: 아이디/비밀번호 찾기 연동 */}
-              <TextButton className="text-body-1-regular text-teal-gray-500 flex items-center justify-center px-1 py-0.5">
+              {/* <TextButton className="text-body-1-regular text-teal-gray-500 flex items-center justify-center px-1 py-0.5">
                 아이디/비밀번호 찾기
               </TextButton>
 
-              <SmallDivider />
+              <SmallDivider /> */}
 
               <TextButton
                 onClick={() => navigate({ to: "/signup" })}
