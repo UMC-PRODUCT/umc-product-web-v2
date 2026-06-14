@@ -13,6 +13,8 @@ interface TextQuestionFieldProps {
   showCounter?: boolean
   error?: string
   className?: string
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  textareaRef?: React.RefObject<HTMLTextAreaElement | null>
 }
 
 export function TextQuestionField({
@@ -23,9 +25,12 @@ export function TextQuestionField({
   showCounter = true,
   error,
   className,
+  onKeyDown,
+  textareaRef: externalTextareaRef,
 }: TextQuestionFieldProps) {
   const [focused, setFocused] = useState(false)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const internalTextareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = externalTextareaRef || internalTextareaRef
   const state = error
     ? "error"
     : focused
@@ -39,7 +44,7 @@ export function TextQuestionField({
     if (!el) return
     el.style.height = "auto"
     el.style.height = `${el.scrollHeight}px`
-  }, [value])
+  }, [value, textareaRef])
 
   return (
     <div className="flex w-full flex-col gap-1">
@@ -56,6 +61,7 @@ export function TextQuestionField({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
+          onKeyDown={onKeyDown}
           className={cn(
             "text-body-1-regular text-teal-gray-900 placeholder:text-teal-gray-400",
             "w-full resize-none overflow-hidden border-none bg-transparent outline-none",

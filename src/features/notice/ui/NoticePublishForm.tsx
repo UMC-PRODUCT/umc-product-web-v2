@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useBlocker } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useAuthStore } from "@/features/auth/store/authStore"
 import { getMemberProfile } from "@/features/challenger/api/member"
@@ -48,6 +48,7 @@ export function NoticePublishForm({
   const [isLoading, setIsLoading] = useState(false)
   const [isDone, setIsDone] = useState(false)
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const memberId = useAuthStore((s) => s.memberId)
 
@@ -212,6 +213,58 @@ export function NoticePublishForm({
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const isMac =
+      typeof window !== "undefined" &&
+      /Mac|iPad|iPhone|iPod/.test(navigator.userAgent)
+    const hasModifier = isMac ? e.metaKey : e.ctrlKey
+
+    if (hasModifier && (e.key === "b" || e.key === "B")) {
+      e.preventDefault()
+
+      const textarea = textareaRef.current
+      if (!textarea) return
+
+      const selectionStart = textarea.selectionStart ?? 0
+      const selectionEnd = textarea.selectionEnd ?? 0
+      const text = textarea.value
+
+      const textBefore = text.substring(0, selectionStart)
+      const selectedText = text.substring(selectionStart, selectionEnd)
+      const textAfter = text.substring(selectionEnd)
+
+      let newText = ""
+      let newStart = selectionStart
+      let newEnd = selectionEnd
+
+      if (
+        selectedText.startsWith("**") &&
+        selectedText.endsWith("**") &&
+        selectedText.length >= 4
+      ) {
+        const unwrapped = selectedText.slice(2, -2)
+        newText = textBefore + unwrapped + textAfter
+        newStart = selectionStart
+        newEnd = selectionEnd - 4
+      } else if (textBefore.endsWith("**") && textAfter.startsWith("**")) {
+        newText = textBefore.slice(0, -2) + selectedText + textAfter.slice(2)
+        newStart = selectionStart - 2
+        newEnd = selectionEnd - 2
+      } else {
+        newText = textBefore + "**" + selectedText + "**" + textAfter
+        newStart = selectionStart + 2
+        newEnd = selectionEnd + 2
+      }
+
+      handleContentChange(newText)
+
+      requestAnimationFrame(() => {
+        textarea.focus()
+        textarea.setSelectionRange(newStart, newEnd)
+      })
+    }
+  }
+
   const handleRequiredToggle = () => {
     setIsRequired((prev) => !prev)
   }
@@ -321,6 +374,8 @@ export function NoticePublishForm({
             placeholder="내용을 입력하세요."
             maxLength={MAX_CHARS}
             className="bg-teal-gray-50 shadow-inner-neutral-2 data-[state=focus]:bg-teal-gray-50 flex flex-col gap-4 px-8 pt-6 pb-7.5"
+            onKeyDown={handleKeyDown}
+            textareaRef={textareaRef}
           />
         </div>
       </section>
