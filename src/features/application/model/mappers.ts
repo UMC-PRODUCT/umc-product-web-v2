@@ -220,27 +220,32 @@ export function summaryToStats(
   const completionRate =
     totalMembers > 0 ? Math.round((completedCount / totalMembers) * 100) : 0
 
-  // 프로젝트별 차수별 지원 현황 (완료된 차수만)
+  // 프로젝트별 차수별 지원/매칭 현황 (완료된 차수만)
+  const projectRoundField =
+    variant === "matching" ? "matchedMemberCount" : "appliedMemberCount"
   const projectRounds: ProjectRoundData[] = summary.projectRoundStatistics.map(
     (p) => ({
       name: projectIdToName.get(String(p.projectId)) ?? String(p.projectId),
       rounds: [
         filterRound === undefined || filterRound >= 1
           ? Number(
-              p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")
-                ?.appliedMemberCount ?? 0,
+              p.matchingRounds.find((r) => r.matchingRound.phase === "FIRST")?.[
+                projectRoundField
+              ] ?? 0,
             )
           : 0,
         filterRound === undefined || filterRound >= 2
           ? Number(
-              p.matchingRounds.find((r) => r.matchingRound.phase === "SECOND")
-                ?.appliedMemberCount ?? 0,
+              p.matchingRounds.find(
+                (r) => r.matchingRound.phase === "SECOND",
+              )?.[projectRoundField] ?? 0,
             )
           : 0,
         filterRound === undefined || filterRound >= 3
           ? Number(
-              p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")
-                ?.appliedMemberCount ?? 0,
+              p.matchingRounds.find((r) => r.matchingRound.phase === "THIRD")?.[
+                projectRoundField
+              ] ?? 0,
             )
           : 0,
       ],

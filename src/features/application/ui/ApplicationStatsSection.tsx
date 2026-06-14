@@ -284,7 +284,7 @@ export function ApplicationStatsSection({
       </div>
 
       {/* 프로젝트별 지원/매칭 현황 */}
-      <div className="flex flex-col gap-4 px-8 pt-7">
+      <div className="shadow-drop-neutral-3 border-teal-gray-100 flex flex-col gap-4 rounded-xl border bg-white px-8 py-7">
         <div className="flex items-center justify-between">
           <h3 className="text-heading-6-semibold text-teal-700">
             {labels.projectSectionTitle}
