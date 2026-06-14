@@ -111,6 +111,7 @@ const ctaParams = {
   hasOtherActiveApplication: false,
   isAlreadyApproved: false,
   isPartIneligible: false,
+  isPartRecruitClosed: false,
 }
 
 describe("resolveProjectDetailCtaMode", () => {
@@ -142,6 +143,22 @@ describe("resolveProjectDetailCtaMode", () => {
         isPartIneligible: true,
       }),
     ).toBe("apply-blocked-other")
+  })
+
+  it("내 파트 모집이 마감된 프로젝트면 apply-blocked-closed를 반환한다", () => {
+    expect(
+      resolveProjectDetailCtaMode({ ...ctaParams, isPartRecruitClosed: true }),
+    ).toBe("apply-blocked-closed")
+  })
+
+  it("내 파트 모집이 마감되어도 이미 지원한 프로젝트면 my-application을 우선한다", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isApplied: true,
+        isPartRecruitClosed: true,
+      }),
+    ).toBe("my-application")
   })
 })
 

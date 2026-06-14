@@ -5,6 +5,7 @@ export type ProjectDetailCtaMode =
   | "apply-blocked-other"
   | "apply-blocked-approved"
   | "apply-blocked-part"
+  | "apply-blocked-closed"
   | "plan-only"
 
 interface ResolveCtaParams {
@@ -15,6 +16,7 @@ interface ResolveCtaParams {
   hasOtherActiveApplication: boolean
   isAlreadyApproved: boolean
   isPartIneligible: boolean
+  isPartRecruitClosed: boolean
 }
 
 export function resolveProjectDetailCtaMode({
@@ -25,6 +27,7 @@ export function resolveProjectDetailCtaMode({
   hasOtherActiveApplication,
   isAlreadyApproved,
   isPartIneligible,
+  isPartRecruitClosed,
 }: ResolveCtaParams): ProjectDetailCtaMode {
   if (isOperator) return "recruit-questions"
   if (!isSameBranch) return "plan-only"
@@ -33,6 +36,7 @@ export function resolveProjectDetailCtaMode({
   if (isAlreadyApproved) return "apply-blocked-approved"
   if (hasOtherActiveApplication) return "apply-blocked-other"
   if (isPartIneligible) return "apply-blocked-part"
+  if (isPartRecruitClosed) return "apply-blocked-closed"
   return "apply"
 }
 
