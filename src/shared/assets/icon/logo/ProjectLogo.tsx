@@ -55,7 +55,7 @@ export function ProjectLogo({
         <img
           src={src}
           alt="project logo"
-          onError={() => setErroredSrc(src)}
+          onError={() => setErroredSrc(src ?? null)}
           className="h-full w-full object-cover"
         />
       )}
