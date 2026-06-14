@@ -107,7 +107,7 @@ export function Dropdown<T extends string | number>({
             if (remaining <= 24) onReachEnd()
           }}
           className={cn(
-            "border-teal-gray-50 shadow-drop-neutral-1 scrollbar-hide absolute top-[calc(100%+0.25rem)] left-0 z-30 flex max-h-60 w-full flex-col overflow-y-auto rounded-[12px] border bg-white p-0.5",
+            "border-teal-gray-50 shadow-drop-neutral-1 scrollbar-none absolute top-[calc(100%+0.25rem)] left-0 z-30 flex max-h-60 w-full flex-col overflow-y-auto rounded-[12px] border bg-white p-0.5",
             panelClassName,
           )}
         >
