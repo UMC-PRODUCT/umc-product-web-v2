@@ -76,8 +76,8 @@ export function ProjectManagementMoreMenu({
     staleTime: 5 * 60 * 1000,
   })
 
-  const hasNoPlanLink =
-    projectDetailQuery.isSuccess && !projectDetailQuery.data.externalLink
+  const isPlanViewDisabled =
+    !projectDetailQuery.isSuccess || !projectDetailQuery.data.externalLink
 
   const applicantsQuery = useQuery({
     queryKey: applicationKeys.applicants(numericProjectId),
@@ -288,7 +288,7 @@ export function ProjectManagementMoreMenu({
     {
       label: "기획 보기",
       onClick: () => void handlePlanViewClick(),
-      disabled: hasNoPlanLink,
+      disabled: isPlanViewDisabled,
     },
     { label: "팀원 구성 보기", onClick: handleTeamViewClick },
   ]
