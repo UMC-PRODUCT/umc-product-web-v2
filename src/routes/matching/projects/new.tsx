@@ -222,12 +222,10 @@ function ProjectRegisterPage() {
     !isEditMode && projectWritePermissionQuery.isPending
   const canManageProject = projectPermissionsQuery.canManage
   const canManageRecruitInfoByRole = canManageProjectRecruitInfo(me)
-  const canEditRecruitStep = isEditMode
-    ? canManageProject
-    : canManageRecruitInfoByRole
+  const canEditRecruitStep = isEditMode ? canManageProject : false
 
   const resolveCanEditRecruitStep = async (): Promise<boolean> => {
-    if (!isEditMode) return canManageRecruitInfoByRole
+    if (!isEditMode) return false
 
     const pid = useProjectRegisterStore.getState().projectId
     if (pid === null) return false
