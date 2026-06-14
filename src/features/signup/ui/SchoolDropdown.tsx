@@ -125,7 +125,7 @@ export function SchoolDropdown({
         )}
       >
         <span className="truncate">{displayLabel}</span>
-        <DownChevronIcon className="text-teal-gray-400 size-4 shrink-0" />
+        <DownChevronIcon className="text-teal-gray-400 size-6 shrink-0" />
       </button>
 
       {open && (
