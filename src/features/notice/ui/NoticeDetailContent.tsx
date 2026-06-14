@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 
+import { MarkdownRenderer } from "@/shared/ui/MarkdownRenderer"
+
 import { getNoticeDetail } from "../api/noticeApi"
 import { NoticeDetailSkeleton } from "./NoticeDetailSkeleton"
 
@@ -30,9 +32,7 @@ export function NoticeDetailContent({ noticeId }: NoticeDetailContentProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-body-1-regular text-teal-gray-900 whitespace-pre-wrap">
-        {data.content}
-      </div>
+      <MarkdownRenderer content={data.content} />
 
       {data.images && data.images.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-4">

@@ -28,6 +28,7 @@ import {
 import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
+import { MarkdownRenderer } from "@/shared/ui/MarkdownRenderer"
 import { Pagination } from "@/shared/ui/Pagination"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { useViewModeStore } from "@/shared/view-mode"
@@ -374,9 +375,7 @@ function TeamMatchingAnnouncePage() {
                 if (defaultContent !== undefined) {
                   return (
                     <div className="flex flex-col gap-4">
-                      <div className="text-body-1-regular text-teal-gray-900 whitespace-pre-wrap">
-                        {defaultContent}
-                      </div>
+                      <MarkdownRenderer content={defaultContent} />
                     </div>
                   )
                 }
