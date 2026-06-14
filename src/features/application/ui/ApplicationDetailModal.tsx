@@ -146,12 +146,15 @@ export function ApplicationDetailModal({
       queryClient.invalidateQueries({ queryKey: applicationKeys.all })
     },
     onError: (error, variables) => {
-      // 서버 에러 메시지 토스트
+      // 서버 에러 메시지 -> 사용자 친화 문구 변환
       const serverMessage = isAxiosError(error)
         ? error.response?.data?.message
         : undefined
+      const displayMessage = serverMessage?.includes("최소 선발 인원")
+        ? "팀 인원이 부족해 지금은 불합격 처리할 수 없습니다."
+        : (serverMessage ?? "배정 상태 변경에 실패했습니다.")
       addToast({
-        message: serverMessage ?? "배정 상태 변경에 실패했습니다.",
+        message: displayMessage,
         color: "red",
         variant: "deep",
         type: "default",
