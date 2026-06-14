@@ -20,7 +20,7 @@ import {
   isChapterPresident,
   isCurrentTermPm,
   isOperator,
-  isSchoolStaff,
+  isSchoolLeadership,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
@@ -55,12 +55,12 @@ function MatchingApplicationsPage() {
   // 지부장 본인 지부 추적 (auto-select 후 갱신)
   const ownChapter = useRef<string>(defaultChapter)
 
-  const canApprove = isOperator(viewMe)
-  // 지부장 본인 지부만 조회 가능 (SUPER_ADMIN/중앙 운영진 제외)
+  const canApprove = isOperator(viewMe) || isSchoolLeadership(viewMe)
+  // 지부장·학교 회장: 본인 지부만 조회 가능 (SUPER_ADMIN/중앙 운영진 제외)
   const isRestrictedToChapter =
-    isChapterPresident(me) && !isSuperAdmin(me) && !isCentralStaff(me)
-  // SCHOOL_PRESIDENT 등 학교 운영진: APPLY-101 목록 조회 가능, APPLY-102 상세 불가
-  const isSchoolView = !canApprove && isSchoolStaff(viewMe)
+    (isChapterPresident(me) || isSchoolLeadership(me)) &&
+    !isSuperAdmin(me) &&
+    !isCentralStaff(me)
   const isPm = isCurrentTermPm(viewMe)
   const isOthers = !isAnyOperator(viewMe) && !isPm
 
@@ -82,11 +82,7 @@ function MatchingApplicationsPage() {
     }
   }, [me, chapters, userChapter])
 
-  // SCHOOL_PRESIDENT: 챕터 필터 없이 조회 후 프론트에서 본인 학교 프로젝트만 필터링
-  const admin = useAdminPageData(
-    selectedChapter,
-    isSchoolView ? (me?.schoolName ?? undefined) : undefined,
-  )
+  const admin = useAdminPageData(selectedChapter)
   const adminStats = admin.stats
   const adminProjects = admin.projects
 
@@ -146,49 +142,6 @@ function MatchingApplicationsPage() {
                     projects={adminProjects}
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {isSchoolView && (
-            <div className="flex w-263 flex-col gap-13">
-              <SegmentButton
-                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
-                value={selectedChapter}
-                onValueChange={(v) => {
-                  if (v !== selectedChapter) {
-                    addToast({
-                      message: "본인 학교의 지원 현황만 조회할 수 있습니다.",
-                      color: "red",
-                      variant: "deep",
-                      type: "default",
-                      duration: 3000,
-                    })
-                  }
-                }}
-                className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
-                itemClassName="min-w-0 flex-1 basis-0 shrink px-2"
-              />
-              {admin.isLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <p className="text-body-2-regular text-teal-gray-400">
-                    데이터를 불러오는 중...
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-14.25">
-                  <ApplicationStatsSection
-                    stats={adminStats}
-                    dataUpdatedAt={admin.dataUpdatedAt}
-                    currentRound={admin.currentRound}
-                    activeRound={admin.activeRound}
-                  />
-                  <ApplicationTableSection
-                    projects={adminProjects}
-                    currentRound={admin.currentRound}
-                    disableFormPanel
                   />
                 </div>
               )}
