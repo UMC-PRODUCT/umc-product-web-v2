@@ -215,7 +215,9 @@ export function ProjectApplyModal({
           const gisu = await getActiveGisu().catch(() => null)
           if (gisu) {
             const apps: MyProjectApplicationResponse[] =
-              await getMyApplications(Number(gisu.gisuId)).catch(() => [])
+              await getMyApplications(Number(gisu.gisuId), "DRAFT").catch(
+                () => [],
+              )
             const existing = selectCurrentApplicationForProject({
               applications: apps,
               projectId,

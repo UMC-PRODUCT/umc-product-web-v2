@@ -171,10 +171,11 @@ export type MyProjectApplicationResponse = {
 
 export async function getMyApplications(
   gisuId: number,
+  status?: ApplicationStatus,
 ): Promise<MyProjectApplicationResponse[]> {
   const { data } = await api.get<ApiResponse<MyProjectApplicationResponse[]>>(
     "/v1/projects/me/applications",
-    { params: { gisuId } },
+    { params: status ? { gisuId, status } : { gisuId } },
   )
   return data.result
 }

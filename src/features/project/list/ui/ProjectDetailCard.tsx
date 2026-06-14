@@ -39,6 +39,7 @@ import {
   isApplyButtonDisabled,
   resolveProjectDetailCtaMode,
   selectCurrentApplicationForProject,
+  selectIsAlreadyApproved,
 } from "../model/projectDetailCta"
 import { ApplyFormSkeleton } from "./apply-modal/ApplyFormSkeleton"
 import { MyApplicationModal } from "./apply-modal/MyApplicationModal"
@@ -245,8 +246,7 @@ export function ProjectDetailCard({
     return id != null ? Number(id) : null
   }, [me])
 
-  const isAlreadyApproved =
-    myApplications?.some((a) => a.status === "APPROVED") ?? false
+  const isAlreadyApproved = selectIsAlreadyApproved(myApplications)
 
   const data = detail
     ? toMatchingProject(detail, detailDataUpdatedAt)
