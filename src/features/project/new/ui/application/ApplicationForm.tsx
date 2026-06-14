@@ -242,6 +242,7 @@ export const ApplicationForm = forwardRef<
                 focused={form.focusedId === q.id}
                 isError={errorQuestionIds.includes(q.id)}
                 canDelete={form.commonQuestions.length > 1}
+                showFocusIndicator={false}
                 onFocus={() => form.setFocusedId(q.id)}
                 onUpdate={(patch) => {
                   form.updateCommonQuestion(q.id, patch)
@@ -259,7 +260,7 @@ export const ApplicationForm = forwardRef<
               onChange={(fieldType) =>
                 form.updateCommonQuestion(
                   focusedCommon.id,
-                  getFieldTypePatch(fieldType, focusedCommon.fieldType),
+                  getFieldTypePatch(fieldType, focusedCommon),
                 )
               }
               onAddAfter={() => form.addCommonQuestion(focusedCommon.id)}
@@ -325,7 +326,7 @@ export const ApplicationForm = forwardRef<
                         focusedSectionEntry.question.id,
                         getFieldTypePatch(
                           fieldType,
-                          focusedSectionEntry.question.fieldType,
+                          focusedSectionEntry.question,
                         ),
                       )
                     }

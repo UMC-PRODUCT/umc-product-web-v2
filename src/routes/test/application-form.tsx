@@ -86,7 +86,7 @@ function ApplicationFormTestPage() {
               onChange={(fieldType) =>
                 form.updateCommonQuestion(
                   focusedCommon.id,
-                  getFieldTypePatch(fieldType, focusedCommon.fieldType),
+                  getFieldTypePatch(fieldType, focusedCommon),
                 )
               }
               onAddAfter={() => form.addCommonQuestion(focusedCommon.id)}
@@ -148,7 +148,7 @@ function ApplicationFormTestPage() {
                         focusedSectionEntry.question.id,
                         getFieldTypePatch(
                           fieldType,
-                          focusedSectionEntry.question.fieldType,
+                          focusedSectionEntry.question,
                         ),
                       )
                     }

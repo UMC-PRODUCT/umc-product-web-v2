@@ -31,7 +31,7 @@ function FieldTypeButtonTestPage() {
         FieldTypeButton Test Page
       </h1>
 
-      <div className="flex w-[900px] flex-col items-center gap-4">
+      <div className="flex w-225 flex-col items-center gap-4">
         <FieldTypeButtonGroup
           options={FIELD_TYPES}
           selected={selected}

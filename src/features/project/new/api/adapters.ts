@@ -29,6 +29,12 @@ const SECTION_TO_ALLOWED_PARTS: Record<UiRoleKey, ApiPart[]> = {
   backend: ["SPRINGBOOT", "NODEJS"],
 }
 
+const SECTION_DISPLAY_NAME: Record<UiRoleKey, string> = {
+  design: "Design",
+  frontend: "Frontend",
+  backend: "Backend",
+}
+
 const FIELD_TYPE_TO_API: Record<FieldType, ApplicationQuestionItem["type"]> = {
   text: "LONG_TEXT",
   radio: "RADIO",
@@ -58,6 +64,9 @@ export function buildPartQuotasEntries(
 }
 
 function toApiQuestion(q: Question, idx: number): ApplicationQuestionItem {
+  const options =
+    q.fieldType === "radio" || q.fieldType === "checkbox" ? q.options : []
+
   return {
     ...(q.questionId !== undefined && { questionId: q.questionId }),
     type: FIELD_TYPE_TO_API[q.fieldType],
@@ -65,7 +74,7 @@ function toApiQuestion(q: Question, idx: number): ApplicationQuestionItem {
     description: q.caption || undefined,
     isRequired: q.required,
     orderNo: idx,
-    options: q.options.map((opt, i) => ({
+    options: options.map((opt, i) => ({
       content: opt.content,
       orderNo: i,
       ...(opt.optionId !== undefined && { optionId: opt.optionId }),
@@ -95,6 +104,10 @@ function allowedPartsToSectionId(
     return "frontend"
   if (partsSet.has("SPRINGBOOT") || partsSet.has("NODEJS")) return "backend"
   return String(fallbackId)
+}
+
+function getSectionDisplayName(id: string, fallbackName: string): string {
+  return SECTION_DISPLAY_NAME[id as UiRoleKey] ?? fallbackName
 }
 
 export function mapApplicationFormToSections(
@@ -135,7 +148,7 @@ export function mapApplicationFormToSections(
 
       return {
         id,
-        name: apiSection.title,
+        name: getSectionDisplayName(id, apiSection.title),
         isEnabled: true,
         questions,
       }

@@ -13,6 +13,8 @@ export interface Question {
   fieldType: FieldType
   required: boolean
   options: QuestionOption[]
+  draftTitle?: string
+  draftOptions?: QuestionOption[]
 }
 
 export interface Section {
@@ -34,13 +36,32 @@ export const PORTFOLIO_FIXED_TITLE =
 
 export function getFieldTypePatch(
   fieldType: FieldType,
-  prevFieldType: FieldType,
+  question: Question,
 ): Partial<Question> {
-  const base: Partial<Question> = { fieldType, options: [] }
+  const prevFieldType = question.fieldType
+  const prevOptions = question.options
+  const prevDraftOptions = question.draftOptions
+  const isPrevOptionField =
+    prevFieldType === "radio" || prevFieldType === "checkbox"
+  const isNextOptionField = fieldType === "radio" || fieldType === "checkbox"
+  const base: Partial<Question> = { fieldType }
+
+  if (isPrevOptionField && !isNextOptionField) {
+    base.options = []
+    base.draftOptions = prevOptions
+  } else if (isNextOptionField) {
+    base.options = isPrevOptionField ? prevOptions : (prevDraftOptions ?? [])
+  } else {
+    base.options = []
+  }
+
   if (fieldType === "portfolio") {
+    if (prevFieldType !== "portfolio") {
+      base.draftTitle = question.title
+    }
     base.title = PORTFOLIO_FIXED_TITLE
   } else if (prevFieldType === "portfolio") {
-    base.title = ""
+    base.title = question.draftTitle ?? ""
   }
   return base
 }
