@@ -228,7 +228,7 @@ export function ApplicationStatsSection({
               <div className="flex flex-1 items-center justify-center">
                 <p className="text-body-2-medium text-teal-gray-300">
                   {variant === "matching"
-                    ? "아직 매칭 완료된 챌린저가 없습니다"
+                    ? "현재 매칭 완료된 챌린저가 없습니다"
                     : "아직 지원자가 없습니다"}
                 </p>
               </div>
