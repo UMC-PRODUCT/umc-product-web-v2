@@ -320,8 +320,8 @@ export function ProjectApplyModal({
     try {
       if (!isDevMatchingRound && applicationId !== null) {
         const answers = buildAnswerPayload(formValues, sections, sectionEnabled)
-        await saveApplicationDraft(projectId, applicationId, answers)
-        await submitApplication(projectId, applicationId)
+        await saveApplicationDraft(projectId, answers)
+        await submitApplication(projectId)
       }
       setIsCompleteModalOpen(true)
     } catch (err) {

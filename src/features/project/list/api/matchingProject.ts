@@ -231,11 +231,10 @@ export async function createApplicationDraft(
 
 export async function saveApplicationDraft(
   projectId: number,
-  applicationId: number,
   answers: ApplicationAnswerItem[],
 ): Promise<ApplicationStatusResponse> {
   const { data } = await api.put<ApiResponse<ApplicationStatusResponse>>(
-    `/v1/projects/${projectId}/applications/${applicationId}`,
+    `/v1/projects/${projectId}/applications/me`,
     { answers },
   )
   return data.result
@@ -243,10 +242,9 @@ export async function saveApplicationDraft(
 
 export async function submitApplication(
   projectId: number,
-  applicationId: number,
 ): Promise<ApplicationStatusResponse> {
   const { data } = await api.post<ApiResponse<ApplicationStatusResponse>>(
-    `/v1/projects/${projectId}/applications/${applicationId}/submit`,
+    `/v1/projects/${projectId}/applications/me/submit`,
   )
   return data.result
 }
