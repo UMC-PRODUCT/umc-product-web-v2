@@ -29,6 +29,7 @@ import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestSocialButtonRouteImport } from './routes/test/social-button'
 import { Route as TestRatingFaceRouteImport } from './routes/test/rating-face'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
+import { Route as TestProjectImageCropRouteImport } from './routes/test/project-image-crop'
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
 import { Route as TestMatchingProjectsRouteImport } from './routes/test/matching-projects'
 import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
@@ -162,6 +163,11 @@ const TestRatingFaceRoute = TestRatingFaceRouteImport.update({
 const TestQuestionFormRoute = TestQuestionFormRouteImport.update({
   id: '/test/question-form',
   path: '/test/question-form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestProjectImageCropRoute = TestProjectImageCropRouteImport.update({
+  id: '/test/project-image-crop',
+  path: '/test/project-image-crop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestOptionButtonRoute = TestOptionButtonRouteImport.update({
@@ -373,6 +379,7 @@ export interface FileRoutesByFullPath {
   '/test/input-box': typeof TestInputBoxRoute
   '/test/matching-projects': typeof TestMatchingProjectsRoute
   '/test/option-button': typeof TestOptionButtonRoute
+  '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
@@ -426,6 +433,7 @@ export interface FileRoutesByTo {
   '/test/input-box': typeof TestInputBoxRoute
   '/test/matching-projects': typeof TestMatchingProjectsRoute
   '/test/option-button': typeof TestOptionButtonRoute
+  '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
@@ -482,6 +490,7 @@ export interface FileRoutesById {
   '/test/input-box': typeof TestInputBoxRoute
   '/test/matching-projects': typeof TestMatchingProjectsRoute
   '/test/option-button': typeof TestOptionButtonRoute
+  '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
@@ -540,6 +549,7 @@ export interface FileRouteTypes {
     | '/test/input-box'
     | '/test/matching-projects'
     | '/test/option-button'
+    | '/test/project-image-crop'
     | '/test/question-form'
     | '/test/rating-face'
     | '/test/social-button'
@@ -593,6 +603,7 @@ export interface FileRouteTypes {
     | '/test/input-box'
     | '/test/matching-projects'
     | '/test/option-button'
+    | '/test/project-image-crop'
     | '/test/question-form'
     | '/test/rating-face'
     | '/test/social-button'
@@ -648,6 +659,7 @@ export interface FileRouteTypes {
     | '/test/input-box'
     | '/test/matching-projects'
     | '/test/option-button'
+    | '/test/project-image-crop'
     | '/test/question-form'
     | '/test/rating-face'
     | '/test/social-button'
@@ -701,6 +713,7 @@ export interface RootRouteChildren {
   TestInputBoxRoute: typeof TestInputBoxRoute
   TestMatchingProjectsRoute: typeof TestMatchingProjectsRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
+  TestProjectImageCropRoute: typeof TestProjectImageCropRoute
   TestQuestionFormRoute: typeof TestQuestionFormRoute
   TestRatingFaceRoute: typeof TestRatingFaceRoute
   TestSocialButtonRoute: typeof TestSocialButtonRoute
@@ -855,6 +868,13 @@ declare module '@tanstack/react-router' {
       path: '/test/question-form'
       fullPath: '/test/question-form'
       preLoaderRoute: typeof TestQuestionFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/project-image-crop': {
+      id: '/test/project-image-crop'
+      path: '/test/project-image-crop'
+      fullPath: '/test/project-image-crop'
+      preLoaderRoute: typeof TestProjectImageCropRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/option-button': {
@@ -1226,6 +1246,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestInputBoxRoute: TestInputBoxRoute,
   TestMatchingProjectsRoute: TestMatchingProjectsRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,
+  TestProjectImageCropRoute: TestProjectImageCropRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
   TestRatingFaceRoute: TestRatingFaceRoute,
   TestSocialButtonRoute: TestSocialButtonRoute,
