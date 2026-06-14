@@ -26,7 +26,10 @@ import {
   SmallDivider,
   UmcLogoButton,
 } from "@/features/login"
+import { emailSchema } from "@/features/signup/validation"
+import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
+import { TextButton } from "@/shared/ui/button/TextButton"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
 export const Route = createFileRoute("/login/default")({
@@ -100,6 +103,12 @@ function DefaultLoginPage() {
   const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (isDisabled || isLoading) return
+
+    if (!emailSchema.safeParse(email).success) {
+      setLoginError("@를 포함한 이메일 형식의 아이디를 입력해 주세요")
+      return
+    }
+
     setIsLoading(true)
     setLoginError("")
 
@@ -116,7 +125,7 @@ function DefaultLoginPage() {
       await navigate({ to: "/" })
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.")
+        setLoginError("이메일 또는 비밀번호가 올바르지 않습니다")
       } else {
         showToast("잠시 후 다시 시도해 주세요.", "red")
       }
@@ -146,6 +155,16 @@ function DefaultLoginPage() {
                     setEmail(e.target.value)
                     if (loginError) setLoginError("")
                   }}
+                  onBlur={() => {
+                    if (
+                      email.trim() !== "" &&
+                      !emailSchema.safeParse(email).success
+                    ) {
+                      setLoginError(
+                        "@를 포함한 이메일 형식의 아이디를 입력해 주세요",
+                      )
+                    }
+                  }}
                 />
 
                 <Input
@@ -172,9 +191,14 @@ function DefaultLoginPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <p className="text-body-2-medium text-error-500 h-5.5 text-center">
-                  {loginError}
+              <div className="flex w-full flex-col gap-2">
+                <p className="text-body-2-medium text-error-500 flex h-5.5 items-center gap-1 text-left">
+                  {loginError && (
+                    <>
+                      <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                      {loginError}
+                    </>
+                  )}
                 </p>
 
                 <Button
@@ -192,18 +216,18 @@ function DefaultLoginPage() {
             </form>
             <div className="flex h-7 items-center gap-3">
               {/* TODO: 아이디/비밀번호 찾기 연동 */}
-              <button className="text-body-1-regular text-teal-gray-500 flex items-center justify-center px-1 py-0.5">
+              <TextButton className="text-body-1-regular text-teal-gray-500 flex items-center justify-center px-1 py-0.5">
                 아이디/비밀번호 찾기
-              </button>
+              </TextButton>
 
               <SmallDivider />
 
-              <button
+              <TextButton
                 onClick={() => navigate({ to: "/signup" })}
                 className="text-body-1-regular flex items-center justify-center px-1 py-0.5 text-teal-500"
               >
                 회원가입
-              </button>
+              </TextButton>
             </div>
           </div>
           <div className="flex flex-col items-center gap-4">

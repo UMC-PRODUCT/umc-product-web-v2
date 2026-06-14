@@ -40,3 +40,7 @@ export async function changePassword(
 ): Promise<void> {
   await api.patch("/v1/auth/password", payload)
 }
+
+export async function logout(refreshToken: string) {
+  await api.post("/v1/auth/logout", { refreshToken })
+}

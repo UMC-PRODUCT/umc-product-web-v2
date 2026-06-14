@@ -23,6 +23,7 @@ import {
 } from "@/features/signup"
 import { type SignUpFormData, signUpSchema } from "@/features/signup/validation"
 import { Button } from "@/shared/ui/Button"
+import { TextButton } from "@/shared/ui/button/TextButton"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import type {
@@ -569,16 +570,12 @@ function SignUpPage() {
                 {currentStep === "TERMS" ? "가입하기" : "다음"}
               </Button>
 
-              <button
+              <TextButton
                 onClick={() => navigate({ to: "/login" })}
-                className="px-1 py-0.5"
+                className="text-body-1-regular text-teal-gray-500 hover:decoration-teal-gray-500 px-1 py-0.5 text-center"
               >
-                <span className="text-body-1-regular text-teal-gray-500">
-                  {currentStep === "EMAIL"
-                    ? "이미 계정이 있어요"
-                    : "로그인으로"}
-                </span>
-              </button>
+                {currentStep === "EMAIL" ? "이미 계정이 있어요" : "로그인으로"}
+              </TextButton>
             </div>
           </div>
         </div>

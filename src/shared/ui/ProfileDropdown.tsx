@@ -2,14 +2,17 @@ import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
 import GenerationListItem from "@/components/header/GenerationListItem"
+import { logout as apiLogout } from "@/features/auth/api/credentials"
 import { useMe } from "@/features/auth/hooks/useMe"
-import { logout } from "@/features/auth/lib/logout"
+import { logout as localLogout } from "@/features/auth/lib/logout"
 import { isCentralStaff, isSuperAdmin } from "@/features/auth/model/identity"
 import { toRoleTag } from "@/features/auth/model/mappers"
+import { useAuthStore } from "@/features/auth/store/authStore"
 import { useSelectedChallengerStore } from "@/features/auth/store/selectedChallengerStore"
 import { cn } from "@/shared/lib/utils"
 
 import ProfileIcon from "../assets/icon/people/ProfileIcon"
+import { TextButton } from "./button/TextButton"
 import { RoleTagChip } from "./chip/RoleTagChip"
 
 interface ProfileDropdownProps {
@@ -65,6 +68,18 @@ export function ProfileDropdown({
 
   const navigate = useNavigate()
   const role = me?.roles?.[0] ? toRoleTag(me.roles[0].roleType) : "challenger"
+
+  const handleLogout = async () => {
+    const refreshToken = useAuthStore.getState().refreshToken
+    if (refreshToken) {
+      try {
+        await apiLogout(refreshToken)
+      } catch (error) {
+        console.error("Failed to call logout API", error)
+      }
+    }
+    localLogout()
+  }
 
   return (
     <div ref={containerRef} className="relative">
@@ -166,33 +181,22 @@ export function ProfileDropdown({
           {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결/로그아웃 API 연동 */}
           <div className="flex flex-col gap-1 px-1.5">
             {canManageMembers && (
-              <button
-                type="button"
-                className="hover:decoration-teal-gray-700 h-6 w-15 text-left hover:underline"
-              >
-                <span className="text-body-2-medium text-teal-gray-700">
-                  기수 관리
-                </span>
-              </button>
+              <TextButton className="text-body-2-medium text-teal-gray-700 hover:decoration-teal-gray-700 h-6 w-15">
+                기수 관리
+              </TextButton>
             )}
-            <button
-              type="button"
-              className="hover:decoration-teal-gray-700 h-6 w-15 text-left hover:underline"
+            <TextButton
               onClick={() => navigate({ to: "/settings" })}
+              className="text-body-2-medium text-teal-gray-700 hover:decoration-teal-gray-700 h-6 w-15"
             >
-              <span className="text-body-2-medium text-teal-gray-700">
-                계정 설정
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={logout}
-              className="hover:decoration-error-500 h-6 w-15 text-left hover:underline"
+              계정 설정
+            </TextButton>
+            <TextButton
+              onClick={() => void handleLogout()}
+              className="text-body-2-medium text-error-500 hover:decoration-error-500 h-6 w-15"
             >
-              <span className="text-body-2-medium text-error-500">
-                로그아웃
-              </span>
-            </button>
+              로그아웃
+            </TextButton>
           </div>
         </div>
       )}
