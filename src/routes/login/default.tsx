@@ -116,7 +116,7 @@ function DefaultLoginPage() {
       await navigate({ to: "/" })
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.")
+        setLoginError("이메일 또는 비밀번호가 올바르지 않습니다")
       } else {
         showToast("잠시 후 다시 시도해 주세요.", "red")
       }
@@ -172,8 +172,8 @@ function DefaultLoginPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <p className="text-body-2-medium text-error-500 h-5.5 text-center">
+              <div className="flex w-full flex-col gap-2">
+                <p className="text-body-2-medium text-error-500 h-5.5 text-left">
                   {loginError}
                 </p>
 
