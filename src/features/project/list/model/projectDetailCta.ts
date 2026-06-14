@@ -13,6 +13,7 @@ interface ResolveCtaParams {
   isPm: boolean
   isSameBranch: boolean
   isApplied: boolean
+  isDraftApplication?: boolean
   hasOtherActiveApplication: boolean
   isAlreadyApproved: boolean
   isPartIneligible: boolean
@@ -24,6 +25,7 @@ export function resolveProjectDetailCtaMode({
   isPm,
   isSameBranch,
   isApplied,
+  isDraftApplication = false,
   hasOtherActiveApplication,
   isAlreadyApproved,
   isPartIneligible,
@@ -32,6 +34,7 @@ export function resolveProjectDetailCtaMode({
   if (isOperator) return "recruit-questions"
   if (!isSameBranch) return "plan-only"
   if (isPm) return "recruit-questions"
+  if (isApplied && isDraftApplication) return "apply"
   if (isApplied) return "my-application"
   if (isAlreadyApproved) return "apply-blocked-approved"
   if (hasOtherActiveApplication) return "apply-blocked-other"

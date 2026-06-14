@@ -1,6 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AxiosError } from "axios"
-import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { Controller, useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -26,6 +33,7 @@ import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 import {
   createApplicationDraft,
+  getApplicationDetail,
   getMyApplications,
   saveApplicationDraft,
   submitApplication,
@@ -37,6 +45,7 @@ import {
   isApplyPortfolioValue,
   isUploadedFileValue,
 } from "../../model/applyAnswerPayload"
+import { buildFormValuesFromDetail } from "../../model/applyDraftHydration"
 import {
   buildApplyAnswersSchema,
   defaultByFieldType,
@@ -44,6 +53,7 @@ import {
 } from "../../model/applyValidation"
 import { isRecruitDone } from "../../model/matchingProject"
 import { selectCurrentApplicationForProject } from "../../model/projectDetailCta"
+import { ApplyFormSkeleton } from "./ApplyFormSkeleton"
 import { ApplyProjectTitleCard } from "./ApplyProjectTitleCard"
 
 import type { FieldErrors, Resolver } from "react-hook-form"
@@ -159,25 +169,41 @@ interface ProjectApplyModalProps {
   sections: Section[]
   canToggleSection?: boolean
   onBack: () => void
+  onDraftSaved?: () => void
   onSubmitSuccess: () => void
+  initialApplicationId?: number
 }
 
-export function ProjectApplyModal({
-  data,
-  projectId,
-  matchingRoundId,
-  sections,
-  canToggleSection = false,
-  onBack,
-  onSubmitSuccess,
-}: ProjectApplyModalProps) {
+export interface ProjectApplyModalHandle {
+  requestClose: () => void
+}
+
+export const ProjectApplyModal = forwardRef<
+  ProjectApplyModalHandle,
+  ProjectApplyModalProps
+>(function ProjectApplyModal(
+  {
+    data,
+    projectId,
+    matchingRoundId,
+    sections,
+    canToggleSection = false,
+    onBack,
+    onDraftSaved,
+    onSubmitSuccess,
+    initialApplicationId,
+  },
+  ref,
+) {
   const addToast = useToastStore((s) => s.addToast)
   const isDevMatchingRound = Boolean(import.meta.env.VITE_DEV_MATCHING_ROUND_ID)
   const [sectionEnabled, setSectionEnabled] = useState<Record<string, boolean>>(
     () => Object.fromEntries(sections.map((s) => [s.id, s.isEnabled])),
   )
   const [applicationId, setApplicationId] = useState<number | null>(null)
+  const [isInitializing, setIsInitializing] = useState(!isDevMatchingRound)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
   const [isFileUploading, setIsFileUploading] = useState(false)
   const [isPortfolioUploading, setIsPortfolioUploading] = useState(false)
   const portfolioUploadTokenRef = useRef(0)
@@ -205,9 +231,21 @@ export function ProjectApplyModal({
   useEffect(() => {
     if (draftInitializedRef.current) return
     draftInitializedRef.current = true
+    async function hydrateDraft(id: number) {
+      const detail = await getApplicationDetail(projectId, id).catch(() => null)
+      if (!detail) return
+      const values = buildFormValuesFromDetail(detail, sections)
+      reset(values)
+      savedSnapshotRef.current = JSON.stringify(values)
+    }
     async function initDraft() {
       if (isDevMatchingRound) return
       try {
+        if (initialApplicationId != null) {
+          setApplicationId(initialApplicationId)
+          await hydrateDraft(initialApplicationId)
+          return
+        }
         const draft = await createApplicationDraft(projectId, matchingRoundId)
         setApplicationId(Number(draft.applicationId))
       } catch (err) {
@@ -223,7 +261,11 @@ export function ProjectApplyModal({
               projectId,
               activeMatchingRoundId: String(matchingRoundId),
             })
-            if (existing) setApplicationId(Number(existing.applicationId))
+            if (existing) {
+              const existingId = Number(existing.applicationId)
+              setApplicationId(existingId)
+              await hydrateDraft(existingId)
+            }
           }
           return
         }
@@ -235,6 +277,8 @@ export function ProjectApplyModal({
           duration: 3000,
         })
         onBack()
+      } finally {
+        setIsInitializing(false)
       }
     }
     void initDraft()
@@ -256,16 +300,15 @@ export function ProjectApplyModal({
     [sections],
   )
 
-  const {
-    control,
-    handleSubmit,
-    clearErrors,
-    formState: { isDirty },
-  } = useForm<Record<string, ApplyAnswerValue>>({
+  const { control, handleSubmit, clearErrors, getValues, reset } = useForm<
+    Record<string, ApplyAnswerValue>
+  >({
     resolver: zodResolver(schema) as Resolver<Record<string, ApplyAnswerValue>>,
     mode: "onChange",
     defaultValues,
   })
+
+  const savedSnapshotRef = useRef(JSON.stringify(defaultValues))
 
   useEffect(() => {
     clearErrors()
@@ -289,11 +332,71 @@ export function ProjectApplyModal({
     onBack()
   }
 
+  function hasUnsavedChanges() {
+    return JSON.stringify(getValues()) !== savedSnapshotRef.current
+  }
+
   function handleBackClick() {
-    if (isDirty) {
+    if (hasUnsavedChanges()) {
       setIsLeaveModalOpen(true)
     } else {
       onBack()
+    }
+  }
+
+  useImperativeHandle(ref, () => ({ requestClose: handleBackClick }))
+
+  async function handleSaveDraft() {
+    if (isDevMatchingRound) {
+      addToast({
+        message: "작성한 내용이 임시 저장되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+    if (applicationId === null) {
+      addToast({
+        message: "지원서 정보를 불러오지 못했습니다. 다시 시도해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+    setIsSavingDraft(true)
+    try {
+      const formValues = getValues()
+      const answers = buildAnswerPayload(formValues, sections, sectionEnabled)
+      await saveApplicationDraft(projectId, applicationId, answers)
+      reset(formValues)
+      savedSnapshotRef.current = JSON.stringify(formValues)
+      onDraftSaved?.()
+      addToast({
+        message: "작성한 내용이 임시 저장되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } catch (err) {
+      const serverMessage =
+        err instanceof AxiosError
+          ? (err.response?.data as { message?: string } | undefined)?.message
+          : undefined
+      addToast({
+        message:
+          serverMessage ?? "임시 저장에 실패했습니다. 다시 시도해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      setIsSavingDraft(false)
     }
   }
 
@@ -543,6 +646,10 @@ export function ProjectApplyModal({
   const SUB_MODAL_CLASS =
     "shadow-drop-neutral-1 flex w-115 max-w-[calc(100vw-32px)] flex-col gap-8 rounded-[9.2px] border border-neutral-200 bg-white px-6 py-6 focus:outline-none"
 
+  if (isInitializing) {
+    return <ApplyFormSkeleton />
+  }
+
   return (
     <>
       <div className="flex w-232 flex-col">
@@ -641,30 +748,49 @@ export function ProjectApplyModal({
             </div>
           </div>
 
-          <div className="border-teal-gray-100 flex justify-center gap-3 border-t px-6 py-4">
+          <div className="border-teal-gray-100 flex items-center justify-between gap-3 border-t px-6 py-4">
             <Button
               variant="weak"
               color="neutral"
               size="xl"
-              onClick={handleBackClick}
-              disabled={isSubmitting}
-            >
-              돌아가기
-            </Button>
-            <Button
-              size="xl"
+              onClick={() => void handleSaveDraft()}
+              isLoading={isSavingDraft}
               disabled={
                 isSubmitting ||
+                isSavingDraft ||
                 isFileUploading ||
                 isPortfolioUploading ||
                 isApplicationEditPermissionLoading
               }
-              onClick={() => {
-                void handleSubmit(onValid, onInvalid)()
-              }}
             >
-              제출하기
+              임시저장
             </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="weak"
+                color="neutral"
+                size="xl"
+                onClick={handleBackClick}
+                disabled={isSubmitting || isSavingDraft}
+              >
+                돌아가기
+              </Button>
+              <Button
+                size="xl"
+                disabled={
+                  isSubmitting ||
+                  isSavingDraft ||
+                  isFileUploading ||
+                  isPortfolioUploading ||
+                  isApplicationEditPermissionLoading
+                }
+                onClick={() => {
+                  void handleSubmit(onValid, onInvalid)()
+                }}
+              >
+                제출하기
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -773,4 +899,4 @@ export function ProjectApplyModal({
       </Modal.Root>
     </>
   )
-}
+})

@@ -1,7 +1,7 @@
 /** 피그마 기준 Project Card Lg입니다. */
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
@@ -45,7 +45,10 @@ import {
 } from "../model/projectDetailCta"
 import { ApplyFormSkeleton } from "./apply-modal/ApplyFormSkeleton"
 import { MyApplicationModal } from "./apply-modal/MyApplicationModal"
-import { ProjectApplyModal } from "./apply-modal/ProjectApplyModal"
+import {
+  ProjectApplyModal,
+  type ProjectApplyModalHandle,
+} from "./apply-modal/ProjectApplyModal"
 import { RecruitQuestionsViewModal } from "./apply-modal/RecruitQuestionsViewModal"
 import { TeamMemberModal } from "./team-member-modal/TeamMemberModal"
 
@@ -219,6 +222,7 @@ export function ProjectDetailCard({
     applicationWritePermissionQuery.isPending
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
+  const applyModalRef = useRef<ProjectApplyModalHandle>(null)
   const [isMyApplicationModalOpen, setIsMyApplicationModalOpen] =
     useState(false)
   const [isRecruitQuestionsModalOpen, setIsRecruitQuestionsModalOpen] =
@@ -267,7 +271,7 @@ export function ProjectDetailCard({
     queryKey: projectKeys.applicationForm(projectId),
     queryFn: () => getApplicationForm(projectId),
     enabled: isShowingFormModal,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   })
 
   const [minSkeletonElapsed, setMinSkeletonElapsed] = useState(false)
@@ -367,6 +371,7 @@ export function ProjectDetailCard({
       : (activeMatchingRound?.id ?? null),
   })
   const isApplied = myApplicationForProject != null
+  const isDraftApplication = myApplicationForProject?.status === "DRAFT"
 
   const hasOtherActiveApplication = useMemo(() => {
     if (!myApplications || !activeMatchingRound) return false
@@ -405,6 +410,7 @@ export function ProjectDetailCard({
           isPm: false,
           isSameBranch,
           isApplied,
+          isDraftApplication,
           hasOtherActiveApplication,
           isAlreadyApproved,
           isPartIneligible,
@@ -415,6 +421,7 @@ export function ProjectDetailCard({
           isPm: userIsPm,
           isSameBranch,
           isApplied,
+          isDraftApplication,
           hasOtherActiveApplication,
           isAlreadyApproved,
           isPartIneligible,
@@ -624,7 +631,7 @@ export function ProjectDetailCard({
                         setIsApplyModalOpen(true)
                       }}
                     >
-                      지원하기
+                      {isDraftApplication ? "이어서 작성하기" : "지원하기"}
                     </Button>
                   )}
                 {(ctaMode === "apply-blocked-other" ||
@@ -719,8 +726,16 @@ export function ProjectDetailCard({
           <Modal.Overlay tone="deep" />
           <Modal.Content
             aria-describedby={undefined}
-            onInteractOutside={(e) => e.preventDefault()}
-            onEscapeKeyDown={(e) => e.preventDefault()}
+            onInteractOutside={(e) => {
+              e.preventDefault()
+              if (applyModalRef.current) applyModalRef.current.requestClose()
+              else setIsApplyModalOpen(false)
+            }}
+            onEscapeKeyDown={(e) => {
+              e.preventDefault()
+              if (applyModalRef.current) applyModalRef.current.requestClose()
+              else setIsApplyModalOpen(false)
+            }}
           >
             {showFormSkeleton ? (
               <ApplyFormSkeleton />
@@ -732,12 +747,23 @@ export function ProjectDetailCard({
               </div>
             ) : activeMatchingRound == null ? null : (
               <ProjectApplyModal
+                ref={applyModalRef}
                 data={data}
                 projectId={projectId}
                 matchingRoundId={Number(activeMatchingRound.id)}
                 sections={visibleSections}
                 canToggleSection={userIsOperator || userIsPm}
+                initialApplicationId={
+                  isDraftApplication && myApplicationForProject
+                    ? Number(myApplicationForProject.applicationId)
+                    : undefined
+                }
                 onBack={() => setIsApplyModalOpen(false)}
+                onDraftSaved={() => {
+                  void queryClient.invalidateQueries({
+                    queryKey: ["myApplications", activeGisuId],
+                  })
+                }}
                 onSubmitSuccess={() => {
                   setIsApplyModalOpen(false)
                   void queryClient.invalidateQueries({

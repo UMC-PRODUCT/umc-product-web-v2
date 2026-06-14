@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { isWithinMatchingPeriod } from "./matchingPeriod"
+import {
+  getNextMatchingBoundary,
+  isWithinMatchingPeriod,
+} from "./matchingPeriod"
 
 import type { MatchingRoundResponse } from "@/features/application/model/apiTypes"
 
@@ -97,5 +100,58 @@ describe("isWithinMatchingPeriod", () => {
   it("빈 배열/undefined는 false", () => {
     expect(isWithinMatchingPeriod([], now)).toBe(false)
     expect(isWithinMatchingPeriod(undefined, now)).toBe(false)
+  })
+})
+
+describe("getNextMatchingBoundary", () => {
+  const now = new Date("2026-06-13T12:00:00Z")
+
+  it("매칭 중이면 종료 시각을 다음 경계로 반환한다", () => {
+    const boundary = getNextMatchingBoundary(
+      [makeRound("2026-06-13T00:00:00Z", "2026-06-14T00:00:00Z")],
+      now,
+    )
+    expect(boundary?.toISOString()).toBe("2026-06-14T00:00:00.000Z")
+  })
+
+  it("매칭 전이면 시작 시각을 다음 경계로 반환한다", () => {
+    const boundary = getNextMatchingBoundary(
+      [makeRound("2026-06-14T00:00:00Z", "2026-06-15T00:00:00Z")],
+      now,
+    )
+    expect(boundary?.toISOString()).toBe("2026-06-14T00:00:00.000Z")
+  })
+
+  it("여러 경계 중 가장 가까운 미래 경계를 반환한다", () => {
+    const boundary = getNextMatchingBoundary(
+      [
+        makeRound("2026-06-10T00:00:00Z", "2026-06-13T18:00:00Z"),
+        makeRound("2026-06-20T00:00:00Z", "2026-06-21T00:00:00Z"),
+      ],
+      now,
+    )
+    expect(boundary?.toISOString()).toBe("2026-06-13T18:00:00.000Z")
+  })
+
+  it("모든 차수가 과거면 null", () => {
+    expect(
+      getNextMatchingBoundary(
+        [makeRound("2026-06-10T00:00:00Z", "2026-06-11T00:00:00Z")],
+        now,
+      ),
+    ).toBeNull()
+  })
+
+  it("현재 시각과 같은 경계는 제외하고 다음 미래 경계를 반환한다", () => {
+    const boundary = getNextMatchingBoundary(
+      [makeRound("2026-06-13T12:00:00Z", "2026-06-14T00:00:00Z")],
+      now,
+    )
+    expect(boundary?.toISOString()).toBe("2026-06-14T00:00:00.000Z")
+  })
+
+  it("빈 배열/undefined는 null", () => {
+    expect(getNextMatchingBoundary([], now)).toBeNull()
+    expect(getNextMatchingBoundary(undefined, now)).toBeNull()
   })
 })
