@@ -73,6 +73,7 @@ export function ProjectManagementMoreMenu({
     queryKey: ["projectDetail", numericProjectId],
     queryFn: () => getProjectDetail(numericProjectId),
     enabled: (applicationOpen || popoverOpen) && numericProjectId > 0,
+    staleTime: 5 * 60 * 1000,
   })
 
   const hasNoPlanLink =
