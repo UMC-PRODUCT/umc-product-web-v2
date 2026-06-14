@@ -16,6 +16,7 @@ import {
   mapApplicationFormToSections,
   projectKeys,
 } from "@/features/project/new/api"
+import { UsabilitySurvey } from "@/features/usability-survey"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
@@ -218,6 +219,7 @@ export function ProjectDetailCard({
     useState(false)
   const [isRecruitQuestionsModalOpen, setIsRecruitQuestionsModalOpen] =
     useState(false)
+  const [isSurveyActive, setIsSurveyActive] = useState(false)
   const {
     data: detail,
     dataUpdatedAt: detailDataUpdatedAt,
@@ -713,6 +715,7 @@ export function ProjectDetailCard({
                   void queryClient.invalidateQueries({
                     queryKey: ["myApplications", activeGisuId],
                   })
+                  setIsSurveyActive(true)
                 }}
               />
             )}
@@ -755,6 +758,11 @@ export function ProjectDetailCard({
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
+
+      <UsabilitySurvey
+        context="APPLICATION_SUBMITTED"
+        active={isSurveyActive}
+      />
     </>
   )
 }
