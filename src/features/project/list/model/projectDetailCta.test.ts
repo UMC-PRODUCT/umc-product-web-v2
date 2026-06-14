@@ -135,6 +135,28 @@ describe("resolveProjectDetailCtaMode", () => {
     ).toBe("my-application")
   })
 
+  it("임시저장(DRAFT) 지원서면 이어쓰기를 위해 apply를 반환한다", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isApplied: true,
+        isDraftApplication: true,
+      }),
+    ).toBe("apply")
+  })
+
+  it("DRAFT 이어쓰기는 합격/타프로젝트 지원 차단보다 우선한다", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isApplied: true,
+        isDraftApplication: true,
+        isAlreadyApproved: true,
+        hasOtherActiveApplication: true,
+      }),
+    ).toBe("apply")
+  })
+
   it("다른 프로젝트에 지원 중이면 파트 부적격이어도 apply-blocked-other를 반환한다", () => {
     expect(
       resolveProjectDetailCtaMode({

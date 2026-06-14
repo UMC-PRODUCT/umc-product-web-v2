@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   forwardRef,
   useEffect,
@@ -11,6 +11,7 @@ import {
 import { useToastStore } from "@/components/toast/useToastStore"
 import {
   buildUpsertApplicationFormBody,
+  projectKeys,
   upsertApplicationForm,
 } from "@/features/project/new/api"
 import {
@@ -62,6 +63,7 @@ export const ApplicationForm = forwardRef<
   ref,
 ) {
   const addToast = useToastStore((s) => s.addToast)
+  const queryClient = useQueryClient()
   const form = useApplicationForm()
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const commonSectionId = useProjectRegisterStore(
@@ -101,6 +103,11 @@ export const ApplicationForm = forwardRef<
     onSuccess: () => {
       lastSavedSnapshotRef.current = currentSnapshot
       setHasSavedOnce(true)
+      if (projectId) {
+        void queryClient.invalidateQueries({
+          queryKey: projectKeys.applicationForm(projectId),
+        })
+      }
       addToast({
         message: "작성한 내용이 임시 저장되었습니다.",
         color: "primary",
