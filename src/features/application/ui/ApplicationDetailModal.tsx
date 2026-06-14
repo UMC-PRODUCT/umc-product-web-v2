@@ -67,7 +67,7 @@ export function ApplicationDetailModal({
     if (project.applicants.length === 0 && !emptyToastShownRef.current) {
       emptyToastShownRef.current = true
       addToast({
-        message: "아직 지원자가 없습니다.",
+        message: "아직 지원자한 챌린저가 없습니다.",
         color: "primary",
         variant: "deep",
         type: "default",
@@ -221,7 +221,7 @@ export function ApplicationDetailModal({
       <Modal.Portal>
         <Modal.Overlay tone="deep" />
         <Modal.Content
-          className="flex max-h-[calc(100vh-60px)] items-start gap-4"
+          className="top-20! bottom-7.5! flex h-[calc(100vh-110px)]! translate-y-0! items-start gap-4"
           aria-describedby={undefined}
           onOpenAutoFocus={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => {
@@ -244,7 +244,7 @@ export function ApplicationDetailModal({
             {project.projectName} 지원 현황 상세
           </Modal.Title>
 
-          <div className="flex w-185 shrink-0 overflow-hidden rounded-xl bg-white shadow-xl">
+          <div className="flex h-full w-185 shrink-0 overflow-hidden rounded-xl bg-white shadow-xl">
             <ModalApplicantPanel
               project={projectWithOverrides}
               chapterName={chapterName}
