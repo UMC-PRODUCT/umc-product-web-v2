@@ -42,6 +42,8 @@ export interface MatchingBlockData {
 export interface MatchingRoleRow {
   role: string
   blocks: MatchingBlockData[]
+  colsPerRow: number
+  firstRowCols: number
 }
 
 interface MatchingResultRowProps {
@@ -185,18 +187,28 @@ export function MatchingResultRow({
     )
   }, [roleRows])
 
-  // 각 행의 usable(비 blocked) 슬롯 수
-  const usableCounts = localRoleRows.map((row) => {
-    const idx = row.blocks.findIndex((b) => b.type === "blocked")
-    return idx === -1 ? row.blocks.length : idx
+  // 블록 배열을 firstRowCols / colsPerRow 단위로 청크 분할
+  const chunkedRows = localRoleRows.map((row) => {
+    const chunks: MatchingBlockData[][] = []
+    if (row.blocks.length === 0) return [[]]
+    // 첫 청크: firstRowCols 개
+    chunks.push(row.blocks.slice(0, row.firstRowCols))
+    // 이후 청크: colsPerRow 개씩
+    for (let i = row.firstRowCols; i < row.blocks.length; i += row.colsPerRow) {
+      chunks.push(row.blocks.slice(i, i + row.colsPerRow))
+    }
+    return chunks
   })
+
+  // 각 시각 행의 블록 수 (라운드 코너 비교용)
+  const visualBlockCounts = chunkedRows.flatMap((chunks) =>
+    chunks.map((c) => c.length),
+  )
+  const totalVisualRows = visualBlockCounts.length
 
   return (
     <div
-      className={cn(
-        "border-teal-gray-300 flex items-start gap-1.75 border-b py-3 pr-5.5 pl-1.75",
-        className,
-      )}
+      className={cn("flex items-start gap-1.75 py-3 pr-5.5 pl-1.75", className)}
     >
       {/* 프로젝트 이동 버튼 */}
       <div className="w-42.5 shrink-0">
@@ -226,119 +238,132 @@ export function MatchingResultRow({
 
       {/* 역할별 블록 테이블 */}
       <div className="flex flex-1 flex-col gap-px">
-        {localRoleRows.map((row, rowIdx) => (
-          <div
-            key={row.role}
-            className="flex w-full items-center justify-between"
-          >
-            <div className="flex items-center gap-3.5">
-              <span className="text-body-2-medium w-14.5 tracking-[-0.14px] text-teal-900">
-                {row.role}
-              </span>
-              <div className="flex items-center">
-                {row.blocks.map((block, blockIdx) => (
-                  <MatchingBlock
-                    key={blockIdx}
-                    type={block.type}
-                    name={block.name}
-                    tagVariant={block.tagVariant}
-                    onNameClick={
-                      isEditable && block.applicantId
-                        ? () => {
-                            setSelectedApplicantId(block.applicantId!)
-                            setSelectedMemberId(block.memberId ?? null)
-                          }
-                        : isEditable &&
-                            !block.applicantId &&
-                            block.memberId &&
-                            block.type === "filled"
-                          ? () => {
-                              setManualUnmatchTarget({
-                                memberId: block.memberId!,
-                                name: block.name ?? "",
-                              })
-                            }
-                          : undefined
-                    }
-                    onAssignClick={
-                      isEditable && block.type === "none"
-                        ? () =>
-                            setAssignTarget({
-                              rowIdx,
-                              blockIdx,
-                              role: row.role,
-                            })
-                        : undefined
-                    }
-                    className={(() => {
-                      const isLastUsable =
-                        block.type !== "blocked" &&
-                        blockIdx === usableCounts[rowIdx]! - 1 &&
-                        usableCounts[rowIdx]! < row.blocks.length
-                      const isFirstBlocked =
-                        block.type === "blocked" &&
-                        blockIdx === usableCounts[rowIdx]
-                      return cn(
-                        // 경계 블록은 -mr-px 제거 (겹침 방지)
-                        !isLastUsable && "-mr-px",
-                        // 외곽 그리드 모서리
-                        rowIdx === 0 && blockIdx === 0 && "rounded-tl-[6px]",
-                        rowIdx === 0 &&
-                          blockIdx === row.blocks.length - 1 &&
-                          "rounded-tr-[6px]",
-                        rowIdx === localRoleRows.length - 1 &&
-                          blockIdx === 0 &&
-                          "rounded-bl-[6px]",
-                        rowIdx === localRoleRows.length - 1 &&
-                          blockIdx === row.blocks.length - 1 &&
-                          "rounded-br-[6px]",
-                        // usable 마지막 슬롯 경계 모서리
-                        isLastUsable &&
-                          (rowIdx === 0 ||
-                            usableCounts[rowIdx - 1] !==
-                              usableCounts[rowIdx]) &&
-                          "rounded-tr-[6px]",
-                        isLastUsable &&
-                          (rowIdx === localRoleRows.length - 1 ||
-                            usableCounts[rowIdx + 1] !==
-                              usableCounts[rowIdx]) &&
-                          "rounded-br-[6px]",
-                        // blocked 첫 슬롯 경계 모서리
-                        isFirstBlocked &&
-                          rowIdx > 0 &&
-                          usableCounts[rowIdx - 1]! > usableCounts[rowIdx]! &&
-                          "rounded-tl-[6px]",
-                        isFirstBlocked &&
-                          rowIdx < localRoleRows.length - 1 &&
-                          usableCounts[rowIdx + 1]! > usableCounts[rowIdx]! &&
-                          "rounded-bl-[6px]",
-                      )
-                    })()}
-                  />
-                ))}
-              </div>
-            </div>
+        {localRoleRows.map((row, rowIdx) => {
+          const chunks = chunkedRows[rowIdx]!
+          const visualBase = chunkedRows
+            .slice(0, rowIdx)
+            .reduce((sum, c) => sum + c.length, 0)
 
-            {/* 상태 표시 (첫 행 우측) */}
-            {rowIdx === 0 && (
-              <div className="flex items-center gap-1.5">
-                {status === "recruiting" && (
-                  <div className="flex h-6 items-center gap-1.5">
-                    <div className="bg-warning-500 size-3 rounded-full" />
-                    <span className="text-label-2-medium text-warning-500">
-                      모집 중
+          return chunks.map((chunk, chunkIdx) => {
+            const vIdx = visualBase + chunkIdx
+            // 플랫 블록 인덱스 오프셋 (수동 배정용)
+            const flatOffset =
+              chunkIdx === 0
+                ? 0
+                : row.firstRowCols + (chunkIdx - 1) * row.colsPerRow
+            // 연속 행은 라벨 없이 우측 정렬
+            const isContinuation = chunkIdx > 0
+
+            return (
+              <div
+                key={`${row.role}-${chunkIdx}`}
+                className={cn(
+                  "flex w-full items-center",
+                  isContinuation ? "justify-end" : "justify-between",
+                )}
+              >
+                <div
+                  className={cn(
+                    "flex items-center",
+                    !isContinuation && "gap-3.5",
+                  )}
+                >
+                  {!isContinuation && (
+                    <span className="text-body-2-medium w-14.5 tracking-[-0.14px] text-teal-900">
+                      {row.role}
+                    </span>
+                  )}
+                  <div className="flex items-center">
+                    {chunk.map((block, blockIdx) => (
+                      <MatchingBlock
+                        key={blockIdx}
+                        type={block.type}
+                        name={block.name}
+                        tagVariant={block.tagVariant}
+                        onNameClick={
+                          isEditable && block.applicantId
+                            ? () => {
+                                setSelectedApplicantId(block.applicantId!)
+                                setSelectedMemberId(block.memberId ?? null)
+                              }
+                            : isEditable &&
+                                !block.applicantId &&
+                                block.memberId &&
+                                block.type === "filled"
+                              ? () => {
+                                  setManualUnmatchTarget({
+                                    memberId: block.memberId!,
+                                    name: block.name ?? "",
+                                  })
+                                }
+                              : undefined
+                        }
+                        onAssignClick={
+                          isEditable && block.type === "none"
+                            ? () =>
+                                setAssignTarget({
+                                  rowIdx,
+                                  blockIdx: flatOffset + blockIdx,
+                                  role: row.role,
+                                })
+                            : undefined
+                        }
+                        className={(() => {
+                          const aboveCount =
+                            vIdx > 0 ? visualBlockCounts[vIdx - 1]! : 0
+                          const belowCount =
+                            vIdx < totalVisualRows - 1
+                              ? visualBlockCounts[vIdx + 1]!
+                              : 0
+                          const isFirst = blockIdx === 0
+                          const isLast = blockIdx === chunk.length - 1
+                          return cn(
+                            "-mr-px",
+                            // 좌측: 모든 행의 좌측 끝 정렬 -> 위/아래 행 유무만 확인
+                            isFirst && vIdx === 0 && "rounded-tl-[6px]",
+                            isFirst &&
+                              vIdx === totalVisualRows - 1 &&
+                              "rounded-bl-[6px]",
+                            // 우측: 첫 행(4칸)이 짧아 이후 행이 더 오른쪽으로 확장
+                            isLast && vIdx === 0 && "rounded-tr-[6px]",
+                            isLast &&
+                              vIdx === totalVisualRows - 1 &&
+                              "rounded-br-[6px]",
+                            isLast &&
+                              aboveCount < chunk.length &&
+                              "rounded-tr-[6px]",
+                            isLast &&
+                              belowCount < chunk.length &&
+                              "rounded-br-[6px]",
+                          )
+                        })()}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* 상태 표시 (첫 시각 행 우측) */}
+                {rowIdx === 0 && chunkIdx === 0 && (
+                  <div className="flex items-center gap-1.5">
+                    {status === "recruiting" && (
+                      <div className="flex h-6 items-center gap-1.5">
+                        <div className="bg-warning-500 size-3 rounded-full" />
+                        <span className="text-label-2-medium text-warning-500">
+                          모집 중
+                        </span>
+                      </div>
+                    )}
+                    <span className="text-subtitle-3-semibold tracking-[-0.16px] whitespace-nowrap text-teal-700">
+                      {status === "recruiting"
+                        ? `${currentCount}/${totalCount}명`
+                        : `총 ${totalCount}명`}
                     </span>
                   </div>
                 )}
-                <span className="text-subtitle-3-semibold tracking-[-0.16px] whitespace-nowrap text-teal-700">
-                  {status === "recruiting"
-                    ? `${currentCount}/${totalCount}명`
-                    : `총 ${totalCount}명`}
-                </span>
               </div>
-            )}
-          </div>
-        ))}
+            )
+          })
+        })}
       </div>
 
       <Modal.Root

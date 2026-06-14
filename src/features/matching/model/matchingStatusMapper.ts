@@ -63,7 +63,6 @@ function toMatchingProject(
   project: ManagedProjectSummaryResponse,
   applicants: ProjectApplicantResponse[],
   members: ProjectMembersResponse | undefined,
-  maxColsByRole: Record<string, number>,
 ): MatchingProjectData {
   // memberId -> APPROVED 지원서 매핑 (차수 태그 조회용)
   // 서버가 memberId를 string으로 내려주는 경우 대비해 String으로 정규화
@@ -150,29 +149,47 @@ function toMatchingProject(
     .filter((q) => q.part === "SPRINGBOOT" || q.part === "NODEJS")
     .reduce((sum, q) => sum + Number(q.quota), 0)
 
+  // firstRowCols: 프로젝트 첫 행은 4칸 (상태 텍스트 공간), 나머지 행은 5칸
   function buildRoleRow(
     role: string,
     quota: number,
-    maxCols: number,
+    isFirstRole: boolean,
   ): MatchingRoleRow {
     const filledBlocks = blocksByRole.get(role) ?? []
+    const effectiveCount = Math.max(filledBlocks.length, quota)
+    const colsPerRow = 5
+    const firstRowCols = isFirstRole ? 4 : colsPerRow
+
+    let totalSlots: number
+    if (effectiveCount <= firstRowCols) {
+      totalSlots = firstRowCols
+    } else {
+      const remaining = effectiveCount - firstRowCols
+      totalSlots = firstRowCols + Math.ceil(remaining / colsPerRow) * colsPerRow
+    }
+
     const emptyCount = Math.max(0, quota - filledBlocks.length)
     const emptyBlocks: MatchingBlockData[] = Array.from(
       { length: emptyCount },
       () => ({ type: "none" }),
     )
-    const blockedCount = Math.max(0, maxCols - quota)
+    const blockedCount = totalSlots - filledBlocks.length - emptyCount
     const blockedBlocks: MatchingBlockData[] = Array.from(
       { length: blockedCount },
       () => ({ type: "blocked" }),
     )
-    return { role, blocks: [...filledBlocks, ...emptyBlocks, ...blockedBlocks] }
+    return {
+      role,
+      blocks: [...filledBlocks, ...emptyBlocks, ...blockedBlocks],
+      colsPerRow,
+      firstRowCols,
+    }
   }
 
   const roleRows = [
-    buildRoleRow("Design", designQuota, maxColsByRole["Design"] ?? designQuota),
-    buildRoleRow("Frontend", feQuota, maxColsByRole["Frontend"] ?? feQuota),
-    buildRoleRow("Backend", beQuota, maxColsByRole["Backend"] ?? beQuota),
+    buildRoleRow("Design", designQuota, true),
+    buildRoleRow("Frontend", feQuota, false),
+    buildRoleRow("Backend", beQuota, false),
   ]
 
   const hasNodejs = project.partQuotas.some(
@@ -204,23 +221,6 @@ function toMatchingProject(
   }
 }
 
-// 프로젝트 목록에서 역할별 최대 열 수 계산
-function computeMaxCols(
-  projects: ManagedProjectSummaryResponse[],
-): Record<string, number> {
-  const maxCols: Record<string, number> = { Design: 0, Frontend: 0, Backend: 0 }
-  for (const p of projects) {
-    for (const q of p.partQuotas) {
-      const role = PART_TO_ROLE[q.part]
-      const numQuota = Number(q.quota)
-      if (role && numQuota > (maxCols[role] ?? 0)) {
-        maxCols[role] = numQuota
-      }
-    }
-  }
-  return maxCols
-}
-
 export function toMatchingPartDataList(
   projects: ManagedProjectSummaryResponse[],
   applicantsByProject: Map<string, ProjectApplicantResponse[]>,
@@ -246,7 +246,6 @@ export function toMatchingPartDataList(
   return FE_PLATFORM_ORDER.filter((platform) => byPlatform.has(platform)).map(
     (platform) => {
       const platformProjects = byPlatform.get(platform)!
-      const maxCols = computeMaxCols(platformProjects)
       return {
         partName: platform,
         projects: platformProjects.map((p) =>
@@ -254,7 +253,6 @@ export function toMatchingPartDataList(
             p,
             applicantsByProject.get(String(p.id)) ?? [],
             membersByProject.get(String(p.id)),
-            maxCols,
           ),
         ),
       }
