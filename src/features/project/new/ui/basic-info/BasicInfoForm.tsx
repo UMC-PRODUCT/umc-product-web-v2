@@ -456,7 +456,6 @@ export const BasicInfoForm = forwardRef<
             nickname={displayNickname}
             name={displayName}
             university={displayUniversity}
-            subPm={pm2Member}
             register={register}
             setValue={(name, value, options) =>
               setValue(name, value, { shouldDirty: true, ...options })

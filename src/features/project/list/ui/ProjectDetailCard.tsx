@@ -484,16 +484,16 @@ export function ProjectDetailCard({
             </div>
           </div>
 
-          <div className="bp1:mt-8.5 bp1:flex-row bp1:items-start mt-6 flex w-full flex-col items-stretch gap-2.5">
+          <div className="bp1:mt-8.5 scrollbar-none mt-6 flex w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1">
             <TeamMemberButton
               variant="weak"
-              className="bp1:w-auto w-full"
+              className="w-auto"
               onClick={() => setIsTeamModalOpen(true)}
             />
             <Button
               variant="weak"
               color="primary"
-              className="flex-1"
+              className="min-w-28 flex-1 whitespace-nowrap"
               disabled={!data.externalLink}
               onClick={() => {
                 if (data.externalLink)
@@ -509,7 +509,7 @@ export function ProjectDetailCard({
             {showEditCta ? (
               shouldShowEditCta ? (
                 <Button
-                  className="flex-1"
+                  className="min-w-36 flex-1 whitespace-nowrap"
                   disabled={
                     resolvedEditPermissionLoading || !resolvedCanEditProject
                   }
@@ -533,7 +533,7 @@ export function ProjectDetailCard({
               <>
                 {ctaMode === "recruit-questions" && (
                   <Button
-                    className="flex-1"
+                    className="min-w-32 flex-1 whitespace-nowrap"
                     isLoading={isDetailLoading}
                     disabled={!isDetailLoading && !detail?.applicationFormId}
                     onClick={() => setIsRecruitQuestionsModalOpen(true)}
@@ -543,7 +543,7 @@ export function ProjectDetailCard({
                 )}
                 {ctaMode === "my-application" && !hideMyApplication && (
                   <Button
-                    className="flex-1"
+                    className="min-w-32 flex-1 whitespace-nowrap"
                     disabled={myApplicationForProject == null}
                     onClick={() => setIsMyApplicationModalOpen(true)}
                   >
@@ -556,7 +556,7 @@ export function ProjectDetailCard({
                     : isApplicationWritePermissionLoading ||
                       canWriteProjectApplication) && (
                     <Button
-                      className="flex-1"
+                      className="min-w-28 flex-1 whitespace-nowrap"
                       isLoading={
                         !(viewOnly && userIsPm) &&
                         (isDetailLoading || isApplicationWritePermissionLoading)
@@ -572,7 +572,6 @@ export function ProjectDetailCard({
                       })}
                       onClick={() => {
                         if (viewOnly && userIsPm) {
-                          // PM 읽기 전용: 모집 문항 보기 모달로 열기
                           if (!detail?.applicationFormId) {
                             addToast({
                               message:
@@ -622,7 +621,10 @@ export function ProjectDetailCard({
                 {(ctaMode === "apply-blocked-other" ||
                   ctaMode === "apply-blocked-approved" ||
                   ctaMode === "apply-blocked-part") && (
-                  <Button className="flex-1" disabled>
+                  <Button
+                    className="min-w-28 flex-1 whitespace-nowrap"
+                    disabled
+                  >
                     지원하기
                   </Button>
                 )}

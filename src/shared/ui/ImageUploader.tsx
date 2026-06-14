@@ -1,7 +1,8 @@
-import { forwardRef, useEffect, useRef, useState } from "react"
+import { forwardRef, useEffect, useId, useRef, useState } from "react"
 
 import CloseCircleIcon from "@/shared/assets/icon/close/CloseCircleIcon"
 import UploadImageIcon from "@/shared/assets/icon/upload/UploadImageIcon"
+import { cropImageFile } from "@/shared/lib/imageCrop"
 import { cn } from "@/shared/lib/utils"
 
 type ImageUploaderVariant = "thumbnail" | "logo"
@@ -47,6 +48,14 @@ const variantAccept: Record<ImageUploaderVariant, string> = {
   logo: "image/jpeg,image/png,image/svg+xml",
 }
 
+const variantCropSize: Record<
+  ImageUploaderVariant,
+  { width: number; height: number }
+> = {
+  thumbnail: { width: 540, height: 286 },
+  logo: { width: 512, height: 512 },
+}
+
 interface ImageUploaderProps {
   variant?: ImageUploaderVariant
   onChange: (file: File) => void
@@ -73,8 +82,13 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
     ref,
   ) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [cropError, setCropError] = useState<string | null>(null)
+    const [isProcessing, setIsProcessing] = useState(false)
     const activePreview = previewUrl ?? initialUrl ?? null
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const fallbackErrorId = useId()
+    const describedBy =
+      error || cropError ? (errorId ?? fallbackErrorId) : undefined
 
     const labels = variantLabels[variant]
     const hint = variantHint[variant]
@@ -85,17 +99,29 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
       }
     }, [previewUrl])
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (!file) return
-      if (previewUrl) URL.revokeObjectURL(previewUrl)
-      setPreviewUrl(URL.createObjectURL(file))
-      onChange(file)
+      setIsProcessing(true)
+      setCropError(null)
+      try {
+        const processedFile =
+          file.type === "image/svg+xml"
+            ? file
+            : await cropImageFile(file, variantCropSize[variant])
+        setPreviewUrl(URL.createObjectURL(processedFile))
+        onChange(processedFile)
+      } catch {
+        setCropError("이미지를 처리할 수 없습니다.")
+        if (fileInputRef.current) fileInputRef.current.value = ""
+      } finally {
+        setIsProcessing(false)
+      }
     }
 
     const handleRemove = () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl)
       setPreviewUrl(null)
+      setCropError(null)
       if (fileInputRef.current) fileInputRef.current.value = ""
       onRemove?.()
     }
@@ -122,13 +148,16 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
             ref={ref}
             type="button"
             aria-label={activePreview ? labels.change : labels.upload}
-            aria-invalid={!!error}
-            aria-describedby={errorId}
+            aria-invalid={!!error || !!cropError}
+            aria-describedby={describedBy}
             data-focus-target={focusTarget}
+            disabled={isProcessing}
             onClick={() => fileInputRef.current?.click()}
             className={cn(
-              "bg-teal-gray-200 hover:bg-teal-gray-400 group relative h-full w-full overflow-hidden transition-colors focus:ring-2 focus:outline-none focus:ring-inset",
-              error ? "focus:ring-error-400" : "focus:ring-teal-300",
+              "bg-teal-gray-200 hover:bg-teal-gray-400 group disabled:hover:bg-teal-gray-200 relative h-full w-full overflow-hidden transition-colors focus:ring-2 focus:outline-none focus:ring-inset disabled:cursor-wait",
+              error || cropError
+                ? "focus:ring-error-400"
+                : "focus:ring-teal-300",
               variantRound[variant],
               variant === "logo" &&
                 activePreview &&
@@ -146,6 +175,10 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
                   {hoverContent}
                 </div>
               </>
+            ) : isProcessing ? (
+              <div className="text-teal-gray-400 text-body-2-regular flex h-full items-center justify-center">
+                이미지 처리 중
+              </div>
             ) : (
               <div className="text-teal-gray-400 text-body-2-regular flex flex-col items-center justify-center">
                 <span className="text-center whitespace-pre transition-opacity duration-200 group-hover:opacity-0 group-focus-visible:opacity-0">
@@ -171,12 +204,12 @@ export const ImageUploader = forwardRef<HTMLButtonElement, ImageUploaderProps>(
             </button>
           )}
         </div>
-        {error && (
+        {(error || cropError) && (
           <p
-            id={errorId}
+            id={describedBy}
             className="text-caption-1-regular text-error-500 px-1 pt-1"
           >
-            {error}
+            {error ?? cropError}
           </p>
         )}
         <input

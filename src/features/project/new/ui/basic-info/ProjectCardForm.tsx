@@ -22,7 +22,6 @@ interface ProjectCardFormProps {
   nickname: string
   name: string
   university: string
-  subPm?: { nickname: string; name: string; university: string } | null
   register: UseFormRegister<BasicInfoFormData>
   setValue: UseFormSetValue<BasicInfoFormData>
   watch: UseFormWatch<BasicInfoFormData>
@@ -36,7 +35,6 @@ export function ProjectCardForm({
   nickname,
   name,
   university,
-  subPm,
   register,
   setValue,
   watch,
@@ -110,15 +108,6 @@ export function ProjectCardForm({
               <span>·</span>
               <span>{university}</span>
             </div>
-            {subPm && (
-              <div className="flex max-w-full flex-wrap items-center gap-x-2 gap-y-0.5">
-                <span>
-                  {subPm.nickname}/{subPm.name}
-                </span>
-                <span>·</span>
-                <span>{subPm.university}</span>
-              </div>
-            )}
           </div>
         </div>
         <label htmlFor="project-description" className="sr-only">
