@@ -300,6 +300,17 @@ function extractAnswerText(question: FormQuestion): string {
   return ""
 }
 
+// 질문의 파일 링크 추출
+function extractAnswerLinks(
+  question: FormQuestion,
+): Array<{ label: string; url: string }> {
+  const { answer } = question
+  if (!answer) return []
+  return answer.files
+    .filter((f) => f.url)
+    .map((f) => ({ label: f.originalFileName, url: f.url }))
+}
+
 // 서버 formResponse -> 프론트 ApplicantFormData
 export function toApplicantFormData(
   formResponse: FormResponseData,
@@ -311,12 +322,16 @@ export function toApplicantFormData(
   const toFormFields = (questions: FormQuestion[]): FormField[] =>
     questions
       .sort((a, b) => Number(a.orderNo) - Number(b.orderNo))
-      .map((q, i) => ({
-        label: `Q${i + 1}`,
-        question: q.title,
-        answer: extractAnswerText(q),
-        required: q.isRequired,
-      }))
+      .map((q, i) => {
+        const links = extractAnswerLinks(q)
+        return {
+          label: `Q${i + 1}`,
+          question: q.title,
+          answer: extractAnswerText(q),
+          ...(links.length > 0 && { links }),
+          required: q.isRequired,
+        }
+      })
 
   return {
     applicantId,

@@ -13,6 +13,7 @@ export interface FormField {
   label: string
   question: string
   answer: string
+  links?: Array<{ label: string; url: string }>
   required?: boolean
 }
 
