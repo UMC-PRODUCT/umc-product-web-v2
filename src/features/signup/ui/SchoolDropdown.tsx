@@ -52,7 +52,7 @@ export function SchoolDropdown({
       school.originalName.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (!open) {
       if (e.key === "Enter" || e.key === " ") {
         setOpen(true)
@@ -143,6 +143,7 @@ export function SchoolDropdown({
                 setSearchQuery(e.target.value)
                 setFocusedIndex(-1)
               }}
+              onKeyDown={handleKeyDown}
               className="text-body-2-regular placeholder:text-teal-gray-400 text-teal-gray-900 w-full outline-none"
             />
           </div>
