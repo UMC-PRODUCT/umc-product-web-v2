@@ -146,8 +146,9 @@ export function ProfileDropdown({
 
             {/* 기수 */}
             <div className="flex w-full flex-col gap-0.5 px-1.5">
-              <span className="text-caption-3-medium text-teal-gray-400 flex h-5.5 w-13 items-center justify-center">
-                기수 변경
+              <span className="text-caption-3-medium text-teal-gray-400 h-5.5 w-13 px-1.5 py-0.5">
+                {/* TODO: "기수 변경"으로 롤백 */}
+                기수
               </span>
 
               <div className="border-teal-gray-100 flex w-full flex-col gap-0.5 rounded-[10px] border px-[1px] py-[1px]">
@@ -160,8 +161,9 @@ export function ProfileDropdown({
                         key={record.challengerId}
                         generation={Number(record.gisu)}
                         active={record.gisuId === selectedGisuId}
-                        onClick={() => setSelectedGisuId(record.gisuId)}
-                        className="w-full"
+                        // TODO: 클릭 시 기수 상태 변경
+                        // onClick={() => setSelectedGisuId(record.gisuId)}
+                        className="w-full cursor-default"
                       />
                     ))
                 ) : (
@@ -178,7 +180,7 @@ export function ProfileDropdown({
             className="bg-teal-gray-100 h-px w-full rounded-[0.5px]"
           />
 
-          {/* TODO: 기수 관리 페이지로 연결/계정 설정 페이지로 연결/로그아웃 API 연동 */}
+          {/* TODO: 기수 관리 페이지로 연결 */}
           <div className="flex flex-col gap-1 px-1.5">
             {canManageMembers && (
               <TextButton className="text-body-2-medium text-teal-gray-700 hover:decoration-teal-gray-700 h-6 w-15">
