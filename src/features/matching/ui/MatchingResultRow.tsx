@@ -200,14 +200,11 @@ export function MatchingResultRow({
     return chunks
   })
 
-  // 전체 시각적 행 목록 (라운드 코너 계산용)
-  const visualRows = chunkedRows.flat()
-
-  // 각 시각적 행의 usable(비 blocked) 슬롯 수
-  const usableCounts = visualRows.map((chunk) => {
-    const idx = chunk.findIndex((b) => b.type === "blocked")
-    return idx === -1 ? chunk.length : idx
-  })
+  // 각 시각 행의 블록 수 (라운드 코너 비교용)
+  const visualBlockCounts = chunkedRows.flatMap((chunks) =>
+    chunks.map((c) => c.length),
+  )
+  const totalVisualRows = visualBlockCounts.length
 
   return (
     <div
@@ -246,7 +243,6 @@ export function MatchingResultRow({
       <div className="flex flex-1 flex-col gap-px">
         {localRoleRows.map((row, rowIdx) => {
           const chunks = chunkedRows[rowIdx]!
-          // 이 역할 첫 청크의 시각적 행 인덱스
           const visualBase = chunkedRows
             .slice(0, rowIdx)
             .reduce((sum, c) => sum + c.length, 0)
@@ -316,44 +312,32 @@ export function MatchingResultRow({
                             : undefined
                         }
                         className={(() => {
-                          const chunkUsable = usableCounts[vIdx]!
-                          const isLastUsable =
-                            block.type !== "blocked" &&
-                            blockIdx === chunkUsable - 1 &&
-                            chunkUsable < chunk.length
-                          const isFirstBlocked =
-                            block.type === "blocked" && blockIdx === chunkUsable
+                          const aboveCount =
+                            vIdx > 0 ? visualBlockCounts[vIdx - 1]! : 0
+                          const belowCount =
+                            vIdx < totalVisualRows - 1
+                              ? visualBlockCounts[vIdx + 1]!
+                              : 0
+                          const isFirst = blockIdx === 0
+                          const isLast = blockIdx === chunk.length - 1
                           return cn(
-                            !isLastUsable && "-mr-px",
-                            // 외곽 그리드 모서리
-                            vIdx === 0 && blockIdx === 0 && "rounded-tl-[6px]",
-                            vIdx === 0 &&
-                              blockIdx === chunk.length - 1 &&
-                              "rounded-tr-[6px]",
-                            vIdx === visualRows.length - 1 &&
-                              blockIdx === 0 &&
+                            "-mr-px",
+                            // 좌측: 모든 행의 좌측 끝 정렬 -> 위/아래 행 유무만 확인
+                            isFirst && vIdx === 0 && "rounded-tl-[6px]",
+                            isFirst &&
+                              vIdx === totalVisualRows - 1 &&
                               "rounded-bl-[6px]",
-                            vIdx === visualRows.length - 1 &&
-                              blockIdx === chunk.length - 1 &&
+                            // 우측: 첫 행(4칸)이 짧아 이후 행이 더 오른쪽으로 확장
+                            isLast && vIdx === 0 && "rounded-tr-[6px]",
+                            isLast &&
+                              vIdx === totalVisualRows - 1 &&
                               "rounded-br-[6px]",
-                            // usable 마지막 슬롯 경계 모서리
-                            isLastUsable &&
-                              (vIdx === 0 ||
-                                usableCounts[vIdx - 1] !== chunkUsable) &&
+                            isLast &&
+                              aboveCount < chunk.length &&
                               "rounded-tr-[6px]",
-                            isLastUsable &&
-                              (vIdx === visualRows.length - 1 ||
-                                usableCounts[vIdx + 1] !== chunkUsable) &&
+                            isLast &&
+                              belowCount < chunk.length &&
                               "rounded-br-[6px]",
-                            // blocked 첫 슬롯 경계 모서리
-                            isFirstBlocked &&
-                              vIdx > 0 &&
-                              usableCounts[vIdx - 1]! > chunkUsable &&
-                              "rounded-tl-[6px]",
-                            isFirstBlocked &&
-                              vIdx < visualRows.length - 1 &&
-                              usableCounts[vIdx + 1]! > chunkUsable &&
-                              "rounded-bl-[6px]",
                           )
                         })()}
                       />
@@ -362,7 +346,7 @@ export function MatchingResultRow({
                 </div>
 
                 {/* 상태 표시 (첫 시각 행 우측) */}
-                {vIdx === 0 && (
+                {rowIdx === 0 && chunkIdx === 0 && (
                   <div className="flex items-center gap-1.5">
                     {status === "recruiting" && (
                       <div className="flex h-6 items-center gap-1.5">
