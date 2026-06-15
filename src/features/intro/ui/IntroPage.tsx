@@ -16,14 +16,25 @@ import { SolutionSection } from "./sections/SolutionSection"
 
 export function IntroPage() {
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return
+    }
+
     let timer: ReturnType<typeof setTimeout> | undefined
     let snapping = false
-    const snapRange = Math.min(window.innerHeight * 0.35, 320)
+    const defaultSnapRange = Math.min(window.innerHeight * 0.35, 320)
+    const strongSnapRange = Math.min(window.innerHeight * 0.58, 520)
 
     const getSnapPoints = () =>
-      Array.from(document.querySelectorAll("[data-snap-point]"))
-        .map((el) => el.getBoundingClientRect().top + window.scrollY)
-        .sort((a, b) => a - b)
+      Array.from(document.querySelectorAll<HTMLElement>("[data-snap-point]"))
+        .map((el) => ({
+          top: el.getBoundingClientRect().top + window.scrollY,
+          range:
+            el.dataset.snapStrength === "strong"
+              ? strongSnapRange
+              : defaultSnapRange,
+        }))
+        .sort((a, b) => a.top - b.top)
 
     const handleScroll = () => {
       if (snapping) return
@@ -35,17 +46,19 @@ export function IntroPage() {
         let nearest = points[0]
         if (nearest === undefined) return
         for (const point of points) {
-          if (Math.abs(point - y) < Math.abs(nearest - y)) nearest = point
+          if (Math.abs(point.top - y) < Math.abs(nearest.top - y)) {
+            nearest = point
+          }
         }
-        if (Math.abs(nearest - y) > snapRange) return
-        if (Math.abs(nearest - y) > 2) {
+        if (Math.abs(nearest.top - y) > nearest.range) return
+        if (Math.abs(nearest.top - y) > 2) {
           snapping = true
-          window.scrollTo({ top: nearest, behavior: "smooth" })
+          window.scrollTo({ top: nearest.top, behavior: "smooth" })
           setTimeout(() => {
             snapping = false
           }, 600)
         }
-      }, 120)
+      }, 80)
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
