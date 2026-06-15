@@ -18,7 +18,7 @@ import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
-import { useViewMe } from "@/shared/view-mode/useViewMe"
+import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import { getManagedProjects } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"
@@ -125,7 +125,7 @@ function toValidProjectId(project: MatchingProject): number | null {
 
 export function ProjectManagementPage() {
   const navigate = useNavigate()
-  const { viewMe: me } = useViewMe()
+  const { me } = useViewerIdentity()
   const [selectedChapter, setSelectedChapter] = useState<string>(CHAPTERS[0])
 
   const isAdminScope = isAnyOperator(me)

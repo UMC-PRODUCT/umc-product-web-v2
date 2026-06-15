@@ -6,7 +6,8 @@ import { filterSectionsByPermission } from "./utils"
 
 const ALL = {
   canAccessProjectSettings: true,
-  canManageProjects: true,
+  canWriteProject: true,
+  canAccessProjectManagement: true,
   canManageMatchingRounds: true,
 }
 
@@ -40,21 +41,35 @@ describe("filterSectionsByPermission", () => {
     expect(sectionIds(result)).not.toContain("project-settings")
   })
 
-  it("그룹 접근 불가면 canManageProjects 값에 무관하게 섹션 제거", () => {
+  it("그룹 접근 불가면 프로젝트 capability 값에 무관하게 섹션 제거", () => {
     const result = filterSectionsByPermission(SIDEBAR_ITEMS, {
       canAccessProjectSettings: false,
-      canManageProjects: true,
+      canWriteProject: true,
+      canAccessProjectManagement: true,
       canManageMatchingRounds: true,
     })
     expect(sectionIds(result)).not.toContain("project-settings")
   })
 
-  it("그룹은 보되 관리 불가면 등록·관리 항목만 숨김(공지는 노출)", () => {
+  it("그룹은 보되 등록·관리 불가면 해당 항목만 숨김", () => {
     const result = filterSectionsByPermission(SIDEBAR_ITEMS, {
       ...ALL,
-      canManageProjects: false,
+      canWriteProject: false,
+      canAccessProjectManagement: false,
     })
     expect(menuIds(result, "project-settings")).toEqual(["project-announce"])
+  })
+
+  it("프로젝트 등록과 관리는 서로 다른 capability로 노출한다", () => {
+    const result = filterSectionsByPermission(SIDEBAR_ITEMS, {
+      ...ALL,
+      canWriteProject: true,
+      canAccessProjectManagement: false,
+    })
+    expect(menuIds(result, "project-settings")).toEqual([
+      "project-announce",
+      "project-register",
+    ])
   })
 
   it("매칭 차수 관리 불가면 매칭 차수 설정 항목 제거", () => {

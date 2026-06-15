@@ -18,3 +18,12 @@ export function computeAvailableViewModes(
   if (records.some((r) => isOtherChallengerPart(r.part))) modes.push("others")
   return modes
 }
+
+export function resolveAvailableViewMode(
+  mode: ViewMode,
+  availableModes: ViewMode[],
+): ViewMode {
+  const defaultMode = availableModes[0]
+  if (defaultMode != null && !availableModes.includes(mode)) return defaultMode
+  return mode
+}

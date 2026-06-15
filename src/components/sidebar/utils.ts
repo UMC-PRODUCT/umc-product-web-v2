@@ -2,7 +2,8 @@ import { SIDEBAR_ID, type SideBarSection } from "@/shared/config/navigation"
 
 export interface SidebarPermissions {
   canAccessProjectSettings: boolean
-  canManageProjects: boolean
+  canWriteProject: boolean
+  canAccessProjectManagement: boolean
   canManageMatchingRounds: boolean
   isRegularChallenger?: boolean
 }
@@ -11,7 +12,8 @@ export function filterSectionsByPermission(
   sections: readonly SideBarSection[],
   {
     canAccessProjectSettings,
-    canManageProjects,
+    canWriteProject,
+    canAccessProjectManagement,
     canManageMatchingRounds,
     isRegularChallenger = false,
   }: SidebarPermissions,
@@ -27,10 +29,11 @@ export function filterSectionsByPermission(
         return {
           ...section,
           menus: section.menus.filter((menu) =>
-            menu.id === SIDEBAR_ID.item.projectRegister ||
-            menu.id === SIDEBAR_ID.item.projectManagement
-              ? canManageProjects
-              : true,
+            menu.id === SIDEBAR_ID.item.projectRegister
+              ? canWriteProject
+              : menu.id === SIDEBAR_ID.item.projectManagement
+                ? canAccessProjectManagement
+                : true,
           ),
         }
       }

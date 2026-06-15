@@ -7,6 +7,7 @@ import {
   getProjectPmSearchScope,
   isAnyOperator,
   isCentralCore,
+  isCurrentTermPm,
   isProjectRegistrationQuotaLimited,
   isSchoolLeadership,
 } from "./identity"
@@ -55,6 +56,16 @@ function makeMe(
     schoolId: "0",
     schoolName: "테스트 학교",
   }))
+  const currentRecord = challengerRecords.reduce<ChallengerInfoResponse | null>(
+    (latest, record) =>
+      latest == null || Number(record.gisuId) > Number(latest.gisuId)
+        ? record
+        : latest,
+    null,
+  )
+  const roleTypes = roleSpecs.map((spec) =>
+    typeof spec === "string" ? spec : spec.roleType,
+  )
 
   return {
     id: "0",
@@ -66,6 +77,19 @@ function makeMe(
     profileImageLink: null,
     status: "ACTIVE",
     hasLocalCredential: false,
+    currentGisuMemberInfo: currentRecord
+      ? {
+          gisuId: currentRecord.gisuId,
+          generation: currentRecord.gisu,
+          challenger: {
+            challengerId: currentRecord.challengerId,
+            part: currentRecord.part,
+            challengerStatus: currentRecord.challengerStatus,
+          },
+          isAdmin: roles.length > 0,
+          roleTypes,
+        }
+      : null,
     roles,
     challengerRecords,
     ...overrides,
@@ -109,6 +133,54 @@ describe("isCentralCore", () => {
   it("중앙 운영국원·교육국원은 false", () => {
     expect(isCentralCore(makeMe(["CENTRAL_OPERATING_TEAM_MEMBER"]))).toBe(false)
     expect(isCentralCore(makeMe(["CENTRAL_EDUCATION_TEAM_MEMBER"]))).toBe(false)
+  })
+})
+
+describe("isCurrentTermPm", () => {
+  it("현재 활성 기수 challenger가 PLAN이면 true", () => {
+    expect(
+      isCurrentTermPm(makeMe(["CHALLENGER"], [{ gisuId: "10", part: "PLAN" }])),
+    ).toBe(true)
+  })
+
+  it("과거 PLAN 이력이 있어도 현재 활성 기수 challenger가 비PLAN이면 false", () => {
+    expect(
+      isCurrentTermPm(
+        makeMe(
+          ["CHALLENGER"],
+          [
+            { gisuId: "9", part: "PLAN" },
+            { gisuId: "10", part: "IOS" },
+          ],
+        ),
+      ),
+    ).toBe(false)
+  })
+
+  it("currentGisuMemberInfo가 null이면 과거 PLAN 이력이 있어도 false", () => {
+    expect(
+      isCurrentTermPm(
+        makeMe(["CHALLENGER"], [{ gisuId: "10", part: "PLAN" }], {
+          currentGisuMemberInfo: null,
+        }),
+      ),
+    ).toBe(false)
+  })
+
+  it("현재 활성 기수 challenger가 null이면 role만 있어도 false", () => {
+    expect(
+      isCurrentTermPm(
+        makeMe(["SCHOOL_PART_LEADER"], [{ gisuId: "10", part: "PLAN" }], {
+          currentGisuMemberInfo: {
+            gisuId: "10",
+            generation: "10",
+            challenger: null,
+            isAdmin: true,
+            roleTypes: ["SCHOOL_PART_LEADER"],
+          },
+        }),
+      ),
+    ).toBe(false)
   })
 })
 

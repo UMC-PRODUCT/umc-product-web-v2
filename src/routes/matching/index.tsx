@@ -31,9 +31,7 @@ import { Button } from "@/shared/ui/Button"
 import { MarkdownRenderer } from "@/shared/ui/MarkdownRenderer"
 import { Pagination } from "@/shared/ui/Pagination"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { useViewModeStore } from "@/shared/view-mode"
-import { projectViewMe } from "@/shared/view-mode/projectViewMe"
-import { useViewMe } from "@/shared/view-mode/useViewMe"
+import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 interface AnnounceSearch {
   chapter: Chapter
@@ -124,10 +122,9 @@ export const Route = createFileRoute("/matching/")({
       page: parsePage(search.page),
     }
   },
-  beforeLoad: async ({ search, context, location }) => {
-    const me = await ensureMe(context.queryClient, location.href)
-    const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
-    const isFullAccess = isSuperAdmin(viewMe) || isCentralStaff(viewMe)
+  beforeLoad: async ({ search, context }) => {
+    const me = await ensureMe(context.queryClient)
+    const isFullAccess = isSuperAdmin(me) || isCentralStaff(me)
     if (isFullAccess) return
 
     const userChapter = getViewerBranch(me)
@@ -149,12 +146,12 @@ function TeamMatchingAnnouncePage() {
   const [hashNoticeId] = useState(readHashNoticeId)
 
   const { data: me } = useMe()
-  const { viewMe } = useViewMe()
+  const { me: identity } = useViewerIdentity()
 
-  const isSuper = isSuperAdmin(viewMe)
-  const isCentral = isCentralStaff(viewMe)
-  const isChapterPres = isChapterPresident(viewMe)
-  const isPm = isCurrentTermPm(viewMe)
+  const isSuper = isSuperAdmin(identity)
+  const isCentral = isCentralStaff(identity)
+  const isChapterPres = isChapterPresident(identity)
+  const isPm = isCurrentTermPm(identity)
   const userChapter = getViewerBranch(me) as Chapter | undefined
 
   // 기수 정보 조회
