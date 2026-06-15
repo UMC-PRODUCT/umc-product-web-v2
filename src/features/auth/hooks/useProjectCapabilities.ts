@@ -1,3 +1,5 @@
+import { useMemo } from "react"
+
 import { buildProjectCapabilities } from "../model/projectCapabilities"
 import { useResourcePermission } from "./useResourcePermission"
 
@@ -14,12 +16,20 @@ export function useProjectCapabilities(me: MemberInfoResponse | undefined) {
     },
   )
 
+  const hasProjectWritePermission =
+    projectWritePermissionQuery.hasPermission("WRITE")
+
+  const capabilities = useMemo(
+    () =>
+      buildProjectCapabilities({
+        me,
+        hasProjectWritePermission,
+      }),
+    [me, hasProjectWritePermission],
+  )
+
   return {
-    capabilities: buildProjectCapabilities({
-      me,
-      hasProjectWritePermission:
-        projectWritePermissionQuery.hasPermission("WRITE"),
-    }),
+    capabilities,
     isPermissionLoading: projectWritePermissionQuery.isPending,
     isPermissionError: projectWritePermissionQuery.isError,
   }

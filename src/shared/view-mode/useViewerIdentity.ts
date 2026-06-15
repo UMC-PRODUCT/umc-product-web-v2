@@ -16,7 +16,10 @@ export function useViewerIdentity() {
   const availableModes = useMemo(() => computeAvailableViewModes(me), [me])
   const defaultMode = availableModes[0]
   const resolvedMode = resolveAvailableViewMode(mode, availableModes)
-  const viewContext = getProjectViewContext(me, resolvedMode)
+  const viewContext = useMemo(
+    () => getProjectViewContext(me, resolvedMode),
+    [me, resolvedMode],
+  )
 
   useEffect(() => {
     if (defaultMode != null && mode !== resolvedMode) {
