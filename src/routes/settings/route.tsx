@@ -4,8 +4,8 @@ import Header from "@/components/header/Header"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 
 export const Route = createFileRoute("/settings")({
-  beforeLoad: async ({ context }) => {
-    await ensureMe(context.queryClient)
+  beforeLoad: async ({ context, location }) => {
+    await ensureMe(context.queryClient, location.href)
   },
   component: SettingsLayout,
 })

@@ -59,8 +59,8 @@ import { projectViewMe } from "@/shared/view-mode/projectViewMe"
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
 export const Route = createFileRoute("/matching/projects/new")({
-  beforeLoad: async ({ context, search }) => {
-    const me = await ensureMe(context.queryClient)
+  beforeLoad: async ({ context, search, location }) => {
+    const me = await ensureMe(context.queryClient, location.href)
     const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
 
     if (!canManageProjects(viewMe)) {

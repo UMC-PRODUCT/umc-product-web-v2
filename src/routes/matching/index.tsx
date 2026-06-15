@@ -124,8 +124,8 @@ export const Route = createFileRoute("/matching/")({
       page: parsePage(search.page),
     }
   },
-  beforeLoad: async ({ search, context }) => {
-    const me = await ensureMe(context.queryClient)
+  beforeLoad: async ({ search, context, location }) => {
+    const me = await ensureMe(context.queryClient, location.href)
     const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
     const isFullAccess = isSuperAdmin(viewMe) || isCentralStaff(viewMe)
     if (isFullAccess) return

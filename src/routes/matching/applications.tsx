@@ -29,8 +29,8 @@ import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 import { useViewMe } from "@/shared/view-mode/useViewMe"
 
 export const Route = createFileRoute("/matching/applications")({
-  beforeLoad: async ({ context }) => {
-    await ensureMe(context.queryClient)
+  beforeLoad: async ({ context, location }) => {
+    await ensureMe(context.queryClient, location.href)
   },
   component: MatchingApplicationsPage,
 })
