@@ -13,7 +13,7 @@ const UmcLogoFilled = ({ variant = "dark", ...props }: UmcLogoFilledProps) => {
         viewBox="0 0 64 20"
         {...props}
       >
-        <g fill="#fff" filter="url(#UMCLogoFilled_light__a)">
+        <g fill="currentColor" filter="url(#UMCLogoFilled_light__a)">
           <path d="M18.602 0H.979A.99.99 0 0 0 0 1v9c0 5.522 4.384 10 9.79 10 5.407 0 9.79-4.478 9.79-10V1a.99.99 0 0 0-.978-1M40.63 0c-4.866 0-8.812 3.028-8.812 8 0-4.972-3.945-8-8.811-8a.99.99 0 0 0-.98 1v18c0 .552.44 1 .98 1H40.63a.99.99 0 0 0 .979-1V1a.99.99 0 0 0-.98-1M63.636 19V1a.99.99 0 0 0-.98-1h-8.81c-5.407 0-9.79 4.478-9.79 10s4.383 10 9.79 10h8.81a.99.99 0 0 0 .98-1" />
         </g>
         <defs>
