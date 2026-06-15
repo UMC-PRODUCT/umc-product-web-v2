@@ -13,22 +13,20 @@ export function PainpointSection() {
   return (
     <section className="relative h-[900px] w-[1440px] overflow-hidden">
       <SmoothGlow
-        left={232}
-        top={110}
-        width={976}
-        height={720}
-        opacity={0.2}
-        blur={128}
-        scale={1.25}
+        left={52}
+        top={-80}
+        width={1336}
+        height={1040}
+        opacity={0.42}
+        scale={1}
       />
       <SmoothGlow
-        left={466}
-        top={250}
-        width={508}
-        height={370}
-        opacity={0.22}
-        blur={96}
-        scale={1.15}
+        left={340}
+        top={145}
+        width={760}
+        height={560}
+        opacity={0.36}
+        scale={1}
       />
       <div className="absolute top-[81px] left-1/2 flex -translate-x-1/2 flex-col items-center gap-[64px]">
         <motion.div

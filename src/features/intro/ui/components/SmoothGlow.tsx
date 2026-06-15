@@ -5,7 +5,6 @@ type SmoothGlowProps = {
   height: number
   color?: string
   opacity?: number
-  blur?: number
   scale?: number
 }
 
@@ -16,22 +15,20 @@ export function SmoothGlow({
   height,
   color = "54, 211, 192",
   opacity = 0.22,
-  blur = 120,
   scale = 1,
 }: SmoothGlowProps) {
   return (
     <div
-      className="pointer-events-none absolute rounded-full will-change-transform"
+      className="pointer-events-none absolute will-change-transform"
       style={{
         left,
         top,
         width,
         height,
         opacity,
-        filter: `blur(${blur}px)`,
         transform: `scale(${scale})`,
         transformOrigin: "center",
-        background: `radial-gradient(ellipse at center, rgba(${color}, 0.95) 0%, rgba(${color}, 0.34) 38%, rgba(${color}, 0) 72%)`,
+        background: `radial-gradient(ellipse at center, rgba(${color}, 0.42) 0%, rgba(${color}, 0.22) 26%, rgba(${color}, 0.12) 42%, rgba(${color}, 0.055) 58%, rgba(${color}, 0.02) 72%, rgba(${color}, 0) 86%)`,
       }}
       aria-hidden="true"
     />
