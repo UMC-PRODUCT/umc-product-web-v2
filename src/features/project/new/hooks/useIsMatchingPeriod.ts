@@ -24,8 +24,9 @@ export function useIsMatchingPeriod(options?: UseIsMatchingPeriodOptions) {
   const fallbackChapterId = getLatestChallengerRecord(me)?.chapterId
     ? Number(getLatestChallengerRecord(me)!.chapterId)
     : undefined
-  const chapterId = options?.chapterId ?? fallbackChapterId
-  const enabled = options?.enabled ?? true
+  const chapterId =
+    options && "chapterId" in options ? options.chapterId : fallbackChapterId
+  const enabled = (options?.enabled ?? true) && chapterId !== undefined
 
   const { data: rounds, isSuccess } = useQuery({
     queryKey: applicationKeys.matchingRounds(chapterId),

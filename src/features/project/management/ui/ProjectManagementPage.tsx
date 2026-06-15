@@ -186,9 +186,8 @@ export function ProjectManagementPage() {
       ? selectedChapterId
       : undefined
   const isMatchingPeriod = useIsMatchingPeriod({
-    chapterId: matchingPeriodChapterId,
-    enabled:
-      hasAccess && (!useGroupedView || matchingPeriodChapterId !== undefined),
+    ...(useGroupedView ? { chapterId: matchingPeriodChapterId } : {}),
+    enabled: hasAccess,
   })
 
   const filteredProjects: MatchingProject[] = useMemo(() => {
