@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IntroRouteImport } from './routes/intro'
 import { Route as ChallengerVerificationRouteImport } from './routes/challenger-verification'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as SettingsRouteRouteImport } from './routes/settings/route'
@@ -65,6 +66,11 @@ import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matc
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
+const IntroRoute = IntroRouteImport.update({
+  id: '/intro',
+  path: '/intro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChallengerVerificationRoute = ChallengerVerificationRouteImport.update({
   id: '/challenger-verification',
   path: '/challenger-verification',
@@ -356,6 +362,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
+  '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -410,6 +417,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
+  '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -467,6 +475,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
+  '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
@@ -526,6 +535,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/auth-test'
     | '/challenger-verification'
+    | '/intro'
     | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -580,6 +590,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth-test'
     | '/challenger-verification'
+    | '/intro'
     | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -636,6 +647,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/auth-test'
     | '/challenger-verification'
+    | '/intro'
     | '/login/default'
     | '/matching/applications'
     | '/matching/notice-publish'
@@ -694,6 +706,7 @@ export interface RootRouteChildren {
   SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
   ChallengerVerificationRoute: typeof ChallengerVerificationRoute
+  IntroRoute: typeof IntroRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   SignupOauthRoute: typeof SignupOauthRoute
   TestApplicationFormRoute: typeof TestApplicationFormRoute
@@ -730,6 +743,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/intro': {
+      id: '/intro'
+      path: '/intro'
+      fullPath: '/intro'
+      preLoaderRoute: typeof IntroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/challenger-verification': {
       id: '/challenger-verification'
       path: '/challenger-verification'
@@ -1227,6 +1247,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRouteRoute: SettingsRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
   ChallengerVerificationRoute: ChallengerVerificationRoute,
+  IntroRoute: IntroRoute,
   LoginDefaultRoute: LoginDefaultRoute,
   SignupOauthRoute: SignupOauthRoute,
   TestApplicationFormRoute: TestApplicationFormRoute,
