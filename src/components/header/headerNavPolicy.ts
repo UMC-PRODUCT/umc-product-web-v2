@@ -4,12 +4,17 @@ export const RECRUITING_DISABLED_MESSAGE =
 export type HeaderNavItem = {
   label: string
   to: string
+  activeBasePath?: string
   disabled?: boolean
 }
 
 export const HEADER_NAV_ITEMS: HeaderNavItem[] = [
   { label: "소개", to: "/intro" },
-  { label: "데모데이 매칭", to: "/matching/projects" },
+  {
+    label: "데모데이 매칭",
+    to: "/matching/projects",
+    activeBasePath: "/matching",
+  },
   { label: "리크루팅", to: "/recruiting", disabled: true },
 ]
 
@@ -22,9 +27,11 @@ export function getDisabledNavMessage(label: string) {
 }
 
 export function isHeaderNavItemActive(pathname: string, item: HeaderNavItem) {
-  if (item.to === "/intro") {
+  const basePath = item.activeBasePath ?? item.to
+
+  if (basePath === "/intro") {
     return pathname === "/intro"
   }
 
-  return pathname.startsWith(item.to)
+  return pathname.startsWith(basePath)
 }
