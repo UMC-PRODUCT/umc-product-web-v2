@@ -18,6 +18,11 @@ import {
 } from "@/features/auth/lib/googleSignIn"
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
+import {
+  normalizeReturnTo,
+  rememberLoginReturnTo,
+  resolveLoginSuccessPath,
+} from "@/features/auth/lib/loginRedirect"
 import { useAuthStore } from "@/features/auth/store/authStore"
 import {
   Divider,
@@ -33,10 +38,14 @@ import { TextButton } from "@/shared/ui/button/TextButton"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
 export const Route = createFileRoute("/login/default")({
+  validateSearch: (search: Record<string, unknown>): { returnTo?: string } => ({
+    returnTo: normalizeReturnTo(search.returnTo),
+  }),
   component: DefaultLoginPage,
 })
 
 function DefaultLoginPage() {
+  const { returnTo } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((s) => s.addToast)
   const [email, setEmail] = useState("")
@@ -60,11 +69,12 @@ function DefaultLoginPage() {
 
   const handleAppleSignIn = async () => {
     try {
+      rememberLoginReturnTo(returnTo)
       const { authorizationCode } = await signInWithApple()
       const res = await loginWithApple({ authorizationCode })
       const result = handleLoginResponse(res, isKeepLoggedIn)
       if (result === "LOGIN_SUCCESS") {
-        await navigate({ to: "/" })
+        await navigate({ to: resolveLoginSuccessPath(returnTo) })
       } else {
         await navigate({ to: "/signup/oauth" })
       }
@@ -76,11 +86,12 @@ function DefaultLoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
+      rememberLoginReturnTo(returnTo)
       const { accessToken } = await signInWithGoogle()
       const res = await loginWithGoogle({ accessToken })
       const result = handleLoginResponse(res, isKeepLoggedIn)
       if (result === "LOGIN_SUCCESS") {
-        await navigate({ to: "/" })
+        await navigate({ to: resolveLoginSuccessPath(returnTo) })
       } else {
         await navigate({ to: "/signup/oauth" })
       }
@@ -93,7 +104,7 @@ function DefaultLoginPage() {
   const handleKakaoSignIn = () => {
     try {
       sessionStorage.setItem("kakao_keep_logged_in", String(isKeepLoggedIn))
-      startKakaoSignIn()
+      startKakaoSignIn(returnTo)
     } catch (error) {
       console.error("[Kakao Sign-In]", error)
       showToast("Kakao 로그인에 실패했습니다. 다시 시도해주세요.", "red")
@@ -113,6 +124,7 @@ function DefaultLoginPage() {
     setLoginError("")
 
     try {
+      rememberLoginReturnTo(returnTo)
       const res = await loginWithEmail({ email, password, clientType: "WEB" })
       useAuthStore.getState().setTokens(
         {
@@ -122,7 +134,7 @@ function DefaultLoginPage() {
         },
         isKeepLoggedIn,
       )
-      await navigate({ to: "/" })
+      await navigate({ to: resolveLoginSuccessPath(returnTo) })
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setLoginError("이메일 또는 비밀번호가 올바르지 않습니다")

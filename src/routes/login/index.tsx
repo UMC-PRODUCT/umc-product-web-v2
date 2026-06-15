@@ -17,6 +17,11 @@ import {
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
 import {
+  normalizeReturnTo,
+  rememberLoginReturnTo,
+  resolveLoginSuccessPath,
+} from "@/features/auth/lib/loginRedirect"
+import {
   Divider,
   LoginButton,
   // SmallDivider,
@@ -26,10 +31,14 @@ import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"
 
 export const Route = createFileRoute("/login/")({
+  validateSearch: (search: Record<string, unknown>): { returnTo?: string } => ({
+    returnTo: normalizeReturnTo(search.returnTo),
+  }),
   component: SocialLoginPage,
 })
 
 function SocialLoginPage() {
+  const { returnTo } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((s) => s.addToast)
 
@@ -45,11 +54,12 @@ function SocialLoginPage() {
 
   const handleAppleSignIn = async () => {
     try {
+      rememberLoginReturnTo(returnTo)
       const { authorizationCode } = await signInWithApple()
       const res = await loginWithApple({ authorizationCode })
       const result = handleLoginResponse(res)
       if (result === "LOGIN_SUCCESS") {
-        await navigate({ to: "/" })
+        await navigate({ to: resolveLoginSuccessPath(returnTo) })
       } else {
         await navigate({ to: "/signup/oauth" })
       }
@@ -61,11 +71,12 @@ function SocialLoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
+      rememberLoginReturnTo(returnTo)
       const { accessToken } = await signInWithGoogle()
       const res = await loginWithGoogle({ accessToken })
       const result = handleLoginResponse(res)
       if (result === "LOGIN_SUCCESS") {
-        await navigate({ to: "/" })
+        await navigate({ to: resolveLoginSuccessPath(returnTo) })
       } else {
         await navigate({ to: "/signup/oauth" })
       }
@@ -77,7 +88,7 @@ function SocialLoginPage() {
 
   const handleKakaoSignIn = () => {
     try {
-      startKakaoSignIn()
+      startKakaoSignIn(returnTo)
     } catch (error) {
       console.error("[Kakao Sign-In]", error)
       showToast("Kakao 로그인에 실패했습니다. 다시 시도해주세요.", "red")
@@ -110,7 +121,12 @@ function SocialLoginPage() {
               variant={"weak"}
               color={"primary"}
               className="h-12.5 w-90 rounded-[10px] px-4 py-1 text-[16px]"
-              onClick={() => navigate({ to: "/login/default" })}
+              onClick={() =>
+                navigate({
+                  to: "/login/default",
+                  search: returnTo ? { returnTo } : {},
+                })
+              }
             >
               UMC 계정 로그인
             </Button>

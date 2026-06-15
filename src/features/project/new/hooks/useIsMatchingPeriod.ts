@@ -14,16 +14,24 @@ import {
 const MAX_TIMER_DELAY_MS = 24 * 60 * 60 * 1000
 const BOUNDARY_PASS_MS = 50
 
-export function useIsMatchingPeriod() {
+interface UseIsMatchingPeriodOptions {
+  chapterId?: number
+  enabled?: boolean
+}
+
+export function useIsMatchingPeriod(options?: UseIsMatchingPeriodOptions) {
   const { data: me } = useMe()
-  const chapterId = getLatestChallengerRecord(me)?.chapterId
+  const fallbackChapterId = getLatestChallengerRecord(me)?.chapterId
     ? Number(getLatestChallengerRecord(me)!.chapterId)
     : undefined
+  const chapterId =
+    options && "chapterId" in options ? options.chapterId : fallbackChapterId
+  const enabled = (options?.enabled ?? true) && chapterId !== undefined
 
   const { data: rounds, isSuccess } = useQuery({
     queryKey: applicationKeys.matchingRounds(chapterId),
     queryFn: () => getMatchingRounds(chapterId),
-    enabled: chapterId !== undefined,
+    enabled: enabled && chapterId !== undefined,
   })
 
   const [now, setNow] = useState(() => new Date())

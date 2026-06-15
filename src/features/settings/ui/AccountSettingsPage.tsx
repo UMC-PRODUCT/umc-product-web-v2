@@ -11,6 +11,7 @@ import {
   isGooglePopupCancelled,
   signInWithGoogle,
 } from "@/features/auth/lib/googleSignIn"
+import { clearLoginReturnTo } from "@/features/auth/lib/loginRedirect"
 import { toRoleTag } from "@/features/auth/model/mappers"
 import { useAuthStore } from "@/features/auth/store/authStore"
 import { uploadFileFlow } from "@/features/project/new/api/storage"
@@ -113,6 +114,7 @@ export function AccountSettingsPage() {
     }
     try {
       await deleteMember({ googleAccessToken })
+      clearLoginReturnTo()
       useAuthStore.getState().clear()
       addToast({
         message: "계정이 삭제되어 로그아웃되었습니다.",

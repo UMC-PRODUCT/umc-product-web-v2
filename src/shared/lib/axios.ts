@@ -1,5 +1,9 @@
 import axios, { AxiosError } from "axios"
 
+import {
+  buildLoginRedirectSearch,
+  getCurrentReturnTo,
+} from "@/features/auth/lib/loginRedirect"
 import { useAuthStore } from "@/features/auth/store/authStore"
 
 import type { AxiosRequestConfig } from "axios"
@@ -71,7 +75,10 @@ api.interceptors.response.use(
     const refreshToken = useAuthStore.getState().refreshToken
     if (!refreshToken) {
       useAuthStore.getState().clear()
-      window.location.href = "/login"
+      const search = new URLSearchParams(
+        buildLoginRedirectSearch(getCurrentReturnTo()),
+      )
+      window.location.href = search.size > 0 ? `/login?${search}` : "/login"
       return Promise.reject(error)
     }
 
@@ -115,7 +122,10 @@ api.interceptors.response.use(
     } catch (refreshError) {
       rejectQueue(refreshError)
       useAuthStore.getState().clear()
-      window.location.href = "/login"
+      const search = new URLSearchParams(
+        buildLoginRedirectSearch(getCurrentReturnTo()),
+      )
+      window.location.href = search.size > 0 ? `/login?${search}` : "/login"
       return Promise.reject(refreshError)
     } finally {
       isRefreshing = false

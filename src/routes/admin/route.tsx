@@ -14,8 +14,8 @@ import { useViewModeStore } from "@/shared/view-mode"
 import { projectViewMe } from "@/shared/view-mode/projectViewMe"
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: async ({ context }) => {
-    const me = await ensureMe(context.queryClient)
+  beforeLoad: async ({ context, location }) => {
+    const me = await ensureMe(context.queryClient, location.href)
     const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
     if (!isOperator(viewMe)) throw redirect({ to: "/" })
   },

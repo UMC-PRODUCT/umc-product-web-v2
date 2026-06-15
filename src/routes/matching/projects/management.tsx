@@ -13,8 +13,8 @@ export const Route = createFileRoute("/matching/projects/management")({
     search: Record<string, unknown>,
   ): { notice?: "duplicate" } =>
     search.notice === "duplicate" ? { notice: "duplicate" } : {},
-  beforeLoad: async ({ context }) => {
-    const me = await ensureMe(context.queryClient)
+  beforeLoad: async ({ context, location }) => {
+    const me = await ensureMe(context.queryClient, location.href)
     const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
     if (!canManageProjects(viewMe)) throw redirect({ to: "/matching/projects" })
   },

@@ -54,6 +54,10 @@ export function isCentralStaff(me: MemberInfoResponse | undefined): boolean {
   return hasAnyRoleType(me, CENTRAL_ROLE_TYPES)
 }
 
+export function isCentralCore(me: MemberInfoResponse | undefined): boolean {
+  return hasAnyRoleType(me, CENTRAL_CORE_ROLE_TYPES)
+}
+
 export function isChapterPresident(
   me: MemberInfoResponse | undefined,
 ): boolean {

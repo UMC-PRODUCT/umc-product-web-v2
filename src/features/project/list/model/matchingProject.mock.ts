@@ -84,7 +84,7 @@ const RAW_MOCK_PROJECTS: MatchingProjectMock[] = [
     description:
       "프로젝트 한 줄 소개가 여기에 표시됩니다. 초과 내용 ... 처리 없이 설명 전문이 표시됩니다. 본문 내용 공백 포함 200자 이내 약 4줄 표시됩니다. 프로젝트 한 줄 소개가 여기에 표시됩니다. 초과 내용 ... 처리 없이 설명 전문이 표시됩니다. 본문 내용 공백 포함 200자 이내 약 4줄 표시됩니다. 프로젝트 한줄 소개가 여기에 표시됩니다. 초과 내용 ... 처리 없이 설명 전문이 표시됩",
     authorSchoolLine: "닉네임/이름 · 한양대 ERICA",
-    externalLink: "https://issac.app",
+    externalLink: "https://example.com",
     coverImage: {
       src: "https://picsum.photos/seed/umc-matching-1/696/368",
       alt: "프로젝트 대표 이미지",

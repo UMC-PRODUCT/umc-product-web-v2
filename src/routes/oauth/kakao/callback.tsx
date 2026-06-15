@@ -12,6 +12,7 @@ import {
   consumeKakaoState,
   getKakaoRedirectUri,
 } from "@/features/auth/lib/kakaoSignIn"
+import { resolveLoginSuccessPath } from "@/features/auth/lib/loginRedirect"
 
 export const Route = createFileRoute("/oauth/kakao/callback")({
   component: KakaoCallbackPage,
@@ -126,7 +127,7 @@ function KakaoCallbackPage() {
         // 일반 로그인 플로우
         const result = handleLoginResponse(res, keepLoggedIn)
         if (result === "LOGIN_SUCCESS") {
-          void navigate({ to: "/" })
+          void navigate({ to: resolveLoginSuccessPath() })
         } else {
           void navigate({ to: "/signup/oauth" })
         }
