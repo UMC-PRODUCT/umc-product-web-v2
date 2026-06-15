@@ -82,11 +82,11 @@ function MatchingApplicationsPage() {
     }
   }, [me, chapters, userChapter])
 
-  const admin = useAdminPageData(selectedChapter)
+  const admin = useAdminPageData(selectedChapter, { enabled: canApprove })
   const adminStats = admin.stats
   const adminProjects = admin.projects
 
-  const challenger = useChallengerPageData()
+  const challenger = useChallengerPageData({ enabled: isPm })
   const pmProjects = challenger.projects
   const availablePerRound = challenger.availablePerRound
 
