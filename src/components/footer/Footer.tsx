@@ -77,7 +77,7 @@ export default function Footer() {
             id="footer-team-heading"
             className="text-subtitle-4-semibold text-teal-gray-400"
           >
-            UMC Product
+            UMC PRODUCT
           </h2>
           <dl className="mt-4 flex flex-col gap-1.75">
             {TEAM_ROWS.map(({ role, members }) => (
