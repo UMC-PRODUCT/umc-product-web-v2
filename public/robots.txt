@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /matching
+Disallow: /settings
+Disallow: /signup
+Disallow: /login
+Disallow: /oauth
+Disallow: /challenger-verification
+Disallow: /auth-test
+Disallow: /test
+
+Sitemap: https://university.neordinary.com/sitemap.xml
