@@ -6,6 +6,7 @@ import Header from "@/components/header/Header"
 import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
 import SideBar from "@/components/sidebar/SideBar"
 import { useAuthStore } from "@/features/auth/store/authStore"
+import { cn } from "@/shared/lib/utils"
 
 import type { MemberInfoResponse } from "@/features/auth/api/me"
 
@@ -62,11 +63,12 @@ function HeaderTestPage() {
                       key={value}
                       type="button"
                       onClick={() => setActivePathname(value)}
-                      className={`text-body-3-medium rounded-full border px-3 py-1.5 transition-colors ${
+                      className={cn(
+                        "text-body-3-medium rounded-full border px-3 py-1.5 transition-colors",
                         activePathname === value
                           ? "border-teal-600 bg-teal-600 text-white"
-                          : "border-teal-gray-200 text-teal-gray-500 hover:border-teal-gray-300 bg-white"
-                      }`}
+                          : "border-teal-gray-200 text-teal-gray-500 hover:border-teal-gray-300 bg-white",
+                      )}
                     >
                       {label}
                     </button>
