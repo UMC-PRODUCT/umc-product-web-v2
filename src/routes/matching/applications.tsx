@@ -157,7 +157,7 @@ function MatchingApplicationsPage() {
                     projects={adminProjects}
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
-                    hideExpand={isSchoolLeadership(identity)}
+                    disableFormPanel={isSchoolLeadership(identity)}
                   />
                 </div>
               )}
