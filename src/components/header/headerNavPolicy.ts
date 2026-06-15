@@ -33,5 +33,5 @@ export function isHeaderNavItemActive(pathname: string, item: HeaderNavItem) {
     return pathname === "/intro"
   }
 
-  return pathname.startsWith(basePath)
+  return pathname === basePath || pathname.startsWith(basePath + "/")
 }
