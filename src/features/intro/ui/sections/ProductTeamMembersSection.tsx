@@ -89,12 +89,13 @@ const SERVER_CARD: TeamCardData = {
       role: "SpringBoot",
       members: [
         { nickname: "하늘", name: "박경운" },
+        { nickname: "갈래", name: "김민서" },
         { nickname: "와나", name: "강하나" },
         { nickname: "박박지현", name: "박지현" },
         { nickname: "세니", name: "박세은", breakAfter: true },
         { nickname: "스읍", name: "이예은" },
         { nickname: "갈래", name: "김민서" },
-        { nickname: "커너", name: "박성현" },
+        { nickname: "우디", name: "박성현" },
         { nickname: "라미", name: "권도희" },
         { nickname: "이람", name: "박승범" },
       ],
@@ -182,7 +183,7 @@ function TeamCard({ title, rows }: TeamCardData) {
     <section className="flex flex-1 flex-col items-start">
       <LabelBadge>{title}</LabelBadge>
       <div
-        className={`mt-[-15px] flex ${cardHeight} w-full flex-col justify-start rounded-[18px] border border-white bg-[rgba(240,249,248,0.5)] px-9 pt-11.25 pb-9`}
+        className={`-mt-3.75 flex ${cardHeight} w-full flex-col justify-start rounded-[18px] border border-white bg-[rgba(240,249,248,0.5)] px-9 pt-11.25 pb-9`}
       >
         <div className="flex flex-col gap-3">
           {rows.map((row) => (
