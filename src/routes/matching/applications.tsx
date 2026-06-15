@@ -20,7 +20,7 @@ import {
   isChapterPresident,
   isCurrentTermPm,
   isOperator,
-  isSchoolLeadership,
+  isSchoolPresident,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
@@ -55,10 +55,10 @@ function MatchingApplicationsPage() {
   // 지부장 본인 지부 추적 (auto-select 후 갱신)
   const ownChapter = useRef<string>(defaultChapter)
 
-  const canApprove = isOperator(viewMe) || isSchoolLeadership(viewMe)
+  const canApprove = isOperator(viewMe) || isSchoolPresident(viewMe)
   // 지부장·학교 회장: 본인 지부만 조회 가능 (SUPER_ADMIN/중앙 운영진 제외)
   const isRestrictedToChapter =
-    (isChapterPresident(me) || isSchoolLeadership(me)) &&
+    (isChapterPresident(me) || isSchoolPresident(me)) &&
     !isSuperAdmin(me) &&
     !isCentralStaff(me)
   const isPm = isCurrentTermPm(viewMe)
