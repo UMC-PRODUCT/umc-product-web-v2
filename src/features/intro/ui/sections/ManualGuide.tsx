@@ -1,5 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 
+import { cn } from "@/shared/lib/utils"
+
 import { GLOW_ELLIPSE_SRC } from "../../constants"
 import { GlowImage } from "../components/GlowImage"
 import { ManualContent01 } from "../components/ManualContent01"
@@ -143,7 +145,11 @@ export function ManualGuideFrame({
 }: ManualGuideFrameProps) {
   return (
     <div
-      className={`${pinned ? "sticky top-0" : ""}h-[900px] w-[1440px] overflow-hidden ${inheritBackground ? "" : "bg-black"}`}
+      className={cn(
+        pinned && "sticky top-0",
+        "h-[900px] w-[1440px] overflow-hidden",
+        !inheritBackground && "bg-black",
+      )}
     >
       <GlowImage
         src={GLOW_ELLIPSE_SRC}
