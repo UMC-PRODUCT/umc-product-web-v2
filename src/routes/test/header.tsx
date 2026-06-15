@@ -6,38 +6,78 @@ import Header from "@/components/header/Header"
 import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
 import SideBar from "@/components/sidebar/SideBar"
 import { useAuthStore } from "@/features/auth/store/authStore"
+import { cn } from "@/shared/lib/utils"
 
 import type { MemberInfoResponse } from "@/features/auth/api/me"
 
-const HEADER_PREVIEW_PATHNAME = "/matching/projects/management"
+const PATHNAME_OPTIONS = [
+  { label: "소개", value: "/intro" },
+  { label: "데모데이 매칭 / 프로젝트 목록", value: "/matching/projects" },
+  { label: "데모데이 매칭 / 관리", value: "/matching/projects/management" },
+  { label: "데모데이 매칭 / 라운드", value: "/matching/rounds" },
+  { label: "데모데이 매칭 / 지원 현황", value: "/matching/status" },
+  { label: "데모데이 매칭 / 지원서 목록", value: "/matching/applications" },
+  { label: "기타 (active 없음)", value: "/other" },
+]
 
 export const Route = createFileRoute("/test/header")({
   component: HeaderTestPage,
 })
 
 function HeaderTestPage() {
+  const [activePathname, setActivePathname] = useState(
+    PATHNAME_OPTIONS[1]?.value ?? PATHNAME_OPTIONS[0]!.value,
+  )
   const isReady = useHeaderPreviewUser()
 
   if (!isReady) return null
 
   return (
     <main className="h-full min-h-screen w-full">
-      <Header activePathname={HEADER_PREVIEW_PATHNAME} />
+      <Header activePathname={activePathname} />
       <div className="flex w-full">
-        <SideBar activePathname={HEADER_PREVIEW_PATHNAME} />
+        <SideBar activePathname={activePathname} />
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="bp2:px-8.5 bp2:pt-14.5 px-4 pt-6">
-            <MatchingSegmentRegion activePathname={HEADER_PREVIEW_PATHNAME} />
+            <MatchingSegmentRegion activePathname={activePathname} />
           </div>
-          <div className="bp2:px-8.5 bp2:pt-8 flex min-h-screen min-w-0 flex-1 flex-col px-4 pt-6">
-            <section className="border-teal-gray-100 flex flex-col gap-3 rounded-lg border bg-white p-6">
-              <h1 className="text-heading-6-semibold text-teal-gray-900">
-                Header Test Page
-              </h1>
-              <p className="text-body-2-regular text-teal-gray-500">
-                실제 매칭 workflow 레이아웃과 같은 Header, SideBar, Segment
-                조합에서 반응형 상태를 확인합니다.
-              </p>
+          <div className="bp2:px-8.5 bp2:pt-8 flex min-w-0 flex-1 flex-col px-4 pt-6">
+            <section className="border-teal-gray-100 flex flex-col gap-4 rounded-lg border bg-white p-6">
+              <div>
+                <h1 className="text-heading-6-semibold text-teal-gray-900">
+                  Header / SideBar / Segment 테스트
+                </h1>
+                <p className="text-body-2-regular text-teal-gray-500 mt-1">
+                  pathname을 전환하며 헤더 active 상태와 사이드바·세그먼트를
+                  확인합니다.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-label-1-medium text-teal-gray-600">
+                  pathname 선택
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {PATHNAME_OPTIONS.map(({ label, value }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setActivePathname(value)}
+                      className={cn(
+                        "text-body-3-medium rounded-full border px-3 py-1.5 transition-colors",
+                        activePathname === value
+                          ? "border-teal-600 bg-teal-600 text-white"
+                          : "border-teal-gray-200 text-teal-gray-500 hover:border-teal-gray-300 bg-white",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-body-3-regular text-teal-gray-400 font-mono">
+                  {activePathname}
+                </p>
+              </div>
             </section>
           </div>
         </div>
