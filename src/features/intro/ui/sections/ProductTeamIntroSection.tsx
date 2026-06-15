@@ -36,7 +36,11 @@ function ParticleLayer() {
 
 export function ProductTeamIntroSection() {
   return (
-    <section data-snap-point className="relative h-[810px] w-[1440px]">
+    <section
+      data-snap-point
+      data-snap-strength="strong"
+      className="relative h-[810px] w-[1440px]"
+    >
       <ParticleLayer />
 
       <motion.div
