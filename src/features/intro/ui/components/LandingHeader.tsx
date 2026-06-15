@@ -7,7 +7,7 @@ import {
   RECRUITING_DISABLED_MESSAGE,
 } from "@/components/header/headerNavPolicy"
 import { useToastStore } from "@/components/toast/useToastStore"
-import UmcLogoFilled from "@/shared/assets/icon/logo/UmcLogoFilled"
+import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { cn } from "@/shared/lib/utils"
 
 export function LandingHeader() {
@@ -67,9 +67,9 @@ export function LandingHeader() {
         }}
       />
 
-      <div className="relative flex h-full w-full max-w-[1440px] items-center justify-between">
+      <div className="relative flex h-full w-full max-w-360 items-center justify-between">
         <div className="flex h-full w-55 items-center justify-start pl-12.5">
-          <UmcLogoFilled className="h-5.5 w-18.5 text-white" aria-label="UMC" />
+          <UmcLogo className="h-5.5 w-18.5 text-white" aria-label="UMC" />
         </div>
 
         <nav
