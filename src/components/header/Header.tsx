@@ -11,24 +11,15 @@ import { cn } from "@/shared/lib/utils"
 import Profile from "@/shared/ui/Profile"
 
 import HeaderButton from "./HeaderButton"
+import {
+  getDisabledNavMessage,
+  HEADER_NAV_ITEMS,
+  isHeaderNavItemActive,
+} from "./headerNavPolicy"
 import NavigationButton from "./NavigationButton"
-
-interface NavItem {
-  label: string
-  to: string
-  disabled?: boolean
-}
 
 interface HeaderProps {
   activePathname?: string
-}
-
-function getDisabledNavMessage(label: string) {
-  if (label === "리크루팅") {
-    return "리크루팅 서비스는 11기 모집 때 공개됩니다. 많은 관심 부탁드립니다!"
-  }
-
-  return `${label} 서비스는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!`
 }
 
 export default function Header({ activePathname }: HeaderProps = {}) {
@@ -36,12 +27,6 @@ export default function Header({ activePathname }: HeaderProps = {}) {
   const pathname = activePathname ?? location.pathname
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const addToast = useToastStore((s) => s.addToast)
-
-  const navItems: NavItem[] = [
-    { label: "소개", to: "/intro", disabled: true },
-    { label: "데모데이 매칭", to: "/matching" },
-    { label: "리크루팅", to: "/recruiting", disabled: true },
-  ]
 
   const handleDisabledClick = (label: string) => {
     addToast({
@@ -82,12 +67,12 @@ export default function Header({ activePathname }: HeaderProps = {}) {
         </Link>
 
         <nav className="bg-teal-gray-50 border-teal-gray-100 bp2:flex hidden shrink-0 items-center gap-1.5 rounded-full border p-1.5 drop-shadow-[0_0_8px_rgba(10,86,80,0.04)]">
-          {navItems.map((item) => (
+          {HEADER_NAV_ITEMS.map((item) => (
             <NavigationButton
               key={item.to}
               label={item.label}
               to={item.to}
-              selected={pathname.startsWith(item.to)}
+              selected={isHeaderNavItemActive(pathname, item)}
               disabled={item.disabled}
               onClick={
                 item.disabled
@@ -153,8 +138,8 @@ export default function Header({ activePathname }: HeaderProps = {}) {
         </div>
 
         <div className="grid grid-cols-2 gap-1">
-          {navItems.map((item) => {
-            const selected = pathname.startsWith(item.to)
+          {HEADER_NAV_ITEMS.map((item) => {
+            const selected = isHeaderNavItemActive(pathname, item)
             return (
               <NavigationButton
                 key={item.to}
