@@ -26,7 +26,7 @@ export const Route = createFileRoute("/test/header")({
 
 function HeaderTestPage() {
   const [activePathname, setActivePathname] = useState(
-    PATHNAME_OPTIONS[1].value,
+    PATHNAME_OPTIONS[1]?.value ?? PATHNAME_OPTIONS[0]!.value,
   )
   const isReady = useHeaderPreviewUser()
 
