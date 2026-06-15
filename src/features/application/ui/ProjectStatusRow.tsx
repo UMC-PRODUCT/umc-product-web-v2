@@ -19,6 +19,7 @@ interface ProjectStatusRowProps {
   isExpanded?: boolean
   onToggleExpand?: () => void
   onProjectClick?: () => void
+  hideExpandButton?: boolean
   className?: string
 }
 
@@ -44,6 +45,7 @@ export function ProjectStatusRow({
   isExpanded = false,
   onToggleExpand,
   onProjectClick,
+  hideExpandButton = false,
   className,
 }: ProjectStatusRowProps) {
   return (
@@ -105,24 +107,26 @@ export function ProjectStatusRow({
       </div>
 
       {/* 확장/축소 버튼 */}
-      <button
-        type="button"
-        aria-label={isExpanded ? "접기" : "펼치기"}
-        aria-expanded={isExpanded}
-        onClick={onToggleExpand}
-        className={cn(
-          "shadow-inner-neutral-2 flex size-7.5 shrink-0 items-center justify-center rounded-[10px] transition-colors",
-          isExpanded ? "bg-teal-100/50" : "hover:bg-teal-gray-150 bg-white",
-        )}
-      >
-        <ChevronDown
-          size={30}
+      {!hideExpandButton && (
+        <button
+          type="button"
+          aria-label={isExpanded ? "접기" : "펼치기"}
+          aria-expanded={isExpanded}
+          onClick={onToggleExpand}
           className={cn(
-            "text-teal-gray-600 transition-transform",
-            isExpanded && "rotate-180",
+            "shadow-inner-neutral-2 flex size-7.5 shrink-0 items-center justify-center rounded-[10px] transition-colors",
+            isExpanded ? "bg-teal-100/50" : "hover:bg-teal-gray-150 bg-white",
           )}
-        />
-      </button>
+        >
+          <ChevronDown
+            size={30}
+            className={cn(
+              "text-teal-gray-600 transition-transform",
+              isExpanded && "rotate-180",
+            )}
+          />
+        </button>
+      )}
     </div>
   )
 }

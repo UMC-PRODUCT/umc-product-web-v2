@@ -15,12 +15,14 @@ const COLUMNS = [
 interface ApplicantTableHeadProps {
   hasExpanded?: boolean
   onToggleAll?: () => void
+  hideExpandButton?: boolean
   className?: string
 }
 
 export function ApplicantTableHead({
   hasExpanded = false,
   onToggleAll,
+  hideExpandButton = false,
   className,
 }: ApplicantTableHeadProps) {
   return (
@@ -47,18 +49,20 @@ export function ApplicantTableHead({
         ))}
       </div>
 
-      <button
-        type="button"
-        aria-label={hasExpanded ? "모두 접기" : "모두 펼치기"}
-        onClick={onToggleAll}
-        className="shadow-inner-neutral-2 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-teal-100 transition-colors hover:bg-teal-200"
-      >
-        {hasExpanded ? (
-          <CollapseAllIcon width={24} height={24} className="text-teal-700" />
-        ) : (
-          <ExpandAllIcon width={24} height={24} className="text-teal-700" />
-        )}
-      </button>
+      {!hideExpandButton && (
+        <button
+          type="button"
+          aria-label={hasExpanded ? "모두 접기" : "모두 펼치기"}
+          onClick={onToggleAll}
+          className="shadow-inner-neutral-2 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-teal-100 transition-colors hover:bg-teal-200"
+        >
+          {hasExpanded ? (
+            <CollapseAllIcon width={24} height={24} className="text-teal-700" />
+          ) : (
+            <ExpandAllIcon width={24} height={24} className="text-teal-700" />
+          )}
+        </button>
+      )}
     </div>
   )
 }

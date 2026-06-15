@@ -71,6 +71,8 @@ interface ApplicationTableSectionProps {
   disableFormPanel?: boolean
   /** 플랜 챌린저(PM) 뷰: 대기 상태 옵션 숨김 */
   hidePendingStatus?: boolean
+  /** 지원자 펼치기 버튼 숨김 (SCHOOL_PRESIDENT 등 열람 제한 역할) */
+  hideExpand?: boolean
   className?: string
 }
 
@@ -84,6 +86,7 @@ export function ApplicationTableSection({
   chapterName,
   disableFormPanel = false,
   hidePendingStatus = false,
+  hideExpand = false,
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -279,7 +282,11 @@ export function ApplicationTableSection({
 
       {/* 테이블 */}
       <div role="table" className="flex flex-col">
-        <ApplicantTableHead hasExpanded={hasExpanded} onToggleAll={toggleAll} />
+        <ApplicantTableHead
+          hasExpanded={hasExpanded}
+          onToggleAll={toggleAll}
+          hideExpandButton={hideExpand}
+        />
 
         {pagedProjects.length === 0 && (
           <div className="border-teal-gray-100 flex min-h-18 items-center justify-center rounded-b-[12px] border-r border-b border-l">
@@ -304,11 +311,14 @@ export function ApplicationTableSection({
                 feCount={project.feCount}
                 beCount={project.beCount}
                 isExpanded={isExpanded}
-                onToggleExpand={() => toggleExpand(project.id)}
+                onToggleExpand={
+                  hideExpand ? undefined : () => toggleExpand(project.id)
+                }
                 onProjectClick={() => {
                   setSelectedProject(project)
                   setDetailModalOpen(true)
                 }}
+                hideExpandButton={hideExpand}
               />
 
               {isExpanded &&

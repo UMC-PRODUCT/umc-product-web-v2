@@ -72,14 +72,15 @@ export function useActiveGisuId() {
 }
 
 // PM 챌린저 뷰용 데이터
-export function useChallengerPageData() {
+export function useChallengerPageData(options?: { enabled?: boolean }) {
+  const enabled = options?.enabled ?? true
   const gisuQuery = useActiveGisuId()
   const gisuId = gisuQuery.data ?? 0
 
   const projectsQuery = useQuery({
     queryKey: applicationKeys.managedProjects(gisuId),
     queryFn: () => getManagedProjects(gisuId),
-    enabled: gisuId > 0,
+    enabled: enabled && gisuId > 0,
   })
 
   // 프로젝트 목록이 로드되면 각 프로젝트의 지원자 목록도 함께 조회
@@ -104,7 +105,7 @@ export function useChallengerPageData() {
       )
       return new Map(results.map((r) => [String(r.projectId), r.applicants]))
     },
-    enabled: projects.length > 0,
+    enabled: enabled && projects.length > 0,
   })
 
   // 프로젝트별 통계 조회 (차수별 지원률, 학교별 지원자 수)
@@ -120,7 +121,7 @@ export function useChallengerPageData() {
       )
       return results
     },
-    enabled: projects.length > 0,
+    enabled: enabled && projects.length > 0,
   })
 
   // 현재 차수: 서버 통계에 존재하는 가장 높은 차수
@@ -153,6 +154,7 @@ export function useChallengerPageData() {
   const schoolsQuery = useQuery({
     queryKey: ["schools", "all"],
     queryFn: getAllSchools,
+    enabled,
   })
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
@@ -210,7 +212,12 @@ export function useChapters() {
 }
 
 // Admin 뷰용 데이터
-export function useAdminPageData(chapterName?: string, schoolName?: string) {
+export function useAdminPageData(
+  chapterName?: string,
+  options?: { enabled?: boolean; schoolName?: string },
+) {
+  const enabled = options?.enabled ?? true
+  const schoolName = options?.schoolName
   const gisuQuery = useActiveGisuId()
   const gisuId = gisuQuery.data ?? 0
 
@@ -224,7 +231,7 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
   const chaptersWithSchoolsQuery = useQuery({
     queryKey: ["chapters-with-schools", gisuId],
     queryFn: () => getChaptersWithSchools(String(gisuId)),
-    enabled: gisuId > 0,
+    enabled: enabled && gisuId > 0,
   })
   const chapterSchoolIds = useMemo(() => {
     if (!chapterName || !chaptersWithSchoolsQuery.data) return null
@@ -246,7 +253,7 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
   const projectsQuery = useQuery({
     queryKey: applicationKeys.allProjects(gisuId, chapterId),
     queryFn: () => getAllProjects(gisuId, { chapterId, size: 100 }),
-    enabled: gisuId > 0,
+    enabled: enabled && gisuId > 0,
   })
 
   const projects = useMemo(() => {
@@ -274,13 +281,14 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
       )
       return new Map(results.map((r) => [String(r.projectId), r.applicants]))
     },
-    enabled: projects.length > 0,
+    enabled: enabled && projects.length > 0,
   })
 
   // 전체 학교 목록 조회 (schoolId -> schoolName 매핑용)
   const schoolsQuery = useQuery({
     queryKey: ["schools", "all"],
     queryFn: getAllSchools,
+    enabled,
   })
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
@@ -303,6 +311,7 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
   const roundsQuery = useQuery({
     queryKey: applicationKeys.matchingRounds(chapterId),
     queryFn: () => getMatchingRounds(chapterId),
+    enabled,
   })
   const { currentRound, activeRound } = useMemo(
     () => getCurrentRound(roundsQuery.data ?? []),
@@ -313,7 +322,7 @@ export function useAdminPageData(chapterName?: string, schoolName?: string) {
   const chapterStatsQuery = useQuery({
     queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
     queryFn: () => getChapterStatistics(chapterId!),
-    enabled: !!chapterId,
+    enabled: enabled && !!chapterId,
   })
 
   // projectId -> name 맵 (키를 String으로 통일)
