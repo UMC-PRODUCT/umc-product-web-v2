@@ -682,6 +682,17 @@ export function ProjectDetailCard({
                     </Button>
                   </>
                 )}
+                {ctaMode === "other-branch" && (
+                  <Button
+                    variant="weak"
+                    color="primary"
+                    className="min-w-32 flex-1 whitespace-nowrap"
+                    disabled={!detail?.applicationFormId}
+                    onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                  >
+                    모집 문항 보기
+                  </Button>
+                )}
               </>
             )}
           </div>

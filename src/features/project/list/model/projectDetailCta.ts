@@ -6,6 +6,7 @@ export type ProjectDetailCtaMode =
   | "apply-blocked-approved"
   | "apply-blocked-part"
   | "apply-blocked-closed"
+  | "other-branch"
   | "no-active-round"
   | "plan-only"
 
@@ -35,8 +36,8 @@ export function resolveProjectDetailCtaMode({
   hasActiveRound,
 }: ResolveCtaParams): ProjectDetailCtaMode {
   if (isOperator) return "recruit-questions"
-  if (!isSameBranch) return "plan-only"
   if (isPm) return "recruit-questions"
+  if (!isSameBranch) return "other-branch"
   if (isApplied && isDraftApplication) return "apply"
   if (isApplied) return "my-application"
   if (isAlreadyApproved) return "apply-blocked-approved"

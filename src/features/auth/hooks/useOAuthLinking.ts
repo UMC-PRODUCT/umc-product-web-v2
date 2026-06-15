@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
+import { isAxiosError } from "axios"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -156,11 +157,15 @@ export function useOAuthLinking() {
         duration: 3000,
       })
     } catch (err) {
+      const errorCode = isAxiosError(err)
+        ? (err.response?.data as { code?: string } | undefined)?.code
+        : undefined
+      const message =
+        errorCode === "AUTHENTICATION-0016"
+          ? "비밀번호가 없는 계정은 마지막 소셜 연동을 해제할 수 없어요.\n비밀번호를 먼저 설정해주세요."
+          : "연동 해제에 실패했습니다. 다시 시도해주세요."
       addToast({
-        message:
-          err instanceof Error
-            ? err.message
-            : "연동 해제에 실패했습니다. 다시 시도해주세요.",
+        message,
         color: "red",
         variant: "deep",
         type: "default",
