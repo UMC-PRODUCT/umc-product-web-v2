@@ -5,8 +5,6 @@ import { useToastStore } from "@/components/toast/useToastStore"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { canManageProjects } from "@/features/auth/model/identity"
 import { ProjectManagementPage } from "@/features/project/management"
-import { useViewModeStore } from "@/shared/view-mode"
-import { projectViewMe } from "@/shared/view-mode/projectViewMe"
 
 export const Route = createFileRoute("/matching/projects/management")({
   validateSearch: (
@@ -15,8 +13,7 @@ export const Route = createFileRoute("/matching/projects/management")({
     search.notice === "duplicate" ? { notice: "duplicate" } : {},
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
-    const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
-    if (!canManageProjects(viewMe)) throw redirect({ to: "/matching/projects" })
+    if (!canManageProjects(me)) throw redirect({ to: "/matching/projects" })
   },
   component: ProjectManagementRoute,
 })

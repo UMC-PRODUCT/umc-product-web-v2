@@ -28,7 +28,7 @@ import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
-import { useViewMe } from "@/shared/view-mode/useViewMe"
+import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import {
   getActiveMatchingRound,
@@ -188,7 +188,7 @@ export function ProjectDetailCard({
   const projectId = Number(projectIdProp)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { viewMe: me } = useViewMe()
+  const { me, viewContext } = useViewerIdentity()
   const addToast = useToastStore((s) => s.addToast)
   const userIsOperator = isOperator(me)
   const userIsPm = isCurrentTermPm(me)
@@ -344,7 +344,8 @@ export function ProjectDetailCard({
     : projectChapterId != null && myChapterId != null
       ? projectChapterId === myChapterId
       : true
-  const isChallengerView = !userIsOperator && !userIsPm
+  const isChallengerView =
+    viewContext.isChallengerView || (!userIsOperator && !userIsPm)
 
   const devMatchingRoundId =
     Number(import.meta.env.VITE_DEV_MATCHING_ROUND_ID) || null
