@@ -142,6 +142,7 @@ function MatchingApplicationsPage() {
                     projects={adminProjects}
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
+                    hideExpand={isSchoolPresident(viewMe)}
                   />
                 </div>
               )}
