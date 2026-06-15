@@ -118,6 +118,7 @@ export function PlanChallengerFaqSection() {
         </>
       }
       items={FAQ_ITEMS}
+      fadeTop
     />
   )
 }

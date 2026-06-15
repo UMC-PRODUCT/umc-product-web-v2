@@ -20,6 +20,7 @@ interface FaqSectionProps {
   label: ReactNode
   heading: ReactNode
   items: FaqItemData[]
+  fadeTop?: boolean
 }
 
 function FaqItem({ label, question, answer }: FaqItemData) {
@@ -65,12 +66,22 @@ function FaqBreadcrumb() {
   )
 }
 
-export function FaqSection({ label, heading, items }: FaqSectionProps) {
+export function FaqSection({
+  label,
+  heading,
+  items,
+  fadeTop = false,
+}: FaqSectionProps) {
   return (
     <section className="relative h-[1485px] w-[1440px]">
       <div
-        className="pointer-events-none absolute inset-0 bg-black/80"
+        className="pointer-events-none absolute inset-0"
         aria-hidden="true"
+        style={{
+          background: fadeTop
+            ? "linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0.8) 160px)"
+            : "rgba(0,0,0,0.8)",
+        }}
       />
       <GlowImage
         src={GLOW_ELLIPSE_SRC}
