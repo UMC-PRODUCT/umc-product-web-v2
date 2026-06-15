@@ -39,7 +39,7 @@ export default function Footer() {
           <div className="flex min-w-0 items-center gap-4">
             <UmcLogoFilled className="text-teal-gray-300 h-5.5 w-auto shrink-0" />
             <span className="text-heading-7-semibold text-teal-gray-400">
-              University Make us Challenge
+              University MakeUs Challenge
             </span>
           </div>
           <div className="text-teal-gray-400 flex flex-col items-center justify-center gap-2 pt-1 whitespace-nowrap max-[930px]:items-start">
