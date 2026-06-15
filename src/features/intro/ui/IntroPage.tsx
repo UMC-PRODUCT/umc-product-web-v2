@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { LANDING_BACKGROUND, LANDING_BACKGROUND_HEIGHT } from "../constants"
 import { LandingHeader } from "./components/LandingHeader"
 import { LightStripTexture } from "./components/LightStripTexture"
+import { SmoothGlow } from "./components/SmoothGlow"
 import { HeroSection } from "./sections/HeroSection"
 import { MakerChallengerFaqSection } from "./sections/MakerChallengerFaqSection"
 import { MatchingSection } from "./sections/MatchingSection"
@@ -80,6 +81,20 @@ export function IntroPage() {
               backgroundImage: LANDING_BACKGROUND,
             }}
             aria-hidden="true"
+          />
+          <SmoothGlow
+            left={52}
+            top={820}
+            width={1336}
+            height={1040}
+            opacity={0.42}
+          />
+          <SmoothGlow
+            left={340}
+            top={1045}
+            width={760}
+            height={560}
+            opacity={0.36}
           />
         </div>
         <div className="relative z-10">

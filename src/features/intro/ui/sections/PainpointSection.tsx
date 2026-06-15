@@ -7,27 +7,10 @@ import {
   PAINPOINT_TITLE,
 } from "../../constants"
 import { FlowSteps } from "../components/FlowSteps"
-import { SmoothGlow } from "../components/SmoothGlow"
 
 export function PainpointSection() {
   return (
     <section className="relative h-[900px] w-[1440px] overflow-hidden">
-      <SmoothGlow
-        left={52}
-        top={-80}
-        width={1336}
-        height={1040}
-        opacity={0.42}
-        scale={1}
-      />
-      <SmoothGlow
-        left={340}
-        top={145}
-        width={760}
-        height={560}
-        opacity={0.36}
-        scale={1}
-      />
       <div className="absolute top-[81px] left-1/2 flex -translate-x-1/2 flex-col items-center gap-[64px]">
         <motion.div
           className="flex flex-col items-center gap-[32px]"
