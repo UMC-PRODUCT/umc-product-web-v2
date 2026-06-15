@@ -92,7 +92,7 @@ export function Toast({
           />
           <span
             className={cn(
-              "text-center wrap-break-word",
+              "text-center wrap-break-word whitespace-pre-line",
               textColorMap[resolvedColor],
             )}
           >
@@ -115,7 +115,10 @@ export function Toast({
               className={cn("shrink-0", iconColorMap[resolvedColor])}
             />
             <span
-              className={cn("wrap-break-word", textColorMap[resolvedColor])}
+              className={cn(
+                "wrap-break-word whitespace-pre-line",
+                textColorMap[resolvedColor],
+              )}
             >
               {message}
             </span>
