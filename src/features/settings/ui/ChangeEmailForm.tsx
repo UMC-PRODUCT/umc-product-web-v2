@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -42,6 +43,7 @@ export function ChangeEmailForm({
   const [openResendModal, setOpenResendModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const addToast = useToastStore((s) => s.addToast)
+  const queryClient = useQueryClient()
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
@@ -49,6 +51,7 @@ export function ChangeEmailForm({
       const token = await handleCodeVerify()
       if (!token) return
       await changeEmail({ newEmail: next, emailVerificationToken: token })
+      await queryClient.invalidateQueries({ queryKey: ["auth", "me"] })
       addToast({
         message: "이메일이 변경되었습니다.",
         color: "primary",
