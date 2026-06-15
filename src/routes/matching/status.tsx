@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useLayoutEffect, useRef, useState } from "react"
+import { useLayoutEffect, useMemo, useRef, useState } from "react"
 
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
@@ -29,7 +29,10 @@ function MatchingStatusPage() {
   const { data: me } = useMe()
   const isAdmin = isOperator(me)
   const chaptersQuery = useChapters()
-  const chapters = chaptersQuery.data?.chapters ?? []
+  const chapters = useMemo(
+    () => chaptersQuery.data?.chapters ?? [],
+    [chaptersQuery.data],
+  )
 
   // challenger records에서 지부명 추출 (어드민 포함 모든 역할)
   const userChapter = getViewerBranch(me)

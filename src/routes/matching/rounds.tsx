@@ -39,16 +39,13 @@ import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { useViewModeStore } from "@/shared/view-mode"
-import { projectViewMe } from "@/shared/view-mode/projectViewMe"
 
 import type { AxiosError } from "axios"
 
 export const Route = createFileRoute("/matching/rounds")({
-  beforeLoad: async ({ context }) => {
-    const me = await ensureMe(context.queryClient)
-    const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
-    if (!canManageMatchingRounds(viewMe)) throw redirect({ to: "/" })
+  beforeLoad: async ({ context, location }) => {
+    const me = await ensureMe(context.queryClient, location.href)
+    if (!canManageMatchingRounds(me)) throw redirect({ to: "/" })
   },
   component: MatchingRoundsPage,
 })

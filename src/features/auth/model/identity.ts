@@ -54,6 +54,10 @@ export function isCentralStaff(me: MemberInfoResponse | undefined): boolean {
   return hasAnyRoleType(me, CENTRAL_ROLE_TYPES)
 }
 
+export function isCentralCore(me: MemberInfoResponse | undefined): boolean {
+  return hasAnyRoleType(me, CENTRAL_CORE_ROLE_TYPES)
+}
+
 export function isChapterPresident(
   me: MemberInfoResponse | undefined,
 ): boolean {
@@ -124,8 +128,7 @@ export function getProjectPmSearchScope(me: MemberInfoResponse | undefined): {
 }
 
 export function isCurrentTermPm(me: MemberInfoResponse | undefined): boolean {
-  const latest = getLatestChallengerRecord(me)
-  return latest?.part === "PLAN"
+  return me?.currentGisuMemberInfo?.challenger?.part === "PLAN"
 }
 
 export function isProjectRegistrationQuotaLimited(

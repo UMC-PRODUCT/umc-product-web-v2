@@ -18,7 +18,6 @@ import { useResourcePermission } from "@/features/auth/hooks/useResourcePermissi
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   canManageProjectRecruitInfo,
-  canManageProjects,
   getLatestChallengerRecord,
   isProjectRegistrationQuotaLimited,
 } from "@/features/auth/model/identity"
@@ -53,19 +52,12 @@ import { useProjectRegisterStore } from "@/features/project/new/model/useProject
 import { getActiveGisu } from "@/shared/api/gisu"
 import { getMe } from "@/shared/api/me"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
-import { useViewModeStore } from "@/shared/view-mode"
-import { projectViewMe } from "@/shared/view-mode/projectViewMe"
 
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
 export const Route = createFileRoute("/matching/projects/new")({
-  beforeLoad: async ({ context, search }) => {
-    const me = await ensureMe(context.queryClient)
-    const viewMe = projectViewMe(me, useViewModeStore.getState().mode)
-
-    if (!canManageProjects(viewMe)) {
-      throw redirect({ to: "/matching/projects" })
-    }
+  beforeLoad: async ({ context, search, location }) => {
+    const me = await ensureMe(context.queryClient, location.href)
 
     if (search.projectId !== undefined) {
       let hasEditPermission = false
@@ -122,7 +114,7 @@ export const Route = createFileRoute("/matching/projects/new")({
       throw redirect({ to: "/matching/projects" })
     }
 
-    if (isProjectRegistrationQuotaLimited(viewMe)) {
+    if (isProjectRegistrationQuotaLimited(me)) {
       try {
         const gisu = await context.queryClient.ensureQueryData({
           queryKey: gisuKeys.active,

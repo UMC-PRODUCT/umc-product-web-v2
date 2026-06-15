@@ -6,7 +6,7 @@ import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { projectKeys } from "@/features/project/new/api"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
-import { useViewMe } from "@/shared/view-mode/useViewMe"
+import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import { getMatchingProjects, type ProjectItem } from "../api/matchingProject"
 import {
@@ -78,7 +78,7 @@ export function useMatchingProjectListFilters() {
     debouncedSearchQuery,
   ])
 
-  const { viewMe: me } = useViewMe()
+  const { me, viewContext } = useViewerIdentity()
   const userIsOperator = isOperator(me)
 
   const { data: gisuData } = useQuery({
@@ -97,7 +97,8 @@ export function useMatchingProjectListFilters() {
     return latest ? Number(latest.gisuId) : undefined
   }, [me])
 
-  const effectiveGisuId = userIsOperator ? activeGisuId : userGisuId
+  const effectiveGisuId =
+    viewContext.isAdminView && userIsOperator ? activeGisuId : userGisuId
 
   const { data: chaptersData } = useQuery({
     queryKey: ["chaptersWithSchools", activeGisuId],
