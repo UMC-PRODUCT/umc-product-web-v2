@@ -6,6 +6,7 @@ import {
   canManageProjects,
   getProjectPmSearchScope,
   isAnyOperator,
+  isCentralCore,
   isProjectRegistrationQuotaLimited,
   isSchoolLeadership,
 } from "./identity"
@@ -95,6 +96,19 @@ describe("isAnyOperator", () => {
   })
   it("일반 챌린저는 false", () => {
     expect(isAnyOperator(makeMe(["CHALLENGER"]))).toBe(false)
+  })
+})
+
+describe("isCentralCore", () => {
+  it("슈퍼어드민·총괄·부총괄은 true", () => {
+    expect(isCentralCore(makeMe(["SUPER_ADMIN"]))).toBe(true)
+    expect(isCentralCore(makeMe(["CENTRAL_PRESIDENT"]))).toBe(true)
+    expect(isCentralCore(makeMe(["CENTRAL_VICE_PRESIDENT"]))).toBe(true)
+  })
+
+  it("중앙 운영국원·교육국원은 false", () => {
+    expect(isCentralCore(makeMe(["CENTRAL_OPERATING_TEAM_MEMBER"]))).toBe(false)
+    expect(isCentralCore(makeMe(["CENTRAL_EDUCATION_TEAM_MEMBER"]))).toBe(false)
   })
 })
 

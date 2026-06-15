@@ -12,7 +12,6 @@ import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 
 import { isRecruitDone } from "../../list/model/matchingProject"
-import { useIsMatchingPeriod } from "../../new/hooks/useIsMatchingPeriod"
 import { ProjectManagementMoreMenu } from "./ProjectManagementMoreMenu"
 
 import type { MatchingProject } from "../../list/model/matchingProject"
@@ -23,6 +22,7 @@ interface ProjectManagementCardProps {
   canEditProject: boolean
   canPublishProject: boolean
   isPermissionLoading: boolean
+  isMatchingPeriod: boolean
 }
 
 export function ProjectManagementCard({
@@ -31,8 +31,8 @@ export function ProjectManagementCard({
   canEditProject,
   canPublishProject,
   isPermissionLoading,
+  isMatchingPeriod,
 }: ProjectManagementCardProps) {
-  const isMatchingPeriod = useIsMatchingPeriod()
   const cover = data.coverImage
   const [open, setOpen] = useState(false)
   const projectId = Number(data.id)
