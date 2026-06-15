@@ -31,6 +31,11 @@ import type {
   UniversityCount,
 } from "../model/types"
 
+interface ApplicationPageDataOptions {
+  enabled?: boolean
+  schoolName?: string
+}
+
 // 매칭 라운드 목록에서 현재 활성 차수 번호 계산
 // PM 결정 기간(endsAt ~ decisionDeadline)도 "활성"으로 판별
 function getCurrentRound(rounds: MatchingRoundResponse[]): {
@@ -62,19 +67,24 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): {
 }
 
 // 활성 기수 ID 조회
-export function useActiveGisuId() {
+export function useActiveGisuId(options: ApplicationPageDataOptions = {}) {
+  const enabled = options.enabled ?? true
+
   return useQuery({
     queryKey: ["gisu", "active"],
     queryFn: getActiveGisu,
+    enabled,
     staleTime: 5 * 60 * 1000,
     select: (data) => (data?.gisuId != null ? Number(data.gisuId) : null),
   })
 }
 
 // PM 챌린저 뷰용 데이터
-export function useChallengerPageData(options?: { enabled?: boolean }) {
-  const enabled = options?.enabled ?? true
-  const gisuQuery = useActiveGisuId()
+export function useChallengerPageData(
+  options: ApplicationPageDataOptions = {},
+) {
+  const enabled = options.enabled ?? true
+  const gisuQuery = useActiveGisuId({ enabled })
   const gisuId = gisuQuery.data ?? 0
 
   const projectsQuery = useQuery({
@@ -194,34 +204,38 @@ export function useChallengerPageData(options?: { enabled?: boolean }) {
     projectStats: projectStatsQuery.data ?? [],
     schoolIdToName,
     isLoading:
-      gisuQuery.isLoading ||
-      projectsQuery.isLoading ||
-      applicantsQuery.isLoading ||
-      projectStatsQuery.isLoading,
-    isError: gisuQuery.isError || projectsQuery.isError,
+      enabled &&
+      (gisuQuery.isLoading ||
+        projectsQuery.isLoading ||
+        applicantsQuery.isLoading ||
+        projectStatsQuery.isLoading),
+    isError: enabled && (gisuQuery.isError || projectsQuery.isError),
     error: gisuQuery.error ?? projectsQuery.error ?? applicantsQuery.error,
   }
 }
 
 // 챕터 목록 조회 (name -> id 매핑용)
-export function useChapters() {
+export function useChapters(options: ApplicationPageDataOptions = {}) {
+  const enabled = options.enabled ?? true
+
   return useQuery({
     queryKey: applicationKeys.chapters(),
     queryFn: getAllChapters,
+    enabled,
   })
 }
 
 // Admin 뷰용 데이터
 export function useAdminPageData(
   chapterName?: string,
-  options?: { enabled?: boolean; schoolName?: string },
+  options: ApplicationPageDataOptions = {},
 ) {
-  const enabled = options?.enabled ?? true
-  const schoolName = options?.schoolName
-  const gisuQuery = useActiveGisuId()
+  const enabled = options.enabled ?? true
+  const schoolName = options.schoolName
+  const gisuQuery = useActiveGisuId({ enabled })
   const gisuId = gisuQuery.data ?? 0
 
-  const chaptersQuery = useChapters()
+  const chaptersQuery = useChapters({ enabled })
   const chapters = useMemo(
     () => chaptersQuery.data?.chapters ?? [],
     [chaptersQuery.data],
@@ -482,14 +496,16 @@ export function useAdminPageData(
     dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
     chapters,
     isLoading:
-      gisuQuery.isLoading ||
-      chaptersQuery.isLoading ||
-      roundsQuery.isLoading ||
-      projectsQuery.isLoading ||
-      applicantsQuery.isLoading ||
-      chapterStatsQuery.isLoading,
+      enabled &&
+      (gisuQuery.isLoading ||
+        chaptersQuery.isLoading ||
+        roundsQuery.isLoading ||
+        projectsQuery.isLoading ||
+        applicantsQuery.isLoading ||
+        chapterStatsQuery.isLoading),
     isError:
-      gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError,
+      enabled &&
+      (gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError),
     error: gisuQuery.error ?? chaptersQuery.error ?? projectsQuery.error,
   }
 }

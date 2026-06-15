@@ -132,8 +132,7 @@ export function getProjectPmSearchScope(me: MemberInfoResponse | undefined): {
 }
 
 export function isCurrentTermPm(me: MemberInfoResponse | undefined): boolean {
-  const latest = getLatestChallengerRecord(me)
-  return latest?.part === "PLAN"
+  return me?.currentGisuMemberInfo?.challenger?.part === "PLAN"
 }
 
 export function isProjectRegistrationQuotaLimited(
