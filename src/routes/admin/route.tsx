@@ -12,8 +12,8 @@ import { isOperator } from "@/features/auth/model/identity"
 import { cn } from "@/shared/lib/utils"
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: async ({ context, location }) => {
-    const me = await ensureMe(context.queryClient, location.href)
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
     if (!isOperator(me)) throw redirect({ to: "/" })
   },
   component: AdminLayout,

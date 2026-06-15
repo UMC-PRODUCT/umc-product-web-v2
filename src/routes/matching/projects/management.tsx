@@ -11,8 +11,8 @@ export const Route = createFileRoute("/matching/projects/management")({
     search: Record<string, unknown>,
   ): { notice?: "duplicate" } =>
     search.notice === "duplicate" ? { notice: "duplicate" } : {},
-  beforeLoad: async ({ context, location }) => {
-    const me = await ensureMe(context.queryClient, location.href)
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
     if (!canManageProjects(me)) throw redirect({ to: "/matching/projects" })
   },
   component: ProjectManagementRoute,

@@ -18,8 +18,8 @@ interface NoticePublishSearch {
 export const Route = createFileRoute(
   "/matching/projects/announce/notice-publish",
 )({
-  beforeLoad: async ({ context, location }) => {
-    const me = await ensureMe(context.queryClient, location.href)
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
     if (!isOperator(me)) throw redirect({ to: "/" })
   },
   validateSearch: (search: Record<string, unknown>): NoticePublishSearch => {

@@ -43,8 +43,8 @@ import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import type { AxiosError } from "axios"
 
 export const Route = createFileRoute("/matching/rounds")({
-  beforeLoad: async ({ context, location }) => {
-    const me = await ensureMe(context.queryClient, location.href)
+  beforeLoad: async ({ context }) => {
+    const me = await ensureMe(context.queryClient)
     if (!canManageMatchingRounds(me)) throw redirect({ to: "/" })
   },
   component: MatchingRoundsPage,

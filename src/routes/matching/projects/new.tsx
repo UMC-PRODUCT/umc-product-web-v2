@@ -56,8 +56,8 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
 export const Route = createFileRoute("/matching/projects/new")({
-  beforeLoad: async ({ context, search, location }) => {
-    const me = await ensureMe(context.queryClient, location.href)
+  beforeLoad: async ({ context, search }) => {
+    const me = await ensureMe(context.queryClient)
 
     if (search.projectId !== undefined) {
       let hasEditPermission = false
