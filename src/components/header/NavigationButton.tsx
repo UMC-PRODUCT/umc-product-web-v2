@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 
 import { cn } from "@/shared/lib/utils"
 
@@ -19,7 +19,6 @@ export default function NavigationButton({
   className,
   onClick,
 }: NavigationButtonProps) {
-  const navigate = useNavigate()
   const sharedClassName = cn(
     "flex h-9 min-w-18 items-center justify-center rounded-full px-4.5 py-1.5 whitespace-nowrap transition-colors",
     selected
@@ -40,15 +39,8 @@ export default function NavigationButton({
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        onClick?.()
-        void navigate({ to })
-      }}
-      className={sharedClassName}
-    >
+    <Link to={to} onClick={onClick} className={sharedClassName}>
       {label}
-    </button>
+    </Link>
   )
 }
