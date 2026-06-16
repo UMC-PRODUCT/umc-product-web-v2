@@ -22,7 +22,7 @@ import {
   isCurrentTermPm,
   isOperator,
   isSchoolLeadership,
-  isSchoolPresident,
+  isSchoolVicePresident,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
@@ -41,7 +41,7 @@ function MatchingApplicationsPage() {
   const { data: me } = useMe()
   const { me: identity, viewContext } = useViewerIdentity()
   const schoolLeadership = isSchoolLeadership(identity)
-  const schoolPresident = isSchoolPresident(identity)
+  const schoolVicePresident = isSchoolVicePresident(identity)
   const addToast = useToastStore((s) => s.addToast)
   const chaptersQuery = useChapters()
   const chapters = useMemo(
@@ -164,7 +164,7 @@ function MatchingApplicationsPage() {
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
                     disableFormPanel={schoolLeadership}
-                    hideExpand={schoolLeadership && !schoolPresident}
+                    hideExpand={schoolVicePresident}
                   />
                 </div>
               )}
