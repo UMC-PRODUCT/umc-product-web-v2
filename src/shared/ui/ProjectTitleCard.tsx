@@ -1,3 +1,4 @@
+import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { cn } from "@/shared/lib/utils"
 
 interface ProjectTitleCardProps {
@@ -37,7 +38,9 @@ export function ProjectTitleCard({
               className="size-8 shrink-0 rounded-lg object-cover"
             />
           ) : (
-            <div className="bg-teal-gray-200 size-8 shrink-0 rounded-lg" />
+            <div className="bg-teal-gray-200 flex size-8 shrink-0 items-center justify-center rounded-lg">
+              <UmcLogo className="text-teal-gray-300 w-3/5" />
+            </div>
           )}
           <div className="flex flex-col">
             <span className="text-subtitle-4-semibold text-teal-gray-800">
@@ -67,7 +70,9 @@ export function ProjectTitleCard({
               className="size-12.5 shrink-0 rounded-lg object-cover"
             />
           ) : (
-            <div className="bg-teal-gray-200 size-12.5 shrink-0 rounded-lg" />
+            <div className="bg-teal-gray-200 flex size-12.5 shrink-0 items-center justify-center rounded-lg">
+              <UmcLogo className="text-teal-gray-300 w-3/5" />
+            </div>
           )}
           <div className="flex flex-col gap-1">
             <span className="text-heading-6-semibold text-teal-gray-800">
@@ -96,7 +101,9 @@ export function ProjectTitleCard({
             className="size-12.5 shrink-0 rounded-lg object-cover"
           />
         ) : (
-          <div className="bg-teal-gray-200 size-12.5 shrink-0 rounded-lg" />
+          <div className="bg-teal-gray-200 flex size-12.5 shrink-0 items-center justify-center rounded-lg">
+            <UmcLogo className="text-teal-gray-300 w-3/5" />
+          </div>
         )}
         <div className="flex flex-col gap-1">
           <span className="text-heading-6-semibold text-teal-gray-800">
