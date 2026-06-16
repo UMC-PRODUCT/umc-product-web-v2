@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import {
   getDisabledNavMessage,
   HEADER_NAV_ITEMS,
+  type HeaderNavItem,
   isHeaderNavItemActive,
 } from "@/components/header/headerNavPolicy"
 import { useToastStore } from "@/components/toast/useToastStore"
@@ -17,9 +18,9 @@ export function LandingHeader() {
   const lastScrollY = useRef(0)
   const addToast = useToastStore((s) => s.addToast)
 
-  const handleDisabledClick = (label: string) => {
+  const handleDisabledClick = (item: HeaderNavItem) => {
     addToast({
-      message: getDisabledNavMessage(label),
+      message: getDisabledNavMessage(item),
       color: "primary",
       variant: "deep",
       type: "notice",
@@ -112,7 +113,7 @@ export function LandingHeader() {
                 <button
                   key={to}
                   type="button"
-                  onClick={() => handleDisabledClick(label)}
+                  onClick={() => handleDisabledClick(item)}
                   className={className}
                 >
                   {label}
