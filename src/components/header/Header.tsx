@@ -14,6 +14,7 @@ import HeaderButton from "./HeaderButton"
 import {
   getDisabledNavMessage,
   HEADER_NAV_ITEMS,
+  type HeaderNavItem,
   isHeaderNavItemActive,
 } from "./headerNavPolicy"
 import NavigationButton from "./NavigationButton"
@@ -28,9 +29,9 @@ export default function Header({ activePathname }: HeaderProps = {}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const addToast = useToastStore((s) => s.addToast)
 
-  const handleDisabledClick = (label: string) => {
+  const handleDisabledClick = (item: HeaderNavItem) => {
     addToast({
-      message: getDisabledNavMessage(label),
+      message: getDisabledNavMessage(item),
       color: "primary",
       variant: "deep",
       type: "notice",
@@ -75,9 +76,7 @@ export default function Header({ activePathname }: HeaderProps = {}) {
               selected={isHeaderNavItemActive(pathname, item)}
               disabled={item.disabled}
               onClick={
-                item.disabled
-                  ? () => handleDisabledClick(item.label)
-                  : undefined
+                item.disabled ? () => handleDisabledClick(item) : undefined
               }
               className="min-w-18 px-4.5"
             />
@@ -149,7 +148,7 @@ export default function Header({ activePathname }: HeaderProps = {}) {
                 disabled={item.disabled}
                 className="text-body-1-medium h-11 w-full min-w-0 justify-center px-4"
                 onClick={() => {
-                  if (item.disabled) handleDisabledClick(item.label)
+                  if (item.disabled) handleDisabledClick(item)
                   setIsMobileMenuOpen(false)
                 }}
               />
