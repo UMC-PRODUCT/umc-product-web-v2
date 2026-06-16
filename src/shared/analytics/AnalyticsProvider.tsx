@@ -14,6 +14,7 @@ export function AnalyticsProvider() {
   }, [])
 
   useEffect(() => {
+    if (!import.meta.env.VITE_GA_MEASUREMENT_ID) return
     if (didRegisterVitalsRef.current) return
     didRegisterVitalsRef.current = true
     const report = ({
