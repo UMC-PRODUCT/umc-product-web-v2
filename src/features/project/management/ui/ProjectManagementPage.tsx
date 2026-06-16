@@ -5,14 +5,14 @@ import { useMemo, useState } from "react"
 import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
 import {
   isAnyOperator,
-  isCentralStaff,
+  isCentralCore,
   isChapterPresident,
   isCurrentTermPm,
   isSchoolStaff,
-  isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { gisuKeys, projectKeys } from "@/features/project/new/api/queryKeys"
+import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
 import { getActiveGisu } from "@/shared/api/gisu"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { EmptyState } from "@/shared/ui/EmptyState"
@@ -131,7 +131,7 @@ export function ProjectManagementPage() {
   const isAdminScope = isAnyOperator(me)
   const isPm = isCurrentTermPm(me)
   const hasAccess = isAdminScope || isPm
-  const useGroupedView = isCentralStaff(me) || isSuperAdmin(me)
+  const useGroupedView = isCentralCore(me)
 
   const descriptionText = useGroupedView
     ? "전체 지부의 프로젝트 정보를 확인하고 수정할 수 있습니다. 팀 매칭 진행 중에는 수정이 제한됩니다."
@@ -171,14 +171,33 @@ export function ProjectManagementPage() {
     [managedQuery.data, managedQuery.dataUpdatedAt],
   )
 
+  const selectedChapterInfo = useMemo(() => {
+    if (!useGroupedView) return undefined
+    return chaptersQuery.data?.chapters.find(
+      (chapter) => chapter.chapterName === selectedChapter,
+    )
+  }, [useGroupedView, chaptersQuery.data, selectedChapter])
+
+  const selectedChapterId = selectedChapterInfo?.chapterId
+    ? Number(selectedChapterInfo.chapterId)
+    : undefined
+  const matchingPeriodChapterId =
+    selectedChapterId !== undefined && Number.isFinite(selectedChapterId)
+      ? selectedChapterId
+      : undefined
+  const isMatchingPeriod = useIsMatchingPeriod({
+    ...(useGroupedView ? { chapterId: matchingPeriodChapterId } : {}),
+    enabled: hasAccess,
+  })
+
   const filteredProjects: MatchingProject[] = useMemo(() => {
     if (!useGroupedView) return projects
-    const chapters = chaptersQuery.data?.chapters ?? []
-    const chapter = chapters.find((c) => c.chapterName === selectedChapter)
-    if (!chapter) return projects
-    const schoolNames = new Set(chapter.schools.map((s) => s.schoolName))
+    if (!selectedChapterInfo) return []
+    const schoolNames = new Set(
+      selectedChapterInfo.schools.map((s) => s.schoolName),
+    )
     return projects.filter((p) => schoolNames.has(p.school))
-  }, [useGroupedView, projects, chaptersQuery.data, selectedChapter])
+  }, [useGroupedView, projects, selectedChapterInfo])
 
   const partGroups = useMemo(() => {
     if (!useGroupedView) return new Map<string, MatchingProject[]>()
@@ -220,6 +239,8 @@ export function ProjectManagementPage() {
 
   const isProjectPermissionLoading =
     permissionProjectIds.length > 0 && projectPermissionsQuery.isPending
+  const isProjectListLoading =
+    managedQuery.isLoading || (useGroupedView && chaptersQuery.isLoading)
 
   const getProjectActionPermissions = (project: MatchingProject) => {
     const projectId = toValidProjectId(project)
@@ -276,7 +297,7 @@ export function ProjectManagementPage() {
               />
             </div>
           )}
-          {managedQuery.isLoading ? (
+          {isProjectListLoading ? (
             <p className="text-body-2-regular text-teal-gray-400 py-10 text-center">
               데이터를 불러오는 중...
             </p>
@@ -293,6 +314,7 @@ export function ProjectManagementPage() {
                           key={project.id}
                           data={project}
                           isPermissionLoading={isProjectPermissionLoading}
+                          isMatchingPeriod={isMatchingPeriod}
                           {...permissions}
                         />
                       )
@@ -309,6 +331,7 @@ export function ProjectManagementPage() {
                       key={project.id}
                       data={project}
                       isPermissionLoading={isProjectPermissionLoading}
+                      isMatchingPeriod={isMatchingPeriod}
                       {...permissions}
                     />
                   )
@@ -329,6 +352,7 @@ export function ProjectManagementPage() {
                     key={project.id}
                     data={project}
                     isPermissionLoading={isProjectPermissionLoading}
+                    isMatchingPeriod={isMatchingPeriod}
                     {...permissions}
                   />
                 )

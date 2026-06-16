@@ -1,5 +1,6 @@
 import { useState } from "react"
 
+import { useMe } from "@/features/auth/hooks/useMe"
 import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import { cn } from "@/shared/lib/utils"
 
@@ -13,6 +14,9 @@ interface ProfileProps {
 
 export default function Profile({ size = 40, src, className }: ProfileProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const { data: me } = useMe()
+
+  const profileSrc = src ?? me?.profileImageLink
 
   return (
     <ProfileDropdown
@@ -24,8 +28,12 @@ export default function Profile({ size = 40, src, className }: ProfileProps) {
       )}
       triggerStyle={{ width: size, height: size }}
     >
-      {src ? (
-        <img src={src} alt="profile" className="size-full object-cover" />
+      {profileSrc ? (
+        <img
+          src={profileSrc}
+          alt={me?.name ?? "profile"}
+          className="size-full object-cover"
+        />
       ) : (
         <ProfileIcon className="size-full" />
       )}

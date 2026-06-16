@@ -7,8 +7,8 @@ import SideBar from "@/components/sidebar/SideBar"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 
 export const Route = createFileRoute("/matching")({
-  beforeLoad: async ({ context }) => {
-    await ensureMe(context.queryClient)
+  beforeLoad: async ({ context, location }) => {
+    await ensureMe(context.queryClient, location.href)
   },
   component: MatchingLayout,
 })

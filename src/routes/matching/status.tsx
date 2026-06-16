@@ -19,8 +19,8 @@ import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 
 export const Route = createFileRoute("/matching/status")({
-  beforeLoad: async ({ context }) => {
-    await ensureMe(context.queryClient)
+  beforeLoad: async ({ context, location }) => {
+    await ensureMe(context.queryClient, location.href)
   },
   component: MatchingStatusPage,
 })

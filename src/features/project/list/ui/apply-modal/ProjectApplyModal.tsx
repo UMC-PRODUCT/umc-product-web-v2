@@ -13,6 +13,7 @@ import { Controller, useForm } from "react-hook-form"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { uploadFileFlow } from "@/features/project/new/api/storage"
+import { trackEvent } from "@/shared/analytics"
 import { getActiveGisu } from "@/shared/api/gisu"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
@@ -309,6 +310,22 @@ export const ProjectApplyModal = forwardRef<
   })
 
   const savedSnapshotRef = useRef(JSON.stringify(defaultValues))
+  const didTrackStartRef = useRef(false)
+
+  useEffect(() => {
+    if (didTrackStartRef.current) return
+    didTrackStartRef.current = true
+    trackEvent("application_form_start", {
+      project_id: projectId,
+      matching_round_id: matchingRoundId,
+      section_count: sections.length,
+      question_count: sections.reduce(
+        (count, section) => count + section.questions.length,
+        0,
+      ),
+      is_draft_application: initialApplicationId != null,
+    })
+  }, [projectId, matchingRoundId, sections, initialApplicationId])
 
   useEffect(() => {
     clearErrors()
@@ -348,6 +365,11 @@ export const ProjectApplyModal = forwardRef<
 
   async function handleSaveDraft() {
     if (isDevMatchingRound) {
+      trackEvent("application_draft_save_success", {
+        project_id: projectId,
+        matching_round_id: matchingRoundId,
+        is_dev_matching_round: true,
+      })
       addToast({
         message: "작성한 내용이 임시 저장되었습니다.",
         color: "primary",
@@ -374,6 +396,10 @@ export const ProjectApplyModal = forwardRef<
       await saveApplicationDraft(projectId, applicationId, answers)
       reset(formValues)
       savedSnapshotRef.current = JSON.stringify(formValues)
+      trackEvent("application_draft_save_success", {
+        project_id: projectId,
+        matching_round_id: matchingRoundId,
+      })
       onDraftSaved?.()
       addToast({
         message: "작성한 내용이 임시 저장되었습니다.",
@@ -383,6 +409,11 @@ export const ProjectApplyModal = forwardRef<
         duration: 3000,
       })
     } catch (err) {
+      trackEvent("application_draft_save_error", {
+        project_id: projectId,
+        matching_round_id: matchingRoundId,
+        status: err instanceof AxiosError ? err.response?.status : undefined,
+      })
       const serverMessage =
         err instanceof AxiosError
           ? (err.response?.data as { message?: string } | undefined)?.message
@@ -426,6 +457,10 @@ export const ProjectApplyModal = forwardRef<
         await saveApplicationDraft(projectId, applicationId, answers)
         await submitApplication(projectId, applicationId)
       }
+      trackEvent("application_submit_success", {
+        project_id: projectId,
+        matching_round_id: matchingRoundId,
+      })
       setIsCompleteModalOpen(true)
     } catch (err) {
       const status =
@@ -443,6 +478,12 @@ export const ProjectApplyModal = forwardRef<
         code: serverData?.code,
         message: serverData?.message,
         error: err,
+      })
+      trackEvent("application_submit_error", {
+        project_id: projectId,
+        matching_round_id: matchingRoundId,
+        status,
+        code: serverData?.code,
       })
       const serverMessage = serverData?.message
       addToast({
@@ -462,6 +503,16 @@ export const ProjectApplyModal = forwardRef<
   function onInvalid(errs: FieldErrors<Record<string, ApplyAnswerValue>>) {
     const firstId = Object.keys(errs)[0]
     if (!firstId) return
+    const fieldType = sections
+      .flatMap((section) => section.questions)
+      .find((question) => question.id === firstId)?.fieldType
+    trackEvent("application_submit_error", {
+      project_id: projectId,
+      matching_round_id: matchingRoundId,
+      reason: "validation",
+      error_count: Object.keys(errs).length,
+      first_field_type: fieldType,
+    })
     const firstEntry = errs[firstId]
     const firstMessage =
       firstEntry &&

@@ -328,11 +328,9 @@ export const BasicInfoForm = forwardRef<
   useEffect(() => {
     if (!basicDraftFields) return
     const { title, description, externalLink } = basicDraftFields
-    if (title) setValue("title", title, { shouldDirty: false })
-    if (description)
-      setValue("description", description, { shouldDirty: false })
-    if (externalLink)
-      setValue("externalLink", externalLink, { shouldDirty: false })
+    setValue("title", title, { shouldDirty: false })
+    setValue("description", description, { shouldDirty: false })
+    setValue("externalLink", externalLink, { shouldDirty: false })
   }, [basicDraftFields, setValue])
 
   useEffect(() => {

@@ -1,10 +1,25 @@
 import axios, { AxiosError } from "axios"
 
+import {
+  buildLoginRedirectSearch,
+  getCurrentReturnTo,
+} from "@/features/auth/lib/loginRedirect"
 import { useAuthStore } from "@/features/auth/store/authStore"
+import {
+  getCurrentPagePath,
+  trackApiRequest,
+  trackEvent,
+} from "@/shared/analytics"
 
-import type { AxiosRequestConfig } from "axios"
+import type { AxiosRequestConfig, InternalAxiosRequestConfig } from "axios"
 
 import type { ApiResponse } from "@/shared/lib/apiResponse"
+
+declare module "axios" {
+  interface InternalAxiosRequestConfig {
+    analyticsStartTime?: number
+  }
+}
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -15,6 +30,7 @@ export const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
+  config.analyticsStartTime = performance.now()
   if (config.url?.includes("/v1/auth/token/renew")) return config
   const token = useAuthStore.getState().accessToken
   if (token) {
@@ -41,6 +57,7 @@ function rejectQueue(err: unknown) {
 
 api.interceptors.response.use(
   (response) => {
+    trackAxiosResponse(response.config, response.status, true)
     const body = response.data as { success?: boolean; message?: string }
     if (body && typeof body === "object" && body.success === false) {
       return Promise.reject(
@@ -59,6 +76,11 @@ api.interceptors.response.use(
     const originalRequest = error.config as AxiosRequestConfig & {
       _retry?: boolean
     }
+    trackAxiosResponse(
+      originalRequest as InternalAxiosRequestConfig | undefined,
+      error.response?.status,
+      false,
+    )
 
     if (
       error.response?.status !== 401 ||
@@ -70,8 +92,15 @@ api.interceptors.response.use(
 
     const refreshToken = useAuthStore.getState().refreshToken
     if (!refreshToken) {
+      trackEvent("auth_token_refresh_error", {
+        reason: "missing_refresh_token",
+        page_path: getCurrentPagePath(),
+      })
       useAuthStore.getState().clear()
-      window.location.href = "/login"
+      const search = new URLSearchParams(
+        buildLoginRedirectSearch(getCurrentReturnTo()),
+      )
+      window.location.href = search.size > 0 ? `/login?${search}` : "/login"
       return Promise.reject(error)
     }
 
@@ -113,12 +142,35 @@ api.interceptors.response.use(
       }
       return api(originalRequest)
     } catch (refreshError) {
+      trackEvent("auth_token_refresh_error", {
+        reason: "renew_failed",
+        page_path: getCurrentPagePath(),
+      })
       rejectQueue(refreshError)
       useAuthStore.getState().clear()
-      window.location.href = "/login"
+      const search = new URLSearchParams(
+        buildLoginRedirectSearch(getCurrentReturnTo()),
+      )
+      window.location.href = search.size > 0 ? `/login?${search}` : "/login"
       return Promise.reject(refreshError)
     } finally {
       isRefreshing = false
     }
   },
 )
+
+function trackAxiosResponse(
+  config: InternalAxiosRequestConfig | undefined,
+  status: number | undefined,
+  success: boolean,
+) {
+  const startTime = config?.analyticsStartTime
+  if (startTime == null) return
+  trackApiRequest({
+    method: config?.method,
+    path: config?.url,
+    status,
+    durationMs: performance.now() - startTime,
+    success,
+  })
+}

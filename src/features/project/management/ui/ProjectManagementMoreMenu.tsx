@@ -15,8 +15,12 @@ import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDet
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { TeamMemberModal } from "@/features/project/list/ui/team-member-modal/TeamMemberModal"
 import { deleteProject } from "@/features/project/management/api"
-import { invalidateProjectSummaryQueries } from "@/features/project/new/api"
+import {
+  invalidateProjectSummaryQueries,
+  projectKeys,
+} from "@/features/project/new/api"
 import { abortProject } from "@/features/project/new/api/projectAbort"
+import { submitProject } from "@/features/project/new/api/projectDraft"
 import { publishProject } from "@/features/project/new/api/projectPublish"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
@@ -63,6 +67,7 @@ export function ProjectManagementMoreMenu({
   const queryClient = useQueryClient()
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [submitOpen, setSubmitOpen] = useState(false)
   const [publishOpen, setPublishOpen] = useState(false)
   const [abortOpen, setAbortOpen] = useState(false)
   const [applicationOpen, setApplicationOpen] = useState(false)
@@ -153,6 +158,37 @@ export function ProjectManagementMoreMenu({
     },
   })
 
+  const submitMutation = useMutation({
+    mutationFn: () => submitProject(numericProjectId),
+    onSuccess: () => {
+      setSubmitOpen(false)
+      invalidateProjectSummaryQueries(queryClient, numericProjectId)
+      void queryClient.invalidateQueries({
+        queryKey: [...projectKeys.all, "draft"],
+      })
+      addToast({
+        message: "검토 요청이 완료되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+    onError: (error) => {
+      const serverMessage = isAxiosError(error)
+        ? (error.response?.data as { message?: string } | undefined)?.message
+        : undefined
+      addToast({
+        message:
+          serverMessage ?? "검토 요청에 실패했습니다. 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+  })
+
   const publishMutation = useMutation({
     mutationFn: () => publishProject(numericProjectId),
     onSuccess: () => {
@@ -231,6 +267,13 @@ export function ProjectManagementMoreMenu({
     shouldPreventFocusRestoreRef.current = true
     setPopoverOpen(false)
     setPublishOpen(true)
+  }
+
+  const handleSubmitClick = () => {
+    if (!canEditProject || isPermissionLoading) return
+    shouldPreventFocusRestoreRef.current = true
+    setPopoverOpen(false)
+    setSubmitOpen(true)
   }
 
   const handleApplicationClick = () => {
@@ -318,6 +361,15 @@ export function ProjectManagementMoreMenu({
                   onClick={onClick}
                 />
               ))}
+              {status === "DRAFT" &&
+                (isPermissionLoading || canEditProject) && (
+                  <DropdownItem
+                    label="검토 요청하기"
+                    disabled={isPermissionLoading}
+                    onClick={handleSubmitClick}
+                    className="text-teal-500"
+                  />
+                )}
               {status === "PENDING_REVIEW" &&
                 (isPermissionLoading || canPublishProject) && (
                   <DropdownItem
@@ -388,6 +440,23 @@ export function ProjectManagementMoreMenu({
         onOpenChange={setDeleteOpen}
         onCancel={() => setDeleteOpen(false)}
         onConfirm={() => deleteMutation.mutate()}
+      />
+
+      <CtaModal
+        open={submitOpen}
+        title="검토 요청"
+        content={
+          <>
+            검토를 요청하면 운영진이 검토를 진행합니다. <br /> '{projectName}'을
+            검토 요청하시겠습니까?
+          </>
+        }
+        cancelText="돌아가기"
+        confirmText="검토 요청하기"
+        confirmLoading={submitMutation.isPending}
+        onOpenChange={setSubmitOpen}
+        onCancel={() => setSubmitOpen(false)}
+        onConfirm={() => submitMutation.mutate()}
       />
 
       <CtaModal

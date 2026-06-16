@@ -22,6 +22,7 @@ import {
   isCurrentTermPm,
   isOperator,
   isSchoolLeadership,
+  isSchoolVicePresident,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
@@ -39,6 +40,8 @@ export const Route = createFileRoute("/matching/applications")({
 function MatchingApplicationsPage() {
   const { data: me } = useMe()
   const { me: identity, viewContext } = useViewerIdentity()
+  const schoolLeadership = isSchoolLeadership(identity)
+  const schoolVicePresident = isSchoolVicePresident(identity)
   const addToast = useToastStore((s) => s.addToast)
   const chaptersQuery = useChapters()
   const chapters = useMemo(
@@ -61,7 +64,7 @@ function MatchingApplicationsPage() {
 
   const hasOperatorRole = isAnyOperator(identity)
   const hasPmRole = isCurrentTermPm(identity)
-  const canApprove = isOperator(identity) || isSchoolLeadership(identity)
+  const canApprove = isOperator(identity) || schoolLeadership
   const canViewOwnApplications =
     viewContext.isChallengerView || (!hasOperatorRole && !hasPmRole)
   const activeView = resolveMatchingApplicationView({
@@ -97,7 +100,10 @@ function MatchingApplicationsPage() {
     }
   }, [me, chapters, userChapter])
 
-  const admin = useAdminPageData(selectedChapter, { enabled: showAdminSection })
+  const admin = useAdminPageData(selectedChapter, {
+    enabled: showAdminSection,
+    schoolName: schoolLeadership ? identity?.schoolName : undefined,
+  })
   const adminStats = admin.stats
   const adminProjects = admin.projects
 
@@ -157,7 +163,8 @@ function MatchingApplicationsPage() {
                     projects={adminProjects}
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
-                    disableFormPanel={isSchoolLeadership(identity)}
+                    disableFormPanel={schoolLeadership}
+                    hideExpand={schoolVicePresident}
                   />
                 </div>
               )}

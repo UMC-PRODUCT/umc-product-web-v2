@@ -1,3 +1,5 @@
+import { rememberLoginReturnTo } from "./loginRedirect"
+
 const KAKAO_REDIRECT_PATH = "/oauth/kakao/callback"
 const KAKAO_STATE_STORAGE_KEY = "kakao_oauth_state"
 const KAKAO_LINK_INTENT_KEY = "kakao_link_intent"
@@ -34,7 +36,7 @@ export function consumeKakaoLinkIntent(): boolean {
   return intent === "link"
 }
 
-export function startKakaoSignIn(): void {
+export function startKakaoSignIn(returnTo?: string): void {
   const appKey = import.meta.env.VITE_KAKAO_APP_KEY as string | undefined
 
   if (!appKey) {
@@ -50,6 +52,7 @@ export function startKakaoSignIn(): void {
 
   const state = generateSecureState()
   sessionStorage.setItem(KAKAO_STATE_STORAGE_KEY, state)
+  rememberLoginReturnTo(returnTo)
 
   window.Kakao.Auth.authorize({
     redirectUri: getKakaoRedirectUri(),

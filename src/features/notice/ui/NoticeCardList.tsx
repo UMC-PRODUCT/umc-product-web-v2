@@ -1,5 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react"
 
+import { trackEvent } from "@/shared/analytics"
+
 import { Border } from "./Border"
 import { NoticeCard } from "./NoticeCard"
 import { NoticeCardSkeleton } from "./NoticeCardSkeleton"
@@ -106,6 +108,12 @@ export function NoticeCardList({
               onExpandedChange={(nextExpanded) => {
                 setExpandedIndex(nextExpanded ? index : null)
                 if (!nextExpanded) return
+                trackEvent("notice_click", {
+                  notice_id: notice.id,
+                  notice_index: index,
+                  page,
+                  is_required: Boolean(notice.chip),
+                })
                 const targetId = notice.id
                 requestAnimationFrame(() => {
                   document
@@ -116,9 +124,17 @@ export function NoticeCardList({
                 })
               }}
               onEdit={() => {
+                trackEvent("notice_edit_click", {
+                  notice_id: notice.id,
+                  page,
+                })
                 onEditNotice?.(notice.id)
               }}
               onDelete={() => {
+                trackEvent("notice_delete_click", {
+                  notice_id: notice.id,
+                  page,
+                })
                 onDeleteNotice?.(notice.id)
               }}
             >

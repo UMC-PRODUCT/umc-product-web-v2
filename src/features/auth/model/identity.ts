@@ -64,6 +64,16 @@ export function isChapterPresident(
   return hasAnyRoleType(me, ["CHAPTER_PRESIDENT"])
 }
 
+export function isSchoolPresident(me: MemberInfoResponse | undefined): boolean {
+  return hasAnyRoleType(me, ["SCHOOL_PRESIDENT"])
+}
+
+export function isSchoolVicePresident(
+  me: MemberInfoResponse | undefined,
+): boolean {
+  return hasAnyRoleType(me, ["SCHOOL_VICE_PRESIDENT"])
+}
+
 export function isSchoolStaff(me: MemberInfoResponse | undefined): boolean {
   return hasAnyRoleType(me, SCHOOL_ROLE_TYPES)
 }
