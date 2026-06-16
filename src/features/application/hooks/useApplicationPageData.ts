@@ -31,6 +31,8 @@ import type {
   UniversityCount,
 } from "../model/types"
 
+const EMPTY_SET = new Set<string>()
+
 interface ApplicationPageDataOptions {
   enabled?: boolean
   schoolName?: string
@@ -364,7 +366,8 @@ export function useAdminPageData(
 
     // 해당 챕터 소속 학교 + 프로젝트만 필터링 (로딩 중엔 빈 Set으로 필터링해 flicker 방지)
     // 학교 회장단 포함 모든 운영진은 지부 전체 통계를 본다 (지부 현황은 지부 단위 집계, 총원·완료율·학교별 분포 일관)
-    const schoolFilter = (id: string) => (chapterSchoolIds ?? new Set()).has(id)
+    const schoolIds = chapterSchoolIds ?? EMPTY_SET
+    const schoolFilter = (id: string) => schoolIds.has(id)
     const filteredSummary = chapterName
       ? {
           ...chapterStatsQuery.data.summary,
@@ -490,7 +493,8 @@ export function useAdminPageData(
         roundsQuery.isLoading ||
         projectsQuery.isLoading ||
         applicantsQuery.isLoading ||
-        chapterStatsQuery.isLoading),
+        chapterStatsQuery.isLoading ||
+        chaptersWithSchoolsQuery.isLoading),
     isError:
       enabled &&
       (gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError),

@@ -5,6 +5,7 @@ import { useState } from "react"
 import { useActiveGisuId } from "@/features/application/hooks/useApplicationPageData"
 import {
   getMyApplications,
+  getProjectDetail,
   type MyProjectApplicationResponse,
 } from "@/features/project/list/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
@@ -106,6 +107,12 @@ function MyApplicationRoundSection({
   const pmInfo = toPmInfo(item.project.productOwner)
   const parts = toParts(item.project.partQuotas)
 
+  const projectDetailQuery = useQuery({
+    queryKey: ["projectDetail", Number(item.projectId)],
+    queryFn: () => getProjectDetail(Number(item.projectId)),
+    staleTime: 60 * 1000,
+  })
+
   return (
     <>
       <div className="flex flex-col">
@@ -116,6 +123,7 @@ function MyApplicationRoundSection({
           <ApplicationProjectCard
             projectName={item.project.name}
             thumbnailUrl={item.project.thumbnailImageUrl ?? undefined}
+            logoUrl={projectDetailQuery.data?.logoImageUrl ?? undefined}
             pmInfo={pmInfo}
             parts={parts}
             onClick={() => setDetailOpen(true)}

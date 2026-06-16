@@ -776,6 +776,7 @@ export const ProjectApplyModal = forwardRef<
                             <QuestionItemTitle
                               index={`Q${questionIndexMap[q.id]}`}
                               title={q.title}
+                              caption={q.caption}
                               required={q.required}
                             />
                             <Controller
