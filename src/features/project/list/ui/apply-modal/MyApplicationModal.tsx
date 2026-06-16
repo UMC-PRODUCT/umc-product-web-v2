@@ -194,6 +194,7 @@ export function MyApplicationModal({
                               <QuestionItemTitle
                                 index={`Q${indexMap.get(q.questionId) ?? ""}`}
                                 title={q.title}
+                                caption={q.description}
                                 required={q.isRequired}
                               />
                               <AnswerDisplay question={q} answer={q.answer} />
