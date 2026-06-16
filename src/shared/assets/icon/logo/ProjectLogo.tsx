@@ -1,7 +1,9 @@
 /** 프로젝트 상세 카드 중 프로젝트 로고 이미지 */
 /** 피그마 기준 40 Logo Frame */
+import { useState } from "react"
+
+import { trackEvent } from "@/shared/analytics"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
-import { useImageFallback } from "@/shared/hooks/useImageFallback"
 import { cn } from "@/shared/lib/utils"
 
 type ProjectLogoSize = 30 | 32 | 40 | 50
@@ -42,7 +44,8 @@ export function ProjectLogo({
   src?: string
   size?: ProjectLogoSize
 }) {
-  const { showFallback, handleError } = useImageFallback(src, "project_logo")
+  const [erroredSrc, setErroredSrc] = useState<string | null>(null)
+  const showFallback = !src || erroredSrc === src
   const { box, logo, padding } = sizeConfig[size]
 
   return (
@@ -59,7 +62,12 @@ export function ProjectLogo({
         <img
           src={src}
           alt="project logo"
-          onError={handleError}
+          onError={() => {
+            trackEvent("image_load_error", {
+              image_type: "project_logo",
+            })
+            setErroredSrc(src ?? null)
+          }}
           className="h-full w-full object-cover"
         />
       )}

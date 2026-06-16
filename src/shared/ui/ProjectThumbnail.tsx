@@ -1,5 +1,7 @@
+import { useState } from "react"
+
+import { trackEvent } from "@/shared/analytics"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
-import { useImageFallback } from "@/shared/hooks/useImageFallback"
 import { cn } from "@/shared/lib/utils"
 
 interface ProjectThumbnailProps {
@@ -13,10 +15,8 @@ export function ProjectThumbnail({
   alt,
   className,
 }: ProjectThumbnailProps) {
-  const { showFallback, handleError } = useImageFallback(
-    src,
-    "project_thumbnail",
-  )
+  const [erroredSrc, setErroredSrc] = useState<string | null>(null)
+  const showFallback = !src || erroredSrc === src
 
   if (showFallback) {
     return (
@@ -30,7 +30,12 @@ export function ProjectThumbnail({
     <img
       src={src ?? undefined}
       alt={alt ?? ""}
-      onError={handleError}
+      onError={() => {
+        trackEvent("image_load_error", {
+          image_type: "project_thumbnail",
+        })
+        setErroredSrc(src ?? null)
+      }}
       className={cn("h-full w-full object-cover", className)}
       loading="lazy"
       decoding="async"
