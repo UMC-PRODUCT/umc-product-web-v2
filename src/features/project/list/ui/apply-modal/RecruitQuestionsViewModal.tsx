@@ -110,6 +110,7 @@ export function RecruitQuestionsViewModal({
                           <QuestionItemTitle
                             index={`Q${questionIndexMap[q.id]}`}
                             title={q.title}
+                            caption={q.caption}
                             required={q.required}
                           />
                           <div className="pointer-events-none w-full">
