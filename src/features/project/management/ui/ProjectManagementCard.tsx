@@ -71,7 +71,7 @@ export function ProjectManagementCard({
           />
         </div>
 
-        <div className="bp2:items-end flex min-w-0 flex-1 flex-col items-stretch gap-4">
+        <div className="bp2:self-start bp2:pt-[9px] flex min-w-0 flex-1 flex-col items-stretch gap-4">
           <div className="flex min-w-0 flex-col items-start gap-2 self-stretch">
             <div className="flex min-w-0 items-start justify-between gap-3 self-stretch">
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
