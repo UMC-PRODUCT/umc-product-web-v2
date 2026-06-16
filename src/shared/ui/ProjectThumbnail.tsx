@@ -1,5 +1,6 @@
 import { useState } from "react"
 
+import { trackEvent } from "@/shared/analytics"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { cn } from "@/shared/lib/utils"
 
@@ -29,7 +30,12 @@ export function ProjectThumbnail({
     <img
       src={src ?? undefined}
       alt={alt ?? ""}
-      onError={() => setErroredSrc(src ?? null)}
+      onError={() => {
+        trackEvent("image_load_error", {
+          image_type: "project_thumbnail",
+        })
+        setErroredSrc(src ?? null)
+      }}
       className={cn("h-full w-full object-cover", className)}
       loading="lazy"
       decoding="async"

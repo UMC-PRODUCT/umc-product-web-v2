@@ -1,7 +1,8 @@
 import { AxiosError } from "axios"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { trackEvent } from "@/shared/analytics"
 
 import {
   useFeedbackTemplate,
@@ -68,8 +69,47 @@ function UsabilitySurveyRunner({
   const mutation = useSubmitFeedback()
   const survey = useMultistepSurvey(config)
   const [open, setOpen] = useState(true)
+  const didStartAnswerRef = useRef(false)
+  const previousStepIndexRef = useRef(survey.stepIndex)
+
+  useEffect(() => {
+    trackEvent("survey_modal_view", {
+      template_id: templateId,
+      variant_key: variantKey,
+      total_steps: survey.totalSteps,
+    })
+  }, [templateId, variantKey, survey.totalSteps])
+
+  useEffect(() => {
+    if (didStartAnswerRef.current) return
+    if (Object.keys(survey.answers).length === 0) return
+    didStartAnswerRef.current = true
+    trackEvent("survey_answer_start", {
+      template_id: templateId,
+      variant_key: variantKey,
+      step_index: survey.stepIndex,
+    })
+  }, [survey.answers, survey.stepIndex, templateId, variantKey])
+
+  useEffect(() => {
+    if (previousStepIndexRef.current === survey.stepIndex) return
+    trackEvent("survey_step_change", {
+      template_id: templateId,
+      variant_key: variantKey,
+      from_step_index: previousStepIndexRef.current,
+      to_step_index: survey.stepIndex,
+      total_steps: survey.totalSteps,
+    })
+    previousStepIndexRef.current = survey.stepIndex
+  }, [survey.stepIndex, survey.totalSteps, templateId, variantKey])
 
   const close = () => {
+    trackEvent("survey_modal_close", {
+      template_id: templateId,
+      variant_key: variantKey,
+      step_index: survey.stepIndex,
+      answered_count: Object.keys(survey.answers).length,
+    })
     setOpen(false)
     onClose()
   }
@@ -81,6 +121,11 @@ function UsabilitySurveyRunner({
     try {
       answers = toAnswerItems(config, form, survey.answers)
     } catch {
+      trackEvent("survey_submit_error", {
+        template_id: templateId,
+        variant_key: variantKey,
+        reason: "mapping_failed",
+      })
       addToast({
         message: "제출 중 문제가 발생했어요. 다시 시도해주세요.",
         color: "red",
@@ -96,6 +141,11 @@ function UsabilitySurveyRunner({
       {
         onSuccess: () => {
           markTemplateSubmitted(templateId)
+          trackEvent("survey_submit_success", {
+            template_id: templateId,
+            variant_key: variantKey,
+            answered_count: Object.keys(survey.answers).length,
+          })
           addToast({
             message: "소중한 의견 감사합니다!",
             color: "primary",
@@ -115,6 +165,12 @@ function UsabilitySurveyRunner({
 
           if (data?.code === DUPLICATE_RESPONSE_CODE) {
             markTemplateSubmitted(templateId)
+            trackEvent("survey_submit_error", {
+              template_id: templateId,
+              variant_key: variantKey,
+              reason: "duplicate_response",
+              code: data.code,
+            })
             addToast({
               message: data.message ?? "이미 제출한 응답이 있어요.",
               color: "primary",
@@ -126,6 +182,12 @@ function UsabilitySurveyRunner({
             return
           }
 
+          trackEvent("survey_submit_error", {
+            template_id: templateId,
+            variant_key: variantKey,
+            reason: "request_failed",
+            code: data?.code,
+          })
           addToast({
             message: "제출에 실패했어요. 다시 시도해주세요.",
             color: "red",
@@ -142,6 +204,9 @@ function UsabilitySurveyRunner({
     <UsabilitySurveyView
       open={open}
       preventClose={config.preventClose}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) close()
+      }}
       survey={survey}
       onSubmit={handleSubmit}
       isSubmitting={mutation.isPending}

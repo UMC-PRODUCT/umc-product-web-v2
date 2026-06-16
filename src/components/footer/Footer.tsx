@@ -75,7 +75,7 @@ export default function Footer({ variant = "light" }: FooterProps) {
               className={cn("h-5.5 w-auto shrink-0", s.logoFilledColor)}
             />
             <span className={cn("text-heading-7-semibold", s.primary)}>
-              University Make us Challenge
+              University MakeUs Challenge
             </span>
           </div>
           <div

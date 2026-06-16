@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { trackEvent } from "@/shared/analytics"
 import { useSchoolChapterMap } from "@/shared/hooks/useSchoolChapterMap"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { cn } from "@/shared/lib/utils"
@@ -79,6 +80,8 @@ export function MatchingProjectsListPage({
     setPage,
     searchQuery,
     setSearchQuery,
+    isLoading,
+    isError,
     filterDescriptors,
   } = useMatchingProjectListFilters()
 
@@ -96,6 +99,32 @@ export function MatchingProjectsListPage({
       useMockData ? MOCK_MATCHING_PROJECTS : projects.map(toMatchingProject),
     [useMockData, projects],
   )
+
+  useEffect(() => {
+    trackEvent("project_list_view", {
+      use_mock_data: useMockData,
+      project_count: visibleProjects.length,
+    })
+  }, [useMockData, visibleProjects.length])
+
+  useEffect(() => {
+    const trimmedLength = searchQuery.trim().length
+    if (trimmedLength === 0) return
+    const timer = setTimeout(() => {
+      trackEvent("project_search_used", {
+        query_length_bucket: getSearchLengthBucket(trimmedLength),
+      })
+    }, 600)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  useEffect(() => {
+    if (useMockData || isLoading || isError) return
+    if (visibleProjects.length > 0) return
+    trackEvent("project_empty_result", {
+      has_search_query: searchQuery.trim().length > 0,
+    })
+  }, [useMockData, isLoading, isError, searchQuery, visibleProjects.length])
 
   useEffect(() => {
     if (!openFilterId) return
@@ -147,12 +176,31 @@ export function MatchingProjectsListPage({
                 label={filter.label}
                 open={openFilterId === filter.id}
                 onClick={() =>
-                  setOpenFilterId((prev) =>
-                    prev === filter.id ? null : filter.id,
-                  )
+                  setOpenFilterId((prev) => {
+                    const next = prev === filter.id ? null : filter.id
+                    if (next) {
+                      trackEvent("project_filter_open", {
+                        filter_id: filter.id,
+                      })
+                    }
+                    return next
+                  })
                 }
                 options={filter.options}
-                onSelect={filter.onSelect}
+                onSelect={(value) => {
+                  filter.onSelect(value)
+                  trackEvent("project_filter_select", {
+                    filter_id: filter.id,
+                    selected_count:
+                      filter.multiSelect && filter.selectedValues
+                        ? filter.selectedValues.includes(value)
+                          ? Math.max(0, filter.selectedValues.length - 1)
+                          : filter.selectedValues.length + 1
+                        : filter.selectedValue === value
+                          ? 0
+                          : 1,
+                  })
+                }}
                 selectedLabel={filter.selectedLabel}
                 onRequestClose={() => setOpenFilterId(null)}
                 dropdownClassName={filter.dropdownClassName}
@@ -190,6 +238,11 @@ export function MatchingProjectsListPage({
                     if (useMockData) return
                     const item = projects[index]
                     if (!item) return
+                    trackEvent("project_card_click", {
+                      project_id: item.id,
+                      card_index: index,
+                      page,
+                    })
                     setSelectedProjectId(item.id)
                     setSelectedProjectChapterId(
                       getChapterIdBySchool(item.productOwner?.schoolName ?? ""),
@@ -240,4 +293,11 @@ export function MatchingProjectsListPage({
       </Modal.Root>
     </section>
   )
+}
+
+function getSearchLengthBucket(length: number) {
+  if (length <= 2) return "1_2"
+  if (length <= 5) return "3_5"
+  if (length <= 10) return "6_10"
+  return "over_10"
 }
