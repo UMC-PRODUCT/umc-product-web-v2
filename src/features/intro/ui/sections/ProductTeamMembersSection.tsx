@@ -75,7 +75,7 @@ const MOBILE_CARD: TeamCardData = {
       role: "Android",
       members: [
         { nickname: "조나단", name: "조경석" },
-        { nickname: "어핫차", name: "박유수" },
+        { nickname: "어헛차", name: "박유수" },
         { nickname: "도리", name: "김도연" },
       ],
     },
@@ -94,7 +94,7 @@ const SERVER_CARD: TeamCardData = {
         { nickname: "세니", name: "박세은", breakAfter: true },
         { nickname: "스읍", name: "이예은" },
         { nickname: "갈래", name: "김민서" },
-        { nickname: "커너", name: "박성현" },
+        { nickname: "우디", name: "박성현" },
         { nickname: "라미", name: "권도희" },
         { nickname: "이람", name: "박승범" },
       ],
