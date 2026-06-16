@@ -15,7 +15,10 @@ import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDet
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { TeamMemberModal } from "@/features/project/list/ui/team-member-modal/TeamMemberModal"
 import { deleteProject } from "@/features/project/management/api"
-import { invalidateProjectSummaryQueries } from "@/features/project/new/api"
+import {
+  invalidateProjectSummaryQueries,
+  projectKeys,
+} from "@/features/project/new/api"
 import { abortProject } from "@/features/project/new/api/projectAbort"
 import { submitProject } from "@/features/project/new/api/projectDraft"
 import { publishProject } from "@/features/project/new/api/projectPublish"
@@ -160,6 +163,9 @@ export function ProjectManagementMoreMenu({
     onSuccess: () => {
       setSubmitOpen(false)
       invalidateProjectSummaryQueries(queryClient, numericProjectId)
+      void queryClient.invalidateQueries({
+        queryKey: [...projectKeys.all, "draft"],
+      })
       addToast({
         message: "검토 요청이 완료되었습니다.",
         color: "primary",
