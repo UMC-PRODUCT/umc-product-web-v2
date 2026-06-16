@@ -16,9 +16,12 @@ declare global {
 
 const GA_SCRIPT_ID = "ga4-script"
 const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID
+let isInitialized = false
 
 export function initializeAnalytics() {
   if (!measurementId || typeof window === "undefined") return
+  if (isInitialized) return
+  isInitialized = true
   if (!window.dataLayer) window.dataLayer = []
   window.gtag =
     window.gtag ??
