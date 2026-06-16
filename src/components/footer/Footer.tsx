@@ -183,20 +183,22 @@ export default function Footer({ variant = "light" }: FooterProps) {
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
-                "text-body-3-medium transition-colors hover:underline",
+                "text-body-3-medium pt-0.5 transition-colors hover:underline",
                 s.secondary,
                 s.linkHover,
               )}
             >
               iOS
             </a>
-            <span className={cn("text-body-3-medium", s.secondary)}>/</span>
+            <span className={cn("text-body-3-medium pt-0.5", s.secondary)}>
+              /
+            </span>
             <a
               href="https://play.google.com/store/apps/details?id=com.umc.product&hl=en"
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
-                "text-body-3-medium transition-colors hover:underline",
+                "text-body-3-medium pt-0.5 transition-colors hover:underline",
                 s.secondary,
                 s.linkHover,
               )}
@@ -214,7 +216,7 @@ export default function Footer({ variant = "light" }: FooterProps) {
               )}
             >
               <UmcLogo className="ml-4 h-3 w-auto" />
-              <span className="hover:underline">Product Tech</span>
+              <span className="pt-0.5 hover:underline">Product Blog</span>
             </a>
           </div>
           <div className="flex items-center gap-6">
