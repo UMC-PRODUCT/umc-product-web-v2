@@ -369,10 +369,17 @@ function ProjectRegisterPage() {
         await upsertApplicationForm(projectId, body)
       }
       if (isEditMode) {
-        if (gisuId) {
+        const activeGisu = await queryClient.ensureQueryData({
+          queryKey: gisuKeys.active,
+          queryFn: getActiveGisu,
+        })
+        const resolvedGisuId = activeGisu?.gisuId
+          ? Number(activeGisu.gisuId)
+          : undefined
+        if (resolvedGisuId) {
           const draft = await queryClient.ensureQueryData({
-            queryKey: projectKeys.draft(Number(gisuId)),
-            queryFn: () => getMyDraft(Number(gisuId)),
+            queryKey: projectKeys.draft(resolvedGisuId),
+            queryFn: () => getMyDraft(resolvedGisuId),
           })
           const isEditingDraft =
             draft?.status === "DRAFT" &&
@@ -380,7 +387,7 @@ function ProjectRegisterPage() {
           if (isEditingDraft) {
             await submitProject(projectId)
             void queryClient.invalidateQueries({
-              queryKey: projectKeys.draft(Number(gisuId)),
+              queryKey: projectKeys.draft(resolvedGisuId),
             })
           }
         }
