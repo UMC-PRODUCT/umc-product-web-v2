@@ -15,6 +15,7 @@ export interface ApplicationProjectCardPart {
 interface ApplicationProjectCardProps {
   thumbnailUrl?: string
   thumbnailAlt?: string
+  logoUrl?: string
   projectName: string
   pmInfo: string
   parts: ApplicationProjectCardPart[]
@@ -26,6 +27,7 @@ interface ApplicationProjectCardProps {
 export function ApplicationProjectCard({
   thumbnailUrl,
   thumbnailAlt,
+  logoUrl,
   projectName,
   pmInfo,
   parts,
@@ -74,7 +76,7 @@ export function ApplicationProjectCard({
         <div className="flex flex-col items-start gap-2 self-stretch">
           <div className="flex items-center justify-between self-stretch">
             <div className="flex items-center gap-2">
-              <ProjectLogo size={30} />
+              <ProjectLogo src={logoUrl} size={30} />
               <span className="text-heading-7-semibold text-teal-gray-900">
                 {projectName}
               </span>
