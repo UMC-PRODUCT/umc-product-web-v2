@@ -17,6 +17,7 @@ import {
   projectKeys,
 } from "@/features/project/new/api"
 import { UsabilitySurvey } from "@/features/usability-survey"
+import { trackEvent } from "@/shared/analytics"
 import { getActiveGisu } from "@/shared/api/gisu"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
@@ -441,6 +442,17 @@ export function ProjectDetailCard({
   const shouldShowEditCta =
     showEditCta && (resolvedEditPermissionLoading || resolvedCanEditProject)
 
+  useEffect(() => {
+    if (!detail) return
+    trackEvent("project_detail_view", {
+      project_id: projectId,
+      cta_mode: ctaMode,
+      view_only: viewOnly,
+      has_external_link: Boolean(detail.externalLink),
+      has_application_form: Boolean(detail.applicationFormId),
+    })
+  }, [detail, projectId, ctaMode, viewOnly])
+
   if (isDetailLoading) {
     return <ProjectDetailCardSkeleton />
   }
@@ -521,6 +533,11 @@ export function ProjectDetailCard({
                 ctaMode !== "apply-blocked-approved" && !data.externalLink
               }
               onClick={() => {
+                trackEvent("project_plan_click", {
+                  project_id: projectId,
+                  cta_mode: ctaMode,
+                  has_external_link: Boolean(data.externalLink),
+                })
                 if (!data.externalLink) {
                   if (ctaMode === "apply-blocked-approved") {
                     addToast({
@@ -547,6 +564,9 @@ export function ProjectDetailCard({
                   }
                   isLoading={resolvedEditPermissionLoading}
                   onClick={() => {
+                    trackEvent("project_edit_click", {
+                      project_id: projectId,
+                    })
                     if (
                       resolvedEditPermissionLoading ||
                       !resolvedCanEditProject
@@ -568,7 +588,13 @@ export function ProjectDetailCard({
                     className="min-w-32 flex-1 whitespace-nowrap"
                     isLoading={isDetailLoading}
                     disabled={!isDetailLoading && !detail?.applicationFormId}
-                    onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                    onClick={() => {
+                      trackEvent("project_questions_click", {
+                        project_id: projectId,
+                        cta_mode: ctaMode,
+                      })
+                      setIsRecruitQuestionsModalOpen(true)
+                    }}
                   >
                     모집 문항 보기
                   </Button>
@@ -577,7 +603,12 @@ export function ProjectDetailCard({
                   <Button
                     className="min-w-32 flex-1 whitespace-nowrap"
                     disabled={myApplicationForProject == null}
-                    onClick={() => setIsMyApplicationModalOpen(true)}
+                    onClick={() => {
+                      trackEvent("my_application_click", {
+                        project_id: projectId,
+                      })
+                      setIsMyApplicationModalOpen(true)
+                    }}
                   >
                     내 지원서 보기
                   </Button>
@@ -604,6 +635,11 @@ export function ProjectDetailCard({
                         isApplicationStatusResolving,
                       })}
                       onClick={() => {
+                        trackEvent("project_apply_click", {
+                          project_id: projectId,
+                          cta_mode: ctaMode,
+                          is_draft_application: isDraftApplication,
+                        })
                         if (viewOnly && userIsPm) {
                           if (!detail?.applicationFormId) {
                             addToast({
@@ -617,6 +653,11 @@ export function ProjectDetailCard({
                             return
                           }
                           setIsRecruitQuestionsModalOpen(true)
+                          trackEvent("project_questions_click", {
+                            project_id: projectId,
+                            cta_mode: ctaMode,
+                            source: "pm_readonly_apply",
+                          })
                           return
                         }
                         if (
@@ -646,6 +687,11 @@ export function ProjectDetailCard({
                           return
                         }
                         setIsApplyModalOpen(true)
+                        trackEvent("application_form_start", {
+                          project_id: projectId,
+                          matching_round_id: activeMatchingRound.id,
+                          is_draft_application: isDraftApplication,
+                        })
                       }}
                     >
                       {isDraftApplication ? "이어서 작성하기" : "지원하기"}
@@ -657,7 +703,13 @@ export function ProjectDetailCard({
                     color="primary"
                     className="min-w-32 flex-1 whitespace-nowrap"
                     disabled={!detail?.applicationFormId}
-                    onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                    onClick={() => {
+                      trackEvent("project_questions_click", {
+                        project_id: projectId,
+                        cta_mode: ctaMode,
+                      })
+                      setIsRecruitQuestionsModalOpen(true)
+                    }}
                   >
                     모집 문항 보기
                   </Button>
@@ -671,7 +723,13 @@ export function ProjectDetailCard({
                       color="primary"
                       className="min-w-32 flex-1 whitespace-nowrap"
                       disabled={!detail?.applicationFormId}
-                      onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                      onClick={() => {
+                        trackEvent("project_questions_click", {
+                          project_id: projectId,
+                          cta_mode: ctaMode,
+                        })
+                        setIsRecruitQuestionsModalOpen(true)
+                      }}
                     >
                       모집 문항 보기
                     </Button>
@@ -689,7 +747,13 @@ export function ProjectDetailCard({
                     color="primary"
                     className="min-w-32 flex-1 whitespace-nowrap"
                     disabled={!detail?.applicationFormId}
-                    onClick={() => setIsRecruitQuestionsModalOpen(true)}
+                    onClick={() => {
+                      trackEvent("project_questions_click", {
+                        project_id: projectId,
+                        cta_mode: ctaMode,
+                      })
+                      setIsRecruitQuestionsModalOpen(true)
+                    }}
                   >
                     모집 문항 보기
                   </Button>

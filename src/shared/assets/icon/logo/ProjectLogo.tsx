@@ -2,6 +2,7 @@
 /** 피그마 기준 40 Logo Frame */
 import { useState } from "react"
 
+import { trackEvent } from "@/shared/analytics"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { cn } from "@/shared/lib/utils"
 
@@ -61,7 +62,12 @@ export function ProjectLogo({
         <img
           src={src}
           alt="project logo"
-          onError={() => setErroredSrc(src ?? null)}
+          onError={() => {
+            trackEvent("image_load_error", {
+              image_type: "project_logo",
+            })
+            setErroredSrc(src ?? null)
+          }}
           className="h-full w-full object-cover"
         />
       )}
