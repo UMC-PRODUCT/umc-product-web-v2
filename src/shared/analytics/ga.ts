@@ -92,7 +92,7 @@ export function trackWebVital({ name, id, value, rating }: WebVitalParams) {
 
 export function getCurrentPagePath() {
   if (typeof window === "undefined") return ""
-  return `${window.location.pathname}${window.location.search}`
+  return window.location.pathname
 }
 
 function compactParams(params: AnalyticsEventParams): AnalyticsEventParams {

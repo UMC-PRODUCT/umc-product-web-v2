@@ -64,7 +64,7 @@ describe("ga analytics", () => {
         status: 200,
         duration_ms: 420,
         duration_bucket: "300ms_1s",
-        page_path: "/matching/projects?tab=all",
+        page_path: "/matching/projects",
         success: true,
       },
     ])
