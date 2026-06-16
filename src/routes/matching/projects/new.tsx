@@ -377,7 +377,12 @@ function ProjectRegisterPage() {
           const isEditingDraft =
             draft?.status === "DRAFT" &&
             Number(draft.id) === Number(editProjectId)
-          if (isEditingDraft) await submitProject(projectId)
+          if (isEditingDraft) {
+            await submitProject(projectId)
+            void queryClient.invalidateQueries({
+              queryKey: projectKeys.draft(Number(gisuId)),
+            })
+          }
         }
         return
       }
