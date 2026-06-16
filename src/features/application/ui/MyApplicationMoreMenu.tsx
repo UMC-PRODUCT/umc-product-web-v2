@@ -91,6 +91,20 @@ export function MyApplicationMoreMenu({
     item.matchingRound.id != null &&
     Number(item.matchingRound.id) === Number(activeMatchingRound.id)
 
+  // /me/applications 응답에는 logoImageUrl이 없어, 모달이 열릴 때만 상세를 조회해 로고를 보완한다
+  const projectDetailQuery = useQuery({
+    queryKey: ["projectDetail", Number(item.projectId)],
+    queryFn: () => getProjectDetail(Number(item.projectId)),
+    enabled: formOpen,
+    staleTime: 60 * 1000,
+  })
+
+  const modalData = useMemo<MatchingProject>(() => {
+    const base = toModalData(item)
+    const logoUrl = projectDetailQuery.data?.logoImageUrl
+    return logoUrl ? { ...base, logoImage: { src: logoUrl } } : base
+  }, [item, projectDetailQuery.data])
+
   const cancelMutation = useMutation({
     mutationFn: () =>
       cancelApplication(Number(item.projectId), Number(item.applicationId)),
@@ -203,7 +217,7 @@ export function MyApplicationMoreMenu({
           <Modal.Overlay tone="deep" />
           <Modal.Content>
             <MyApplicationModal
-              data={toModalData(item)}
+              data={modalData}
               projectId={Number(item.projectId)}
               applicationId={Number(item.applicationId)}
               isRoundOpen={isRoundOpen}
