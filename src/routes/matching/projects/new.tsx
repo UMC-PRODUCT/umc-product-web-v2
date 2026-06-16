@@ -368,7 +368,31 @@ function ProjectRegisterPage() {
         )
         await upsertApplicationForm(projectId, body)
       }
-      if (isEditMode) return
+      if (isEditMode) {
+        const activeGisu = await queryClient.ensureQueryData({
+          queryKey: gisuKeys.active,
+          queryFn: getActiveGisu,
+        })
+        const resolvedGisuId = activeGisu?.gisuId
+          ? Number(activeGisu.gisuId)
+          : undefined
+        if (resolvedGisuId) {
+          const draft = await queryClient.ensureQueryData({
+            queryKey: projectKeys.draft(resolvedGisuId),
+            queryFn: () => getMyDraft(resolvedGisuId),
+          })
+          const isEditingDraft =
+            draft?.status === "DRAFT" &&
+            Number(draft.id) === Number(editProjectId)
+          if (isEditingDraft) {
+            await submitProject(projectId)
+            void queryClient.invalidateQueries({
+              queryKey: projectKeys.draft(resolvedGisuId),
+            })
+          }
+        }
+        return
+      }
       const result = await submitProject(projectId)
       if (pmInfo.pm1 && (await resolveCanEditRecruitStep())) {
         await transferOwnership(projectId, {
