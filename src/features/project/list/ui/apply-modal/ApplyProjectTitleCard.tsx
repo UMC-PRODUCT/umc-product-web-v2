@@ -1,7 +1,9 @@
+import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { cn } from "@/shared/lib/utils"
 
 interface ApplyProjectTitleCardProps {
   projectName: string
+  logoSrc?: string
   challengerName?: string
   challengerUniversity?: string
   subtitle?: string
@@ -30,6 +32,7 @@ export const TRAPEZOID_CLIP_PATH = [
 
 export function ApplyProjectTitleCard({
   projectName,
+  logoSrc,
   challengerName,
   challengerUniversity,
   subtitle,
@@ -50,7 +53,7 @@ export function ApplyProjectTitleCard({
         className="flex h-15 w-fit max-w-[calc(100%-1rem)] min-w-69.5 shrink-0 items-center gap-3.5 bg-teal-100 bg-linear-to-r py-2.5 pr-14 pl-4"
         style={{ clipPath: TRAPEZOID_CLIP_PATH }}
       >
-        <div className="bg-teal-gray-200 size-8 shrink-0 rounded-lg" />
+        <ProjectLogo src={logoSrc} size={32} />
         <div className="flex min-w-0 flex-col">
           <span className="text-subtitle-4-semibold text-teal-gray-800 truncate">
             {projectName}
