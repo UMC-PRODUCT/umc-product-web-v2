@@ -119,8 +119,7 @@ export function MatchingProjectsListPage({
   }, [searchQuery])
 
   useEffect(() => {
-    if (useMockData || isLoading || isError || searchQuery.trim().length === 0)
-      return
+    if (useMockData || isLoading || isError) return
     if (visibleProjects.length > 0) return
     trackEvent("project_empty_result", {
       has_search_query: searchQuery.trim().length > 0,
