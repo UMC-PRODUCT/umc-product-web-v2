@@ -40,6 +40,8 @@ export const Route = createFileRoute("/matching/applications")({
 function MatchingApplicationsPage() {
   const { data: me } = useMe()
   const { me: identity, viewContext } = useViewerIdentity()
+  const schoolLeadership = isSchoolLeadership(identity)
+  const schoolPresident = isSchoolPresident(identity)
   const addToast = useToastStore((s) => s.addToast)
   const chaptersQuery = useChapters()
   const chapters = useMemo(
@@ -62,7 +64,7 @@ function MatchingApplicationsPage() {
 
   const hasOperatorRole = isAnyOperator(identity)
   const hasPmRole = isCurrentTermPm(identity)
-  const canApprove = isOperator(identity) || isSchoolLeadership(identity)
+  const canApprove = isOperator(identity) || schoolLeadership
   const canViewOwnApplications =
     viewContext.isChallengerView || (!hasOperatorRole && !hasPmRole)
   const activeView = resolveMatchingApplicationView({
@@ -100,7 +102,7 @@ function MatchingApplicationsPage() {
 
   const admin = useAdminPageData(selectedChapter, {
     enabled: showAdminSection,
-    schoolName: isSchoolPresident(identity) ? identity?.schoolName : undefined,
+    schoolName: schoolLeadership ? identity?.schoolName : undefined,
   })
   const adminStats = admin.stats
   const adminProjects = admin.projects
@@ -161,11 +163,8 @@ function MatchingApplicationsPage() {
                     projects={adminProjects}
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
-                    disableFormPanel={isSchoolLeadership(identity)}
-                    hideExpand={
-                      isSchoolLeadership(identity) &&
-                      !isSchoolPresident(identity)
-                    }
+                    disableFormPanel={schoolLeadership}
+                    hideExpand={schoolLeadership && !schoolPresident}
                   />
                 </div>
               )}
