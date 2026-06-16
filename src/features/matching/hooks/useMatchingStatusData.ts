@@ -348,7 +348,8 @@ export function useMatchingStatusData(chapterName?: string) {
       roundsQuery.isLoading ||
       projectsQuery.isLoading ||
       applicantsQuery.isLoading ||
-      chapterStatsQuery.isLoading,
+      chapterStatsQuery.isLoading ||
+      chaptersWithSchoolsQuery.isLoading,
     isError:
       gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError,
     error:
