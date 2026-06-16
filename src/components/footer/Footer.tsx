@@ -17,9 +17,13 @@ const TEAM_ROWS = [
   {
     role: "Mobile",
     members: {
-      group_1: ["PM 제용/정의찬", "Design 삼이/이희원", "Design 시안/우자영"],
-      group_2: ["iOS 원/김동민", "iOS 도도/김도연", "iOS 소피/이예지"],
-      group_3: ["Android 도리/김도연", "Android 어헛차/박유수"],
+      group_1: ["PM 제옹/정의찬", "Design 삼이/이희원", "Design 시안/우자영"],
+      group_2: ["iOS 원/김동민", "iOS 소피/이예지"],
+      group_3: [
+        "Android 조나단/조경석",
+        "Android 도리/김도연",
+        "Android 어헛차/박유수",
+      ],
     },
   },
   {
