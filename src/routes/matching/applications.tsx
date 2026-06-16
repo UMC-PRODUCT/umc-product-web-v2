@@ -162,7 +162,10 @@ function MatchingApplicationsPage() {
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
                     disableFormPanel={isSchoolLeadership(identity)}
-                    hideExpand={isSchoolLeadership(identity)}
+                    hideExpand={
+                      isSchoolLeadership(identity) &&
+                      !isSchoolPresident(identity)
+                    }
                   />
                 </div>
               )}
