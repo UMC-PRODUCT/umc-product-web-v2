@@ -36,15 +36,18 @@ export function AnalyticsProvider() {
   }, [])
 
   useEffect(() => {
-    const pagePath = `${location.pathname}${location.searchStr}`
+    const pagePath = location.pathname
+    const referrer = document.referrer
+      ? document.referrer.split("?")[0]
+      : undefined
     trackPageView({
       pagePath,
       pageTitle: document.title,
       previousPath: previousPathRef.current,
-      referrer: document.referrer || undefined,
+      referrer,
     })
     previousPathRef.current = pagePath
-  }, [location.pathname, location.searchStr])
+  }, [location.pathname])
 
   return null
 }
