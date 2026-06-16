@@ -89,6 +89,11 @@ export function ChallengerStatsSection({
           {/* 하단 차수별 breakdown */}
           <div className="bg-stats-breakdown absolute right-7.5 bottom-8 w-44.5 rounded px-3.5 py-3">
             <div className="flex flex-col gap-1.25 text-[12px]">
+              <div className="text-label-4-medium text-teal-gray-400 flex items-center justify-end gap-1 leading-normal">
+                <span className="text-teal-500">지원</span>
+                <span>/</span>
+                <span>지원 가능 인원</span>
+              </div>
               {stats.rounds.map((r) => (
                 <div key={r.round} className="flex items-center gap-7">
                   <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-normal">

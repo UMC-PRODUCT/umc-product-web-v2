@@ -707,6 +707,7 @@ export const ProjectApplyModal = forwardRef<
         <div className="flex w-full">
           <ApplyProjectTitleCard
             projectName={data.title}
+            logoSrc={data.logoImage?.src}
             subtitle={data.authorSchoolLine}
           />
         </div>
@@ -775,6 +776,7 @@ export const ProjectApplyModal = forwardRef<
                             <QuestionItemTitle
                               index={`Q${questionIndexMap[q.id]}`}
                               title={q.title}
+                              caption={q.caption}
                               required={q.required}
                             />
                             <Controller

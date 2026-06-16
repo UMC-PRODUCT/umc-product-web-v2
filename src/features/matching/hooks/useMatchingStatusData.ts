@@ -243,23 +243,35 @@ export function useMatchingStatusData(chapterName?: string) {
   }
 
   const stats: ApplicationStats = useMemo(() => {
-    // s2 이전: 아무 정보도 표시하지 않음
-    if (!chapterStatsQuery.data || visibleUpToRound === 0) return emptyStats
+    if (!chapterStatsQuery.data) return emptyStats
+
+    const summary = chapterStatsQuery.data.summary
+    // 총원·학교별 분포는 지부 모집단 기준 (라운드 가시성과 무관)
+    const chapterSchoolStats = chapterName
+      ? summary.schoolMatchingStatistics.filter((s) =>
+          (chapterSchoolIds ?? new Set()).has(String(s.schoolId)),
+        )
+      : summary.schoolMatchingStatistics
+    const totalMembers = chapterSchoolStats.reduce(
+      (sum, s) => sum + Number(s.totalMemberCount),
+      0,
+    )
+
+    // s2 이전: 차수별 매칭 결과는 숨기되 지부 총원은 표시
+    if (visibleUpToRound === 0) {
+      return { ...emptyStats, totalMembers, pendingCount: totalMembers }
+    }
 
     // 해당 챕터 소속 학교 + 프로젝트만 필터링 (로딩 중엔 빈 Set으로 필터링해 flicker 방지)
     const filteredSummary = chapterName
       ? {
-          ...chapterStatsQuery.data.summary,
-          schoolMatchingStatistics:
-            chapterStatsQuery.data.summary.schoolMatchingStatistics.filter(
-              (s) => (chapterSchoolIds ?? new Set()).has(String(s.schoolId)),
-            ),
-          projectRoundStatistics:
-            chapterStatsQuery.data.summary.projectRoundStatistics.filter((p) =>
-              projectIdToName.has(String(p.projectId)),
-            ),
+          ...summary,
+          schoolMatchingStatistics: chapterSchoolStats,
+          projectRoundStatistics: summary.projectRoundStatistics.filter((p) =>
+            projectIdToName.has(String(p.projectId)),
+          ),
         }
-      : chapterStatsQuery.data.summary
+      : summary
 
     // visibleUpToRound 차수까지의 결과만 표시
     // Top4는 d3 이후에도 1차 기준
@@ -336,7 +348,8 @@ export function useMatchingStatusData(chapterName?: string) {
       roundsQuery.isLoading ||
       projectsQuery.isLoading ||
       applicantsQuery.isLoading ||
-      chapterStatsQuery.isLoading,
+      chapterStatsQuery.isLoading ||
+      chaptersWithSchoolsQuery.isLoading,
     isError:
       gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError,
     error:

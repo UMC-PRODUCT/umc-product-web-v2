@@ -50,6 +50,7 @@ export function RecruitQuestionsViewModal({
       <div className="flex w-full">
         <ApplyProjectTitleCard
           projectName={data.title}
+          logoSrc={data.logoImage?.src}
           subtitle={data.authorSchoolLine}
         />
       </div>
@@ -110,6 +111,7 @@ export function RecruitQuestionsViewModal({
                           <QuestionItemTitle
                             index={`Q${questionIndexMap[q.id]}`}
                             title={q.title}
+                            caption={q.caption}
                             required={q.required}
                           />
                           <div className="pointer-events-none w-full">

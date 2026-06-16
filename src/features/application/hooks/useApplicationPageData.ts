@@ -31,6 +31,8 @@ import type {
   UniversityCount,
 } from "../model/types"
 
+const EMPTY_SET = new Set<string>()
+
 interface ApplicationPageDataOptions {
   enabled?: boolean
   schoolName?: string
@@ -312,15 +314,6 @@ export function useAdminPageData(
     return map
   }, [schoolsQuery.data])
 
-  // SCHOOL_PRESIDENT: 본인 학교 schoolId 역매핑
-  const mySchoolId = useMemo(() => {
-    if (!schoolName) return undefined
-    for (const [id, name] of schoolIdToName) {
-      if (name === schoolName) return id
-    }
-    return undefined
-  }, [schoolName, schoolIdToName])
-
   // 매칭 차수 조회 (현재 진행 차수 계산용)
   const roundsQuery = useQuery({
     queryKey: applicationKeys.matchingRounds(chapterId),
@@ -372,10 +365,9 @@ export function useAdminPageData(
     }
 
     // 해당 챕터 소속 학교 + 프로젝트만 필터링 (로딩 중엔 빈 Set으로 필터링해 flicker 방지)
-    // SCHOOL_PRESIDENT: mySchoolId가 있으면 본인 학교만 필터링
-    const schoolFilter = mySchoolId
-      ? (id: string) => id === mySchoolId
-      : (id: string) => (chapterSchoolIds ?? new Set()).has(id)
+    // 학교 회장단 포함 모든 운영진은 지부 전체 통계를 본다 (지부 현황은 지부 단위 집계, 총원·완료율·학교별 분포 일관)
+    const schoolIds = chapterSchoolIds ?? EMPTY_SET
+    const schoolFilter = (id: string) => schoolIds.has(id)
     const filteredSummary = chapterName
       ? {
           ...chapterStatsQuery.data.summary,
@@ -484,7 +476,6 @@ export function useAdminPageData(
     schoolIdToName,
     chapterName,
     chapterSchoolIds,
-    mySchoolId,
     currentRound,
   ])
 
@@ -502,7 +493,8 @@ export function useAdminPageData(
         roundsQuery.isLoading ||
         projectsQuery.isLoading ||
         applicantsQuery.isLoading ||
-        chapterStatsQuery.isLoading),
+        chapterStatsQuery.isLoading ||
+        chaptersWithSchoolsQuery.isLoading),
     isError:
       enabled &&
       (gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError),
