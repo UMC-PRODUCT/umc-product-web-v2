@@ -22,6 +22,7 @@ import {
   isCurrentTermPm,
   isOperator,
   isSchoolLeadership,
+  isSchoolPresident,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
@@ -99,7 +100,7 @@ function MatchingApplicationsPage() {
 
   const admin = useAdminPageData(selectedChapter, {
     enabled: showAdminSection,
-    schoolName: isSchoolLeadership(identity) ? identity?.schoolName : undefined,
+    schoolName: isSchoolPresident(identity) ? identity?.schoolName : undefined,
   })
   const adminStats = admin.stats
   const adminProjects = admin.projects
