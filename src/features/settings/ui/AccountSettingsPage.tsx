@@ -356,7 +356,7 @@ export function AccountSettingsPage() {
       <CtaModal
         open={unlinkTarget !== null}
         variant="error"
-        title={`${unlinkTarget?.social === "kakao" ? "카카오" : unlinkTarget?.social === "apple" ? "애플" : "구글"} 계정 연동을 해제하시겠습니까?`}
+        title={`${unlinkTarget?.social === "kakao" ? "카카오" : unlinkTarget?.social === "apple" ? "Apple" : "Google"} 계정 연동을 해제하시겠습니까?`}
         content={
           <>
             계정 연동을 해제하더라도 기존 데이터는 안전하게 유지됩니다.
