@@ -687,11 +687,6 @@ export function ProjectDetailCard({
                           return
                         }
                         setIsApplyModalOpen(true)
-                        trackEvent("application_form_start", {
-                          project_id: projectId,
-                          matching_round_id: activeMatchingRound.id,
-                          is_draft_application: isDraftApplication,
-                        })
                       }}
                     >
                       {isDraftApplication ? "이어서 작성하기" : "지원하기"}
