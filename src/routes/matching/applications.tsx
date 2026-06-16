@@ -97,7 +97,10 @@ function MatchingApplicationsPage() {
     }
   }, [me, chapters, userChapter])
 
-  const admin = useAdminPageData(selectedChapter, { enabled: showAdminSection })
+  const admin = useAdminPageData(selectedChapter, {
+    enabled: showAdminSection,
+    schoolName: isSchoolLeadership(identity) ? identity?.schoolName : undefined,
+  })
   const adminStats = admin.stats
   const adminProjects = admin.projects
 
@@ -158,6 +161,7 @@ function MatchingApplicationsPage() {
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
                     disableFormPanel={isSchoolLeadership(identity)}
+                    hideExpand={isSchoolLeadership(identity)}
                   />
                 </div>
               )}
