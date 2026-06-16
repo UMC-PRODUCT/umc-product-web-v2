@@ -310,8 +310,11 @@ export const ProjectApplyModal = forwardRef<
   })
 
   const savedSnapshotRef = useRef(JSON.stringify(defaultValues))
+  const didTrackStartRef = useRef(false)
 
   useEffect(() => {
+    if (didTrackStartRef.current) return
+    didTrackStartRef.current = true
     trackEvent("application_form_start", {
       project_id: projectId,
       matching_round_id: matchingRoundId,
