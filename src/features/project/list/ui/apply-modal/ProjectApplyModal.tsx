@@ -707,6 +707,7 @@ export const ProjectApplyModal = forwardRef<
         <div className="flex w-full">
           <ApplyProjectTitleCard
             projectName={data.title}
+            logoSrc={data.logoImage?.src}
             subtitle={data.authorSchoolLine}
           />
         </div>
