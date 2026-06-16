@@ -9,7 +9,7 @@ export type HeaderNavItem = {
 }
 
 export const HEADER_NAV_ITEMS: HeaderNavItem[] = [
-  { label: "소개", to: "/intro" },
+  { label: "소개", to: "/intro", disabled: true },
   {
     label: "데모데이 매칭",
     to: "/matching/projects",
@@ -21,6 +21,10 @@ export const HEADER_NAV_ITEMS: HeaderNavItem[] = [
 export function getDisabledNavMessage(label: string) {
   if (label === "리크루팅") {
     return RECRUITING_DISABLED_MESSAGE
+  }
+
+  if (label === "소개") {
+    return "소개 페이지는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!"
   }
 
   return `${label} 서비스는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!`

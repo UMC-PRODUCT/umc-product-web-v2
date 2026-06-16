@@ -2,9 +2,9 @@ import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
 import {
+  getDisabledNavMessage,
   HEADER_NAV_ITEMS,
   isHeaderNavItemActive,
-  RECRUITING_DISABLED_MESSAGE,
 } from "@/components/header/headerNavPolicy"
 import { useToastStore } from "@/components/toast/useToastStore"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
@@ -17,9 +17,9 @@ export function LandingHeader() {
   const lastScrollY = useRef(0)
   const addToast = useToastStore((s) => s.addToast)
 
-  const handleRecruitingClick = () => {
+  const handleDisabledClick = (label: string) => {
     addToast({
-      message: RECRUITING_DISABLED_MESSAGE,
+      message: getDisabledNavMessage(label),
       color: "primary",
       variant: "deep",
       type: "notice",
@@ -112,7 +112,7 @@ export function LandingHeader() {
                 <button
                   key={to}
                   type="button"
-                  onClick={handleRecruitingClick}
+                  onClick={() => handleDisabledClick(label)}
                   className={className}
                 >
                   {label}
