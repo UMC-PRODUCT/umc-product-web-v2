@@ -368,7 +368,19 @@ function ProjectRegisterPage() {
         )
         await upsertApplicationForm(projectId, body)
       }
-      if (isEditMode) return
+      if (isEditMode) {
+        if (gisuId) {
+          const draft = await queryClient.ensureQueryData({
+            queryKey: projectKeys.draft(Number(gisuId)),
+            queryFn: () => getMyDraft(Number(gisuId)),
+          })
+          const isEditingDraft =
+            draft?.status === "DRAFT" &&
+            Number(draft.id) === Number(editProjectId)
+          if (isEditingDraft) await submitProject(projectId)
+        }
+        return
+      }
       const result = await submitProject(projectId)
       if (pmInfo.pm1 && (await resolveCanEditRecruitStep())) {
         await transferOwnership(projectId, {
