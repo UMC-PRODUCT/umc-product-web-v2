@@ -400,7 +400,9 @@ function ProjectRegisterPage() {
 
           if (!isEditingDraft) {
             try {
-              const managed = await getManagedProjects(resolvedGisuId)
+              const managed = await getManagedProjects(resolvedGisuId, {
+                size: 200,
+              })
               const currentProject = managed.find(
                 (p) => Number(p.id) === Number(editProjectId),
               )
