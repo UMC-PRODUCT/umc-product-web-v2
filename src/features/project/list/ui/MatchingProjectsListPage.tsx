@@ -168,7 +168,10 @@ export function MatchingProjectsListPage({
           />
           <div
             ref={filterAreaRef}
-            className="scrollbar-none bp2:w-auto bp2:overflow-visible bp2:pb-0 flex w-full min-w-0 items-center gap-2 overflow-x-auto pb-1"
+            className={cn(
+              "scrollbar-none bp2:w-auto bp2:overflow-visible bp2:pb-0 flex w-full min-w-0 items-center gap-2 pb-1",
+              openFilterId ? "overflow-visible" : "overflow-x-auto",
+            )}
           >
             {filterDescriptors.map((filter) => (
               <FilterDropdown
