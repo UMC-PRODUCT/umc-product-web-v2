@@ -30,6 +30,7 @@ export function useOAuthLinking() {
   const addToast = useToastStore((s) => s.addToast)
   const queryClient = useQueryClient()
   const [isLinking, setIsLinking] = useState(false)
+  const [isUnlinkBlockedOpen, setIsUnlinkBlockedOpen] = useState(false)
 
   const handleGoogleLink = async () => {
     if (isLinking) return
@@ -162,12 +163,12 @@ export function useOAuthLinking() {
       const errorCode = isAxiosError(err)
         ? (err.response?.data as { code?: string } | undefined)?.code
         : undefined
-      const message =
-        errorCode === "AUTHENTICATION-0016"
-          ? "비밀번호가 없는 계정은 마지막 소셜 연동을 해제할 수 없어요.\n비밀번호를 먼저 설정해주세요."
-          : "연동 해제에 실패했습니다. 다시 시도해주세요."
+      if (errorCode === "AUTHENTICATION-0016") {
+        setIsUnlinkBlockedOpen(true)
+        return
+      }
       addToast({
-        message,
+        message: "연동 해제에 실패했습니다. 다시 시도해주세요.",
         color: "red",
         variant: "deep",
         type: "default",
@@ -181,5 +182,7 @@ export function useOAuthLinking() {
     handleAppleLink,
     handleKakaoLink,
     handleUnlink,
+    isUnlinkBlockedOpen,
+    setIsUnlinkBlockedOpen,
   }
 }

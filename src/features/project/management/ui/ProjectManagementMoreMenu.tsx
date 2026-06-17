@@ -288,17 +288,6 @@ export function ProjectManagementMoreMenu({
     })
   }
 
-  const handleEditMatchingPeriodClick = () => {
-    setPopoverOpen(false)
-    addToast({
-      message: "매칭 기간 중에는 프로젝트를 수정할 수 없습니다.",
-      color: "red",
-      variant: "deep",
-      type: "default",
-      duration: 3000,
-    })
-  }
-
   const handleTeamViewClick = () => {
     shouldPreventFocusRestoreRef.current = true
     setPopoverOpen(false)
@@ -309,7 +298,6 @@ export function ProjectManagementMoreMenu({
     label: string
     onClick: () => void
     disabled?: boolean
-    className?: string
   }[] = []
 
   if (status === "PENDING_REVIEW") {
@@ -321,26 +309,17 @@ export function ProjectManagementMoreMenu({
       })
     }
   } else if (status === "IN_PROGRESS") {
-    if (isMatchingPeriod) {
-      menuItems.push({
-        label: "지원 현황 확인하기",
-        onClick: handleApplicationClick,
-      })
-      menuItems.push({ label: "팀원 구성 보기", onClick: handleTeamViewClick })
+    menuItems.push({
+      label: "지원 현황 확인하기",
+      onClick: handleApplicationClick,
+    })
+    menuItems.push({ label: "팀원 구성 보기", onClick: handleTeamViewClick })
+    if (isPermissionLoading || canEditProject) {
       menuItems.push({
         label: "프로젝트 수정하기",
-        onClick: handleEditMatchingPeriodClick,
-        className:
-          "text-teal-gray-300 cursor-not-allowed hover:bg-white hover:shadow-none",
+        onClick: handleEditClick,
+        disabled: isMatchingPeriod || isPermissionLoading,
       })
-    } else {
-      if (isPermissionLoading || canEditProject) {
-        menuItems.push({
-          label: "프로젝트 수정하기",
-          onClick: handleEditClick,
-          disabled: isPermissionLoading,
-        })
-      }
     }
   } else {
     menuItems.push({
@@ -348,7 +327,7 @@ export function ProjectManagementMoreMenu({
       onClick: handleApplicationClick,
     })
     menuItems.push({ label: "팀원 구성 보기", onClick: handleTeamViewClick })
-    if (!isMatchingPeriod && (isPermissionLoading || canEditProject)) {
+    if (isPermissionLoading || canEditProject) {
       menuItems.push({
         label: "프로젝트 수정하기",
         onClick: handleEditClick,
@@ -384,13 +363,12 @@ export function ProjectManagementMoreMenu({
             </span>
 
             <div className="flex w-full flex-col">
-              {menuItems.map(({ label, onClick, disabled, className }) => (
+              {menuItems.map(({ label, onClick, disabled }) => (
                 <DropdownItem
                   key={label}
                   label={label}
                   disabled={disabled}
                   onClick={onClick}
-                  className={className}
                 />
               ))}
               {status === "DRAFT" &&
