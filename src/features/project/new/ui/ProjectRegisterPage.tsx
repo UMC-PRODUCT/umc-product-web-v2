@@ -15,6 +15,7 @@ import {
 } from "@/features/auth/model/identity"
 import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
+import { getManagedProjects } from "@/features/project/management/api"
 import {
   ApplicationForm,
   type ApplicationFormHandle,
@@ -189,6 +190,12 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
     enabled: !!gisuId,
   })
 
+  const managedQuery = useQuery({
+    queryKey: projectKeys.managedMe(gisuId ? Number(gisuId) : undefined),
+    queryFn: () => getManagedProjects(Number(gisuId)!, { size: 200 }),
+    enabled: isEditMode && !!gisuId,
+  })
+
   const isDraft = useMemo(() => {
     if (!isEditMode || !editProjectId) return false
     const draft = draftQuery.data
@@ -196,6 +203,14 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
       draft?.status === "DRAFT" && Number(draft.id) === Number(editProjectId)
     )
   }, [isEditMode, editProjectId, draftQuery.data])
+
+  const isInProgress = useMemo(() => {
+    if (!isEditMode || !editProjectId || !managedQuery.data) return false
+    const project = managedQuery.data.find(
+      (p) => Number(p.id) === Number(editProjectId),
+    )
+    return project?.status === "IN_PROGRESS"
+  }, [isEditMode, editProjectId, managedQuery.data])
 
   useEffect(() => {
     if (detailQuery.data) {
@@ -219,6 +234,27 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
       navigate({ to: "/matching/projects/management", replace: true })
     }
   }, [isEditMode, detailQuery.isError, detailQuery.error, addToast, navigate])
+
+  useEffect(() => {
+    if (!isEditMode || !isInProgress) return
+    if (!matchingRoundsQuery.isSuccess) return
+    if (!isWithinMatchingPeriod(matchingRoundsQuery.data, new Date())) return
+    addToast({
+      message: "매칭 기간 중에는 수정이 불가능 합니다!",
+      color: "red",
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
+    navigate({ to: "/matching/projects/management", replace: true })
+  }, [
+    isEditMode,
+    isInProgress,
+    matchingRoundsQuery.isSuccess,
+    matchingRoundsQuery.data,
+    addToast,
+    navigate,
+  ])
 
   useEffect(() => {
     if (isEditMode) return

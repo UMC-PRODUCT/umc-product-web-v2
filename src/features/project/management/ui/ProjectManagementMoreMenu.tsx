@@ -281,6 +281,17 @@ export function ProjectManagementMoreMenu({
 
   const handleEditClick = () => {
     if (!canEditProject || isPermissionLoading) return
+    if (status === "IN_PROGRESS" && isMatchingPeriod) {
+      setPopoverOpen(false)
+      addToast({
+        message: "매칭 기간 중에는 수정이 불가능 합니다!",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
     setPopoverOpen(false)
     if (status === "DRAFT") {
       navigate({ to: "/matching/projects/new" })
@@ -302,6 +313,7 @@ export function ProjectManagementMoreMenu({
     label: string
     onClick: () => void
     disabled?: boolean
+    visuallyDisabled?: boolean
   }[] = []
 
   if (status === "PENDING_REVIEW") {
@@ -322,7 +334,8 @@ export function ProjectManagementMoreMenu({
       menuItems.push({
         label: "프로젝트 수정하기",
         onClick: handleEditClick,
-        disabled: isMatchingPeriod || isPermissionLoading,
+        disabled: isPermissionLoading,
+        visuallyDisabled: isMatchingPeriod,
       })
     }
   } else {
@@ -367,14 +380,17 @@ export function ProjectManagementMoreMenu({
             </span>
 
             <div className="flex w-full flex-col">
-              {menuItems.map(({ label, onClick, disabled }) => (
-                <DropdownItem
-                  key={label}
-                  label={label}
-                  disabled={disabled}
-                  onClick={onClick}
-                />
-              ))}
+              {menuItems.map(
+                ({ label, onClick, disabled, visuallyDisabled }) => (
+                  <DropdownItem
+                    key={label}
+                    label={label}
+                    disabled={disabled}
+                    visuallyDisabled={visuallyDisabled}
+                    onClick={onClick}
+                  />
+                ),
+              )}
               {status === "DRAFT" &&
                 (isPermissionLoading || canEditProject) && (
                   <DropdownItem

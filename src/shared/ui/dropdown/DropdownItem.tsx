@@ -6,6 +6,7 @@ interface DropdownItemProps {
   onClick: () => void
   isSelected?: boolean
   disabled?: boolean
+  visuallyDisabled?: boolean
   className?: string
   size?: "xs" | "md"
 }
@@ -32,9 +33,11 @@ export function DropdownItem({
   onClick,
   isSelected = false,
   disabled = false,
+  visuallyDisabled = false,
   className,
   size = "md",
 }: DropdownItemProps) {
+  const inactive = disabled || visuallyDisabled
   return (
     <button
       type="button"
@@ -44,12 +47,12 @@ export function DropdownItem({
         "flex w-full shrink-0 rounded-lg bg-white text-left transition-[background-color,color,box-shadow]",
         baseClass[size],
         isSelected ? paddingClass[size].selected : paddingClass[size].default,
-        !disabled &&
+        !inactive &&
           (isSelected
             ? "shadow-inner-neutral-1 bg-teal-50"
             : "hover:bg-teal-gray-50 hover:shadow-inner-neutral-2"),
         className,
-        disabled && "text-teal-gray-300 cursor-not-allowed",
+        inactive && "text-teal-gray-300 cursor-not-allowed",
       )}
     >
       <span
