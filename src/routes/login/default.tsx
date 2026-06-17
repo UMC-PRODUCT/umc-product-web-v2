@@ -33,11 +33,18 @@ import {
 } from "@/features/login"
 import { emailSchema } from "@/features/signup/validation"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
+import { createMeta, SITE_URL } from "@/shared/seo"
 import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
 export const Route = createFileRoute("/login/default")({
+  head: () =>
+    createMeta(
+      "UMC 계정 로그인 | UMC 데모데이 팀 매칭 시스템",
+      "UMC 계정(이메일)으로 로그인하고 데모데이 팀 매칭을 이용하세요.",
+      { canonical: `${SITE_URL}/login/default` },
+    ),
   validateSearch: (search: Record<string, unknown>): { returnTo?: string } => ({
     returnTo: normalizeReturnTo(search.returnTo),
   }),

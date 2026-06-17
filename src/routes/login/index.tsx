@@ -27,10 +27,17 @@ import {
   // SmallDivider,
   UmcLogoButton,
 } from "@/features/login"
+import { createMeta, SITE_URL } from "@/shared/seo"
 import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"
 
 export const Route = createFileRoute("/login/")({
+  head: () =>
+    createMeta(
+      "로그인 | UMC 데모데이 팀 매칭 시스템",
+      "UMC 데모데이 팀 매칭 시스템에 로그인하고 프로젝트 등록·지원, 매칭 결과 확인을 시작하세요.",
+      { canonical: `${SITE_URL}/login` },
+    ),
   validateSearch: (search: Record<string, unknown>): { returnTo?: string } => ({
     returnTo: normalizeReturnTo(search.returnTo),
   }),

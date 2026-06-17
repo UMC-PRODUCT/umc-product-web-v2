@@ -4,6 +4,9 @@ import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { ChallengerVerification } from "@/features/challenger/ui/ChallengerVerification"
 
 export const Route = createFileRoute("/challenger-verification")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   beforeLoad: async ({ context, location }) => {
     await ensureMe(context.queryClient, location.href)
   },

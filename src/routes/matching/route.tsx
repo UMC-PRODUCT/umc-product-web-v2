@@ -7,6 +7,9 @@ import SideBar from "@/components/sidebar/SideBar"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 
 export const Route = createFileRoute("/matching")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   beforeLoad: async ({ context, location }) => {
     await ensureMe(context.queryClient, location.href)
   },

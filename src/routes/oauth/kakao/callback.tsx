@@ -16,6 +16,9 @@ import { resolveLoginSuccessPath } from "@/features/auth/lib/loginRedirect"
 import { trackEvent } from "@/shared/analytics"
 
 export const Route = createFileRoute("/oauth/kakao/callback")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   component: KakaoCallbackPage,
 })
 
