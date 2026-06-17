@@ -119,7 +119,9 @@ export function useOAuthLinking() {
 
   const handleKakaoLink = () => {
     setKakaoLinkIntent()
-    startKakaoSignIn()
+    startKakaoSignIn().catch((error: unknown) => {
+      console.error("[Kakao Link]", error)
+    })
   }
 
   const handleUnlink = async (

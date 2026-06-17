@@ -101,10 +101,10 @@ function DefaultLoginPage() {
     }
   }
 
-  const handleKakaoSignIn = () => {
+  const handleKakaoSignIn = async () => {
     try {
       sessionStorage.setItem("kakao_keep_logged_in", String(isKeepLoggedIn))
-      startKakaoSignIn(returnTo)
+      await startKakaoSignIn(returnTo)
     } catch (error) {
       console.error("[Kakao Sign-In]", error)
       showToast("Kakao 로그인에 실패했습니다. 다시 시도해주세요.", "red")
@@ -246,7 +246,10 @@ function DefaultLoginPage() {
             <Divider />
 
             <div className="flex items-center gap-8">
-              <LoginCircleButton social={"kakao"} onClick={handleKakaoSignIn} />
+              <LoginCircleButton
+                social={"kakao"}
+                onClick={() => void handleKakaoSignIn()}
+              />
 
               <LoginCircleButton
                 social={"apple"}
