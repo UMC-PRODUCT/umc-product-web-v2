@@ -775,24 +775,36 @@ export function ProjectDetailCard({
             )}
           </div>
           {!viewOnly && ctaMode === "apply-blocked-other" && (
-            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
-              이번 차수에 이미 다른 프로젝트에 지원하여 지원할 수 없습니다.
-            </p>
+            <div className="mt-2 flex w-full items-center justify-center gap-1">
+              <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
+              <p className="text-caption-2-regular text-teal-gray-500 text-center">
+                이번 차수에 이미 다른 프로젝트에 지원하여 지원할 수 없습니다.
+              </p>
+            </div>
           )}
           {!viewOnly && ctaMode === "apply-blocked-approved" && (
-            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
-              이미 합격한 챌린저는 추가로 지원할 수 없습니다.
-            </p>
+            <div className="mt-2 flex w-full items-center justify-center gap-1">
+              <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
+              <p className="text-caption-2-regular text-teal-gray-500 text-center">
+                이미 합격한 챌린저는 추가로 지원할 수 없습니다.
+              </p>
+            </div>
           )}
           {!viewOnly && ctaMode === "apply-blocked-part" && (
-            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
-              지원 가능한 파트가 아니어서 지원할 수 없습니다.
-            </p>
+            <div className="mt-2 flex w-full items-center justify-center gap-1">
+              <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
+              <p className="text-caption-2-regular text-teal-gray-500 text-center">
+                지원 가능한 파트가 아니어서 지원할 수 없습니다.
+              </p>
+            </div>
           )}
           {!viewOnly && ctaMode === "apply-blocked-closed" && (
-            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
-              모집이 마감된 파트라 지원할 수 없습니다.
-            </p>
+            <div className="mt-2 flex w-full items-center justify-center gap-1">
+              <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
+              <p className="text-caption-2-regular text-teal-gray-500 text-center">
+                모집이 마감된 파트라 지원할 수 없습니다.
+              </p>
+            </div>
           )}
           {!viewOnly && ctaMode === "no-active-round" && (
             <div className="mt-2 flex w-full items-center justify-center gap-1">
