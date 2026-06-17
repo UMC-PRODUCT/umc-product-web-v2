@@ -86,11 +86,7 @@ function ProjectDetailCardSkeleton() {
               <div className="bg-teal-gray-150 h-6 w-full max-w-52 animate-pulse rounded-md" />
               <div className="bg-teal-gray-150 h-4 w-32 animate-pulse rounded-md" />
             </div>
-            <div className="flex w-full flex-col gap-1.5">
-              <div className="bg-teal-gray-150 h-4 w-full animate-pulse rounded-md" />
-              <div className="bg-teal-gray-150 h-4 w-4/5 animate-pulse rounded-md" />
-              <div className="bg-teal-gray-150 h-4 w-2/3 animate-pulse rounded-md" />
-            </div>
+            <div className="bg-teal-gray-150 h-4 w-full animate-pulse rounded-md" />
           </div>
           <div className="flex w-full flex-col items-start gap-1.5">
             {[0, 1, 2].map((i) => (
