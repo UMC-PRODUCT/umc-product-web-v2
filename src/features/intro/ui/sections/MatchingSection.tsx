@@ -4,7 +4,7 @@ import {
   useMotionValueEvent,
   useScroll,
 } from "motion/react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { GLOW_ELLIPSE_SRC, MATCHING_LABEL } from "../../constants"
 import { GlowImage } from "../components/GlowImage"
@@ -17,6 +17,7 @@ const TOTAL_PAGE_COUNT = MATCHING_PAGE_COUNT + MANUAL_PAGE_COUNT
 const PAGE_SCROLL_HEIGHT = 900
 const SECTION_HEIGHT = PAGE_SCROLL_HEIGHT * TOTAL_PAGE_COUNT
 const PAGE_SCROLL_DURATION = 500
+const PAGE_SCROLL_GUARD_TAIL = 400
 
 function smoothScrollTo(targetY: number, duration: number, onDone: () => void) {
   const startY = window.scrollY
@@ -55,6 +56,7 @@ export function MatchingSection() {
   const directionRef = useRef(1)
   const isProgrammaticRef = useRef(false)
   const cancelScrollRef = useRef<(() => void) | null>(null)
+  const clearGuardTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
@@ -70,6 +72,12 @@ export function MatchingSection() {
     setPage(nextPage)
   })
 
+  useEffect(() => {
+    return () => {
+      if (clearGuardTimerRef.current) clearTimeout(clearGuardTimerRef.current)
+    }
+  }, [])
+
   function moveToPage(index: number) {
     const section = ref.current
     if (!section) {
@@ -84,12 +92,15 @@ export function MatchingSection() {
 
     setPage(index)
     cancelScrollRef.current?.()
+    if (clearGuardTimerRef.current) clearTimeout(clearGuardTimerRef.current)
     isProgrammaticRef.current = true
     cancelScrollRef.current = smoothScrollTo(
       targetY,
       PAGE_SCROLL_DURATION,
       () => {
-        isProgrammaticRef.current = false
+        clearGuardTimerRef.current = setTimeout(() => {
+          isProgrammaticRef.current = false
+        }, PAGE_SCROLL_GUARD_TAIL)
       },
     )
   }
