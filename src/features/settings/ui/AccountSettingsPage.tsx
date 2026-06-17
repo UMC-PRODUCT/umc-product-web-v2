@@ -55,8 +55,14 @@ export function AccountSettingsPage() {
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { handleGoogleLink, handleAppleLink, handleKakaoLink, handleUnlink } =
-    useOAuthLinking()
+  const {
+    handleGoogleLink,
+    handleAppleLink,
+    handleKakaoLink,
+    handleUnlink,
+    isUnlinkBlockedOpen,
+    setIsUnlinkBlockedOpen,
+  } = useOAuthLinking()
 
   const linkedMap = new Map(
     oauths.map((o) => [PROVIDER_TO_SOCIAL[o.provider], o.memberOAuthId]),
@@ -375,6 +381,22 @@ export function AccountSettingsPage() {
           void handleUnlink(unlinkTarget.id, unlinkTarget.social)
           setUnlinkTarget(null)
         }}
+      />
+
+      <CtaModal
+        open={isUnlinkBlockedOpen}
+        variant="error"
+        title="계정을 해제할 수 없습니다"
+        content={
+          <>
+            가입한 서비스의 계정은 연동 해제할 수 없습니다.
+            <br />
+            다른 계정을 추가 연동한 후 다시 시도해주세요.
+          </>
+        }
+        confirmText="확인"
+        onOpenChange={setIsUnlinkBlockedOpen}
+        onConfirm={() => setIsUnlinkBlockedOpen(false)}
       />
 
       <CtaModal
