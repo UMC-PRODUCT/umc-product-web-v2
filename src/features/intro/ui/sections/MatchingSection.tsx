@@ -14,17 +14,54 @@ import { MANUAL_PAGE_COUNT, ManualGuideFrame } from "./ManualGuide"
 
 const MATCHING_PAGE_COUNT = 2
 const TOTAL_PAGE_COUNT = MATCHING_PAGE_COUNT + MANUAL_PAGE_COUNT
-const SECTION_HEIGHT = 900 * TOTAL_PAGE_COUNT
+const PAGE_SCROLL_HEIGHT = 900
+const SECTION_HEIGHT = PAGE_SCROLL_HEIGHT * TOTAL_PAGE_COUNT
+const PAGE_SCROLL_DURATION = 500
+
+function smoothScrollTo(targetY: number, duration: number, onDone: () => void) {
+  const startY = window.scrollY
+  const distance = targetY - startY
+  if (Math.abs(distance) < 1) {
+    onDone()
+    return () => {}
+  }
+
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
+  let startTime: number | null = null
+  let rafId = 0
+  let cancelled = false
+
+  const step = (now: number) => {
+    if (cancelled) return
+    if (startTime === null) startTime = now
+    const progress = Math.min(1, (now - startTime) / duration)
+    window.scrollTo(window.scrollX, startY + distance * easeOutCubic(progress))
+    if (progress < 1) {
+      rafId = requestAnimationFrame(step)
+    } else {
+      onDone()
+    }
+  }
+
+  rafId = requestAnimationFrame(step)
+  return () => {
+    cancelled = true
+    cancelAnimationFrame(rafId)
+  }
+}
 
 export function MatchingSection() {
   const ref = useRef<HTMLElement>(null)
   const directionRef = useRef(1)
+  const isProgrammaticRef = useRef(false)
+  const cancelScrollRef = useRef<(() => void) | null>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
   })
   const [page, setPage] = useState(0)
   useMotionValueEvent(scrollYProgress, "change", (value) => {
+    if (isProgrammaticRef.current) return
     const nextPage = Math.min(
       TOTAL_PAGE_COUNT - 1,
       Math.floor(value * TOTAL_PAGE_COUNT),
@@ -45,8 +82,16 @@ export function MatchingSection() {
     const targetY =
       sectionTop + (scrollableHeight * index) / (TOTAL_PAGE_COUNT - 1)
 
-    window.scrollTo({ top: targetY, behavior: "smooth" })
     setPage(index)
+    cancelScrollRef.current?.()
+    isProgrammaticRef.current = true
+    cancelScrollRef.current = smoothScrollTo(
+      targetY,
+      PAGE_SCROLL_DURATION,
+      () => {
+        isProgrammaticRef.current = false
+      },
+    )
   }
 
   function handleManualPrev() {
