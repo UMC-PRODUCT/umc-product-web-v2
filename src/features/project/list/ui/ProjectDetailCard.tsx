@@ -736,6 +736,24 @@ export function ProjectDetailCard({
                     </Button>
                   </>
                 )}
+                {ctaMode === "no-active-round" && (
+                  <Button
+                    variant="weak"
+                    color="primary"
+                    className="min-w-32 flex-1 whitespace-nowrap"
+                    isLoading={isDetailLoading}
+                    disabled={!isDetailLoading && !detail?.applicationFormId}
+                    onClick={() => {
+                      trackEvent("project_questions_click", {
+                        project_id: projectId,
+                        cta_mode: ctaMode,
+                      })
+                      setIsRecruitQuestionsModalOpen(true)
+                    }}
+                  >
+                    모집 문항 보기
+                  </Button>
+                )}
                 {ctaMode === "other-branch" && (
                   <Button
                     variant="weak"
