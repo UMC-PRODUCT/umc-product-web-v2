@@ -138,6 +138,9 @@ export const BasicInfoForm = forwardRef<
   const setProjectId = useProjectRegisterStore((s) => s.setProjectId)
   const setBasicInfo = useProjectRegisterStore((s) => s.setBasicInfo)
   const basicDraftFields = useProjectRegisterStore((s) => s.basicDraftFields)
+  const setBasicDraftFields = useProjectRegisterStore(
+    (s) => s.setBasicDraftFields,
+  )
   const addToast = useToastStore((s) => s.addToast)
   const queryClient = useQueryClient()
 
@@ -409,17 +412,21 @@ export const BasicInfoForm = forwardRef<
       }
 
       let thumbnailFileId = uploaded.thumbnailFileId
+      let thumbnailUrl = uploaded.thumbnailUrl
       if (values.thumbnail instanceof File && !thumbnailFileId) {
         const res = await uploadFileFlow(values.thumbnail, "PROJECT_THUMBNAIL")
         thumbnailFileId = res.fileId ?? null
-        setUploaded({ thumbnailFileId })
+        thumbnailUrl = res.downloadUrl ?? null
+        setUploaded({ thumbnailFileId, thumbnailUrl })
       }
 
       let logoFileId = uploaded.logoFileId
+      let logoUrl = uploaded.logoUrl
       if (values.logo instanceof File && !logoFileId) {
         const res = await uploadFileFlow(values.logo, "PROJECT_LOGO")
         logoFileId = res.fileId ?? null
-        setUploaded({ logoFileId })
+        logoUrl = res.downloadUrl ?? null
+        setUploaded({ logoFileId, logoUrl })
       }
 
       await updateProjectDraft(resolvedProjectId, {
@@ -443,6 +450,11 @@ export const BasicInfoForm = forwardRef<
       }
 
       setPmInfo({ isMultiPm, pm1: pm1Member, pm2: pm2Member })
+      setBasicDraftFields({
+        title: values.title,
+        description: values.description,
+        externalLink: values.externalLink,
+      })
       invalidateProjectSummaryQueries(queryClient, resolvedProjectId)
       reset(values, { keepValues: true, keepDirty: false })
       setSavedSnapshot({ pm1: pm1Member, pm2: pm2Member, isMultiPm })
