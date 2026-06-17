@@ -1,5 +1,4 @@
 import { motion } from "motion/react"
-import { useEffect } from "react"
 
 import { LANDING_BACKGROUND, LANDING_BACKGROUND_HEIGHT } from "../constants"
 import { LandingHeader } from "./components/LandingHeader"
@@ -16,59 +15,6 @@ import { ProductTeamMembersSection } from "./sections/ProductTeamMembersSection"
 import { SolutionSection } from "./sections/SolutionSection"
 
 export function IntroPage() {
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return
-    }
-
-    let timer: ReturnType<typeof setTimeout> | undefined
-    let snapping = false
-    const defaultSnapRange = Math.min(window.innerHeight * 0.35, 320)
-    const strongSnapRange = Math.min(window.innerHeight * 0.58, 520)
-
-    const getSnapPoints = () =>
-      Array.from(document.querySelectorAll<HTMLElement>("[data-snap-point]"))
-        .map((el) => ({
-          top: el.getBoundingClientRect().top + window.scrollY,
-          range:
-            el.dataset.snapStrength === "strong"
-              ? strongSnapRange
-              : defaultSnapRange,
-        }))
-        .sort((a, b) => a.top - b.top)
-
-    const handleScroll = () => {
-      if (snapping) return
-      clearTimeout(timer)
-      timer = setTimeout(() => {
-        const points = getSnapPoints()
-        if (points.length === 0) return
-        const y = window.scrollY
-        let nearest = points[0]
-        if (nearest === undefined) return
-        for (const point of points) {
-          if (Math.abs(point.top - y) < Math.abs(nearest.top - y)) {
-            nearest = point
-          }
-        }
-        if (Math.abs(nearest.top - y) > nearest.range) return
-        if (Math.abs(nearest.top - y) > 2) {
-          snapping = true
-          window.scrollTo({ top: nearest.top, behavior: "smooth" })
-          setTimeout(() => {
-            snapping = false
-          }, 600)
-        }
-      }, 80)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-      clearTimeout(timer)
-    }
-  }, [])
-
   return (
     <main className="flex w-full justify-center bg-black">
       <LandingHeader />

@@ -212,11 +212,7 @@ function LeadRow() {
 
 export function ProductTeamMembersSection() {
   return (
-    <section
-      data-snap-point
-      data-snap-strength="strong"
-      className="relative h-202.5 w-360"
-    >
+    <section className="relative h-202.5 w-360">
       <div className="absolute -top-62.5 -left-63.75 h-225 w-225 rotate-[-17deg] rounded-full border border-white/25 opacity-40" />
       <div className="absolute -top-54.5 -left-30 h-160 w-90 rotate-15 rounded-full border border-white/20 opacity-40" />
       <ParticleLayer />
