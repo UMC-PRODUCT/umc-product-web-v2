@@ -17,45 +17,54 @@ const ROUTES = [
 const BLOCKED_HOSTS = ["googletagmanager.com", "google-analytics.com"]
 
 async function run() {
-  const server = await preview({ preview: { port: PORT, strictPort: true } })
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  })
+  let server
+  let browser
 
   try {
+    server = await preview({ preview: { port: PORT, strictPort: true } })
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    })
+
     for (const route of ROUTES) {
       const page = await browser.newPage()
 
-      await page.setRequestInterception(true)
-      page.on("request", (req) => {
-        const url = req.url()
-        if (BLOCKED_HOSTS.some((host) => url.includes(host))) req.abort()
-        else req.continue()
-      })
+      try {
+        await page.setRequestInterception(true)
+        page.on("request", (req) => {
+          const url = req.url()
+          if (BLOCKED_HOSTS.some((host) => url.includes(host))) req.abort()
+          else req.continue()
+        })
 
-      const target = `http://localhost:${PORT}${route.path}`
-      await page
-        .goto(target, { waitUntil: "networkidle2", timeout: 20000 })
-        .catch(() => {})
+        const target = `http://localhost:${PORT}${route.path}`
+        try {
+          await page.goto(target, { waitUntil: "networkidle2", timeout: 20000 })
+        } catch (err) {
+          if (err.name !== "TimeoutError") throw err
+          console.warn(`networkidle 대기 타임아웃, 계속 진행: ${target}`)
+        }
 
-      await page.waitForFunction(
-        (match) => document.title.includes(match),
-        { timeout: 15000 },
-        route.titleMatch,
-      )
+        await page.waitForFunction(
+          (match) => document.title.includes(match),
+          { timeout: 15000 },
+          route.titleMatch,
+        )
 
-      const html = await page.content()
-      const outPath = join(DIST, route.path.replace(/^\//, ""), "index.html")
-      mkdirSync(dirname(outPath), { recursive: true })
-      writeFileSync(outPath, html, "utf-8")
+        const html = await page.content()
+        const outPath = join(DIST, route.path.replace(/^\//, ""), "index.html")
+        mkdirSync(dirname(outPath), { recursive: true })
+        writeFileSync(outPath, html, "utf-8")
 
-      console.log(`prerendered ${route.path} -> ${outPath}`)
-      await page.close()
+        console.log(`prerendered ${route.path} -> ${outPath}`)
+      } finally {
+        await page.close()
+      }
     }
   } finally {
-    await browser.close()
-    await server.close()
+    if (browser) await browser.close()
+    if (server) await server.close()
   }
 }
 
