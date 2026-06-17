@@ -1,9 +1,9 @@
 import heroMockup from "@/features/intro/assets/01/asset.webp"
 import painpointArrow from "@/features/intro/assets/02/arrow.svg"
-import painpointMockup from "@/features/intro/assets/02/mockup.png"
+import painpointMockup from "@/features/intro/assets/02/mockup.png?quality=85&format=webp"
 import solutionLineEnd from "@/features/intro/assets/03/line-end.svg"
 import solutionLine from "@/features/intro/assets/03/line.svg"
-import solutionMockup from "@/features/intro/assets/03/mockup.png"
+import solutionMockup from "@/features/intro/assets/03/mockup.png?quality=85&format=webp"
 import glowCircle from "@/features/intro/assets/glow/circle.svg"
 import glowEllipse from "@/features/intro/assets/glow/ellipse.svg"
 

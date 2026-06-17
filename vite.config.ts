@@ -3,6 +3,7 @@ import { TanStackRouterVite } from "@tanstack/router-plugin/vite"
 import react from "@vitejs/plugin-react"
 import path from "node:path"
 import { defineConfig } from "vite"
+import { imagetools } from "vite-imagetools"
 import svgr from "vite-plugin-svgr"
 
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     react(),
+    imagetools({ removeMetadata: true }),
     svgr(),
     tailwindcss(),
   ],

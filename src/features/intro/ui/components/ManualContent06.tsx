@@ -1,5 +1,5 @@
 import MOCKUP_SRC from "@/features/intro/assets/06/mockup06-06-01.webp"
-import STATUS_PANEL_SRC from "@/features/intro/assets/06/mockup06-06-02.svg"
+import STATUS_PANEL_SRC from "@/features/intro/assets/06/mockup06-06-02.webp"
 
 const STEPS = [
   {
@@ -37,6 +37,7 @@ export function ManualContent06() {
           alt=""
           width={700}
           height={470}
+          loading="lazy"
           className="w-[650px] flex-none rounded-[10.78px]"
         />
         <div className="flex w-[408.75px] flex-col items-start gap-[39px]">
@@ -69,6 +70,7 @@ export function ManualContent06() {
             alt=""
             width={171}
             height={172}
+            loading="lazy"
             className="ml-[35px]"
           />
         </div>

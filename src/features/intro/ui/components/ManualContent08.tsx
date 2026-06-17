@@ -1,5 +1,5 @@
 import MOCKUP_SRC from "@/features/intro/assets/06/mockup06-08-01.webp"
-import RESULT_SHEET_SRC from "@/features/intro/assets/06/mockup06-08-02.svg"
+import RESULT_SHEET_SRC from "@/features/intro/assets/06/mockup06-08-02.webp"
 
 const STEPS = [
   {
@@ -34,6 +34,7 @@ export function ManualContent08() {
           alt=""
           width={700}
           height={476}
+          loading="lazy"
           className="w-[650px] flex-none rounded-[10.78px]"
         />
         <div className="flex w-[408.75px] flex-col items-start gap-[39px]">
@@ -61,7 +62,13 @@ export function ManualContent08() {
               </div>
             ))}
           </div>
-          <img src={RESULT_SHEET_SRC} alt="" width={405} height={284} />
+          <img
+            src={RESULT_SHEET_SRC}
+            alt=""
+            width={405}
+            height={284}
+            loading="lazy"
+          />
         </div>
       </div>
     </div>

@@ -47,6 +47,7 @@ export function SolutionSection() {
             alt=""
             width={1273}
             height={379}
+            loading="lazy"
             className="h-[379px] w-[1273px] max-w-none"
           />
           <SolutionTimeline />
