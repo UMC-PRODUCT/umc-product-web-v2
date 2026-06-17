@@ -520,7 +520,11 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
             isDraft={isDraft}
             readOnly={isApplicationReadOnly}
             isHydrated={isEditMode ? applicationFormHydrated : true}
-            isSubmitting={submitMutation.isPending || isCreatePermissionLoading}
+            isSubmitting={
+              submitMutation.isPending ||
+              isCreatePermissionLoading ||
+              (isEditMode && draftQuery.isLoading)
+            }
             canCreateProject={canCreateProject}
             createPermissionLoading={isCreatePermissionLoading}
             onPrev={handleApplicationFormPrev}
