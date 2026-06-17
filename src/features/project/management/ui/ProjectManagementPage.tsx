@@ -168,7 +168,7 @@ export function ProjectManagementPage() {
   const draftQuery = useQuery({
     queryKey: projectKeys.draft(gisuId ?? 0),
     queryFn: () => getMyDraft(gisuId!),
-    enabled: hasAccess && !!gisuId,
+    enabled: hasAccess && !!gisuId && !useGroupedView,
   })
 
   const projects: MatchingProject[] = useMemo(
