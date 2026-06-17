@@ -83,4 +83,10 @@ export default tseslint.config(
       },
     },
   },
+  {
+    files: ["src/shared/analytics/ga.ts"],
+    rules: {
+      "prefer-rest-params": "off",
+    },
+  },
 )
