@@ -1,5 +1,4 @@
 export const SITE_URL = "https://university.neordinary.com"
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`
 
 export interface MetaOptions {
   canonical?: string
