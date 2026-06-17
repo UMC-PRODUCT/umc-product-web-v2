@@ -84,9 +84,6 @@ export function ProjectManagementMoreMenu({
     staleTime: 5 * 60 * 1000,
   })
 
-  const isPlanViewDisabled =
-    !projectDetailQuery.isSuccess || !projectDetailQuery.data.externalLink
-
   const applicantsQuery = useQuery({
     queryKey: applicationKeys.applicants(numericProjectId),
     queryFn: () => getProjectApplications(numericProjectId),
@@ -291,11 +288,15 @@ export function ProjectManagementMoreMenu({
     })
   }
 
-  const handlePlanViewClick = () => {
+  const handleEditMatchingPeriodClick = () => {
     setPopoverOpen(false)
-    const externalLink = projectDetailQuery.data?.externalLink
-    if (!externalLink) return
-    window.open(externalLink, "_blank", "noopener,noreferrer")
+    addToast({
+      message: "매칭 기간 중에는 프로젝트를 수정할 수 없습니다.",
+      color: "red",
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
   }
 
   const handleTeamViewClick = () => {
@@ -308,22 +309,52 @@ export function ProjectManagementMoreMenu({
     label: string
     onClick: () => void
     disabled?: boolean
-  }[] = [
-    { label: "지원 현황 확인하기", onClick: handleApplicationClick },
-    {
-      label: "기획 보기",
-      onClick: handlePlanViewClick,
-      disabled: isPlanViewDisabled,
-    },
-    { label: "팀원 구성 보기", onClick: handleTeamViewClick },
-  ]
+    className?: string
+  }[] = []
 
-  if (!isMatchingPeriod && (isPermissionLoading || canEditProject)) {
-    menuItems.splice(2, 0, {
-      label: "프로젝트 수정하기",
-      onClick: handleEditClick,
-      disabled: isPermissionLoading,
+  if (status === "PENDING_REVIEW") {
+    if (isPermissionLoading || canEditProject) {
+      menuItems.push({
+        label: "프로젝트 수정하기",
+        onClick: handleEditClick,
+        disabled: isPermissionLoading,
+      })
+    }
+  } else if (status === "IN_PROGRESS") {
+    if (isMatchingPeriod) {
+      menuItems.push({
+        label: "지원 현황 확인하기",
+        onClick: handleApplicationClick,
+      })
+      menuItems.push({ label: "팀원 구성 보기", onClick: handleTeamViewClick })
+      menuItems.push({
+        label: "프로젝트 수정하기",
+        onClick: handleEditMatchingPeriodClick,
+        className:
+          "text-teal-gray-300 cursor-not-allowed hover:bg-white hover:shadow-none",
+      })
+    } else {
+      if (isPermissionLoading || canEditProject) {
+        menuItems.push({
+          label: "프로젝트 수정하기",
+          onClick: handleEditClick,
+          disabled: isPermissionLoading,
+        })
+      }
+    }
+  } else {
+    menuItems.push({
+      label: "지원 현황 확인하기",
+      onClick: handleApplicationClick,
     })
+    menuItems.push({ label: "팀원 구성 보기", onClick: handleTeamViewClick })
+    if (!isMatchingPeriod && (isPermissionLoading || canEditProject)) {
+      menuItems.push({
+        label: "프로젝트 수정하기",
+        onClick: handleEditClick,
+        disabled: isPermissionLoading,
+      })
+    }
   }
 
   return (
@@ -353,12 +384,13 @@ export function ProjectManagementMoreMenu({
             </span>
 
             <div className="flex w-full flex-col">
-              {menuItems.map(({ label, onClick, disabled }) => (
+              {menuItems.map(({ label, onClick, disabled, className }) => (
                 <DropdownItem
                   key={label}
                   label={label}
                   disabled={disabled}
                   onClick={onClick}
+                  className={className}
                 />
               ))}
               {status === "DRAFT" &&
