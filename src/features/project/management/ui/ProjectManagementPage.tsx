@@ -11,6 +11,7 @@ import {
   isSchoolStaff,
 } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
+import { getMyDraft } from "@/features/project/new/api"
 import { gisuKeys, projectKeys } from "@/features/project/new/api/queryKeys"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
 import { getActiveGisu } from "@/shared/api/gisu"
@@ -164,12 +165,29 @@ export function ProjectManagementPage() {
     enabled: useGroupedView && !!gisuId,
   })
 
+  const draftQuery = useQuery({
+    queryKey: projectKeys.draft(gisuId ?? 0),
+    queryFn: () => getMyDraft(gisuId!),
+    enabled: hasAccess && !!gisuId,
+  })
+
   const projects: MatchingProject[] = useMemo(
     () =>
       (managedQuery.data ?? []).map((project) =>
         toMatchingProject(project, managedQuery.dataUpdatedAt),
       ),
     [managedQuery.data, managedQuery.dataUpdatedAt],
+  )
+
+  const draftProject: MatchingProject | null = useMemo(() => {
+    const draft = draftQuery.data
+    if (!draft || draft.status !== "DRAFT") return null
+    return toMatchingProject(draft, draftQuery.dataUpdatedAt)
+  }, [draftQuery.data, draftQuery.dataUpdatedAt])
+
+  const projectsWithDraft: MatchingProject[] = useMemo(
+    () => (draftProject ? [draftProject, ...projects] : projects),
+    [draftProject, projects],
   )
 
   const selectedChapterInfo = useMemo(() => {
@@ -219,12 +237,12 @@ export function ProjectManagementPage() {
 
   const permissionProjectIds = useMemo(() => {
     const ids = new Set<number>()
-    for (const project of projects) {
+    for (const project of projectsWithDraft) {
       const id = toValidProjectId(project)
       if (id !== null) ids.add(id)
     }
     return Array.from(ids)
-  }, [projects])
+  }, [projectsWithDraft])
 
   const projectPermissionQueries = useMemo<ResourcePermissionQuery[]>(
     () => [
@@ -327,9 +345,9 @@ export function ProjectManagementPage() {
                   </div>
                 </div>
               ))
-            ) : !useGroupedView && projects.length > 0 ? (
+            ) : !useGroupedView && projectsWithDraft.length > 0 ? (
               <div className="bp2:grid-cols-1 grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2">
-                {projects.map((project) => {
+                {projectsWithDraft.map((project) => {
                   const permissions = getProjectActionPermissions(project)
                   return (
                     <ProjectManagementCard
@@ -348,9 +366,9 @@ export function ProjectManagementPage() {
                 subMessage="챌린저들이 프로젝트를 등록한 후 확인할 수 있습니다."
               />
             )
-          ) : projects.length > 0 ? (
+          ) : projectsWithDraft.length > 0 ? (
             <div className="bp2:grid-cols-1 grid min-w-0 grid-cols-1 gap-3 min-[700px]:grid-cols-2">
-              {projects.map((project) => {
+              {projectsWithDraft.map((project) => {
                 const permissions = getProjectActionPermissions(project)
                 return (
                   <ProjectManagementCard
