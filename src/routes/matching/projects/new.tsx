@@ -377,10 +377,7 @@ function ProjectRegisterPage() {
           ? Number(activeGisu.gisuId)
           : undefined
         if (resolvedGisuId) {
-          const draft = await queryClient.ensureQueryData({
-            queryKey: projectKeys.draft(resolvedGisuId),
-            queryFn: () => getMyDraft(resolvedGisuId),
-          })
+          const draft = await getMyDraft(resolvedGisuId)
           const isEditingDraft =
             draft?.status === "DRAFT" &&
             Number(draft.id) === Number(editProjectId)
@@ -562,7 +559,8 @@ function ProjectRegisterPage() {
       queryClient.removeQueries({
         queryKey: projectKeys.applicationForm(editProjectId),
       })
-    } else if (gisuId) {
+    }
+    if (gisuId) {
       queryClient.removeQueries({
         queryKey: projectKeys.draft(Number(gisuId)),
       })
