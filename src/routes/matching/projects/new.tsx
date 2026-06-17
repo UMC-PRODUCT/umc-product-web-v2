@@ -378,9 +378,24 @@ function ProjectRegisterPage() {
           : undefined
         if (resolvedGisuId) {
           const draft = await getMyDraft(resolvedGisuId)
-          const isEditingDraft =
+          const isOwnDraft =
             draft?.status === "DRAFT" &&
             Number(draft.id) === Number(editProjectId)
+
+          let isEditingDraft = isOwnDraft
+
+          if (!isEditingDraft) {
+            try {
+              const managed = await getManagedProjects(resolvedGisuId)
+              const currentProject = managed.find(
+                (p) => Number(p.id) === Number(editProjectId),
+              )
+              isEditingDraft = currentProject?.status === "DRAFT"
+            } catch {
+              // ignore
+            }
+          }
+
           if (isEditingDraft) {
             await submitProject(projectId)
             void queryClient.invalidateQueries({

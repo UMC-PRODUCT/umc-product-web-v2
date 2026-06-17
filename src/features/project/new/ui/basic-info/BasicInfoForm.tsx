@@ -453,7 +453,7 @@ export const BasicInfoForm = forwardRef<
       setBasicDraftFields({
         title: values.title,
         description: values.description,
-        externalLink: values.externalLink,
+        externalLink: values.externalLink ?? "",
       })
       invalidateProjectSummaryQueries(queryClient, resolvedProjectId)
       reset(values, { keepValues: true, keepDirty: false })
