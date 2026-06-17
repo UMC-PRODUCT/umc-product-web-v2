@@ -8,7 +8,10 @@ import { GlowImage } from "./GlowImage"
 import type { ReactNode } from "react"
 
 const QUESTION_GRADIENT =
-  "linear-gradient(97.1deg, #ffffff 1.28%, #dcf2f2 100%)"
+  "linear-gradient(97.1deg, rgba(255,255,255,0.88) 1.28%, rgba(220,242,242,0.88) 100%)"
+
+const QUESTION_BORDER_GRADIENT =
+  "linear-gradient(135deg, rgba(159,220,212,0.12) 0%, rgba(14,129,121,0.12) 100%)"
 
 export interface FaqItemData {
   label: string
@@ -27,8 +30,10 @@ function FaqItem({ label, question, answer }: FaqItemData) {
   return (
     <div className="flex w-[867px] flex-col">
       <div
-        className="flex w-[867px] items-start gap-[19.5px] rounded-[20px] border-[2.25px] border-[#9fdcd4] py-[22.5px] pl-[27px] tracking-[-0.72px]"
-        style={{ backgroundImage: QUESTION_GRADIENT }}
+        className="flex w-[867px] items-start gap-[19.5px] rounded-[20px] border-[2.25px] border-transparent py-[22.5px] pl-[27px] tracking-[-0.72px]"
+        style={{
+          background: `${QUESTION_GRADIENT} padding-box, ${QUESTION_BORDER_GRADIENT} border-box`,
+        }}
       >
         <span className="w-[33.75px] shrink-0 text-[24px] leading-[1.6] text-[#2e302f]">
           {label}
@@ -42,7 +47,7 @@ function FaqItem({ label, question, answer }: FaqItemData) {
           <span className="absolute top-0 left-1/2 h-full w-[1.5px] -translate-x-1/2 bg-[#0D514B]" />
           <span className="absolute bottom-0 left-1/2 size-[8px] -translate-x-1/2 translate-y-1/2 rounded-full bg-[#0D514B]" />
         </div>
-        <div className="flex w-[867px] items-center rounded-[20px] border-[1.125px] border-[rgba(255,255,255,0.4)] bg-[rgba(54,211,192,0.12)] py-[19.5px] pl-[80.25px] shadow-[4.5px_7.875px_7.875px_0px_rgba(0,0,0,0.02)]">
+        <div className="flex w-[867px] items-center rounded-[15px] border-[0.25px] border-[rgba(255,255,255,0.025)] bg-[rgba(54,211,192,0.08)] py-[19.5px] pl-[80.25px] shadow-[4.5px_7.875px_7.875px_0px_rgba(0,0,0,0.02)]">
           <div className="text-[16.5px] leading-[1.7] tracking-[-0.495px] whitespace-nowrap text-[#fbfcfc]">
             {answer}
           </div>

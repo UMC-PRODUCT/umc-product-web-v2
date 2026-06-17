@@ -303,6 +303,7 @@
   }
   html {
     @apply font-sans;
+    overscroll-behavior: none;
   }
   button:not(:disabled) {
     cursor: pointer;

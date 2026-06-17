@@ -1,24 +1,7 @@
+import { loadGoogleGsi } from "./loadAuthSdk"
+
 export interface GoogleSignInResult {
   accessToken: string
-}
-
-function waitForGsi(timeoutMs = 5000): Promise<void> {
-  if (window.google?.accounts?.oauth2) return Promise.resolve()
-  return new Promise((resolve, reject) => {
-    let elapsed = 0
-    const interval = setInterval(() => {
-      if (window.google?.accounts?.oauth2) {
-        clearInterval(interval)
-        resolve()
-        return
-      }
-      elapsed += 50
-      if (elapsed >= timeoutMs) {
-        clearInterval(interval)
-        reject(new Error("Google SDK 로드 시간이 초과되었습니다."))
-      }
-    }, 50)
-  })
 }
 
 export function signInWithGoogle(): Promise<GoogleSignInResult> {
@@ -29,7 +12,7 @@ export function signInWithGoogle(): Promise<GoogleSignInResult> {
       return
     }
 
-    waitForGsi()
+    loadGoogleGsi()
       .then(() => {
         const client = window.google!.accounts.oauth2.initTokenClient({
           client_id: clientId,

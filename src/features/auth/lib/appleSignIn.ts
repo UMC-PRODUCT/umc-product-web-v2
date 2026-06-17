@@ -1,3 +1,5 @@
+import { loadAppleSdk } from "./loadAuthSdk"
+
 export interface AppleSignInResult {
   authorizationCode: string
 }
@@ -20,6 +22,9 @@ export async function signInWithApple(): Promise<AppleSignInResult> {
   if (!clientId || !redirectURI) {
     throw new Error("Apple Sign In 환경변수가 설정되지 않았습니다.")
   }
+
+  await loadAppleSdk()
+
   if (!window.AppleID?.auth) {
     throw new Error("Apple Sign In SDK가 로드되지 않았습니다.")
   }

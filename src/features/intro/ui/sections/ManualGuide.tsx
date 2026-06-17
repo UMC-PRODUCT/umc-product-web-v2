@@ -173,7 +173,7 @@ export function ManualGuideFrame({
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             {page === 0 && <ManualContent01 />}
             {page === 1 && <ManualContent02 />}

@@ -23,6 +23,7 @@ export function FloatingMockups({
         alt=""
         width={HERO_MOCKUP_WIDTH}
         height={HERO_MOCKUP_HEIGHT}
+        fetchPriority="high"
         draggable={false}
         className="absolute bottom-[102px] left-[465px] h-[723px] w-[975px] select-none"
         initial={{ opacity: 0, y: 28, scale: 0.98 }}

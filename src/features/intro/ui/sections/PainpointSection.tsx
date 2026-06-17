@@ -38,7 +38,8 @@ export function PainpointSection() {
             alt=""
             width={1000}
             height={460}
-            className="h-[460px] w-[1000px]"
+            loading="lazy"
+            className="h-[460px] w-[1000px] max-w-none"
             initial={{ opacity: 0, y: 28, scale: 0.985 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, amount: 0.45 }}

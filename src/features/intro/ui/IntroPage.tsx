@@ -1,5 +1,4 @@
 import { motion } from "motion/react"
-import { useEffect } from "react"
 
 import { LANDING_BACKGROUND, LANDING_BACKGROUND_HEIGHT } from "../constants"
 import { LandingHeader } from "./components/LandingHeader"
@@ -15,62 +14,22 @@ import { ProductTeamIntroSection } from "./sections/ProductTeamIntroSection"
 import { ProductTeamMembersSection } from "./sections/ProductTeamMembersSection"
 import { SolutionSection } from "./sections/SolutionSection"
 
+const LANDING_BACKGROUND_FADE_LEFT = 40
+const LANDING_BACKGROUND_FADE_RIGHT = 120
+const LANDING_BACKGROUND_MASK = `linear-gradient(to right, transparent, #000 ${LANDING_BACKGROUND_FADE_LEFT}px, #000 calc(100% - ${LANDING_BACKGROUND_FADE_RIGHT}px), transparent)`
+
+const LIGHT_OVERLAY_FADE = 120
+const LIGHT_OVERLAY_MASK = `linear-gradient(to right, transparent, #000 ${LIGHT_OVERLAY_FADE}px, #000 calc(100% - ${LIGHT_OVERLAY_FADE}px), transparent)`
+
 export function IntroPage() {
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return
-    }
-
-    let timer: ReturnType<typeof setTimeout> | undefined
-    let snapping = false
-    const defaultSnapRange = Math.min(window.innerHeight * 0.35, 320)
-    const strongSnapRange = Math.min(window.innerHeight * 0.58, 520)
-
-    const getSnapPoints = () =>
-      Array.from(document.querySelectorAll<HTMLElement>("[data-snap-point]"))
-        .map((el) => ({
-          top: el.getBoundingClientRect().top + window.scrollY,
-          range:
-            el.dataset.snapStrength === "strong"
-              ? strongSnapRange
-              : defaultSnapRange,
-        }))
-        .sort((a, b) => a.top - b.top)
-
-    const handleScroll = () => {
-      if (snapping) return
-      clearTimeout(timer)
-      timer = setTimeout(() => {
-        const points = getSnapPoints()
-        if (points.length === 0) return
-        const y = window.scrollY
-        let nearest = points[0]
-        if (nearest === undefined) return
-        for (const point of points) {
-          if (Math.abs(point.top - y) < Math.abs(nearest.top - y)) {
-            nearest = point
-          }
-        }
-        if (Math.abs(nearest.top - y) > nearest.range) return
-        if (Math.abs(nearest.top - y) > 2) {
-          snapping = true
-          window.scrollTo({ top: nearest.top, behavior: "smooth" })
-          setTimeout(() => {
-            snapping = false
-          }, 600)
-        }
-      }, 80)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-      clearTimeout(timer)
-    }
-  }, [])
-
   return (
-    <main className="flex w-full justify-center bg-black">
+    <main
+      className="flex w-full justify-center"
+      style={{
+        background: `linear-gradient(to bottom, #000 ${LANDING_BACKGROUND_HEIGHT}px, #def4ef ${LANDING_BACKGROUND_HEIGHT}px)`,
+        overflowX: "clip",
+      }}
+    >
       <LandingHeader />
       <div className="relative w-[1440px]">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -79,6 +38,8 @@ export function IntroPage() {
             style={{
               height: LANDING_BACKGROUND_HEIGHT,
               backgroundImage: LANDING_BACKGROUND,
+              maskImage: LANDING_BACKGROUND_MASK,
+              WebkitMaskImage: LANDING_BACKGROUND_MASK,
             }}
             aria-hidden="true"
           />
@@ -104,59 +65,88 @@ export function IntroPage() {
           <MatchingSection />
           <PlanChallengerFaqSection />
           <MakerChallengerFaqSection />
-          <div
-            className="relative w-[1440px] overflow-hidden bg-[#def4ef]"
-            style={{
-              backgroundImage: [
-                "linear-gradient(135.17deg, rgba(46,209,190,0.16) 8.35%, rgba(46,209,190,0) 48.63%)",
-                "linear-gradient(-35.68deg, rgba(152,235,235,0.2) 12.21%, rgba(10,252,252,0) 35.65%)",
-              ].join(", "),
-              backgroundSize: "100% 2430px",
-              backgroundPosition: "0 0",
-              backgroundRepeat: "no-repeat",
-            }}
-          >
-            <motion.div
-              className="pointer-events-none absolute top-[428px] left-[880px] size-[764px] rounded-full bg-[#5fd7cf]/30 blur-[150px]"
-              animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
-              transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="pointer-events-none absolute top-[1117px] left-[720px] size-[764px] rounded-full bg-[#5fd7cf]/30 blur-[150px]"
-              animate={{ x: [0, -16, 0], y: [0, 18, 0] }}
-              transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="pointer-events-none absolute top-[2048px] left-[880px] size-[764px] rounded-full bg-[#5fd7cf]/30 blur-[150px]"
-              animate={{ x: [0, 14, 0], y: [0, 16, 0] }}
-              transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="pointer-events-none absolute top-[1322px] left-[-79px] size-[676px]"
-              animate={{ x: [0, 12, 0], y: [0, -10, 0] }}
-              transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          <div className="relative w-[1440px] overflow-hidden bg-[#def4ef]">
+            <div
+              className="pointer-events-none absolute inset-0"
               style={{
-                backgroundImage:
-                  "radial-gradient(circle, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0) 50%)",
+                backgroundImage: [
+                  "linear-gradient(135.17deg, rgba(46,209,190,0.16) 8.35%, rgba(46,209,190,0) 48.63%)",
+                  "linear-gradient(-35.68deg, rgba(152,235,235,0.2) 12.21%, rgba(10,252,252,0) 35.65%)",
+                ].join(", "),
+                backgroundSize: "100% 2430px",
+                backgroundPosition: "0 0",
+                backgroundRepeat: "no-repeat",
+                maskImage: LIGHT_OVERLAY_MASK,
+                WebkitMaskImage: LIGHT_OVERLAY_MASK,
               }}
-            />
-            <motion.div
-              className="pointer-events-none absolute top-0 right-0"
-              animate={{ x: [0, -10, 0], opacity: [0.85, 1, 0.85] }}
-              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+              aria-hidden="true"
             >
-              <LightStripTexture />
-            </motion.div>
-            <motion.div
-              className="pointer-events-none absolute top-0 left-[101px]"
-              animate={{ x: [0, 10, 0], opacity: [0.75, 1, 0.75] }}
-              transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="flex">
+              <motion.div
+                className="pointer-events-none absolute top-[428px] left-[880px] size-[764px] rounded-full bg-[#5fd7cf]/30 blur-[150px]"
+                animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
+                transition={{
+                  duration: 14,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              <motion.div
+                className="pointer-events-none absolute top-[1117px] left-[720px] size-[764px] rounded-full bg-[#5fd7cf]/30 blur-[150px]"
+                animate={{ x: [0, -16, 0], y: [0, 18, 0] }}
+                transition={{
+                  duration: 16,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              <motion.div
+                className="pointer-events-none absolute top-[2048px] left-[880px] size-[764px] rounded-full bg-[#5fd7cf]/30 blur-[150px]"
+                animate={{ x: [0, 14, 0], y: [0, 16, 0] }}
+                transition={{
+                  duration: 18,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              <motion.div
+                className="pointer-events-none absolute top-[1322px] left-[-79px] size-[676px]"
+                animate={{ x: [0, 12, 0], y: [0, -10, 0] }}
+                transition={{
+                  duration: 15,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0) 50%)",
+                }}
+              />
+              <motion.div
+                className="pointer-events-none absolute top-0 right-0"
+                animate={{ x: [0, -10, 0], opacity: [0.85, 1, 0.85] }}
+                transition={{
+                  duration: 12,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
                 <LightStripTexture />
-                <LightStripTexture className="ml-[736px]" />
-              </div>
-            </motion.div>
+              </motion.div>
+              <motion.div
+                className="pointer-events-none absolute top-0 left-[101px]"
+                animate={{ x: [0, 10, 0], opacity: [0.75, 1, 0.75] }}
+                transition={{
+                  duration: 13,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <div className="flex">
+                  <LightStripTexture />
+                  <LightStripTexture className="ml-[736px]" />
+                </div>
+              </motion.div>
+            </div>
             <ProductTeamIntroSection />
             <ProductTeamAboutSection />
             <ProductTeamMembersSection />

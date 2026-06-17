@@ -40,9 +40,5 @@ export function getDisabledNavMessage(item: HeaderNavItem) {
 export function isHeaderNavItemActive(pathname: string, item: HeaderNavItem) {
   const basePath = item.activeBasePath ?? item.to
 
-  if (basePath === "/intro") {
-    return pathname === "/intro"
-  }
-
   return pathname === basePath || pathname.startsWith(basePath + "/")
 }
