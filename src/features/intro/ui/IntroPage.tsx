@@ -14,9 +14,19 @@ import { ProductTeamIntroSection } from "./sections/ProductTeamIntroSection"
 import { ProductTeamMembersSection } from "./sections/ProductTeamMembersSection"
 import { SolutionSection } from "./sections/SolutionSection"
 
+const LANDING_BACKGROUND_FADE_LEFT = 40
+const LANDING_BACKGROUND_FADE_RIGHT = 120
+const LANDING_BACKGROUND_MASK = `linear-gradient(to right, transparent, #000 ${LANDING_BACKGROUND_FADE_LEFT}px, #000 calc(100% - ${LANDING_BACKGROUND_FADE_RIGHT}px), transparent)`
+
 export function IntroPage() {
   return (
-    <main className="flex w-full justify-center bg-black">
+    <main
+      className="flex w-full justify-center"
+      style={{
+        background: `linear-gradient(to bottom, #000 ${LANDING_BACKGROUND_HEIGHT}px, #def4ef ${LANDING_BACKGROUND_HEIGHT}px)`,
+        overflowX: "clip",
+      }}
+    >
       <LandingHeader />
       <div className="relative w-[1440px]">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -25,6 +35,8 @@ export function IntroPage() {
             style={{
               height: LANDING_BACKGROUND_HEIGHT,
               backgroundImage: LANDING_BACKGROUND,
+              maskImage: LANDING_BACKGROUND_MASK,
+              WebkitMaskImage: LANDING_BACKGROUND_MASK,
             }}
             aria-hidden="true"
           />

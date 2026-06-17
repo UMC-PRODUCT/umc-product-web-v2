@@ -4,7 +4,6 @@ import painpointMockup from "@/features/intro/assets/02/mockup.png?quality=85&fo
 import solutionLineEnd from "@/features/intro/assets/03/line-end.svg"
 import solutionLine from "@/features/intro/assets/03/line.svg"
 import solutionMockup from "@/features/intro/assets/03/mockup.png?quality=85&format=webp"
-import glowCircle from "@/features/intro/assets/glow/circle.svg"
 import glowEllipse from "@/features/intro/assets/glow/ellipse.svg"
 
 export const LANDING_BACKGROUND = [
@@ -15,7 +14,6 @@ export const LANDING_BACKGROUND = [
 
 export const LANDING_BACKGROUND_HEIGHT = 15756
 
-export const GLOW_CIRCLE_SRC = glowCircle
 export const GLOW_ELLIPSE_SRC = glowEllipse
 
 export const HERO_TITLE = "팀 매칭 시스템 사용 가이드"
