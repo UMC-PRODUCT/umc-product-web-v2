@@ -22,6 +22,7 @@ import {
   VerificationStep,
 } from "@/features/signup"
 import { type SignUpFormData, signUpSchema } from "@/features/signup/validation"
+import { createMeta, SITE_URL } from "@/shared/seo"
 import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -191,6 +192,12 @@ function signUpReducer(state: SignUpState, action: SignUpAction): SignUpState {
 }
 
 export const Route = createFileRoute("/signup/")({
+  head: () =>
+    createMeta(
+      "회원가입 | UMC 데모데이 팀 매칭 시스템",
+      "UMC 데모데이 팀 매칭 시스템 회원가입. 이메일 인증으로 간편하게 계정을 만드세요.",
+      { canonical: `${SITE_URL}/signup` },
+    ),
   component: SignUpPage,
 })
 

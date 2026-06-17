@@ -186,6 +186,9 @@ function signUpReducer(state: SignUpState, action: SignUpAction): SignUpState {
 }
 
 export const Route = createFileRoute("/signup/oauth")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   beforeLoad: () => {
     const token = sessionStorage.getItem(OAUTH_VERIFICATION_TOKEN_KEY)
     if (!token) {

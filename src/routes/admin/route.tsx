@@ -12,6 +12,9 @@ import { isOperator } from "@/features/auth/model/identity"
 import { cn } from "@/shared/lib/utils"
 
 export const Route = createFileRoute("/admin")({
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
     if (!isOperator(me)) throw redirect({ to: "/" })
