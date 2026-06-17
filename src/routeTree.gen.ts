@@ -63,6 +63,7 @@ import { Route as AdminChallengerRecordsRouteImport } from './routes/admin/chall
 import { Route as AdminChallengerPointsRouteImport } from './routes/admin/challenger/points'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
 import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matching/projects/announce/index'
+import { Route as MatchingProjectsEditProjectIdRouteImport } from './routes/matching/projects/edit.$projectId'
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
@@ -342,6 +343,12 @@ const MatchingProjectsAnnounceIndexRoute =
     path: '/',
     getParentRoute: () => MatchingProjectsAnnounceRouteRoute,
   } as any)
+const MatchingProjectsEditProjectIdRoute =
+  MatchingProjectsEditProjectIdRouteImport.update({
+    id: '/projects/edit/$projectId',
+    path: '/projects/edit/$projectId',
+    getParentRoute: () => MatchingRouteRoute,
+  } as any)
 const MatchingProjectsAnnounceNoticePublishRoute =
   MatchingProjectsAnnounceNoticePublishRouteImport.update({
     id: '/notice-publish',
@@ -410,6 +417,7 @@ export interface FileRoutesByFullPath {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
+  '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -464,6 +472,7 @@ export interface FileRoutesByTo {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
+  '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -523,6 +532,7 @@ export interface FileRoutesById {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
+  '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
+    | '/matching/projects/edit/$projectId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesByTo: FileRoutesByTo
@@ -637,6 +648,7 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/matching/projects'
     | '/matching/projects/announce/notice-publish'
+    | '/matching/projects/edit/$projectId'
     | '/matching/projects/announce'
     | '/matching/projects/announce/notice-publish/$noticeId'
   id:
@@ -695,6 +707,7 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
+    | '/matching/projects/edit/$projectId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesById: FileRoutesById
@@ -1121,6 +1134,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsAnnounceIndexRouteImport
       parentRoute: typeof MatchingProjectsAnnounceRouteRoute
     }
+    '/matching/projects/edit/$projectId': {
+      id: '/matching/projects/edit/$projectId'
+      path: '/projects/edit/$projectId'
+      fullPath: '/matching/projects/edit/$projectId'
+      preLoaderRoute: typeof MatchingProjectsEditProjectIdRouteImport
+      parentRoute: typeof MatchingRouteRoute
+    }
     '/matching/projects/announce/notice-publish': {
       id: '/matching/projects/announce/notice-publish'
       path: '/notice-publish'
@@ -1209,6 +1229,7 @@ interface MatchingRouteRouteChildren {
   MatchingProjectsManagementRoute: typeof MatchingProjectsManagementRoute
   MatchingProjectsNewRoute: typeof MatchingProjectsNewRoute
   MatchingProjectsIndexRoute: typeof MatchingProjectsIndexRoute
+  MatchingProjectsEditProjectIdRoute: typeof MatchingProjectsEditProjectIdRoute
 }
 
 const MatchingRouteRouteChildren: MatchingRouteRouteChildren = {
@@ -1222,6 +1243,7 @@ const MatchingRouteRouteChildren: MatchingRouteRouteChildren = {
   MatchingProjectsManagementRoute: MatchingProjectsManagementRoute,
   MatchingProjectsNewRoute: MatchingProjectsNewRoute,
   MatchingProjectsIndexRoute: MatchingProjectsIndexRoute,
+  MatchingProjectsEditProjectIdRoute: MatchingProjectsEditProjectIdRoute,
 }
 
 const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(

@@ -53,9 +53,9 @@ export function trackPageView({
   referrer,
 }: PageViewParams) {
   trackEvent("page_view", {
-    page_path: pagePath,
+    page_path: sanitizePath(pagePath),
     page_title: pageTitle,
-    previous_path: previousPath,
+    previous_path: previousPath ? sanitizePath(previousPath) : undefined,
     referrer,
     ...getDeviceAnalyticsParams(),
   })
