@@ -569,8 +569,8 @@ export function ProjectDetailCard({
                     )
                       return
                     navigate({
-                      to: "/matching/projects/new",
-                      search: { projectId },
+                      to: "/matching/projects/edit/$projectId",
+                      params: { projectId: Number(projectId) },
                     })
                   }}
                 >

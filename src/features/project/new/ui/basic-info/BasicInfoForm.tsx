@@ -87,6 +87,7 @@ export interface BasicInfoFormHandle {
 interface BasicInfoFormProps {
   canCreateProject?: boolean
   createPermissionLoading?: boolean
+  isEditMode?: boolean
   onNext: () => void
 }
 
@@ -94,7 +95,12 @@ export const BasicInfoForm = forwardRef<
   BasicInfoFormHandle,
   BasicInfoFormProps
 >(function BasicInfoForm(
-  { canCreateProject = true, createPermissionLoading = false, onNext },
+  {
+    canCreateProject = true,
+    createPermissionLoading = false,
+    isEditMode = false,
+    onNext,
+  },
   ref,
 ) {
   const { me: meData } = useViewerIdentity()
@@ -386,6 +392,17 @@ export const BasicInfoForm = forwardRef<
       return false
     }
     const values = getValues()
+    if (isEditMode && !projectId) {
+      addToast({
+        message:
+          "프로젝트 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
+    }
     if (!projectId && !pm1Member) {
       addToast({
         message: "PM을 선택한 뒤 임시 저장해 주세요.",

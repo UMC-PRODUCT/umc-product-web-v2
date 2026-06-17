@@ -282,9 +282,16 @@ export function ProjectManagementMoreMenu({
   const handleEditClick = () => {
     if (!canEditProject || isPermissionLoading) return
     setPopoverOpen(false)
+    if (status === "DRAFT") {
+      navigate({
+        to: "/matching/projects/new",
+        search: { projectId: undefined },
+      })
+      return
+    }
     navigate({
-      to: "/matching/projects/new",
-      search: { projectId: Number(projectId) },
+      to: "/matching/projects/edit/$projectId",
+      params: { projectId: Number(projectId) },
     })
   }
 
