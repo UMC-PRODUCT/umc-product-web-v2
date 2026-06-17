@@ -84,9 +84,6 @@ export function ProjectManagementMoreMenu({
     staleTime: 5 * 60 * 1000,
   })
 
-  const isPlanViewDisabled =
-    !projectDetailQuery.isSuccess || !projectDetailQuery.data.externalLink
-
   const applicantsQuery = useQuery({
     queryKey: applicationKeys.applicants(numericProjectId),
     queryFn: () => getProjectApplications(numericProjectId),
@@ -291,13 +288,6 @@ export function ProjectManagementMoreMenu({
     })
   }
 
-  const handlePlanViewClick = () => {
-    setPopoverOpen(false)
-    const externalLink = projectDetailQuery.data?.externalLink
-    if (!externalLink) return
-    window.open(externalLink, "_blank", "noopener,noreferrer")
-  }
-
   const handleTeamViewClick = () => {
     shouldPreventFocusRestoreRef.current = true
     setPopoverOpen(false)
@@ -308,22 +298,42 @@ export function ProjectManagementMoreMenu({
     label: string
     onClick: () => void
     disabled?: boolean
-  }[] = [
-    { label: "지원 현황 확인하기", onClick: handleApplicationClick },
-    {
-      label: "기획 보기",
-      onClick: handlePlanViewClick,
-      disabled: isPlanViewDisabled,
-    },
-    { label: "팀원 구성 보기", onClick: handleTeamViewClick },
-  ]
+  }[] = []
 
-  if (!isMatchingPeriod && (isPermissionLoading || canEditProject)) {
-    menuItems.splice(2, 0, {
-      label: "프로젝트 수정하기",
-      onClick: handleEditClick,
-      disabled: isPermissionLoading,
+  if (status === "PENDING_REVIEW") {
+    if (isPermissionLoading || canEditProject) {
+      menuItems.push({
+        label: "프로젝트 수정하기",
+        onClick: handleEditClick,
+        disabled: isPermissionLoading,
+      })
+    }
+  } else if (status === "IN_PROGRESS") {
+    menuItems.push({
+      label: "지원 현황 확인하기",
+      onClick: handleApplicationClick,
     })
+    menuItems.push({ label: "팀원 구성 보기", onClick: handleTeamViewClick })
+    if (isPermissionLoading || canEditProject) {
+      menuItems.push({
+        label: "프로젝트 수정하기",
+        onClick: handleEditClick,
+        disabled: isMatchingPeriod || isPermissionLoading,
+      })
+    }
+  } else {
+    menuItems.push({
+      label: "지원 현황 확인하기",
+      onClick: handleApplicationClick,
+    })
+    menuItems.push({ label: "팀원 구성 보기", onClick: handleTeamViewClick })
+    if (isPermissionLoading || canEditProject) {
+      menuItems.push({
+        label: "프로젝트 수정하기",
+        onClick: handleEditClick,
+        disabled: isPermissionLoading,
+      })
+    }
   }
 
   return (

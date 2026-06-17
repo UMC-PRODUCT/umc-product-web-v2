@@ -6,6 +6,7 @@ import {
   isCurrentTermPm,
   isOperator,
 } from "@/features/auth/model/identity"
+import { useAuthStore } from "@/features/auth/store/authStore"
 import { type Chapter, CHAPTERS } from "@/features/notice"
 
 function isChapter(value: unknown): value is Chapter {
@@ -16,6 +17,10 @@ function isChapter(value: unknown): value is Chapter {
 
 export const Route = createFileRoute("/")({
   beforeLoad: async ({ context }) => {
+    if (!useAuthStore.getState().isAuthed) {
+      throw redirect({ to: "/intro" })
+    }
+
     const me = await ensureMe(context.queryClient)
 
     if (isOperator(me)) {

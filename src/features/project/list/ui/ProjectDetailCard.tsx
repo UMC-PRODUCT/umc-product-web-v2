@@ -86,11 +86,7 @@ function ProjectDetailCardSkeleton() {
               <div className="bg-teal-gray-150 h-6 w-full max-w-52 animate-pulse rounded-md" />
               <div className="bg-teal-gray-150 h-4 w-32 animate-pulse rounded-md" />
             </div>
-            <div className="flex w-full flex-col gap-1.5">
-              <div className="bg-teal-gray-150 h-4 w-full animate-pulse rounded-md" />
-              <div className="bg-teal-gray-150 h-4 w-4/5 animate-pulse rounded-md" />
-              <div className="bg-teal-gray-150 h-4 w-2/3 animate-pulse rounded-md" />
-            </div>
+            <div className="bg-teal-gray-150 h-4 w-full animate-pulse rounded-md" />
           </div>
           <div className="flex w-full flex-col items-start gap-1.5">
             {[0, 1, 2].map((i) => (
@@ -736,6 +732,24 @@ export function ProjectDetailCard({
                     </Button>
                   </>
                 )}
+                {ctaMode === "no-active-round" && (
+                  <Button
+                    variant="weak"
+                    color="primary"
+                    className="min-w-32 flex-1 whitespace-nowrap"
+                    isLoading={isDetailLoading}
+                    disabled={!isDetailLoading && !detail?.applicationFormId}
+                    onClick={() => {
+                      trackEvent("project_questions_click", {
+                        project_id: projectId,
+                        cta_mode: ctaMode,
+                      })
+                      setIsRecruitQuestionsModalOpen(true)
+                    }}
+                  >
+                    모집 문항 보기
+                  </Button>
+                )}
                 {ctaMode === "other-branch" && (
                   <Button
                     variant="weak"
@@ -757,24 +771,36 @@ export function ProjectDetailCard({
             )}
           </div>
           {!viewOnly && ctaMode === "apply-blocked-other" && (
-            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
-              이번 차수에 이미 다른 프로젝트에 지원하여 지원할 수 없습니다.
-            </p>
+            <div className="mt-2 flex w-full items-center justify-center gap-1">
+              <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
+              <p className="text-caption-2-regular text-teal-gray-500 text-center">
+                이번 차수에 이미 다른 프로젝트에 지원하여 지원할 수 없습니다.
+              </p>
+            </div>
           )}
           {!viewOnly && ctaMode === "apply-blocked-approved" && (
-            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
-              이미 합격한 챌린저는 추가로 지원할 수 없습니다.
-            </p>
+            <div className="mt-2 flex w-full items-center justify-center gap-1">
+              <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
+              <p className="text-caption-2-regular text-teal-gray-500 text-center">
+                이미 합격한 챌린저는 추가로 지원할 수 없습니다.
+              </p>
+            </div>
           )}
           {!viewOnly && ctaMode === "apply-blocked-part" && (
-            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
-              지원 가능한 파트가 아니어서 지원할 수 없습니다.
-            </p>
+            <div className="mt-2 flex w-full items-center justify-center gap-1">
+              <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
+              <p className="text-caption-2-regular text-teal-gray-500 text-center">
+                지원 가능한 파트가 아니어서 지원할 수 없습니다.
+              </p>
+            </div>
           )}
           {!viewOnly && ctaMode === "apply-blocked-closed" && (
-            <p className="text-caption-2-regular text-error-600 mt-2 w-full text-center">
-              모집이 마감된 파트라 지원할 수 없습니다.
-            </p>
+            <div className="mt-2 flex w-full items-center justify-center gap-1">
+              <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
+              <p className="text-caption-2-regular text-teal-gray-500 text-center">
+                모집이 마감된 파트라 지원할 수 없습니다.
+              </p>
+            </div>
           )}
           {!viewOnly && ctaMode === "no-active-round" && (
             <div className="mt-2 flex w-full items-center justify-center gap-1">

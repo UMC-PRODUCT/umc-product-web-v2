@@ -13,9 +13,6 @@ export const HEADER_NAV_ITEMS: HeaderNavItem[] = [
   {
     label: "소개",
     to: "/intro",
-    disabled: true,
-    disabledMessage:
-      "소개 페이지는 준비 중입니다. 더 나은 UMC 웹사이트로 찾아뵙겠습니다!",
   },
   {
     label: "데모데이 매칭",
