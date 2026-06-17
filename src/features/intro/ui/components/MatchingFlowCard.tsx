@@ -1,7 +1,7 @@
-import flowStep1 from "@/features/intro/assets/04/icons/step1.png"
+import flowStep1 from "@/features/intro/assets/04/icons/step1.png?w=240&format=webp"
 import flowStep2 from "@/features/intro/assets/04/icons/step2.png"
-import flowStep3 from "@/features/intro/assets/04/icons/step3.png"
-import flowStep4 from "@/features/intro/assets/04/icons/step4.png"
+import flowStep3 from "@/features/intro/assets/04/icons/step3.png?w=240&format=webp"
+import flowStep4 from "@/features/intro/assets/04/icons/step4.png?w=240&format=webp"
 import flowArrow from "@/features/intro/assets/04/vector.svg"
 
 type FlowStep = {
@@ -112,6 +112,7 @@ export function MatchingFlowCard() {
                 alt=""
                 width={step.iconWidth}
                 height={step.iconHeight}
+                loading="lazy"
                 className="max-w-none"
                 style={{ width: step.iconWidth, height: step.iconHeight }}
               />

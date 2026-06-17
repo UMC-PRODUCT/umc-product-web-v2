@@ -1,5 +1,4 @@
 import { motion } from "motion/react"
-import { Fragment } from "react"
 
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 
@@ -155,6 +154,19 @@ function MemberText({ member }: { member: Member }) {
 function RoleRow({ role, members }: RoleRow) {
   const roleColumnWidth = role === "SpringBoot" ? "w-[100px]" : "w-[76px]"
 
+  const lines: Member[][] = []
+  let current: Member[] = []
+  for (const member of members) {
+    current.push(member)
+    if (member.breakAfter) {
+      lines.push(current)
+      current = []
+    }
+  }
+  if (current.length > 0) {
+    lines.push(current)
+  }
+
   return (
     <div className="flex items-start gap-3.5 text-[16.5px] leading-[1.4] font-medium tracking-[-0.33px] text-[#062b29]">
       <div
@@ -163,12 +175,19 @@ function RoleRow({ role, members }: RoleRow) {
         <span>{role}</span>
         <span className="font-light">|</span>
       </div>
-      <div className="flex flex-wrap gap-x-3.5 gap-y-3">
-        {members.map((member) => (
-          <Fragment key={`${member.nickname}-${member.name}`}>
-            <MemberText member={member} />
-            {member.breakAfter && <span className="basis-full" />}
-          </Fragment>
+      <div className="flex flex-col gap-3">
+        {lines.map((line) => (
+          <div
+            key={line.map((member) => member.nickname).join("-")}
+            className="flex flex-wrap gap-x-3.5 gap-y-3"
+          >
+            {line.map((member) => (
+              <MemberText
+                key={`${member.nickname}-${member.name}`}
+                member={member}
+              />
+            ))}
+          </div>
         ))}
       </div>
     </div>
@@ -212,11 +231,7 @@ function LeadRow() {
 
 export function ProductTeamMembersSection() {
   return (
-    <section
-      data-snap-point
-      data-snap-strength="strong"
-      className="relative h-202.5 w-360"
-    >
+    <section className="relative h-202.5 w-360">
       <div className="absolute -top-62.5 -left-63.75 h-225 w-225 rotate-[-17deg] rounded-full border border-white/25 opacity-40" />
       <div className="absolute -top-54.5 -left-30 h-160 w-90 rotate-15 rounded-full border border-white/20 opacity-40" />
       <ParticleLayer />

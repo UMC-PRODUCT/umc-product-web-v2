@@ -1,4 +1,4 @@
-import MOCKUP_SRC from "@/features/intro/assets/06/mockup06-01.svg"
+import MOCKUP_SRC from "@/features/intro/assets/06/mockup06-01.webp"
 
 const STEPS = [
   {
@@ -46,6 +46,7 @@ export function ManualContent01() {
           alt=""
           width={700}
           height={469}
+          loading="lazy"
           className="w-[650px] flex-none rounded-[10.78px]"
         />
         <div className="flex w-[465px] flex-col items-start gap-[39px]">

@@ -1,5 +1,5 @@
-import MOCKUP_SRC from "@/features/intro/assets/06/mockup06-02-01.svg"
-import TYPE_PICKER_SRC from "@/features/intro/assets/06/mockup06-02-02.svg"
+import MOCKUP_SRC from "@/features/intro/assets/06/mockup06-02-01.webp"
+import TYPE_PICKER_SRC from "@/features/intro/assets/06/mockup06-02-02.webp"
 
 const STEPS = [
   {
@@ -45,6 +45,7 @@ export function ManualContent02() {
           alt=""
           width={700}
           height={469}
+          loading="lazy"
           className="w-[650px] flex-none rounded-[10.78px]"
         />
         <div className="flex w-[408.75px] flex-col items-start gap-[39px]">
@@ -74,6 +75,7 @@ export function ManualContent02() {
                       alt=""
                       width={338}
                       height={81}
+                      loading="lazy"
                       className="mt-[6px]"
                     />
                   )}

@@ -1,3 +1,4 @@
+import { loadKakaoSdk } from "./loadAuthSdk"
 import { rememberLoginReturnTo } from "./loginRedirect"
 
 const KAKAO_REDIRECT_PATH = "/oauth/kakao/callback"
@@ -36,12 +37,15 @@ export function consumeKakaoLinkIntent(): boolean {
   return intent === "link"
 }
 
-export function startKakaoSignIn(returnTo?: string): void {
+export async function startKakaoSignIn(returnTo?: string): Promise<void> {
   const appKey = import.meta.env.VITE_KAKAO_APP_KEY as string | undefined
 
   if (!appKey) {
     throw new Error("VITE_KAKAO_APP_KEY가 설정되지 않았습니다.")
   }
+
+  await loadKakaoSdk()
+
   if (!window.Kakao) {
     throw new Error("Kakao SDK가 로드되지 않았습니다.")
   }

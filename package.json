@@ -1,7 +1,7 @@
 {
   "name": "umc-product-web-v2",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,7 +15,8 @@
     "test:run": "vitest run",
     "prepare": "husky",
     "generate:api-types": "openapi-typescript ./openapi.yaml -o ./src/types/api.d.ts",
-    "svgr": "npx @svgr/cli -d src/shared/assets --ignore-existing --typescript --no-dimensions --no-index public"
+    "svgr": "npx @svgr/cli -d src/shared/assets --ignore-existing --typescript --no-dimensions --no-index public",
+    "rasterize": "node scripts/rasterize-svg.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -66,10 +67,12 @@
     "openapi-typescript": "^7.10.1",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.12",
+    "sharp": "^0.35.1",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.33.1",
     "vite": "^7.1.7",
+    "vite-imagetools": "^10.0.1",
     "vite-plugin-svgr": "^4.5.0",
     "vitest": "^3.0.5"
   },

@@ -29,6 +29,7 @@ import type { ProjectStatus } from "@/features/project/list/api/matchingProject"
 import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 
 const FE_PART_LABELS = new Set(["Web", "iOS", "Android"])
+const UNCLASSIFIED_PART_LABEL = "미분류"
 const MANAGED_PROJECTS_PAGE_SIZE = 200
 
 const PART_LABEL: Record<string, string> = {
@@ -202,13 +203,17 @@ export function ProjectManagementPage() {
   const partGroups = useMemo(() => {
     if (!useGroupedView) return new Map<string, MatchingProject[]>()
     const map = new Map<string, MatchingProject[]>()
+    const classified = new Set<string>()
     for (const project of filteredProjects) {
       for (const row of project.recruitRows) {
         if (!FE_PART_LABELS.has(row.part)) continue
         if (!map.has(row.part)) map.set(row.part, [])
         map.get(row.part)!.push(project)
+        classified.add(project.id)
       }
     }
+    const unclassified = filteredProjects.filter((p) => !classified.has(p.id))
+    if (unclassified.length > 0) map.set(UNCLASSIFIED_PART_LABEL, unclassified)
     return map
   }, [useGroupedView, filteredProjects])
 

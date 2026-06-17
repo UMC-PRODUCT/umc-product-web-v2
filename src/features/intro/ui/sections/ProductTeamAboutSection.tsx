@@ -41,11 +41,7 @@ function ProductTeamArticle({ title, body }: ProductTeamArticle) {
 
 export function ProductTeamAboutSection() {
   return (
-    <section
-      data-snap-point
-      data-snap-strength="strong"
-      className="relative h-202.5 w-360"
-    >
+    <section className="relative h-202.5 w-360">
       <motion.div
         className="absolute top-95.5 left-16.5 flex w-311 flex-col gap-14"
         initial={{ opacity: 0, y: 24 }}

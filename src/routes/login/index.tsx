@@ -86,9 +86,9 @@ function SocialLoginPage() {
     }
   }
 
-  const handleKakaoSignIn = () => {
+  const handleKakaoSignIn = async () => {
     try {
-      startKakaoSignIn(returnTo)
+      await startKakaoSignIn(returnTo)
     } catch (error) {
       console.error("[Kakao Sign-In]", error)
       showToast("Kakao 로그인에 실패했습니다. 다시 시도해주세요.", "red")
@@ -111,7 +111,10 @@ function SocialLoginPage() {
               social={"google"}
               onClick={() => void handleGoogleSignIn()}
             />
-            <LoginButton social={"kakao"} onClick={handleKakaoSignIn} />
+            <LoginButton
+              social={"kakao"}
+              onClick={() => void handleKakaoSignIn()}
+            />
           </div>
 
           <Divider />
