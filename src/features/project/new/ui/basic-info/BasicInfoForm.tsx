@@ -417,7 +417,6 @@ export const BasicInfoForm = forwardRef<
         const res = await uploadFileFlow(values.thumbnail, "PROJECT_THUMBNAIL")
         thumbnailFileId = res.fileId ?? null
         thumbnailUrl = res.downloadUrl ?? null
-        setUploaded({ thumbnailFileId, thumbnailUrl })
       }
 
       let logoFileId = uploaded.logoFileId
@@ -426,7 +425,15 @@ export const BasicInfoForm = forwardRef<
         const res = await uploadFileFlow(values.logo, "PROJECT_LOGO")
         logoFileId = res.fileId ?? null
         logoUrl = res.downloadUrl ?? null
-        setUploaded({ logoFileId, logoUrl })
+      }
+
+      if (
+        thumbnailFileId !== uploaded.thumbnailFileId ||
+        thumbnailUrl !== uploaded.thumbnailUrl ||
+        logoFileId !== uploaded.logoFileId ||
+        logoUrl !== uploaded.logoUrl
+      ) {
+        setUploaded({ thumbnailFileId, thumbnailUrl, logoFileId, logoUrl })
       }
 
       await updateProjectDraft(resolvedProjectId, {
