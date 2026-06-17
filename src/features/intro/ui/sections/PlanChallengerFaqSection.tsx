@@ -13,7 +13,7 @@ const FAQ_ITEMS: FaqItemData[] = [
           <span className="font-bold">
             매칭 진행 중에도 지원 폼 문항을 수정
           </span>
-          <span className="text-[32px] font-light tracking-[-0.96px]">
+          <span className="text-[24px] font-light tracking-[-0.96px]">
             할 수 있나요?
           </span>
         </p>
