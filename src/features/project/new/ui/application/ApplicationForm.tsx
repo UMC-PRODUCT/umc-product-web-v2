@@ -39,6 +39,7 @@ interface ApplicationFormProps {
   onPrev?: () => void
   onNext?: () => void
   isEditMode?: boolean
+  isDraft?: boolean
   readOnly?: boolean
   isHydrated?: boolean
   isSubmitting?: boolean
@@ -54,6 +55,7 @@ export const ApplicationForm = forwardRef<
     onPrev,
     onNext,
     isEditMode = false,
+    isDraft = false,
     readOnly = false,
     isHydrated = true,
     isSubmitting = false,
@@ -387,7 +389,7 @@ export const ApplicationForm = forwardRef<
               disabled={isSubmitting}
               onClick={handleNext}
             >
-              {isEditMode ? "수정 완료" : "등록하기"}
+              {isEditMode && !isDraft ? "수정 완료" : "등록하기"}
             </Button>
           )}
         </div>

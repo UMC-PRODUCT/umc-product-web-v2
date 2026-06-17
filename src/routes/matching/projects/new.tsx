@@ -285,6 +285,20 @@ function ProjectRegisterPage() {
     enabled: isEditMode,
   })
 
+  const managedQuery = useQuery({
+    queryKey: projectKeys.managedMe(gisuId ? Number(gisuId) : undefined),
+    queryFn: () => getManagedProjects(Number(gisuId)!, { size: 200 }),
+    enabled: isEditMode && !!gisuId,
+  })
+
+  const isDraft = useMemo(() => {
+    if (!isEditMode || !editProjectId || !managedQuery.data) return false
+    const project = managedQuery.data.find(
+      (p) => Number(p.id) === Number(editProjectId),
+    )
+    return project?.status === "DRAFT"
+  }, [isEditMode, editProjectId, managedQuery.data])
+
   useEffect(() => {
     if (detailQuery.data) {
       hydrateProjectDetailIntoStore(detailQuery.data)
@@ -377,13 +391,27 @@ function ProjectRegisterPage() {
           ? Number(activeGisu.gisuId)
           : undefined
         if (resolvedGisuId) {
-          const draft = await queryClient.ensureQueryData({
-            queryKey: projectKeys.draft(resolvedGisuId),
-            queryFn: () => getMyDraft(resolvedGisuId),
-          })
-          const isEditingDraft =
+          const draft = await getMyDraft(resolvedGisuId)
+          const isOwnDraft =
             draft?.status === "DRAFT" &&
             Number(draft.id) === Number(editProjectId)
+
+          let isEditingDraft = isOwnDraft
+
+          if (!isEditingDraft) {
+            try {
+              const managed = await getManagedProjects(resolvedGisuId, {
+                size: 200,
+              })
+              const currentProject = managed.find(
+                (p) => Number(p.id) === Number(editProjectId),
+              )
+              isEditingDraft = currentProject?.status === "DRAFT"
+            } catch {
+              // ignore
+            }
+          }
+
           if (isEditingDraft) {
             await submitProject(projectId)
             void queryClient.invalidateQueries({
@@ -562,7 +590,8 @@ function ProjectRegisterPage() {
       queryClient.removeQueries({
         queryKey: projectKeys.applicationForm(editProjectId),
       })
-    } else if (gisuId) {
+    }
+    if (gisuId) {
       queryClient.removeQueries({
         queryKey: projectKeys.draft(Number(gisuId)),
       })
@@ -622,6 +651,7 @@ function ProjectRegisterPage() {
           <ApplicationForm
             ref={applicationFormRef}
             isEditMode={isEditMode}
+            isDraft={isDraft}
             readOnly={isApplicationReadOnly}
             isHydrated={isEditMode ? applicationFormHydrated : true}
             isSubmitting={submitMutation.isPending || isCreatePermissionLoading}
@@ -635,9 +665,9 @@ function ProjectRegisterPage() {
       <CtaModal
         open={showSuccessModal}
         variant="success"
-        title={isEditMode ? "수정 완료" : "등록 완료"}
+        title={isEditMode && !isDraft ? "수정 완료" : "등록 완료"}
         content={
-          isEditMode
+          isEditMode && !isDraft
             ? "프로젝트 수정이 완료되었습니다."
             : "프로젝트 등록이 완료되었습니다."
         }
