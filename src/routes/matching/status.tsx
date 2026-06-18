@@ -73,14 +73,7 @@ function MatchingStatusPage() {
   } = useMatchingStatusData(selectedChapter)
 
   const DEFAULT_PARTS = ["Web", "iOS", "Android"]
-  const hasAnyMatch = matchingParts.some((part) =>
-    part.projects.some((project) =>
-      project.roleRows.some((row) =>
-        row.blocks.some((b) => b.type === "filled" || b.type === "round1"),
-      ),
-    ),
-  )
-  const displayParts = hasAnyMatch
+  const displayParts = matchingParts.length > 0
     ? matchingParts
     : DEFAULT_PARTS.map((name) => ({ partName: name, projects: [] }))
   const displayStats = stats
