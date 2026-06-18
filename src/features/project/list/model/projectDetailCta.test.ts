@@ -186,6 +186,101 @@ describe("resolveProjectDetailCtaMode", () => {
       }),
     ).toBe("my-application")
   })
+
+  it("운영진 복합 계정이 admin view이면 모집 문항 보기 모드", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isOperator: true,
+      }),
+    ).toBe("recruit-questions")
+  })
+
+  it("운영진 복합 계정도 challenger view 기준이면 지원 가능 모드", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isOperator: false,
+        isPm: false,
+        isPartIneligible: selectIsPartIneligible(
+          [
+            { part: "SPRINGBOOT", status: "RECRUITING" },
+            { part: "WEB", status: "COMPLETED" },
+          ],
+          "SPRINGBOOT",
+        ),
+        isPartRecruitClosed: selectIsPartRecruitClosed(
+          [
+            { part: "SPRINGBOOT", status: "RECRUITING" },
+            { part: "WEB", status: "COMPLETED" },
+          ],
+          "SPRINGBOOT",
+        ),
+      }),
+    ).toBe("apply")
+  })
+})
+
+describe("파트 적격/마감 판정", () => {
+  it("내 파트를 모집하지 않으면 부적격", () => {
+    expect(
+      selectIsPartIneligible(
+        [
+          { part: "WEB", status: "RECRUITING" },
+          { part: "DESIGN", status: "RECRUITING" },
+        ],
+        "SPRINGBOOT",
+      ),
+    ).toBe(true)
+  })
+
+  it("내 파트가 모집 중이면 지원 가능", () => {
+    expect(
+      selectIsPartIneligible(
+        [
+          { part: "SPRINGBOOT", status: "RECRUITING" },
+          { part: "WEB", status: "COMPLETED" },
+        ],
+        "SPRINGBOOT",
+      ),
+    ).toBe(false)
+    expect(
+      selectIsPartRecruitClosed(
+        [
+          { part: "SPRINGBOOT", status: "RECRUITING" },
+          { part: "WEB", status: "COMPLETED" },
+        ],
+        "SPRINGBOOT",
+      ),
+    ).toBe(false)
+  })
+
+  it("내 파트가 마감이면 모집 마감", () => {
+    expect(
+      selectIsPartRecruitClosed(
+        [
+          { part: "SPRINGBOOT", status: "COMPLETED" },
+          { part: "DESIGN", status: "RECRUITING" },
+        ],
+        "SPRINGBOOT",
+      ),
+    ).toBe(true)
+  })
+
+  it("내 파트를 알 수 없으면 파트 사유로 차단하지 않는다", () => {
+    expect(
+      selectIsPartIneligible(
+        [{ part: "WEB", status: "RECRUITING" }],
+        undefined,
+      ),
+    ).toBe(false)
+    expect(
+      selectIsPartRecruitClosed(
+        [{ part: "WEB", status: "COMPLETED" }],
+        undefined,
+      ),
+    ).toBe(false)
+  })
 })
 
 describe("파트 적격/마감 판정 (dev 실데이터 기반, Web 계정)", () => {

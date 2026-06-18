@@ -4,6 +4,7 @@ import {
   canAccessProjectSettings,
   canManageProjectRecruitInfo,
   canManageProjects,
+  getCurrentChallengerPart,
   getProjectPmSearchScope,
   isAnyOperator,
   isCentralCore,
@@ -181,6 +182,33 @@ describe("isCurrentTermPm", () => {
         }),
       ),
     ).toBe(false)
+  })
+})
+
+describe("getCurrentChallengerPart", () => {
+  it("currentGisuMemberInfo의 challenger part를 우선한다", () => {
+    const me = makeMe(
+      ["CHAPTER_PRESIDENT"],
+      [
+        { gisuId: "9", part: "WEB" },
+        { gisuId: "10", part: "SPRINGBOOT" },
+      ],
+    )
+
+    expect(getCurrentChallengerPart(me)).toBe("SPRINGBOOT")
+  })
+
+  it("currentGisuMemberInfo가 없으면 최신 기록이 있어도 undefined를 반환한다", () => {
+    const me = makeMe(
+      ["CHALLENGER"],
+      [
+        { gisuId: "9", part: "WEB" },
+        { gisuId: "10", part: "IOS" },
+      ],
+      { currentGisuMemberInfo: null },
+    )
+
+    expect(getCurrentChallengerPart(me)).toBeUndefined()
   })
 })
 
