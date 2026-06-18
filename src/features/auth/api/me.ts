@@ -81,8 +81,13 @@ interface MemberInfoV2Raw {
 }
 
 export async function getMyInfo(
-  bypassCache = false,
+  options?: unknown,
 ): Promise<MemberInfoResponse> {
+  const bypassCache =
+    options && typeof options === "object" && "bypassCache" in options
+      ? (options as { bypassCache?: unknown }).bypassCache === true
+      : false
+
   if (!bypassCache) {
     const cached = useCacheStore.getState().me
     if (cached) {
