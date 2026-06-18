@@ -87,6 +87,17 @@ export function toRoundNumber(phase: MatchingRoundPhaseView): number {
   return PHASE_MAP[phase] ?? 1
 }
 
+function toMemberDisplayName(member: {
+  nickname?: string | null
+  name?: string | null
+}): string {
+  if (member.nickname && member.name) {
+    return `${member.nickname}/${member.name}`
+  }
+
+  return member.nickname ?? member.name ?? ""
+}
+
 // 날짜 문자열 -> { date, time } 변환
 export function toDateTimePair(
   isoString: string | null,
@@ -130,7 +141,7 @@ export function toApplicantDetail(
     id: String(res.applicationId),
     round: toRoundNumber(res.matchingRound.phase),
     role: toFrontRole(res.applicant.part),
-    name: res.applicant.nickname || res.applicant.name,
+    name: toMemberDisplayName(res.applicant),
     university: res.applicant.schoolName,
     status: toFrontStatus(res.status),
     processedAt: toDateTimePair(res.statusChangedAt),
