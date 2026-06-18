@@ -412,7 +412,7 @@ export function ProjectManagementMoreMenu({
               {status === "IN_PROGRESS" &&
                 (isPermissionLoading || canPublishProject) && (
                   <DropdownItem
-                    label="매칭 중단 (복구 불가)"
+                    label="중단 (복구 불가)"
                     disabled={isPermissionLoading}
                     onClick={handleAbortClick}
                     className="text-error-500"
