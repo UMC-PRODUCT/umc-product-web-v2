@@ -101,7 +101,32 @@ export function useMatchingStatusData(chapterName?: string) {
   // 전체 프로젝트 조회 (매칭 결과 시트용)
   const projectsQuery = useQuery({
     queryKey: applicationKeys.matchingParts(gisuId, chapterId),
-    queryFn: () => getAllProjects(gisuId, { chapterId }),
+    queryFn: async () => {
+      const size = 100
+      const firstPage = await getAllProjects(gisuId, {
+        chapterId,
+        page: 0,
+        size,
+        statuses: ["IN_PROGRESS", "COMPLETED"],
+      })
+      const projects = [...firstPage.content]
+      let page = 0
+      let hasNext = firstPage.hasNext
+
+      while (hasNext) {
+        page += 1
+        const nextPage = await getAllProjects(gisuId, {
+          chapterId,
+          page,
+          size,
+          statuses: ["IN_PROGRESS", "COMPLETED"],
+        })
+        projects.push(...nextPage.content)
+        hasNext = nextPage.hasNext
+      }
+
+      return { ...firstPage, content: projects }
+    },
     enabled: gisuId > 0,
   })
 
