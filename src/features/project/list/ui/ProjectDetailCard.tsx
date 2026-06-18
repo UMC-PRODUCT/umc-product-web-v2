@@ -193,7 +193,7 @@ export function ProjectDetailCard({
   const userIsOperator = isOperator(me)
   const userIsPm = isCurrentTermPm(me)
   const isAdminView = viewContext.isAdminView && userIsOperator
-  const isPmView = viewContext.isPmView || (!userIsOperator && userIsPm)
+  const isPmView = viewContext.isPmView
   const isApplicantView =
     viewContext.isChallengerView || (!userIsOperator && !userIsPm)
   const shouldQueryEditPermission =
