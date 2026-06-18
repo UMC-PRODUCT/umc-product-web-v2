@@ -67,7 +67,7 @@ export function ApplicationDetailModal({
     if (project.applicants.length === 0 && !emptyToastShownRef.current) {
       emptyToastShownRef.current = true
       addToast({
-        message: "아직 지원자한 챌린저가 없습니다.",
+        message: "아직 지원한 챌린저가 없습니다.",
         color: "primary",
         variant: "deep",
         type: "default",

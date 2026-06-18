@@ -31,16 +31,32 @@ describe("ga analytics", () => {
     trackEvent("project_card_click", { project_id: 1 })
 
     expect(document.querySelector("#ga4-script")).not.toBeNull()
-    expect(window.dataLayer).toContainEqual([
+    const commands = (window.dataLayer ?? []).map((entry) =>
+      Array.from(entry as ArrayLike<unknown>),
+    )
+    expect(commands).toContainEqual([
       "config",
       "G-TEST1234",
       { send_page_view: false },
     ])
-    expect(window.dataLayer).toContainEqual([
+    expect(commands).toContainEqual([
       "event",
       "project_card_click",
       { project_id: 1 },
     ])
+  })
+
+  it("gtag 명령을 배열이 아닌 arguments 객체로 push 한다", async () => {
+    vi.stubEnv("VITE_GA_MEASUREMENT_ID", "G-TEST1234")
+    const { trackEvent } = await import("./ga")
+
+    trackEvent("project_card_click", { project_id: 1 })
+
+    const firstCommand = window.dataLayer?.[0]
+    expect(Array.isArray(firstCommand)).toBe(false)
+    expect(Object.prototype.toString.call(firstCommand)).toBe(
+      "[object Arguments]",
+    )
   })
 
   it("api path query와 식별자 segment를 정리한다", async () => {
@@ -55,7 +71,10 @@ describe("ga analytics", () => {
       success: true,
     })
 
-    expect(window.dataLayer).toContainEqual([
+    const commands = (window.dataLayer ?? []).map((entry) =>
+      Array.from(entry as ArrayLike<unknown>),
+    )
+    expect(commands).toContainEqual([
       "event",
       "api_request",
       {

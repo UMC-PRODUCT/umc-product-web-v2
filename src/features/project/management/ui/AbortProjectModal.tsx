@@ -52,7 +52,7 @@ export function AbortProjectModal({
             </div>
             <Modal.Description className="text-subtitle-3-semibold text-teal-gray-800">
               중단하면 '{projectName}'의 모집이 종료되고 진행 중인 지원이
-              취소됩니다. 중단 사유를 입력해 주세요.
+              취소되며, 되돌릴 수 없습니다. 중단 사유를 입력해 주세요.
             </Modal.Description>
             <textarea
               value={reason}

@@ -5,7 +5,11 @@ import {
   resolveProjectDetailCtaMode,
   selectCurrentApplicationForProject,
   selectIsAlreadyApproved,
+  selectIsPartIneligible,
+  selectIsPartRecruitClosed,
 } from "./projectDetailCta"
+
+import type { PartQuotaStatus, ProjectPart } from "../api/matchingProject"
 
 const applicable = {
   isPmReadonly: false,
@@ -181,6 +185,206 @@ describe("resolveProjectDetailCtaMode", () => {
         isPartRecruitClosed: true,
       }),
     ).toBe("my-application")
+  })
+
+  it("운영진 복합 계정이 admin view이면 모집 문항 보기 모드", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isOperator: true,
+      }),
+    ).toBe("recruit-questions")
+  })
+
+  it("운영진 복합 계정도 challenger view 기준이면 지원 가능 모드", () => {
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isOperator: false,
+        isPm: false,
+        isPartIneligible: selectIsPartIneligible(
+          [
+            { part: "SPRINGBOOT", status: "RECRUITING" },
+            { part: "WEB", status: "COMPLETED" },
+          ],
+          "SPRINGBOOT",
+        ),
+        isPartRecruitClosed: selectIsPartRecruitClosed(
+          [
+            { part: "SPRINGBOOT", status: "RECRUITING" },
+            { part: "WEB", status: "COMPLETED" },
+          ],
+          "SPRINGBOOT",
+        ),
+      }),
+    ).toBe("apply")
+  })
+})
+
+describe("파트 적격/마감 판정", () => {
+  it("내 파트를 모집하지 않으면 부적격", () => {
+    expect(
+      selectIsPartIneligible(
+        [
+          { part: "WEB", status: "RECRUITING" },
+          { part: "DESIGN", status: "RECRUITING" },
+        ],
+        "SPRINGBOOT",
+      ),
+    ).toBe(true)
+  })
+
+  it("내 파트가 모집 중이면 지원 가능", () => {
+    expect(
+      selectIsPartIneligible(
+        [
+          { part: "SPRINGBOOT", status: "RECRUITING" },
+          { part: "WEB", status: "COMPLETED" },
+        ],
+        "SPRINGBOOT",
+      ),
+    ).toBe(false)
+    expect(
+      selectIsPartRecruitClosed(
+        [
+          { part: "SPRINGBOOT", status: "RECRUITING" },
+          { part: "WEB", status: "COMPLETED" },
+        ],
+        "SPRINGBOOT",
+      ),
+    ).toBe(false)
+  })
+
+  it("내 파트가 마감이면 모집 마감", () => {
+    expect(
+      selectIsPartRecruitClosed(
+        [
+          { part: "SPRINGBOOT", status: "COMPLETED" },
+          { part: "DESIGN", status: "RECRUITING" },
+        ],
+        "SPRINGBOOT",
+      ),
+    ).toBe(true)
+  })
+
+  it("내 파트를 알 수 없으면 파트 사유로 차단하지 않는다", () => {
+    expect(
+      selectIsPartIneligible(
+        [{ part: "WEB", status: "RECRUITING" }],
+        undefined,
+      ),
+    ).toBe(false)
+    expect(
+      selectIsPartRecruitClosed(
+        [{ part: "WEB", status: "COMPLETED" }],
+        undefined,
+      ),
+    ).toBe(false)
+  })
+})
+
+describe("파트 적격/마감 판정 (dev 실데이터 기반, Web 계정)", () => {
+  const projects = {
+    "13-중앙대1": [
+      { part: "WEB", currentCount: "3", quota: "3", status: "COMPLETED" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "3",
+        quota: "3",
+        status: "COMPLETED",
+      },
+      { part: "DESIGN", currentCount: "0", quota: "1", status: "RECRUITING" },
+    ],
+    "14-중앙대2": [
+      { part: "DESIGN", currentCount: "1", quota: "2", status: "RECRUITING" },
+      { part: "WEB", currentCount: "4", quota: "4", status: "COMPLETED" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "4",
+        quota: "4",
+        status: "COMPLETED",
+      },
+    ],
+    "15-한성대1": [
+      { part: "DESIGN", currentCount: "1", quota: "20", status: "RECRUITING" },
+      { part: "WEB", currentCount: "20", quota: "20", status: "COMPLETED" },
+      { part: "NODEJS", currentCount: "20", quota: "20", status: "COMPLETED" },
+    ],
+    "16-중앙대3": [
+      { part: "DESIGN", currentCount: "0", quota: "2", status: "RECRUITING" },
+      { part: "ANDROID", currentCount: "4", quota: "4", status: "COMPLETED" },
+      { part: "NODEJS", currentCount: "4", quota: "4", status: "COMPLETED" },
+    ],
+    "17-중앙대4": [
+      { part: "DESIGN", currentCount: "0", quota: "2", status: "RECRUITING" },
+      { part: "IOS", currentCount: "3", quota: "3", status: "COMPLETED" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "4",
+        quota: "4",
+        status: "COMPLETED",
+      },
+    ],
+    "23-가천대": [
+      { part: "DESIGN", currentCount: "0", quota: "1", status: "RECRUITING" },
+      { part: "WEB", currentCount: "0", quota: "1", status: "RECRUITING" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "0",
+        quota: "1",
+        status: "RECRUITING",
+      },
+    ],
+    "37-가천대": [
+      { part: "IOS", currentCount: "0", quota: "1", status: "RECRUITING" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "0",
+        quota: "2",
+        status: "RECRUITING",
+      },
+    ],
+  } satisfies Record<
+    string,
+    {
+      part: ProjectPart
+      currentCount: string
+      quota: string
+      status: PartQuotaStatus
+    }[]
+  >
+
+  const ctaForWeb = (key: keyof typeof projects) =>
+    resolveProjectDetailCtaMode({
+      ...ctaParams,
+      isPartIneligible: selectIsPartIneligible(projects[key], "WEB"),
+      isPartRecruitClosed: selectIsPartRecruitClosed(projects[key], "WEB"),
+      hasActiveRound: true,
+    })
+
+  it("WEB 정원이 마감(COMPLETED)된 프로젝트는 apply-blocked-closed", () => {
+    expect(ctaForWeb("13-중앙대1")).toBe("apply-blocked-closed")
+    expect(ctaForWeb("14-중앙대2")).toBe("apply-blocked-closed")
+    expect(ctaForWeb("15-한성대1")).toBe("apply-blocked-closed")
+  })
+
+  it("WEB 파트를 아예 모집하지 않는 프로젝트는 apply-blocked-part", () => {
+    expect(ctaForWeb("16-중앙대3")).toBe("apply-blocked-part")
+    expect(ctaForWeb("17-중앙대4")).toBe("apply-blocked-part")
+    expect(ctaForWeb("37-가천대")).toBe("apply-blocked-part")
+  })
+
+  it("WEB 파트를 모집 중(RECRUITING)인 프로젝트는 apply(지원 가능)", () => {
+    expect(ctaForWeb("23-가천대")).toBe("apply")
+  })
+
+  it("내 파트를 알 수 없으면(undefined) 파트 사유로 막지 않는다", () => {
+    expect(selectIsPartIneligible(projects["16-중앙대3"], undefined)).toBe(
+      false,
+    )
+    expect(selectIsPartRecruitClosed(projects["14-중앙대2"], undefined)).toBe(
+      false,
+    )
   })
 })
 

@@ -25,8 +25,8 @@ export function initializeAnalytics() {
   if (!window.dataLayer) window.dataLayer = []
   window.gtag =
     window.gtag ??
-    function gtag(...args: unknown[]) {
-      window.dataLayer?.push(args)
+    function gtag() {
+      window.dataLayer?.push(arguments)
     }
   window.gtag("js", new Date())
   window.gtag("config", measurementId, { send_page_view: false })
@@ -53,9 +53,9 @@ export function trackPageView({
   referrer,
 }: PageViewParams) {
   trackEvent("page_view", {
-    page_path: pagePath,
+    page_path: sanitizePath(pagePath),
     page_title: pageTitle,
-    previous_path: previousPath,
+    previous_path: previousPath ? sanitizePath(previousPath) : undefined,
     referrer,
     ...getDeviceAnalyticsParams(),
   })

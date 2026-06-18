@@ -166,9 +166,11 @@ export function ProjectManagementPage() {
 
   const projects: MatchingProject[] = useMemo(
     () =>
-      (managedQuery.data ?? []).map((project) =>
-        toMatchingProject(project, managedQuery.dataUpdatedAt),
-      ),
+      (managedQuery.data ?? [])
+        .filter((project) => project.status !== "DRAFT")
+        .map((project) =>
+          toMatchingProject(project, managedQuery.dataUpdatedAt),
+        ),
     [managedQuery.data, managedQuery.dataUpdatedAt],
   )
 

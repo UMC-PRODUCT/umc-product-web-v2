@@ -80,7 +80,14 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...globals.node,
+        ...globals.browser,
       },
+    },
+  },
+  {
+    files: ["src/shared/analytics/ga.ts"],
+    rules: {
+      "prefer-rest-params": "off",
     },
   },
 )
