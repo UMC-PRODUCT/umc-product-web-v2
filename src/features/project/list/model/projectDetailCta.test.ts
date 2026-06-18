@@ -5,6 +5,8 @@ import {
   resolveProjectDetailCtaMode,
   selectCurrentApplicationForProject,
   selectIsAlreadyApproved,
+  selectIsPartIneligible,
+  selectIsPartRecruitClosed,
 } from "./projectDetailCta"
 
 const applicable = {
@@ -181,6 +183,106 @@ describe("resolveProjectDetailCtaMode", () => {
         isPartRecruitClosed: true,
       }),
     ).toBe("my-application")
+  })
+})
+
+describe("파트 적격/마감 판정 (dev 실데이터 기반, Web 계정)", () => {
+  const projects: Record<
+    string,
+    { part: string; currentCount: string; quota: string; status: string }[]
+  > = {
+    "13-중앙대1": [
+      { part: "WEB", currentCount: "3", quota: "3", status: "COMPLETED" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "3",
+        quota: "3",
+        status: "COMPLETED",
+      },
+      { part: "DESIGN", currentCount: "0", quota: "1", status: "RECRUITING" },
+    ],
+    "14-중앙대2": [
+      { part: "DESIGN", currentCount: "1", quota: "2", status: "RECRUITING" },
+      { part: "WEB", currentCount: "4", quota: "4", status: "COMPLETED" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "4",
+        quota: "4",
+        status: "COMPLETED",
+      },
+    ],
+    "15-한성대1": [
+      { part: "DESIGN", currentCount: "1", quota: "20", status: "RECRUITING" },
+      { part: "WEB", currentCount: "20", quota: "20", status: "COMPLETED" },
+      { part: "NODEJS", currentCount: "20", quota: "20", status: "COMPLETED" },
+    ],
+    "16-중앙대3": [
+      { part: "DESIGN", currentCount: "0", quota: "2", status: "RECRUITING" },
+      { part: "ANDROID", currentCount: "4", quota: "4", status: "COMPLETED" },
+      { part: "NODEJS", currentCount: "4", quota: "4", status: "COMPLETED" },
+    ],
+    "17-중앙대4": [
+      { part: "DESIGN", currentCount: "0", quota: "2", status: "RECRUITING" },
+      { part: "IOS", currentCount: "3", quota: "3", status: "COMPLETED" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "4",
+        quota: "4",
+        status: "COMPLETED",
+      },
+    ],
+    "23-가천대": [
+      { part: "DESIGN", currentCount: "0", quota: "1", status: "RECRUITING" },
+      { part: "WEB", currentCount: "0", quota: "1", status: "RECRUITING" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "0",
+        quota: "1",
+        status: "RECRUITING",
+      },
+    ],
+    "37-가천대": [
+      { part: "IOS", currentCount: "0", quota: "1", status: "RECRUITING" },
+      {
+        part: "SPRINGBOOT",
+        currentCount: "0",
+        quota: "2",
+        status: "RECRUITING",
+      },
+    ],
+  }
+
+  const ctaForWeb = (key: string) =>
+    resolveProjectDetailCtaMode({
+      ...ctaParams,
+      isPartIneligible: selectIsPartIneligible(projects[key], "WEB"),
+      isPartRecruitClosed: selectIsPartRecruitClosed(projects[key], "WEB"),
+      hasActiveRound: true,
+    })
+
+  it("WEB 정원이 마감(COMPLETED)된 프로젝트는 apply-blocked-closed", () => {
+    expect(ctaForWeb("13-중앙대1")).toBe("apply-blocked-closed")
+    expect(ctaForWeb("14-중앙대2")).toBe("apply-blocked-closed")
+    expect(ctaForWeb("15-한성대1")).toBe("apply-blocked-closed")
+  })
+
+  it("WEB 파트를 아예 모집하지 않는 프로젝트는 apply-blocked-part", () => {
+    expect(ctaForWeb("16-중앙대3")).toBe("apply-blocked-part")
+    expect(ctaForWeb("17-중앙대4")).toBe("apply-blocked-part")
+    expect(ctaForWeb("37-가천대")).toBe("apply-blocked-part")
+  })
+
+  it("WEB 파트를 모집 중(RECRUITING)인 프로젝트는 apply(지원 가능)", () => {
+    expect(ctaForWeb("23-가천대")).toBe("apply")
+  })
+
+  it("내 파트를 알 수 없으면(undefined) 파트 사유로 막지 않는다", () => {
+    expect(selectIsPartIneligible(projects["16-중앙대3"], undefined)).toBe(
+      false,
+    )
+    expect(selectIsPartRecruitClosed(projects["14-중앙대2"], undefined)).toBe(
+      false,
+    )
   })
 })
 
