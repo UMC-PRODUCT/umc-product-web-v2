@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
 import { Modal } from "@/shared/ui/Modal"
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import { updateApplicationDecision } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
@@ -38,6 +39,38 @@ function toApplicationId(applicantId: string): number | null {
   return Number.isFinite(id) && id > 0 ? id : null
 }
 
+// 합/불 상태 변경 확인 모달 문구 (대기는 PM 뷰에서 노출되지 않으나 타입 완전성 위해 포함)
+const DECISION_CONFIRM: Record<
+  StatusValue,
+  {
+    title: string
+    confirmText: string
+    variant: "success" | "warning" | "error"
+  }
+> = {
+  pass: {
+    title: "합격 처리할까요?",
+    confirmText: "합격 처리",
+    variant: "success",
+  },
+  fail: {
+    title: "불합격 처리할까요?",
+    confirmText: "불합격 처리",
+    variant: "warning",
+  },
+  pending: {
+    title: "대기로 변경할까요?",
+    confirmText: "변경",
+    variant: "warning",
+  },
+}
+
+const STATUS_LABEL: Record<StatusValue, string> = {
+  pass: "합격",
+  fail: "불합격",
+  pending: "대기",
+}
+
 export function ApplicationDetailModal({
   project,
   chapterName,
@@ -58,6 +91,11 @@ export function ApplicationDetailModal({
   const [statusOverrides, setStatusOverrides] = useState<
     Record<string, StatusValue>
   >({})
+  // 합/불 변경 확인 모달 대기 상태 (확인 시에만 실제 반영)
+  const [pendingDecision, setPendingDecision] = useState<{
+    applicantId: string
+    status: StatusValue
+  } | null>(null)
 
   // 이중 실행 방지용 ref (Strict Mode 대응)
   const emptyToastShownRef = useRef(false)
@@ -201,8 +239,19 @@ export function ApplicationDetailModal({
     )
     if (!applicant) return
     if (!canChangeApplicantStatus(applicant.id, applicant.round)) return
-    setStatusOverrides((prev) => ({ ...prev, [applicant.id]: status }))
-    decisionMutation.mutate({ appId: Number(applicant.id), status })
+    if (applicant.status === status) return
+    // 즉시 반영하지 않고 확인 모달을 띄운다
+    setPendingDecision({ applicantId: applicant.id, status })
+  }
+
+  const handleConfirmDecision = () => {
+    if (!pendingDecision) return
+    const { applicantId, status } = pendingDecision
+    setStatusOverrides((prev) => ({ ...prev, [applicantId]: status }))
+    decisionMutation.mutate(
+      { appId: Number(applicantId), status },
+      { onSettled: () => setPendingDecision(null) },
+    )
   }
 
   const handleClose = () => {
@@ -211,90 +260,137 @@ export function ApplicationDetailModal({
     setRoundFilter([])
     setStatusFilter([])
     setStatusOverrides({})
+    setPendingDecision(null)
   }
 
   const handlePanelClose = () => {
     setSelectedApplicantId(null)
   }
 
+  const pendingApplicant = pendingDecision
+    ? (projectWithOverrides.applicants.find(
+        (a) => a.id === pendingDecision.applicantId,
+      ) ?? null)
+    : null
+  const decisionConfirm = pendingDecision
+    ? DECISION_CONFIRM[pendingDecision.status]
+    : null
+
   return (
-    <Modal.Root
-      open={open}
-      onOpenChange={(next) => (next ? onOpenChange(true) : handleClose())}
-    >
-      <Modal.Portal>
-        <Modal.Overlay tone="deep" />
-        <Modal.Content
-          className="top-20! bottom-7.5! flex h-[calc(100vh-110px)]! translate-y-0! items-start gap-4"
-          aria-describedby={undefined}
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => {
-            // 우측 패널 열려있으면 패널만 닫고, 없으면 전체 닫기
-            if (hasPanel) {
-              e.preventDefault()
-              handlePanelClose()
-            }
-          }}
-          onPointerDownOutside={(e) => {
-            const target = e.target as HTMLElement
-            if (target.closest("[data-status-chip-dropdown]")) {
-              e.preventDefault()
-              return
-            }
-            handleClose()
-          }}
-        >
-          <Modal.Title className="sr-only">
-            {project.projectName} 지원 현황 상세
-          </Modal.Title>
+    <>
+      <Modal.Root
+        open={open}
+        onOpenChange={(next) => (next ? onOpenChange(true) : handleClose())}
+      >
+        <Modal.Portal>
+          <Modal.Overlay tone="deep" />
+          <Modal.Content
+            className="top-20! bottom-7.5! flex h-[calc(100vh-110px)]! translate-y-0! items-start gap-4"
+            aria-describedby={undefined}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            onEscapeKeyDown={(e) => {
+              // 확인 모달 열려있으면 전체 모달은 그대로 유지
+              if (pendingDecision) {
+                e.preventDefault()
+                return
+              }
+              // 우측 패널 열려있으면 패널만 닫고, 없으면 전체 닫기
+              if (hasPanel) {
+                e.preventDefault()
+                handlePanelClose()
+              }
+            }}
+            onPointerDownOutside={(e) => {
+              // 확인 모달과 상호작용 중에는 전체 모달을 닫지 않는다
+              if (pendingDecision) {
+                e.preventDefault()
+                return
+              }
+              const target = e.target as HTMLElement
+              if (target.closest("[data-status-chip-dropdown]")) {
+                e.preventDefault()
+                return
+              }
+              handleClose()
+            }}
+          >
+            <Modal.Title className="sr-only">
+              {project.projectName} 지원 현황 상세
+            </Modal.Title>
 
-          <div className="flex h-full w-185 shrink-0 overflow-hidden rounded-xl bg-white shadow-xl">
-            <ModalApplicantPanel
-              project={projectWithOverrides}
-              chapterName={chapterName}
-              roundFilter={roundFilter}
-              statusFilter={statusFilter}
-              onRoundFilterChange={setRoundFilter}
-              onStatusFilterChange={setStatusFilter}
-              selectedApplicantId={selectedApplicantId}
-              onApplicantClick={
-                disableFormPanel ? () => {} : setSelectedApplicantId
-              }
-              onStatusChange={handleApplicantStatusChange}
-              onClose={handleClose}
-              currentRound={currentRound}
-              decisionDeadlineByRound={decisionDeadlineByRound}
-              canApproveApplicant={canApproveApplicant}
-              approvePermissionLoading={isApprovePermissionLoading}
-              statusOptions={hidePendingStatus ? ["pass", "fail"] : undefined}
-              className="w-full"
-            />
-          </div>
+            <div className="flex h-full w-185 shrink-0 overflow-hidden rounded-xl bg-white shadow-xl">
+              <ModalApplicantPanel
+                project={projectWithOverrides}
+                chapterName={chapterName}
+                roundFilter={roundFilter}
+                statusFilter={statusFilter}
+                onRoundFilterChange={setRoundFilter}
+                onStatusFilterChange={setStatusFilter}
+                selectedApplicantId={selectedApplicantId}
+                onApplicantClick={
+                  disableFormPanel ? () => {} : setSelectedApplicantId
+                }
+                onStatusChange={handleApplicantStatusChange}
+                onClose={handleClose}
+                currentRound={currentRound}
+                decisionDeadlineByRound={decisionDeadlineByRound}
+                canApproveApplicant={canApproveApplicant}
+                approvePermissionLoading={isApprovePermissionLoading}
+                statusOptions={hidePendingStatus ? ["pass", "fail"] : undefined}
+                className="w-full"
+              />
+            </div>
 
-          {hasPanel && selectedApplicant && (
-            <ModalFormPanel
-              applicant={selectedApplicant}
-              formData={formData}
-              chapterName={chapterName}
-              projectName={project.projectName}
-              challengerName={project.challengerName}
-              challengerUniversity={project.challengerUniversity}
-              onStatusChange={(status) =>
-                handleApplicantStatusChange(selectedApplicant.id, status)
-              }
-              onClose={handlePanelClose}
-              statusDisabled={
-                !canChangeApplicantStatus(
-                  selectedApplicant.id,
-                  selectedApplicant.round,
-                )
-              }
-              hidePendingStatus={hidePendingStatus}
-              className="max-h-[calc(100vh-60px)] shadow-xl"
-            />
-          )}
-        </Modal.Content>
-      </Modal.Portal>
-    </Modal.Root>
+            {hasPanel && selectedApplicant && (
+              <ModalFormPanel
+                applicant={selectedApplicant}
+                formData={formData}
+                chapterName={chapterName}
+                projectName={project.projectName}
+                challengerName={project.challengerName}
+                challengerUniversity={project.challengerUniversity}
+                onStatusChange={(status) =>
+                  handleApplicantStatusChange(selectedApplicant.id, status)
+                }
+                onClose={handlePanelClose}
+                statusDisabled={
+                  !canChangeApplicantStatus(
+                    selectedApplicant.id,
+                    selectedApplicant.round,
+                  )
+                }
+                hidePendingStatus={hidePendingStatus}
+                className="max-h-[calc(100vh-60px)] shadow-xl"
+              />
+            )}
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
+
+      {pendingDecision && pendingApplicant && decisionConfirm && (
+        <CtaModal
+          open
+          title={decisionConfirm.title}
+          content={
+            <>
+              {pendingApplicant.name} · {pendingApplicant.university} 지원자를{" "}
+              {STATUS_LABEL[pendingDecision.status]} 처리합니다.
+            </>
+          }
+          cancelText="취소"
+          confirmText={decisionConfirm.confirmText}
+          variant={decisionConfirm.variant}
+          overlayTone="deep"
+          confirmLoading={decisionMutation.isPending}
+          onOpenChange={(next) => {
+            if (!next && !decisionMutation.isPending) setPendingDecision(null)
+          }}
+          onCancel={() => {
+            if (!decisionMutation.isPending) setPendingDecision(null)
+          }}
+          onConfirm={handleConfirmDecision}
+        />
+      )}
+    </>
   )
 }
