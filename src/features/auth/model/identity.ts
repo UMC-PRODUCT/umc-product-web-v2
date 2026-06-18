@@ -1,6 +1,7 @@
 import type { MemberInfoResponse } from "@/features/auth/api/me"
 import type {
   ChallengerInfoResponse,
+  Part,
   RoleType,
 } from "@/features/challenger/model/types"
 
@@ -160,4 +161,13 @@ export function getLatestChallengerRecord(
   const records = me?.challengerRecords
   if (!records?.length) return undefined
   return [...records].sort((a, b) => Number(b.gisuId) - Number(a.gisuId))[0]
+}
+
+export function getCurrentChallengerPart(
+  me: MemberInfoResponse | undefined,
+): Part | undefined {
+  return (
+    me?.currentGisuMemberInfo?.challenger?.part ??
+    getLatestChallengerRecord(me)?.part
+  )
 }

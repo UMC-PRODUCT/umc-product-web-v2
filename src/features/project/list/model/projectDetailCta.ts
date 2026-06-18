@@ -48,6 +48,27 @@ export function resolveProjectDetailCtaMode({
   return "apply"
 }
 
+type PartQuotaForCta = {
+  part: string
+  status: string
+}
+
+export function selectIsPartIneligible(
+  partQuotas: PartQuotaForCta[],
+  myPart: string | undefined,
+): boolean {
+  if (myPart == null) return false
+  return !partQuotas.some((q) => q.part === myPart)
+}
+
+export function selectIsPartRecruitClosed(
+  partQuotas: PartQuotaForCta[],
+  myPart: string | undefined,
+): boolean {
+  if (myPart == null) return false
+  return partQuotas.some((q) => q.part === myPart && q.status === "COMPLETED")
+}
+
 interface ApplyButtonDisabledParams {
   isPmReadonly: boolean
   isDetailLoading: boolean
