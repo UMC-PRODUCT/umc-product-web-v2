@@ -3,19 +3,22 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { MatchingProjectsListPage } from "@/features/project/list"
 
-import type {
-  PartQuotaStatus,
-  ProjectPart,
-} from "@/features/project/list/api/matchingProject"
+import type { ProjectListSearch } from "@/features/project/list"
+import type { ProjectPart } from "@/features/project/list/api/matchingProject"
 
-export type ProjectListSearch = {
-  mock?: "projects"
-  branch?: string
-  school?: string
-  parts?: ProjectPart[]
-  status?: PartQuotaStatus
-  keyword?: string
-  page?: number
+const VALID_PARTS = new Set<string>([
+  "PLAN",
+  "DESIGN",
+  "WEB",
+  "ANDROID",
+  "IOS",
+  "NODEJS",
+  "SPRINGBOOT",
+  "ADMIN",
+])
+
+function isProjectPart(value: unknown): value is ProjectPart {
+  return typeof value === "string" && VALID_PARTS.has(value)
 }
 
 function parsePage(value: unknown): number {
@@ -34,12 +37,10 @@ function parsePage(value: unknown): number {
 export const Route = createFileRoute("/matching/projects/")({
   validateSearch: (search: Record<string, unknown>): ProjectListSearch => {
     let parts: ProjectPart[] | undefined
-    if (typeof search.parts === "string") {
-      parts = [search.parts as ProjectPart]
+    if (isProjectPart(search.parts)) {
+      parts = [search.parts]
     } else if (Array.isArray(search.parts)) {
-      parts = search.parts.filter(
-        (p): p is ProjectPart => typeof p === "string",
-      )
+      parts = search.parts.filter(isProjectPart)
     }
 
     return {

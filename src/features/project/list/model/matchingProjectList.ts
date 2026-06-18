@@ -39,6 +39,16 @@ export type MatchingProjectListFilterDescriptor = {
   multiSelect?: boolean
 }
 
+export type ProjectListSearch = {
+  mock?: "projects"
+  branch?: string
+  school?: string
+  parts?: ProjectPart[]
+  status?: PartQuotaStatus
+  keyword?: string
+  page?: number
+}
+
 const FILTER_LAYOUT = {
   branch: { className: "w-fit min-w-20", dropdownClassName: "w-[9.5rem]" },
   school: {
@@ -53,30 +63,31 @@ const FILTER_LAYOUT = {
   },
 } as const
 
+const EMPTY_PARTS: ProjectPart[] = []
+
 export function useMatchingProjectListFilters() {
-  const search = useSearch({ strict: false }) as Record<string, unknown>
+  const search = useSearch({ strict: false }) as ProjectListSearch
   const navigate = useNavigate() as unknown as (opts: {
-    search: (prev: Record<string, unknown>) => Record<string, unknown>
+    search: (prev: ProjectListSearch) => ProjectListSearch
     replace?: boolean
   }) => Promise<void>
 
   const [openFilterId, setOpenFilterId] = useState<string | null>(null)
 
-  const selectedBranch = search.branch as string | undefined
-  const selectedSchool = search.school as string | undefined
-
-  const rawParts = search.parts as ProjectPart[] | undefined
-  const selectedParts = useMemo(() => rawParts ?? [], [rawParts])
-
-  const selectedRecruitStatus = search.status as PartQuotaStatus | undefined
-  const page = (search.page ?? 1) as number
-  const keyword = (search.keyword ?? "") as string
+  const selectedBranch = search.branch
+  const selectedSchool = search.school
+  const selectedParts = search.parts ?? EMPTY_PARTS
+  const selectedRecruitStatus = search.status
+  const page = search.page ?? 1
+  const keyword = search.keyword ?? ""
 
   const [searchQuery, setSearchQuery] = useState(keyword)
+  const [prevKeyword, setPrevKeyword] = useState(keyword)
 
-  useEffect(() => {
+  if (keyword !== prevKeyword) {
+    setPrevKeyword(keyword)
     setSearchQuery(keyword)
-  }, [keyword])
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -197,7 +208,7 @@ export function useMatchingProjectListFilters() {
       const part = value as ProjectPart
       void navigate({
         search: (prev) => {
-          const currentParts = (prev.parts ?? []) as ProjectPart[]
+          const currentParts = prev.parts ?? EMPTY_PARTS
           const newParts = currentParts.includes(part)
             ? currentParts.filter((selected) => selected !== part)
             : [...currentParts, part]
@@ -230,7 +241,7 @@ export function useMatchingProjectListFilters() {
     (newPage: number | ((prev: number) => number)) => {
       void navigate({
         search: (prev) => {
-          const prevPage = typeof prev.page === "number" ? prev.page : 1
+          const prevPage = prev.page ?? 1
           const nextPage =
             typeof newPage === "function" ? newPage(prevPage) : newPage
           return {

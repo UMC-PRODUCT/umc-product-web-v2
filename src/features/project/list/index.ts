@@ -12,6 +12,7 @@ export { useMatchingProjectListFilters } from "./model/matchingProjectList"
 export type {
   MatchingProjectListFilterDescriptor,
   MatchingProjectListFilterId,
+  ProjectListSearch,
 } from "./model/matchingProjectList"
 export { FilterDropdown } from "./ui/FilterDropDown"
 export { MatchingProjectCard } from "./ui/MatchingProjectCard"
