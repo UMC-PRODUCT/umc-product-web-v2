@@ -1,4 +1,5 @@
 import { api } from "@/shared/lib/axios"
+import { useCacheStore } from "@/shared/store/cacheStore"
 
 import type {
   ChallengerInfoResponse,
@@ -79,7 +80,16 @@ interface MemberInfoV2Raw {
   [key: string]: unknown
 }
 
-export async function getMyInfo(): Promise<MemberInfoResponse> {
+export async function getMyInfo(
+  bypassCache = false,
+): Promise<MemberInfoResponse> {
+  if (!bypassCache) {
+    const cached = useCacheStore.getState().me
+    if (cached) {
+      return cached
+    }
+  }
+
   const { data } = await api.get<ApiResponse<MemberInfoV2Raw>>("/v2/member/me")
   const raw = data.result
   const history = raw.challengerHistory ?? []
@@ -115,7 +125,7 @@ export async function getMyInfo(): Promise<MemberInfoResponse> {
     }),
   )
 
-  return {
+  const result: MemberInfoResponse = {
     ...(raw as unknown as MemberInfoResponse),
     currentGisuMemberInfo: currentGisu
       ? {
@@ -134,6 +144,9 @@ export async function getMyInfo(): Promise<MemberInfoResponse> {
     challengerRecords,
     roles,
   }
+
+  useCacheStore.getState().setMe(result)
+  return result
 }
 
 export async function updateMemberInfo(body: {
@@ -143,6 +156,7 @@ export async function updateMemberInfo(body: {
     "/v1/member",
     body,
   )
+  useCacheStore.getState().setMe(null)
   return data.result
 }
 
@@ -152,6 +166,7 @@ export async function changeEmail(body: {
   emailVerificationToken: string
 }): Promise<void> {
   await api.patch("/v1/member/email", body)
+  useCacheStore.getState().setMe(null)
 }
 
 export interface DeleteMemberRequest {
@@ -166,5 +181,6 @@ export async function deleteMember(
     "/v1/member",
     { data: body },
   )
+  useCacheStore.getState().clear()
   return data.result
 }
