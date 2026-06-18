@@ -37,6 +37,7 @@ interface ModalApplicantPanelProps {
   onStatusChange?: (applicantId: string, status: StatusValue) => void
   onClose: () => void
   currentRound?: number
+  decisionDeadlineByRound?: Map<number, number>
   canApproveApplicant: (applicantId: string) => boolean
   approvePermissionLoading: boolean
   statusOptions?: StatusValue[]
@@ -55,6 +56,7 @@ export function ModalApplicantPanel({
   onStatusChange,
   onClose,
   currentRound,
+  decisionDeadlineByRound,
   canApproveApplicant,
   approvePermissionLoading,
   statusOptions,
@@ -249,7 +251,7 @@ export function ModalApplicantPanel({
               selectedApplicantId={selectedApplicantId}
               onApplicantClick={onApplicantClick}
               onStatusChange={onStatusChange}
-              currentRound={currentRound}
+              decisionDeadlineByRound={decisionDeadlineByRound}
               canApproveApplicant={canApproveApplicant}
               approvePermissionLoading={approvePermissionLoading}
               statusOptions={statusOptions}
@@ -266,7 +268,7 @@ export function ModalApplicantPanel({
                 selectedApplicantId={selectedApplicantId}
                 onApplicantClick={onApplicantClick}
                 onStatusChange={onStatusChange}
-                currentRound={currentRound}
+                decisionDeadlineByRound={decisionDeadlineByRound}
                 canApproveApplicant={canApproveApplicant}
                 approvePermissionLoading={approvePermissionLoading}
                 statusOptions={statusOptions}

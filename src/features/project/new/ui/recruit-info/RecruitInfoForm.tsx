@@ -48,6 +48,7 @@ interface RecruitInfoFormProps {
   readOnly?: boolean
   isHydrated?: boolean
   canUpdatePartQuotasOverride?: boolean
+  quotaOnlyMode?: boolean
 }
 
 function buildSummaryText(
@@ -74,6 +75,7 @@ export const RecruitInfoForm = forwardRef<
     readOnly = false,
     isHydrated = true,
     canUpdatePartQuotasOverride,
+    quotaOnlyMode = false,
   },
   ref,
 ) {
@@ -197,6 +199,7 @@ export const RecruitInfoForm = forwardRef<
 
   const handleNext = async () => {
     if (isReadOnly) {
+      if (quotaOnlyMode) return
       onNext()
       return
     }
@@ -217,7 +220,9 @@ export const RecruitInfoForm = forwardRef<
     const ok = await savePartQuotas(true)
     if (!ok) return
     addToast({
-      message: "작성한 내용이 저장되었습니다.",
+      message: quotaOnlyMode
+        ? "모집 정원이 변경되었습니다."
+        : "작성한 내용이 저장되었습니다.",
       color: "primary",
       variant: "deep",
       type: "default",
@@ -307,7 +312,7 @@ export const RecruitInfoForm = forwardRef<
         </div>
       </div>
       <div className="flex items-center justify-between gap-3">
-        {!readOnly ? (
+        {!readOnly && !quotaOnlyMode ? (
           <Button
             type="button"
             variant="weak"
@@ -323,16 +328,16 @@ export const RecruitInfoForm = forwardRef<
         )}
         <div className="flex items-center justify-end gap-4">
           <Button type="button" variant="weak" color="neutral" onClick={onPrev}>
-            이전
+            {quotaOnlyMode ? "돌아가기" : "이전"}
           </Button>
           <Button
             type="button"
             variant="fill"
             color="primary"
-            disabled={isSaving}
+            disabled={isSaving || (quotaOnlyMode && isReadOnly)}
             onClick={() => void handleNext()}
           >
-            다음
+            {quotaOnlyMode ? "변경" : "다음"}
           </Button>
         </div>
       </div>

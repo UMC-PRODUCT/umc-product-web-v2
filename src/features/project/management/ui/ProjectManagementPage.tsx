@@ -9,6 +9,7 @@ import {
   isChapterPresident,
   isCurrentTermPm,
   isSchoolStaff,
+  isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { projectKeys } from "@/features/project/new/api/queryKeys"
@@ -184,10 +185,11 @@ export function ProjectManagementPage() {
     selectedChapterId !== undefined && Number.isFinite(selectedChapterId)
       ? selectedChapterId
       : undefined
-  const isMatchingPeriod = useIsMatchingPeriod({
+  const rawIsMatchingPeriod = useIsMatchingPeriod({
     ...(useGroupedView ? { chapterId: matchingPeriodChapterId } : {}),
     enabled: hasAccess,
   })
+  const isMatchingPeriod = isSuperAdmin(me) ? false : rawIsMatchingPeriod
 
   const filteredProjects: MatchingProject[] = useMemo(() => {
     if (!useGroupedView) return projects

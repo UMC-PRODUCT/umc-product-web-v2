@@ -1,6 +1,7 @@
 import { cn } from "@/shared/lib/utils"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 
+import { isRoundDecisionClosed } from "../../model/matchingDecision"
 import { ApplicantRow } from "./ApplicantRow"
 
 import type { ApplicantDetail, Role, StatusValue } from "../../model/types"
@@ -12,7 +13,7 @@ interface ApplicantRoleSectionProps {
   selectedApplicantId: string | null
   onApplicantClick: (id: string) => void
   onStatusChange?: (applicantId: string, status: StatusValue) => void
-  currentRound?: number
+  decisionDeadlineByRound?: Map<number, number>
   canApproveApplicant: (applicantId: string) => boolean
   approvePermissionLoading: boolean
   statusOptions?: StatusValue[]
@@ -26,7 +27,7 @@ export function ApplicantRoleSection({
   selectedApplicantId,
   onApplicantClick,
   onStatusChange,
-  currentRound,
+  decisionDeadlineByRound,
   canApproveApplicant,
   approvePermissionLoading,
   statusOptions,
@@ -76,7 +77,11 @@ export function ApplicantRoleSection({
           const statusDisabled =
             approvePermissionLoading ||
             !canApproveApplicant(applicant.id) ||
-            (currentRound != null && applicant.round < currentRound)
+            isRoundDecisionClosed(
+              applicant.round,
+              decisionDeadlineByRound,
+              Date.now(),
+            )
 
           return (
             <ApplicantRow

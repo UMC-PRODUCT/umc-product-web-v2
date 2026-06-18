@@ -281,7 +281,7 @@ export function ProjectManagementMoreMenu({
 
   const handleEditClick = () => {
     if (!canEditProject || isPermissionLoading) return
-    if (status === "IN_PROGRESS" && isMatchingPeriod) {
+    if (status === "IN_PROGRESS" && isMatchingPeriod && !canPublishProject) {
       setPopoverOpen(false)
       addToast({
         message: "매칭 기간 중에는 수정이 불가능 합니다!",
@@ -335,7 +335,7 @@ export function ProjectManagementMoreMenu({
         label: "프로젝트 수정하기",
         onClick: handleEditClick,
         disabled: isPermissionLoading,
-        visuallyDisabled: isMatchingPeriod,
+        visuallyDisabled: isMatchingPeriod && !canPublishProject,
       })
     }
   } else {
@@ -412,7 +412,7 @@ export function ProjectManagementMoreMenu({
               {status === "IN_PROGRESS" &&
                 (isPermissionLoading || canPublishProject) && (
                   <DropdownItem
-                    label="매칭 중단 (복구 불가)"
+                    label="중단 (복구 불가)"
                     disabled={isPermissionLoading}
                     onClick={handleAbortClick}
                     className="text-error-500"

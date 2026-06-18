@@ -25,6 +25,7 @@ import {
   toProjectApplication,
   toRoundNumber,
 } from "../model/mappers"
+import { buildDecisionDeadlineByRound } from "../model/matchingDecision"
 
 import type { MatchingRoundResponse } from "../model/apiTypes"
 import type {
@@ -77,6 +78,7 @@ export function useChallengerPageData(
   const gisuQuery = useActiveGisuId({ enabled })
   const gisuId = gisuQuery.data ?? 0
 
+  // PM 본인 지부의 매칭 차수 -> 현재 차수 판단 + 차수별 합/불 결정 마감 잠금
   const { data: me, isLoading: isMeLoading } = useMe()
   const chapterId = useMemo(() => {
     const record = getLatestChallengerRecord(me)
@@ -89,12 +91,16 @@ export function useChallengerPageData(
     enabled: enabled && gisuId > 0,
   })
 
-  // 매칭 차수 조회 (현재 진행 차수 계산용)
+  // 매칭 차수 조회 (현재 진행 차수 계산 + 차수별 결정 마감 잠금용)
   const roundsQuery = useQuery({
     queryKey: applicationKeys.matchingRounds(chapterId),
     queryFn: () => getMatchingRounds(chapterId),
     enabled: enabled && chapterId !== undefined,
   })
+  const decisionDeadlineByRound = useMemo(
+    () => buildDecisionDeadlineByRound(roundsQuery.data),
+    [roundsQuery.data],
+  )
 
   // 프로젝트 목록이 로드되면 각 프로젝트의 지원자 목록도 함께 조회
   const projects = useMemo(
@@ -196,6 +202,7 @@ export function useChallengerPageData(
     projects: transformed,
     projectInfo,
     currentRound,
+    decisionDeadlineByRound,
     availablePerRound,
     projectStats: projectStatsQuery.data ?? [],
     schoolIdToName,
@@ -296,6 +303,10 @@ export function useAdminPageData(
   })
   const { currentRound, activeRound } = useMemo(
     () => getCurrentRound(roundsQuery.data ?? []),
+    [roundsQuery.data],
+  )
+  const decisionDeadlineByRound = useMemo(
+    () => buildDecisionDeadlineByRound(roundsQuery.data),
     [roundsQuery.data],
   )
 
@@ -455,6 +466,7 @@ export function useAdminPageData(
     stats,
     currentRound,
     activeRound,
+    decisionDeadlineByRound,
     dataUpdatedAt: projectsQuery.dataUpdatedAt,
     chapters,
     isLoading:

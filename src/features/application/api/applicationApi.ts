@@ -50,6 +50,9 @@ export async function getAllProjects(
     chapterId?: number
     keyword?: string
     partQuotaStatus?: string
+    statuses?: Array<
+      "DRAFT" | "PENDING_REVIEW" | "IN_PROGRESS" | "COMPLETED" | "ABORTED"
+    >
     page?: number
     size?: number
   },
