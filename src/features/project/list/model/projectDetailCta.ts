@@ -1,3 +1,5 @@
+import type { ProjectDetail } from "../api/matchingProject"
+
 export type ProjectDetailCtaMode =
   | "recruit-questions"
   | "my-application"
@@ -48,10 +50,10 @@ export function resolveProjectDetailCtaMode({
   return "apply"
 }
 
-type PartQuotaForCta = {
-  part: string
-  status: string
-}
+type PartQuotaForCta = Pick<
+  ProjectDetail["partQuotas"][number],
+  "part" | "status"
+>
 
 export function selectIsPartIneligible(
   partQuotas: PartQuotaForCta[],

@@ -9,6 +9,8 @@ import {
   selectIsPartRecruitClosed,
 } from "./projectDetailCta"
 
+import type { PartQuotaStatus, ProjectPart } from "../api/matchingProject"
+
 const applicable = {
   isPmReadonly: false,
   isDetailLoading: false,
@@ -249,7 +251,12 @@ describe("파트 적격/마감 판정 (dev 실데이터 기반, Web 계정)", ()
     ],
   } satisfies Record<
     string,
-    { part: string; currentCount: string; quota: string; status: string }[]
+    {
+      part: ProjectPart
+      currentCount: string
+      quota: string
+      status: PartQuotaStatus
+    }[]
   >
 
   const ctaForWeb = (key: keyof typeof projects) =>
