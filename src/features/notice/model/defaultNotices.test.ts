@@ -100,7 +100,7 @@ describe("canViewDefaultNotice", () => {
     expect(
       canViewDefaultNotice(
         "operator",
-        makeMe({ roleTypes: ["CHAPTER_PRESIDENT"] }),
+        makeMe({ roleTypes: ["CHAPTER_PRESIDENT"], isAdmin: false }),
       ),
     ).toBe(true)
   })
