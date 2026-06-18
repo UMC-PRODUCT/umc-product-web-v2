@@ -35,7 +35,6 @@ const EMPTY_SET = new Set<string>()
 
 interface ApplicationPageDataOptions {
   enabled?: boolean
-  schoolName?: string
 }
 
 // 매칭 라운드 목록에서 현재 활성 차수 번호 계산
@@ -220,7 +219,6 @@ export function useAdminPageData(
   options: ApplicationPageDataOptions = {},
 ) {
   const enabled = options.enabled ?? true
-  const schoolName = options.schoolName
   const gisuQuery = useActiveGisuId({ enabled })
   const gisuId = gisuQuery.data ?? 0
 
@@ -259,33 +257,10 @@ export function useAdminPageData(
     enabled: enabled && gisuId > 0,
   })
 
-  const projects = useMemo(() => {
-    const content = projectsQuery.data?.content ?? []
-    // SCHOOL_PRESIDENT: 본인 학교 소속 PM의 프로젝트만 표시
-    if (!schoolName) return content
-    return content.filter((p) => p.productOwner.schoolName === schoolName)
-  }, [projectsQuery.data, schoolName])
-
-  // 각 프로젝트의 지원자 목록 조회 (테이블 + 학교별 통계용)
-  const applicantsQuery = useQuery({
-    queryKey: [
-      ...applicationKeys.all,
-      "admin-applicants",
-      gisuId,
-      chapterId,
-      projects.map((p) => p.id),
-    ],
-    queryFn: async () => {
-      const results = await Promise.all(
-        projects.map(async (p) => {
-          const applicants = await getProjectApplications(Number(p.id))
-          return { projectId: p.id, applicants }
-        }),
-      )
-      return new Map(results.map((r) => [String(r.projectId), r.applicants]))
-    },
-    enabled: enabled && projects.length > 0,
-  })
+  const projects = useMemo(
+    () => projectsQuery.data?.content ?? [],
+    [projectsQuery.data],
+  )
 
   // 전체 학교 목록 조회 (schoolId -> schoolName 매핑용)
   const schoolsQuery = useQuery({
@@ -327,11 +302,8 @@ export function useAdminPageData(
 
   // 서버 데이터 -> 프론트 타입 변환 (테이블용)
   const transformed: ProjectApplication[] = useMemo(
-    () =>
-      projects.map((p) =>
-        toProjectApplication(p, applicantsQuery.data?.get(String(p.id)) ?? []),
-      ),
-    [projects, applicantsQuery.data],
+    () => projects.map((p) => toProjectApplication(p, [])),
+    [projects],
   )
 
   // 통계: summary 기반
@@ -471,7 +443,7 @@ export function useAdminPageData(
     stats,
     currentRound,
     activeRound,
-    dataUpdatedAt: applicantsQuery.dataUpdatedAt || projectsQuery.dataUpdatedAt,
+    dataUpdatedAt: projectsQuery.dataUpdatedAt,
     chapters,
     isLoading:
       enabled &&
@@ -479,7 +451,6 @@ export function useAdminPageData(
         chaptersQuery.isLoading ||
         roundsQuery.isLoading ||
         projectsQuery.isLoading ||
-        applicantsQuery.isLoading ||
         chapterStatsQuery.isLoading ||
         chaptersWithSchoolsQuery.isLoading),
     isError:

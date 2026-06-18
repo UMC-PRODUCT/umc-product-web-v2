@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useLayoutEffect, useMemo, useRef, useState } from "react"
 
@@ -24,6 +25,8 @@ import {
   isSchoolLeadership,
   isSuperAdmin,
 } from "@/features/auth/model/identity"
+import { getChaptersWithSchools } from "@/features/challenger/api/organization"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
@@ -46,6 +49,13 @@ function MatchingApplicationsPage() {
     () => chaptersQuery.data?.chapters ?? [],
     [chaptersQuery.data],
   )
+
+  const gisuId = useActiveGisuId().data ?? 0
+  const chaptersWithSchoolsQuery = useQuery({
+    queryKey: ["chapters-with-schools", gisuId],
+    queryFn: () => getChaptersWithSchools(String(gisuId)),
+    enabled: gisuId > 0 && schoolLeadership,
+  })
 
   // challenger records에서 지부명 추출 (어드민 포함 모든 역할)
   const userChapter = getViewerBranch(me)
@@ -83,24 +93,39 @@ function MatchingApplicationsPage() {
   // challenger records에 지부 정보가 없는 경우 chapters API로 폴백 (페인트 전 적용)
   const hasAutoSelected = useRef(false)
   useLayoutEffect(() => {
-    if (hasAutoSelected.current || !me || chapters.length === 0) return
-    if (!isChapterPresident(me)) return
-    if (CHAPTERS.includes(userChapter as (typeof CHAPTERS)[number])) return // 이미 records로 처리됨
-    const myChapterId = me.roles?.find(
-      (r) => r.roleType === "CHAPTER_PRESIDENT",
-    )?.organizationId
-    if (!myChapterId) return
-    const myChapter = chapters.find((c) => c.id === myChapterId)
-    if (myChapter) {
-      setSelectedChapter(myChapter.name)
-      ownChapter.current = myChapter.name
-      hasAutoSelected.current = true
+    if (hasAutoSelected.current || !me) return
+    if (isChapterPresident(me)) {
+      if (chapters.length === 0) return
+      if (CHAPTERS.includes(userChapter as (typeof CHAPTERS)[number])) return // 이미 records로 처리됨
+      const myChapterId = me.roles?.find(
+        (r) => r.roleType === "CHAPTER_PRESIDENT",
+      )?.organizationId
+      if (!myChapterId) return
+      const myChapter = chapters.find((c) => c.id === myChapterId)
+      if (myChapter) {
+        setSelectedChapter(myChapter.name)
+        ownChapter.current = myChapter.name
+        hasAutoSelected.current = true
+      }
+      return
     }
-  }, [me, chapters, userChapter])
+    if (isSchoolLeadership(me)) {
+      const myChapter = chaptersWithSchoolsQuery.data?.chapters.find((c) =>
+        c.schools.some((s) => s.schoolId === String(me.schoolId)),
+      )
+      if (
+        myChapter &&
+        CHAPTERS.includes(myChapter.chapterName as (typeof CHAPTERS)[number])
+      ) {
+        setSelectedChapter(myChapter.chapterName)
+        ownChapter.current = myChapter.chapterName
+        hasAutoSelected.current = true
+      }
+    }
+  }, [me, chapters, userChapter, chaptersWithSchoolsQuery.data])
 
   const admin = useAdminPageData(selectedChapter, {
     enabled: showAdminSection,
-    schoolName: schoolLeadership ? identity?.schoolName : undefined,
   })
   const adminStats = admin.stats
   const adminProjects = admin.projects
@@ -161,16 +186,8 @@ function MatchingApplicationsPage() {
                     projects={adminProjects}
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
-                    disableFormPanel={
-                      isChapterPresident(identity) ||
-                      schoolLeadership ||
-                      isSuperAdmin(identity) ||
-                      isCentralStaff(identity)
-                    }
-                    hideExpand={
-                      isChapterPresident(identity) ||
-                      schoolLeadership
-                    }
+                    hideExpand
+                    disableProjectModal
                   />
                 </div>
               )}

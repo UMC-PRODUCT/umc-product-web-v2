@@ -73,6 +73,7 @@ interface ApplicationTableSectionProps {
   hidePendingStatus?: boolean
   /** 지원자 펼치기 버튼 숨김 (SCHOOL_PRESIDENT 등 열람 제한 역할) */
   hideExpand?: boolean
+  disableProjectModal?: boolean
   className?: string
 }
 
@@ -87,6 +88,7 @@ export function ApplicationTableSection({
   disableFormPanel = false,
   hidePendingStatus = false,
   hideExpand = false,
+  disableProjectModal = false,
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -314,10 +316,14 @@ export function ApplicationTableSection({
                 onToggleExpand={
                   hideExpand ? undefined : () => toggleExpand(project.id)
                 }
-                onProjectClick={() => {
-                  setSelectedProject(project)
-                  setDetailModalOpen(true)
-                }}
+                onProjectClick={
+                  disableProjectModal
+                    ? undefined
+                    : () => {
+                        setSelectedProject(project)
+                        setDetailModalOpen(true)
+                      }
+                }
                 hideExpandButton={hideExpand}
               />
 
