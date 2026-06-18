@@ -166,8 +166,5 @@ export function getLatestChallengerRecord(
 export function getCurrentChallengerPart(
   me: MemberInfoResponse | undefined,
 ): Part | undefined {
-  return (
-    me?.currentGisuMemberInfo?.challenger?.part ??
-    getLatestChallengerRecord(me)?.part
-  )
+  return me?.currentGisuMemberInfo?.challenger?.part
 }
