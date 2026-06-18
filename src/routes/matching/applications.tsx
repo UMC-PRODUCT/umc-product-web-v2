@@ -234,6 +234,7 @@ function MatchingApplicationsPage() {
                   projectStats={challenger.projectStats}
                   schoolIdToName={challenger.schoolIdToName}
                   currentRound={challenger.currentRound}
+                  decisionDeadlineByRound={challenger.decisionDeadlineByRound}
                 />
               ) : (
                 pmProjects.map((project) => (
@@ -253,6 +254,7 @@ function MatchingApplicationsPage() {
                       )}
                       schoolIdToName={challenger.schoolIdToName}
                       currentRound={challenger.currentRound}
+                      decisionDeadlineByRound={challenger.decisionDeadlineByRound}
                     />
                   </div>
                 ))

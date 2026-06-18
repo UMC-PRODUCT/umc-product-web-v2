@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
+import { useMe } from "@/features/auth/hooks/useMe"
+import { getLatestChallengerRecord } from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllSchools,
@@ -23,6 +25,7 @@ import {
   toProjectApplication,
   toRoundNumber,
 } from "../model/mappers"
+import { buildDecisionDeadlineByRound } from "../model/matchingDecision"
 
 import type { MatchingRoundResponse } from "../model/apiTypes"
 import type {
@@ -74,6 +77,20 @@ export function useChallengerPageData(
   const enabled = options.enabled ?? true
   const gisuQuery = useActiveGisuId({ enabled })
   const gisuId = gisuQuery.data ?? 0
+
+  // PM 본인 지부의 매칭 차수(decisionDeadline) -> 차수별 합/불 결정 마감 잠금용
+  const meQuery = useMe()
+  const pmChapterIdRaw = getLatestChallengerRecord(meQuery.data)?.chapterId
+  const pmChapterId = pmChapterIdRaw ? Number(pmChapterIdRaw) : undefined
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(pmChapterId),
+    queryFn: () => getMatchingRounds(pmChapterId),
+    enabled: enabled && pmChapterId !== undefined,
+  })
+  const decisionDeadlineByRound = useMemo(
+    () => buildDecisionDeadlineByRound(roundsQuery.data),
+    [roundsQuery.data],
+  )
 
   const projectsQuery = useQuery({
     queryKey: applicationKeys.managedProjects(gisuId),
@@ -188,6 +205,7 @@ export function useChallengerPageData(
     projects: transformed,
     projectInfo,
     currentRound,
+    decisionDeadlineByRound,
     availablePerRound,
     projectStats: projectStatsQuery.data ?? [],
     schoolIdToName,
@@ -284,6 +302,10 @@ export function useAdminPageData(
   })
   const { currentRound, activeRound } = useMemo(
     () => getCurrentRound(roundsQuery.data ?? []),
+    [roundsQuery.data],
+  )
+  const decisionDeadlineByRound = useMemo(
+    () => buildDecisionDeadlineByRound(roundsQuery.data),
     [roundsQuery.data],
   )
 
@@ -443,6 +465,7 @@ export function useAdminPageData(
     stats,
     currentRound,
     activeRound,
+    decisionDeadlineByRound,
     dataUpdatedAt: projectsQuery.dataUpdatedAt,
     chapters,
     isLoading:
