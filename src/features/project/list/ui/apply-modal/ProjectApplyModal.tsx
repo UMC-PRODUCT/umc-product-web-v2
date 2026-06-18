@@ -15,10 +15,9 @@ import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import { uploadFileFlow } from "@/features/project/new/api/storage"
 import { trackEvent } from "@/shared/analytics"
-import { getActiveGisu } from "@/shared/api/gisu"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
-import { gisuKeys } from "@/shared/hooks/useActiveGisu"
+import { activeGisuQueryOptions } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import { FormHeader } from "@/shared/ui/FormHeader"
@@ -255,11 +254,7 @@ export const ProjectApplyModal = forwardRef<
       } catch (err) {
         if (err instanceof AxiosError && err.response?.status === 409) {
           const gisu = await queryClient
-            .ensureQueryData({
-              queryKey: gisuKeys.active,
-              queryFn: getActiveGisu,
-              staleTime: 5 * 60 * 1000,
-            })
+            .ensureQueryData(activeGisuQueryOptions)
             .catch(() => null)
           if (gisu) {
             const apps: MyProjectApplicationResponse[] =
