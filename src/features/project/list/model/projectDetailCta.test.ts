@@ -187,10 +187,7 @@ describe("resolveProjectDetailCtaMode", () => {
 })
 
 describe("파트 적격/마감 판정 (dev 실데이터 기반, Web 계정)", () => {
-  const projects: Record<
-    string,
-    { part: string; currentCount: string; quota: string; status: string }[]
-  > = {
+  const projects = {
     "13-중앙대1": [
       { part: "WEB", currentCount: "3", quota: "3", status: "COMPLETED" },
       {
@@ -250,9 +247,12 @@ describe("파트 적격/마감 판정 (dev 실데이터 기반, Web 계정)", ()
         status: "RECRUITING",
       },
     ],
-  }
+  } satisfies Record<
+    string,
+    { part: string; currentCount: string; quota: string; status: string }[]
+  >
 
-  const ctaForWeb = (key: string) =>
+  const ctaForWeb = (key: keyof typeof projects) =>
     resolveProjectDetailCtaMode({
       ...ctaParams,
       isPartIneligible: selectIsPartIneligible(projects[key], "WEB"),
