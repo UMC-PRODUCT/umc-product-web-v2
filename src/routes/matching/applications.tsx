@@ -163,13 +163,13 @@ function MatchingApplicationsPage() {
                     chapterName={selectedChapter}
                     disableFormPanel={
                       isChapterPresident(identity) ||
-                      isSchoolLeadership(identity) ||
+                      schoolLeadership ||
                       isSuperAdmin(identity) ||
                       isCentralStaff(identity)
                     }
                     hideExpand={
                       isChapterPresident(identity) ||
-                      isSchoolLeadership(identity)
+                      schoolLeadership
                     }
                   />
                 </div>
