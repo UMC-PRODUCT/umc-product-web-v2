@@ -4,7 +4,7 @@ import { useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { deleteMember, updateMemberInfo } from "@/features/auth/api/me"
-import { useMe } from "@/features/auth/hooks/useMe"
+import { authKeys, useMe } from "@/features/auth/hooks/useMe"
 import { useMemberOAuthList } from "@/features/auth/hooks/useMemberOAuthList"
 import { useOAuthLinking } from "@/features/auth/hooks/useOAuthLinking"
 import {
@@ -77,7 +77,7 @@ export function AccountSettingsPage() {
     try {
       const { fileId } = await uploadFileFlow(file, "PROFILE_IMAGE")
       await updateMemberInfo({ profileImageId: fileId })
-      await queryClient.invalidateQueries({ queryKey: ["auth", "me"] })
+      await queryClient.invalidateQueries({ queryKey: authKeys.me })
       addToast({
         message: "프로필 이미지가 변경되었습니다.",
         color: "primary",

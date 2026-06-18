@@ -1,9 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  useInfiniteQuery,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query"
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
 import { isAxiosError } from "axios"
 import {
   forwardRef,
@@ -33,8 +29,8 @@ import {
   uploadFileFlow,
 } from "@/features/project/new/api"
 import { challengerSearchItemToMemberItem } from "@/features/project/new/api/memberAdapter"
-import { getActiveGisu } from "@/shared/api/gisu"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
@@ -105,11 +101,7 @@ export const BasicInfoForm = forwardRef<
 ) {
   const { me: meData } = useViewerIdentity()
   const isPm = isCurrentTermPm(meData)
-  const activeGisuQuery = useQuery({
-    queryKey: ["gisu"],
-    queryFn: getActiveGisu,
-    staleTime: 5 * 60 * 1000,
-  })
+  const activeGisuQuery = useActiveGisu()
   const activeGisuId = activeGisuQuery.data?.gisuId
 
   const pmSearchScope = useMemo(() => getProjectPmSearchScope(meData), [meData])

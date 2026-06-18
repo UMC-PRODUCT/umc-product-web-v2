@@ -26,6 +26,11 @@ import {
   type NoticeItem,
 } from "@/features/notice"
 import { deleteNotice, getNotices } from "@/features/notice/api/noticeApi"
+import {
+  canViewDefaultNotice,
+  DEFAULT_TEAM_MATCHING_CONTENTS,
+  DEFAULT_TEAM_MATCHING_NOTICES,
+} from "@/features/notice/model/defaultNotices"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { MarkdownRenderer } from "@/shared/ui/MarkdownRenderer"
@@ -41,29 +46,6 @@ interface AnnounceSearch {
 const DEFAULT_PAGE = 1
 const NOTICE_PAGE_SIZE = 10
 const NOTICE_COMPLETION_STORAGE_KEY = "notice:completion-target"
-
-const DEFAULT_MATCHING_NOTICES: NoticeItem[] = [
-  {
-    id: "default-matching-1",
-    title: "[프로덕트 팀이 작성한 FAQ예요]",
-    date: "2003.03.16",
-    chip: "필독",
-  },
-]
-
-const DEFAULT_MATCHING_CONTENTS: Record<string, string> = {
-  "default-matching-1": `1. **여러 프로젝트에 동시에 지원할 수 있나요?**
-동일한 매칭 차수 내에는 하나의 프로젝트에만 지원할 수 있어요. 차수가 바뀌면 다른 프로젝트에 새로 지원할 수 있어요.
-
-2. **같은 프로젝트에 여러 차수에 걸쳐 지원할 수 있나요?**
-네, 가능해요. 1차에 지원했다가 불합격하더라도 2차, 3차에 동일한 프로젝트에 다시 지원할 수 있어요.
-
-3. **지원 폼 제출 후 수정이 가능한가요? 지원을 취소할 수 있나요?**
-이미 제출한 지원 폼의 수정은 불가능해요. 단, 해당 매칭 차수가 종료되기 전까지는 지원 취소가 가능해요. 지원 취소 후 동일한 프로젝트에 지원 폼을 새롭게 제출할 수 있어요.
-
-4. **합/불 결과는 언제, 어디서 확인할 수 있나요?**
-매칭 차수가 종료된 후, 웹사이트의 내 지원 현황 페이지에서 확인할 수 있어요. 차수가 진행되는 동안에는 결과가 공개되지 않아요.`,
-}
 
 type PendingNotice = {
   id: string
@@ -208,8 +190,16 @@ function TeamMatchingAnnouncePage() {
   const canEdit = hasPermission("EDIT")
   const canDelete = hasPermission("DELETE")
 
+  const defaultMatchingNotices = useMemo(
+    () =>
+      DEFAULT_TEAM_MATCHING_NOTICES.filter((notice) =>
+        canViewDefaultNotice(notice.audience, identity),
+      ),
+    [identity],
+  )
+
   const notices = useMemo(() => {
-    if (!noticesData) return page === 1 ? DEFAULT_MATCHING_NOTICES : []
+    if (!noticesData) return page === 1 ? defaultMatchingNotices : []
 
     const mappedNotices: NoticeItem[] = noticesData.content.map((item) => ({
       id: String(item.id),
@@ -219,16 +209,14 @@ function TeamMatchingAnnouncePage() {
     }))
 
     const combined =
-      page === 1
-        ? [...DEFAULT_MATCHING_NOTICES, ...mappedNotices]
-        : mappedNotices
+      page === 1 ? [...defaultMatchingNotices, ...mappedNotices] : mappedNotices
 
     return [...combined].sort((a, b) => {
       if (a.chip === "필독" && b.chip !== "필독") return -1
       if (a.chip !== "필독" && b.chip === "필독") return 1
       return 0
     })
-  }, [noticesData, page])
+  }, [defaultMatchingNotices, noticesData, page])
 
   const totalPages = noticesData?.totalPages || 1
   const safePage = Math.min(Math.max(1, page), totalPages)
@@ -368,7 +356,7 @@ function TeamMatchingAnnouncePage() {
               onDeleteNotice={handleNoticeDeleteClick}
               onEditNotice={handleNoticeEditClick}
               renderContent={(noticeId) => {
-                const defaultContent = DEFAULT_MATCHING_CONTENTS[noticeId]
+                const defaultContent = DEFAULT_TEAM_MATCHING_CONTENTS[noticeId]
                 if (defaultContent !== undefined) {
                   return (
                     <div className="flex flex-col gap-4">
