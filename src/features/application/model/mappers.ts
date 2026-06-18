@@ -163,7 +163,7 @@ export function toProjectApplication(
     thumbnailUrl: project.thumbnailImageUrl || undefined,
     statusLabel,
     designCount: getQuotaCount(project.partQuotas, "DESIGN"),
-    feCount: getQuotaCount(project.partQuotas, "WEB"),
+    feCount: getQuotaCount(project.partQuotas, "WEB", "IOS", "ANDROID"),
     beCount: getQuotaCount(project.partQuotas, "SPRINGBOOT", "NODEJS"),
     applicants: applicants.map(toApplicantDetail),
   }
