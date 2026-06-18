@@ -30,9 +30,7 @@ export const projectKeys = {
     [...projectKeys.all, "members", projectId] as const,
 } as const
 
-export const gisuKeys = {
-  active: ["gisu"] as const,
-} as const
+export { gisuKeys } from "@/shared/hooks/useActiveGisu"
 
 export const memberKeys = {
   search: (keyword: string) => ["member", "search", keyword] as const,

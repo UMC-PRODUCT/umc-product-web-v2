@@ -19,9 +19,9 @@ import {
 } from "@/features/project/new/api"
 import { UsabilitySurvey } from "@/features/usability-survey"
 import { trackEvent } from "@/shared/analytics"
-import { getActiveGisu } from "@/shared/api/gisu"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { Button } from "@/shared/ui/Button"
@@ -242,11 +242,7 @@ export function ProjectDetailCard({
     staleTime: 5 * 60 * 1000,
   })
 
-  const { data: activeGisuData } = useQuery({
-    queryKey: ["gisu"],
-    queryFn: getActiveGisu,
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: activeGisuData } = useActiveGisu()
   const activeGisuId = activeGisuData?.gisuId ?? null
 
   const { data: myApplications, isError: isMyApplicationsError } = useQuery({
@@ -616,7 +612,7 @@ export function ProjectDetailCard({
                     <Button
                       className="min-w-28 flex-1 whitespace-nowrap"
                       isLoading={
-                        (isDetailLoading || isApplicationWritePermissionLoading)
+                        isDetailLoading || isApplicationWritePermissionLoading
                       }
                       disabled={isApplyButtonDisabled({
                         isPmReadonly: false,

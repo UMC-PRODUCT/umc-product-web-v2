@@ -8,10 +8,7 @@ import {
   getProjectApplications,
 } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
-import {
-  useActiveGisuId,
-  useChapters,
-} from "@/features/application/hooks/useApplicationPageData"
+import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import {
   shortenSchoolName,
   summaryToStats,
@@ -22,6 +19,7 @@ import {
   getChaptersWithSchools,
 } from "@/features/challenger/api/organization"
 import { getProjectMembers } from "@/features/project/list/api/matchingProject"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { useViewModeStore } from "@/shared/view-mode"
 
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"

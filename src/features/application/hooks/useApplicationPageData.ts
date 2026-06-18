@@ -6,7 +6,7 @@ import {
   getAllSchools,
   getChaptersWithSchools,
 } from "@/features/challenger/api/organization"
-import { getActiveGisu } from "@/shared/api/gisu"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
 import {
   getAllProjects,
@@ -66,19 +66,6 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): {
   const fallback =
     completed.length > 0 ? toRound(completed[0]!.phase) : undefined
   return { currentRound: fallback, activeRound: undefined }
-}
-
-// 활성 기수 ID 조회
-export function useActiveGisuId(options: ApplicationPageDataOptions = {}) {
-  const enabled = options.enabled ?? true
-
-  return useQuery({
-    queryKey: ["gisu", "active"],
-    queryFn: getActiveGisu,
-    enabled,
-    staleTime: 5 * 60 * 1000,
-    select: (data) => (data?.gisuId != null ? Number(data.gisuId) : null),
-  })
 }
 
 // PM 챌린저 뷰용 데이터

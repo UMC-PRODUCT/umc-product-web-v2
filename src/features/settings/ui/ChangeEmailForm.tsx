@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { changeEmail } from "@/features/auth/api/me"
 import { useEmailVerification } from "@/features/auth/hooks/useEmailVerification"
+import { authKeys } from "@/features/auth/hooks/useMe"
 import CircleBang from "@/shared/assets/icon/bang/CircleBang"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
@@ -51,7 +52,7 @@ export function ChangeEmailForm({
       const token = await handleCodeVerify()
       if (!token) return
       await changeEmail({ newEmail: next, emailVerificationToken: token })
-      await queryClient.invalidateQueries({ queryKey: ["auth", "me"] })
+      await queryClient.invalidateQueries({ queryKey: authKeys.me })
       addToast({
         message: "이메일이 변경되었습니다.",
         color: "primary",

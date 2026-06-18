@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { isOperator } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { projectKeys } from "@/features/project/new/api"
-import { getActiveGisu } from "@/shared/api/gisu"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
@@ -81,10 +81,7 @@ export function useMatchingProjectListFilters() {
   const { me, viewContext } = useViewerIdentity()
   const userIsOperator = isOperator(me)
 
-  const { data: gisuData } = useQuery({
-    queryKey: ["gisu"],
-    queryFn: getActiveGisu,
-  })
+  const { data: gisuData } = useActiveGisu()
 
   const activeGisuId = gisuData?.gisuId ? Number(gisuData.gisuId) : undefined
 

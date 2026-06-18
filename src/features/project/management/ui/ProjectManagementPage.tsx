@@ -11,9 +11,9 @@ import {
   isSchoolStaff,
 } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
-import { gisuKeys, projectKeys } from "@/features/project/new/api/queryKeys"
+import { projectKeys } from "@/features/project/new/api/queryKeys"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
-import { getActiveGisu } from "@/shared/api/gisu"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
@@ -142,11 +142,7 @@ export function ProjectManagementPage() {
         ? "내 지부의 프로젝트 정보를 확인합니다."
         : "내 프로젝트 정보를 확인하고 수정할 수 있습니다. 팀 매칭 진행 중에는 수정할 수 없습니다."
 
-  const gisuQuery = useQuery({
-    queryKey: gisuKeys.active,
-    queryFn: getActiveGisu,
-    enabled: hasAccess,
-  })
+  const gisuQuery = useActiveGisu({ enabled: hasAccess })
   const gisuId = gisuQuery.data?.gisuId
     ? Number(gisuQuery.data.gisuId)
     : undefined

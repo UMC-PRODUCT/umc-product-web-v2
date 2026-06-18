@@ -29,7 +29,6 @@ import {
   getApplicationForm,
   getMyDraft,
   getProjectDetail,
-  gisuKeys,
   invalidateProjectSummaryQueries,
   projectKeys,
   submitProject,
@@ -41,8 +40,7 @@ import { hydrateDraftIntoStore } from "@/features/project/new/model/draftHydrato
 import { isWithinMatchingPeriod } from "@/features/project/new/model/matchingPeriod"
 import { hydrateProjectDetailIntoStore } from "@/features/project/new/model/projectDetailHydrator"
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
-import { getActiveGisu } from "@/shared/api/gisu"
-import { getMe } from "@/shared/api/me"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
@@ -159,12 +157,7 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
     )
   })
 
-  useQuery({ queryKey: ["me"], queryFn: getMe })
-
-  const gisuQuery = useQuery({
-    queryKey: gisuKeys.active,
-    queryFn: getActiveGisu,
-  })
+  const gisuQuery = useActiveGisu()
 
   const gisuId = gisuQuery.data?.gisuId
 
