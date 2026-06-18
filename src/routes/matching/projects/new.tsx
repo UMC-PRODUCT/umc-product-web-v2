@@ -5,9 +5,9 @@ import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { isProjectRegistrationQuotaLimited } from "@/features/auth/model/identity"
 import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
 import { getManagedProjects } from "@/features/project/management/api"
-import { getMyDraft, gisuKeys, projectKeys } from "@/features/project/new/api"
+import { getMyDraft, projectKeys } from "@/features/project/new/api"
 import { ProjectRegisterPage } from "@/features/project/new/ui/ProjectRegisterPage"
-import { getActiveGisu } from "@/shared/api/gisu"
+import { activeGisuQueryOptions } from "@/shared/hooks/useActiveGisu"
 
 export const Route = createFileRoute("/matching/projects/new")({
   beforeLoad: async ({ context }) => {
@@ -41,11 +41,9 @@ export const Route = createFileRoute("/matching/projects/new")({
 
     if (isProjectRegistrationQuotaLimited(me)) {
       try {
-        const gisu = await context.queryClient.ensureQueryData({
-          queryKey: gisuKeys.active,
-          queryFn: getActiveGisu,
-          staleTime: 5 * 60 * 1000,
-        })
+        const gisu = await context.queryClient.ensureQueryData(
+          activeGisuQueryOptions,
+        )
         const gisuId = gisu?.gisuId ? Number(gisu.gisuId) : undefined
         if (gisuId) {
           const draft = await context.queryClient.ensureQueryData({
