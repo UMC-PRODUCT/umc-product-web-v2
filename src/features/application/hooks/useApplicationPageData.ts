@@ -78,25 +78,29 @@ export function useChallengerPageData(
   const gisuQuery = useActiveGisuId({ enabled })
   const gisuId = gisuQuery.data ?? 0
 
-  // PM 본인 지부의 매칭 차수(decisionDeadline) -> 차수별 합/불 결정 마감 잠금용
-  const meQuery = useMe()
-  const pmChapterIdRaw = getLatestChallengerRecord(meQuery.data)?.chapterId
-  const pmChapterId = pmChapterIdRaw ? Number(pmChapterIdRaw) : undefined
-  const roundsQuery = useQuery({
-    queryKey: applicationKeys.matchingRounds(pmChapterId),
-    queryFn: () => getMatchingRounds(pmChapterId),
-    enabled: enabled && pmChapterId !== undefined,
-  })
-  const decisionDeadlineByRound = useMemo(
-    () => buildDecisionDeadlineByRound(roundsQuery.data),
-    [roundsQuery.data],
-  )
+  // PM 본인 지부의 매칭 차수 -> 현재 차수 판단 + 차수별 합/불 결정 마감 잠금
+  const { data: me, isLoading: isMeLoading } = useMe()
+  const chapterId = useMemo(() => {
+    const record = getLatestChallengerRecord(me)
+    return record?.chapterId ? Number(record.chapterId) : undefined
+  }, [me])
 
   const projectsQuery = useQuery({
     queryKey: applicationKeys.managedProjects(gisuId),
     queryFn: () => getManagedProjects(gisuId),
     enabled: enabled && gisuId > 0,
   })
+
+  // 매칭 차수 조회 (현재 진행 차수 계산 + 차수별 결정 마감 잠금용)
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(chapterId),
+    queryFn: () => getMatchingRounds(chapterId),
+    enabled: enabled && chapterId !== undefined,
+  })
+  const decisionDeadlineByRound = useMemo(
+    () => buildDecisionDeadlineByRound(roundsQuery.data),
+    [roundsQuery.data],
+  )
 
   // 프로젝트 목록이 로드되면 각 프로젝트의 지원자 목록도 함께 조회
   const projects = useMemo(
@@ -139,17 +143,10 @@ export function useChallengerPageData(
     enabled: enabled && projects.length > 0,
   })
 
-  // 현재 차수: 서버 통계에 존재하는 가장 높은 차수
-  const currentRound = useMemo(() => {
-    const firstStat = (projectStatsQuery.data ?? [])[0]
-    if (!firstStat) return undefined
-    let max = 0
-    for (const r of firstStat.roundApplicationStatistics) {
-      const n = toRoundNumber(r.matchingRound.phase)
-      if (n > max) max = n
-    }
-    return max || undefined
-  }, [projectStatsQuery.data])
+  const { currentRound } = useMemo(
+    () => getCurrentRound(roundsQuery.data ?? []),
+    [roundsQuery.data],
+  )
 
   // 차수별 지원 가용 인원 (서버 roundApplicationStatistics 직접 사용)
   const availablePerRound = useMemo(() => {
@@ -214,7 +211,11 @@ export function useChallengerPageData(
       (gisuQuery.isLoading ||
         projectsQuery.isLoading ||
         applicantsQuery.isLoading ||
-        projectStatsQuery.isLoading),
+        projectStatsQuery.isLoading ||
+        isMeLoading ||
+        (chapterId !== undefined &&
+          roundsQuery.data === undefined &&
+          !roundsQuery.isError)),
     isError: enabled && (gisuQuery.isError || projectsQuery.isError),
     error: gisuQuery.error ?? projectsQuery.error ?? applicantsQuery.error,
   }
