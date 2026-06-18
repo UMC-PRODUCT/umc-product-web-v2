@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { isOperator } from "@/features/auth/model/identity"
@@ -38,6 +39,16 @@ export type MatchingProjectListFilterDescriptor = {
   multiSelect?: boolean
 }
 
+export type ProjectListSearch = {
+  mock?: "projects"
+  branch?: string
+  school?: string
+  parts?: ProjectPart[]
+  status?: PartQuotaStatus
+  keyword?: string
+  page?: number
+}
+
 const FILTER_LAYOUT = {
   branch: { className: "w-fit min-w-20", dropdownClassName: "w-[9.5rem]" },
   school: {
@@ -52,31 +63,47 @@ const FILTER_LAYOUT = {
   },
 } as const
 
+const EMPTY_PARTS: ProjectPart[] = []
+
 export function useMatchingProjectListFilters() {
+  const search = useSearch({ strict: false }) as ProjectListSearch
+  const navigate = useNavigate() as unknown as (opts: {
+    search: (prev: ProjectListSearch) => ProjectListSearch
+    replace?: boolean
+  }) => Promise<void>
+
   const [openFilterId, setOpenFilterId] = useState<string | null>(null)
-  const [selectedBranch, setSelectedBranch] = useState<string>()
-  const [selectedSchool, setSelectedSchool] = useState<string>()
-  const [selectedParts, setSelectedParts] = useState<ProjectPart[]>([])
-  const [selectedRecruitStatus, setSelectedRecruitStatus] =
-    useState<PartQuotaStatus>()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("")
-  const [page, setPage] = useState(1)
+
+  const selectedBranch = search.branch
+  const selectedSchool = search.school
+  const selectedParts = search.parts ?? EMPTY_PARTS
+  const selectedRecruitStatus = search.status
+  const page = search.page ?? 1
+  const keyword = search.keyword ?? ""
+
+  const [searchQuery, setSearchQuery] = useState(keyword)
+  const [prevKeyword, setPrevKeyword] = useState(keyword)
+
+  if (keyword !== prevKeyword) {
+    setPrevKeyword(keyword)
+    setSearchQuery(keyword)
+  }
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 300)
+    const timer = setTimeout(() => {
+      if (searchQuery !== keyword) {
+        void navigate({
+          search: (prev) => ({
+            ...prev,
+            keyword: searchQuery || undefined,
+            page: 1,
+          }),
+          replace: true,
+        })
+      }
+    }, 300)
     return () => clearTimeout(timer)
-  }, [searchQuery])
-
-  useEffect(() => {
-    setPage(1)
-  }, [
-    selectedBranch,
-    selectedSchool,
-    selectedParts,
-    selectedRecruitStatus,
-    debouncedSearchQuery,
-  ])
+  }, [searchQuery, keyword, navigate])
 
   const { me, viewContext } = useViewerIdentity()
   const userIsOperator = isOperator(me)
@@ -130,7 +157,7 @@ export function useMatchingProjectListFilters() {
     queryKey: projectKeys.list({
       gisuId: effectiveGisuId,
       page,
-      keyword: debouncedSearchQuery,
+      keyword: keyword,
       chapterId: selectedBranch,
       schoolId: selectedSchool,
       parts: selectedParts,
@@ -139,7 +166,7 @@ export function useMatchingProjectListFilters() {
     queryFn: () =>
       getMatchingProjects({
         gisuId: effectiveGisuId!,
-        keyword: debouncedSearchQuery || undefined,
+        keyword: keyword || undefined,
         chapterId: selectedBranch ? Number(selectedBranch) : undefined,
         schoolIds: selectedSchool ? [Number(selectedSchool)] : undefined,
         parts: selectedParts.length > 0 ? selectedParts : undefined,
@@ -176,21 +203,56 @@ export function useMatchingProjectListFilters() {
     [selectedRecruitStatus],
   )
 
-  const handlePartSelect = useCallback((value: string) => {
-    setSelectedParts((prev) => {
+  const handlePartSelect = useCallback(
+    (value: string) => {
       const part = value as ProjectPart
-      return prev.includes(part)
-        ? prev.filter((selected) => selected !== part)
-        : [...prev, part]
-    })
-  }, [])
+      void navigate({
+        search: (prev) => {
+          const currentParts = prev.parts ?? EMPTY_PARTS
+          const newParts = currentParts.includes(part)
+            ? currentParts.filter((selected) => selected !== part)
+            : [...currentParts, part]
+          return {
+            ...prev,
+            parts: newParts.length > 0 ? newParts : undefined,
+            page: 1,
+          }
+        },
+      })
+    },
+    [navigate],
+  )
 
-  const handleRecruitStatusSelect = useCallback((value: string) => {
-    setSelectedRecruitStatus((prev) => {
+  const handleRecruitStatusSelect = useCallback(
+    (value: string) => {
       const status = value as PartQuotaStatus
-      return prev === status ? undefined : status
-    })
-  }, [])
+      void navigate({
+        search: (prev) => ({
+          ...prev,
+          status: prev.status === status ? undefined : status,
+          page: 1,
+        }),
+      })
+    },
+    [navigate],
+  )
+
+  const setPage = useCallback(
+    (newPage: number | ((prev: number) => number)) => {
+      void navigate({
+        search: (prev) => {
+          const prevPage = prev.page ?? 1
+          const nextPage =
+            typeof newPage === "function" ? newPage(prevPage) : newPage
+          return {
+            ...prev,
+            page: nextPage,
+          }
+        },
+      })
+    },
+    [navigate],
+  )
 
   const filterDescriptors: MatchingProjectListFilterDescriptor[] = [
     {
@@ -200,8 +262,14 @@ export function useMatchingProjectListFilters() {
       selectedValue: selectedBranch,
       selectedLabel: selectedBranchLabel,
       onSelect: (value) => {
-        setSelectedBranch((prev) => (prev === value ? undefined : value))
-        setSelectedSchool(undefined)
+        void navigate({
+          search: (prev) => ({
+            ...prev,
+            branch: prev.branch === value ? undefined : value,
+            school: undefined,
+            page: 1,
+          }),
+        })
       },
       ...FILTER_LAYOUT.branch,
     },
@@ -211,8 +279,15 @@ export function useMatchingProjectListFilters() {
       options: schoolOptions,
       selectedValue: selectedSchool,
       selectedLabel: selectedSchoolLabel,
-      onSelect: (value) =>
-        setSelectedSchool((prev) => (prev === value ? undefined : value)),
+      onSelect: (value) => {
+        void navigate({
+          search: (prev) => ({
+            ...prev,
+            school: prev.school === value ? undefined : value,
+            page: 1,
+          }),
+        })
+      },
       ...FILTER_LAYOUT.school,
     },
     {
