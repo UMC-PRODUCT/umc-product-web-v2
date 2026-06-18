@@ -252,7 +252,7 @@ export function ProjectDetailCard({
   const { data: myApplications, isError: isMyApplicationsError } = useQuery({
     queryKey: ["myApplications", activeGisuId],
     queryFn: () => getMyApplications(activeGisuId!),
-    enabled: activeGisuId != null && isApplicantView,
+    enabled: activeGisuId != null && isApplicantView && me != null,
   })
 
   const myChapterId = useMemo(() => {
