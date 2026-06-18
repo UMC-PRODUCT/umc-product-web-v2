@@ -15,6 +15,7 @@ interface ChallengerApplicationViewProps {
   projectStats?: ProjectStatisticsResponse[]
   schoolIdToName?: Map<string, string>
   currentRound?: number
+  decisionDeadlineByRound?: Map<number, number>
   className?: string
 }
 
@@ -116,6 +117,7 @@ export function ChallengerApplicationView({
   projectStats,
   schoolIdToName,
   currentRound,
+  decisionDeadlineByRound,
   className,
 }: ChallengerApplicationViewProps) {
   const stats = useMemo(
@@ -138,6 +140,7 @@ export function ChallengerApplicationView({
         searchPlaceholder="닉네임/이름으로 검색하세요."
         visibleFilters={["part", "school"]}
         currentRound={currentRound}
+        decisionDeadlineByRound={decisionDeadlineByRound}
         hidePendingStatus
       />
     </div>

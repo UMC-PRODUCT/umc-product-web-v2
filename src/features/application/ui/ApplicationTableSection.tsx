@@ -63,8 +63,10 @@ interface ApplicationTableSectionProps {
   projects: ProjectApplication[]
   searchPlaceholder?: string
   visibleFilters?: FilterName[]
-  /** 현재 활성 차수 (이전 차수의 상태 칩 disabled 처리) */
+  /** 현재 활성 차수 (배정 안내 툴팁 분기용) */
   currentRound?: number
+  /** 차수별 합/불 결정 마감(decisionDeadline) - 마감 지난 차수의 상태 변경 잠금 */
+  decisionDeadlineByRound?: Map<number, number>
   /** 현재 선택된 챕터 이름 (상세 모달 전달용) */
   chapterName?: string
   /** APPLY-102 단건 상세 권한 없는 역할(SCHOOL_PRESIDENT 등)일 때 true - 모달은 열리지만 폼 패널 비활성 */
@@ -84,6 +86,7 @@ export function ApplicationTableSection({
   searchPlaceholder = "프로젝트 명으로 검색하세요.",
   visibleFilters = DEFAULT_FILTERS,
   currentRound,
+  decisionDeadlineByRound,
   chapterName,
   disableFormPanel = false,
   hidePendingStatus = false,
@@ -372,6 +375,7 @@ export function ApplicationTableSection({
           open={detailModalOpen}
           onOpenChange={setDetailModalOpen}
           currentRound={currentRound}
+          decisionDeadlineByRound={decisionDeadlineByRound}
           disableFormPanel={disableFormPanel}
           hidePendingStatus={hidePendingStatus}
         />

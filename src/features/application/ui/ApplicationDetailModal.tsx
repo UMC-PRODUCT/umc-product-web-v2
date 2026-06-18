@@ -10,6 +10,7 @@ import { updateApplicationDecision } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
 import { useApplicationDetail } from "../hooks/useApplications"
 import { toApplicantFormData, toServerStatus } from "../model/mappers"
+import { isRoundDecisionClosed } from "../model/matchingDecision"
 import { ModalApplicantPanel } from "./detail-modal/ModalApplicantPanel"
 import { ModalFormPanel } from "./detail-modal/ModalFormPanel"
 
@@ -22,8 +23,10 @@ interface ApplicationDetailModalProps {
   chapterName: string
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** 현재 활성 차수 (이전 차수의 상태 칩 disabled 처리) */
+  /** 현재 활성 차수 (배정 안내 툴팁 분기용) */
   currentRound?: number
+  /** 차수별 합/불 결정 마감(decisionDeadline) - 마감 지난 차수의 상태 변경 잠금 */
+  decisionDeadlineByRound?: Map<number, number>
   /** APPLY-102 권한 없는 역할(SCHOOL_PRESIDENT 등) - 지원자 행 클릭 시 폼 패널 열리지 않음 */
   disableFormPanel?: boolean
   /** 플랜 챌린저(PM) 뷰: 대기 상태 옵션 숨김 */
@@ -41,6 +44,7 @@ export function ApplicationDetailModal({
   open,
   onOpenChange,
   currentRound,
+  decisionDeadlineByRound,
   disableFormPanel = false,
   hidePendingStatus = false,
 }: ApplicationDetailModalProps) {
@@ -186,7 +190,7 @@ export function ApplicationDetailModal({
   ): boolean =>
     !isApprovePermissionLoading &&
     canApproveApplicant(applicantId) &&
-    !(currentRound != null && applicantRound < currentRound)
+    !isRoundDecisionClosed(applicantRound, decisionDeadlineByRound, Date.now())
 
   const handleApplicantStatusChange = (
     applicantId: string,
@@ -259,6 +263,7 @@ export function ApplicationDetailModal({
               onStatusChange={handleApplicantStatusChange}
               onClose={handleClose}
               currentRound={currentRound}
+              decisionDeadlineByRound={decisionDeadlineByRound}
               canApproveApplicant={canApproveApplicant}
               approvePermissionLoading={isApprovePermissionLoading}
               statusOptions={hidePendingStatus ? ["pass", "fail"] : undefined}
