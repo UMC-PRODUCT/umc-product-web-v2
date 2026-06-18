@@ -552,7 +552,10 @@ export function ProjectDetailCard({
             >
               기획 보기
             </Button>
-            {showEditCta && (!isMatchingPeriod || resolvedCanManageProject) ? (
+            {showEditCta &&
+            (!isMatchingPeriod ||
+              resolvedEditPermissionLoading ||
+              resolvedCanManageProject) ? (
               shouldShowEditCta ? (
                 <Button
                   className="min-w-36 flex-1 whitespace-nowrap"
