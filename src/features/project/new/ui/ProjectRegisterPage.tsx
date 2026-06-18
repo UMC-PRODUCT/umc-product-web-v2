@@ -205,6 +205,24 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
     return project?.status === "IN_PROGRESS"
   }, [isEditMode, editProjectId, managedQuery.data])
 
+  const isMatchingPeriodActive = useMemo(() => {
+    if (!isEditMode || !isInProgress) return false
+    if (!matchingRoundsQuery.isSuccess) return false
+    return isWithinMatchingPeriod(matchingRoundsQuery.data, new Date())
+  }, [
+    isEditMode,
+    isInProgress,
+    matchingRoundsQuery.isSuccess,
+    matchingRoundsQuery.data,
+  ])
+
+  const isQuotaOnlyMode = isMatchingPeriodActive && canManageProject
+
+  const isMatchingGateLoading =
+    isEditMode &&
+    isInProgress &&
+    (!matchingRoundsQuery.isSuccess || isMatchingPeriodActive)
+
   useEffect(() => {
     if (detailQuery.data) {
       hydrateProjectDetailIntoStore(detailQuery.data)
@@ -229,9 +247,9 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
   }, [isEditMode, detailQuery.isError, detailQuery.error, addToast, navigate])
 
   useEffect(() => {
-    if (!isEditMode || !isInProgress) return
-    if (!matchingRoundsQuery.isSuccess) return
-    if (!isWithinMatchingPeriod(matchingRoundsQuery.data, new Date())) return
+    if (!isMatchingPeriodActive) return
+    if (projectPermissionsQuery.isPending) return
+    if (canManageProject) return
     addToast({
       message: "매칭 기간 중에는 수정이 불가능 합니다!",
       color: "red",
@@ -241,13 +259,16 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
     })
     navigate({ to: "/matching/projects/management", replace: true })
   }, [
-    isEditMode,
-    isInProgress,
-    matchingRoundsQuery.isSuccess,
-    matchingRoundsQuery.data,
+    isMatchingPeriodActive,
+    projectPermissionsQuery.isPending,
+    canManageProject,
     addToast,
     navigate,
   ])
+
+  useEffect(() => {
+    if (isQuotaOnlyMode) setStep(2)
+  }, [isQuotaOnlyMode])
 
   useEffect(() => {
     if (isEditMode) return
@@ -412,6 +433,10 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
 
   const handleStepChange = async (targetStep: number) => {
     if (targetStep === step) return
+    if (isQuotaOnlyMode && targetStep !== 2) {
+      triggerStepTooltip(targetStep)
+      return
+    }
     if (!canEditRecruitStep && targetStep === 2) {
       triggerStepTooltip(2)
       return
@@ -449,6 +474,10 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
 
   const handleRegister = () => {
     submitMutation.mutate()
+  }
+
+  const handleQuotaOnlyLeave = () => {
+    navigate({ to: "/matching/projects/management", replace: true })
   }
 
   const handleSaveAndLeave = async () => {
@@ -507,39 +536,52 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
         <Stepper
           step={step}
           onStepChange={handleStepChange}
-          disabledSteps={!canEditRecruitStep ? [2] : []}
+          disabledSteps={
+            isQuotaOnlyMode ? [1, 3] : !canEditRecruitStep ? [2] : []
+          }
           disabledTooltips={
-            !canEditRecruitStep
+            isQuotaOnlyMode
               ? {
-                  2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
-                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                  1: "매칭 기간 중에는 모집 정원만 수정할 수 있습니다.",
+                  3: "매칭 기간 중에는 모집 정원만 수정할 수 있습니다.",
                 }
-              : {
-                  2: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                  3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
-                }
+              : !canEditRecruitStep
+                ? {
+                    2: "기술 스택 및 파트별 TO는 운영진이 수기로 조정합니다.",
+                    3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                  }
+                : {
+                    2: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                    3: "기본 정보를 입력한 뒤 작성할 수 있습니다.",
+                  }
           }
           openTooltipStep={tooltipTriggerStep}
         />
-        {step === 1 && (
-          <BasicInfoForm
-            ref={basicInfoRef}
-            canCreateProject={canCreateProject}
-            createPermissionLoading={isCreatePermissionLoading}
-            isEditMode={isEditMode}
-            onNext={handleBasicInfoNext}
-          />
-        )}
+        {step === 1 &&
+          (isMatchingGateLoading ? (
+            <p className="text-body-2-regular text-teal-gray-400 py-20 text-center">
+              데이터를 불러오는 중...
+            </p>
+          ) : (
+            <BasicInfoForm
+              ref={basicInfoRef}
+              canCreateProject={canCreateProject}
+              createPermissionLoading={isCreatePermissionLoading}
+              isEditMode={isEditMode}
+              onNext={handleBasicInfoNext}
+            />
+          ))}
         {step === 2 && (
           <RecruitInfoForm
             ref={recruitInfoRef}
             readOnly={!canEditRecruitStep}
+            quotaOnlyMode={isQuotaOnlyMode}
             canUpdatePartQuotasOverride={
               isEditMode ? undefined : canManageRecruitInfoByRole
             }
             isHydrated={isEditMode ? detailQuery.isSuccess : true}
-            onPrev={() => moveToStep(1)}
-            onNext={() => moveToStep(3)}
+            onPrev={isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(1)}
+            onNext={isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(3)}
           />
         )}
         {step === 3 && (

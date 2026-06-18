@@ -146,6 +146,7 @@ export function ProjectManagementCard({
                 projectId={projectId}
                 showEditCta
                 canEditProject={canEditProject}
+                canManageProject={canPublishProject}
                 editPermissionLoading={isPermissionLoading}
                 isMatchingPeriod={isMatchingPeriod}
               />

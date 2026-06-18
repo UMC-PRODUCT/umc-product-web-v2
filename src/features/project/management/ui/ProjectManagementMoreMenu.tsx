@@ -281,7 +281,7 @@ export function ProjectManagementMoreMenu({
 
   const handleEditClick = () => {
     if (!canEditProject || isPermissionLoading) return
-    if (status === "IN_PROGRESS" && isMatchingPeriod) {
+    if (status === "IN_PROGRESS" && isMatchingPeriod && !canPublishProject) {
       setPopoverOpen(false)
       addToast({
         message: "매칭 기간 중에는 수정이 불가능 합니다!",
@@ -335,7 +335,7 @@ export function ProjectManagementMoreMenu({
         label: "프로젝트 수정하기",
         onClick: handleEditClick,
         disabled: isPermissionLoading,
-        visuallyDisabled: isMatchingPeriod,
+        visuallyDisabled: isMatchingPeriod && !canPublishProject,
       })
     }
   } else {

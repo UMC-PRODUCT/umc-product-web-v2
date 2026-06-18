@@ -76,6 +76,7 @@ interface ProjectDetailCardProps {
   hideMyApplication?: boolean
   /** 매칭 기간 중 수정하기 버튼 숨김 */
   isMatchingPeriod?: boolean
+  canManageProject?: boolean
 }
 
 function ProjectDetailCardSkeleton() {
@@ -184,6 +185,7 @@ export function ProjectDetailCard({
   viewOnly = false,
   hideMyApplication = false,
   isMatchingPeriod = false,
+  canManageProject,
 }: ProjectDetailCardProps) {
   const projectId = Number(projectIdProp)
   const navigate = useNavigate()
@@ -216,6 +218,8 @@ export function ProjectDetailCard({
   )
   const resolvedCanEditProject =
     canEditProject ?? projectPermissionsQuery.canEdit
+  const resolvedCanManageProject =
+    canManageProject ?? projectPermissionsQuery.canManage
   const resolvedEditPermissionLoading =
     editPermissionLoading ??
     (shouldQueryEditPermission && projectPermissionsQuery.isPending)
@@ -548,7 +552,7 @@ export function ProjectDetailCard({
             >
               기획 보기
             </Button>
-            {showEditCta && !isMatchingPeriod ? (
+            {showEditCta && (!isMatchingPeriod || resolvedCanManageProject) ? (
               shouldShowEditCta ? (
                 <Button
                   className="min-w-36 flex-1 whitespace-nowrap"
