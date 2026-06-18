@@ -31,7 +31,7 @@ export const projectKeys = {
 } as const
 
 export const gisuKeys = {
-  active: ["gisu"] as const,
+  active: ["gisu", "active"] as const,
 } as const
 
 export const memberKeys = {

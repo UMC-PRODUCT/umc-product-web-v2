@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
-import { useActiveGisuId } from "@/features/application/hooks/useApplicationPageData"
 import {
   getMyApplications,
   getProjectDetail,
@@ -11,6 +10,7 @@ import {
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { ProjectManagementSubTitle } from "@/features/project/management/ui/ProjectManagementSubTitle"
 import { UsabilitySurvey } from "@/features/usability-survey"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { Modal } from "@/shared/ui/Modal"

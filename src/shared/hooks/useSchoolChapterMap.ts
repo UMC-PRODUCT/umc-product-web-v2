@@ -4,14 +4,10 @@ import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
-import { getActiveGisu } from "@/shared/api/gisu"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 
 export function useSchoolChapterMap() {
-  const { data: gisuData } = useQuery({
-    queryKey: ["gisu"],
-    queryFn: getActiveGisu,
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: gisuData } = useActiveGisu()
 
   const activeGisuId = gisuData?.gisuId ? Number(gisuData.gisuId) : undefined
 

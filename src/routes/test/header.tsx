@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import Header from "@/components/header/Header"
 import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
 import SideBar from "@/components/sidebar/SideBar"
+import { authKeys } from "@/features/auth/hooks/useMe"
 import { useAuthStore } from "@/features/auth/store/authStore"
 import { cn } from "@/shared/lib/utils"
 
@@ -134,7 +135,7 @@ export function useHeaderPreviewUser() {
 
   useEffect(() => {
     const previousAuthState = useAuthStore.getState()
-    const previousAuthQuery = queryClient.getQueryData(["auth", "me"])
+    const previousAuthQuery = queryClient.getQueryData(authKeys.me)
 
     useAuthStore.setState({
       accessToken: null,
@@ -142,7 +143,7 @@ export function useHeaderPreviewUser() {
       memberId: null,
       isAuthed: false,
     })
-    queryClient.setQueryData(["auth", "me"], HEADER_PREVIEW_USER)
+    queryClient.setQueryData(authKeys.me, HEADER_PREVIEW_USER)
     setIsReady(true)
 
     return () => {
@@ -152,7 +153,7 @@ export function useHeaderPreviewUser() {
         memberId: previousAuthState.memberId,
         isAuthed: previousAuthState.isAuthed,
       })
-      queryClient.setQueryData(["auth", "me"], previousAuthQuery)
+      queryClient.setQueryData(authKeys.me, previousAuthQuery)
     }
   }, [queryClient])
 

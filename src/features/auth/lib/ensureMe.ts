@@ -1,6 +1,7 @@
 import { redirect } from "@tanstack/react-router"
 
 import { getMyInfo, type MemberInfoResponse } from "@/features/auth/api/me"
+import { authKeys } from "@/features/auth/hooks/useMe"
 import { buildLoginRedirectSearch } from "@/features/auth/lib/loginRedirect"
 import { useAuthStore } from "@/features/auth/store/authStore"
 
@@ -19,7 +20,7 @@ export async function ensureMe(
 
   try {
     return await queryClient.ensureQueryData({
-      queryKey: ["auth", "me"],
+      queryKey: authKeys.me,
       queryFn: getMyInfo,
       staleTime: 1000 * 60 * 5,
     })

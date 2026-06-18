@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { Info } from "lucide-react"
 import { useState } from "react"
 
+import { authKeys } from "@/features/auth/hooks/useMe"
 import { addChallengerRecordToMember } from "@/features/challenger/api/challengerRecord"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
@@ -35,7 +36,7 @@ export function ChallengerVerification() {
   const verifyMutation = useMutation({
     mutationFn: (value: string) => addChallengerRecordToMember(value),
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["auth", "me"] })
+      queryClient.removeQueries({ queryKey: authKeys.me })
       void navigate({ to: "/" })
     },
     onError: () => {

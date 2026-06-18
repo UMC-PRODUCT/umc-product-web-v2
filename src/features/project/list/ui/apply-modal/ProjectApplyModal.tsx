@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 import {
   forwardRef,
@@ -17,6 +18,7 @@ import { trackEvent } from "@/shared/analytics"
 import { getActiveGisu } from "@/shared/api/gisu"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
+import { gisuKeys } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import { FormHeader } from "@/shared/ui/FormHeader"
@@ -196,6 +198,7 @@ export const ProjectApplyModal = forwardRef<
   },
   ref,
 ) {
+  const queryClient = useQueryClient()
   const addToast = useToastStore((s) => s.addToast)
   const isDevMatchingRound = Boolean(import.meta.env.VITE_DEV_MATCHING_ROUND_ID)
   const [sectionEnabled, setSectionEnabled] = useState<Record<string, boolean>>(
@@ -251,7 +254,13 @@ export const ProjectApplyModal = forwardRef<
         setApplicationId(Number(draft.applicationId))
       } catch (err) {
         if (err instanceof AxiosError && err.response?.status === 409) {
-          const gisu = await getActiveGisu().catch(() => null)
+          const gisu = await queryClient
+            .ensureQueryData({
+              queryKey: gisuKeys.active,
+              queryFn: getActiveGisu,
+              staleTime: 5 * 60 * 1000,
+            })
+            .catch(() => null)
           if (gisu) {
             const apps: MyProjectApplicationResponse[] =
               await getMyApplications(Number(gisu.gisuId), "DRAFT").catch(

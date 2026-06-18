@@ -44,6 +44,7 @@ export const Route = createFileRoute("/matching/projects/new")({
         const gisu = await context.queryClient.ensureQueryData({
           queryKey: gisuKeys.active,
           queryFn: getActiveGisu,
+          staleTime: 5 * 60 * 1000,
         })
         const gisuId = gisu?.gisuId ? Number(gisu.gisuId) : undefined
         if (gisuId) {
