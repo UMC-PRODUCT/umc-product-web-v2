@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
+import { useMe } from "@/features/auth/hooks/useMe"
+import { getLatestChallengerRecord } from "@/features/auth/model/identity"
 import {
   getAllChapters,
   getAllSchools,
@@ -75,10 +77,23 @@ export function useChallengerPageData(
   const gisuQuery = useActiveGisuId({ enabled })
   const gisuId = gisuQuery.data ?? 0
 
+  const { data: me } = useMe()
+  const chapterId = useMemo(() => {
+    const record = getLatestChallengerRecord(me)
+    return record?.chapterId ? Number(record.chapterId) : undefined
+  }, [me])
+
   const projectsQuery = useQuery({
     queryKey: applicationKeys.managedProjects(gisuId),
     queryFn: () => getManagedProjects(gisuId),
     enabled: enabled && gisuId > 0,
+  })
+
+  // 매칭 차수 조회 (현재 진행 차수 계산용)
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(chapterId),
+    queryFn: () => getMatchingRounds(chapterId),
+    enabled: enabled && chapterId !== undefined,
   })
 
   // 프로젝트 목록이 로드되면 각 프로젝트의 지원자 목록도 함께 조회
@@ -122,17 +137,10 @@ export function useChallengerPageData(
     enabled: enabled && projects.length > 0,
   })
 
-  // 현재 차수: 서버 통계에 존재하는 가장 높은 차수
-  const currentRound = useMemo(() => {
-    const firstStat = (projectStatsQuery.data ?? [])[0]
-    if (!firstStat) return undefined
-    let max = 0
-    for (const r of firstStat.roundApplicationStatistics) {
-      const n = toRoundNumber(r.matchingRound.phase)
-      if (n > max) max = n
-    }
-    return max || undefined
-  }, [projectStatsQuery.data])
+  const { currentRound } = useMemo(
+    () => getCurrentRound(roundsQuery.data ?? []),
+    [roundsQuery.data],
+  )
 
   // 차수별 지원 가용 인원 (서버 roundApplicationStatistics 직접 사용)
   const availablePerRound = useMemo(() => {
@@ -196,7 +204,8 @@ export function useChallengerPageData(
       (gisuQuery.isLoading ||
         projectsQuery.isLoading ||
         applicantsQuery.isLoading ||
-        projectStatsQuery.isLoading),
+        projectStatsQuery.isLoading ||
+        roundsQuery.isLoading),
     isError: enabled && (gisuQuery.isError || projectsQuery.isError),
     error: gisuQuery.error ?? projectsQuery.error ?? applicantsQuery.error,
   }
