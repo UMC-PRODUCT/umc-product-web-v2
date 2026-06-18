@@ -221,7 +221,7 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
   const isMatchingGateLoading =
     isEditMode &&
     isInProgress &&
-    (!matchingRoundsQuery.isSuccess || isMatchingPeriodActive)
+    (matchingRoundsQuery.isLoading || isMatchingPeriodActive)
 
   useEffect(() => {
     if (detailQuery.data) {
