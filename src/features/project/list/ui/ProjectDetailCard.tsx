@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
 import {
+  getCurrentChallengerPart,
   getLatestChallengerRecord,
   isCurrentTermPm,
   isOperator,
@@ -44,6 +45,8 @@ import {
   resolveProjectDetailCtaMode,
   selectCurrentApplicationForProject,
   selectIsAlreadyApproved,
+  selectIsPartIneligible,
+  selectIsPartRecruitClosed,
 } from "../model/projectDetailCta"
 import { ApplyFormSkeleton } from "./apply-modal/ApplyFormSkeleton"
 import { MyApplicationModal } from "./apply-modal/MyApplicationModal"
@@ -289,14 +292,14 @@ export function ProjectDetailCard({
     [applicationForm],
   )
 
-  const latestChallengerPart = useMemo(() => {
-    return getLatestChallengerRecord(me)?.part
+  const myMatchingPart = useMemo(() => {
+    return getCurrentChallengerPart(me)
   }, [me])
 
   const visibleSections = useMemo(() => {
     if (userIsOperator || userIsPm) return sections
-    return filterApplicationSectionsByPart(sections, latestChallengerPart)
-  }, [sections, userIsOperator, userIsPm, latestChallengerPart])
+    return filterApplicationSectionsByPart(sections, myMatchingPart)
+  }, [sections, userIsOperator, userIsPm, myMatchingPart])
 
   useEffect(() => {
     if (!formError) return
@@ -391,16 +394,12 @@ export function ProjectDetailCard({
   const isPartIneligible =
     isChallengerView &&
     detail != null &&
-    latestChallengerPart != null &&
-    !detail.partQuotas.some((q) => q.part === latestChallengerPart)
+    selectIsPartIneligible(detail.partQuotas, myMatchingPart)
 
   const isPartRecruitClosed =
     isChallengerView &&
     detail != null &&
-    latestChallengerPart != null &&
-    detail.partQuotas.some(
-      (q) => q.part === latestChallengerPart && q.status === "COMPLETED",
-    )
+    selectIsPartRecruitClosed(detail.partQuotas, myMatchingPart)
 
   const hasActiveRoundForCtaMode: boolean | undefined =
     isChallengerView && !isActiveMatchingRoundLoading
@@ -708,29 +707,21 @@ export function ProjectDetailCard({
                 {(ctaMode === "apply-blocked-other" ||
                   ctaMode === "apply-blocked-part" ||
                   ctaMode === "apply-blocked-closed") && (
-                  <>
-                    <Button
-                      variant="weak"
-                      color="primary"
-                      className="min-w-32 flex-1 whitespace-nowrap"
-                      disabled={!detail?.applicationFormId}
-                      onClick={() => {
-                        trackEvent("project_questions_click", {
-                          project_id: projectId,
-                          cta_mode: ctaMode,
-                        })
-                        setIsRecruitQuestionsModalOpen(true)
-                      }}
-                    >
-                      모집 문항 보기
-                    </Button>
-                    <Button
-                      className="min-w-28 flex-1 whitespace-nowrap"
-                      disabled
-                    >
-                      지원하기
-                    </Button>
-                  </>
+                  <Button
+                    variant="weak"
+                    color="primary"
+                    className="min-w-32 flex-1 whitespace-nowrap"
+                    disabled={!detail?.applicationFormId}
+                    onClick={() => {
+                      trackEvent("project_questions_click", {
+                        project_id: projectId,
+                        cta_mode: ctaMode,
+                      })
+                      setIsRecruitQuestionsModalOpen(true)
+                    }}
+                  >
+                    모집 문항 보기
+                  </Button>
                 )}
                 {ctaMode === "no-active-round" && (
                   <Button
@@ -798,7 +789,7 @@ export function ProjectDetailCard({
             <div className="mt-2 flex w-full items-center justify-center gap-1">
               <CheckIcon className="text-teal-gray-500 h-4 w-4 shrink-0" />
               <p className="text-caption-2-regular text-teal-gray-500 text-center">
-                모집이 마감된 파트라 지원할 수 없습니다.
+                해당 파트는 모집이 마감되었습니다.
               </p>
             </div>
           )}

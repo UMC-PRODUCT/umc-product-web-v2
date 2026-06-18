@@ -1,3 +1,5 @@
+import type { ProjectDetail } from "../api/matchingProject"
+
 export type ProjectDetailCtaMode =
   | "recruit-questions"
   | "my-application"
@@ -46,6 +48,27 @@ export function resolveProjectDetailCtaMode({
   if (isPartIneligible) return "apply-blocked-part"
   if (isPartRecruitClosed) return "apply-blocked-closed"
   return "apply"
+}
+
+type PartQuotaForCta = Pick<
+  ProjectDetail["partQuotas"][number],
+  "part" | "status"
+>
+
+export function selectIsPartIneligible(
+  partQuotas: PartQuotaForCta[],
+  myPart: string | undefined,
+): boolean {
+  if (myPart == null) return false
+  return !partQuotas.some((q) => q.part === myPart)
+}
+
+export function selectIsPartRecruitClosed(
+  partQuotas: PartQuotaForCta[],
+  myPart: string | undefined,
+): boolean {
+  if (myPart == null) return false
+  return partQuotas.some((q) => q.part === myPart && q.status === "COMPLETED")
 }
 
 interface ApplyButtonDisabledParams {
