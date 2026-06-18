@@ -77,7 +77,7 @@ export function useChallengerPageData(
   const gisuQuery = useActiveGisuId({ enabled })
   const gisuId = gisuQuery.data ?? 0
 
-  const { data: me } = useMe()
+  const { data: me, isLoading: isMeLoading } = useMe()
   const chapterId = useMemo(() => {
     const record = getLatestChallengerRecord(me)
     return record?.chapterId ? Number(record.chapterId) : undefined
@@ -205,7 +205,10 @@ export function useChallengerPageData(
         projectsQuery.isLoading ||
         applicantsQuery.isLoading ||
         projectStatsQuery.isLoading ||
-        roundsQuery.isLoading),
+        isMeLoading ||
+        (chapterId !== undefined &&
+          roundsQuery.data === undefined &&
+          !roundsQuery.isError)),
     isError: enabled && (gisuQuery.isError || projectsQuery.isError),
     error: gisuQuery.error ?? projectsQuery.error ?? applicantsQuery.error,
   }
