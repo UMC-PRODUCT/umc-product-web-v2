@@ -186,7 +186,7 @@ describe("isCurrentTermPm", () => {
 })
 
 describe("getCurrentChallengerPart", () => {
-  it("currentGisuMemberInfo의 challenger part를 우선한다", () => {
+  it("currentGisuMemberInfo의 challenger part를 반환한다", () => {
     const me = makeMe(
       ["CHAPTER_PRESIDENT"],
       [
