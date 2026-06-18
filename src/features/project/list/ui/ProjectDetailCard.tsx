@@ -192,6 +192,10 @@ export function ProjectDetailCard({
   const addToast = useToastStore((s) => s.addToast)
   const userIsOperator = isOperator(me)
   const userIsPm = isCurrentTermPm(me)
+  const isAdminView = viewContext.isAdminView && userIsOperator
+  const isPmView = viewContext.isPmView
+  const isApplicantView =
+    viewContext.isChallengerView || (!userIsOperator && !userIsPm)
   const shouldQueryEditPermission =
     showEditCta && canEditProject === undefined && Number.isFinite(projectId)
   const projectPermissionsQuery = useProjectPermissions(projectId, {
@@ -201,8 +205,7 @@ export function ProjectDetailCard({
     !showEditCta &&
     Number.isFinite(projectId) &&
     me !== undefined &&
-    !userIsOperator &&
-    !userIsPm
+    isApplicantView
   const applicationWritePermissionQuery = useResourcePermission(
     "PROJECT_APPLICATION",
     projectId,
@@ -249,13 +252,14 @@ export function ProjectDetailCard({
   const { data: myApplications, isError: isMyApplicationsError } = useQuery({
     queryKey: ["myApplications", activeGisuId],
     queryFn: () => getMyApplications(activeGisuId!),
-    enabled: activeGisuId != null && !userIsOperator && !userIsPm,
+    enabled: activeGisuId != null && isApplicantView && me != null,
   })
 
   const myChapterId = useMemo(() => {
-    const id = getLatestChallengerRecord(me)?.chapterId
+    const id =
+      viewContext.currentChapterId ?? getLatestChallengerRecord(me)?.chapterId
     return id != null ? Number(id) : null
-  }, [me])
+  }, [me, viewContext.currentChapterId])
 
   const isAlreadyApproved = selectIsAlreadyApproved(myApplications)
 
@@ -297,9 +301,9 @@ export function ProjectDetailCard({
   }, [me])
 
   const visibleSections = useMemo(() => {
-    if (userIsOperator || userIsPm) return sections
+    if (!isApplicantView) return sections
     return filterApplicationSectionsByPart(sections, myMatchingPart)
-  }, [sections, userIsOperator, userIsPm, myMatchingPart])
+  }, [sections, isApplicantView, myMatchingPart])
 
   useEffect(() => {
     if (!formError) return
@@ -339,13 +343,11 @@ export function ProjectDetailCard({
     addToast,
   ])
 
-  const isSameBranch = userIsOperator
+  const isSameBranch = isAdminView
     ? true
     : projectChapterId != null && myChapterId != null
       ? projectChapterId === myChapterId
       : true
-  const isChallengerView =
-    viewContext.isChallengerView || (!userIsOperator && !userIsPm)
 
   const devMatchingRoundId =
     Number(import.meta.env.VITE_DEV_MATCHING_ROUND_ID) || null
@@ -361,7 +363,7 @@ export function ProjectDetailCard({
         return getActiveMatchingRound(myChapterId!)
       },
       enabled:
-        isChallengerView && (myChapterId != null || devMatchingRoundId != null),
+        isApplicantView && (myChapterId != null || devMatchingRoundId != null),
       staleTime: 60 * 1000,
     })
 
@@ -387,27 +389,27 @@ export function ProjectDetailCard({
   }, [myApplications, activeMatchingRound, projectId])
 
   const isApplicationStatusResolving =
-    isChallengerView &&
+    isApplicantView &&
     (myApplications === undefined || activeMatchingRound === undefined) &&
     !isMyApplicationsError
 
   const isPartIneligible =
-    isChallengerView &&
+    isApplicantView &&
     detail != null &&
     selectIsPartIneligible(detail.partQuotas, myMatchingPart)
 
   const isPartRecruitClosed =
-    isChallengerView &&
+    isApplicantView &&
     detail != null &&
     selectIsPartRecruitClosed(detail.partQuotas, myMatchingPart)
 
   const hasActiveRoundForCtaMode: boolean | undefined =
-    isChallengerView && !isActiveMatchingRoundLoading
+    isApplicantView && !isActiveMatchingRoundLoading
       ? activeMatchingRound != null
       : undefined
 
   const ctaMode =
-    viewOnly && !userIsOperator
+    viewOnly && !isAdminView && !isPmView
       ? resolveProjectDetailCtaMode({
           isOperator: false,
           isPm: false,
@@ -420,8 +422,8 @@ export function ProjectDetailCard({
           isPartRecruitClosed,
         })
       : resolveProjectDetailCtaMode({
-          isOperator: userIsOperator,
-          isPm: userIsPm,
+          isOperator: isAdminView,
+          isPm: isPmView,
           isSameBranch,
           isApplied,
           isDraftApplication,
@@ -609,18 +611,15 @@ export function ProjectDetailCard({
                   </Button>
                 )}
                 {ctaMode === "apply" &&
-                  (viewOnly && userIsPm
-                    ? true
-                    : isApplicationWritePermissionLoading ||
-                      canWriteProjectApplication) && (
+                  (isApplicationWritePermissionLoading ||
+                    canWriteProjectApplication) && (
                     <Button
                       className="min-w-28 flex-1 whitespace-nowrap"
                       isLoading={
-                        !(viewOnly && userIsPm) &&
                         (isDetailLoading || isApplicationWritePermissionLoading)
                       }
                       disabled={isApplyButtonDisabled({
-                        isPmReadonly: viewOnly && userIsPm,
+                        isPmReadonly: false,
                         isDetailLoading,
                         hasApplicationForm: !!detail?.applicationFormId,
                         isWritePermissionLoading:
@@ -635,26 +634,6 @@ export function ProjectDetailCard({
                           cta_mode: ctaMode,
                           is_draft_application: isDraftApplication,
                         })
-                        if (viewOnly && userIsPm) {
-                          if (!detail?.applicationFormId) {
-                            addToast({
-                              message:
-                                "지원 양식이 등록되지 않은 프로젝트입니다.",
-                              color: "red",
-                              variant: "deep",
-                              type: "default",
-                              duration: 3000,
-                            })
-                            return
-                          }
-                          setIsRecruitQuestionsModalOpen(true)
-                          trackEvent("project_questions_click", {
-                            project_id: projectId,
-                            cta_mode: ctaMode,
-                            source: "pm_readonly_apply",
-                          })
-                          return
-                        }
                         if (
                           isApplicationWritePermissionLoading ||
                           !canWriteProjectApplication
@@ -874,7 +853,7 @@ export function ProjectDetailCard({
                 projectId={projectId}
                 matchingRoundId={Number(activeMatchingRound.id)}
                 sections={visibleSections}
-                canToggleSection={userIsOperator || userIsPm}
+                canToggleSection={!isApplicantView}
                 initialApplicationId={
                   isDraftApplication && myApplicationForProject
                     ? Number(myApplicationForProject.applicationId)
