@@ -634,26 +634,6 @@ export function ProjectDetailCard({
                           cta_mode: ctaMode,
                           is_draft_application: isDraftApplication,
                         })
-                        if (viewOnly && isPmView) {
-                          if (!detail?.applicationFormId) {
-                            addToast({
-                              message:
-                                "지원 양식이 등록되지 않은 프로젝트입니다.",
-                              color: "red",
-                              variant: "deep",
-                              type: "default",
-                              duration: 3000,
-                            })
-                            return
-                          }
-                          setIsRecruitQuestionsModalOpen(true)
-                          trackEvent("project_questions_click", {
-                            project_id: projectId,
-                            cta_mode: ctaMode,
-                            source: "pm_readonly_apply",
-                          })
-                          return
-                        }
                         if (
                           isApplicationWritePermissionLoading ||
                           !canWriteProjectApplication
