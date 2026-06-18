@@ -199,6 +199,7 @@ export const RecruitInfoForm = forwardRef<
 
   const handleNext = async () => {
     if (isReadOnly) {
+      if (quotaOnlyMode) return
       onNext()
       return
     }
@@ -333,7 +334,7 @@ export const RecruitInfoForm = forwardRef<
             type="button"
             variant="fill"
             color="primary"
-            disabled={isSaving}
+            disabled={isSaving || (quotaOnlyMode && isReadOnly)}
             onClick={() => void handleNext()}
           >
             {quotaOnlyMode ? "변경" : "다음"}
