@@ -73,9 +73,10 @@ function MatchingStatusPage() {
   } = useMatchingStatusData(selectedChapter)
 
   const DEFAULT_PARTS = ["Web", "iOS", "Android"]
-  const displayParts = matchingParts.length > 0
-    ? matchingParts
-    : DEFAULT_PARTS.map((name) => ({ partName: name, projects: [] }))
+  const displayParts = DEFAULT_PARTS.map((name) => {
+    const part = matchingParts.find((item) => item.partName === name)
+    return part ?? { partName: name, projects: [] }
+  })
   const displayStats = stats
 
   return (
