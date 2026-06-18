@@ -611,18 +611,15 @@ export function ProjectDetailCard({
                   </Button>
                 )}
                 {ctaMode === "apply" &&
-                  (viewOnly && isPmView
-                    ? true
-                    : isApplicationWritePermissionLoading ||
-                      canWriteProjectApplication) && (
+                  (isApplicationWritePermissionLoading ||
+                    canWriteProjectApplication) && (
                     <Button
                       className="min-w-28 flex-1 whitespace-nowrap"
                       isLoading={
-                        !(viewOnly && isPmView) &&
                         (isDetailLoading || isApplicationWritePermissionLoading)
                       }
                       disabled={isApplyButtonDisabled({
-                        isPmReadonly: viewOnly && isPmView,
+                        isPmReadonly: false,
                         isDetailLoading,
                         hasApplicationForm: !!detail?.applicationFormId,
                         isWritePermissionLoading:
