@@ -97,6 +97,7 @@ export const RecruitInfoForm = forwardRef<
     projectPermissionsQuery.isPending
   const isReadOnly =
     readOnly || isPartQuotaPermissionLoading || !canUpdatePartQuotas
+  const isStackLocked = isReadOnly || quotaOnlyMode
 
   const [isSaving, setIsSaving] = useState(false)
   const [hasSavedOnce, setHasSavedOnce] = useState(false)
@@ -281,7 +282,7 @@ export const RecruitInfoForm = forwardRef<
                   value={roleStates[key].stack}
                   className="max-w-full flex-wrap"
                   onValueChange={(v) =>
-                    isReadOnly
+                    isStackLocked
                       ? undefined
                       : updateStack(key, v as RoleStack | undefined)
                   }
@@ -290,7 +291,7 @@ export const RecruitInfoForm = forwardRef<
                     <OptionButton
                       key={stack}
                       value={stack}
-                      disabled={isReadOnly || roleStates[key].count === 0}
+                      disabled={isStackLocked || roleStates[key].count === 0}
                     >
                       {stack}
                     </OptionButton>
