@@ -26,6 +26,7 @@ import {
   isSuperAdmin,
 } from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
+import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
@@ -124,15 +125,28 @@ function MatchingApplicationsPage() {
     }
   }, [me, chapters, userChapter, chaptersWithSchoolsQuery.data])
 
+  // 차수 제한 대상: 지부장·교내 회장/부회장·Plan 챌린저
+  const isRoundRestrictedRole =
+    isChapterPresident(identity) || schoolLeadership || hasPmRole
+
   const admin = useAdminPageData(selectedChapter, {
     enabled: showAdminSection,
   })
   const adminStats = admin.stats
   const adminProjects = admin.projects
 
+  // 지부장·교내 회장/부회장: admin.activeRound가 있으면 차수 진행 중 → 조회 잠금
+  const isAdminRoundLocked =
+    isRoundRestrictedRole && admin.activeRound !== undefined
+
   const challenger = useChallengerPageData({ enabled: showPmSection })
   const pmProjects = challenger.projects
   const availablePerRound = challenger.availablePerRound
+
+  // Plan 챌린저: 매칭 기간 중이면 조회 잠금
+  const isPmMatchingPeriod = useIsMatchingPeriod({
+    enabled: showPmSection && hasPmRole,
+  })
 
   return (
     <section className="flex w-full flex-col">
@@ -174,6 +188,12 @@ function MatchingApplicationsPage() {
                     데이터를 불러오는 중...
                   </p>
                 </div>
+              ) : isAdminRoundLocked ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-body-2-regular text-teal-gray-400">
+                    매칭 차수가 진행 중입니다. 차수 종료 후 조회할 수 있습니다.
+                  </p>
+                </div>
               ) : (
                 <div className="flex flex-col gap-14.25">
                   <ApplicationStatsSection
@@ -186,7 +206,6 @@ function MatchingApplicationsPage() {
                     projects={adminProjects}
                     currentRound={admin.currentRound}
                     chapterName={selectedChapter}
-                    hideExpand
                     disableProjectModal
                   />
                 </div>
@@ -200,6 +219,12 @@ function MatchingApplicationsPage() {
                 <div className="flex items-center justify-center py-20">
                   <p className="text-body-2-regular text-teal-gray-400">
                     데이터를 불러오는 중...
+                  </p>
+                </div>
+              ) : isPmMatchingPeriod ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-body-2-regular text-teal-gray-400">
+                    매칭 차수가 진행 중입니다. 차수 종료 후 조회할 수 있습니다.
                   </p>
                 </div>
               ) : pmProjects.length === 0 ? (
