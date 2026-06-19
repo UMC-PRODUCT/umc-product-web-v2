@@ -162,20 +162,16 @@ export function ProjectManagementPage() {
     enabled: useGroupedView && !!gisuId,
   })
 
-  const projects: MatchingProject[] = useMemo(
-    () =>
-      (managedQuery.data ?? [])
-        .filter(
-          (project) =>
-            isSuperAdmin(me) ||
-            isCentralStaff(me) ||
-            project.status !== "DRAFT",
-        )
-        .map((project) =>
-          toMatchingProject(project, managedQuery.dataUpdatedAt),
-        ),
-    [managedQuery.data, managedQuery.dataUpdatedAt, me],
-  )
+  const projects: MatchingProject[] = useMemo(() => {
+    const hasFullAccess = isSuperAdmin(me) || isCentralStaff(me)
+    const list = managedQuery.data ?? []
+    const filtered = hasFullAccess
+      ? list
+      : list.filter((project) => project.status !== "DRAFT")
+    return filtered.map((project) =>
+      toMatchingProject(project, managedQuery.dataUpdatedAt),
+    )
+  }, [managedQuery.data, managedQuery.dataUpdatedAt, me])
 
   const selectedChapterInfo = useMemo(() => {
     if (!useGroupedView) return undefined
