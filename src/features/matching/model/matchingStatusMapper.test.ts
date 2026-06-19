@@ -48,14 +48,14 @@ const makeMembers = (
 
 describe("toMatchingPartDataList - 지원자/멤버 없을 때", () => {
   it("지원자도 멤버도 없어도 Web 탭에 프로젝트가 포함된다", () => {
-    const result = toMatchingPartDataList([baseProject], new Map(), new Map())
+    const result = toMatchingPartDataList([baseProject], new Map())
     const webPart = result.find((p) => p.partName === "Web")
     expect(webPart).toBeDefined()
     expect(webPart?.projects).toHaveLength(1)
   })
 
   it("Frontend 행이 WEB quota(3) 수만큼 빈 슬롯(type: none)을 가진다", () => {
-    const result = toMatchingPartDataList([baseProject], new Map(), new Map())
+    const result = toMatchingPartDataList([baseProject], new Map())
     const project = result.find((p) => p.partName === "Web")?.projects[0]
     const feRow = project?.roleRows.find((r) => r.role === "Frontend")
     const noneBlocks = feRow?.blocks.filter((b) => b.type === "none")
@@ -63,7 +63,7 @@ describe("toMatchingPartDataList - 지원자/멤버 없을 때", () => {
   })
 
   it("Design 행이 DESIGN quota(1) 수만큼 빈 슬롯을 가진다", () => {
-    const result = toMatchingPartDataList([baseProject], new Map(), new Map())
+    const result = toMatchingPartDataList([baseProject], new Map())
     const project = result.find((p) => p.partName === "Web")?.projects[0]
     const designRow = project?.roleRows.find((r) => r.role === "Design")
     const noneBlocks = designRow?.blocks.filter((b) => b.type === "none")
@@ -71,7 +71,7 @@ describe("toMatchingPartDataList - 지원자/멤버 없을 때", () => {
   })
 
   it("Backend 행이 SPRINGBOOT quota(2) 수만큼 빈 슬롯을 가진다", () => {
-    const result = toMatchingPartDataList([baseProject], new Map(), new Map())
+    const result = toMatchingPartDataList([baseProject], new Map())
     const project = result.find((p) => p.partName === "Web")?.projects[0]
     const beRow = project?.roleRows.find((r) => r.role === "Backend")
     const noneBlocks = beRow?.blocks.filter((b) => b.type === "none")
@@ -93,7 +93,7 @@ describe("toMatchingPartDataList - 탭 분류", () => {
         },
       ],
     }
-    const result = toMatchingPartDataList([project], new Map(), new Map())
+    const result = toMatchingPartDataList([project], new Map())
     expect(result.find((p) => p.partName === "Web")).toBeUndefined()
   })
 
@@ -110,12 +110,12 @@ describe("toMatchingPartDataList - 탭 분류", () => {
         },
       ],
     }
-    const result = toMatchingPartDataList([project], new Map(), new Map())
+    const result = toMatchingPartDataList([project], new Map())
     expect(result.find((p) => p.partName === "iOS")).toBeDefined()
   })
 
   it("프로젝트가 없으면 빈 배열을 반환한다", () => {
-    expect(toMatchingPartDataList([], new Map(), new Map())).toEqual([])
+    expect(toMatchingPartDataList([], new Map())).toEqual([])
   })
 })
 
@@ -135,7 +135,7 @@ describe("toMatchingPartDataList - 멤버 배정 시", () => {
         ],
       },
     ])
-    const result = toMatchingPartDataList([baseProject], new Map(), members)
+    const result = toMatchingPartDataList([baseProject], members)
     const feRow = result
       .find((p) => p.partName === "Web")
       ?.projects[0]?.roleRows.find((r) => r.role === "Frontend")
@@ -174,7 +174,7 @@ describe("toMatchingPartDataList - 멤버 배정 시", () => {
         ],
       },
     ])
-    const result = toMatchingPartDataList([baseProject], new Map(), members)
+    const result = toMatchingPartDataList([baseProject], members)
     const feRow = result
       .find((p) => p.partName === "Web")
       ?.projects[0]?.roleRows.find((r) => r.role === "Frontend")
