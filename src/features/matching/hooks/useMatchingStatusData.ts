@@ -89,6 +89,7 @@ export function useMatchingStatusData(chapterName?: string) {
   const schoolsQuery = useQuery({
     queryKey: ["schools", "all"],
     queryFn: getAllSchools,
+    staleTime: Infinity,
   })
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()

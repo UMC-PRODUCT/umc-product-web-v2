@@ -128,6 +128,7 @@ export function useMatchingProjectListFilters() {
     queryKey: ["chaptersWithSchools", activeGisuId],
     queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
     enabled: activeGisuId != null,
+    staleTime: Infinity,
   })
 
   const branchOptions: ProjectFilterOption[] = useMemo(

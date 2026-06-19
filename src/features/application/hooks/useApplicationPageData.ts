@@ -169,6 +169,7 @@ export function useChallengerPageData(
     queryKey: ["schools", "all"],
     queryFn: getAllSchools,
     enabled,
+    staleTime: Infinity,
   })
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
@@ -231,6 +232,7 @@ export function useChapters(options: ApplicationPageDataOptions = {}) {
     queryKey: applicationKeys.chapters(),
     queryFn: getAllChapters,
     enabled,
+    staleTime: Infinity,
   })
 }
 
@@ -254,6 +256,7 @@ export function useAdminPageData(
     queryKey: ["chapters-with-schools", gisuId],
     queryFn: () => getChaptersWithSchools(String(gisuId)),
     enabled: enabled && gisuId > 0,
+    staleTime: Infinity,
   })
   const chapterSchoolIds = useMemo(() => {
     if (!chapterName || !chaptersWithSchoolsQuery.data) return null
@@ -288,6 +291,7 @@ export function useAdminPageData(
     queryKey: ["schools", "all"],
     queryFn: getAllSchools,
     enabled,
+    staleTime: Infinity,
   })
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
