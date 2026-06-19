@@ -6,7 +6,6 @@ import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePe
 import {
   isAnyOperator,
   isCentralCore,
-  isCentralStaff,
   isChapterPresident,
   isCurrentTermPm,
   isSchoolStaff,
@@ -163,7 +162,7 @@ export function ProjectManagementPage() {
   })
 
   const projects: MatchingProject[] = useMemo(() => {
-    const hasFullAccess = isSuperAdmin(me) || isCentralStaff(me)
+    const hasFullAccess = isCentralCore(me)
     const list = managedQuery.data ?? []
     const filtered = hasFullAccess
       ? list
