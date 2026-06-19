@@ -290,6 +290,7 @@ function toMatchingProject(
       project.partQuotaStatus === "RECRUITING" ? "recruiting" : "completed",
     currentCount,
     totalCount,
+    thumbnailUrl: project.thumbnailImageUrl || undefined,
   }
 }
 

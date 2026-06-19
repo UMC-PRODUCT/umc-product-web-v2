@@ -90,9 +90,12 @@ interface ModalFormPanelProps {
   applicant: ApplicantDetail
   formData: ApplicantFormData | null
   chapterName: string
-  projectName: string
-  challengerName: string
-  challengerUniversity: string
+  project: {
+    projectName: string
+    challengerName: string
+    challengerUniversity: string
+    thumbnailUrl?: string
+  }
   variant?: "application" | "matching"
   onStatusChange?: (status: StatusValue) => void
   onUnmatch?: () => void
@@ -106,9 +109,7 @@ export function ModalFormPanel({
   applicant,
   formData,
   chapterName,
-  projectName,
-  challengerName,
-  challengerUniversity,
+  project,
   variant = "application",
   onStatusChange,
   onUnmatch,
@@ -230,9 +231,10 @@ export function ModalFormPanel({
         <div className="relative flex h-15 items-end px-4 py-4.5">
           {/* 프로젝트 카드 (좌) */}
           <ProjectTitleCard
-            projectName={projectName}
-            challengerName={challengerName}
-            challengerUniversity={challengerUniversity}
+            projectName={project.projectName}
+            challengerName={project.challengerName}
+            challengerUniversity={project.challengerUniversity}
+            thumbnailUrl={project.thumbnailUrl}
             size="sm"
             className="absolute top-0 left-0 w-full"
           />

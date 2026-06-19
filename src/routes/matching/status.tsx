@@ -151,6 +151,7 @@ function MatchingStatusPage() {
                               chapterId={chapterId}
                               assignedMemberIds={assignedMemberIds}
                               chapterName={selectedChapter}
+                              thumbnailUrl={project.thumbnailUrl}
                             />
                           ))}
                         </>
