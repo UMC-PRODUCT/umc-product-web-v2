@@ -8,8 +8,15 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import { updateApplicationDecision } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
-import { useApplicationDetail } from "../hooks/useApplications"
-import { toApplicantFormData, toServerStatus } from "../model/mappers"
+import {
+  useApplicationDetail,
+  useProjectApplications,
+} from "../hooks/useApplications"
+import {
+  toApplicantDetail,
+  toApplicantFormData,
+  toServerStatus,
+} from "../model/mappers"
 import { isRoundDecisionClosed } from "../model/matchingDecision"
 import { ModalApplicantPanel } from "./detail-modal/ModalApplicantPanel"
 import { ModalFormPanel } from "./detail-modal/ModalFormPanel"
@@ -31,6 +38,8 @@ interface ApplicationDetailModalProps {
   hidePendingStatus?: boolean
   /** 프로젝트 단위 합/불 결정 권한 (projects/permissions의 application.canDecide) */
   canDecide?: boolean
+  /** 모달 오픈 시 미리 선택할 지원서 ID (챌린저 이름 클릭으로 지원서 상세 바로 열기) */
+  initialApplicantId?: string
 }
 
 // 합/불 상태 변경 확인 모달 문구 (대기는 PM 뷰에서 노출되지 않으나 타입 완전성 위해 포함)
@@ -75,6 +84,7 @@ export function ApplicationDetailModal({
   disableFormPanel = false,
   hidePendingStatus = false,
   canDecide = false,
+  initialApplicantId,
 }: ApplicationDetailModalProps) {
   const addToast = useToastStore((s) => s.addToast)
 
@@ -95,13 +105,30 @@ export function ApplicationDetailModal({
   // 이중 실행 방지용 ref (Strict Mode 대응)
   const emptyToastShownRef = useRef(false)
 
-  // 지원자 없는 프로젝트 모달 오픈 시 토스트 노출
+  // admin 등 project.applicants가 비어 있으면 지원자 목록을 직접 조회(펼침 목록 캐시 재사용)
+  const lazyApplicantsQuery = useProjectApplications(
+    project.applicants.length === 0 ? Number(project.id) : 0,
+  )
+  const baseApplicants = useMemo(
+    () =>
+      project.applicants.length > 0
+        ? project.applicants
+        : (lazyApplicantsQuery.data ?? []).map(toApplicantDetail),
+    [project.applicants, lazyApplicantsQuery.data],
+  )
+
+  // 지원자 없는 프로젝트 모달 오픈 시 토스트 노출 (lazy 로드 완료 후 실제 지원자 0명일 때만)
   useEffect(() => {
     if (!open) {
       emptyToastShownRef.current = false
       return
     }
-    if (project.applicants.length === 0 && !emptyToastShownRef.current) {
+    if (
+      !initialApplicantId &&
+      !lazyApplicantsQuery.isLoading &&
+      baseApplicants.length === 0 &&
+      !emptyToastShownRef.current
+    ) {
       emptyToastShownRef.current = true
       addToast({
         message: "아직 지원한 챌린저가 없습니다.",
@@ -111,21 +138,35 @@ export function ApplicationDetailModal({
         duration: 3000,
       })
     }
-  }, [open, addToast])
+  }, [
+    open,
+    addToast,
+    initialApplicantId,
+    baseApplicants.length,
+    lazyApplicantsQuery.isLoading,
+  ])
 
   // 합/불 결정 권한은 프로젝트 단위(application.canDecide)로 상위에서 전달받는다
   const canApproveApplicant = (_applicantId: string): boolean => canDecide
 
-  const projectWithOverrides = useMemo(() => {
-    if (Object.keys(statusOverrides).length === 0) return project
-    return {
-      ...project,
-      applicants: project.applicants.map((a) => {
-        const override = statusOverrides[a.id]
-        return override ? { ...a, status: override } : a
-      }),
+  // 챌린저 이름 클릭으로 지정된 지원자를 모달 오픈 시 선택 → 지원서 상세(폼) 바로 표시
+  // 단, 폼 조회 권한이 없는 역할(disableFormPanel)은 목록만 보고 폼은 열지 않는다
+  useEffect(() => {
+    if (open && initialApplicantId && !disableFormPanel) {
+      setSelectedApplicantId(initialApplicantId)
     }
-  }, [project, statusOverrides])
+  }, [open, initialApplicantId, disableFormPanel])
+
+  const projectWithOverrides = useMemo(() => {
+    const applicants =
+      Object.keys(statusOverrides).length === 0
+        ? baseApplicants
+        : baseApplicants.map((a) => {
+            const override = statusOverrides[a.id]
+            return override ? { ...a, status: override } : a
+          })
+    return { ...project, applicants }
+  }, [project, baseApplicants, statusOverrides])
 
   const selectedApplicant = selectedApplicantId
     ? (projectWithOverrides.applicants.find(
@@ -295,6 +336,7 @@ export function ApplicationDetailModal({
                 decisionDeadlineByRound={decisionDeadlineByRound}
                 canApproveApplicant={canApproveApplicant}
                 approvePermissionLoading={false}
+                disableFormPanel={disableFormPanel}
                 statusOptions={hidePendingStatus ? ["pass", "fail"] : undefined}
                 className="w-full"
               />

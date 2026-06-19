@@ -143,10 +143,7 @@ function MatchingApplicationsPage() {
   const availablePerRound = challenger.availablePerRound
 
   // PM 뷰 프로젝트별 capability (목록/통계/승인 노출 게이팅)
-  const pmProjectIds = useMemo(
-    () => pmProjects.map((p) => p.id),
-    [pmProjects],
-  )
+  const pmProjectIds = useMemo(() => pmProjects.map((p) => p.id), [pmProjects])
   const pmPermissions = useProjectsPermissions(pmProjectIds, {
     enabled: showPmSection && pmProjectIds.length > 0,
   })
@@ -218,8 +215,13 @@ function MatchingApplicationsPage() {
                       projects={adminProjects}
                       currentRound={admin.currentRound}
                       chapterName={selectedChapter}
-                      disableProjectModal
                       lazyLoadApplicants
+                      disableFormPanel={
+                        !(
+                          isCentralCore(identity) ||
+                          isChapterPresident(identity)
+                        )
+                      }
                     />
                   )}
                 </div>

@@ -4,9 +4,13 @@ import { ApplicantDetailRow } from "./ApplicantDetailRow"
 
 interface LazyApplicantRowsProps {
   projectId: string
+  onApplicantClick?: (applicationId: string) => void
 }
 
-export function LazyApplicantRows({ projectId }: LazyApplicantRowsProps) {
+export function LazyApplicantRows({
+  projectId,
+  onApplicantClick,
+}: LazyApplicantRowsProps) {
   const query = useProjectApplications(Number(projectId))
 
   if (query.isLoading) {
@@ -43,6 +47,9 @@ export function LazyApplicantRows({ projectId }: LazyApplicantRowsProps) {
           status={applicant.status}
           processedAt={applicant.processedAt}
           appliedAt={applicant.appliedAt}
+          onChallengerClick={
+            onApplicantClick ? () => onApplicantClick(applicant.id) : undefined
+          }
         />
       ))}
     </div>

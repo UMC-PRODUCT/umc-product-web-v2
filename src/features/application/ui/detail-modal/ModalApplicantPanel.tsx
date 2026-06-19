@@ -41,6 +41,8 @@ interface ModalApplicantPanelProps {
   canApproveApplicant: (applicantId: string) => boolean
   approvePermissionLoading: boolean
   statusOptions?: StatusValue[]
+  /** 지원서 상세 조회 권한 없음(학교 회장단/운영국원 등) - 지원자 이름 버튼 비활성 */
+  disableFormPanel?: boolean
   className?: string
 }
 
@@ -60,6 +62,7 @@ export function ModalApplicantPanel({
   canApproveApplicant,
   approvePermissionLoading,
   statusOptions,
+  disableFormPanel = false,
   className,
 }: ModalApplicantPanelProps) {
   const filteredApplicants = useMemo(() => {
@@ -272,6 +275,7 @@ export function ModalApplicantPanel({
                 canApproveApplicant={canApproveApplicant}
                 approvePermissionLoading={approvePermissionLoading}
                 statusOptions={statusOptions}
+                nameDisabled={disableFormPanel}
               />
             ))}
 

@@ -16,6 +16,8 @@ interface ApplicantRowProps {
   onStatusChange?: (status: StatusValue) => void
   statusDisabled?: boolean
   statusOptions?: StatusValue[]
+  /** 지원서 상세 조회 권한 없음 - 이름 버튼 비활성(폼 열기 차단) */
+  nameDisabled?: boolean
 }
 
 export function ApplicantRow({
@@ -30,6 +32,7 @@ export function ApplicantRow({
   onStatusChange,
   statusDisabled = false,
   statusOptions,
+  nameDisabled = false,
 }: ApplicantRowProps) {
   return (
     <div
@@ -41,9 +44,11 @@ export function ApplicantRow({
         <button
           type="button"
           onClick={onClick}
+          disabled={nameDisabled}
           className={cn(
             "flex h-12.5 w-37.5 flex-col justify-center rounded-lg px-3.5 text-left",
             isSelected && "bg-teal-50",
+            nameDisabled && "cursor-not-allowed",
           )}
         >
           <span className="text-body-2-medium text-teal-gray-900">{name}</span>
