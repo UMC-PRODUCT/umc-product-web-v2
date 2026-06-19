@@ -125,9 +125,11 @@ function MatchingApplicationsPage() {
     }
   }, [me, chapters, userChapter, chaptersWithSchoolsQuery.data])
 
-  // 차수 제한 대상: 지부장·교내 회장/부회장·Plan 챌린저
+  // 차수 제한 대상: 지부장·교내 회장/부회장·Plan 챌린저 (최고관리자·중앙 총괄단 제외)
   const isRoundRestrictedRole =
-    isChapterPresident(identity) || schoolLeadership || hasPmRole
+    (isChapterPresident(identity) || schoolLeadership || hasPmRole) &&
+    !isSuperAdmin(identity) &&
+    !isCentralStaff(identity)
 
   const admin = useAdminPageData(selectedChapter, {
     enabled: showAdminSection,
@@ -254,7 +256,9 @@ function MatchingApplicationsPage() {
                       )}
                       schoolIdToName={challenger.schoolIdToName}
                       currentRound={challenger.currentRound}
-                      decisionDeadlineByRound={challenger.decisionDeadlineByRound}
+                      decisionDeadlineByRound={
+                        challenger.decisionDeadlineByRound
+                      }
                     />
                   </div>
                 ))

@@ -6,6 +6,7 @@ import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePe
 import {
   isAnyOperator,
   isCentralCore,
+  isCentralStaff,
   isChapterPresident,
   isCurrentTermPm,
   isSchoolStaff,
@@ -164,11 +165,16 @@ export function ProjectManagementPage() {
   const projects: MatchingProject[] = useMemo(
     () =>
       (managedQuery.data ?? [])
-        .filter((project) => project.status !== "DRAFT")
+        .filter(
+          (project) =>
+            isSuperAdmin(me) ||
+            isCentralStaff(me) ||
+            project.status !== "DRAFT",
+        )
         .map((project) =>
           toMatchingProject(project, managedQuery.dataUpdatedAt),
         ),
-    [managedQuery.data, managedQuery.dataUpdatedAt],
+    [managedQuery.data, managedQuery.dataUpdatedAt, me],
   )
 
   const selectedChapterInfo = useMemo(() => {
