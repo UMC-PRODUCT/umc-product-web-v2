@@ -70,9 +70,9 @@ export function MatchingSection() {
 
   useMotionValueEvent(scrollYProgress, "change", (value) => {
     if (isProgrammaticRef.current) return
-    const nextPage = Math.min(
-      TOTAL_PAGE_COUNT - 1,
-      Math.floor(value * TOTAL_PAGE_COUNT),
+    const nextPage = Math.max(
+      0,
+      Math.min(TOTAL_PAGE_COUNT - 1, Math.floor(value * TOTAL_PAGE_COUNT)),
     )
     if (nextPage === pageRef.current) return
     directionRef.current = nextPage > pageRef.current ? 1 : -1
