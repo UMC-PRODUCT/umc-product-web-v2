@@ -248,7 +248,9 @@ export function useChallengerPageData(
         projectsQuery.isLoading ||
         applicantsQuery.isLoading ||
         projectStatsQuery.isLoading ||
-        logoQuery.isLoading ||
+        (projects.length > 0 &&
+          logoQuery.data === undefined &&
+          !logoQuery.isError) ||
         isMeLoading ||
         (chapterId !== undefined &&
           roundsQuery.data === undefined &&
