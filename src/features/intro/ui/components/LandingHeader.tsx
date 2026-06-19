@@ -31,11 +31,13 @@ export function LandingHeader() {
   }
 
   useEffect(() => {
+    let rafId: number | null = null
+
     const handleScroll = () => {
       if (tickingRef.current) return
       tickingRef.current = true
 
-      requestAnimationFrame(() => {
+      rafId = requestAnimationFrame(() => {
         const currentScrollY = window.scrollY
         const threshold = window.innerHeight
         const nextVisible =
@@ -52,7 +54,11 @@ export function LandingHeader() {
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      if (rafId !== null) cancelAnimationFrame(rafId)
+      tickingRef.current = false
+    }
   }, [])
 
   return (
