@@ -2,28 +2,31 @@ import { cva } from "class-variance-authority"
 
 import { cn } from "@/shared/lib/utils"
 
-const barVariants = cva("w-full rounded-t-[0.375rem] px-2 pt-2", {
-  variants: {
-    rank: {
-      1: "bg-teal-500",
-      2: "bg-teal-400",
-      3: "bg-teal-300",
-      4: "bg-teal-200",
-      5: "border-b-[0.3125rem] border-teal-200 bg-teal-50",
-    },
-  },
-})
-
-const labelVariants = cva(
-  "text-[0.75rem] font-bold leading-[1.4] tracking-[-0.02em]",
+const barVariants = cva(
+  "w-full rounded-t-[0.375rem] px-2 pt-2 overflow-hidden",
   {
     variants: {
       rank: {
-        1: "text-white",
-        2: "text-teal-600",
-        3: "text-teal-500",
-        4: "text-teal-500",
-        5: "text-teal-500",
+        1: "bg-teal-500",
+        2: "bg-teal-400",
+        3: "bg-teal-300",
+        4: "bg-teal-200",
+        5: "border-b-[0.3125rem] border-teal-200 bg-teal-50",
+      },
+    },
+  },
+)
+
+const labelVariants = cva(
+  "text-[0.75rem] font-bold leading-[1.4] tracking-[-0.02em] break-all",
+  {
+    variants: {
+      rank: {
+        1: "text-white line-clamp-3",
+        2: "text-teal-600 line-clamp-3",
+        3: "text-teal-500 line-clamp-2",
+        4: "text-teal-500 line-clamp-2",
+        5: "text-teal-500 line-clamp-2",
       },
     },
   },

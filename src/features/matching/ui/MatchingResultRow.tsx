@@ -62,6 +62,7 @@ interface MatchingResultRowProps {
   assignedMemberIds?: Set<string>
   chapterName?: string
   className?: string
+  thumbnailUrl?: string
 }
 
 export function MatchingResultRow({
@@ -80,6 +81,7 @@ export function MatchingResultRow({
   assignedMemberIds,
   chapterName,
   className,
+  thumbnailUrl,
 }: MatchingResultRowProps) {
   const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
     null,
@@ -390,9 +392,12 @@ export function MatchingResultRow({
         projectId={projectId}
         memberId={selectedMemberId ?? undefined}
         chapterName={chapterName ?? ""}
-        projectName={projectName}
-        challengerName={challengerName}
-        challengerUniversity={challengerUniversity}
+        project={{
+          projectName,
+          challengerName,
+          challengerUniversity,
+          thumbnailUrl,
+        }}
         open={selectedApplicantId !== null}
         onOpenChange={(open) => {
           if (!open) {

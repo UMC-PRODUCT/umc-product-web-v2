@@ -14,9 +14,12 @@ interface MatchingDetailModalProps {
   projectId?: string
   memberId?: string
   chapterName: string
-  projectName: string
-  challengerName: string
-  challengerUniversity: string
+  project: {
+    projectName: string
+    challengerName: string
+    challengerUniversity: string
+    thumbnailUrl?: string
+  }
   open: boolean
   onOpenChange: (open: boolean) => void
   isEditable?: boolean
@@ -27,9 +30,7 @@ export function MatchingDetailModal({
   applicantId,
   projectId,
   chapterName,
-  projectName,
-  challengerName,
-  challengerUniversity,
+  project,
   open,
   onOpenChange,
   isEditable = false,
@@ -94,9 +95,7 @@ export function MatchingDetailModal({
             applicant={applicant}
             formData={formData}
             chapterName={chapterName}
-            projectName={projectName}
-            challengerName={challengerName}
-            challengerUniversity={challengerUniversity}
+            project={project}
             variant="matching"
             onUnmatch={isEditable ? handleUnmatch : undefined}
             onClose={handleClose}

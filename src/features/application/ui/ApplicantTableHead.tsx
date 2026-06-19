@@ -1,3 +1,5 @@
+import { AnimatePresence, motion } from "motion/react"
+
 import CollapseAllIcon from "@/shared/assets/icon/expand-collapse/CollapseAllIcon"
 import ExpandAllIcon from "@/shared/assets/icon/expand-collapse/ExpandAllIcon"
 import { cn } from "@/shared/lib/utils"
@@ -56,11 +58,30 @@ export function ApplicantTableHead({
           onClick={onToggleAll}
           className="shadow-inner-neutral-2 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-teal-100 transition-colors hover:bg-teal-200"
         >
-          {hasExpanded ? (
-            <CollapseAllIcon width={24} height={24} className="text-teal-700" />
-          ) : (
-            <ExpandAllIcon width={24} height={24} className="text-teal-700" />
-          )}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={hasExpanded ? "collapse" : "expand"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center justify-center"
+            >
+              {hasExpanded ? (
+                <CollapseAllIcon
+                  width={24}
+                  height={24}
+                  className="text-teal-700"
+                />
+              ) : (
+                <ExpandAllIcon
+                  width={24}
+                  height={24}
+                  className="text-teal-700"
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </button>
       )}
     </div>

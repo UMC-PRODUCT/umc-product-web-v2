@@ -10,6 +10,7 @@ export interface MatchingProjectData {
   status: "recruiting" | "completed"
   currentCount?: number
   totalCount?: number
+  thumbnailUrl?: string
 }
 
 export interface MatchingPartData {
