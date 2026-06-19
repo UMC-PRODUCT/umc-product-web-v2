@@ -126,6 +126,19 @@ export async function getProjectMembers(
   return data.result
 }
 
+export async function getProjectMembersBatch(
+  projectIds: number[],
+): Promise<Map<string, ProjectMembersResponse>> {
+  if (projectIds.length === 0) return new Map()
+  const { data } = await api.get<
+    ApiResponse<Record<string, ProjectMembersResponse>>
+  >("/v1/projects/members", {
+    params: { projectIds },
+    paramsSerializer: { indexes: null },
+  })
+  return new Map(Object.entries(data.result ?? {}))
+}
+
 export async function getMatchingProjects(
   params: GetMatchingProjectsParams,
 ): Promise<ProjectPage> {
