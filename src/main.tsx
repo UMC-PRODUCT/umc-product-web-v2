@@ -15,9 +15,9 @@ const isMaintenance = import.meta.env.VITE_MAINTENANCE === "true"
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0,
+      staleTime: 1000 * 30, // 30초
       retry: 1,
-      refetchOnMount: "always",
+      refetchOnMount: true, // 데이터가 stale할 때만 마운트 시 리페치 수행
     },
   },
 })
