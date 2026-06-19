@@ -37,6 +37,7 @@ export interface MatchingBlockData {
   tagVariant?: NumberTagVariant
   applicantId?: string
   memberId?: string
+  part?: Part
 }
 
 export interface MatchingRoleRow {
@@ -89,6 +90,7 @@ export function MatchingResultRow({
     rowIdx: number
     blockIdx: number
     role: string
+    part?: Part
   } | null>(null)
   const [manualUnmatchTarget, setManualUnmatchTarget] = useState<{
     memberId: string
@@ -184,7 +186,7 @@ export function MatchingResultRow({
         idx === rowIdx ? { ...row, blocks: newBlocks } : row,
       ),
     )
-  }, [roleRows])
+  }, [roleRows, projectId])
 
   // 블록 배열을 colsPerRow 단위로 청크 분할
   const chunkedRows = localRoleRows.map((row) => {
@@ -298,6 +300,7 @@ export function MatchingResultRow({
                                   rowIdx,
                                   blockIdx: flatOffset + blockIdx,
                                   role: row.role,
+                                  part: block.part,
                                 })
                             : undefined
                         }
@@ -442,9 +445,10 @@ export function MatchingResultRow({
           challengerUniversity={challengerUniversity}
           role={assignTarget?.role ?? ""}
           part={
-            assignTarget
+            assignTarget?.part ??
+            (assignTarget
               ? roleToPart(assignTarget.role, backendPart)
-              : undefined
+              : undefined)
           }
           gisuId={gisuId}
           chapterId={chapterId}
@@ -465,6 +469,7 @@ export function MatchingResultRow({
               name: challenger.nickname,
               tagVariant: "random" as NumberTagVariant,
               memberId: String(challenger.id),
+              part: assignTarget.part,
             }
             setLocalRoleRows((prev) =>
               prev.map((row, rIdx) =>
@@ -481,7 +486,8 @@ export function MatchingResultRow({
               ),
             )
             // 서버 API 호출 - 실패 시 throw해서 AssignmentModal에서 완료 모달 미표시
-            const part = roleToPart(assignTarget.role, backendPart)
+            const part =
+              assignTarget.part ?? roleToPart(assignTarget.role, backendPart)
             await assignMutation.mutateAsync({
               memberId: String(challenger.id),
               part,
