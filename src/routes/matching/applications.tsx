@@ -186,12 +186,6 @@ function MatchingApplicationsPage() {
                     데이터를 불러오는 중...
                   </p>
                 </div>
-              ) : isAdminRoundLocked ? (
-                <div className="flex items-center justify-center py-20">
-                  <p className="text-body-2-regular text-teal-gray-400">
-                    매칭 차수가 진행 중입니다. 차수 종료 후 조회할 수 있습니다.
-                  </p>
-                </div>
               ) : (
                 <div className="flex flex-col gap-14.25">
                   <ApplicationStatsSection
@@ -200,12 +194,21 @@ function MatchingApplicationsPage() {
                     currentRound={admin.currentRound}
                     activeRound={admin.activeRound}
                   />
-                  <ApplicationTableSection
-                    projects={adminProjects}
-                    currentRound={admin.currentRound}
-                    chapterName={selectedChapter}
-                    disableProjectModal
-                  />
+                  {isAdminRoundLocked ? (
+                    <div className="flex items-center justify-center py-20">
+                      <p className="text-body-2-regular text-teal-gray-400">
+                        매칭 차수가 진행 중입니다. 차수 종료 후 조회할 수
+                        있습니다.
+                      </p>
+                    </div>
+                  ) : (
+                    <ApplicationTableSection
+                      projects={adminProjects}
+                      currentRound={admin.currentRound}
+                      chapterName={selectedChapter}
+                      disableProjectModal
+                    />
+                  )}
                 </div>
               )}
             </div>
