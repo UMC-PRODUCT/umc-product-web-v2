@@ -427,12 +427,6 @@ export function useAdminPageData(
         ? Math.round((appliedCount / partial.totalMembers) * 100)
         : 0
 
-    // 도넛 차트 총원을 필터링된 schoolMatchingStatistics 기준으로 보정
-    // roundApplicationStatistics.availableMemberCount는 전체 기준이므로 지부/학교 필터링 반영 안 됨
-    for (const r of partial.rounds) {
-      r.total = partial.totalMembers
-    }
-
     // 학교별 지원자 수 집계 (roundSchoolRankings 전 차수 합산, 챕터 소속 학교만)
     const schoolApplicantCounts = new Map<string, number>()
     for (const ranking of chapterStatsQuery.data.summary.roundSchoolRankings ??
