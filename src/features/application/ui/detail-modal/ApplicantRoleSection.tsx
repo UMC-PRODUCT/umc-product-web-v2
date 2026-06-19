@@ -17,6 +17,8 @@ interface ApplicantRoleSectionProps {
   canApproveApplicant: (applicantId: string) => boolean
   approvePermissionLoading: boolean
   statusOptions?: StatusValue[]
+  /** 지원서 상세 조회 권한 없음 - 지원자 이름 버튼 비활성 */
+  nameDisabled?: boolean
   className?: string
 }
 
@@ -31,6 +33,7 @@ export function ApplicantRoleSection({
   canApproveApplicant,
   approvePermissionLoading,
   statusOptions,
+  nameDisabled = false,
   className,
 }: ApplicantRoleSectionProps) {
   const roundCounts = applicants.reduce<Record<number, number>>((acc, a) => {
@@ -97,6 +100,7 @@ export function ApplicantRoleSection({
               onStatusChange={(s) => onStatusChange?.(applicant.id, s)}
               statusDisabled={statusDisabled}
               statusOptions={statusOptions}
+              nameDisabled={nameDisabled}
             />
           )
         })}

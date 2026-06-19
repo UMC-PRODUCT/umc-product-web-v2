@@ -109,6 +109,19 @@ export function ApplicationTableSection({
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] =
     useState<ProjectApplication | null>(null)
+  // 챌린저 이름 클릭 시 미리 선택할 지원서 ID (지원서 상세 바로 열기)
+  const [initialApplicantId, setInitialApplicantId] = useState<
+    string | undefined
+  >(undefined)
+
+  const openApplicantDetail = (
+    targetProject: ProjectApplication,
+    applicationId: string,
+  ) => {
+    setSelectedProject(targetProject)
+    setInitialApplicantId(applicationId)
+    setDetailModalOpen(true)
+  }
 
   // 필터 상태
   const [openFilter, setOpenFilter] = useState<string | null>(null)
@@ -331,6 +344,7 @@ export function ApplicationTableSection({
                     ? undefined
                     : () => {
                         setSelectedProject(project)
+                        setInitialApplicantId(undefined)
                         setDetailModalOpen(true)
                       }
                 }
@@ -339,7 +353,12 @@ export function ApplicationTableSection({
 
               {isExpanded &&
                 (lazyLoadApplicants ? (
-                  <LazyApplicantRows projectId={project.id} />
+                  <LazyApplicantRows
+                    projectId={project.id}
+                    onApplicantClick={(applicationId) =>
+                      openApplicantDetail(project, applicationId)
+                    }
+                  />
                 ) : project.applicants.length > 0 ? (
                   <div className="border-teal-gray-150 py-1">
                     {project.applicants.map((applicant) => (
@@ -352,6 +371,9 @@ export function ApplicationTableSection({
                         status={applicant.status}
                         processedAt={applicant.processedAt}
                         appliedAt={applicant.appliedAt}
+                        onChallengerClick={() =>
+                          openApplicantDetail(project, applicant.id)
+                        }
                       />
                     ))}
                   </div>
@@ -382,12 +404,16 @@ export function ApplicationTableSection({
           project={selectedProject}
           chapterName={chapterName ?? ""}
           open={detailModalOpen}
-          onOpenChange={setDetailModalOpen}
+          onOpenChange={(next) => {
+            setDetailModalOpen(next)
+            if (!next) setInitialApplicantId(undefined)
+          }}
           currentRound={currentRound}
           decisionDeadlineByRound={decisionDeadlineByRound}
           disableFormPanel={disableFormPanel}
           hidePendingStatus={hidePendingStatus}
           canDecide={canDecide}
+          initialApplicantId={initialApplicantId}
         />
       )}
     </div>
