@@ -13,6 +13,19 @@ function normalizePathname(pathname: string): string {
   return pathname
 }
 
+function matchesPath(path: string, target: string): boolean {
+  return path === target || path.startsWith(`${target}/`)
+}
+
+/** menu.to 또는 matchPaths 중 path와 일치하는 경로 문자열을 반환 */
+function getMatchedPath(path: string, menu: SideBarMenu): string | null {
+  if (matchesPath(path, menu.to)) return menu.to
+  for (const alias of menu.matchPaths ?? []) {
+    if (matchesPath(path, alias)) return alias
+  }
+  return null
+}
+
 export function resolveNavigationFromPathname(pathname: string): {
   section: SideBarSection
   menu: SideBarMenu
@@ -38,10 +51,10 @@ export function resolveNavigationFromPathname(
   const source = sections ?? SIDEBAR_ITEMS
   for (const section of source) {
     for (const menu of section.menus) {
-      const hit = path === menu.to || path.startsWith(`${menu.to}/`)
-      if (!hit) continue
-      if (menu.to.length > bestLen) {
-        bestLen = menu.to.length
+      const matchedPath = getMatchedPath(path, menu)
+      if (matchedPath === null) continue
+      if (matchedPath.length > bestLen) {
+        bestLen = matchedPath.length
         picked = { section, menu }
       }
     }
