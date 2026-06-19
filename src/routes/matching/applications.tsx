@@ -244,7 +244,7 @@ function MatchingApplicationsPage() {
                       projectName={project.projectName}
                       challengerName={project.challengerName}
                       challengerUniversity={project.challengerUniversity}
-                      thumbnailUrl={project.thumbnailUrl}
+                      thumbnailUrl={project.logoUrl}
                       size="lg"
                     />
                     <ChallengerApplicationView

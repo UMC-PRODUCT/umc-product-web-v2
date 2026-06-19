@@ -8,6 +8,7 @@ import {
   getAllSchools,
   getChaptersWithSchools,
 } from "@/features/challenger/api/organization"
+import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
 import {
@@ -179,13 +180,45 @@ export function useChallengerPageData(
     return map
   }, [schoolsQuery.data])
 
+  // 프로젝트별 로고 조회 (managed API는 logoImageUrl 미포함)
+  const logoQuery = useQuery({
+    queryKey: [
+      ...applicationKeys.all,
+      "project-logos",
+      projects.map((p) => p.id),
+    ],
+    queryFn: async () => {
+      const results = await Promise.allSettled(
+        projects.map(async (p) => {
+          const detail = await getProjectDetail(Number(p.id))
+          return {
+            projectId: String(p.id),
+            logoUrl: detail.logoImageUrl ?? undefined,
+          }
+        }),
+      )
+      return new Map(
+        results.flatMap((r) =>
+          r.status === "fulfilled"
+            ? [[r.value.projectId, r.value.logoUrl]]
+            : [],
+        ),
+      )
+    },
+    enabled: enabled && projects.length > 0,
+  })
+
   // 서버 데이터 -> 프론트 타입으로 변환
   const transformed: ProjectApplication[] = useMemo(
     () =>
-      projects.map((p) =>
-        toProjectApplication(p, applicantsQuery.data?.get(String(p.id)) ?? []),
-      ),
-    [projects, applicantsQuery.data],
+      projects.map((p) => ({
+        ...toProjectApplication(
+          p,
+          applicantsQuery.data?.get(String(p.id)) ?? [],
+        ),
+        logoUrl: logoQuery.data?.get(String(p.id)),
+      })),
+    [projects, applicantsQuery.data, logoQuery.data],
   )
 
   // PM 프로젝트 정보 (프로젝트 카드용)
@@ -215,6 +248,9 @@ export function useChallengerPageData(
         projectsQuery.isLoading ||
         applicantsQuery.isLoading ||
         projectStatsQuery.isLoading ||
+        (projects.length > 0 &&
+          logoQuery.data === undefined &&
+          !logoQuery.isError) ||
         isMeLoading ||
         (chapterId !== undefined &&
           roundsQuery.data === undefined &&

@@ -89,6 +89,7 @@ export interface ProjectApplication {
   challengerName: string
   challengerUniversity: string
   thumbnailUrl?: string
+  logoUrl?: string
   statusLabel: string
   designCount: AssignmentCount
   feCount: AssignmentCount
