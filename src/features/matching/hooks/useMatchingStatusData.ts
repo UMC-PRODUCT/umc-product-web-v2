@@ -18,7 +18,7 @@ import {
   getAllSchools,
   getChaptersWithSchools,
 } from "@/features/challenger/api/organization"
-import { getProjectMembers } from "@/features/project/list/api/matchingProject"
+import { getProjectMembersBatch } from "@/features/project/list/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { useViewModeStore } from "@/shared/view-mode"
 
@@ -202,15 +202,7 @@ export function useMatchingStatusData(chapterName?: string) {
       chapterId,
       projects.map((p) => p.id),
     ),
-    queryFn: async () => {
-      const results = await Promise.all(
-        projects.map(async (p) => {
-          const members = await getProjectMembers(Number(p.id))
-          return { projectId: p.id, members }
-        }),
-      )
-      return new Map(results.map((r) => [String(r.projectId), r.members]))
-    },
+    queryFn: () => getProjectMembersBatch(projects.map((p) => Number(p.id))),
     enabled: projects.length > 0,
   })
 
