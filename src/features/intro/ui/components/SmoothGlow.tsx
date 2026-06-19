@@ -19,7 +19,7 @@ export function SmoothGlow({
 }: SmoothGlowProps) {
   return (
     <div
-      className="pointer-events-none absolute will-change-transform"
+      className="pointer-events-none absolute"
       style={{
         left,
         top,
