@@ -38,12 +38,12 @@ export function matchingResponseToStats(
   const completionRate =
     totalMembers > 0 ? Math.round((completedCount / totalMembers) * 100) : 0
 
-  // 차수별 매칭 (matched > 0인 차수만, 도넛 분모는 지부 총원으로 보정)
+  // 차수별 매칭 (matched > 0인 차수만, 분모는 차수별 지원 가능 인원)
   const rounds = response.roundMatchingStatistics
     .map((r) => ({
       round: toRoundNumber(r.matchingRound.phase),
       applied: Number(r.matchedMemberCount),
-      total: totalMembers,
+      total: Number(r.availableMemberCount),
     }))
     .filter((r) => r.applied > 0)
     .sort((a, b) => a.round - b.round)
