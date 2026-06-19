@@ -6,6 +6,7 @@ import type {
   ManagedProjectSummaryResponse,
   ProjectApplicantResponse,
 } from "@/features/application/model/apiTypes"
+import type { Part } from "@/features/challenger/model/types"
 import type { ProjectMembersResponse } from "@/features/project/list/api/matchingProject"
 
 import type {
@@ -46,6 +47,46 @@ const PART_TO_ROLE: Record<string, string> = {
   IOS: "Frontend",
   SPRINGBOOT: "Backend",
   NODEJS: "Backend",
+}
+
+const ROLE_TO_PARTS: Record<string, string[]> = {
+  Design: ["DESIGN"],
+  Frontend: ["WEB", "ANDROID", "IOS"],
+  Backend: ["SPRINGBOOT", "NODEJS"],
+}
+
+// 각 역할에 대해 아직 채워지지 않은 파트별 남은 슬롯 수 계산
+function getNeededParts(
+  role: string,
+  partQuotas: ManagedProjectSummaryResponse["partQuotas"],
+  approvedAppByMemberId: Map<string, ProjectApplicantResponse>,
+  members: ProjectMembersResponse | undefined,
+): Part[] {
+  const subParts = ROLE_TO_PARTS[role] ?? []
+  const neededParts: Part[] = []
+
+  const filledCounts = new Map<string, number>()
+  if (members) {
+    for (const group of members.partGroups) {
+      filledCounts.set(group.part, group.members.length)
+    }
+  } else {
+    for (const app of approvedAppByMemberId.values()) {
+      const p = app.applicant.part
+      filledCounts.set(p, (filledCounts.get(p) ?? 0) + 1)
+    }
+  }
+
+  for (const part of subParts) {
+    const partQuota =
+      Number(partQuotas.find((q) => q.part === part)?.quota) || 0
+    const filledCount = filledCounts.get(part) ?? 0
+    const needed = Math.max(0, partQuota - filledCount)
+    for (let i = 0; i < needed; i++) {
+      neededParts.push(part as Part)
+    }
+  }
+  return neededParts
 }
 
 // 섹션 헤더용 FE 플랫폼 분류
@@ -95,6 +136,7 @@ function toMatchingProject(
                 String(app.applicationId),
               ),
               memberId: String(member.memberId),
+              part: group.part as Part,
             }
           : member.matchedRoundInfo
             ? {
@@ -103,6 +145,7 @@ function toMatchingProject(
                   displayName,
                 ),
                 memberId: String(member.memberId),
+                part: group.part as Part,
               }
             : {
                 // matchedRoundInfo 미제공: 배정 차수 알 수 없음 → 랜덤 매칭으로 표기
@@ -111,6 +154,7 @@ function toMatchingProject(
                 name: displayName,
                 tagVariant: "random" as const,
                 memberId: String(member.memberId),
+                part: group.part as Part,
               }
         const list = blocksByRole.get(role) ?? []
         list.push(block)
@@ -131,6 +175,7 @@ function toMatchingProject(
           String(app.applicationId),
         ),
         memberId: app.applicant.memberId,
+        part: app.applicant.part as Part,
       }
       const list = blocksByRole.get(role) ?? []
       list.push(block)
@@ -157,9 +202,18 @@ function toMatchingProject(
       0,
       Math.min(quota, totalSlots) - filledBlocks.length,
     )
+    const neededParts = getNeededParts(
+      "Design",
+      project.partQuotas,
+      approvedAppByMemberId,
+      members,
+    )
     const emptyBlocks: MatchingBlockData[] = Array.from(
       { length: emptyCount },
-      () => ({ type: "none" }),
+      (_, index) => ({
+        type: "none",
+        part: neededParts[index] as Part,
+      }),
     )
     return {
       role: "Design",
@@ -179,9 +233,18 @@ function toMatchingProject(
     )
 
     const emptyCount = Math.max(0, quota - filledBlocks.length)
+    const neededParts = getNeededParts(
+      role,
+      project.partQuotas,
+      approvedAppByMemberId,
+      members,
+    )
     const emptyBlocks: MatchingBlockData[] = Array.from(
       { length: emptyCount },
-      () => ({ type: "none" }),
+      (_, index) => ({
+        type: "none",
+        part: neededParts[index] as Part,
+      }),
     )
     const blockedCount = totalSlots - filledBlocks.length - emptyCount
     const blockedBlocks: MatchingBlockData[] = Array.from(
