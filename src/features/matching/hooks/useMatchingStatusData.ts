@@ -370,8 +370,9 @@ export function useMatchingStatusData(chapterName?: string) {
       chaptersQuery.isLoading ||
       roundsQuery.isLoading ||
       projectsQuery.isLoading ||
-      applicantsQuery.isLoading ||
-      membersQuery.isLoading ||
+      (projects.length > 0 &&
+        ((applicantsQuery.data === undefined && !applicantsQuery.isError) ||
+          (membersQuery.data === undefined && !membersQuery.isError))) ||
       chapterStatsQuery.isLoading ||
       chaptersWithSchoolsQuery.isLoading,
     isError:
