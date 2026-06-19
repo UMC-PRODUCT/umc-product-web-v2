@@ -125,6 +125,7 @@ export function useChallengerPageData(
       return new Map(results.map((r) => [String(r.projectId), r.applicants]))
     },
     enabled: enabled && projects.length > 0,
+    staleTime: 1000 * 60 * 5,
   })
 
   // 프로젝트별 통계 조회 (차수별 지원률, 학교별 지원자 수)
@@ -141,6 +142,7 @@ export function useChallengerPageData(
       return res.projects
     },
     enabled: enabled && projects.length > 0,
+    staleTime: 1000 * 60 * 5,
   })
 
   const { currentRound } = useMemo(
@@ -315,6 +317,7 @@ export function useAdminPageData(
     queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
     queryFn: () => getChapterStatistics(chapterId!),
     enabled: enabled && !!chapterId,
+    staleTime: 1000 * 60 * 5,
   })
 
   // projectId -> name 맵 (키를 String으로 통일)

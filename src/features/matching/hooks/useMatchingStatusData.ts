@@ -104,6 +104,7 @@ export function useMatchingStatusData(chapterName?: string) {
     queryKey: applicationKeys.matchingMatchings(chapterId ?? 0),
     queryFn: () => getMatchingStatistics(chapterId!),
     enabled: !!chapterId,
+    staleTime: 1000 * 60 * 5,
   })
 
   // projectId -> name 맵 (키를 String으로 통일)
@@ -121,6 +122,7 @@ export function useMatchingStatusData(chapterName?: string) {
     ),
     queryFn: () => getProjectMembersBatch(projects.map((p) => Number(p.id))),
     enabled: projects.length > 0,
+    staleTime: 1000 * 60 * 5,
   })
 
   // 전체 프로젝트에 배정된 멤버 ID 수집 (수동 배정 시 중복 필터링용)
