@@ -256,6 +256,42 @@ export interface ChapterStatisticsResponse {
   }
 }
 
+// 프로젝트별 매칭 완료 인원 수 (round/unclassified 공통)
+export interface MatchingProjectCount {
+  projectId: string
+  matchedMemberCount: string
+}
+
+// 차수별 ProjectMember 기준 매칭 현황
+export interface RoundMatchingStat {
+  matchingRound: StatMatchingRound
+  matchedMemberCount: string
+  availableMemberCount: string
+  projects: MatchingProjectCount[]
+}
+
+// 학교별 매칭 인원 수와 총원
+export interface SchoolMatchingStat {
+  schoolId: string
+  matchedMemberCount: string
+  totalMemberCount: string
+}
+
+// 합격 지원서가 없어 차수에 귀속할 수 없는 ProjectMember 집계
+export interface UnclassifiedMatchingStat {
+  matchedMemberCount: string
+  projects: MatchingProjectCount[]
+}
+
+// GET /api/v1/projects/statistics/matchings 응답 (PROJECT-STAT-003)
+// ProjectMember 기준 공개 매칭 집계 (멤버/지원서 ID 미노출)
+export interface ChapterMatchingStatisticsResponse {
+  chapterId: string
+  roundMatchingStatistics: RoundMatchingStat[]
+  schoolMatchingStatistics: SchoolMatchingStat[]
+  unclassifiedMatchingStatistics: UnclassifiedMatchingStat
+}
+
 // 페이지네이션 공통
 export interface PageResponse<T> {
   content: T[]

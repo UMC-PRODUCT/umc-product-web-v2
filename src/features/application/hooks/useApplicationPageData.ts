@@ -12,11 +12,11 @@ import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
 import {
   getAllProjects,
+  getChapterProjectStatistics,
   getChapterStatistics,
   getManagedProjects,
   getMatchingRounds,
   getProjectApplications,
-  getProjectStatistics,
 } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"
 import {
@@ -135,10 +135,10 @@ export function useChallengerPageData(
       projects.map((p) => p.id),
     ],
     queryFn: async () => {
-      const results = await Promise.all(
-        projects.map((p) => getProjectStatistics(Number(p.id))),
-      )
-      return results
+      const res = await getChapterProjectStatistics({
+        projectIds: projects.map((p) => Number(p.id)),
+      })
+      return res.projects
     },
     enabled: enabled && projects.length > 0,
   })

@@ -3,6 +3,7 @@ import { api } from "@/shared/lib/axios"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 import type {
+  ChapterMatchingStatisticsResponse,
   ChapterStatisticsResponse,
   CreateMatchingRoundRequest,
   DecisionRequest,
@@ -12,7 +13,6 @@ import type {
   PageResponse,
   ProjectApplicantResponse,
   ProjectApplicationDetailResponse,
-  ProjectStatisticsResponse,
   UpdateMatchingRoundRequest,
 } from "../model/apiTypes"
 
@@ -145,10 +145,14 @@ export async function removeProjectMember(
   return data.result
 }
 
-// 프로젝트 통계 조회 (PM용 - 단일 프로젝트)
-export async function getProjectStatistics(projectId: number) {
-  const { data } = await api.get<ApiResponse<ProjectStatisticsResponse>>(
-    `/v1/projects/${projectId}/statistics`,
+// 프로젝트 지원/매칭 현황 통합 조회 (projectIds 또는 chapterId 중 하나)
+export async function getChapterProjectStatistics(params: {
+  projectIds?: number[]
+  chapterId?: number
+}) {
+  const { data } = await api.get<ApiResponse<ChapterStatisticsResponse>>(
+    "/v1/projects/statistics",
+    { params, paramsSerializer: { indexes: null } },
   )
   return data.result
 }
@@ -159,6 +163,14 @@ export async function getChapterStatistics(chapterId: number) {
     "/v1/projects/statistics",
     { params: { chapterId } },
   )
+  return data.result
+}
+
+// 매칭 현황 집계 조회 (PROJECT-STAT-003, ProjectMember 기준 공개 집계)
+export async function getMatchingStatistics(chapterId: number) {
+  const { data } = await api.get<
+    ApiResponse<ChapterMatchingStatisticsResponse>
+  >("/v1/projects/statistics/matchings", { params: { chapterId } })
   return data.result
 }
 
