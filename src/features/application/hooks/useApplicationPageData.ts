@@ -8,6 +8,7 @@ import {
   getAllSchools,
   getChaptersWithSchools,
 } from "@/features/challenger/api/organization"
+import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
 import {
@@ -26,6 +27,7 @@ import {
   toRoundNumber,
 } from "../model/mappers"
 import { buildDecisionDeadlineByRound } from "../model/matchingDecision"
+import { useProjectsPermissions } from "./useProjectsPermissions"
 
 import type { MatchingRoundResponse } from "../model/apiTypes"
 import type {
@@ -179,13 +181,45 @@ export function useChallengerPageData(
     return map
   }, [schoolsQuery.data])
 
+  // 프로젝트별 로고 조회 (managed API는 logoImageUrl 미포함)
+  const logoQuery = useQuery({
+    queryKey: [
+      ...applicationKeys.all,
+      "project-logos",
+      projects.map((p) => p.id),
+    ],
+    queryFn: async () => {
+      const results = await Promise.allSettled(
+        projects.map(async (p) => {
+          const detail = await getProjectDetail(Number(p.id))
+          return {
+            projectId: String(p.id),
+            logoUrl: detail.logoImageUrl ?? undefined,
+          }
+        }),
+      )
+      return new Map(
+        results.flatMap((r) =>
+          r.status === "fulfilled"
+            ? [[r.value.projectId, r.value.logoUrl]]
+            : [],
+        ),
+      )
+    },
+    enabled: enabled && projects.length > 0,
+  })
+
   // 서버 데이터 -> 프론트 타입으로 변환
   const transformed: ProjectApplication[] = useMemo(
     () =>
-      projects.map((p) =>
-        toProjectApplication(p, applicantsQuery.data?.get(String(p.id)) ?? []),
-      ),
-    [projects, applicantsQuery.data],
+      projects.map((p) => ({
+        ...toProjectApplication(
+          p,
+          applicantsQuery.data?.get(String(p.id)) ?? [],
+        ),
+        logoUrl: logoQuery.data?.get(String(p.id)),
+      })),
+    [projects, applicantsQuery.data, logoQuery.data],
   )
 
   // PM 프로젝트 정보 (프로젝트 카드용)
@@ -215,6 +249,9 @@ export function useChallengerPageData(
         projectsQuery.isLoading ||
         applicantsQuery.isLoading ||
         projectStatsQuery.isLoading ||
+        (projects.length > 0 &&
+          logoQuery.data === undefined &&
+          !logoQuery.isError) ||
         isMeLoading ||
         (chapterId !== undefined &&
           roundsQuery.data === undefined &&
@@ -317,10 +354,23 @@ export function useAdminPageData(
   )
 
   // 지부 통계 조회 (rounds, totalMembers, projectRounds, topProjects)
+  // 지부 집계통계는 프로젝트 단위 statistics.canRead로 게이팅
+  // (선택 지부 내 프로젝트들의 capability는 역할 기반이라 균일 → 서버 값 그대로 반영)
+  const projectIds = useMemo(
+    () => projects.map((p) => String(p.id)),
+    [projects],
+  )
+  const permissions = useProjectsPermissions(projectIds, {
+    enabled: enabled && projectIds.length > 0,
+  })
+  const canReadStatistics =
+    projectIds.length > 0 &&
+    projectIds.some((id) => permissions.canReadStatistics(id))
+
   const chapterStatsQuery = useQuery({
     queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
     queryFn: () => getChapterStatistics(chapterId!),
-    enabled: enabled && !!chapterId,
+    enabled: enabled && !!chapterId && canReadStatistics,
     staleTime: 1000 * 60 * 5,
   })
 
@@ -427,12 +477,6 @@ export function useAdminPageData(
         ? Math.round((appliedCount / partial.totalMembers) * 100)
         : 0
 
-    // 도넛 차트 총원을 필터링된 schoolMatchingStatistics 기준으로 보정
-    // roundApplicationStatistics.availableMemberCount는 전체 기준이므로 지부/학교 필터링 반영 안 됨
-    for (const r of partial.rounds) {
-      r.total = partial.totalMembers
-    }
-
     // 학교별 지원자 수 집계 (roundSchoolRankings 전 차수 합산, 챕터 소속 학교만)
     const schoolApplicantCounts = new Map<string, number>()
     for (const ranking of chapterStatsQuery.data.summary.roundSchoolRankings ??
@@ -471,6 +515,7 @@ export function useAdminPageData(
   return {
     projects: transformed,
     stats,
+    showStats: canReadStatistics,
     currentRound,
     activeRound,
     decisionDeadlineByRound,

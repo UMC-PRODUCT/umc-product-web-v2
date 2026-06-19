@@ -16,7 +16,7 @@ export function LightStripTexture({ className = "" }: LightStripTextureProps) {
       {STRIP_OPACITIES.map((opacity, index) => (
         <span
           key={index}
-          className="h-full w-[69.14px] shrink-0 mix-blend-overlay backdrop-blur-[83px]"
+          className="h-full w-[69.14px] shrink-0"
           style={{ opacity, backgroundImage: STRIP_GRADIENT }}
         />
       ))}

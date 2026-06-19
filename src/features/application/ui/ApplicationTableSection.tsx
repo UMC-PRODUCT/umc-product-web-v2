@@ -13,6 +13,7 @@ import { shortenSchoolName } from "../model/mappers"
 import { ApplicantDetailRow } from "./ApplicantDetailRow"
 import { ApplicantTableHead } from "./ApplicantTableHead"
 import { ApplicationDetailModal } from "./ApplicationDetailModal"
+import { LazyApplicantRows } from "./LazyApplicantRows"
 import { ProjectStatusRow } from "./ProjectStatusRow"
 
 import type { ProjectApplication } from "../model/types"
@@ -76,6 +77,10 @@ interface ApplicationTableSectionProps {
   /** 지원자 펼치기 버튼 숨김 (SCHOOL_PRESIDENT 등 열람 제한 역할) */
   hideExpand?: boolean
   disableProjectModal?: boolean
+  /** 프로젝트 단위 합/불 결정 권한 (application.canDecide) - 상세 모달 승인 게이팅 */
+  canDecide?: boolean
+  /** 펼칠 때 프로젝트별 지원자를 lazy-load (admin 뷰: projects에 applicants 미포함) */
+  lazyLoadApplicants?: boolean
   className?: string
 }
 
@@ -92,6 +97,8 @@ export function ApplicationTableSection({
   hidePendingStatus = false,
   hideExpand = false,
   disableProjectModal = false,
+  canDecide = false,
+  lazyLoadApplicants = false,
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -102,6 +109,19 @@ export function ApplicationTableSection({
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] =
     useState<ProjectApplication | null>(null)
+  // 챌린저 이름 클릭 시 미리 선택할 지원서 ID (지원서 상세 바로 열기)
+  const [initialApplicantId, setInitialApplicantId] = useState<
+    string | undefined
+  >(undefined)
+
+  const openApplicantDetail = (
+    targetProject: ProjectApplication,
+    applicationId: string,
+  ) => {
+    setSelectedProject(targetProject)
+    setInitialApplicantId(applicationId)
+    setDetailModalOpen(true)
+  }
 
   // 필터 상태
   const [openFilter, setOpenFilter] = useState<string | null>(null)
@@ -324,6 +344,7 @@ export function ApplicationTableSection({
                     ? undefined
                     : () => {
                         setSelectedProject(project)
+                        setInitialApplicantId(undefined)
                         setDetailModalOpen(true)
                       }
                 }
@@ -331,7 +352,14 @@ export function ApplicationTableSection({
               />
 
               {isExpanded &&
-                (project.applicants.length > 0 ? (
+                (lazyLoadApplicants ? (
+                  <LazyApplicantRows
+                    projectId={project.id}
+                    onApplicantClick={(applicationId) =>
+                      openApplicantDetail(project, applicationId)
+                    }
+                  />
+                ) : project.applicants.length > 0 ? (
                   <div className="border-teal-gray-150 py-1">
                     {project.applicants.map((applicant) => (
                       <ApplicantDetailRow
@@ -343,6 +371,9 @@ export function ApplicationTableSection({
                         status={applicant.status}
                         processedAt={applicant.processedAt}
                         appliedAt={applicant.appliedAt}
+                        onChallengerClick={() =>
+                          openApplicantDetail(project, applicant.id)
+                        }
                       />
                     ))}
                   </div>
@@ -373,11 +404,16 @@ export function ApplicationTableSection({
           project={selectedProject}
           chapterName={chapterName ?? ""}
           open={detailModalOpen}
-          onOpenChange={setDetailModalOpen}
+          onOpenChange={(next) => {
+            setDetailModalOpen(next)
+            if (!next) setInitialApplicantId(undefined)
+          }}
           currentRound={currentRound}
           decisionDeadlineByRound={decisionDeadlineByRound}
           disableFormPanel={disableFormPanel}
           hidePendingStatus={hidePendingStatus}
+          canDecide={canDecide}
+          initialApplicantId={initialApplicantId}
         />
       )}
     </div>

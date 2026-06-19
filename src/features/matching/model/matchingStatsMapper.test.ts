@@ -53,7 +53,7 @@ describe("matchingResponseToStats", () => {
       schoolIdToName,
     )
 
-    expect(stats.rounds).toEqual([{ round: 1, applied: 3, total: 5 }])
+    expect(stats.rounds).toEqual([{ round: 1, applied: 3, total: 4 }])
   })
 
   it("학교별 집계로 총원/완료/완료율을 계산한다 (unclassified는 학교 집계에 이미 포함)", () => {

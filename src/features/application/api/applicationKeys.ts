@@ -55,4 +55,8 @@ export const applicationKeys = {
   // 매칭 현황 집계 (PROJECT-STAT-003) - 응답 shape이 달라 chapterStatistics와 분리
   matchingMatchings: (chapterId: number) =>
     [...applicationKeys.all, "statistics", "matchings", chapterId] as const,
+
+  // 프로젝트 단위 capability (PROJECT-PERMISSIONS-001)
+  projectsPermissions: (ids: string[]) =>
+    [...applicationKeys.all, "projects-permissions", [...ids].sort()] as const,
 }

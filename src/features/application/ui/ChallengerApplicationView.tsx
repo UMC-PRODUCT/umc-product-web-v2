@@ -16,6 +16,8 @@ interface ChallengerApplicationViewProps {
   schoolIdToName?: Map<string, string>
   currentRound?: number
   decisionDeadlineByRound?: Map<number, number>
+  /** 합/불 결정 권한 (application.canDecide) */
+  canDecide?: boolean
   className?: string
 }
 
@@ -118,6 +120,7 @@ export function ChallengerApplicationView({
   schoolIdToName,
   currentRound,
   decisionDeadlineByRound,
+  canDecide = false,
   className,
 }: ChallengerApplicationViewProps) {
   const stats = useMemo(
@@ -141,6 +144,7 @@ export function ChallengerApplicationView({
         visibleFilters={["part", "school"]}
         currentRound={currentRound}
         decisionDeadlineByRound={decisionDeadlineByRound}
+        canDecide={canDecide}
         hidePendingStatus
       />
     </div>
