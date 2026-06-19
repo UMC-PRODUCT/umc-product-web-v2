@@ -445,10 +445,10 @@ export function MatchingResultRow({
           challengerUniversity={challengerUniversity}
           role={assignTarget?.role ?? ""}
           part={
-            assignTarget?.part ??
-            (assignTarget
-              ? roleToPart(assignTarget.role, backendPart)
-              : undefined)
+            assignTarget
+              ? (assignTarget.part ??
+                roleToPart(assignTarget.role, backendPart))
+              : undefined
           }
           gisuId={gisuId}
           chapterId={chapterId}
