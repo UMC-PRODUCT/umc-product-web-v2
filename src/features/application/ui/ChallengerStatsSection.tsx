@@ -97,7 +97,9 @@ export function ChallengerStatsSection({
               {stats.rounds.map((r) => (
                 <div key={r.round} className="flex items-center gap-7">
                   <div className="text-body-3-medium text-teal-gray-600 flex items-center gap-0.75 leading-normal">
-                    <span className="w-4.5">{r.round}차</span>
+                    <span className="min-w-5 whitespace-nowrap">
+                      {r.round}차
+                    </span>
                     <span className="whitespace-nowrap">지원</span>
                   </div>
                   <div className="flex w-20 items-center justify-end gap-2 leading-[1.4]">
