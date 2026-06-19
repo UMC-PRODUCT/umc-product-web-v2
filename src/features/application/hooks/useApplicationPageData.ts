@@ -125,6 +125,7 @@ export function useChallengerPageData(
       return new Map(results.map((r) => [String(r.projectId), r.applicants]))
     },
     enabled: enabled && projects.length > 0,
+    staleTime: 1000 * 60 * 5,
   })
 
   // 프로젝트별 통계 조회 (차수별 지원률, 학교별 지원자 수)
@@ -141,6 +142,7 @@ export function useChallengerPageData(
       return res.projects
     },
     enabled: enabled && projects.length > 0,
+    staleTime: 1000 * 60 * 5,
   })
 
   const { currentRound } = useMemo(
@@ -167,6 +169,7 @@ export function useChallengerPageData(
     queryKey: ["schools", "all"],
     queryFn: getAllSchools,
     enabled,
+    staleTime: Infinity,
   })
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
@@ -229,6 +232,7 @@ export function useChapters(options: ApplicationPageDataOptions = {}) {
     queryKey: applicationKeys.chapters(),
     queryFn: getAllChapters,
     enabled,
+    staleTime: Infinity,
   })
 }
 
@@ -252,6 +256,7 @@ export function useAdminPageData(
     queryKey: ["chapters-with-schools", gisuId],
     queryFn: () => getChaptersWithSchools(String(gisuId)),
     enabled: enabled && gisuId > 0,
+    staleTime: Infinity,
   })
   const chapterSchoolIds = useMemo(() => {
     if (!chapterName || !chaptersWithSchoolsQuery.data) return null
@@ -286,6 +291,7 @@ export function useAdminPageData(
     queryKey: ["schools", "all"],
     queryFn: getAllSchools,
     enabled,
+    staleTime: Infinity,
   })
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
@@ -315,6 +321,7 @@ export function useAdminPageData(
     queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
     queryFn: () => getChapterStatistics(chapterId!),
     enabled: enabled && !!chapterId,
+    staleTime: 1000 * 60 * 5,
   })
 
   // projectId -> name 맵 (키를 String으로 통일)

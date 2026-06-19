@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
@@ -128,6 +128,7 @@ export function useMatchingProjectListFilters() {
     queryKey: ["chaptersWithSchools", activeGisuId],
     queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
     enabled: activeGisuId != null,
+    staleTime: Infinity,
   })
 
   const branchOptions: ProjectFilterOption[] = useMemo(
@@ -176,6 +177,7 @@ export function useMatchingProjectListFilters() {
         size: MATCHING_PROJECT_PAGE_SIZE,
       }),
     enabled: effectiveGisuId != null,
+    placeholderData: keepPreviousData,
   })
 
   const selectedBranchLabel = useMemo(
