@@ -11,7 +11,7 @@ import type { ApplicantFormData, FormField } from "../../model/types"
 import type { ApplicantDetail, StatusValue } from "../../model/types"
 
 const ROLE_LABEL: Record<string, string> = {
-  plan: "PM",
+  plan: "Plan",
   design: "Design",
   web: "Web",
   ios: "iOS",
@@ -90,9 +90,12 @@ interface ModalFormPanelProps {
   applicant: ApplicantDetail
   formData: ApplicantFormData | null
   chapterName: string
-  projectName: string
-  challengerName: string
-  challengerUniversity: string
+  project: {
+    projectName: string
+    challengerName: string
+    challengerUniversity: string
+    thumbnailUrl?: string
+  }
   variant?: "application" | "matching"
   onStatusChange?: (status: StatusValue) => void
   onUnmatch?: () => void
@@ -106,9 +109,7 @@ export function ModalFormPanel({
   applicant,
   formData,
   chapterName,
-  projectName,
-  challengerName,
-  challengerUniversity,
+  project,
   variant = "application",
   onStatusChange,
   onUnmatch,
@@ -177,22 +178,19 @@ export function ModalFormPanel({
                   variant="segmented"
                   value={statusDisabled ? "" : applicant.status}
                   onValueChange={(v) => onStatusChange?.(v as StatusValue)}
-                  className={cn(
-                    "w-60",
-                    statusDisabled && "pointer-events-none",
-                  )}
+                  className={cn(statusDisabled && "pointer-events-none")}
                 >
                   <OptionButton
                     value="pass"
                     disabled={statusDisabled}
-                    className="h-7.5 gap-0.5 font-normal!"
+                    className="h-7.5 w-20 gap-0.5 font-normal!"
                   >
                     합격
                   </OptionButton>
                   <OptionButton
                     value="fail"
                     disabled={statusDisabled}
-                    className="h-7.5 gap-0.5 font-normal!"
+                    className="h-7.5 w-20 gap-0.5 font-normal!"
                   >
                     불합격
                   </OptionButton>
@@ -200,7 +198,7 @@ export function ModalFormPanel({
                     <OptionButton
                       value="pending"
                       disabled={statusDisabled}
-                      className="h-7.5 gap-0.5 font-normal!"
+                      className="h-7.5 w-20 gap-0.5 font-normal!"
                     >
                       대기
                     </OptionButton>
@@ -233,9 +231,10 @@ export function ModalFormPanel({
         <div className="relative flex h-15 items-end px-4 py-4.5">
           {/* 프로젝트 카드 (좌) */}
           <ProjectTitleCard
-            projectName={projectName}
-            challengerName={challengerName}
-            challengerUniversity={challengerUniversity}
+            projectName={project.projectName}
+            challengerName={project.challengerName}
+            challengerUniversity={project.challengerUniversity}
+            thumbnailUrl={project.thumbnailUrl}
             size="sm"
             className="absolute top-0 left-0 w-full"
           />
@@ -243,7 +242,7 @@ export function ModalFormPanel({
           {/* 역할 정보 (우) */}
           <div className="ml-auto flex items-center gap-3">
             <span className="text-body-2-medium text-teal-gray-700">
-              {roleLabel.toUpperCase()}
+              {roleLabel}
             </span>
             <span className="text-caption-2-regular text-teal-gray-500">
               0/1

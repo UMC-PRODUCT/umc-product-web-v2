@@ -15,18 +15,19 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import { AssignmentModal } from "./AssignmentModal"
 import { MatchingBlock } from "./MatchingBlock"
-import { MatchingDetailModal } from "./MatchingDetailModal"
 
 import type { Part } from "@/features/challenger/model/types"
 import type { NumberTagVariant } from "@/shared/ui/NumberTag"
 
 // 역할 행 라벨 -> 서버 Part enum 변환
-function roleToPart(role: string, backendPart: "springboot" | "nodejs"): Part {
-  if (role === "Frontend") return "WEB"
+function roleToPart(
+  role: string,
+  backendPart: "springboot" | "nodejs",
+): Part | undefined {
   if (role === "Backend")
     return backendPart === "nodejs" ? "NODEJS" : "SPRINGBOOT"
   if (role === "Design") return "DESIGN"
-  return "WEB"
+  return undefined
 }
 
 type BlockType = "round1" | "filled" | "none" | "blocked"
@@ -35,8 +36,8 @@ export interface MatchingBlockData {
   type: BlockType
   name?: string
   tagVariant?: NumberTagVariant
-  applicantId?: string
   memberId?: string
+  part?: Part
 }
 
 export interface MatchingRoleRow {
@@ -59,7 +60,6 @@ interface MatchingResultRowProps {
   gisuId?: number
   chapterId?: number
   assignedMemberIds?: Set<string>
-  chapterName?: string
   className?: string
 }
 
@@ -77,18 +77,14 @@ export function MatchingResultRow({
   gisuId,
   chapterId,
   assignedMemberIds,
-  chapterName,
   className,
 }: MatchingResultRowProps) {
-  const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
-    null,
-  )
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null)
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
   const [assignTarget, setAssignTarget] = useState<{
     rowIdx: number
     blockIdx: number
     role: string
+    part?: Part
   } | null>(null)
   const [manualUnmatchTarget, setManualUnmatchTarget] = useState<{
     memberId: string
@@ -184,7 +180,7 @@ export function MatchingResultRow({
         idx === rowIdx ? { ...row, blocks: newBlocks } : row,
       ),
     )
-  }, [roleRows])
+  }, [roleRows, projectId])
 
   // 블록 배열을 colsPerRow 단위로 청크 분할
   const chunkedRows = localRoleRows.map((row) => {
@@ -201,6 +197,9 @@ export function MatchingResultRow({
     chunks.map((c) => c.length),
   )
   const totalVisualRows = visualBlockCounts.length
+  const assignPart = assignTarget
+    ? (assignTarget.part ?? roleToPart(assignTarget.role, backendPart))
+    : undefined
 
   return (
     <div
@@ -267,22 +266,20 @@ export function MatchingResultRow({
                     </span>
                   )}
                   <div className="flex items-center">
-                    {chunk.map((block, blockIdx) => (
-                      <MatchingBlock
-                        key={blockIdx}
-                        type={block.type}
-                        name={block.name}
-                        tagVariant={block.tagVariant}
-                        onNameClick={
-                          isEditable && block.applicantId
-                            ? () => {
-                                setSelectedApplicantId(block.applicantId!)
-                                setSelectedMemberId(block.memberId ?? null)
-                              }
-                            : isEditable &&
-                                !block.applicantId &&
-                                block.memberId &&
-                                block.type === "filled"
+                    {chunk.map((block, blockIdx) => {
+                      const targetPart =
+                        block.part ?? roleToPart(row.role, backendPart)
+
+                      return (
+                        <MatchingBlock
+                          key={blockIdx}
+                          type={block.type}
+                          name={block.name}
+                          tagVariant={block.tagVariant}
+                          onNameClick={
+                            isEditable &&
+                            block.memberId &&
+                            block.type === "filled"
                               ? () => {
                                   setManualUnmatchTarget({
                                     memberId: block.memberId!,
@@ -290,48 +287,50 @@ export function MatchingResultRow({
                                   })
                                 }
                               : undefined
-                        }
-                        onAssignClick={
-                          isEditable && block.type === "none"
-                            ? () =>
-                                setAssignTarget({
-                                  rowIdx,
-                                  blockIdx: flatOffset + blockIdx,
-                                  role: row.role,
-                                })
-                            : undefined
-                        }
-                        className={(() => {
-                          const aboveCount =
-                            vIdx > 0 ? visualBlockCounts[vIdx - 1]! : 0
-                          const belowCount =
-                            vIdx < totalVisualRows - 1
-                              ? visualBlockCounts[vIdx + 1]!
-                              : 0
-                          const isFirst = blockIdx === 0
-                          const isLast = blockIdx === chunk.length - 1
-                          return cn(
-                            "-mr-px",
-                            // 좌측: 모든 행의 좌측 끝 정렬 -> 위/아래 행 유무만 확인
-                            isFirst && vIdx === 0 && "rounded-tl-[6px]",
-                            isFirst &&
-                              vIdx === totalVisualRows - 1 &&
-                              "rounded-bl-[6px]",
-                            // 우측: 첫 행(4칸)이 짧아 이후 행이 더 오른쪽으로 확장
-                            isLast && vIdx === 0 && "rounded-tr-[6px]",
-                            isLast &&
-                              vIdx === totalVisualRows - 1 &&
-                              "rounded-br-[6px]",
-                            isLast &&
-                              aboveCount < chunk.length &&
-                              "rounded-tr-[6px]",
-                            isLast &&
-                              belowCount < chunk.length &&
-                              "rounded-br-[6px]",
-                          )
-                        })()}
-                      />
-                    ))}
+                          }
+                          onAssignClick={
+                            isEditable && block.type === "none" && targetPart
+                              ? () =>
+                                  setAssignTarget({
+                                    rowIdx,
+                                    blockIdx: flatOffset + blockIdx,
+                                    role: row.role,
+                                    part: targetPart,
+                                  })
+                              : undefined
+                          }
+                          className={(() => {
+                            const aboveCount =
+                              vIdx > 0 ? visualBlockCounts[vIdx - 1]! : 0
+                            const belowCount =
+                              vIdx < totalVisualRows - 1
+                                ? visualBlockCounts[vIdx + 1]!
+                                : 0
+                            const isFirst = blockIdx === 0
+                            const isLast = blockIdx === chunk.length - 1
+                            return cn(
+                              "-mr-px",
+                              // 좌측: 모든 행의 좌측 끝 정렬 -> 위/아래 행 유무만 확인
+                              isFirst && vIdx === 0 && "rounded-tl-[6px]",
+                              isFirst &&
+                                vIdx === totalVisualRows - 1 &&
+                                "rounded-bl-[6px]",
+                              // 우측: 첫 행(4칸)이 짧아 이후 행이 더 오른쪽으로 확장
+                              isLast && vIdx === 0 && "rounded-tr-[6px]",
+                              isLast &&
+                                vIdx === totalVisualRows - 1 &&
+                                "rounded-br-[6px]",
+                              isLast &&
+                                aboveCount < chunk.length &&
+                                "rounded-tr-[6px]",
+                              isLast &&
+                                belowCount < chunk.length &&
+                                "rounded-br-[6px]",
+                            )
+                          })()}
+                        />
+                      )
+                    })}
                   </div>
                 </div>
 
@@ -382,29 +381,6 @@ export function MatchingResultRow({
         </Modal.Portal>
       </Modal.Root>
 
-      <MatchingDetailModal
-        applicantId={selectedApplicantId}
-        projectId={projectId}
-        memberId={selectedMemberId ?? undefined}
-        chapterName={chapterName ?? ""}
-        projectName={projectName}
-        challengerName={challengerName}
-        challengerUniversity={challengerUniversity}
-        open={selectedApplicantId !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedApplicantId(null)
-            setSelectedMemberId(null)
-          }
-        }}
-        isEditable={isEditable}
-        onConfirmUnmatch={
-          projectId && selectedMemberId
-            ? () => unmatchMutation.mutate(selectedMemberId)
-            : undefined
-        }
-      />
-
       <CtaModal
         open={manualUnmatchTarget !== null}
         variant="error"
@@ -441,11 +417,7 @@ export function MatchingResultRow({
           challengerName={challengerName}
           challengerUniversity={challengerUniversity}
           role={assignTarget?.role ?? ""}
-          part={
-            assignTarget
-              ? roleToPart(assignTarget.role, backendPart)
-              : undefined
-          }
+          part={assignPart}
           gisuId={gisuId}
           chapterId={chapterId}
           assignedMemberIds={assignedMemberIds}
@@ -465,6 +437,7 @@ export function MatchingResultRow({
               name: challenger.nickname,
               tagVariant: "random" as NumberTagVariant,
               memberId: String(challenger.id),
+              part: assignTarget.part,
             }
             setLocalRoleRows((prev) =>
               prev.map((row, rIdx) =>
@@ -481,7 +454,9 @@ export function MatchingResultRow({
               ),
             )
             // 서버 API 호출 - 실패 시 throw해서 AssignmentModal에서 완료 모달 미표시
-            const part = roleToPart(assignTarget.role, backendPart)
+            const part =
+              assignTarget.part ?? roleToPart(assignTarget.role, backendPart)
+            if (!part) throw new Error("Missing assignment part")
             await assignMutation.mutateAsync({
               memberId: String(challenger.id),
               part,

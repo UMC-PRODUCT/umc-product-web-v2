@@ -2,10 +2,8 @@
 
 import { toRoundNumber } from "@/features/application/model/mappers"
 
-import type {
-  ManagedProjectSummaryResponse,
-  ProjectApplicantResponse,
-} from "@/features/application/model/apiTypes"
+import type { ManagedProjectSummaryResponse } from "@/features/application/model/apiTypes"
+import type { Part } from "@/features/challenger/model/types"
 import type { ProjectMembersResponse } from "@/features/project/list/api/matchingProject"
 
 import type {
@@ -18,13 +16,9 @@ import type {
 } from "./matchingStatusTypes"
 
 // phase 번호 -> 블록 타입/variant 매핑
-function phaseToBlock(
-  phase: number,
-  name: string,
-  applicantId?: string,
-): MatchingBlockData {
+function phaseToBlock(phase: number, name: string): MatchingBlockData {
   if (phase === 1) {
-    return { type: "round1", name, ...(applicantId ? { applicantId } : {}) }
+    return { type: "round1", name }
   }
   const variantMap: Record<number, "round2" | "round3" | "random"> = {
     2: "round2",
@@ -34,7 +28,6 @@ function phaseToBlock(
     type: "filled",
     name,
     tagVariant: variantMap[phase] ?? "random",
-    ...(applicantId ? { applicantId } : {}),
   }
 }
 
@@ -48,6 +41,40 @@ const PART_TO_ROLE: Record<string, string> = {
   NODEJS: "Backend",
 }
 
+const ROLE_TO_PARTS: Record<string, string[]> = {
+  Design: ["DESIGN"],
+  Frontend: ["WEB", "ANDROID", "IOS"],
+  Backend: ["SPRINGBOOT", "NODEJS"],
+}
+
+// 각 역할에 대해 아직 채워지지 않은 파트별 남은 슬롯 수 계산
+function getNeededParts(
+  role: string,
+  partQuotas: ManagedProjectSummaryResponse["partQuotas"],
+  members: ProjectMembersResponse | undefined,
+): Part[] {
+  const subParts = ROLE_TO_PARTS[role] ?? []
+  const neededParts: Part[] = []
+
+  const filledCounts = new Map<string, number>()
+  if (members) {
+    for (const group of members.partGroups) {
+      filledCounts.set(group.part, group.members.length)
+    }
+  }
+
+  for (const part of subParts) {
+    const partQuota =
+      Number(partQuotas.find((q) => q.part === part)?.quota) || 0
+    const filledCount = filledCounts.get(part) ?? 0
+    const needed = Math.max(0, partQuota - filledCount)
+    for (let i = 0; i < needed; i++) {
+      neededParts.push(part as Part)
+    }
+  }
+  return neededParts
+}
+
 // 섹션 헤더용 FE 플랫폼 분류
 const FE_PLATFORM_ORDER = ["Web", "iOS", "Android"] as const
 type FEPlatform = (typeof FE_PLATFORM_ORDER)[number]
@@ -58,83 +85,42 @@ const PART_TO_FE_PLATFORM: Record<string, FEPlatform> = {
   IOS: "iOS",
 }
 
-// 프로젝트 + 지원자 + 팀원 -> MatchingProjectData 변환
+// 프로젝트 + 팀원 -> MatchingProjectData 변환
 function toMatchingProject(
   project: ManagedProjectSummaryResponse,
-  applicants: ProjectApplicantResponse[],
   members: ProjectMembersResponse | undefined,
 ): MatchingProjectData {
-  // memberId -> APPROVED 지원서 매핑 (차수 태그 조회용)
-  // 서버가 memberId를 string으로 내려주는 경우 대비해 String으로 정규화
-  const approvedAppByMemberId = new Map<string, ProjectApplicantResponse>()
-  for (const app of applicants) {
-    if (app.status !== "APPROVED") continue
-    approvedAppByMemberId.set(String(app.applicant.memberId), app)
-  }
-
-  // partGroups를 현재 멤버 기준으로 사용 - 매칭 해제 시 즉시 반영
-  // members 미로딩 시 APPROVED 지원서 기반으로 폴백
+  // partGroups(ProjectMember)를 기준으로 블록 구성 - 매칭 해제 시 즉시 반영
+  // 차수 태그는 member.matchedRoundInfo.phase, 없으면 랜덤 매칭으로 표기
   const blocksByRole = new Map<string, MatchingBlockData[]>()
   if (members) {
     for (const group of members.partGroups) {
       const role = PART_TO_ROLE[group.part]
       if (!role) continue
       for (const member of group.members) {
-        const app = approvedAppByMemberId.get(String(member.memberId))
         const displayName = member.nickname
           ? `${member.nickname}/${member.name}`
           : member.name
-        // APPROVED 지원서 있으면 지원서 차수 사용
-        // 없고 matchedRoundInfo 있으면 해당 차수 사용 (수동 배정 차수 보존)
-        // 둘 다 없으면 랜덤 매칭으로 표기
-        const block: MatchingBlockData = app
+        const block: MatchingBlockData = member.matchedRoundInfo
           ? {
               ...phaseToBlock(
-                toRoundNumber(app.matchingRound.phase),
+                toRoundNumber(member.matchedRoundInfo.phase),
                 displayName,
-                String(app.applicationId),
               ),
               memberId: String(member.memberId),
+              part: group.part as Part,
             }
-          : member.matchedRoundInfo
-            ? {
-                ...phaseToBlock(
-                  toRoundNumber(member.matchedRoundInfo.phase),
-                  displayName,
-                ),
-                memberId: String(member.memberId),
-              }
-            : {
-                // matchedRoundInfo 미제공: 배정 차수 알 수 없음 → 랜덤 매칭으로 표기
-                // 서버에서 matchedRoundInfo 배포 후 정확한 차수로 표시됨
-                type: "filled" as const,
-                name: displayName,
-                tagVariant: "random" as const,
-                memberId: String(member.memberId),
-              }
+          : {
+              type: "filled" as const,
+              name: displayName,
+              tagVariant: "random" as const,
+              memberId: String(member.memberId),
+              part: group.part as Part,
+            }
         const list = blocksByRole.get(role) ?? []
         list.push(block)
         blocksByRole.set(role, list)
       }
-    }
-  } else {
-    // members 미로딩 폴백: APPROVED 지원서 기반
-    for (const [, app] of approvedAppByMemberId) {
-      const role = PART_TO_ROLE[app.applicant.part]
-      if (!role) continue
-      const block: MatchingBlockData = {
-        ...phaseToBlock(
-          toRoundNumber(app.matchingRound.phase),
-          app.applicant.nickname
-            ? `${app.applicant.nickname}/${app.applicant.name}`
-            : app.applicant.name,
-          String(app.applicationId),
-        ),
-        memberId: app.applicant.memberId,
-      }
-      const list = blocksByRole.get(role) ?? []
-      list.push(block)
-      blocksByRole.set(role, list)
     }
   }
 
@@ -157,9 +143,13 @@ function toMatchingProject(
       0,
       Math.min(quota, totalSlots) - filledBlocks.length,
     )
+    const neededParts = getNeededParts("Design", project.partQuotas, members)
     const emptyBlocks: MatchingBlockData[] = Array.from(
       { length: emptyCount },
-      () => ({ type: "none" }),
+      (_, index) => ({
+        type: "none",
+        part: neededParts[index] as Part,
+      }),
     )
     return {
       role: "Design",
@@ -179,9 +169,13 @@ function toMatchingProject(
     )
 
     const emptyCount = Math.max(0, quota - filledBlocks.length)
+    const neededParts = getNeededParts(role, project.partQuotas, members)
     const emptyBlocks: MatchingBlockData[] = Array.from(
       { length: emptyCount },
-      () => ({ type: "none" }),
+      (_, index) => ({
+        type: "none",
+        part: neededParts[index] as Part,
+      }),
     )
     const blockedCount = totalSlots - filledBlocks.length - emptyCount
     const blockedBlocks: MatchingBlockData[] = Array.from(
@@ -212,7 +206,7 @@ function toMatchingProject(
   // 실제 배정된 멤버 수 (수동 배정 포함, 매칭 해제 즉시 반영)
   const currentCount = members
     ? members.partGroups.reduce((sum, g) => sum + g.members.length, 0)
-    : applicants.filter((a) => a.status === "APPROVED").length
+    : 0
 
   return {
     projectId: project.id,
@@ -227,12 +221,12 @@ function toMatchingProject(
       project.partQuotaStatus === "RECRUITING" ? "recruiting" : "completed",
     currentCount,
     totalCount,
+    thumbnailUrl: project.thumbnailImageUrl || undefined,
   }
 }
 
 export function toMatchingPartDataList(
   projects: ManagedProjectSummaryResponse[],
-  applicantsByProject: Map<string, ProjectApplicantResponse[]>,
   membersByProject: Map<string, ProjectMembersResponse>,
 ): MatchingPartData[] {
   if (projects.length === 0) return []
@@ -258,11 +252,7 @@ export function toMatchingPartDataList(
       return {
         partName: platform,
         projects: platformProjects.map((p) =>
-          toMatchingProject(
-            p,
-            applicantsByProject.get(String(p.id)) ?? [],
-            membersByProject.get(String(p.id)),
-          ),
+          toMatchingProject(p, membersByProject.get(String(p.id))),
         ),
       }
     },

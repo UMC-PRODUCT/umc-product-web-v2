@@ -45,7 +45,7 @@ export function ProjectRoundBar({
           )
         })}
       </div>
-      <span className="text-body-2-medium text-teal-gray-900 mt-1.25 h-10.5 w-full text-center wrap-break-word">
+      <span className="text-body-2-medium text-teal-gray-900 mt-1.25 line-clamp-2 h-10.5 w-full text-center wrap-break-word break-all">
         {projectName}
       </span>
     </div>

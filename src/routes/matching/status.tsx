@@ -150,7 +150,6 @@ function MatchingStatusPage() {
                               gisuId={gisuId}
                               chapterId={chapterId}
                               assignedMemberIds={assignedMemberIds}
-                              chapterName={selectedChapter}
                             />
                           ))}
                         </>

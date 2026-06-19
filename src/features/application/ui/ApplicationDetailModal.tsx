@@ -346,9 +346,7 @@ export function ApplicationDetailModal({
                 applicant={selectedApplicant}
                 formData={formData}
                 chapterName={chapterName}
-                projectName={project.projectName}
-                challengerName={project.challengerName}
-                challengerUniversity={project.challengerUniversity}
+                project={project}
                 onStatusChange={(status) =>
                   handleApplicantStatusChange(selectedApplicant.id, status)
                 }
