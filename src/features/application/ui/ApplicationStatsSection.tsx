@@ -163,7 +163,9 @@ export function ApplicationStatsSection({
                           : "text-body-3-medium text-teal-gray-600",
                       )}
                     >
-                      <span className="w-4.5">{r.round}차</span>
+                      <span className="min-w-5 whitespace-nowrap">
+                        {r.round}차
+                      </span>
                       <span className="whitespace-nowrap">
                         {labels.roundSuffix}
                       </span>
