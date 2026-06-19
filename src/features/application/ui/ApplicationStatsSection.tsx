@@ -15,8 +15,6 @@ const ROUND_COLORS = [
   "var(--color-teal-200)",
 ] as const
 
-const ROUND_LABELS = ["1차 지원", "2차 지원", "3차 지원"] as const
-
 interface ApplicationStatsSectionProps {
   stats: ApplicationStats
   dataUpdatedAt?: number
@@ -34,6 +32,7 @@ const VARIANT_LABELS = {
     roundSuffix: "지원",
     top4Suffix: "지원",
     projectSectionTitle: "프로젝트별 지원 현황",
+    legendLabels: ["1차 지원", "2차 지원", "3차 지원"],
   },
   matching: {
     completedLabel: "매칭 완료",
@@ -41,6 +40,7 @@ const VARIANT_LABELS = {
     roundSuffix: "매칭",
     top4Suffix: "완료",
     projectSectionTitle: "프로젝트별 매칭 현황",
+    legendLabels: ["1차 매칭", "2차 매칭", "3차 매칭"],
   },
 } as const
 
@@ -291,7 +291,7 @@ export function ApplicationStatsSection({
             {labels.projectSectionTitle}
           </h3>
           <div className="flex items-center gap-2">
-            {ROUND_LABELS.map((label, i) => (
+            {labels.legendLabels.map((label, i) => (
               <ChartLegendLabel
                 key={label}
                 color={ROUND_COLORS[i]!}
