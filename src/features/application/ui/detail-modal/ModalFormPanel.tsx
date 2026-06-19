@@ -177,22 +177,19 @@ export function ModalFormPanel({
                   variant="segmented"
                   value={statusDisabled ? "" : applicant.status}
                   onValueChange={(v) => onStatusChange?.(v as StatusValue)}
-                  className={cn(
-                    "w-60",
-                    statusDisabled && "pointer-events-none",
-                  )}
+                  className={cn(statusDisabled && "pointer-events-none")}
                 >
                   <OptionButton
                     value="pass"
                     disabled={statusDisabled}
-                    className="h-7.5 gap-0.5 font-normal!"
+                    className="h-7.5 w-20 gap-0.5 font-normal!"
                   >
                     합격
                   </OptionButton>
                   <OptionButton
                     value="fail"
                     disabled={statusDisabled}
-                    className="h-7.5 gap-0.5 font-normal!"
+                    className="h-7.5 w-20 gap-0.5 font-normal!"
                   >
                     불합격
                   </OptionButton>
@@ -200,7 +197,7 @@ export function ModalFormPanel({
                     <OptionButton
                       value="pending"
                       disabled={statusDisabled}
-                      className="h-7.5 gap-0.5 font-normal!"
+                      className="h-7.5 w-20 gap-0.5 font-normal!"
                     >
                       대기
                     </OptionButton>
