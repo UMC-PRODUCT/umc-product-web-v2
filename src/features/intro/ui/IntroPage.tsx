@@ -1,5 +1,3 @@
-import { motion } from "motion/react"
-
 import { LANDING_BACKGROUND, LANDING_BACKGROUND_HEIGHT } from "../constants"
 import { LandingHeader } from "./components/LandingHeader"
 import { LightStripTexture } from "./components/LightStripTexture"
@@ -20,6 +18,34 @@ const LANDING_BACKGROUND_MASK = `linear-gradient(to right, transparent, #000 ${L
 
 const LIGHT_OVERLAY_FADE = 120
 const LIGHT_OVERLAY_MASK = `linear-gradient(to right, transparent, #000 ${LIGHT_OVERLAY_FADE}px, #000 calc(100% - ${LIGHT_OVERLAY_FADE}px), transparent)`
+
+function StaticGlow({
+  left,
+  top,
+  size,
+  opacity = 0.3,
+}: {
+  left: number
+  top: number
+  size: number
+  opacity?: number
+}) {
+  return (
+    <div
+      className="pointer-events-none absolute rounded-full"
+      style={{
+        left,
+        top,
+        width: size,
+        height: size,
+        opacity,
+        background:
+          "radial-gradient(circle, rgba(95,215,207,0.42) 0%, rgba(95,215,207,0.22) 34%, rgba(95,215,207,0.08) 58%, rgba(95,215,207,0) 78%)",
+      }}
+      aria-hidden="true"
+    />
+  )
+}
 
 export function IntroPage() {
   return (
@@ -81,71 +107,25 @@ export function IntroPage() {
               }}
               aria-hidden="true"
             >
-              <motion.div
-                className="pointer-events-none absolute top-[428px] left-[880px] size-[764px] rounded-full bg-[#5fd7cf]/30 blur-[150px]"
-                animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
-                transition={{
-                  duration: 14,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <motion.div
-                className="pointer-events-none absolute top-[1117px] left-[720px] size-[764px] rounded-full bg-[#5fd7cf]/30 blur-[150px]"
-                animate={{ x: [0, -16, 0], y: [0, 18, 0] }}
-                transition={{
-                  duration: 16,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <motion.div
-                className="pointer-events-none absolute top-[2048px] left-[880px] size-[764px] rounded-full bg-[#5fd7cf]/30 blur-[150px]"
-                animate={{ x: [0, 14, 0], y: [0, 16, 0] }}
-                transition={{
-                  duration: 18,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <motion.div
+              <StaticGlow left={760} top={308} size={1004} opacity={0.34} />
+              <StaticGlow left={600} top={997} size={1004} opacity={0.32} />
+              <StaticGlow left={760} top={1928} size={1004} opacity={0.3} />
+              <div
                 className="pointer-events-none absolute top-[1322px] left-[-79px] size-[676px]"
-                animate={{ x: [0, 12, 0], y: [0, -10, 0] }}
-                transition={{
-                  duration: 15,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
                 style={{
                   backgroundImage:
                     "radial-gradient(circle, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0) 50%)",
                 }}
               />
-              <motion.div
-                className="pointer-events-none absolute top-0 right-0"
-                animate={{ x: [0, -10, 0], opacity: [0.85, 1, 0.85] }}
-                transition={{
-                  duration: 12,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
+              <div className="pointer-events-none absolute top-0 right-0 opacity-90">
                 <LightStripTexture />
-              </motion.div>
-              <motion.div
-                className="pointer-events-none absolute top-0 left-[101px]"
-                animate={{ x: [0, 10, 0], opacity: [0.75, 1, 0.75] }}
-                transition={{
-                  duration: 13,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
+              </div>
+              <div className="pointer-events-none absolute top-0 left-[101px] opacity-80">
                 <div className="flex">
                   <LightStripTexture />
                   <LightStripTexture className="ml-[736px]" />
                 </div>
-              </motion.div>
+              </div>
             </div>
             <ProductTeamIntroSection />
             <ProductTeamAboutSection />

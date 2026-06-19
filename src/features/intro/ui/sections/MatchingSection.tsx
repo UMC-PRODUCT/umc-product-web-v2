@@ -54,6 +54,7 @@ function smoothScrollTo(targetY: number, duration: number, onDone: () => void) {
 export function MatchingSection() {
   const ref = useRef<HTMLElement>(null)
   const directionRef = useRef(1)
+  const pageRef = useRef(0)
   const isProgrammaticRef = useRef(false)
   const cancelScrollRef = useRef<(() => void) | null>(null)
   const clearGuardTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -62,14 +63,20 @@ export function MatchingSection() {
     offset: ["start start", "end end"],
   })
   const [page, setPage] = useState(0)
+  const setCurrentPage = (nextPage: number) => {
+    pageRef.current = nextPage
+    setPage(nextPage)
+  }
+
   useMotionValueEvent(scrollYProgress, "change", (value) => {
     if (isProgrammaticRef.current) return
     const nextPage = Math.min(
       TOTAL_PAGE_COUNT - 1,
       Math.floor(value * TOTAL_PAGE_COUNT),
     )
-    directionRef.current = nextPage > page ? 1 : -1
-    setPage(nextPage)
+    if (nextPage === pageRef.current) return
+    directionRef.current = nextPage > pageRef.current ? 1 : -1
+    setCurrentPage(nextPage)
   })
 
   useEffect(() => {
@@ -81,16 +88,18 @@ export function MatchingSection() {
   function moveToPage(index: number) {
     const section = ref.current
     if (!section) {
-      setPage(index)
+      setCurrentPage(index)
       return
     }
+
+    if (index === pageRef.current) return
 
     const sectionTop = section.getBoundingClientRect().top + window.scrollY
     const scrollableHeight = section.offsetHeight - window.innerHeight
     const targetY =
       sectionTop + (scrollableHeight * index) / (TOTAL_PAGE_COUNT - 1)
 
-    setPage(index)
+    setCurrentPage(index)
     cancelScrollRef.current?.()
     if (clearGuardTimerRef.current) clearTimeout(clearGuardTimerRef.current)
     isProgrammaticRef.current = true

@@ -42,7 +42,7 @@ function PaginationBar({
   onDotClick,
 }: PaginationBarProps) {
   return (
-    <div className="absolute top-[852px] left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-[10px] rounded-[12px] border border-white/10 bg-[rgba(251,252,252,0.05)] px-[12px] py-[6px] backdrop-blur-[10px]">
+    <div className="absolute top-[852px] left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-[10px] rounded-[12px] border border-white/10 bg-[rgba(21,36,34,0.72)] px-[12px] py-[6px]">
       <button
         onClick={onPrev}
         disabled={activeDot === 0}

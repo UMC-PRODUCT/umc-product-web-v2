@@ -16,6 +16,8 @@ export function LandingHeader() {
   const navigate = useNavigate()
   const [isVisible, setIsVisible] = useState(true)
   const lastScrollY = useRef(0)
+  const visibleRef = useRef(true)
+  const tickingRef = useRef(false)
   const addToast = useToastStore((s) => s.addToast)
 
   const handleDisabledClick = (item: HeaderNavItem) => {
@@ -30,21 +32,23 @@ export function LandingHeader() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      const threshold = window.innerHeight
+      if (tickingRef.current) return
+      tickingRef.current = true
 
-      if (currentScrollY <= threshold) {
-        setIsVisible(true)
-      } else {
-        const isScrollingUp = currentScrollY < lastScrollY.current
-        if (isScrollingUp) {
-          setIsVisible(true)
-        } else {
-          setIsVisible(false)
+      requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY
+        const threshold = window.innerHeight
+        const nextVisible =
+          currentScrollY <= threshold || currentScrollY < lastScrollY.current
+
+        if (visibleRef.current !== nextVisible) {
+          visibleRef.current = nextVisible
+          setIsVisible(nextVisible)
         }
-      }
 
-      lastScrollY.current = currentScrollY
+        lastScrollY.current = currentScrollY
+        tickingRef.current = false
+      })
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
@@ -76,10 +80,8 @@ export function LandingHeader() {
         <nav
           className="relative flex items-center justify-center gap-1.5 rounded-[9999px] p-1.5"
           style={{
-            background: "rgba(251, 252, 252, 0.30)",
+            background: "rgba(33, 54, 51, 0.72)",
             boxShadow: "0 0 16px 0 rgba(10, 86, 80, 0.04)",
-            backdropFilter: "blur(21px)",
-            WebkitBackdropFilter: "blur(21px)",
           }}
           aria-label="랜딩 페이지 내비게이션"
         >

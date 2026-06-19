@@ -14,7 +14,7 @@ export function FlowSteps() {
       {PAINPOINT_STEPS.map((step, index) => (
         <Fragment key={step}>
           <motion.div
-            className="flex items-center justify-center gap-[7.5px] rounded-full bg-[rgba(251,252,252,0.05)] px-5.5 pt-2 pb-1.5 shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.25)] backdrop-blur-[21px]"
+            className="flex items-center justify-center gap-[7.5px] rounded-full bg-[rgba(251,252,252,0.08)] px-5.5 pt-2 pb-1.5 shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.25)]"
             variants={{
               hidden: { opacity: 0, y: 14, scale: 0.98 },
               visible: {
