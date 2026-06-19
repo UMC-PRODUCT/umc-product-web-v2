@@ -11,7 +11,7 @@ import type { ApplicantFormData, FormField } from "../../model/types"
 import type { ApplicantDetail, StatusValue } from "../../model/types"
 
 const ROLE_LABEL: Record<string, string> = {
-  plan: "PM",
+  plan: "Plan",
   design: "Design",
   web: "Web",
   ios: "iOS",
@@ -242,7 +242,7 @@ export function ModalFormPanel({
           {/* 역할 정보 (우) */}
           <div className="ml-auto flex items-center gap-3">
             <span className="text-body-2-medium text-teal-gray-700">
-              {roleLabel.toUpperCase()}
+              {roleLabel}
             </span>
             <span className="text-caption-2-regular text-teal-gray-500">
               0/1
