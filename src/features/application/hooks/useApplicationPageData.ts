@@ -27,6 +27,7 @@ import {
   toRoundNumber,
 } from "../model/mappers"
 import { buildDecisionDeadlineByRound } from "../model/matchingDecision"
+import { useProjectsPermissions } from "./useProjectsPermissions"
 
 import type { MatchingRoundResponse } from "../model/apiTypes"
 import type {
@@ -353,10 +354,23 @@ export function useAdminPageData(
   )
 
   // 지부 통계 조회 (rounds, totalMembers, projectRounds, topProjects)
+  // 지부 집계통계는 프로젝트 단위 statistics.canRead로 게이팅
+  // (선택 지부 내 프로젝트들의 capability는 역할 기반이라 균일 → 서버 값 그대로 반영)
+  const projectIds = useMemo(
+    () => projects.map((p) => String(p.id)),
+    [projects],
+  )
+  const permissions = useProjectsPermissions(projectIds, {
+    enabled: enabled && projectIds.length > 0,
+  })
+  const canReadStatistics =
+    projectIds.length > 0 &&
+    projectIds.some((id) => permissions.canReadStatistics(id))
+
   const chapterStatsQuery = useQuery({
     queryKey: applicationKeys.chapterStatistics(chapterId ?? 0),
     queryFn: () => getChapterStatistics(chapterId!),
-    enabled: enabled && !!chapterId,
+    enabled: enabled && !!chapterId && canReadStatistics,
     staleTime: 1000 * 60 * 5,
   })
 
@@ -501,6 +515,7 @@ export function useAdminPageData(
   return {
     projects: transformed,
     stats,
+    showStats: canReadStatistics,
     currentRound,
     activeRound,
     decisionDeadlineByRound,

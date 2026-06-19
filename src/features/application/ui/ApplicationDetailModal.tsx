@@ -3,7 +3,6 @@ import { isAxiosError } from "axios"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
@@ -14,8 +13,6 @@ import { toApplicantFormData, toServerStatus } from "../model/mappers"
 import { isRoundDecisionClosed } from "../model/matchingDecision"
 import { ModalApplicantPanel } from "./detail-modal/ModalApplicantPanel"
 import { ModalFormPanel } from "./detail-modal/ModalFormPanel"
-
-import type { ResourcePermissionQuery } from "@/features/auth/api/permissions"
 
 import type { ProjectApplication, StatusValue } from "../model/types"
 
@@ -32,11 +29,8 @@ interface ApplicationDetailModalProps {
   disableFormPanel?: boolean
   /** 플랜 챌린저(PM) 뷰: 대기 상태 옵션 숨김 */
   hidePendingStatus?: boolean
-}
-
-function toApplicationId(applicantId: string): number | null {
-  const id = Number(applicantId)
-  return Number.isFinite(id) && id > 0 ? id : null
+  /** 프로젝트 단위 합/불 결정 권한 (projects/permissions의 application.canDecide) */
+  canDecide?: boolean
 }
 
 // 합/불 상태 변경 확인 모달 문구 (대기는 PM 뷰에서 노출되지 않으나 타입 완전성 위해 포함)
@@ -80,6 +74,7 @@ export function ApplicationDetailModal({
   decisionDeadlineByRound,
   disableFormPanel = false,
   hidePendingStatus = false,
+  canDecide = false,
 }: ApplicationDetailModalProps) {
   const addToast = useToastStore((s) => s.addToast)
 
@@ -118,43 +113,8 @@ export function ApplicationDetailModal({
     }
   }, [open, addToast])
 
-  const applicationIds = useMemo(() => {
-    const ids = new Set<number>()
-    for (const applicant of project.applicants) {
-      const id = toApplicationId(applicant.id)
-      if (id !== null) ids.add(id)
-    }
-    return Array.from(ids)
-  }, [project.applicants])
-
-  const approvePermissionQueries = useMemo<ResourcePermissionQuery[]>(
-    () => [
-      {
-        resourceType: "PROJECT_APPLICATION",
-        resourceIds: applicationIds,
-        permissionTypes: ["APPROVE"],
-      },
-    ],
-    [applicationIds],
-  )
-
-  const approvePermissionsQuery = useResourcePermissionsBatch(
-    approvePermissionQueries,
-    { enabled: open },
-  )
-
-  const isApprovePermissionLoading =
-    open && applicationIds.length > 0 && approvePermissionsQuery.isPending
-
-  const canApproveApplicant = (applicantId: string): boolean => {
-    const applicationId = toApplicationId(applicantId)
-    if (applicationId === null) return false
-    return approvePermissionsQuery.hasPermission({
-      resourceType: "PROJECT_APPLICATION",
-      resourceId: applicationId,
-      permissionType: "APPROVE",
-    })
-  }
+  // 합/불 결정 권한은 프로젝트 단위(application.canDecide)로 상위에서 전달받는다
+  const canApproveApplicant = (_applicantId: string): boolean => canDecide
 
   const projectWithOverrides = useMemo(() => {
     if (Object.keys(statusOverrides).length === 0) return project
@@ -226,7 +186,6 @@ export function ApplicationDetailModal({
     applicantId: string,
     applicantRound: number,
   ): boolean =>
-    !isApprovePermissionLoading &&
     canApproveApplicant(applicantId) &&
     !isRoundDecisionClosed(applicantRound, decisionDeadlineByRound, Date.now())
 
@@ -335,7 +294,7 @@ export function ApplicationDetailModal({
                 currentRound={currentRound}
                 decisionDeadlineByRound={decisionDeadlineByRound}
                 canApproveApplicant={canApproveApplicant}
-                approvePermissionLoading={isApprovePermissionLoading}
+                approvePermissionLoading={false}
                 statusOptions={hidePendingStatus ? ["pass", "fail"] : undefined}
                 className="w-full"
               />

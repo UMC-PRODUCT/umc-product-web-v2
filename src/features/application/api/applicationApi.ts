@@ -15,6 +15,19 @@ import type {
   ProjectApplicationDetailResponse,
   UpdateMatchingRoundRequest,
 } from "../model/apiTypes"
+import type { ProjectPermissionsResult } from "../model/projectPermissionTypes"
+
+// 프로젝트 단위 화면 분기용 capability 일괄 조회 (PROJECT-PERMISSIONS-001)
+export async function getProjectsPermissions(
+  ids: Array<string | number>,
+): Promise<ProjectPermissionsResult> {
+  if (ids.length === 0) return { projects: [] }
+  const { data } = await api.get<ApiResponse<ProjectPermissionsResult>>(
+    "/v1/projects/permissions",
+    { params: { ids: ids.join(",") } },
+  )
+  return data.result
+}
 
 // 프로젝트별 지원자 목록 조회
 export async function getProjectApplications(

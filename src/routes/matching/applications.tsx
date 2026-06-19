@@ -8,6 +8,7 @@ import {
   useChallengerPageData,
   useChapters,
 } from "@/features/application/hooks/useApplicationPageData"
+import { useProjectsPermissions } from "@/features/application/hooks/useProjectsPermissions"
 import { resolveMatchingApplicationView } from "@/features/application/model/applicationViewMode"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
@@ -141,6 +142,15 @@ function MatchingApplicationsPage() {
   const pmProjects = challenger.projects
   const availablePerRound = challenger.availablePerRound
 
+  // PM 뷰 프로젝트별 capability (목록/통계/승인 노출 게이팅)
+  const pmProjectIds = useMemo(
+    () => pmProjects.map((p) => p.id),
+    [pmProjects],
+  )
+  const pmPermissions = useProjectsPermissions(pmProjectIds, {
+    enabled: showPmSection && pmProjectIds.length > 0,
+  })
+
   // Plan 챌린저: 매칭 기간 중이면 조회 잠금
   const isPmMatchingPeriod = useIsMatchingPeriod({
     enabled: showPmSection && hasPmRole,
@@ -188,12 +198,14 @@ function MatchingApplicationsPage() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-14.25">
-                  <ApplicationStatsSection
-                    stats={adminStats}
-                    dataUpdatedAt={admin.dataUpdatedAt}
-                    currentRound={admin.currentRound}
-                    activeRound={admin.activeRound}
-                  />
+                  {admin.showStats && (
+                    <ApplicationStatsSection
+                      stats={adminStats}
+                      dataUpdatedAt={admin.dataUpdatedAt}
+                      currentRound={admin.currentRound}
+                      activeRound={admin.activeRound}
+                    />
+                  )}
                   {isAdminRoundLocked ? (
                     <div className="flex items-center justify-center py-20">
                       <p className="text-body-2-regular text-teal-gray-400">
@@ -207,6 +219,7 @@ function MatchingApplicationsPage() {
                       currentRound={admin.currentRound}
                       chapterName={selectedChapter}
                       disableProjectModal
+                      lazyLoadApplicants
                     />
                   )}
                 </div>
@@ -258,6 +271,7 @@ function MatchingApplicationsPage() {
                       decisionDeadlineByRound={
                         challenger.decisionDeadlineByRound
                       }
+                      canDecide={pmPermissions.canDecide(project.id)}
                     />
                   </div>
                 ))

@@ -13,6 +13,7 @@ import { shortenSchoolName } from "../model/mappers"
 import { ApplicantDetailRow } from "./ApplicantDetailRow"
 import { ApplicantTableHead } from "./ApplicantTableHead"
 import { ApplicationDetailModal } from "./ApplicationDetailModal"
+import { LazyApplicantRows } from "./LazyApplicantRows"
 import { ProjectStatusRow } from "./ProjectStatusRow"
 
 import type { ProjectApplication } from "../model/types"
@@ -76,6 +77,10 @@ interface ApplicationTableSectionProps {
   /** 지원자 펼치기 버튼 숨김 (SCHOOL_PRESIDENT 등 열람 제한 역할) */
   hideExpand?: boolean
   disableProjectModal?: boolean
+  /** 프로젝트 단위 합/불 결정 권한 (application.canDecide) - 상세 모달 승인 게이팅 */
+  canDecide?: boolean
+  /** 펼칠 때 프로젝트별 지원자를 lazy-load (admin 뷰: projects에 applicants 미포함) */
+  lazyLoadApplicants?: boolean
   className?: string
 }
 
@@ -92,6 +97,8 @@ export function ApplicationTableSection({
   hidePendingStatus = false,
   hideExpand = false,
   disableProjectModal = false,
+  canDecide = false,
+  lazyLoadApplicants = false,
   className,
 }: ApplicationTableSectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -331,7 +338,9 @@ export function ApplicationTableSection({
               />
 
               {isExpanded &&
-                (project.applicants.length > 0 ? (
+                (lazyLoadApplicants ? (
+                  <LazyApplicantRows projectId={project.id} />
+                ) : project.applicants.length > 0 ? (
                   <div className="border-teal-gray-150 py-1">
                     {project.applicants.map((applicant) => (
                       <ApplicantDetailRow
@@ -378,6 +387,7 @@ export function ApplicationTableSection({
           decisionDeadlineByRound={decisionDeadlineByRound}
           disableFormPanel={disableFormPanel}
           hidePendingStatus={hidePendingStatus}
+          canDecide={canDecide}
         />
       )}
     </div>
