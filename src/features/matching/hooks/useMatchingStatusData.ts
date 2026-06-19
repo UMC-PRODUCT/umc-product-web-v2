@@ -78,6 +78,7 @@ export function useMatchingStatusData(chapterName?: string) {
       return { ...firstPage, content: projects }
     },
     enabled: gisuId > 0,
+    staleTime: 1000 * 60 * 5,
   })
 
   const projects = useMemo(
