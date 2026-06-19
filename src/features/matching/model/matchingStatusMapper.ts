@@ -65,20 +65,22 @@ function getNeededParts(
   const subParts = ROLE_TO_PARTS[role] ?? []
   const neededParts: Part[] = []
 
+  const filledCounts = new Map<string, number>()
+  if (members) {
+    for (const group of members.partGroups) {
+      filledCounts.set(group.part, group.members.length)
+    }
+  } else {
+    for (const app of approvedAppByMemberId.values()) {
+      const p = app.applicant.part
+      filledCounts.set(p, (filledCounts.get(p) ?? 0) + 1)
+    }
+  }
+
   for (const part of subParts) {
     const partQuota =
       Number(partQuotas.find((q) => q.part === part)?.quota) || 0
-
-    let filledCount = 0
-    if (members) {
-      const group = members.partGroups.find((g) => g.part === part)
-      filledCount = group ? group.members.length : 0
-    } else {
-      filledCount = Array.from(approvedAppByMemberId.values()).filter(
-        (app) => app.applicant.part === part,
-      ).length
-    }
-
+    const filledCount = filledCounts.get(part) ?? 0
     const needed = Math.max(0, partQuota - filledCount)
     for (let i = 0; i < needed; i++) {
       neededParts.push(part as Part)
