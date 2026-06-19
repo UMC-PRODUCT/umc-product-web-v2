@@ -172,9 +172,13 @@ export function useMatchingStatusData(chapterName?: string) {
       gisuQuery.isLoading ||
       chaptersQuery.isLoading ||
       projectsQuery.isLoading ||
-      membersQuery.isLoading ||
       schoolsQuery.isLoading ||
-      matchingStatsQuery.isLoading,
+      (projects.length > 0 &&
+        membersQuery.data === undefined &&
+        !membersQuery.isError) ||
+      (!!chapterId &&
+        matchingStatsQuery.data === undefined &&
+        !matchingStatsQuery.isError),
     isError:
       gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError,
     error:
