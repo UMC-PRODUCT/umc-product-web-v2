@@ -6,6 +6,7 @@ export interface SideBarMenu {
   id: string
   title: string
   to: string
+  matchPaths?: string[]
 }
 
 export interface SideBarSection {
@@ -35,6 +36,7 @@ export const SIDEBAR_ITEMS: SideBarSection[] = [
         id: "project-management",
         title: "프로젝트 관리",
         to: "/matching/projects/management",
+        matchPaths: ["/matching/projects/edit"],
       },
     ],
   },
