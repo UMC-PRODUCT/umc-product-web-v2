@@ -49,9 +49,10 @@ export const applicationKeys = {
     ] as const,
 
   // 통계 API
-  projectStatistics: (projectId: number) =>
-    [...applicationKeys.all, "statistics", "project", projectId] as const,
-
   chapterStatistics: (chapterId: number) =>
     [...applicationKeys.all, "statistics", "chapter", chapterId] as const,
+
+  // 매칭 현황 집계 (PROJECT-STAT-003) - 응답 shape이 달라 chapterStatistics와 분리
+  matchingMatchings: (chapterId: number) =>
+    [...applicationKeys.all, "statistics", "matchings", chapterId] as const,
 }

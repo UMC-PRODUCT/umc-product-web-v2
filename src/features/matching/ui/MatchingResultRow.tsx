@@ -15,7 +15,6 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import { AssignmentModal } from "./AssignmentModal"
 import { MatchingBlock } from "./MatchingBlock"
-import { MatchingDetailModal } from "./MatchingDetailModal"
 
 import type { Part } from "@/features/challenger/model/types"
 import type { NumberTagVariant } from "@/shared/ui/NumberTag"
@@ -35,7 +34,6 @@ export interface MatchingBlockData {
   type: BlockType
   name?: string
   tagVariant?: NumberTagVariant
-  applicantId?: string
   memberId?: string
   part?: Part
 }
@@ -60,9 +58,7 @@ interface MatchingResultRowProps {
   gisuId?: number
   chapterId?: number
   assignedMemberIds?: Set<string>
-  chapterName?: string
   className?: string
-  thumbnailUrl?: string
 }
 
 export function MatchingResultRow({
@@ -79,14 +75,8 @@ export function MatchingResultRow({
   gisuId,
   chapterId,
   assignedMemberIds,
-  chapterName,
   className,
-  thumbnailUrl,
 }: MatchingResultRowProps) {
-  const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(
-    null,
-  )
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null)
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
   const [assignTarget, setAssignTarget] = useState<{
     rowIdx: number
@@ -278,22 +268,16 @@ export function MatchingResultRow({
                         name={block.name}
                         tagVariant={block.tagVariant}
                         onNameClick={
-                          isEditable && block.applicantId
+                          isEditable &&
+                          block.memberId &&
+                          block.type === "filled"
                             ? () => {
-                                setSelectedApplicantId(block.applicantId!)
-                                setSelectedMemberId(block.memberId ?? null)
+                                setManualUnmatchTarget({
+                                  memberId: block.memberId!,
+                                  name: block.name ?? "",
+                                })
                               }
-                            : isEditable &&
-                                !block.applicantId &&
-                                block.memberId &&
-                                block.type === "filled"
-                              ? () => {
-                                  setManualUnmatchTarget({
-                                    memberId: block.memberId!,
-                                    name: block.name ?? "",
-                                  })
-                                }
-                              : undefined
+                            : undefined
                         }
                         onAssignClick={
                           isEditable && block.type === "none"
@@ -386,32 +370,6 @@ export function MatchingResultRow({
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
-
-      <MatchingDetailModal
-        applicantId={selectedApplicantId}
-        projectId={projectId}
-        memberId={selectedMemberId ?? undefined}
-        chapterName={chapterName ?? ""}
-        project={{
-          projectName,
-          challengerName,
-          challengerUniversity,
-          thumbnailUrl,
-        }}
-        open={selectedApplicantId !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedApplicantId(null)
-            setSelectedMemberId(null)
-          }
-        }}
-        isEditable={isEditable}
-        onConfirmUnmatch={
-          projectId && selectedMemberId
-            ? () => unmatchMutation.mutate(selectedMemberId)
-            : undefined
-        }
-      />
 
       <CtaModal
         open={manualUnmatchTarget !== null}
