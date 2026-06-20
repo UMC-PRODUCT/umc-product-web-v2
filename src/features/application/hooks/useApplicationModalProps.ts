@@ -38,8 +38,7 @@ function getCurrentRound(rounds: MatchingRoundResponse[]): {
   const completed = [...rounds]
     .filter((r) => new Date(r.endsAt).getTime() < now)
     .sort((a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime())
-  const fallback =
-    completed.length > 0 ? toRound(completed[0]!.phase) : undefined
+  const fallback = completed[0] ? toRound(completed[0].phase) : undefined
   return { currentRound: fallback, activeRound: undefined }
 }
 
@@ -103,9 +102,12 @@ export function useApplicationModalProps(
 
   const isLoading =
     enabled &&
-    (projectDetailQuery.isLoading ||
-      permissions.isLoading ||
-      roundsQuery.isLoading)
+    (projectDetailQuery.data === undefined ||
+      permissions.data === undefined ||
+      (chapterId !== undefined && roundsQuery.data === undefined)) &&
+    !projectDetailQuery.isError &&
+    !permissions.isError &&
+    !(chapterId !== undefined && roundsQuery.isError)
 
   return {
     currentRound,
