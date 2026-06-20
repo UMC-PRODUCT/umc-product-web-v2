@@ -7,6 +7,7 @@ import { useMemo, useRef, useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { getProjectApplications } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
+import { useProjectsPermissions } from "@/features/application/hooks/useProjectsPermissions"
 import {
   toApplicantDetail,
   toFrontRole,
@@ -76,6 +77,10 @@ export function ProjectManagementMoreMenu({
   const addToast = useToastStore((s) => s.addToast)
 
   const numericProjectId = Number(projectId)
+
+  const permissions = useProjectsPermissions([projectId], {
+    enabled: applicationOpen,
+  })
 
   const projectDetailQuery = useQuery({
     queryKey: ["projectDetail", numericProjectId],
@@ -449,6 +454,7 @@ export function ProjectManagementMoreMenu({
         <ApplicationDetailModal
           project={projectApplication}
           chapterName={chapterName}
+          canDecide={permissions.canDecide(projectId)}
           open={applicationOpen}
           onOpenChange={setApplicationOpen}
         />
