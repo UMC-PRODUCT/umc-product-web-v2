@@ -191,11 +191,11 @@ export function ApplicationStatsSection({
           </div>
         </div>
 
-        {/* 1차 매칭 지원 Top 4 */}
+        {/* N차 매칭 지원 Top 4 */}
         <div className="shadow-drop-neutral-3 border-teal-gray-100 flex w-100.5 shrink-0 flex-col rounded-xl border bg-white px-8 pt-7 pb-8">
           <h3 className="text-heading-6-semibold text-teal-700">
             {stats.rounds.length > 0 && currentRound
-              ? `${currentRound >= 3 ? 1 : currentRound}차 매칭 ${labels.top4Suffix} Top 4 `
+              ? `${activeRound !== undefined ? activeRound : currentRound >= 3 ? 1 : currentRound}차 매칭 ${labels.top4Suffix} Top 4 `
               : `N차 매칭 ${labels.top4Suffix} Top 4 `}
           </h3>
           {stats.topProjects.some((p) => p.count > 0) ? (
