@@ -7,7 +7,6 @@ import { useMemo, useRef, useState } from "react"
 import { useToastStore } from "@/components/toast/useToastStore"
 import { getProjectApplications } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
-import { useApplicationModalProps } from "@/features/application/hooks/useApplicationModalProps"
 import {
   toApplicantDetail,
   toFrontRole,
@@ -89,10 +88,6 @@ export function ProjectManagementMoreMenu({
     queryKey: applicationKeys.applicants(numericProjectId),
     queryFn: () => getProjectApplications(numericProjectId),
     enabled: (applicationOpen || popoverOpen) && numericProjectId > 0,
-  })
-
-  const modalProps = useApplicationModalProps(projectId, {
-    enabled: applicationOpen,
   })
 
   const projectApplication = useMemo((): ProjectApplication | null => {
@@ -456,7 +451,6 @@ export function ProjectManagementMoreMenu({
           chapterName={chapterName}
           open={applicationOpen}
           onOpenChange={setApplicationOpen}
-          {...modalProps}
         />
       )}
 
