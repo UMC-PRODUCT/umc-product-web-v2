@@ -1,4 +1,3 @@
-export { useApplicationModalProps } from "./hooks/useApplicationModalProps"
 export { ApplicantDetailRow } from "./ui/ApplicantDetailRow"
 export { ApplicantTableHead } from "./ui/ApplicantTableHead"
 export { ApplicationDetailModal } from "./ui/ApplicationDetailModal"
