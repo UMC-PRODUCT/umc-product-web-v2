@@ -5,13 +5,23 @@ import { Popover } from "radix-ui"
 import { useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { getProjectApplications } from "@/features/application/api/applicationApi"
+import {
+  getMatchingRounds,
+  getProjectApplications,
+} from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
+import { useProjectsPermissions } from "@/features/application/hooks/useProjectsPermissions"
 import {
   toApplicantDetail,
   toFrontRole,
 } from "@/features/application/model/mappers"
+import { buildDecisionDeadlineByRound } from "@/features/application/model/matchingDecision"
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
+import {
+  isCentralCore,
+  isChapterPresident,
+  isCurrentTermPm,
+} from "@/features/auth/model/identity"
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { TeamMemberModal } from "@/features/project/list/ui/team-member-modal/TeamMemberModal"
 import { deleteProject } from "@/features/project/management/api"
@@ -23,13 +33,18 @@ import { abortProject } from "@/features/project/new/api/projectAbort"
 import { submitProject } from "@/features/project/new/api/projectDraft"
 import { publishProject } from "@/features/project/new/api/projectPublish"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
+import { useSchoolChapterMap } from "@/shared/hooks/useSchoolChapterMap"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import { AbortProjectModal } from "./AbortProjectModal"
 
-import type { PartEnum } from "@/features/application/model/apiTypes"
+import type {
+  MatchingRoundResponse,
+  PartEnum,
+} from "@/features/application/model/apiTypes"
 import type {
   AssignmentCount,
   ProjectApplication,
@@ -49,6 +64,34 @@ interface ProjectManagementMoreMenuProps {
   canPublishProject: boolean
   isPermissionLoading: boolean
   isMatchingPeriod?: boolean
+}
+
+function getCurrentRound(rounds: MatchingRoundResponse[]): {
+  currentRound: number | undefined
+  activeRound: number | undefined
+} {
+  const now = Date.now()
+  const toRound = (phase: string) =>
+    phase === "FIRST" ? 1 : phase === "SECOND" ? 2 : 3
+
+  // 지원현황 기준: startsAt ~ endsAt (지원 마감 시점)
+  const active = rounds.find(
+    (r) =>
+      new Date(r.startsAt).getTime() <= now &&
+      now <= new Date(r.endsAt).getTime(),
+  )
+  if (active) {
+    const round = toRound(active.phase)
+    return { currentRound: round, activeRound: round }
+  }
+
+  // endsAt이 지난 차수 중 가장 최근
+  const completed = [...rounds]
+    .filter((r) => new Date(r.endsAt).getTime() < now)
+    .sort((a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime())
+  const fallback =
+    completed.length > 0 ? toRound(completed[0]!.phase) : undefined
+  return { currentRound: fallback, activeRound: undefined }
 }
 
 export function ProjectManagementMoreMenu({
@@ -89,6 +132,42 @@ export function ProjectManagementMoreMenu({
     queryFn: () => getProjectApplications(numericProjectId),
     enabled: (applicationOpen || popoverOpen) && numericProjectId > 0,
   })
+
+  // 유저 권한 조회
+  const { me } = useViewerIdentity()
+  const isPm = isCurrentTermPm(me)
+  const hidePendingStatus = isPm
+  const disableFormPanel = !(isCentralCore(me) || isChapterPresident(me))
+
+  // 프로젝트 단위 합/불 결정 권한 조회
+  const permissions = useProjectsPermissions([projectId], {
+    enabled: applicationOpen && !!projectId,
+  })
+  const canDecide = permissions.canDecide(projectId)
+
+  // 프로젝트의 chapterId 조회
+  const { getChapterIdBySchool } = useSchoolChapterMap()
+  const schoolName = projectDetailQuery.data?.productOwner?.schoolName
+  const chapterId = schoolName ? getChapterIdBySchool(schoolName) : undefined
+
+  // 매칭 차수 조회
+  const roundsQuery = useQuery({
+    queryKey: applicationKeys.matchingRounds(chapterId),
+    queryFn: () => getMatchingRounds(chapterId),
+    enabled: applicationOpen && chapterId !== undefined,
+  })
+
+  // 차수별 합/불 결정 마감 epoch ms
+  const decisionDeadlineByRound = useMemo(
+    () => buildDecisionDeadlineByRound(roundsQuery.data),
+    [roundsQuery.data],
+  )
+
+  // 현재 활성 차수
+  const { currentRound } = useMemo(
+    () => getCurrentRound(roundsQuery.data ?? []),
+    [roundsQuery.data],
+  )
 
   const projectApplication = useMemo((): ProjectApplication | null => {
     const detail = projectDetailQuery.data
@@ -451,6 +530,11 @@ export function ProjectManagementMoreMenu({
           chapterName={chapterName}
           open={applicationOpen}
           onOpenChange={setApplicationOpen}
+          currentRound={currentRound}
+          decisionDeadlineByRound={decisionDeadlineByRound}
+          disableFormPanel={disableFormPanel}
+          hidePendingStatus={hidePendingStatus}
+          canDecide={canDecide}
         />
       )}
 
