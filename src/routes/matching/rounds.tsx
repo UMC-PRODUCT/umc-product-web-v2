@@ -21,6 +21,7 @@ import {
 import {
   type Branch,
   emptyRoundSchedules,
+  computeDecisionDeadline,
   MATCHING_TYPES,
   type MatchingType,
   PHASES,
@@ -295,17 +296,10 @@ function MatchingRoundsPage() {
         // decisionDeadline 자동 계산:
         // 다음 차수 있음 -> 다음 차수 startsAt - 5분
         // 마지막 차수 -> endsAt + 12시간
-        let decisionDeadline: string
-        const nextData = filledData[idx + 1]
-        if (nextData) {
-          decisionDeadline = new Date(
-            new Date(nextData.startsAt).getTime() - 5 * 60 * 1000,
-          ).toISOString()
-        } else {
-          decisionDeadline = new Date(
-            new Date(endsAt).getTime() + 12 * 60 * 60 * 1000,
-          ).toISOString()
-        }
+        const decisionDeadline = computeDecisionDeadline(
+          endsAt,
+          filledData[idx + 1]?.startsAt,
+        )
 
         if (round.id) {
           return updateMatchingRound(round.id, {

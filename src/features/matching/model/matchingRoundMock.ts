@@ -59,7 +59,7 @@ const PHASE_LABEL: Record<MatchingPhase, string> = {
 export const PHASES: MatchingPhase[] = ["FIRST", "SECOND", "THIRD"]
 
 // 서버 ISO datetime -> UI date + time 분리
-function parseServerDatetime(iso: string): { date: string; time: string } {
+export function parseServerDatetime(iso: string): { date: string; time: string } {
   const dt = new Date(iso)
   const y = dt.getFullYear()
   const m = String(dt.getMonth() + 1).padStart(2, "0")
@@ -78,6 +78,26 @@ export function toISODatetime(
   const suffix = seconds === "start" ? ":00.000" : ":59.999"
   const dt = new Date(`${date}T${time}${suffix}`)
   return dt.toISOString()
+}
+
+export const DECISION_DEADLINE_NEXT_GAP_MS = 5 * 60 * 1000
+export const DECISION_DEADLINE_LAST_GAP_MS = 12 * 60 * 60 * 1000
+
+// 결정 마감(decisionDeadline) 자동 계산
+// 다음 차수 있음 -> 다음 차수 startsAt - 5분 / 마지막 차수 -> endsAt + 12시간
+// 입력/출력 모두 UTC ISO 문자열 (epoch ms 연산이라 타임존 무관)
+export function computeDecisionDeadline(
+  endsAt: string,
+  nextStartsAt: string | undefined,
+): string {
+  if (nextStartsAt !== undefined) {
+    return new Date(
+      new Date(nextStartsAt).getTime() - DECISION_DEADLINE_NEXT_GAP_MS,
+    ).toISOString()
+  }
+  return new Date(
+    new Date(endsAt).getTime() + DECISION_DEADLINE_LAST_GAP_MS,
+  ).toISOString()
 }
 
 // 서버 응답 -> RoundSchedule 변환
