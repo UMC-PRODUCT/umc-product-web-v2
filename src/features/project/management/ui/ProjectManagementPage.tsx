@@ -4,7 +4,6 @@ import { useMemo, useState } from "react"
 
 import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
 import {
-  getLatestChallengerRecord,
   isAnyOperator,
   isCentralCore,
   isChapterPresident,
@@ -136,11 +135,6 @@ export function ProjectManagementPage() {
   const hasAccess = isAdminScope || isPm
   const useGroupedView = isCentralCore(me)
 
-  const userChapter = useMemo(() => {
-    const record = getLatestChallengerRecord(me)
-    return record?.chapterName ?? ""
-  }, [me])
-
   const descriptionText = useGroupedView
     ? "전체 지부의 프로젝트 정보를 확인하고 수정할 수 있습니다. 팀 매칭 진행 중에는 수정이 제한됩니다."
     : isChapterPresident(me)
@@ -173,19 +167,10 @@ export function ProjectManagementPage() {
     const filtered = hasFullAccess
       ? list
       : list.filter((project) => project.status !== "DRAFT")
-    return filtered.map((project) => {
-      const mapped = toMatchingProject(project, managedQuery.dataUpdatedAt)
-      mapped.branch = useGroupedView ? selectedChapter : userChapter
-      return mapped
-    })
-  }, [
-    managedQuery.data,
-    managedQuery.dataUpdatedAt,
-    me,
-    useGroupedView,
-    selectedChapter,
-    userChapter,
-  ])
+    return filtered.map((project) =>
+      toMatchingProject(project, managedQuery.dataUpdatedAt),
+    )
+  }, [managedQuery.data, managedQuery.dataUpdatedAt, me])
 
   const selectedChapterInfo = useMemo(() => {
     if (!useGroupedView) return undefined
