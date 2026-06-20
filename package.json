@@ -19,6 +19,7 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:tz": "TZ=Asia/Seoul vitest run && TZ=UTC vitest run && TZ=America/New_York vitest run",
     "prepare": "husky",
     "generate:api-types": "openapi-typescript ./openapi.yaml -o ./src/types/api.d.ts",
     "svgr": "npx @svgr/cli -d src/shared/assets --ignore-existing --typescript --no-dimensions --no-index public",

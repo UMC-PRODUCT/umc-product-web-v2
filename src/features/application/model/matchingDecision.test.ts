@@ -76,4 +76,24 @@ describe("isRoundDecisionClosed", () => {
     expect(isRoundDecisionClosed(3, map, now)).toBe(false)
     expect(isRoundDecisionClosed(1, undefined, now)).toBe(false)
   })
+
+  // 인시던트(자정 직전 합불 불가) 회귀 방지: 마감 "정확한 순간" 경계 고정
+  describe("결정 마감 경계 (now vs deadline)", () => {
+    const deadline = new Date("2026-06-20T00:00:00Z").getTime()
+    const boundaryMap = buildDecisionDeadlineByRound([
+      makeRound("SECOND", "2026-06-20T00:00:00Z"),
+    ])
+
+    it("마감 1ms 전: 열림 (지원자 합불 가능)", () => {
+      expect(isRoundDecisionClosed(2, boundaryMap, deadline - 1)).toBe(false)
+    })
+
+    it("마감 정각(now === deadline): 열림 (> 비교라 잠그지 않음)", () => {
+      expect(isRoundDecisionClosed(2, boundaryMap, deadline)).toBe(false)
+    })
+
+    it("마감 1ms 후: 잠김 (자동 확정 영역)", () => {
+      expect(isRoundDecisionClosed(2, boundaryMap, deadline + 1)).toBe(true)
+    })
+  })
 })
