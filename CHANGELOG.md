@@ -4,6 +4,14 @@
 
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며, 버전 관리는 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
+## [1.1.10] - 2026-07-03
+
+지원 현황 Top4 라벨이 활성 차수를 반영하도록 정정한 hotfix 배포입니다.
+
+### Fixed (수정)
+
+- **지원 현황 Top4 차수 정정** — 3차 지원 기간 중 Top4가 1차 기준으로 표시되던 문제를 활성 차수(activeRound) 기준으로 수정 (#546)
+
 ## [1.1.9] - 2026-06-20
 
 지원 현황·매칭의 권한 분기를 프로젝트 권한 capability 기반으로 정비하고, 소개 페이지 성능을 개선한 배포입니다.
@@ -219,6 +227,7 @@ v1.0.0 이후 develop에 누적된 변경을 배포합니다. 데모데이 소�
 
 UMC 데모데이 매칭 시스템 첫 공식 릴리스.
 
+[1.1.10]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.9...v1.1.10
 [1.1.9]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.8...v1.1.9
 [1.1.8]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.7...v1.1.8
 [1.1.7]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.6...v1.1.7
