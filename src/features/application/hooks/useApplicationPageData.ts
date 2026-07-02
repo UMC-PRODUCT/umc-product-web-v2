@@ -421,9 +421,13 @@ export function useAdminPageData(
         }
       : chapterStatsQuery.data.summary
 
-    // Top4를 현재 차수 단일 기준으로 표시, 3차 이후에는 1차 기준
+    // Top4: 활성 차수가 있으면 해당 차수, 3차 이후 기간 외에는 1차 기준
     const topProjectsRound =
-      currentRound !== undefined && currentRound >= 3 ? 1 : currentRound
+      activeRound !== undefined
+        ? activeRound
+        : currentRound !== undefined && currentRound >= 3
+          ? 1
+          : currentRound
     const partial = summaryToStats(
       filteredSummary,
       projectIdToName,
@@ -510,6 +514,7 @@ export function useAdminPageData(
     chapterName,
     chapterSchoolIds,
     currentRound,
+    activeRound,
   ])
 
   return {
