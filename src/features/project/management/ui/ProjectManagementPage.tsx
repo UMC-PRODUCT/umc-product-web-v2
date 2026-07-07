@@ -18,12 +18,12 @@ import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingP
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { EmptyState } from "@/shared/ui/EmptyState"
+import { ProjectManagementSubTitle } from "@/shared/ui/ProjectManagementSubTitle"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 
 import { getManagedProjects } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"
-import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
 import type { ResourcePermissionQuery } from "@/entities/member/api/permissions"
 import type { ProjectStatus } from "@/entities/project/api/matchingProject"

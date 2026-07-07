@@ -19,7 +19,6 @@ import {
   isSuperAdmin,
 } from "@/entities/member/model/identity"
 import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
-import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
   addProjectMember,
   createProjectDraft,
@@ -33,8 +32,10 @@ import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
+import { Dropdown } from "@/shared/ui/Dropdown"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
 import { InputBox } from "@/shared/ui/input/InputBox"
+import { SectionHeader } from "@/shared/ui/SectionHeader"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
@@ -42,7 +43,6 @@ import {
   basicInfoSchema,
 } from "../../model/basicInfoSchema"
 import { useProjectRegisterStore } from "../../model/useProjectRegisterStore"
-import { SectionHeader } from "../shared/SectionHeader"
 import { ProjectCardForm } from "./ProjectCardForm"
 
 import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"

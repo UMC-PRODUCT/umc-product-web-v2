@@ -14,7 +14,7 @@ import { useMatchingStatusData } from "@/features/matching/hooks/useMatchingStat
 import { MatchingPartSection } from "@/features/matching/ui/MatchingPartSection"
 import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"
 import { MatchingTableHead } from "@/features/matching/ui/MatchingTableHead"
-import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
+import { SectionHeader } from "@/shared/ui/SectionHeader"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 

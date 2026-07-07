@@ -8,12 +8,12 @@ import {
   type MyProjectApplicationResponse,
 } from "@/entities/project/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
-import { ProjectManagementSubTitle } from "@/features/project/management/ui/ProjectManagementSubTitle"
 import { UsabilitySurvey } from "@/features/usability-survey"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { Modal } from "@/shared/ui/Modal"
+import { ProjectManagementSubTitle } from "@/shared/ui/ProjectManagementSubTitle"
 
 import { ApplicationProjectCard } from "./ApplicationProjectCard"
 import { MyApplicationMoreMenu } from "./MyApplicationMoreMenu"

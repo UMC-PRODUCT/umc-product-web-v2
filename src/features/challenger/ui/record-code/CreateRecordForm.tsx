@@ -17,15 +17,15 @@ import {
   ROLE_TYPE_OPTIONS,
   roleNeedsPart,
 } from "@/features/challenger/model/enums"
-import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import { FieldRow } from "@/features/challenger/ui/shared/FieldRow"
 import { Button } from "@/shared/ui/Button"
+import { Dropdown } from "@/shared/ui/Dropdown"
 import { InputBox } from "@/shared/ui/input/InputBox"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { GeneratedCodeCard } from "./GeneratedCodeCard"
 
-import type { DropdownOption } from "@/features/challenger/ui/shared/Dropdown"
+import type { DropdownOption } from "@/shared/ui/Dropdown"
 
 export function CreateRecordForm() {
   const addToast = useToastStore((state) => state.addToast)

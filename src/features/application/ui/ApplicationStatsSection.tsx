@@ -1,6 +1,6 @@
-import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
 import PersonGraphicIcon from "@/shared/assets/icon/people/PersonGraphicIcon"
 import { cn } from "@/shared/lib/utils"
+import { SectionHeader } from "@/shared/ui/SectionHeader"
 
 import { ChartLegendLabel } from "./ChartLegendLabel"
 import { DonutChart } from "./DonutChart"

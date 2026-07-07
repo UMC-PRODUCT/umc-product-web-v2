@@ -13,10 +13,10 @@ import {
   type GrantPointFormData,
   grantPointSchema,
 } from "@/features/challenger/model/grantPointSchema"
-import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import { FieldRow } from "@/features/challenger/ui/shared/FieldRow"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
+import { Dropdown } from "@/shared/ui/Dropdown"
 import { InputBox } from "@/shared/ui/input/InputBox"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 

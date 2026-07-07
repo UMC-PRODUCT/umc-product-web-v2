@@ -4,7 +4,6 @@ export type {
   MatchingProjectListFilterId,
   ProjectListSearch,
 } from "./model/matchingProjectList"
-export { FilterDropdown } from "./ui/FilterDropDown"
 export { MatchingProjectCard } from "./ui/MatchingProjectCard"
 export type { MatchingProjectCardVariant } from "./ui/MatchingProjectCard"
 export { MatchingProjectsListPage } from "./ui/MatchingProjectsListPage"
@@ -19,3 +18,4 @@ export {
   DEFAULT_MATCHING_PROJECT_MOCK,
   MOCK_MATCHING_PROJECTS,
 } from "@/entities/project/model/matchingProject.mock"
+export { FilterDropdown } from "@/shared/ui/FilterDropDown"

@@ -6,7 +6,7 @@ import {
   resendEmailVerification,
   sendEmailVerification,
 } from "@/features/auth/api/emailVerification"
-import { emailSchema } from "@/features/signup/validation"
+import { emailSchema } from "@/shared/lib/validationSchemas"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type { EmailVerificationPurpose } from "@/features/auth/model/types"

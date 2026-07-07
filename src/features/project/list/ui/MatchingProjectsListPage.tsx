@@ -5,11 +5,11 @@ import { MOCK_MATCHING_PROJECTS } from "@/entities/project/model/matchingProject
 import { trackEvent } from "@/shared/analytics"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { cn } from "@/shared/lib/utils"
+import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Modal } from "@/shared/ui/Modal"
 import { Pagination } from "@/shared/ui/Pagination"
 
 import { useMatchingProjectListFilters } from "../model/matchingProjectList"
-import { FilterDropdown } from "./FilterDropDown"
 import { MatchingProjectCard } from "./MatchingProjectCard"
 import { ProjectDetailCard } from "./ProjectDetailCard"
 import { ProjectSearchField } from "./ProjectSearchField"

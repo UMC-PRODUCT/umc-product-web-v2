@@ -2,13 +2,13 @@ import { Search } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 
 import { shortenSchoolName } from "@/entities/application/model/mappers"
+import { cn } from "@/shared/lib/utils"
 import {
   FilterDropdown,
   type FilterDropdownProps,
-} from "@/features/project/list/ui/FilterDropDown"
-import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
-import { cn } from "@/shared/lib/utils"
+} from "@/shared/ui/FilterDropDown"
 import { Pagination } from "@/shared/ui/Pagination"
+import { SectionHeader } from "@/shared/ui/SectionHeader"
 
 import { ApplicantDetailRow } from "./ApplicantDetailRow"
 import { ApplicantTableHead } from "./ApplicantTableHead"
