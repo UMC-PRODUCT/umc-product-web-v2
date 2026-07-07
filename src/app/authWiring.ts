@@ -14,10 +14,12 @@ export function wireAuthBridge(): void {
     setTokens: (tokens) => useAuthStore.getState().setTokens(tokens),
     clear: () => useAuthStore.getState().clear(),
     redirectToLogin: () => {
+      // buildLoginRedirectSearch는 객체를 반환하므로 URLSearchParams로 직렬화한다.
+      // .size(비교적 최신 스펙) 대신 toString() 결과로 존재 여부를 판별한다.
       const search = new URLSearchParams(
         buildLoginRedirectSearch(getCurrentReturnTo()),
-      )
-      window.location.href = search.size > 0 ? `/login?${search}` : "/login"
+      ).toString()
+      window.location.href = search ? `/login?${search}` : "/login"
     },
   })
 }

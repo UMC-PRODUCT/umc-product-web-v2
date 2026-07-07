@@ -110,11 +110,22 @@ export default tseslint.config(
           default: "disallow",
           policies: [
             {
-              from: [
-                { element: { type: "app" } },
-                { element: { type: "routes" } },
-              ],
+              // app은 조립 루트: 자기 자신과 routes를 포함한 모든 하위 레이어 참조 가능
+              from: [{ element: { type: "app" } }],
               allow: [
+                { to: { element: { type: "app" } } },
+                { to: { element: { type: "routes" } } },
+                { to: { element: { type: "widgets" } } },
+                { to: { element: { type: "features" } } },
+                { to: { element: { type: "entities" } } },
+                { to: { element: { type: "shared" } } },
+                { to: { element: { type: "types" } } },
+              ],
+            },
+            {
+              from: [{ element: { type: "routes" } }],
+              allow: [
+                { to: { element: { type: "routes" } } },
                 { to: { element: { type: "widgets" } } },
                 { to: { element: { type: "features" } } },
                 { to: { element: { type: "entities" } } },
