@@ -4,16 +4,16 @@ import { isAxiosError } from "axios"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { getMatchingRounds } from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
-import { getResourcePermission } from "@/features/auth/api/permissions"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { getResourcePermission } from "@/entities/member/api/permissions"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   canManageProjectRecruitInfo,
   getLatestChallengerRecord,
-} from "@/features/auth/model/identity"
-import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
+} from "@/entities/member/model/identity"
+import { hasGrantedPermission } from "@/entities/member/model/resourcePermission"
+import { getMatchingRounds } from "@/features/application/api/applicationApi"
+import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import { getManagedProjects } from "@/features/project/management/api"
 import {
@@ -580,8 +580,12 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
               isEditMode ? undefined : canManageRecruitInfoByRole
             }
             isHydrated={isEditMode ? detailQuery.isSuccess : true}
-            onPrev={isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(1)}
-            onNext={isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(3)}
+            onPrev={
+              isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(1)
+            }
+            onNext={
+              isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(3)
+            }
           />
         )}
         {step === 3 && (

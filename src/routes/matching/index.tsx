@@ -4,16 +4,16 @@ import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
-import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   getViewerBranch,
   isCentralStaff,
   isChapterPresident,
   isCurrentTermPm,
   isSuperAdmin,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   getAllChapters,
   getAllGisu,

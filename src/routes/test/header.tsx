@@ -5,11 +5,11 @@ import { useEffect, useState } from "react"
 import Header from "@/components/header/Header"
 import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
 import SideBar from "@/components/sidebar/SideBar"
-import { authKeys } from "@/features/auth/hooks/useMe"
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { authKeys } from "@/entities/member/hooks/useMe"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { cn } from "@/shared/lib/utils"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 const PATHNAME_OPTIONS = [
   { label: "소개", value: "/intro" },

@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-import { useMe } from "@/features/auth/hooks/useMe"
+import { useMe } from "@/entities/member/hooks/useMe"
 import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import { cn } from "@/shared/lib/utils"
 

@@ -1,9 +1,9 @@
-import { isAnyOperator } from "@/features/auth/model/identity"
+import { isAnyOperator } from "@/entities/member/model/identity"
 
 import { getCurrentGisuChallengerRecords } from "./currentGisuRecords"
 import { isOtherChallengerPart, isPmPart } from "./viewModeParts"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 import type { Part } from "@/features/challenger/model/types"
 
 import type { ViewMode } from "."

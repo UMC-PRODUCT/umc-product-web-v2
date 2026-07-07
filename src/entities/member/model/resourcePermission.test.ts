@@ -5,7 +5,7 @@ import {
   hasGrantedResourcePermission,
 } from "./resourcePermission"
 
-import type { ResourcePermissionResponse } from "@/features/auth/api/permissions"
+import type { ResourcePermissionResponse } from "@/entities/member/api/permissions"
 
 describe("hasGrantedPermission", () => {
   it("권한 응답이 없으면 false", () => {

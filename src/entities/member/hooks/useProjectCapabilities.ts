@@ -3,7 +3,7 @@ import { useMemo } from "react"
 import { buildProjectCapabilities } from "../model/projectCapabilities"
 import { useResourcePermission } from "./useResourcePermission"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 export function useProjectCapabilities(me: MemberInfoResponse | undefined) {
   const projectWritePermissionQuery = useResourcePermission(

@@ -1,6 +1,9 @@
-import { isAnyOperator, isCurrentTermPm } from "@/features/auth/model/identity"
+import {
+  isAnyOperator,
+  isCurrentTermPm,
+} from "@/entities/member/model/identity"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 import type { NoticeItem } from "../ui/NoticeCardList"
 

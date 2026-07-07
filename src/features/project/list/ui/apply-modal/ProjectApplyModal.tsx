@@ -12,7 +12,7 @@ import {
 import { Controller, useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import { uploadFileFlow } from "@/features/project/new/api/storage"
 import { trackEvent } from "@/shared/analytics"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"

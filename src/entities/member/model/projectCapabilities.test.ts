@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import { buildProjectCapabilities } from "./projectCapabilities"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
-import type { Part, RoleType } from "@/features/challenger/model/types"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
+import type { Part, RoleType } from "@/entities/member/model/challenger"
 
 function makeMe(roleTypes: RoleType[], part?: Part): MemberInfoResponse {
   return {

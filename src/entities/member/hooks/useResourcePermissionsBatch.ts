@@ -5,9 +5,9 @@ import {
   type PermissionType,
   type ResourcePermissionQuery,
   type ResourceType,
-} from "@/features/auth/api/permissions"
-import { hasGrantedResourcePermission } from "@/features/auth/model/resourcePermission"
-import { useAuthStore } from "@/features/auth/store/authStore"
+} from "@/entities/member/api/permissions"
+import { hasGrantedResourcePermission } from "@/entities/member/model/resourcePermission"
+import { useAuthStore } from "@/entities/member/store/authStore"
 
 interface UseResourcePermissionsBatchOptions {
   enabled?: boolean

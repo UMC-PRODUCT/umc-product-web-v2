@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
-import { useMe } from "@/features/auth/hooks/useMe"
-import { getLatestChallengerRecord } from "@/features/auth/model/identity"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { getLatestChallengerRecord } from "@/entities/member/model/identity"
 import {
   getAllChapters,
   getAllSchools,

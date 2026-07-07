@@ -3,6 +3,16 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useLayoutEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/entities/member/hooks/useMe"
+import {
+  getViewerBranch,
+  isAnyOperator,
+  isCentralCore,
+  isChapterPresident,
+  isCurrentTermPm,
+  isOperator,
+  isSchoolLeadership,
+} from "@/entities/member/model/identity"
 import {
   useAdminPageData,
   useChallengerPageData,
@@ -14,17 +24,7 @@ import { ApplicationStatsSection } from "@/features/application/ui/ApplicationSt
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
 import { MyApplicationView } from "@/features/application/ui/MyApplicationView"
-import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import {
-  getViewerBranch,
-  isAnyOperator,
-  isCentralCore,
-  isChapterPresident,
-  isCurrentTermPm,
-  isOperator,
-  isSchoolLeadership,
-} from "@/features/auth/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"

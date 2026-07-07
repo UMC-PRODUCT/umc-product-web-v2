@@ -5,7 +5,7 @@ import {
   resolveAvailableViewMode,
 } from "./availableViewModes"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 function makeMe(
   roleTypes: string[],

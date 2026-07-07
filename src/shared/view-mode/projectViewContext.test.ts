@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { getProjectViewContext } from "./projectViewContext"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 const baseMe = {
   id: 1,

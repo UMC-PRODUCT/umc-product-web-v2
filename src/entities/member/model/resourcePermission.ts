@@ -2,7 +2,7 @@ import type {
   PermissionType,
   ResourcePermissionResponse,
   ResourceType,
-} from "@/features/auth/api/permissions"
+} from "@/entities/member/api/permissions"
 
 export function hasGrantedPermission(
   permissionResponse: ResourcePermissionResponse | undefined,

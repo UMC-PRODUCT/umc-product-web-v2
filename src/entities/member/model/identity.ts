@@ -1,9 +1,9 @@
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 import type {
   ChallengerInfoResponse,
   Part,
   RoleType,
-} from "@/features/challenger/model/types"
+} from "@/entities/member/model/challenger"
 
 const CENTRAL_ROLE_TYPES: RoleType[] = [
   "CENTRAL_PRESIDENT",

@@ -1,7 +1,10 @@
 import { useMemo } from "react"
 
-import { useProjectCapabilities } from "@/features/auth/hooks/useProjectCapabilities"
-import { isAnyOperator, isCurrentTermPm } from "@/features/auth/model/identity"
+import { useProjectCapabilities } from "@/entities/member/hooks/useProjectCapabilities"
+import {
+  isAnyOperator,
+  isCurrentTermPm,
+} from "@/entities/member/model/identity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 

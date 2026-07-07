@@ -4,6 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { Tooltip } from "@/components/tooltip/Tooltip"
+import { useMe } from "@/entities/member/hooks/useMe"
+import {
+  canManageMatchingRounds,
+  isChapterPresident,
+} from "@/entities/member/model/identity"
 import {
   createMatchingRound,
   deleteMatchingRound,
@@ -12,12 +17,7 @@ import {
 } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
-import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import {
-  canManageMatchingRounds,
-  isChapterPresident,
-} from "@/features/auth/model/identity"
 import {
   type Branch,
   emptyRoundSchedules,

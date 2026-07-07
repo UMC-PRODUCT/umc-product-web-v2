@@ -7,8 +7,8 @@ import {
 } from "@tanstack/react-router"
 
 import Header from "@/components/header/Header"
+import { isOperator } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isOperator } from "@/features/auth/model/identity"
 import { cn } from "@/shared/lib/utils"
 
 export const Route = createFileRoute("/admin")({

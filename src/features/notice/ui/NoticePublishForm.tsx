@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useBlocker } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { getMemberProfile } from "@/features/challenger/api/member"
 import {
   getAllChapters,

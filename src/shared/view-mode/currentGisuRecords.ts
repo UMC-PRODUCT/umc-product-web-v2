@@ -1,4 +1,4 @@
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 import type { ChallengerInfoResponse } from "@/features/challenger/model/types"
 
 export function getCurrentGisuChallengerRecords(

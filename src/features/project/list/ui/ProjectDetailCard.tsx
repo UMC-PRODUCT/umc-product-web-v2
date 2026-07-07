@@ -4,13 +4,13 @@ import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   getCurrentChallengerPart,
   getLatestChallengerRecord,
   isCurrentTermPm,
   isOperator,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   getApplicationForm,

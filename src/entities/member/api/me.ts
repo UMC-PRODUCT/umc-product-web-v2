@@ -7,7 +7,7 @@ import type {
   ChallengerStatus,
   Part,
   RoleType,
-} from "@/features/challenger/model/types"
+} from "@/entities/member/model/challenger"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 export interface MemberProfileInfo {

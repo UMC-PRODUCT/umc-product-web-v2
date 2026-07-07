@@ -1,6 +1,6 @@
-import { useMe } from "@/features/auth/hooks/useMe"
+import { useMe } from "@/entities/member/hooks/useMe"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 export function useViewMe(): {
   viewMe: MemberInfoResponse | undefined

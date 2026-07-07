@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { useAuthStore } from "@/entities/member/store/authStore"
 
 import { getProjectsPermissions } from "../api/applicationApi"
 import { applicationKeys } from "../api/applicationKeys"

@@ -17,7 +17,7 @@ import {
   isCentralStaff,
   isCurrentTermPm,
   isSuperAdmin,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
 import { searchChallengersByCursor } from "@/features/challenger/api/member"
 import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {

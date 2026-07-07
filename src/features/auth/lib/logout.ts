@@ -1,5 +1,5 @@
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { clearLoginReturnTo } from "@/features/auth/lib/loginRedirect"
-import { useAuthStore } from "@/features/auth/store/authStore"
 
 export function logout() {
   clearLoginReturnTo()

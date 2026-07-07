@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { canViewDefaultNotice } from "./defaultNotices"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 import type {
   ChallengerInfoResponse,
   ChallengerRoleResponse,

@@ -18,7 +18,7 @@ import {
 import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 import type { Section } from "@/features/project/new/model/applicationQuestion"
 
-vi.mock("@/features/auth/hooks/useResourcePermission", () => ({
+vi.mock("@/entities/member/hooks/useResourcePermission", () => ({
   useResourcePermission: () => ({ isPending: false }),
 }))
 

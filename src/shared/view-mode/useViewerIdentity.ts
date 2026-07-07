@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react"
 
-import { useMe } from "@/features/auth/hooks/useMe"
+import { useMe } from "@/entities/member/hooks/useMe"
 
 import { useViewModeStore } from "."
 import {

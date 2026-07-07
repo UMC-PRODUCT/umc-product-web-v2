@@ -13,13 +13,13 @@ import {
   isSchoolLeadership,
 } from "./identity"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 import type {
   ChallengerInfoResponse,
   ChallengerRoleResponse,
   Part,
   RoleType,
-} from "@/features/challenger/model/types"
+} from "@/entities/member/model/challenger"
 
 type RoleSpec = RoleType | { roleType: RoleType; organizationId: string }
 

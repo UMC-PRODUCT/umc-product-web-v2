@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useLayoutEffect, useMemo, useRef, useState } from "react"
 
-import { useChapters } from "@/features/application/hooks/useApplicationPageData"
-import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { useMe } from "@/entities/member/hooks/useMe"
 import {
   getViewerBranch,
   isChapterPresident,
   isOperator,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
+import { useChapters } from "@/features/application/hooks/useApplicationPageData"
+import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { useMatchingStatusData } from "@/features/matching/hooks/useMatchingStatusData"
 import { MatchingPartSection } from "@/features/matching/ui/MatchingPartSection"
 import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"

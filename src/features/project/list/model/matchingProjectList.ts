@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { isOperator } from "@/features/auth/model/identity"
+import { isOperator } from "@/entities/member/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { projectKeys } from "@/features/project/new/api"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"

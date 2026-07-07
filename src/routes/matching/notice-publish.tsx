@@ -5,8 +5,8 @@ import {
   useMatchRoute,
 } from "@tanstack/react-router"
 
+import { isOperator } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isOperator } from "@/features/auth/model/identity"
 import { NoticePublishForm } from "@/features/notice"
 
 interface NoticePublishSearch {

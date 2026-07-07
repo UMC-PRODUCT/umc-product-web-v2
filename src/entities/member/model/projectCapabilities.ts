@@ -5,7 +5,7 @@ import {
   canManageProjects,
 } from "./identity"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 export interface ProjectCapabilities {
   canAccessProjectSettings: boolean

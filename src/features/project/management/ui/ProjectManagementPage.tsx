@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
-import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
+import { useResourcePermissionsBatch } from "@/entities/member/hooks/useResourcePermissionsBatch"
 import {
   isAnyOperator,
   isCentralCore,
@@ -10,7 +10,7 @@ import {
   isCurrentTermPm,
   isSchoolStaff,
   isSuperAdmin,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
 import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { projectKeys } from "@/features/project/new/api/queryKeys"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
@@ -25,7 +25,7 @@ import { getManagedProjects } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"
 import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
-import type { ResourcePermissionQuery } from "@/features/auth/api/permissions"
+import type { ResourcePermissionQuery } from "@/entities/member/api/permissions"
 import type { ProjectStatus } from "@/features/project/list/api/matchingProject"
 import type { MatchingProject } from "@/features/project/list/model/matchingProject"
 

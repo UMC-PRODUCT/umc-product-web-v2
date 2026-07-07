@@ -1,10 +1,10 @@
 import axios, { AxiosError } from "axios"
 
+import { useAuthStore } from "@/entities/member/store/authStore"
 import {
   buildLoginRedirectSearch,
   getCurrentReturnTo,
 } from "@/features/auth/lib/loginRedirect"
-import { useAuthStore } from "@/features/auth/store/authStore"
 import {
   getCurrentPagePath,
   trackApiRequest,

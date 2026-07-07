@@ -2,8 +2,8 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useEffect } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { canManageProjects } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { canManageProjects } from "@/features/auth/model/identity"
 import { ProjectManagementPage } from "@/features/project/management"
 
 export const Route = createFileRoute("/matching/projects/management")({

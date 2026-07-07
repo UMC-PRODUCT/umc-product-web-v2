@@ -3,6 +3,7 @@ import axios from "axios"
 import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { loginWithEmail } from "@/features/auth/api/credentials"
 import {
   loginWithApple,
@@ -23,7 +24,6 @@ import {
   rememberLoginReturnTo,
   resolveLoginSuccessPath,
 } from "@/features/auth/lib/loginRedirect"
-import { useAuthStore } from "@/features/auth/store/authStore"
 import {
   Divider,
   Input,

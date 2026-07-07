@@ -3,7 +3,7 @@ import { Popover } from "radix-ui"
 import { useMemo, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { useMe } from "@/features/auth/hooks/useMe"
+import { useMe } from "@/entities/member/hooks/useMe"
 import {
   cancelApplication,
   getActiveMatchingRound,
