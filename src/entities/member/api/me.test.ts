@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { computeAvailableViewModes } from "@/shared/view-mode/availableViewModes"
-import { getProjectViewContext } from "@/shared/view-mode/projectViewContext"
+import { computeAvailableViewModes } from "@/entities/member/view-mode/availableViewModes"
+import { getProjectViewContext } from "@/entities/member/view-mode/projectViewContext"
 
 import { normalizeMemberInfo } from "./me"
 

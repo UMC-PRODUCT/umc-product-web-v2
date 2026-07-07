@@ -19,6 +19,7 @@ import {
   isCurrentTermPm,
   isSuperAdmin,
 } from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
   addProjectMember,
@@ -35,7 +36,6 @@ import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
 import { InputBox } from "@/shared/ui/input/InputBox"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import {
   type BasicInfoFormData,

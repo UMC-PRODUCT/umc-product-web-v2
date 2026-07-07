@@ -3,11 +3,11 @@ import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { isOperator } from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import { projectKeys } from "@/features/project/new/api"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import { getMatchingProjects, type ProjectItem } from "../api/matchingProject"
 import {

@@ -1,4 +1,4 @@
-import type { ViewMode } from "@/shared/view-mode"
+import type { ViewMode } from "@/entities/member/view-mode"
 
 export type MatchingApplicationView = "admin" | "pm" | "others" | "none"
 

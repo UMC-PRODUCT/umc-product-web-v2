@@ -1,10 +1,10 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
+import { useViewModeStore } from "@/entities/member/view-mode"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { cn } from "@/shared/lib/utils"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import { SideBarMenu } from "./menu/SideBarMenu"
 import { SideBarMenuItem } from "./menu/SideBarMenuItem"

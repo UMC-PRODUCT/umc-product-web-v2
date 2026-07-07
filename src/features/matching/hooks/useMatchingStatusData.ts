@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
+import { useViewModeStore } from "@/entities/member/view-mode"
 import { getAllSchools } from "@/entities/organization/api/organization"
 import {
   getAllProjects,
@@ -10,7 +11,6 @@ import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { getProjectMembersBatch } from "@/features/project/list/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import { matchingResponseToStats } from "../model/matchingStatsMapper"
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"

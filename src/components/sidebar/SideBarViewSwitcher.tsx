@@ -2,8 +2,8 @@ import {
   useViewModeStore,
   VIEW_MODE_OPTIONS,
   type ViewMode,
-} from "@/shared/view-mode"
-import { useAvailableViewModes } from "@/shared/view-mode/useAvailableViewModes"
+} from "@/entities/member/view-mode"
+import { useAvailableViewModes } from "@/entities/member/view-mode/useAvailableViewModes"
 
 import { SideBarDropDown } from "./dropdown/SideBarDropDown"
 

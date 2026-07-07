@@ -11,6 +11,7 @@ import {
   isSchoolStaff,
   isSuperAdmin,
 } from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import { projectKeys } from "@/features/project/new/api/queryKeys"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
@@ -19,7 +20,6 @@ import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import { getManagedProjects } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"

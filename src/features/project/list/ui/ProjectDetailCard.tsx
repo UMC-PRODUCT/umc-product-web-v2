@@ -11,6 +11,7 @@ import {
   isCurrentTermPm,
   isOperator,
 } from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   getApplicationForm,
@@ -30,7 +31,6 @@ import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import {
   getActiveMatchingRound,

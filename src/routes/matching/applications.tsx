@@ -13,6 +13,7 @@ import {
   isOperator,
   isSchoolLeadership,
 } from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import {
   useAdminPageData,
@@ -31,7 +32,6 @@ import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 export const Route = createFileRoute("/matching/applications")({
   beforeLoad: async ({ context }) => {

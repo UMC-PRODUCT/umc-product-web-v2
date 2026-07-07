@@ -6,7 +6,7 @@ import { cn } from "@/shared/lib/utils"
 
 import { SideBarDropDownMenu } from "./SideBarDropDownMenu"
 
-import type { ViewMode } from "@/shared/view-mode"
+import type { ViewMode } from "@/entities/member/view-mode"
 
 interface SideBarDropDownProps {
   options: ReadonlyArray<{ mode: ViewMode; label: string }>

@@ -13,6 +13,7 @@ import {
   isCurrentTermPm,
   isSuperAdmin,
 } from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import {
   getAllChapters,
   getAllGisu,
@@ -36,7 +37,6 @@ import { Button } from "@/shared/ui/Button"
 import { MarkdownRenderer } from "@/shared/ui/MarkdownRenderer"
 import { Pagination } from "@/shared/ui/Pagination"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 interface AnnounceSearch {
   chapter: Chapter

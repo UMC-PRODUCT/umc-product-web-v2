@@ -6,10 +6,10 @@ import {
   isAnyOperator,
   isCurrentTermPm,
 } from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { Segment, type SegmentItem } from "@/shared/ui/segment/Segment"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import { filterSectionsByPermission } from "./utils"
 
