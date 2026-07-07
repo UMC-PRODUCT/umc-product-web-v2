@@ -15,6 +15,7 @@
     "preview:ssg": "vite preview --port 4173",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "lint:boundaries": "node scripts/check-boundaries.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest",
