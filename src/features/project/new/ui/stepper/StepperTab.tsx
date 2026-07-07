@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 
-import { Tooltip } from "@/components/tooltip/Tooltip"
 import { cn } from "@/shared/lib/utils"
+import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 interface StepperTabProps {
   idx: number

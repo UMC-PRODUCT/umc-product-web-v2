@@ -4,7 +4,6 @@ import { isAxiosError } from "axios"
 import { Popover } from "radix-ui"
 import { useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { getProjectDetail } from "@/entities/project/api/matchingProject"
 import { getProjectApplications } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
@@ -26,6 +25,7 @@ import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { AbortProjectModal } from "./AbortProjectModal"
 

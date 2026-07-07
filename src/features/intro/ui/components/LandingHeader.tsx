@@ -7,9 +7,9 @@ import {
   type HeaderNavItem,
   isHeaderNavItemActive,
 } from "@/components/header/headerNavPolicy"
-import { useToastStore } from "@/components/toast/useToastStore"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { cn } from "@/shared/lib/utils"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 export function LandingHeader() {
   const { pathname } = useLocation()

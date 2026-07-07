@@ -10,7 +10,7 @@ vi.mock("@/entities/member/api/member", () => ({
   searchMembers: vi.fn(),
 }))
 
-vi.mock("@/components/tooltip/Tooltip", () => ({
+vi.mock("@/shared/ui/tooltip/Tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => children,
 }))
 

@@ -8,7 +8,6 @@ import {
   useState,
 } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import {
   buildUpsertApplicationFormBody,
   projectKeys,
@@ -24,6 +23,7 @@ import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
 import { FloatingActionButton } from "@/shared/ui/button/FloatingActionButton"
 import { FormHeader } from "@/shared/ui/FormHeader"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { QuestionCard } from "./QuestionCard"
 import { QuestionListContainer } from "./QuestionListContainer"

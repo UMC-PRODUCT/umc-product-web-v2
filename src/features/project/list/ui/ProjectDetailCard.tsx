@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   getCurrentChallengerPart,
@@ -38,6 +37,7 @@ import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { filterApplicationSectionsByPart } from "../model/applicationSectionFilter"
 import {

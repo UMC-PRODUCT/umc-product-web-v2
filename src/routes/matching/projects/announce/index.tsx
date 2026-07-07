@@ -3,7 +3,6 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/entities/member/hooks/useMe"
 import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
@@ -36,6 +35,7 @@ import { Button } from "@/shared/ui/Button"
 import { MarkdownRenderer } from "@/shared/ui/MarkdownRenderer"
 import { Pagination } from "@/shared/ui/Pagination"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 interface AnnounceSearch {
   chapter: Chapter

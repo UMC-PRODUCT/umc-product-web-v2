@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import axios from "axios"
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import { loginWithEmail } from "@/features/auth/api/credentials"
 import {
@@ -37,6 +36,7 @@ import { createMeta, SITE_URL } from "@/shared/seo"
 import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 export const Route = createFileRoute("/login/default")({
   head: () =>

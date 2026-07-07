@@ -2,8 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, redirect, useBlocker } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { Tooltip } from "@/components/tooltip/Tooltip"
 import { useMe } from "@/entities/member/hooks/useMe"
 import {
   canManageMatchingRounds,
@@ -39,6 +37,8 @@ import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
+import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 import type { AxiosError } from "axios"
 

@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   type AnswerView,
@@ -17,6 +16,7 @@ import { FormHeader } from "@/shared/ui/FormHeader"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { ApplyProjectTitleCard } from "./ApplyProjectTitleCard"
 

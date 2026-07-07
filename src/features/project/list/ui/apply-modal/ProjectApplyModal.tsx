@@ -11,7 +11,6 @@ import {
 } from "react"
 import { Controller, useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   createApplicationDraft,
@@ -40,6 +39,7 @@ import {
 } from "@/shared/ui/question-field/PortfolioField"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
   type ApplyAnswerValue,

@@ -11,7 +11,6 @@ import {
 } from "react"
 import { useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { searchChallengersByCursor } from "@/entities/member/api/member"
 import {
   getProjectPmSearchScope,
@@ -36,6 +35,7 @@ import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
 import { InputBox } from "@/shared/ui/input/InputBox"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
   type BasicInfoFormData,

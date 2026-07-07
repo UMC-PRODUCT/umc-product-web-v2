@@ -2,7 +2,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { isAxiosError } from "axios"
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import {
   addMemberOAuth,
   removeMemberOAuth,
@@ -23,6 +22,7 @@ import {
   setKakaoLinkIntent,
   startKakaoSignIn,
 } from "@/features/auth/lib/kakaoSignIn"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { MEMBER_OAUTH_QUERY_KEY } from "./useMemberOAuthList"
 

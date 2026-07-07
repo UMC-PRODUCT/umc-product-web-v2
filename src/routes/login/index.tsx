@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useNavigate } from "@tanstack/react-router"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import {
   loginWithApple,
   loginWithGoogle,
@@ -30,6 +29,7 @@ import {
 import { createMeta, SITE_URL } from "@/shared/seo"
 import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 export const Route = createFileRoute("/login/")({
   head: () =>

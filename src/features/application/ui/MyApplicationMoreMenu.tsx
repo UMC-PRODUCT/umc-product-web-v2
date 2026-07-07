@@ -2,7 +2,6 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { Popover } from "radix-ui"
 import { useMemo, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { useMe } from "@/entities/member/hooks/useMe"
 import {
   cancelApplication,
@@ -15,6 +14,7 @@ import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type { MatchingProject } from "@/entities/project/model/matchingProject"
 

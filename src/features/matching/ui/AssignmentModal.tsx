@@ -1,7 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 
-import { Tooltip } from "@/components/tooltip/Tooltip"
 import { searchMembers } from "@/entities/member/api/member"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
@@ -9,6 +8,7 @@ import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
 import { Button } from "@/shared/ui/Button"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 import { AssignmentChallengerRow } from "./AssignmentChallengerRow"
 

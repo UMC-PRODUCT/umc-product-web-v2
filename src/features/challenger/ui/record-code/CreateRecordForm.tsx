@@ -3,7 +3,6 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import {
   getAllGisu,
   getChaptersWithSchools,
@@ -22,6 +21,7 @@ import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import { FieldRow } from "@/features/challenger/ui/shared/FieldRow"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { GeneratedCodeCard } from "./GeneratedCodeCard"
 

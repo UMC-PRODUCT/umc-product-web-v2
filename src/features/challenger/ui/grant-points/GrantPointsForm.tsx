@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useEffect } from "react"
 import { Controller, useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { grantChallengerPoints } from "@/features/challenger/api/challengerPoint"
 import {
   formatSignedPoint,
@@ -19,6 +18,7 @@ import { FieldRow } from "@/features/challenger/ui/shared/FieldRow"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 interface GrantPointsFormProps {
   challengerId: string

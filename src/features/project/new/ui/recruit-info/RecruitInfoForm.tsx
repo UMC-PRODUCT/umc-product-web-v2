@@ -7,7 +7,6 @@ import {
   useState,
 } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   buildPartQuotasEntries,
@@ -18,6 +17,7 @@ import { Button } from "@/shared/ui/Button"
 import { Counter } from "@/shared/ui/Counter"
 import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
   type RoleKey,

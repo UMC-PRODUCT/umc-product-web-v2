@@ -4,10 +4,10 @@ import {
   Outlet,
 } from "@tanstack/react-router"
 
-import { ToastProvider } from "@/components/toast/ToastProvider"
 import { NotFoundPage } from "@/features/error/ui/NotFoundPage"
 import { RootErrorComponent } from "@/features/error/ui/RootErrorComponent"
 import { AnalyticsProvider } from "@/shared/analytics"
+import { ToastProvider } from "@/shared/ui/toast/ToastProvider"
 
 import type { QueryClient } from "@tanstack/react-query"
 

@@ -1,6 +1,5 @@
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { changeEmail } from "@/entities/member/api/me"
 import { useEmailVerification } from "@/features/auth/hooks/useEmailVerification"
 import CircleBang from "@/shared/assets/icon/bang/CircleBang"
@@ -8,6 +7,7 @@ import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 interface ChangeUsernameFormProps {
   currentEmail: string

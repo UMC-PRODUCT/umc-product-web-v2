@@ -1,7 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { changeEmail } from "@/entities/member/api/me"
 import { authKeys } from "@/entities/member/hooks/useMe"
 import { useEmailVerification } from "@/features/auth/hooks/useEmailVerification"
@@ -10,6 +9,7 @@ import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 // 소셜 로그인 사용자 기준으로 하드코딩
 const isSocialLogin = true

@@ -1,12 +1,12 @@
 import { Filter } from "lucide-react"
 import { useMemo } from "react"
 
-import { Tooltip } from "@/components/tooltip/Tooltip"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { cn } from "@/shared/lib/utils"
 import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
+import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 import { ApplicantRoleSection } from "./ApplicantRoleSection"
 

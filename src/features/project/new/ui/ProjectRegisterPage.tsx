@@ -3,7 +3,6 @@ import { useBlocker, useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { getResourcePermission } from "@/entities/member/api/permissions"
 import { useMe } from "@/entities/member/hooks/useMe"
 import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
@@ -42,6 +41,7 @@ import { hydrateProjectDetailIntoStore } from "@/features/project/new/model/proj
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 

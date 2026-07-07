@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import {
   clearSubmittedTemplates,
   SURVEY_VARIANTS,
@@ -11,6 +10,7 @@ import {
   useMultistepSurvey,
 } from "@/features/usability-survey"
 import { Button } from "@/shared/ui/Button"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type {
   FeedbackContext,

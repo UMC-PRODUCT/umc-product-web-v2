@@ -4,11 +4,11 @@ import { useEffect, useState } from "react"
 import Profile from "@/components/header/Profile"
 import { MobileSidebarDrawerContent } from "@/components/sidebar/MobileSidebarDrawerContent"
 import { SideBarViewSwitcher } from "@/components/sidebar/SideBarViewSwitcher"
-import { useToastStore } from "@/components/toast/useToastStore"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { cn } from "@/shared/lib/utils"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import HeaderButton from "./HeaderButton"
 import {
