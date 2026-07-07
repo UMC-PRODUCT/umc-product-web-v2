@@ -11,7 +11,7 @@ import {
   isSchoolStaff,
   isSuperAdmin,
 } from "@/entities/member/model/identity"
-import { getChaptersWithSchools } from "@/features/challenger/api/organization"
+import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import { projectKeys } from "@/features/project/new/api/queryKeys"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"

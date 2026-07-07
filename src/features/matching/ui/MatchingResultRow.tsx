@@ -16,7 +16,7 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { AssignmentModal } from "./AssignmentModal"
 import { MatchingBlock } from "./MatchingBlock"
 
-import type { Part } from "@/features/challenger/model/types"
+import type { Part } from "@/shared/model/domain"
 import type { NumberTagVariant } from "@/shared/ui/NumberTag"
 
 // 역할 행 라벨 -> 서버 Part enum 변환

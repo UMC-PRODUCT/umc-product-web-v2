@@ -1,4 +1,4 @@
-import type { Part } from "@/features/challenger/model/types"
+import type { Part } from "@/shared/model/domain"
 
 const OTHER_CHALLENGER_PARTS = new Set<Part>([
   "DESIGN",

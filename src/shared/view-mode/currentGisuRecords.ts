@@ -1,5 +1,5 @@
 import type { MemberInfoResponse } from "@/entities/member/api/me"
-import type { ChallengerInfoResponse } from "@/features/challenger/model/types"
+import type { ChallengerInfoResponse } from "@/entities/member/model/challenger"
 
 export function getCurrentGisuChallengerRecords(
   me: MemberInfoResponse | undefined,

@@ -6,7 +6,7 @@ import type {
   SearchChallengerCursorResponse,
   SearchMemberParams,
   SearchMemberResponse,
-} from "@/features/challenger/model/types"
+} from "@/entities/member/model/people"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 export async function searchMembers(

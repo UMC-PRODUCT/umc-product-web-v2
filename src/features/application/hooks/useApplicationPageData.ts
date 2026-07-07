@@ -7,7 +7,7 @@ import {
   getAllChapters,
   getAllSchools,
   getChaptersWithSchools,
-} from "@/features/challenger/api/organization"
+} from "@/entities/organization/api/organization"
 import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 

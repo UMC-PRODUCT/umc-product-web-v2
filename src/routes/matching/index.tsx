@@ -13,11 +13,11 @@ import {
   isCurrentTermPm,
   isSuperAdmin,
 } from "@/entities/member/model/identity"
-import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   getAllChapters,
   getAllGisu,
-} from "@/features/challenger/api/organization"
+} from "@/entities/organization/api/organization"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   type Chapter,
   CHAPTERS,

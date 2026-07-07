@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 
 import { Tooltip } from "@/components/tooltip/Tooltip"
-import { searchMembers } from "@/features/challenger/api/member"
+import { searchMembers } from "@/entities/member/api/member"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
@@ -12,7 +12,7 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import { AssignmentChallengerRow } from "./AssignmentChallengerRow"
 
-import type { Part } from "@/features/challenger/model/types"
+import type { Part } from "@/shared/model/domain"
 
 import type { AssignableChallenger } from "../model/matchingStatusTypes"
 

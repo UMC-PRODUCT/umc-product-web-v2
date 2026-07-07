@@ -1,6 +1,6 @@
 import { api } from "@/shared/lib/axios"
 
-import type { ChallengerInfoResponse } from "@/features/challenger/model/types"
+import type { ChallengerInfoResponse } from "@/entities/member/model/challenger"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 export async function getChallengerInfo(

@@ -12,13 +12,13 @@ import {
 import { useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { searchChallengersByCursor } from "@/entities/member/api/member"
 import {
   getProjectPmSearchScope,
   isCentralStaff,
   isCurrentTermPm,
   isSuperAdmin,
 } from "@/entities/member/model/identity"
-import { searchChallengersByCursor } from "@/features/challenger/api/member"
 import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import {
   addProjectMember,

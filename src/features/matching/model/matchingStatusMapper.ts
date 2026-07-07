@@ -3,8 +3,8 @@
 import { toRoundNumber } from "@/features/application/model/mappers"
 
 import type { ManagedProjectSummaryResponse } from "@/features/application/model/apiTypes"
-import type { Part } from "@/features/challenger/model/types"
 import type { ProjectMembersResponse } from "@/features/project/list/api/matchingProject"
+import type { Part } from "@/shared/model/domain"
 
 import type {
   MatchingBlockData,

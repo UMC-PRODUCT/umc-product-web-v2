@@ -13,6 +13,7 @@ import {
   isOperator,
   isSchoolLeadership,
 } from "@/entities/member/model/identity"
+import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import {
   useAdminPageData,
   useChallengerPageData,
@@ -25,7 +26,6 @@ import { ApplicationTableSection } from "@/features/application/ui/ApplicationTa
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
 import { MyApplicationView } from "@/features/application/ui/MyApplicationView"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"

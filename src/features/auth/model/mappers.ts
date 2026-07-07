@@ -1,4 +1,4 @@
-import type { RoleType } from "@/features/challenger/model/types"
+import type { RoleType } from "@/shared/model/domain"
 import type { Role } from "@/shared/ui/chip/RoleTagChip"
 
 const ROLE_MAP: Record<RoleType, Role> = {

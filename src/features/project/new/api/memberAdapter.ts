@@ -3,7 +3,7 @@ import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import type {
   SearchChallengerItem,
   SearchMemberItem,
-} from "@/features/challenger/model/types"
+} from "@/entities/member/model/people"
 import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"
 
 export function toMemberItem(item: SearchMemberItem): MemberItem {

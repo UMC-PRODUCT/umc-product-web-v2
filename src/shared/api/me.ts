@@ -1,6 +1,6 @@
 import { api } from "@/shared/lib/axios"
 
-import type { MemberInfoResponse } from "@/features/challenger/model/types"
+import type { MemberInfoResponse } from "@/entities/member/model/people"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 export async function getMe(): Promise<MemberInfoResponse> {

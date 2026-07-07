@@ -5,7 +5,7 @@ import type {
   ChapterWithSchoolsResponse,
   GisuNameListResponse,
   SchoolNameListResponse,
-} from "@/features/challenger/model/types"
+} from "@/entities/organization/model/types"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 /**

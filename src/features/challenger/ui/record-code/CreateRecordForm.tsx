@@ -4,11 +4,11 @@ import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 
 import { useToastStore } from "@/components/toast/useToastStore"
-import { createChallengerRecord } from "@/features/challenger/api/challengerRecord"
 import {
   getAllGisu,
   getChaptersWithSchools,
-} from "@/features/challenger/api/organization"
+} from "@/entities/organization/api/organization"
+import { createChallengerRecord } from "@/features/challenger/api/challengerRecord"
 import {
   type CreateRecordFormData,
   createRecordSchema,

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
-import { getChaptersWithSchools } from "@/features/challenger/api/organization"
+import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 
 export function useSchoolChapterMap() {
