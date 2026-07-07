@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
-import GenerationListItem from "@/components/header/GenerationListItem"
 import { useMe } from "@/entities/member/hooks/useMe"
 import { isCentralStaff, isSuperAdmin } from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
@@ -13,6 +12,7 @@ import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import { cn } from "@/shared/lib/utils"
 import { TextButton } from "@/shared/ui/button/TextButton"
 import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import GenerationListItem from "@/widgets/navigation/header/GenerationListItem"
 
 interface ProfileDropdownProps {
   open?: boolean

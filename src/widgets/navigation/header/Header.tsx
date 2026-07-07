@@ -1,22 +1,22 @@
 import { Link, useLocation } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
-import Profile from "@/components/header/Profile"
-import { MobileSidebarDrawerContent } from "@/components/sidebar/MobileSidebarDrawerContent"
-import { SideBarViewSwitcher } from "@/components/sidebar/SideBarViewSwitcher"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
-import { cn } from "@/shared/lib/utils"
-import { useToastStore } from "@/shared/ui/toast/useToastStore"
-
-import HeaderButton from "./HeaderButton"
 import {
   getDisabledNavMessage,
   HEADER_NAV_ITEMS,
   type HeaderNavItem,
   isHeaderNavItemActive,
-} from "./headerNavPolicy"
+} from "@/shared/config/headerNavPolicy"
+import { cn } from "@/shared/lib/utils"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
+import Profile from "@/widgets/navigation/header/Profile"
+import { MobileSidebarDrawerContent } from "@/widgets/navigation/sidebar/MobileSidebarDrawerContent"
+import { SideBarViewSwitcher } from "@/widgets/navigation/sidebar/SideBarViewSwitcher"
+
+import HeaderButton from "./HeaderButton"
 import NavigationButton from "./NavigationButton"
 
 interface HeaderProps {

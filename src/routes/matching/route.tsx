@@ -1,10 +1,10 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 
-import Footer from "@/components/footer/Footer"
-import Header from "@/components/header/Header"
-import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
-import SideBar from "@/components/sidebar/SideBar"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
+import Footer from "@/widgets/footer/Footer"
+import Header from "@/widgets/navigation/header/Header"
+import { MatchingSegmentRegion } from "@/widgets/navigation/sidebar/MatchingSegmentRegion"
+import SideBar from "@/widgets/navigation/sidebar/SideBar"
 
 export const Route = createFileRoute("/matching")({
   head: () => ({

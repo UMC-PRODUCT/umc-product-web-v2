@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 
-import Header from "@/components/header/Header"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
+import Header from "@/widgets/navigation/header/Header"
 
 export const Route = createFileRoute("/settings")({
   head: () => ({

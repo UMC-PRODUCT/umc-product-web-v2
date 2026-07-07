@@ -1,13 +1,13 @@
 import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
+import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import {
   getDisabledNavMessage,
   HEADER_NAV_ITEMS,
   type HeaderNavItem,
   isHeaderNavItemActive,
-} from "@/components/header/headerNavPolicy"
-import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
+} from "@/shared/config/headerNavPolicy"
 import { cn } from "@/shared/lib/utils"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 

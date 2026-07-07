@@ -6,10 +6,10 @@ import {
   useLocation,
 } from "@tanstack/react-router"
 
-import Header from "@/components/header/Header"
 import { isOperator } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { cn } from "@/shared/lib/utils"
+import Header from "@/widgets/navigation/header/Header"
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
