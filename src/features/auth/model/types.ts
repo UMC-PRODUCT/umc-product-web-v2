@@ -100,7 +100,7 @@ export interface TermResponse {
 
 import type { Term } from "@/shared/model/domain"
 
-export type { Term } from "@/shared/model/domain"
+export type { Term }
 
 export interface Terms {
   terms: Term[]

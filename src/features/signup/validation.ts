@@ -9,15 +9,8 @@ import {
 } from "@/shared/lib/validationSchemas"
 
 // 하위 호환: 기존 소비자(routes 등)가 signup/validation 경유로 참조하던 primitive re-export
-export {
-  codeSchema,
-  emailSchema,
-  idSchema,
-  nicknameSchema,
-  passwordSchema,
-} from "@/shared/lib/validationSchemas"
+export { codeSchema, emailSchema, idSchema, nicknameSchema, passwordSchema }
 
-//
 export const signUpSchemaObject = z.object({
   email: emailSchema,
   code: codeSchema,

@@ -1,14 +1,5 @@
 // 챌린저(회원) 도메인 응답 타입. 공통 enum은 shared/model/domain에서 가져와 re-export.
 
-export type {
-  ChallengerStatus,
-  MemberStatus,
-  OrganizationType,
-  Part,
-  PointType,
-  RoleType,
-} from "@/shared/model/domain"
-
 import type {
   ChallengerStatus,
   MemberStatus,
@@ -17,6 +8,15 @@ import type {
   PointType,
   RoleType,
 } from "@/shared/model/domain"
+
+export type {
+  ChallengerStatus,
+  MemberStatus,
+  OrganizationType,
+  Part,
+  PointType,
+  RoleType,
+}
 
 export interface ChallengerPointInfo {
   id: string
