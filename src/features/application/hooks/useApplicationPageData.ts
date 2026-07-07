@@ -1,6 +1,21 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
+import {
+  getAllProjects,
+  getChapterProjectStatistics,
+  getChapterStatistics,
+  getManagedProjects,
+  getMatchingRounds,
+  getProjectApplications,
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import {
+  shortenSchoolName,
+  summaryToStats,
+  toProjectApplication,
+  toRoundNumber,
+} from "@/entities/application/model/mappers"
 import { useMe } from "@/entities/member/hooks/useMe"
 import { getLatestChallengerRecord } from "@/entities/member/model/identity"
 import {
@@ -11,30 +26,15 @@ import {
 import { getProjectDetail } from "@/entities/project/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
-import {
-  getAllProjects,
-  getChapterProjectStatistics,
-  getChapterStatistics,
-  getManagedProjects,
-  getMatchingRounds,
-  getProjectApplications,
-} from "../api/applicationApi"
-import { applicationKeys } from "../api/applicationKeys"
-import {
-  shortenSchoolName,
-  summaryToStats,
-  toProjectApplication,
-  toRoundNumber,
-} from "../model/mappers"
 import { buildDecisionDeadlineByRound } from "../model/matchingDecision"
 import { useProjectsPermissions } from "./useProjectsPermissions"
 
-import type { MatchingRoundResponse } from "../model/apiTypes"
+import type { MatchingRoundResponse } from "@/entities/application/model/apiTypes"
 import type {
   ApplicationStats,
   ProjectApplication,
   UniversityCount,
-} from "../model/types"
+} from "@/entities/application/model/types"
 
 const EMPTY_SET = new Set<string>()
 

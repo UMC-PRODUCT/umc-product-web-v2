@@ -5,7 +5,7 @@ import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 
-import type { AssignmentCount, Role } from "../model/types"
+import type { AssignmentCount, Role } from "@/entities/application/model/types"
 
 interface ProjectStatusRowProps {
   projectName: string

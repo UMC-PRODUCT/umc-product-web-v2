@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react"
 import {
   addProjectMember,
   removeProjectMember,
-} from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"

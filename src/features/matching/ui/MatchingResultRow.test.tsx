@@ -2,12 +2,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
+import { addProjectMember } from "@/entities/application/api/applicationApi"
 import { searchMembers } from "@/entities/member/api/member"
-import { addProjectMember } from "@/features/application/api/applicationApi"
 
 import { MatchingResultRow } from "./MatchingResultRow"
 
-vi.mock("@/features/application/api/applicationApi", () => ({
+vi.mock("@/entities/application/api/applicationApi", () => ({
   addProjectMember: vi.fn(),
   removeProjectMember: vi.fn(),
 }))

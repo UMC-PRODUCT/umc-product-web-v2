@@ -1,13 +1,19 @@
 import { useMemo } from "react"
 
+import {
+  shortenSchoolName,
+  toRoundNumber,
+} from "@/entities/application/model/mappers"
 import { cn } from "@/shared/lib/utils"
 
-import { shortenSchoolName, toRoundNumber } from "../model/mappers"
 import { ApplicationTableSection } from "./ApplicationTableSection"
 import { ChallengerStatsSection } from "./ChallengerStatsSection"
 
-import type { ProjectStatisticsResponse } from "../model/apiTypes"
-import type { ChallengerStats, ProjectApplication } from "../model/types"
+import type { ProjectStatisticsResponse } from "@/entities/application/model/apiTypes"
+import type {
+  ChallengerStats,
+  ProjectApplication,
+} from "@/entities/application/model/types"
 
 interface ChallengerApplicationViewProps {
   projects: ProjectApplication[]

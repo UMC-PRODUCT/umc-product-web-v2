@@ -7,7 +7,7 @@ import { DonutChart } from "./DonutChart"
 import { ProjectRoundBar } from "./ProjectRoundBar"
 import { RankBar } from "./RankBar"
 
-import type { ApplicationStats } from "../model/types"
+import type { ApplicationStats } from "@/entities/application/model/types"
 
 const ROUND_COLORS = [
   "var(--color-teal-500)",

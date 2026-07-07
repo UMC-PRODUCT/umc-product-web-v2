@@ -18,7 +18,8 @@ import { Modal } from "@/shared/ui/Modal"
 import { ApplicationProjectCard } from "./ApplicationProjectCard"
 import { MyApplicationMoreMenu } from "./MyApplicationMoreMenu"
 
-import type { StatusValue } from "../model/types"
+import type { StatusValue } from "@/entities/application/model/types"
+
 import type { ApplicationProjectCardPart } from "./ApplicationProjectCard"
 
 const PART_LABEL: Record<string, string> = {

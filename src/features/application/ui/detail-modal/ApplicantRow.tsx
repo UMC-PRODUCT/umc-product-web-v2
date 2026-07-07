@@ -2,7 +2,7 @@ import { cn } from "@/shared/lib/utils"
 import { StatusChipDropdown } from "@/shared/ui/chip/StatusChipDropdown"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 
-import type { StatusValue } from "../../model/types"
+import type { StatusValue } from "@/entities/application/model/types"
 
 interface ApplicantRowProps {
   name: string

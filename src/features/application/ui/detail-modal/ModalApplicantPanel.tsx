@@ -15,7 +15,7 @@ import type {
   ProjectApplication,
   Role,
   StatusValue,
-} from "../../model/types"
+} from "@/entities/application/model/types"
 
 // 파트별 할당 정원 추출 (지원자 없는 빈 상태에서 0/n 표시용)
 function getRoleTotalCount(role: Role, project: ProjectApplication): number {

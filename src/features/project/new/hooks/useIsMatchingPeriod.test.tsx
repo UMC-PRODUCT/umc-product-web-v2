@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { renderHook, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { getMatchingRounds } from "@/entities/application/api/applicationApi"
 import { useMe } from "@/entities/member/hooks/useMe"
-import { getMatchingRounds } from "@/features/application/api/applicationApi"
 
 import { useIsMatchingPeriod } from "./useIsMatchingPeriod"
 
@@ -11,7 +11,7 @@ import type { ReactNode } from "react"
 
 import type { MemberInfoResponse } from "@/entities/member/api/me"
 
-vi.mock("@/features/application/api/applicationApi", () => ({
+vi.mock("@/entities/application/api/applicationApi", () => ({
   getMatchingRounds: vi.fn(),
 }))
 

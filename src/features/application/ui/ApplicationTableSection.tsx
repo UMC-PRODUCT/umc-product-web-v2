@@ -1,6 +1,7 @@
 import { Search } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 
+import { shortenSchoolName } from "@/entities/application/model/mappers"
 import {
   FilterDropdown,
   type FilterDropdownProps,
@@ -9,14 +10,13 @@ import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
 import { cn } from "@/shared/lib/utils"
 import { Pagination } from "@/shared/ui/Pagination"
 
-import { shortenSchoolName } from "../model/mappers"
 import { ApplicantDetailRow } from "./ApplicantDetailRow"
 import { ApplicantTableHead } from "./ApplicantTableHead"
 import { ApplicationDetailModal } from "./ApplicationDetailModal"
 import { LazyApplicantRows } from "./LazyApplicantRows"
 import { ProjectStatusRow } from "./ProjectStatusRow"
 
-import type { ProjectApplication } from "../model/types"
+import type { ProjectApplication } from "@/entities/application/model/types"
 
 const ITEMS_PER_PAGE = 15
 

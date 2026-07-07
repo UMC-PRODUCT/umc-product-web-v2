@@ -1,6 +1,6 @@
 import dayjs from "dayjs"
 
-import type { MatchingRoundResponse } from "@/features/application/model/apiTypes"
+import type { MatchingRoundResponse } from "@/entities/application/model/apiTypes"
 
 export function isWithinMatchingPeriod(
   rounds: MatchingRoundResponse[] | undefined,

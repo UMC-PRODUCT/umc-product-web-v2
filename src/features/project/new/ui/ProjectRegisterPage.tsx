@@ -3,6 +3,8 @@ import { useBlocker, useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { getMatchingRounds } from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
 import { getResourcePermission } from "@/entities/member/api/permissions"
 import { useMe } from "@/entities/member/hooks/useMe"
 import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
@@ -11,8 +13,6 @@ import {
   getLatestChallengerRecord,
 } from "@/entities/member/model/identity"
 import { hasGrantedPermission } from "@/entities/member/model/resourcePermission"
-import { getMatchingRounds } from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import { getManagedProjects } from "@/features/project/management/api"
 import {

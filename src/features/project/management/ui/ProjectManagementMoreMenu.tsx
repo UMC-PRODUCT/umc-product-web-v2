@@ -4,13 +4,13 @@ import { isAxiosError } from "axios"
 import { Popover } from "radix-ui"
 import { useMemo, useRef, useState } from "react"
 
-import { getProjectDetail } from "@/entities/project/api/matchingProject"
-import { getProjectApplications } from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
+import { getProjectApplications } from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
 import {
   toApplicantDetail,
   toFrontRole,
-} from "@/features/application/model/mappers"
+} from "@/entities/application/model/mappers"
+import { getProjectDetail } from "@/entities/project/api/matchingProject"
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
 import { TeamMemberModal } from "@/features/project/list/ui/team-member-modal/TeamMemberModal"
 import { deleteProject } from "@/features/project/management/api"
@@ -29,14 +29,14 @@ import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { AbortProjectModal } from "./AbortProjectModal"
 
-import type { ProjectStatus } from "@/entities/project/api/matchingProject"
-import type { ProjectRecruitRow } from "@/entities/project/model/matchingProject"
-import type { PartEnum } from "@/features/application/model/apiTypes"
+import type { PartEnum } from "@/entities/application/model/apiTypes"
 import type {
   AssignmentCount,
   ProjectApplication,
   Role,
-} from "@/features/application/model/types"
+} from "@/entities/application/model/types"
+import type { ProjectStatus } from "@/entities/project/api/matchingProject"
+import type { ProjectRecruitRow } from "@/entities/project/model/matchingProject"
 
 interface ProjectManagementMoreMenuProps {
   projectId: string

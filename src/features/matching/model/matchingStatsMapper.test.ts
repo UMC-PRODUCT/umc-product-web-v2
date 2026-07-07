@@ -5,7 +5,7 @@ import { matchingResponseToStats } from "./matchingStatsMapper"
 import type {
   ChapterMatchingStatisticsResponse,
   RoundMatchingStat,
-} from "@/features/application/model/apiTypes"
+} from "@/entities/application/model/apiTypes"
 
 function round(
   phase: RoundMatchingStat["matchingRound"]["phase"],
@@ -39,7 +39,10 @@ describe("matchingResponseToStats", () => {
       chapterId: "3",
       roundMatchingStatistics: [
         round("SECOND", 0, 4, [[10, 0]]),
-        round("FIRST", 3, 4, [[10, 2], [11, 1]]),
+        round("FIRST", 3, 4, [
+          [10, 2],
+          [11, 1],
+        ]),
       ],
       schoolMatchingStatistics: [
         { schoolId: "1", matchedMemberCount: "2", totalMemberCount: "5" },
@@ -89,8 +92,14 @@ describe("matchingResponseToStats", () => {
     const response: ChapterMatchingStatisticsResponse = {
       chapterId: "3",
       roundMatchingStatistics: [
-        round("FIRST", 3, 4, [[10, 2], [11, 1]]),
-        round("SECOND", 2, 4, [[10, 1], [11, 1]]),
+        round("FIRST", 3, 4, [
+          [10, 2],
+          [11, 1],
+        ]),
+        round("SECOND", 2, 4, [
+          [10, 1],
+          [11, 1],
+        ]),
       ],
       schoolMatchingStatistics: [
         { schoolId: "1", matchedMemberCount: "5", totalMemberCount: "8" },
@@ -115,7 +124,10 @@ describe("matchingResponseToStats", () => {
     const response: ChapterMatchingStatisticsResponse = {
       chapterId: "3",
       roundMatchingStatistics: [
-        round("FIRST", 3, 4, [[10, 1], [11, 2]]),
+        round("FIRST", 3, 4, [
+          [10, 1],
+          [11, 2],
+        ]),
       ],
       schoolMatchingStatistics: [
         { schoolId: "1", matchedMemberCount: "3", totalMemberCount: "8" },

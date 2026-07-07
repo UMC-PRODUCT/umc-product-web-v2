@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import { toMatchingPartDataList } from "./matchingStatusMapper"
 
+import type { ManagedProjectSummaryResponse } from "@/entities/application/model/apiTypes"
 import type { ProjectMembersResponse } from "@/entities/project/api/matchingProject"
-import type { ManagedProjectSummaryResponse } from "@/features/application/model/apiTypes"
 
 const baseProject: ManagedProjectSummaryResponse = {
   id: "1",

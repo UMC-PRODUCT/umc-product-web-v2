@@ -4,7 +4,7 @@ import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 import { TimestampLabel } from "@/shared/ui/TimestampLabel"
 
-import type { Role, StatusValue } from "../model/types"
+import type { Role, StatusValue } from "@/entities/application/model/types"
 
 interface ApplicantDetailRowProps {
   round: number

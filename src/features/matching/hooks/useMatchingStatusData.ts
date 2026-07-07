@@ -1,21 +1,21 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
-import { useViewModeStore } from "@/entities/member/view-mode"
-import { getAllSchools } from "@/entities/organization/api/organization"
-import { getProjectMembersBatch } from "@/entities/project/api/matchingProject"
 import {
   getAllProjects,
   getMatchingStatistics,
-} from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import { useViewModeStore } from "@/entities/member/view-mode"
+import { getAllSchools } from "@/entities/organization/api/organization"
+import { getProjectMembersBatch } from "@/entities/project/api/matchingProject"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
 import { matchingResponseToStats } from "../model/matchingStatsMapper"
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"
 
-import type { ApplicationStats } from "@/features/application/model/types"
+import type { ApplicationStats } from "@/entities/application/model/types"
 
 const emptyStats: ApplicationStats = {
   totalMembers: 0,

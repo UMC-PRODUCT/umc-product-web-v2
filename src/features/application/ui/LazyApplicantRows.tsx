@@ -1,5 +1,6 @@
+import { toApplicantDetail } from "@/entities/application/model/mappers"
+
 import { useProjectApplications } from "../hooks/useApplications"
-import { toApplicantDetail } from "../model/mappers"
 import { ApplicantDetailRow } from "./ApplicantDetailRow"
 
 interface LazyApplicantRowsProps {
