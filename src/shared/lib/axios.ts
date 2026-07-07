@@ -1,15 +1,11 @@
 import axios, { AxiosError } from "axios"
 
-import { useAuthStore } from "@/entities/member/store/authStore"
-import {
-  buildLoginRedirectSearch,
-  getCurrentReturnTo,
-} from "@/features/auth/lib/loginRedirect"
 import {
   getCurrentPagePath,
   trackApiRequest,
   trackEvent,
 } from "@/shared/analytics"
+import { authBridge } from "@/shared/lib/authBridge"
 
 import type { AxiosRequestConfig, InternalAxiosRequestConfig } from "axios"
 
@@ -32,7 +28,7 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   config.analyticsStartTime = performance.now()
   if (config.url?.includes("/v1/auth/token/renew")) return config
-  const token = useAuthStore.getState().accessToken
+  const token = authBridge.getAccessToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -90,17 +86,14 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    const refreshToken = useAuthStore.getState().refreshToken
+    const refreshToken = authBridge.getRefreshToken()
     if (!refreshToken) {
       trackEvent("auth_token_refresh_error", {
         reason: "missing_refresh_token",
         page_path: getCurrentPagePath(),
       })
-      useAuthStore.getState().clear()
-      const search = new URLSearchParams(
-        buildLoginRedirectSearch(getCurrentReturnTo()),
-      )
-      window.location.href = search.size > 0 ? `/login?${search}` : "/login"
+      authBridge.clear()
+      authBridge.redirectToLogin()
       return Promise.reject(error)
     }
 
@@ -130,10 +123,7 @@ api.interceptors.response.use(
         }>
       >("/v1/auth/token/renew", { refreshToken })
       const { accessToken, refreshToken: newRefreshToken } = data.result
-      useAuthStore.getState().setTokens({
-        accessToken,
-        refreshToken: newRefreshToken,
-      })
+      authBridge.setTokens({ accessToken, refreshToken: newRefreshToken })
       api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
       drainQueue(accessToken)
       originalRequest.headers = {
@@ -147,11 +137,8 @@ api.interceptors.response.use(
         page_path: getCurrentPagePath(),
       })
       rejectQueue(refreshError)
-      useAuthStore.getState().clear()
-      const search = new URLSearchParams(
-        buildLoginRedirectSearch(getCurrentReturnTo()),
-      )
-      window.location.href = search.size > 0 ? `/login?${search}` : "/login"
+      authBridge.clear()
+      authBridge.redirectToLogin()
       return Promise.reject(refreshError)
     } finally {
       isRefreshing = false

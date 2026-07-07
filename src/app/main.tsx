@@ -8,7 +8,11 @@ import ReactDOM from "react-dom/client"
 
 import { ServiceUnavailablePage } from "@/features/error/ui/ServiceUnavailablePage"
 
-import { routeTree } from "./routeTree.gen"
+import { routeTree } from "../routeTree.gen"
+import { wireAuthBridge } from "./authWiring"
+
+// axios 인터셉터가 첫 요청을 보내기 전에 인증 브릿지 구현을 주입한다.
+wireAuthBridge()
 
 const isMaintenance = import.meta.env.VITE_MAINTENANCE === "true"
 
