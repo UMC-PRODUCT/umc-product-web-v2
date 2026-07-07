@@ -8,7 +8,7 @@ import {
   getAllSchools,
   getChaptersWithSchools,
 } from "@/entities/organization/api/organization"
-import { getProjectDetail } from "@/features/project/list/api/matchingProject"
+import { getProjectDetail } from "@/entities/project/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
 import {

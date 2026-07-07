@@ -26,8 +26,8 @@ import { ProjectManagementCard } from "./ProjectManagementCard"
 import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
 import type { ResourcePermissionQuery } from "@/entities/member/api/permissions"
-import type { ProjectStatus } from "@/features/project/list/api/matchingProject"
-import type { MatchingProject } from "@/features/project/list/model/matchingProject"
+import type { ProjectStatus } from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 const FE_PART_LABELS = new Set(["Web", "iOS", "Android"])
 const UNCLASSIFIED_PART_LABEL = "미분류"

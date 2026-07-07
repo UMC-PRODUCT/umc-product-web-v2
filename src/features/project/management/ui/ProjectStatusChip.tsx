@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority"
 
 import { cn } from "@/shared/lib/utils"
 
-import type { ProjectStatus } from "@/features/project/list/api/matchingProject"
+import type { ProjectStatus } from "@/entities/project/api/matchingProject"
 
 const projectStatusChipVariants = cva(
   "inline-flex items-center justify-center rounded-md px-2 py-0.5 text-center text-body-3-medium",

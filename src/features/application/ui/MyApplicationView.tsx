@@ -6,7 +6,7 @@ import {
   getMyApplications,
   getProjectDetail,
   type MyProjectApplicationResponse,
-} from "@/features/project/list/api/matchingProject"
+} from "@/entities/project/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { ProjectManagementSubTitle } from "@/features/project/management/ui/ProjectManagementSubTitle"
 import { UsabilitySurvey } from "@/features/usability-survey"

@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 
+import { getProjectMembers } from "@/entities/project/api/matchingProject"
 import { projectKeys } from "@/features/project/new/api"
 import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import MemberCount from "@/shared/ui/MemberCount"
 
-import { getProjectMembers } from "../../api/matchingProject"
 import { TeamMemberRow } from "./TeamMemberRow"
 
-import type { ProjectRecruitRow } from "../../model/matchingProject"
+import type { ProjectRecruitRow } from "@/entities/project/model/matchingProject"
 
 const PART_LABEL: Record<string, string> = {
   PLAN: "기획",

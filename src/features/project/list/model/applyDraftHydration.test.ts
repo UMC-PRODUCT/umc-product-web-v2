@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest"
 
 import { buildFormValuesFromDetail } from "./applyDraftHydration"
 
+import type {
+  AnswerView,
+  ApplicationDetail,
+} from "@/entities/project/api/matchingProject"
 import type { Section } from "@/features/project/new/model/applicationQuestion"
-
-import type { AnswerView, ApplicationDetail } from "../api/matchingProject"
 
 const sections: Section[] = [
   {

@@ -1,4 +1,4 @@
-import { SCHOOLS_BY_BRANCH } from "./projectFilterOptions"
+import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 import type { MatchingProject, ProjectRecruitRow } from "./matchingProject"
 

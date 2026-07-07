@@ -3,13 +3,13 @@ import { useMemo } from "react"
 
 import { useViewModeStore } from "@/entities/member/view-mode"
 import { getAllSchools } from "@/entities/organization/api/organization"
+import { getProjectMembersBatch } from "@/entities/project/api/matchingProject"
 import {
   getAllProjects,
   getMatchingStatistics,
 } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
-import { getProjectMembersBatch } from "@/features/project/list/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
 import { matchingResponseToStats } from "../model/matchingStatsMapper"

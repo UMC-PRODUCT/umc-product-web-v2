@@ -12,6 +12,13 @@ import {
   isOperator,
 } from "@/entities/member/model/identity"
 import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
+import {
+  getActiveMatchingRound,
+  getMyApplications,
+  getProjectDetail,
+} from "@/entities/project/api/matchingProject"
+import { isRecruitDone } from "@/entities/project/model/matchingProject"
+import { DEFAULT_MATCHING_PROJECT_MOCK } from "@/entities/project/model/matchingProject.mock"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   getApplicationForm,
@@ -32,14 +39,7 @@ import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 
-import {
-  getActiveMatchingRound,
-  getMyApplications,
-  getProjectDetail,
-} from "../api/matchingProject"
 import { filterApplicationSectionsByPart } from "../model/applicationSectionFilter"
-import { isRecruitDone } from "../model/matchingProject"
-import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import {
   isApplyButtonDisabled,
   resolveProjectDetailCtaMode,
@@ -57,8 +57,11 @@ import {
 import { RecruitQuestionsViewModal } from "./apply-modal/RecruitQuestionsViewModal"
 import { TeamMemberModal } from "./team-member-modal/TeamMemberModal"
 
-import type { ActiveMatchingRound, ProjectDetail } from "../api/matchingProject"
-import type { MatchingProject } from "../model/matchingProject"
+import type {
+  ActiveMatchingRound,
+  ProjectDetail,
+} from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 type ProjectDetailCardLogo = "on" | "off"
 

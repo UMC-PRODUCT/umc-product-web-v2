@@ -3,6 +3,13 @@ import { useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
 import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
+import {
+  type AnswerView,
+  cancelApplication,
+  getApplicationDetail,
+  type QuestionView,
+} from "@/entities/project/api/matchingProject"
+import { isRecruitDone } from "@/entities/project/model/matchingProject"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { Button } from "@/shared/ui/Button"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
@@ -11,17 +18,10 @@ import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 
-import {
-  type AnswerView,
-  cancelApplication,
-  getApplicationDetail,
-  type QuestionView,
-} from "../../api/matchingProject"
-import { isRecruitDone } from "../../model/matchingProject"
 import { ApplyProjectTitleCard } from "./ApplyProjectTitleCard"
 
-import type { MyApplicationStatus } from "../../api/matchingProject"
-import type { MatchingProject } from "../../model/matchingProject"
+import type { MyApplicationStatus } from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 interface MyApplicationModalProps {
   data: MatchingProject

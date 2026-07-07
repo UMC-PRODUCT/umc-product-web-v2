@@ -1,21 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
+import { MOCK_MATCHING_PROJECTS } from "@/entities/project/model/matchingProject.mock"
 import { trackEvent } from "@/shared/analytics"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { cn } from "@/shared/lib/utils"
 import { Modal } from "@/shared/ui/Modal"
 import { Pagination } from "@/shared/ui/Pagination"
 
-import { MOCK_MATCHING_PROJECTS } from "../model/matchingProject.mock"
 import { useMatchingProjectListFilters } from "../model/matchingProjectList"
 import { FilterDropdown } from "./FilterDropDown"
 import { MatchingProjectCard } from "./MatchingProjectCard"
 import { ProjectDetailCard } from "./ProjectDetailCard"
 import { ProjectSearchField } from "./ProjectSearchField"
 
-import type { ProjectItem } from "../api/matchingProject"
-import type { MatchingProject } from "../model/matchingProject"
+import type { ProjectItem } from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 const PART_LABEL: Record<string, string> = {
   PLAN: "기획",

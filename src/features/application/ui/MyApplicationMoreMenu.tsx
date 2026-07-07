@@ -9,14 +9,14 @@ import {
   getActiveMatchingRound,
   getProjectDetail,
   type MyProjectApplicationResponse,
-} from "@/features/project/list/api/matchingProject"
+} from "@/entities/project/api/matchingProject"
 import { MyApplicationModal } from "@/features/project/list/ui/apply-modal/MyApplicationModal"
 import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
-import type { MatchingProject } from "@/features/project/list/model/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 const PART_LABEL: Record<string, string> = {
   PLAN: "기획",

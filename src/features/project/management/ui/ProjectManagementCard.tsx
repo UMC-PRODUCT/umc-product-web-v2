@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 
-import { getProjectDetail } from "@/features/project/list/api/matchingProject"
+import { getProjectDetail } from "@/entities/project/api/matchingProject"
+import { isRecruitDone } from "@/entities/project/model/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { ProjectStatusChip } from "@/features/project/management/ui/ProjectStatusChip"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
@@ -11,10 +12,9 @@ import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 
-import { isRecruitDone } from "../../list/model/matchingProject"
 import { ProjectManagementMoreMenu } from "./ProjectManagementMoreMenu"
 
-import type { MatchingProject } from "../../list/model/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 interface ProjectManagementCardProps {
   data: MatchingProject

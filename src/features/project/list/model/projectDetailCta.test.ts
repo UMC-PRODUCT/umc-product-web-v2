@@ -9,7 +9,10 @@ import {
   selectIsPartRecruitClosed,
 } from "./projectDetailCta"
 
-import type { PartQuotaStatus, ProjectPart } from "../api/matchingProject"
+import type {
+  PartQuotaStatus,
+  ProjectPart,
+} from "@/entities/project/api/matchingProject"
 
 const applicable = {
   isPmReadonly: false,

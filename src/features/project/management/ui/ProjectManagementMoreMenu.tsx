@@ -5,6 +5,7 @@ import { Popover } from "radix-ui"
 import { useMemo, useRef, useState } from "react"
 
 import { useToastStore } from "@/components/toast/useToastStore"
+import { getProjectDetail } from "@/entities/project/api/matchingProject"
 import { getProjectApplications } from "@/features/application/api/applicationApi"
 import { applicationKeys } from "@/features/application/api/applicationKeys"
 import {
@@ -12,7 +13,6 @@ import {
   toFrontRole,
 } from "@/features/application/model/mappers"
 import { ApplicationDetailModal } from "@/features/application/ui/ApplicationDetailModal"
-import { getProjectDetail } from "@/features/project/list/api/matchingProject"
 import { TeamMemberModal } from "@/features/project/list/ui/team-member-modal/TeamMemberModal"
 import { deleteProject } from "@/features/project/management/api"
 import {
@@ -29,14 +29,14 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import { AbortProjectModal } from "./AbortProjectModal"
 
+import type { ProjectStatus } from "@/entities/project/api/matchingProject"
+import type { ProjectRecruitRow } from "@/entities/project/model/matchingProject"
 import type { PartEnum } from "@/features/application/model/apiTypes"
 import type {
   AssignmentCount,
   ProjectApplication,
   Role,
 } from "@/features/application/model/types"
-import type { ProjectStatus } from "@/features/project/list/api/matchingProject"
-import type { ProjectRecruitRow } from "@/features/project/list/model/matchingProject"
 
 interface ProjectManagementMoreMenuProps {
   projectId: string
