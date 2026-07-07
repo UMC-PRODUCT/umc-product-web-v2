@@ -9,11 +9,10 @@ import { logout as apiLogout } from "@/features/auth/api/credentials"
 import { logout as localLogout } from "@/features/auth/lib/logout"
 import { toRoleTag } from "@/features/auth/model/mappers"
 import { useSelectedChallengerStore } from "@/features/auth/store/selectedChallengerStore"
+import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import { cn } from "@/shared/lib/utils"
-
-import ProfileIcon from "../assets/icon/people/ProfileIcon"
-import { TextButton } from "./button/TextButton"
-import { RoleTagChip } from "./chip/RoleTagChip"
+import { TextButton } from "@/shared/ui/button/TextButton"
+import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
 
 interface ProfileDropdownProps {
   open?: boolean

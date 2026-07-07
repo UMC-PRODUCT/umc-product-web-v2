@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { trackEvent } from "@/shared/analytics"
-import { useSchoolChapterMap } from "@/shared/hooks/useSchoolChapterMap"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { cn } from "@/shared/lib/utils"
 import { Modal } from "@/shared/ui/Modal"
