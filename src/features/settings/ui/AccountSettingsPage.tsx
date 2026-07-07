@@ -11,11 +11,11 @@ import {
   isGooglePopupCancelled,
   signInWithGoogle,
 } from "@/features/auth/lib/googleSignIn"
-import { clearLoginReturnTo } from "@/features/auth/lib/loginRedirect"
-import { toRoleTag } from "@/features/auth/model/mappers"
-import { uploadFileFlow } from "@/features/project/new/api/storage"
+import { uploadFileFlow } from "@/shared/api/storage"
 import EditIcon from "@/shared/assets/icon/edit/EditIcon"
 import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
+import { clearLoginReturnTo } from "@/shared/lib/loginRedirect"
+import { toRoleTag } from "@/shared/lib/roleTagMapper"
 import { Button } from "@/shared/ui/Button"
 import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
 import { InputBox } from "@/shared/ui/input/InputBox"

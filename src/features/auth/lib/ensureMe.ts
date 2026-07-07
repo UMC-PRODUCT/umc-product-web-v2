@@ -2,7 +2,7 @@ import { redirect } from "@tanstack/react-router"
 
 import { meQueryOptions } from "@/entities/member/hooks/useMe"
 import { useAuthStore } from "@/entities/member/store/authStore"
-import { buildLoginRedirectSearch } from "@/features/auth/lib/loginRedirect"
+import { buildLoginRedirectSearch } from "@/shared/lib/loginRedirect"
 
 import type { QueryClient } from "@tanstack/react-query"
 

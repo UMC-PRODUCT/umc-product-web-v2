@@ -16,16 +16,16 @@ import {
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
 import {
-  normalizeReturnTo,
-  rememberLoginReturnTo,
-  resolveLoginSuccessPath,
-} from "@/features/auth/lib/loginRedirect"
-import {
   Divider,
   LoginButton,
   // SmallDivider,
   UmcLogoButton,
 } from "@/features/login"
+import {
+  normalizeReturnTo,
+  rememberLoginReturnTo,
+  resolveLoginSuccessPath,
+} from "@/shared/lib/loginRedirect"
 import { createMeta, SITE_URL } from "@/shared/seo"
 import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"

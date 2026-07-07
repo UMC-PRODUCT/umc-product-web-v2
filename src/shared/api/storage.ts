@@ -3,12 +3,13 @@ import axios from "axios"
 import { api } from "@/shared/lib/axios"
 
 import type { ApiResponse } from "@/shared/lib/apiResponse"
+import type { components } from "@/types/api"
 
-import type {
-  PrepareUploadRequest,
-  PrepareUploadResponse,
-  UploadCategory,
-} from "./types"
+// 파일 업로드 계약 타입(OpenAPI 파생). storage 함수 전용이라 여기에 둔다.
+export type PrepareUploadRequest = components["schemas"]["PrepareUploadRequest"]
+export type PrepareUploadResponse =
+  components["schemas"]["PrepareUploadResponse"]
+export type UploadCategory = PrepareUploadRequest["category"]
 
 export async function prepareUpload(
   payload: PrepareUploadRequest,

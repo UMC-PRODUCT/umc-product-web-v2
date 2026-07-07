@@ -11,8 +11,8 @@ import {
   consumeKakaoState,
   getKakaoRedirectUri,
 } from "@/features/auth/lib/kakaoSignIn"
-import { resolveLoginSuccessPath } from "@/features/auth/lib/loginRedirect"
 import { trackEvent } from "@/shared/analytics"
+import { resolveLoginSuccessPath } from "@/shared/lib/loginRedirect"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 export const Route = createFileRoute("/oauth/kakao/callback")({

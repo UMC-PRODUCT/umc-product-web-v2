@@ -8,9 +8,9 @@
 
 import { execSync } from "node:child_process"
 
-// 2026-07-07 기준 남은 위반 20건(전부 정당한 feature 간 수평 결합).
+// 2026-07-07 기준 남은 위반 15건(정당한 feature 조합 + 도메인 UI 조합).
 // 역방향/순환 위반은 0. 위반을 더 줄이면 이 값을 낮춘다.
-const BASELINE = 20
+const BASELINE = 15
 const RULE = "boundaries/dependencies"
 
 let raw

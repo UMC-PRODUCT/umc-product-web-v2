@@ -1,9 +1,9 @@
-import { LoginCircleButton } from "@/features/login/ui/LoginCircleButton"
 import LinkIcon from "@/shared/assets/icon/link/LinkIcon"
 import AppleLogo from "@/shared/assets/icon/logo/AppleLogo"
 import GoogleLogoWhite from "@/shared/assets/icon/logo/GoogleLogoWhite"
 import KakaoLogo from "@/shared/assets/icon/logo/KakaoLogo"
 import { cn } from "@/shared/lib/utils"
+import { LoginCircleButton } from "@/shared/ui/LoginCircleButton"
 
 export type Social = "apple" | "google" | "kakao"
 

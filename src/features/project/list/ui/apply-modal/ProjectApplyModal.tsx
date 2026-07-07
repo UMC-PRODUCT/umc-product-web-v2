@@ -20,8 +20,8 @@ import {
   submitApplication,
 } from "@/entities/project/api/matchingProject"
 import { isRecruitDone } from "@/entities/project/model/matchingProject"
-import { uploadFileFlow } from "@/features/project/new/api/storage"
 import { trackEvent } from "@/shared/analytics"
+import { uploadFileFlow } from "@/shared/api/storage"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { activeGisuQueryOptions } from "@/shared/hooks/useActiveGisu"

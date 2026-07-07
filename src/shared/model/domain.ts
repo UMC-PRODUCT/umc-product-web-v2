@@ -54,3 +54,16 @@ export type PointType =
  * 백엔드는 모든 ID 류 (`*Id`) 를 Java Long 정밀도 보전을 위해 numeric string 으로 직렬화한다.
  * FE 도 ID 는 string 으로 다룬다.
  */
+
+export type TermType = "SERVICE" | "PRIVACY" | "MARKETING" | "LOCATION"
+
+export interface Term {
+  id: number
+  type: TermType
+  typeDescription: string
+  link: string
+  isMandatory: boolean
+  version: number
+  createdAt: string
+  updatedAt: string
+}
