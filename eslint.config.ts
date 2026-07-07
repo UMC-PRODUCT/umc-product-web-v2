@@ -1,4 +1,5 @@
 import js from "@eslint/js"
+import boundaries from "eslint-plugin-boundaries"
 import perfectionist from "eslint-plugin-perfectionist"
 import reactHooks from "eslint-plugin-react-hooks"
 import globals from "globals"
@@ -73,6 +74,128 @@ export default tseslint.config(
       parserOptions: {
         tsconfigRootDir,
       },
+    },
+  },
+  {
+    // FSD 레이어 경계 규칙. 의존 방향 (상위 -> 하위):
+    // app > routes(pages) > widgets|components > features > entities > shared|types
+    // 하위 레이어는 상위 레이어를 import 할 수 없다. 베이스라인 확보를 위해 warn으로
+    // 시작하고, 구조 개편 완료 후 error로 전환한다.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}", "src/test/**"],
+    plugins: {
+      boundaries,
+    },
+    settings: {
+      "boundaries/elements": [
+        { type: "app", pattern: "src/app" },
+        { type: "routes", pattern: "src/routes" },
+        { type: "widgets", pattern: "src/widgets/*", capture: ["slice"] },
+        { type: "components", pattern: "src/components/*", capture: ["slice"] },
+        { type: "features", pattern: "src/features/*", capture: ["slice"] },
+        { type: "entities", pattern: "src/entities/*", capture: ["slice"] },
+        { type: "shared", pattern: "src/shared" },
+        { type: "types", pattern: "src/types" },
+      ],
+      "boundaries/include": ["src/**/*"],
+      "import/resolver": {
+        typescript: {
+          project: "tsconfig.app.json",
+        },
+      },
+    },
+    rules: {
+      "boundaries/dependencies": [
+        "warn",
+        {
+          default: "disallow",
+          policies: [
+            {
+              from: [
+                { element: { type: "app" } },
+                { element: { type: "routes" } },
+              ],
+              allow: [
+                { to: { element: { type: "widgets" } } },
+                { to: { element: { type: "components" } } },
+                { to: { element: { type: "features" } } },
+                { to: { element: { type: "entities" } } },
+                { to: { element: { type: "shared" } } },
+                { to: { element: { type: "types" } } },
+              ],
+            },
+            {
+              from: [
+                { element: { type: "widgets" } },
+                { element: { type: "components" } },
+              ],
+              allow: [
+                {
+                  to: {
+                    element: {
+                      type: "widgets",
+                      captured: { slice: "{{ from.element.captured.slice }}" },
+                    },
+                  },
+                },
+                {
+                  to: {
+                    element: {
+                      type: "components",
+                      captured: { slice: "{{ from.element.captured.slice }}" },
+                    },
+                  },
+                },
+                { to: { element: { type: "features" } } },
+                { to: { element: { type: "entities" } } },
+                { to: { element: { type: "shared" } } },
+                { to: { element: { type: "types" } } },
+              ],
+            },
+            {
+              from: [{ element: { type: "features" } }],
+              allow: [
+                {
+                  to: {
+                    element: {
+                      type: "features",
+                      captured: { slice: "{{ from.element.captured.slice }}" },
+                    },
+                  },
+                },
+                { to: { element: { type: "entities" } } },
+                { to: { element: { type: "shared" } } },
+                { to: { element: { type: "types" } } },
+              ],
+            },
+            {
+              from: [{ element: { type: "entities" } }],
+              allow: [
+                {
+                  to: {
+                    element: {
+                      type: "entities",
+                      captured: { slice: "{{ from.element.captured.slice }}" },
+                    },
+                  },
+                },
+                { to: { element: { type: "shared" } } },
+                { to: { element: { type: "types" } } },
+              ],
+            },
+            {
+              from: [
+                { element: { type: "shared" } },
+                { element: { type: "types" } },
+              ],
+              allow: [
+                { to: { element: { type: "shared" } } },
+                { to: { element: { type: "types" } } },
+              ],
+            },
+          ],
+        },
+      ],
     },
   },
   {
