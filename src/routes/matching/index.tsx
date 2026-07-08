@@ -3,21 +3,21 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
-import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   getViewerBranch,
   isCentralStaff,
   isChapterPresident,
   isCurrentTermPm,
   isSuperAdmin,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import {
   getAllChapters,
   getAllGisu,
-} from "@/features/challenger/api/organization"
+} from "@/entities/organization/api/organization"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   type Chapter,
   CHAPTERS,
@@ -36,7 +36,7 @@ import { Button } from "@/shared/ui/Button"
 import { MarkdownRenderer } from "@/shared/ui/MarkdownRenderer"
 import { Pagination } from "@/shared/ui/Pagination"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 interface AnnounceSearch {
   chapter: Chapter

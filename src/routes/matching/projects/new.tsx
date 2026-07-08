@@ -1,9 +1,9 @@
 import { createFileRoute, isRedirect, redirect } from "@tanstack/react-router"
 
-import { getResourcePermission } from "@/features/auth/api/permissions"
+import { getResourcePermission } from "@/entities/member/api/permissions"
+import { isProjectRegistrationQuotaLimited } from "@/entities/member/model/identity"
+import { hasGrantedPermission } from "@/entities/member/model/resourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isProjectRegistrationQuotaLimited } from "@/features/auth/model/identity"
-import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
 import { getManagedProjects } from "@/features/project/management/api"
 import { getMyDraft, projectKeys } from "@/features/project/new/api"
 import { ProjectRegisterPage } from "@/features/project/new/ui/ProjectRegisterPage"

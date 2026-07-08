@@ -6,19 +6,20 @@ import {
   getMyApplications,
   getProjectDetail,
   type MyProjectApplicationResponse,
-} from "@/features/project/list/api/matchingProject"
+} from "@/entities/project/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
-import { ProjectManagementSubTitle } from "@/features/project/management/ui/ProjectManagementSubTitle"
 import { UsabilitySurvey } from "@/features/usability-survey"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 import { EmptyState } from "@/shared/ui/EmptyState"
 import { Modal } from "@/shared/ui/Modal"
+import { ProjectManagementSubTitle } from "@/shared/ui/ProjectManagementSubTitle"
 
 import { ApplicationProjectCard } from "./ApplicationProjectCard"
 import { MyApplicationMoreMenu } from "./MyApplicationMoreMenu"
 
-import type { StatusValue } from "../model/types"
+import type { StatusValue } from "@/entities/application/model/types"
+
 import type { ApplicationProjectCardPart } from "./ApplicationProjectCard"
 
 const PART_LABEL: Record<string, string> = {

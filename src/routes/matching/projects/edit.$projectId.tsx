@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 
-import { getResourcePermission } from "@/features/auth/api/permissions"
+import { getResourcePermission } from "@/entities/member/api/permissions"
+import { hasGrantedPermission } from "@/entities/member/model/resourcePermission"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
 import { ProjectRegisterPage } from "@/features/project/new/ui/ProjectRegisterPage"
 
 export const Route = createFileRoute("/matching/projects/edit/$projectId")({

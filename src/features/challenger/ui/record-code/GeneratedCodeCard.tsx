@@ -1,9 +1,9 @@
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { PART_LABEL, ROLE_TYPE_LABEL } from "@/features/challenger/model/enums"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type { ChallengerRecordResponse } from "@/features/challenger/model/types"
 

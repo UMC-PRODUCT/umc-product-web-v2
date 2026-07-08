@@ -3,22 +3,22 @@ import { AxiosError } from "axios"
 import { createRef } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { getActiveGisu } from "@/shared/api/gisu"
-
 import {
   createApplicationDraft,
   getApplicationDetail,
   getMyApplications,
-} from "../../api/matchingProject"
+} from "@/entities/project/api/matchingProject"
+import { getActiveGisu } from "@/shared/api/gisu"
+
 import {
   ProjectApplyModal,
   type ProjectApplyModalHandle,
 } from "./ProjectApplyModal"
 
-import type { MatchingProject } from "@/features/project/list/model/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 import type { Section } from "@/features/project/new/model/applicationQuestion"
 
-vi.mock("@/features/auth/hooks/useResourcePermission", () => ({
+vi.mock("@/entities/member/hooks/useResourcePermission", () => ({
   useResourcePermission: () => ({ isPending: false }),
 }))
 
@@ -26,8 +26,10 @@ vi.mock("@/shared/api/gisu", () => ({
   getActiveGisu: vi.fn(),
 }))
 
-vi.mock("../../api/matchingProject", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../api/matchingProject")>()),
+vi.mock("@/entities/project/api/matchingProject", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("@/entities/project/api/matchingProject")
+  >()),
   createApplicationDraft: vi.fn(),
   getMyApplications: vi.fn(),
   getApplicationDetail: vi.fn(),

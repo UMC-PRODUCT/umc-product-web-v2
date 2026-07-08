@@ -1,11 +1,14 @@
 import { defaultByFieldType } from "./applyValidation"
 
 import type {
+  AnswerView,
+  ApplicationDetail,
+} from "@/entities/project/api/matchingProject"
+import type {
   Question,
   Section,
 } from "@/features/project/new/model/applicationQuestion"
 
-import type { AnswerView, ApplicationDetail } from "../api/matchingProject"
 import type { ApplyAnswerValue } from "./applyAnswerPayload"
 
 function mapAnswerToValue(

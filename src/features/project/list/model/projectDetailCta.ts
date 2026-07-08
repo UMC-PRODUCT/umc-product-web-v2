@@ -1,4 +1,4 @@
-import type { ProjectDetail } from "../api/matchingProject"
+import type { ProjectDetail } from "@/entities/project/api/matchingProject"
 
 export type ProjectDetailCtaMode =
   | "recruit-questions"

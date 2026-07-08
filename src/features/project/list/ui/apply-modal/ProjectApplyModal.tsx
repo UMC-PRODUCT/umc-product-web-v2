@@ -11,10 +11,17 @@ import {
 } from "react"
 import { Controller, useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
-import { uploadFileFlow } from "@/features/project/new/api/storage"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
+import {
+  createApplicationDraft,
+  getApplicationDetail,
+  getMyApplications,
+  saveApplicationDraft,
+  submitApplication,
+} from "@/entities/project/api/matchingProject"
+import { isRecruitDone } from "@/entities/project/model/matchingProject"
 import { trackEvent } from "@/shared/analytics"
+import { uploadFileFlow } from "@/shared/api/storage"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { activeGisuQueryOptions } from "@/shared/hooks/useActiveGisu"
@@ -32,14 +39,8 @@ import {
 } from "@/shared/ui/question-field/PortfolioField"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
-import {
-  createApplicationDraft,
-  getApplicationDetail,
-  getMyApplications,
-  saveApplicationDraft,
-  submitApplication,
-} from "../../api/matchingProject"
 import {
   type ApplyAnswerValue,
   buildAnswerPayload,
@@ -53,20 +54,18 @@ import {
   defaultByFieldType,
   type UploadedFileValue,
 } from "../../model/applyValidation"
-import { isRecruitDone } from "../../model/matchingProject"
 import { selectCurrentApplicationForProject } from "../../model/projectDetailCta"
 import { ApplyFormSkeleton } from "./ApplyFormSkeleton"
 import { ApplyProjectTitleCard } from "./ApplyProjectTitleCard"
 
 import type { FieldErrors, Resolver } from "react-hook-form"
 
+import type { MyProjectApplicationResponse } from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 import type {
   Question,
   Section,
 } from "@/features/project/new/model/applicationQuestion"
-
-import type { MyProjectApplicationResponse } from "../../api/matchingProject"
-import type { MatchingProject } from "../../model/matchingProject"
 
 const FILE_UPLOAD_CATEGORY = "POST_ATTACHMENT" as const
 const PORTFOLIO_UPLOAD_CATEGORY = "PORTFOLIO" as const

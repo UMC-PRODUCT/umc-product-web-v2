@@ -1,16 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
-import { useMe } from "@/features/auth/hooks/useMe"
-import { getLatestChallengerRecord } from "@/features/auth/model/identity"
-import {
-  getAllChapters,
-  getAllSchools,
-  getChaptersWithSchools,
-} from "@/features/challenger/api/organization"
-import { getProjectDetail } from "@/features/project/list/api/matchingProject"
-import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
-
 import {
   getAllProjects,
   getChapterProjectStatistics,
@@ -18,23 +8,33 @@ import {
   getManagedProjects,
   getMatchingRounds,
   getProjectApplications,
-} from "../api/applicationApi"
-import { applicationKeys } from "../api/applicationKeys"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
 import {
   shortenSchoolName,
   summaryToStats,
   toProjectApplication,
   toRoundNumber,
-} from "../model/mappers"
+} from "@/entities/application/model/mappers"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { getLatestChallengerRecord } from "@/entities/member/model/identity"
+import {
+  getAllChapters,
+  getAllSchools,
+  getChaptersWithSchools,
+} from "@/entities/organization/api/organization"
+import { getProjectDetail } from "@/entities/project/api/matchingProject"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
+
 import { buildDecisionDeadlineByRound } from "../model/matchingDecision"
 import { useProjectsPermissions } from "./useProjectsPermissions"
 
-import type { MatchingRoundResponse } from "../model/apiTypes"
+import type { MatchingRoundResponse } from "@/entities/application/model/apiTypes"
 import type {
   ApplicationStats,
   ProjectApplication,
   UniversityCount,
-} from "../model/types"
+} from "@/entities/application/model/types"
 
 const EMPTY_SET = new Set<string>()
 

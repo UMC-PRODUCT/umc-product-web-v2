@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
-import { getMemberProfile } from "@/features/challenger/api/member"
+import { getMemberProfile } from "@/entities/member/api/member"
 import {
   CHALLENGER_STATUS_LABEL,
   PART_LABEL,
@@ -8,7 +8,7 @@ import {
 } from "@/features/challenger/model/enums"
 import { cn } from "@/shared/lib/utils"
 
-import type { ChallengerInfoResponse } from "@/features/challenger/model/types"
+import type { ChallengerInfoResponse } from "@/entities/member/model/challenger"
 
 interface MemberRecordListProps {
   memberId: string

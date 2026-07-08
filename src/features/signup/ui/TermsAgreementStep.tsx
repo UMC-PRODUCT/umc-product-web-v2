@@ -5,7 +5,7 @@ import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
 import { type SignUpFormData } from "../validation"
 
-import type { Term, TermType } from "@/features/auth/model/types"
+import type { Term, TermType } from "@/shared/model/domain"
 
 const TERM_TITLE_MAP: Record<TermType, string> = {
   SERVICE: "서비스 이용약관 동의",

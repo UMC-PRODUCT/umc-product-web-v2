@@ -2,7 +2,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { addMemberOAuth } from "@/features/auth/api/memberOauth"
 import { loginWithKakao } from "@/features/auth/api/socialLogin"
 import { MEMBER_OAUTH_QUERY_KEY } from "@/features/auth/hooks/useMemberOAuthList"
@@ -12,8 +11,9 @@ import {
   consumeKakaoState,
   getKakaoRedirectUri,
 } from "@/features/auth/lib/kakaoSignIn"
-import { resolveLoginSuccessPath } from "@/features/auth/lib/loginRedirect"
 import { trackEvent } from "@/shared/analytics"
+import { resolveLoginSuccessPath } from "@/shared/lib/loginRedirect"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 export const Route = createFileRoute("/oauth/kakao/callback")({
   head: () => ({

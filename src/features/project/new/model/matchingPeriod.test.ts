@@ -5,7 +5,7 @@ import {
   isWithinMatchingPeriod,
 } from "./matchingPeriod"
 
-import type { MatchingRoundResponse } from "@/features/application/model/apiTypes"
+import type { MatchingRoundResponse } from "@/entities/application/model/apiTypes"
 
 function makeRound(startsAt: string, endsAt: string): MatchingRoundResponse {
   return {

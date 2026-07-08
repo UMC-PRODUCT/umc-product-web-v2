@@ -1,12 +1,12 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 
-import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   getViewerBranch,
   isCurrentTermPm,
   isOperator,
-} from "@/features/auth/model/identity"
-import { useAuthStore } from "@/features/auth/store/authStore"
+} from "@/entities/member/model/identity"
+import { useAuthStore } from "@/entities/member/store/authStore"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { type Chapter, CHAPTERS } from "@/features/notice"
 
 function isChapter(value: unknown): value is Chapter {

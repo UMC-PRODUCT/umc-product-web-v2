@@ -3,8 +3,8 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { MatchingProjectsListPage } from "@/features/project/list"
 
+import type { ProjectPart } from "@/entities/project/api/matchingProject"
 import type { ProjectListSearch } from "@/features/project/list"
-import type { ProjectPart } from "@/features/project/list/api/matchingProject"
 
 const VALID_PARTS = new Set<string>([
   "PLAN",

@@ -2,12 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useBlocker } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { useAuthStore } from "@/features/auth/store/authStore"
-import { getMemberProfile } from "@/features/challenger/api/member"
+import { getMemberProfile } from "@/entities/member/api/member"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import {
   getAllChapters,
   getAllGisu,
-} from "@/features/challenger/api/organization"
+} from "@/entities/organization/api/organization"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import LeftChevronIcon from "@/shared/assets/icon/chevron/LeftChevronIcon"
 import { Button } from "@/shared/ui/Button"

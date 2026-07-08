@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import Header from "@/components/header/Header"
-import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
-import SideBar from "@/components/sidebar/SideBar"
 import { MatchingProjectsListPage } from "@/features/project/list"
+import Header from "@/widgets/navigation/header/Header"
+import { MatchingSegmentRegion } from "@/widgets/navigation/sidebar/MatchingSegmentRegion"
+import SideBar from "@/widgets/navigation/sidebar/SideBar"
 
 export const Route = createFileRoute("/test/matching-projects")({
   component: MatchingProjectsTestPage,

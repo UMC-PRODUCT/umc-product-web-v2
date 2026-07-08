@@ -4,7 +4,11 @@ import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { isRoundDecisionClosed } from "../../model/matchingDecision"
 import { ApplicantRow } from "./ApplicantRow"
 
-import type { ApplicantDetail, Role, StatusValue } from "../../model/types"
+import type {
+  ApplicantDetail,
+  Role,
+  StatusValue,
+} from "@/entities/application/model/types"
 
 interface ApplicantRoleSectionProps {
   role: Role

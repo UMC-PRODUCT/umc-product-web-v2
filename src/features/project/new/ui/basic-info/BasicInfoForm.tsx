@@ -11,15 +11,14 @@ import {
 } from "react"
 import { useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
+import { searchChallengersByCursor } from "@/entities/member/api/member"
 import {
   getProjectPmSearchScope,
   isCentralStaff,
   isCurrentTermPm,
   isSuperAdmin,
-} from "@/features/auth/model/identity"
-import { searchChallengersByCursor } from "@/features/challenger/api/member"
-import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
+} from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import {
   addProjectMember,
   createProjectDraft,
@@ -33,16 +32,17 @@ import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { Button } from "@/shared/ui/Button"
+import { Dropdown } from "@/shared/ui/Dropdown"
 import { ImageUploader } from "@/shared/ui/ImageUploader"
 import { InputBox } from "@/shared/ui/input/InputBox"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
+import { SectionHeader } from "@/shared/ui/SectionHeader"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
   type BasicInfoFormData,
   basicInfoSchema,
 } from "../../model/basicInfoSchema"
 import { useProjectRegisterStore } from "../../model/useProjectRegisterStore"
-import { SectionHeader } from "../shared/SectionHeader"
 import { ProjectCardForm } from "./ProjectCardForm"
 
 import type { MemberItem } from "@/shared/ui/searchbar/MemberSearchBar"

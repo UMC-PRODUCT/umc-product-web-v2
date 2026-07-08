@@ -2,22 +2,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, redirect, useBlocker } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { Tooltip } from "@/components/tooltip/Tooltip"
 import {
   createMatchingRound,
   deleteMatchingRound,
   getMatchingRounds,
   updateMatchingRound,
-} from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
-import { useChapters } from "@/features/application/hooks/useApplicationPageData"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { ensureMe } from "@/features/auth/lib/ensureMe"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import { useMe } from "@/entities/member/hooks/useMe"
 import {
   canManageMatchingRounds,
   isChapterPresident,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
+import { useChapters } from "@/features/application/hooks/useApplicationPageData"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   type Branch,
   emptyRoundSchedules,
@@ -33,12 +31,14 @@ import { BranchSelector } from "@/features/matching/ui/BranchSelector"
 import { Calendar } from "@/features/matching/ui/Calendar"
 import { CalendarScheduleList } from "@/features/matching/ui/CalendarScheduleList"
 import { RoundForm } from "@/features/matching/ui/RoundForm"
-import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
 import { UsabilitySurvey } from "@/features/usability-survey"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { SectionHeader } from "@/shared/ui/SectionHeader"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
+import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 import type { AxiosError } from "axios"
 

@@ -4,7 +4,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useReducer, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import {
   completeEmailVerification,
   getEmailAvailability,
@@ -26,6 +25,7 @@ import { createMeta, SITE_URL } from "@/shared/seo"
 import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type {
   EmailRegisterMemberRequest,

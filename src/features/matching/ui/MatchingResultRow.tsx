@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react"
 import {
   addProjectMember,
   removeProjectMember,
-} from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
@@ -16,7 +16,7 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { AssignmentModal } from "./AssignmentModal"
 import { MatchingBlock } from "./MatchingBlock"
 
-import type { Part } from "@/features/challenger/model/types"
+import type { Part } from "@/shared/model/domain"
 import type { NumberTagVariant } from "@/shared/ui/NumberTag"
 
 // 역할 행 라벨 -> 서버 Part enum 변환

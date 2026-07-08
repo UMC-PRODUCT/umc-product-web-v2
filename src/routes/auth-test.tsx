@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
-import { getMyInfo, type MemberInfoResponse } from "@/features/auth/api/me"
+import { getMyInfo, type MemberInfoResponse } from "@/entities/member/api/me"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { logout } from "@/features/auth/lib/logout"
-import { useAuthStore } from "@/features/auth/store/authStore"
 import { Button } from "@/shared/ui/Button"
 
 export const Route = createFileRoute("/auth-test")({

@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { useAuthStore } from "@/entities/member/store/authStore"
 
 import type { OAuthLoginResponse } from "@/features/auth/model/types"
 

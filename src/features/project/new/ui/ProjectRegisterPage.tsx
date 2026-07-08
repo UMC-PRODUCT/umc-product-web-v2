@@ -3,17 +3,16 @@ import { useBlocker, useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { getMatchingRounds } from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
-import { getResourcePermission } from "@/features/auth/api/permissions"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { getMatchingRounds } from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import { getResourcePermission } from "@/entities/member/api/permissions"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   canManageProjectRecruitInfo,
   getLatestChallengerRecord,
-} from "@/features/auth/model/identity"
-import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
+} from "@/entities/member/model/identity"
+import { hasGrantedPermission } from "@/entities/member/model/resourcePermission"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import { getManagedProjects } from "@/features/project/management/api"
 import {
@@ -42,6 +41,7 @@ import { hydrateProjectDetailIntoStore } from "@/features/project/new/model/proj
 import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
@@ -580,8 +580,12 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
               isEditMode ? undefined : canManageRecruitInfoByRole
             }
             isHydrated={isEditMode ? detailQuery.isSuccess : true}
-            onPrev={isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(1)}
-            onNext={isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(3)}
+            onPrev={
+              isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(1)
+            }
+            onNext={
+              isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(3)
+            }
           />
         )}
         {step === 3 && (

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
-import { useResourcePermissionsBatch } from "@/features/auth/hooks/useResourcePermissionsBatch"
+import { useResourcePermissionsBatch } from "@/entities/member/hooks/useResourcePermissionsBatch"
 import {
   isAnyOperator,
   isCentralCore,
@@ -10,24 +10,24 @@ import {
   isCurrentTermPm,
   isSchoolStaff,
   isSuperAdmin,
-} from "@/features/auth/model/identity"
-import { getChaptersWithSchools } from "@/features/challenger/api/organization"
+} from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
+import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import { projectKeys } from "@/features/project/new/api/queryKeys"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { EmptyState } from "@/shared/ui/EmptyState"
+import { ProjectManagementSubTitle } from "@/shared/ui/ProjectManagementSubTitle"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
 import { getManagedProjects } from "../api"
 import { ProjectManagementCard } from "./ProjectManagementCard"
-import { ProjectManagementSubTitle } from "./ProjectManagementSubTitle"
 
-import type { ResourcePermissionQuery } from "@/features/auth/api/permissions"
-import type { ProjectStatus } from "@/features/project/list/api/matchingProject"
-import type { MatchingProject } from "@/features/project/list/model/matchingProject"
+import type { ResourcePermissionQuery } from "@/entities/member/api/permissions"
+import type { ProjectStatus } from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 const FE_PART_LABELS = new Set(["Web", "iOS", "Android"])
 const UNCLASSIFIED_PART_LABEL = "미분류"

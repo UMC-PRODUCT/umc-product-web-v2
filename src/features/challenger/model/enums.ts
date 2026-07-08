@@ -1,8 +1,4 @@
-import type {
-  Part,
-  PointType,
-  RoleType,
-} from "@/features/challenger/model/types"
+import type { Part, PointType, RoleType } from "@/shared/model/domain"
 
 export const PART_OPTIONS: ReadonlyArray<{ value: Part; label: string }> = [
   { value: "PLAN", label: "Plan" },

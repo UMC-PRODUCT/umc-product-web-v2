@@ -1,6 +1,6 @@
 export { Divider } from "./ui/Divider"
 export { Input } from "./ui/Input"
 export { LoginButton } from "./ui/LoginButton"
-export { LoginCircleButton } from "./ui/LoginCircleButton"
 export { SmallDivider } from "./ui/SmallDivider"
 export { UmcLogoButton } from "./ui/UmcLogoButton"
+export { LoginCircleButton } from "@/shared/ui/LoginCircleButton"

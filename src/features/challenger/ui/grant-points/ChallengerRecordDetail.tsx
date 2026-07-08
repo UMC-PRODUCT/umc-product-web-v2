@@ -10,7 +10,7 @@ import {
 } from "@/features/challenger/model/enums"
 import { cn } from "@/shared/lib/utils"
 
-import type { ChallengerPointInfo } from "@/features/challenger/model/types"
+import type { ChallengerPointInfo } from "@/entities/member/model/challenger"
 
 interface ChallengerRecordDetailProps {
   challengerId: string

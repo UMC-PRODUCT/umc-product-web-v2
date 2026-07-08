@@ -1,7 +1,7 @@
 /** 피그마 기준 Project Card_Md입니다. */
 
-import { isRecruitDone } from "@/features/project/list/model/matchingProject"
-import { DEFAULT_MATCHING_PROJECT_MOCK } from "@/features/project/list/model/matchingProject.mock"
+import { isRecruitDone } from "@/entities/project/model/matchingProject"
+import { DEFAULT_MATCHING_PROJECT_MOCK } from "@/entities/project/model/matchingProject.mock"
 import { cn } from "@/shared/lib/utils"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
@@ -10,7 +10,7 @@ import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 import type {
   MatchingProject,
   ProjectRecruitRow,
-} from "@/features/project/list/model/matchingProject"
+} from "@/entities/project/model/matchingProject"
 
 export type MatchingProjectCardVariant =
   | "default"

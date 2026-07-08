@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { Tooltip } from "@/components/tooltip/Tooltip"
+import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 export const Route = createFileRoute("/test/tooltip")({
   component: TooltipTestPage,

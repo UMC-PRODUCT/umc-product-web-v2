@@ -29,13 +29,6 @@ export { publishProject } from "./projectPublish"
 export { invalidateProjectSummaryQueries } from "./queryInvalidation"
 export { gisuKeys, memberKeys, projectKeys } from "./queryKeys"
 
-export {
-  confirmUpload,
-  prepareUpload,
-  uploadFileFlow,
-  uploadToSignedUrl,
-} from "./storage"
-
 export type {
   AddProjectMemberRequest,
   ApiPart,
@@ -45,14 +38,24 @@ export type {
   DraftProjectResponse,
   GetApplicationFormResponse,
   PartQuotaEntry,
-  PrepareUploadRequest,
-  PrepareUploadResponse,
   ProjectDetailResponse,
   ProjectStatusResponse,
   TransferProjectOwnershipRequest,
   UpdatePartQuotasRequest,
   UpdateProjectRequest,
-  UploadCategory,
   UpsertApplicationFormRequest,
   UpsertApplicationFormResponse,
 } from "./types"
+
+export {
+  confirmUpload,
+  prepareUpload,
+  uploadFileFlow,
+  uploadToSignedUrl,
+} from "@/shared/api/storage"
+
+export type {
+  PrepareUploadRequest,
+  PrepareUploadResponse,
+  UploadCategory,
+} from "@/shared/api/storage"

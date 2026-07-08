@@ -1,5 +1,6 @@
+import { rememberLoginReturnTo } from "@/shared/lib/loginRedirect"
+
 import { loadKakaoSdk } from "./loadAuthSdk"
-import { rememberLoginReturnTo } from "./loginRedirect"
 
 const KAKAO_REDIRECT_PATH = "/oauth/kakao/callback"
 const KAKAO_STATE_STORAGE_KEY = "kakao_oauth_state"

@@ -2,26 +2,29 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { isAxiosError } from "axios"
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { Modal } from "@/shared/ui/Modal"
-import { CtaModal } from "@/shared/ui/modal/CtaModal"
-
-import { updateApplicationDecision } from "../api/applicationApi"
-import { applicationKeys } from "../api/applicationKeys"
-import {
-  useApplicationDetail,
-  useProjectApplications,
-} from "../hooks/useApplications"
+import { updateApplicationDecision } from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
 import {
   toApplicantDetail,
   toApplicantFormData,
   toServerStatus,
-} from "../model/mappers"
+} from "@/entities/application/model/mappers"
+import { Modal } from "@/shared/ui/Modal"
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
+
+import {
+  useApplicationDetail,
+  useProjectApplications,
+} from "../hooks/useApplications"
 import { isRoundDecisionClosed } from "../model/matchingDecision"
 import { ModalApplicantPanel } from "./detail-modal/ModalApplicantPanel"
 import { ModalFormPanel } from "./detail-modal/ModalFormPanel"
 
-import type { ProjectApplication, StatusValue } from "../model/types"
+import type {
+  ProjectApplication,
+  StatusValue,
+} from "@/entities/application/model/types"
 
 interface ApplicationDetailModalProps {
   project: ProjectApplication

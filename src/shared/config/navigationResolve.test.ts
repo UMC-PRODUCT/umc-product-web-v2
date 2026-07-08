@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { filterSectionsByPermission } from "@/components/sidebar/utils"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
+import { filterSectionsByPermission } from "@/widgets/navigation/sidebar/utils"
 
 import { resolveNavigationFromPathname } from "./navigationResolve"
 

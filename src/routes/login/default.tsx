@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import axios from "axios"
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { loginWithEmail } from "@/features/auth/api/credentials"
 import {
   loginWithApple,
@@ -19,12 +19,6 @@ import {
 import { handleLoginResponse } from "@/features/auth/lib/handleLoginResponse"
 import { startKakaoSignIn } from "@/features/auth/lib/kakaoSignIn"
 import {
-  normalizeReturnTo,
-  rememberLoginReturnTo,
-  resolveLoginSuccessPath,
-} from "@/features/auth/lib/loginRedirect"
-import { useAuthStore } from "@/features/auth/store/authStore"
-import {
   Divider,
   Input,
   LoginCircleButton,
@@ -33,10 +27,16 @@ import {
 } from "@/features/login"
 import { emailSchema } from "@/features/signup/validation"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
+import {
+  normalizeReturnTo,
+  rememberLoginReturnTo,
+  resolveLoginSuccessPath,
+} from "@/shared/lib/loginRedirect"
 import { createMeta, SITE_URL } from "@/shared/seo"
 import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 export const Route = createFileRoute("/login/default")({
   head: () =>

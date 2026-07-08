@@ -1,10 +1,10 @@
 // 서버 응답 -> 매칭 현황 프론트 타입 변환
 
-import { toRoundNumber } from "@/features/application/model/mappers"
+import { toRoundNumber } from "@/entities/application/model/mappers"
 
-import type { ManagedProjectSummaryResponse } from "@/features/application/model/apiTypes"
-import type { Part } from "@/features/challenger/model/types"
-import type { ProjectMembersResponse } from "@/features/project/list/api/matchingProject"
+import type { ManagedProjectSummaryResponse } from "@/entities/application/model/apiTypes"
+import type { ProjectMembersResponse } from "@/entities/project/api/matchingProject"
+import type { Part } from "@/shared/model/domain"
 
 import type {
   MatchingBlockData,

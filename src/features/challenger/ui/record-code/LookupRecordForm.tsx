@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query"
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { getChallengerRecordByCode } from "@/features/challenger/api/challengerRecord"
 import { PART_LABEL, ROLE_TYPE_LABEL } from "@/features/challenger/model/enums"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type { ChallengerRecordResponse } from "@/features/challenger/model/types"
 

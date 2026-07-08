@@ -4,18 +4,18 @@ import { useMemo } from "react"
 import {
   getAllProjects,
   getMatchingStatistics,
-} from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import { useViewModeStore } from "@/entities/member/view-mode"
+import { getAllSchools } from "@/entities/organization/api/organization"
+import { getProjectMembersBatch } from "@/entities/project/api/matchingProject"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
-import { getAllSchools } from "@/features/challenger/api/organization"
-import { getProjectMembersBatch } from "@/features/project/list/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import { matchingResponseToStats } from "../model/matchingStatsMapper"
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"
 
-import type { ApplicationStats } from "@/features/application/model/types"
+import type { ApplicationStats } from "@/entities/application/model/types"
 
 const emptyStats: ApplicationStats = {
   totalMembers: 0,

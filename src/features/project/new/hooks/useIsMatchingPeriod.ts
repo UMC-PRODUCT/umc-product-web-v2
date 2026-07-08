@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 
-import { getMatchingRounds } from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { getLatestChallengerRecord } from "@/features/auth/model/identity"
+import { getMatchingRounds } from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { getLatestChallengerRecord } from "@/entities/member/model/identity"
 
 import {
   getNextMatchingBoundary,

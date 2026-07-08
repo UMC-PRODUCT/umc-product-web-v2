@@ -3,14 +3,21 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   getCurrentChallengerPart,
   getLatestChallengerRecord,
   isCurrentTermPm,
   isOperator,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
+import {
+  getActiveMatchingRound,
+  getMyApplications,
+  getProjectDetail,
+} from "@/entities/project/api/matchingProject"
+import { isRecruitDone } from "@/entities/project/model/matchingProject"
+import { DEFAULT_MATCHING_PROJECT_MOCK } from "@/entities/project/model/matchingProject.mock"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   getApplicationForm,
@@ -30,16 +37,9 @@ import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
-import {
-  getActiveMatchingRound,
-  getMyApplications,
-  getProjectDetail,
-} from "../api/matchingProject"
 import { filterApplicationSectionsByPart } from "../model/applicationSectionFilter"
-import { isRecruitDone } from "../model/matchingProject"
-import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import {
   isApplyButtonDisabled,
   resolveProjectDetailCtaMode,
@@ -57,8 +57,11 @@ import {
 import { RecruitQuestionsViewModal } from "./apply-modal/RecruitQuestionsViewModal"
 import { TeamMemberModal } from "./team-member-modal/TeamMemberModal"
 
-import type { ActiveMatchingRound, ProjectDetail } from "../api/matchingProject"
-import type { MatchingProject } from "../model/matchingProject"
+import type {
+  ActiveMatchingRound,
+  ProjectDetail,
+} from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 type ProjectDetailCardLogo = "on" | "off"
 
