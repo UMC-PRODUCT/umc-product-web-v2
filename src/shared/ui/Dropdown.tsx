@@ -43,9 +43,7 @@ export function Dropdown<T extends string | number>({
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  useClickOutside(containerRef, () => {
-    if (open) setOpen(false)
-  })
+  useClickOutside(containerRef, () => setOpen(false), open)
 
   const selected = options.find((option) => option.value === value)
   const displayLabel = selected?.label ?? placeholder

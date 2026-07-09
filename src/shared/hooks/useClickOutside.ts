@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react"
 export function useClickOutside<T extends HTMLElement>(
   ref: React.RefObject<T | null>,
   callback: (event: MouseEvent | TouchEvent) => void,
+  enabled = true,
 ) {
   const savedCallback = useRef(callback)
 
@@ -11,6 +12,8 @@ export function useClickOutside<T extends HTMLElement>(
   }, [callback])
 
   useEffect(() => {
+    if (!enabled) return
+
     const handler = (event: MouseEvent | TouchEvent) => {
       const element = ref.current
       if (!element || element.contains(event.target as Node)) {
@@ -26,5 +29,5 @@ export function useClickOutside<T extends HTMLElement>(
       document.removeEventListener("mousedown", handler)
       document.removeEventListener("touchstart", handler)
     }
-  }, [ref])
+  }, [ref, enabled])
 }

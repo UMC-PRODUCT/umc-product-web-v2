@@ -28,9 +28,7 @@ export function SideBarDropDown({
   const containerRef = useRef<HTMLDivElement>(null)
   const selectedLabel = options[selectedIdx]?.label ?? options[0]?.label ?? ""
 
-  useClickOutside(containerRef, () => {
-    if (isOpen) setIsOpen(false)
-  })
+  useClickOutside(containerRef, () => setIsOpen(false), isOpen)
 
   return (
     <div ref={containerRef} className={cn("relative w-43", className)}>

@@ -49,12 +49,14 @@ export function ProfileDropdown({
     if (latest) setSelectedGisuId(latest.gisuId)
   }, [me, selectedGisuId, setSelectedGisuId])
 
-  useClickOutside(containerRef, () => {
-    if (isOpen) {
+  useClickOutside(
+    containerRef,
+    () => {
       setIsOpen(false)
       onOpenChange?.(false)
-    }
-  })
+    },
+    isOpen,
+  )
 
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen)

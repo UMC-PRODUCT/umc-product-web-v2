@@ -46,9 +46,7 @@ export function MemberSearchPanel({
   const items = data?.page.content ?? []
   const showDropdown = focused && enabled
 
-  useClickOutside(containerRef, () => {
-    if (focused) setFocused(false)
-  })
+  useClickOutside(containerRef, () => setFocused(false), focused)
 
   return (
     <div ref={containerRef} className="relative w-full max-w-115">

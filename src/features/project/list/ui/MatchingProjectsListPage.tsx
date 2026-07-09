@@ -127,11 +127,7 @@ export function MatchingProjectsListPage({
     })
   }, [useMockData, isLoading, isError, searchQuery, visibleProjects.length])
 
-  useClickOutside(filterAreaRef, () => {
-    if (openFilterId) {
-      setOpenFilterId(null)
-    }
-  })
+  useClickOutside(filterAreaRef, () => setOpenFilterId(null), !!openFilterId)
 
   return (
     <section className="relative isolate flex w-full min-w-0 flex-col items-stretch justify-start">

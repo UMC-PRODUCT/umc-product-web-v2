@@ -29,9 +29,7 @@ export function SchoolDropdown({
 
   const { schools, isLoading } = useSchools({ nameType: "short" })
 
-  useClickOutside(containerRef, () => {
-    if (open) setOpen(false)
-  })
+  useClickOutside(containerRef, () => setOpen(false), open)
 
   useEffect(() => {
     if (open) {

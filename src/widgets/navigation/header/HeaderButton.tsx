@@ -20,9 +20,7 @@ export default function HeaderButton({
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  useClickOutside(containerRef, () => {
-    if (isOpen) setIsOpen(false)
-  })
+  useClickOutside(containerRef, () => setIsOpen(false), isOpen)
 
   return (
     <div ref={containerRef} className="relative">
