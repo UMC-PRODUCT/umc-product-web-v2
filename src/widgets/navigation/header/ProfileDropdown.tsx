@@ -6,7 +6,6 @@ import { isCentralStaff, isSuperAdmin } from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import { logout as apiLogout } from "@/features/auth/api/credentials"
 import { logout as localLogout } from "@/features/auth/lib/logout"
-import { useSelectedChallengerStore } from "@/features/auth/store/selectedChallengerStore"
 import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { toRoleTag } from "@/shared/lib/roleTagMapper"
@@ -38,7 +37,8 @@ export function ProfileDropdown({
   const { data: me } = useMe()
   const canManageMembers = isSuperAdmin(me) || isCentralStaff(me)
 
-  const { selectedGisuId, setSelectedGisuId } = useSelectedChallengerStore()
+  // TODO: 기수 변경이 다른 화면에서도 쓰게 되면 URL 쿼리(?gisuId=)로 전환
+  const [selectedGisuId, setSelectedGisuId] = useState<string | null>(null)
 
   // TODO: GET /api/v2/member/me 연동 후 challengerRecords → challengerHistory, record.gisu → record.generation 으로 교체
   useEffect(() => {
