@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
+import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { cn } from "@/shared/lib/utils"
 
 import KakaoChannelListItem from "./KakaoChannelListItem"
@@ -19,16 +20,7 @@ export default function HeaderButton({
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!isOpen) return
-    const handler = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    window.addEventListener("mousedown", handler)
-    return () => window.removeEventListener("mousedown", handler)
-  }, [isOpen])
+  useClickOutside(containerRef, () => setIsOpen(false), isOpen)
 
   return (
     <div ref={containerRef} className="relative">

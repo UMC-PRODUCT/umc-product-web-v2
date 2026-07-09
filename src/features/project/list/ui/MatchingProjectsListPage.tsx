@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { MOCK_MATCHING_PROJECTS } from "@/entities/project/model/matchingProject.mock"
 import { trackEvent } from "@/shared/analytics"
+import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { cn } from "@/shared/lib/utils"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
@@ -126,19 +127,7 @@ export function MatchingProjectsListPage({
     })
   }, [useMockData, isLoading, isError, searchQuery, visibleProjects.length])
 
-  useEffect(() => {
-    if (!openFilterId) return
-
-    function handlePointerDown(event: PointerEvent) {
-      const target = event.target
-      if (!(target instanceof Node)) return
-      if (filterAreaRef.current?.contains(target)) return
-      setOpenFilterId(null)
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown)
-    return () => document.removeEventListener("pointerdown", handlePointerDown)
-  }, [openFilterId, setOpenFilterId])
+  useClickOutside(filterAreaRef, () => setOpenFilterId(null), !!openFilterId)
 
   return (
     <section className="relative isolate flex w-full min-w-0 flex-col items-stretch justify-start">

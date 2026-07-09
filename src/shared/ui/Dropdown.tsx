@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
+import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { cn } from "@/shared/lib/utils"
 
 export interface DropdownOption<T extends string | number> {
@@ -42,16 +43,7 @@ export function Dropdown<T extends string | number>({
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!open) return
-    const handler = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-    window.addEventListener("mousedown", handler)
-    return () => window.removeEventListener("mousedown", handler)
-  }, [open])
+  useClickOutside(containerRef, () => setOpen(false), open)
 
   const selected = options.find((option) => option.value === value)
   const displayLabel = selected?.label ?? placeholder
