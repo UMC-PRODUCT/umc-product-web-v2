@@ -16,7 +16,8 @@ export function useClickOutside<T extends HTMLElement>(
 
     const handler = (event: PointerEvent) => {
       const element = ref.current
-      if (!element || element.contains(event.target as Node)) {
+      const target = event.target
+      if (!element || !(target instanceof Node) || element.contains(target)) {
         return
       }
       savedCallback.current(event)
