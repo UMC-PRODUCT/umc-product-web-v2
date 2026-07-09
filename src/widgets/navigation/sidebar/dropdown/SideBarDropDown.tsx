@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
+import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { cn } from "@/shared/lib/utils"
 
 import { SideBarDropDownMenu } from "./SideBarDropDownMenu"
@@ -27,18 +28,9 @@ export function SideBarDropDown({
   const containerRef = useRef<HTMLDivElement>(null)
   const selectedLabel = options[selectedIdx]?.label ?? options[0]?.label ?? ""
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  useClickOutside(containerRef, () => {
+    if (isOpen) setIsOpen(false)
+  })
 
   return (
     <div ref={containerRef} className={cn("relative w-43", className)}>

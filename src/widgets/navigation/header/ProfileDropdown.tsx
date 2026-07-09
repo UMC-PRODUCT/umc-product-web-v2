@@ -8,6 +8,7 @@ import { logout as apiLogout } from "@/features/auth/api/credentials"
 import { logout as localLogout } from "@/features/auth/lib/logout"
 import { useSelectedChallengerStore } from "@/features/auth/store/selectedChallengerStore"
 import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
+import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { toRoleTag } from "@/shared/lib/roleTagMapper"
 import { cn } from "@/shared/lib/utils"
 import { TextButton } from "@/shared/ui/button/TextButton"
@@ -48,17 +49,12 @@ export function ProfileDropdown({
     if (latest) setSelectedGisuId(latest.gisuId)
   }, [me, selectedGisuId, setSelectedGisuId])
 
-  useEffect(() => {
-    if (!isOpen) return
-    const handler = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setIsOpen(false)
-        onOpenChange?.(false)
-      }
+  useClickOutside(containerRef, () => {
+    if (isOpen) {
+      setIsOpen(false)
+      onOpenChange?.(false)
     }
-    window.addEventListener("mousedown", handler)
-    return () => window.removeEventListener("mousedown", handler)
-  }, [isOpen, onOpenChange])
+  })
 
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen)

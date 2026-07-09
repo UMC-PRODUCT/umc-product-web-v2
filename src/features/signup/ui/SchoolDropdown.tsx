@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import { useSchools } from "@/features/auth/hooks/useSchools"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
+import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { cn } from "@/shared/lib/utils"
 
 export type School = string
@@ -28,16 +29,9 @@ export function SchoolDropdown({
 
   const { schools, isLoading } = useSchools({ nameType: "short" })
 
-  useEffect(() => {
-    if (!open) return
-    const handler = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-    window.addEventListener("mousedown", handler)
-    return () => window.removeEventListener("mousedown", handler)
-  }, [open])
+  useClickOutside(containerRef, () => {
+    if (open) setOpen(false)
+  })
 
   useEffect(() => {
     if (open) {
