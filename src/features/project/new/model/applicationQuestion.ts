@@ -25,10 +25,8 @@ export interface Section {
   questions: Question[]
 }
 
-let _idCounter = 0
-
 export function genId(): string {
-  return `q-${++_idCounter}`
+  return crypto.randomUUID()
 }
 
 export const PORTFOLIO_FIXED_TITLE =
