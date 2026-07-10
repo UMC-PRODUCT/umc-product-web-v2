@@ -20,9 +20,9 @@ import { useMe } from "@/entities/member/hooks/useMe"
 import { getLatestChallengerRecord } from "@/entities/member/model/identity"
 import {
   getAllChapters,
-  getAllSchools,
   getChaptersWithSchools,
 } from "@/entities/organization/api/organization"
+import { useAllSchools } from "@/entities/organization/hooks/useAllSchools"
 import { getProjectDetail } from "@/entities/project/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
@@ -167,12 +167,7 @@ export function useChallengerPageData(
   }, [projectStatsQuery.data])
 
   // schoolId -> schoolName 매핑 (학교별 지원 통계 표시용)
-  const schoolsQuery = useQuery({
-    queryKey: ["schools", "all"],
-    queryFn: getAllSchools,
-    enabled,
-    staleTime: Infinity,
-  })
+  const schoolsQuery = useAllSchools({ enabled })
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
     for (const s of schoolsQuery.data?.schools ?? []) {
@@ -324,12 +319,7 @@ export function useAdminPageData(
   )
 
   // 전체 학교 목록 조회 (schoolId -> schoolName 매핑용)
-  const schoolsQuery = useQuery({
-    queryKey: ["schools", "all"],
-    queryFn: getAllSchools,
-    enabled,
-    staleTime: Infinity,
-  })
+  const schoolsQuery = useAllSchools({ enabled })
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
     for (const s of schoolsQuery.data?.schools ?? []) {

@@ -449,7 +449,7 @@ function OAuthSignupPage() {
       name,
       nickname,
       emailVerificationToken,
-      schoolId: selectedSchool.schoolId,
+      schoolId: Number(selectedSchool.schoolId),
       termsAgreements,
     }
 
