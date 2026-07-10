@@ -107,12 +107,8 @@ export interface Terms {
 }
 
 export interface SchoolNameItem {
-  schoolId: number
+  schoolId: string
   schoolName: string
-}
-
-export interface SchoolNameListResponse {
-  schools: SchoolNameItem[]
 }
 
 export interface EmailLoginRequest {
