@@ -8,7 +8,6 @@ import {
   type MyProjectApplicationResponse,
 } from "@/entities/project/api/matchingProject"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
-import { UsabilitySurvey } from "@/features/usability-survey"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 import { EmptyState } from "@/shared/ui/EmptyState"
@@ -166,9 +165,6 @@ export function MyApplicationView() {
     enabled: gisuId != null,
   })
   const applications = raw.filter((a) => a.status !== "CANCELLED")
-  const hasMatchingResult = applications.some(
-    (a) => a.status === "APPROVED" || a.status === "REJECTED",
-  )
 
   if (!applications?.length) {
     return (
@@ -196,11 +192,6 @@ export function MyApplicationView() {
           }
         />
       ))}
-
-      <UsabilitySurvey
-        context="MATCHING_COMPLETED"
-        active={hasMatchingResult}
-      />
     </div>
   )
 }
