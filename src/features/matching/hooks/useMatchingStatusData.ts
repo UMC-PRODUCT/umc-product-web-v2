@@ -7,7 +7,7 @@ import {
 } from "@/entities/application/api/applicationApi"
 import { applicationKeys } from "@/entities/application/api/applicationKeys"
 import { useViewModeStore } from "@/entities/member/view-mode"
-import { getAllSchools } from "@/entities/organization/api/organization"
+import { useAllSchools } from "@/entities/organization/hooks/useAllSchools"
 import { getProjectMembersBatch } from "@/entities/project/api/matchingProject"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
@@ -87,11 +87,7 @@ export function useMatchingStatusData(chapterName?: string) {
   )
 
   // 전체 학교 목록 조회 (schoolId -> schoolName 매핑용)
-  const schoolsQuery = useQuery({
-    queryKey: ["schools", "all"],
-    queryFn: getAllSchools,
-    staleTime: Infinity,
-  })
+  const schoolsQuery = useAllSchools()
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
     for (const s of schoolsQuery.data?.schools ?? []) {
