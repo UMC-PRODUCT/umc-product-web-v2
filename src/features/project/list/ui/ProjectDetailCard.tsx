@@ -24,7 +24,6 @@ import {
   mapApplicationFormToSections,
   projectKeys,
 } from "@/features/project/new/api"
-import { UsabilitySurvey } from "@/features/usability-survey"
 import { trackEvent } from "@/shared/analytics"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
@@ -238,7 +237,6 @@ export function ProjectDetailCard({
     useState(false)
   const [isRecruitQuestionsModalOpen, setIsRecruitQuestionsModalOpen] =
     useState(false)
-  const [isSurveyActive, setIsSurveyActive] = useState(false)
   const {
     data: detail,
     dataUpdatedAt: detailDataUpdatedAt,
@@ -876,7 +874,6 @@ export function ProjectDetailCard({
                   void queryClient.invalidateQueries({
                     queryKey: ["myApplications", activeGisuId],
                   })
-                  setIsSurveyActive(true)
                 }}
               />
             )}
@@ -919,11 +916,6 @@ export function ProjectDetailCard({
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
-
-      <UsabilitySurvey
-        context="APPLICATION_SUBMITTED"
-        active={isSurveyActive}
-      />
     </>
   )
 }
