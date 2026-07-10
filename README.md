@@ -28,13 +28,12 @@ UMC Product Web v2는 UMC 데모데이 프로젝트의 팀원(PM/디자이너/�
 
 ## 2. 팀원 소개
 
-<!-- TODO: 팀원 정보로 교체 -->
-
-| 이름     | 역할             | GitHub                            |
-| -------- | ---------------- | --------------------------------- |
-| `<이름>` | `<역할, 예: FE>` | [@github-id](https://github.com/) |
-| `<이름>` | `<역할>`         | [@github-id](https://github.com/) |
-| `<이름>` | `<역할>`         | [@github-id](https://github.com/) |
+| 사진                      | 이름            | GitHub                                           |
+| ------------------------- | --------------- | ------------------------------------------------ |
+| <img width="80" src="" /> | `이삭/강지훈`   | [@Issac](https://github.com/theSnackOverflow)    |
+| <img width="80" src="" /> | `헤일리/한현서` | [@hhyunseo](https://github.com/hyunseo-han)      |
+| <img width="80" src="" /> | `주디/양혜원`   | [@hyewonimdang](https://github.com/hyewonimdang) |
+| <img width="80" src="" /> | `준오/오창준`   | [@OCJune](https://github.com/OCJune)             |
 
 ## 3. 주요 기능
 
