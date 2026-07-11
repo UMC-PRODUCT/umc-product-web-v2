@@ -30,10 +30,10 @@ UMC Product Web v2는 UMC 데모데이 프로젝트의 팀원(PM/디자이너/�
 
 | 사진                      | 이름            | GitHub                                           |
 | ------------------------- | --------------- | ------------------------------------------------ |
-| <img width="80" src="" /> | `이삭/강지훈`   | [@Issac](https://github.com/theSnackOverflow)    |
-| <img width="80" src="" /> | `헤일리/한현서` | [@hhyunseo](https://github.com/hyunseo-han)      |
-| <img width="80" src="" /> | `주디/양혜원`   | [@hyewonimdang](https://github.com/hyewonimdang) |
-| <img width="80" src="" /> | `준오/오창준`   | [@OCJune](https://github.com/OCJune)             |
+| <img width="120" height="120" alt="image" src="https://github.com/user-attachments/assets/58e179ba-19ca-42a2-826a-cb512e317486" /> | `이삭/강지훈`   | [@Issac](https://github.com/theSnackOverflow)    |
+| <img width="120" height="140" alt="image" src="https://github.com/user-attachments/assets/338b174a-d32a-4630-9d30-4cd558a416b5" /> | `헤일리/한현서` | [@hhyunseo](https://github.com/hyunseo-han)      |
+| <img width="120" height="140" alt="image" src="https://github.com/user-attachments/assets/c184e49d-04e3-4a22-a0c6-6e36868ffcff" /> | `주디/양혜원`   | [@hyewonimdang](https://github.com/hyewonimdang) |
+| <img width="120" height="140" alt="image" src="https://github.com/user-attachments/assets/3f6c3355-4ee2-41fe-a1a0-5f5f2bb6f5ec" /> | `준오/오창준`   | [@OCJune](https://github.com/OCJune)             |
 
 ## 3. 주요 기능
 
@@ -131,15 +131,12 @@ pnpm preview
 
 ## 6. 화면 구성
 
-<!-- TODO: 화면 캡처 이미지 추가 -->
-
 | 화면            | 설명                    |
 | --------------- | ----------------------- |
-| `<캡처 이미지>` | 로그인 / 회원가입       |
-| `<캡처 이미지>` | 프로젝트(공고) 등록     |
-| `<캡처 이미지>` | 지원 현황 · 지원서 상세 |
-| `<캡처 이미지>` | 매칭 관리               |
-| `<캡처 이미지>` | 챌린저 관리             |
+| <img width="300" height="170" alt="image" src="https://github.com/user-attachments/assets/46a93106-076a-43b0-bba8-3e9f2c7c2bf8" /> | 로그인 / 회원가입       |
+| <img width="300" height="150" alt="image" src="https://github.com/user-attachments/assets/36f9d85a-e0e1-46cd-a3f3-6487c55614ea" /> | 프로젝트(공고) 등록     |
+| <img width="300" height="170" alt="image" src="https://github.com/user-attachments/assets/126f1ae6-a998-4d32-981d-d89ea400b76c" /> | 지원 현황 · 지원서 상세 |
+| <img width="300" height="170" alt="image" src="https://github.com/user-attachments/assets/3de59509-202b-475e-8e0f-79bb2d875203" /> | 매칭 관리 |
 
 ### 디자인 시스템
 
