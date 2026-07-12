@@ -14,6 +14,9 @@ const partTagChipVariants = cva(
         android: "w-16.5",
         springboot: "w-22",
         nodejs: "w-16.5",
+        pm: "w-9",
+        "mobile-pe": "w-22",
+        "web-pe": "w-20",
       },
       type: {
         default: "",
@@ -43,6 +46,16 @@ const partTagChipVariants = cva(
         className: "bg-chip-springboot-100",
       },
       { role: "nodejs", type: "light", className: "bg-chip-nodejs-100" },
+      { role: "pm", type: "default", className: "bg-chip-pm-300" },
+      {
+        role: "mobile-pe",
+        type: "default",
+        className: "bg-chip-mobile-pe-300",
+      },
+      { role: "web-pe", type: "default", className: "bg-chip-web-pe-300" },
+      { role: "pm", type: "light", className: "bg-chip-pm-100" },
+      { role: "mobile-pe", type: "light", className: "bg-chip-mobile-pe-100" },
+      { role: "web-pe", type: "light", className: "bg-chip-web-pe-100" },
     ],
     defaultVariants: {
       type: "default",
@@ -58,6 +71,9 @@ const ROLE_LABEL = {
   android: "Android",
   springboot: "SpringBoot",
   nodejs: "Node.js",
+  pm: "PM",
+  "mobile-pe": "Mobile PE",
+  "web-pe": "Web PE",
 } as const
 
 type Role = keyof typeof ROLE_LABEL

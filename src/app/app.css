@@ -135,6 +135,16 @@
   --color-chip-springboot-300: var(--color-chip-springboot-300);
   --color-chip-springboot-500: var(--color-chip-springboot-500);
 
+  --color-chip-pm-100: var(--color-chip-pm-100);
+  --color-chip-pm-300: var(--color-chip-pm-300);
+  --color-chip-pm-500: var(--color-chip-pm-500);
+  --color-chip-mobile-pe-100: var(--color-chip-mobile-pe-100);
+  --color-chip-mobile-pe-300: var(--color-chip-mobile-pe-300);
+  --color-chip-mobile-pe-500: var(--color-chip-mobile-pe-500);
+  --color-chip-web-pe-100: var(--color-chip-web-pe-100);
+  --color-chip-web-pe-300: var(--color-chip-web-pe-300);
+  --color-chip-web-pe-500: var(--color-chip-web-pe-500);
+
   --color-role-hq-200: var(--color-role-hq-200);
   --color-role-hq-600: var(--color-role-hq-600);
   --color-role-chapter-200: var(--color-role-chapter-200);
