@@ -7,9 +7,12 @@ const roleTagChipVariants = cva(
   {
     variants: {
       role: {
-        central: "bg-role-central-200 text-role-central-600",
-        campus: "bg-role-campus-200 text-role-campus-600",
+        hq: "bg-role-hq-200 text-role-hq-600",
+        chapter: "bg-role-chapter-200 text-role-chapter-600",
+        school: "bg-role-school-200 text-role-school-600",
         challenger: "bg-role-challenger-200 text-role-challenger-600",
+        superadmin: "bg-role-superadmin-200 text-role-superadmin-600",
+        product: "bg-role-product-200 text-role-product-600",
       },
       size: {
         default: "rounded-[6px] px-2 py-[3px] text-label-2-medium",
@@ -23,9 +26,12 @@ const roleTagChipVariants = cva(
 )
 
 const ROLE_LABEL = {
-  central: "중앙 운영진",
-  campus: "교내 운영진",
+  hq: "중앙 운영진",
+  chapter: "지부장",
+  school: "교내 운영진",
   challenger: "챌린저",
+  superadmin: "슈퍼 어드민",
+  product: "프로덕트",
 } as const
 
 export type Role = keyof typeof ROLE_LABEL

@@ -106,16 +106,40 @@
   --color-chip-springboot-500: #b79778;
 
   /* -------------------------
+   * Color / Semantic / Chip / Part (통합 체계)
+   * ------------------------- */
+  --color-chip-pm-100: #f3ebff;
+  --color-chip-pm-300: #e8d8fc;
+  --color-chip-pm-500: #b887ea;
+
+  --color-chip-mobile-pe-100: #f0f4ff;
+  --color-chip-mobile-pe-300: #e5ebff;
+  --color-chip-mobile-pe-500: #8ea5f6;
+
+  --color-chip-web-pe-100: #fff6e0;
+  --color-chip-web-pe-300: #fff4db;
+  --color-chip-web-pe-500: #e3c36a;
+
+  /* -------------------------
    * Color / Semantic / Chip / Role
    * ------------------------- */
-  --color-role-central-200: #eae4ff;
-  --color-role-central-600: #5a43b8;
+  --color-role-hq-200: #eae4ff;
+  --color-role-hq-600: #5a43b8;
 
-  --color-role-campus-200: #e4edff;
-  --color-role-campus-600: #3b63c7;
+  --color-role-chapter-200: #ede3d9;
+  --color-role-chapter-600: #b79778;
 
-  --color-role-challenger-200: #e1f4f1;
+  --color-role-school-200: #ebf0ff;
+  --color-role-school-600: #3b63c7;
+
+  --color-role-challenger-200: #caece8;
   --color-role-challenger-600: #0b6b64;
+
+  --color-role-superadmin-200: #caece8;
+  --color-role-superadmin-600: #0b6b64;
+
+  --color-role-product-200: #ededed;
+  --color-role-product-600: #333333;
 
   /* -------------------------
    * Color / Accent Teal

@@ -607,7 +607,7 @@ export const BasicInfoForm = forwardRef<
                 }
                 setIsMultiPm((prev) => !prev)
               }}
-              className="text-body-2-medium text-teal-gray-400 flex items-center gap-1 self-start pl-0.5 font-medium underline decoration-solid underline-offset-auto"
+              className="text-body-2-medium text-teal-gray-400 flex items-center gap-1 self-start pl-0.5 underline decoration-solid underline-offset-auto"
             >
               <InfoCircleIcon width={14} height={14} aria-hidden="true" />
               <span>

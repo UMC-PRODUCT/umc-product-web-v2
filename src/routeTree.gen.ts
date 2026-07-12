@@ -23,6 +23,7 @@ import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as TestUsabilitySurveyRouteImport } from './routes/test/usability-survey'
+import { Route as TestTypographyRouteImport } from './routes/test/typography'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
@@ -135,6 +136,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const TestUsabilitySurveyRoute = TestUsabilitySurveyRouteImport.update({
   id: '/test/usability-survey',
   path: '/test/usability-survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestTypographyRoute = TestTypographyRouteImport.update({
+  id: '/test/typography',
+  path: '/test/typography',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestTooltipRoute = TestTooltipRouteImport.update({
@@ -401,6 +407,7 @@ export interface FileRoutesByFullPath {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/typography': typeof TestTypographyRoute
   '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -457,6 +464,7 @@ export interface FileRoutesByTo {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/typography': typeof TestTypographyRoute
   '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin': typeof AdminIndexRoute
   '/login': typeof LoginIndexRoute
@@ -516,6 +524,7 @@ export interface FileRoutesById {
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/typography': typeof TestTypographyRoute
   '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -577,6 +586,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/typography'
     | '/test/usability-survey'
     | '/admin/'
     | '/login/'
@@ -633,6 +643,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/typography'
     | '/test/usability-survey'
     | '/admin'
     | '/login'
@@ -691,6 +702,7 @@ export interface FileRouteTypes {
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/typography'
     | '/test/usability-survey'
     | '/admin/'
     | '/login/'
@@ -747,6 +759,7 @@ export interface RootRouteChildren {
   TestToggleRoute: typeof TestToggleRoute
   TestToggleInputsRoute: typeof TestToggleInputsRoute
   TestTooltipRoute: typeof TestTooltipRoute
+  TestTypographyRoute: typeof TestTypographyRoute
   TestUsabilitySurveyRoute: typeof TestUsabilitySurveyRoute
   LoginIndexRoute: typeof LoginIndexRoute
   SignupIndexRoute: typeof SignupIndexRoute
@@ -852,6 +865,13 @@ declare module '@tanstack/react-router' {
       path: '/test/usability-survey'
       fullPath: '/test/usability-survey'
       preLoaderRoute: typeof TestUsabilitySurveyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/typography': {
+      id: '/test/typography'
+      path: '/test/typography'
+      fullPath: '/test/typography'
+      preLoaderRoute: typeof TestTypographyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/tooltip': {
@@ -1297,6 +1317,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
+  TestTypographyRoute: TestTypographyRoute,
   TestUsabilitySurveyRoute: TestUsabilitySurveyRoute,
   LoginIndexRoute: LoginIndexRoute,
   SignupIndexRoute: SignupIndexRoute,
