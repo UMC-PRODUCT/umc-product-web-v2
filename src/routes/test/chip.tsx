@@ -20,7 +20,14 @@ const PARTS = [
 
 const PART_TYPES = ["default", "light"] as const
 
-const ROLES = ["central", "campus", "challenger"] as const
+const ROLES = [
+  "hq",
+  "chapter",
+  "school",
+  "challenger",
+  "superadmin",
+  "product",
+] as const
 
 function ChipTestPage() {
   return (

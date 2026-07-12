@@ -135,12 +135,18 @@
   --color-chip-springboot-300: var(--color-chip-springboot-300);
   --color-chip-springboot-500: var(--color-chip-springboot-500);
 
-  --color-role-central-200: var(--color-role-central-200);
-  --color-role-central-600: var(--color-role-central-600);
-  --color-role-campus-200: var(--color-role-campus-200);
-  --color-role-campus-600: var(--color-role-campus-600);
+  --color-role-hq-200: var(--color-role-hq-200);
+  --color-role-hq-600: var(--color-role-hq-600);
+  --color-role-chapter-200: var(--color-role-chapter-200);
+  --color-role-chapter-600: var(--color-role-chapter-600);
+  --color-role-school-200: var(--color-role-school-200);
+  --color-role-school-600: var(--color-role-school-600);
   --color-role-challenger-200: var(--color-role-challenger-200);
   --color-role-challenger-600: var(--color-role-challenger-600);
+  --color-role-superadmin-200: var(--color-role-superadmin-200);
+  --color-role-superadmin-600: var(--color-role-superadmin-600);
+  --color-role-product-200: var(--color-role-product-200);
+  --color-role-product-600: var(--color-role-product-600);
 
   --color-accent-teal-normal: var(--color-accent-teal-normal);
   --color-accent-teal-bright: var(--color-accent-teal-bright);
