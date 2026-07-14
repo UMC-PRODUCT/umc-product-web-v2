@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/shared/lib/utils"
 
 const textButtonVariants = cva(
-  "inline-flex items-center justify-center px-1 py-0.5 text-center transition-colors hover:underline disabled:pointer-events-none disabled:no-underline disabled:opacity-50",
+  "inline-flex items-center justify-center px-1 py-0.5 text-center transition-colors hover:underline hover:underline-offset-2 disabled:pointer-events-none disabled:no-underline disabled:opacity-50",
   {
     variants: {
       color: {

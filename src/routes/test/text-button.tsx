@@ -41,13 +41,18 @@ function TextButtonTestPage() {
               <TextButton>텍스트 버튼</TextButton>
             </TextButtonSpecimen>
             <TextButtonSpecimen label="Neutral / Hover">
-              <TextButton className="underline">텍스트 버튼</TextButton>
+              <TextButton className="underline underline-offset-2">
+                텍스트 버튼
+              </TextButton>
             </TextButtonSpecimen>
             <TextButtonSpecimen label="Primary / Default">
               <TextButton color="primary">텍스트 버튼</TextButton>
             </TextButtonSpecimen>
             <TextButtonSpecimen label="Primary / Hover">
-              <TextButton color="primary" className="underline">
+              <TextButton
+                color="primary"
+                className="underline underline-offset-2"
+              >
                 텍스트 버튼
               </TextButton>
             </TextButtonSpecimen>
@@ -61,7 +66,7 @@ function TextButtonTestPage() {
               <TextButton size="14">텍스트 버튼</TextButton>
             </TextButtonSpecimen>
             <TextButtonSpecimen label="Neutral / Hover">
-              <TextButton size="14" className="underline">
+              <TextButton size="14" className="underline underline-offset-2">
                 텍스트 버튼
               </TextButton>
             </TextButtonSpecimen>
