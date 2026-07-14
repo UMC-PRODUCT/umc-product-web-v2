@@ -16,8 +16,10 @@ describe("TextButton", () => {
       "text-teal-gray-500",
       "hover:underline",
       "hover:underline-offset-3",
+      "active:rounded-sm",
       "active:underline",
       "active:underline-offset-3",
+      "active:bg-teal-gray-200",
       "active:text-teal-gray-700",
     )
   })
@@ -28,6 +30,7 @@ describe("TextButton", () => {
     expect(screen.getByRole("button", { name: "회원가입" })).toHaveClass(
       "text-teal-500",
       "hover:decoration-teal-500",
+      "active:bg-teal-100",
       "active:text-teal-700",
     )
   })
@@ -43,6 +46,7 @@ describe("TextButton", () => {
       "text-body-2-medium",
       "text-teal-gray-700",
       "hover:decoration-teal-gray-700",
+      "active:bg-teal-gray-200",
       "active:text-teal-gray-900",
     )
   })

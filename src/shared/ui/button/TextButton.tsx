@@ -3,13 +3,14 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/shared/lib/utils"
 
 const textButtonVariants = cva(
-  "inline-flex items-center justify-center px-1 py-0.5 text-center transition-colors hover:underline hover:underline-offset-3 active:underline active:underline-offset-3 disabled:pointer-events-none disabled:no-underline disabled:opacity-50",
+  "inline-flex items-center justify-center px-1 py-0.5 text-center transition-colors hover:underline hover:underline-offset-3 active:rounded-sm active:underline active:underline-offset-3 disabled:pointer-events-none disabled:no-underline disabled:opacity-50",
   {
     variants: {
       color: {
-        primary: "text-teal-500 hover:decoration-teal-500 active:text-teal-700",
+        primary:
+          "text-teal-500 hover:decoration-teal-500 active:bg-teal-100 active:text-teal-700",
         neutral:
-          "text-teal-gray-500 hover:decoration-teal-gray-500 active:text-teal-gray-700",
+          "text-teal-gray-500 hover:decoration-teal-gray-500 active:bg-teal-gray-200 active:text-teal-gray-700",
       },
       size: {
         "16": "text-[16px] leading-6 font-normal tracking-normal",

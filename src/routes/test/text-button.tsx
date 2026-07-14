@@ -47,7 +47,7 @@ function TextButtonTestPage() {
               </TextButton>
             </TextButtonSpecimen>
             <TextButtonSpecimen label="Neutral / Active">
-              <TextButton className="text-teal-gray-700 underline underline-offset-3">
+              <TextButton className="bg-teal-gray-200 text-teal-gray-700 rounded-sm underline underline-offset-3">
                 텍스트 버튼
               </TextButton>
             </TextButtonSpecimen>
@@ -65,7 +65,7 @@ function TextButtonTestPage() {
             <TextButtonSpecimen label="Primary / Active">
               <TextButton
                 color="primary"
-                className="text-teal-700 underline underline-offset-3"
+                className="rounded-sm bg-teal-100 text-teal-700 underline underline-offset-3"
               >
                 텍스트 버튼
               </TextButton>
@@ -87,7 +87,7 @@ function TextButtonTestPage() {
             <TextButtonSpecimen label="Neutral / Active">
               <TextButton
                 size="14"
-                className="text-teal-gray-900 underline underline-offset-3"
+                className="bg-teal-gray-200 text-teal-gray-900 rounded-sm underline underline-offset-3"
               >
                 텍스트 버튼
               </TextButton>
