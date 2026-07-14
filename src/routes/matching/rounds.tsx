@@ -600,21 +600,12 @@ function MatchingRoundsPage() {
 
                   {/* 툴팁: 매칭 차수 기간 설정 안내 */}
                   <Tooltip
-                    content={
-                      <div className="text-left">
-                        <p className="text-caption-2-medium font-bold text-teal-600">
-                          매칭 차수 기간 설정
-                        </p>
-                        <p className="text-caption-2-regular text-teal-gray-600">
-                          1차 매칭 시작 후에는 차수 기간을 변경할 수 없습니다.
-                        </p>
-                      </div>
-                    }
+                    label="매칭 차수 기간 설정"
+                    content="1차 매칭 시작 후에는 차수 기간을 변경할 수 없습니다."
                     size="big"
                     dark={false}
                     side="right"
                     sideOffset={8}
-                    className="h-13! w-69!"
                     triggerClassName="self-start -mt-6"
                   >
                     <button

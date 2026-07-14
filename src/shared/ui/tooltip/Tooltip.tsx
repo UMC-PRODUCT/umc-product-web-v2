@@ -13,11 +13,11 @@ import { createPortal } from "react-dom"
 
 import { cn } from "@/shared/lib/utils"
 
-const tooltipContentVariants = cva("rounded-[6px] relative text-center", {
+const tooltipContentVariants = cva("relative rounded-[6px]", {
   variants: {
     size: {
-      big: "w-[221px] min-h-[52px] py-2 px-3 text-body-2-medium break-keep",
-      small: "py-1 px-2 text-caption-2-medium whitespace-nowrap",
+      big: "w-[221px] min-h-[52px] px-3 py-2",
+      small: "px-2 py-1",
     },
     dark: {
       true: "bg-teal-gray-500 text-white",
@@ -146,6 +146,7 @@ function TooltipArrow({
 
 interface TooltipProps {
   content: ReactNode
+  label?: ReactNode
   children: ReactNode
   size?: "big" | "small"
   dark?: boolean
@@ -163,6 +164,7 @@ interface TooltipProps {
 
 export function Tooltip({
   content,
+  label,
   children,
   size = "big",
   dark = true,
@@ -179,12 +181,14 @@ export function Tooltip({
 }: TooltipProps) {
   const tooltipId = useId()
   const isControlled = controlledOpen !== undefined
+  const isLabeled = label != null && size === "big" && !dark
 
   const [internalOpen, setInternalOpen] = useState(defaultOpen)
   const [position, setPosition] = useState<CSSProperties>({})
   const isOpen = isControlled ? controlledOpen : internalOpen
 
   const triggerRef = useRef<HTMLSpanElement>(null)
+  const tooltipRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -201,7 +205,7 @@ export function Tooltip({
         ),
       )
     }
-  }, [side, sideOffset])
+  }, [side, sideOffset, size])
 
   const handleOpen = useCallback(() => {
     if (pinned) return
@@ -220,18 +224,23 @@ export function Tooltip({
     onOpenChange?.(false)
   }, [pinned, isControlled, onOpenChange])
 
+  const closeTooltip = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setPinned(false)
+    if (!isControlled) setInternalOpen(false)
+    onOpenChange?.(false)
+  }, [isControlled, onOpenChange])
+
   const handleClick = useCallback(() => {
     if (pinned) {
-      setPinned(false)
-      if (!isControlled) setInternalOpen(false)
-      onOpenChange?.(false)
+      closeTooltip()
     } else {
       updatePosition()
       setPinned(true)
       if (!isControlled) setInternalOpen(true)
       onOpenChange?.(true)
     }
-  }, [pinned, isControlled, onOpenChange, updatePosition])
+  }, [pinned, isControlled, onOpenChange, updatePosition, closeTooltip])
 
   useEffect(() => {
     return () => {
@@ -243,14 +252,29 @@ export function Tooltip({
   useEffect(() => {
     if (!isOpen || !autoHideDuration) return
     autoHideTimerRef.current = setTimeout(() => {
-      setPinned(false)
-      if (!isControlled) setInternalOpen(false)
-      onOpenChange?.(false)
+      closeTooltip()
     }, autoHideDuration)
     return () => {
       if (autoHideTimerRef.current) clearTimeout(autoHideTimerRef.current)
     }
-  }, [isOpen, autoHideDuration, isControlled, onOpenChange])
+  }, [isOpen, autoHideDuration, closeTooltip])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target
+      if (!(target instanceof Node)) return
+      if (
+        triggerRef.current?.contains(target) ||
+        tooltipRef.current?.contains(target)
+      )
+        return
+      closeTooltip()
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown)
+    return () => document.removeEventListener("pointerdown", handlePointerDown)
+  }, [isOpen, closeTooltip])
 
   useLayoutEffect(() => {
     if (!isOpen) return
@@ -280,15 +304,27 @@ export function Tooltip({
         createPortal(
           <div
             id={tooltipId}
+            ref={tooltipRef}
             role="tooltip"
             style={position}
             className={cn(
               tooltipContentVariants({ size, dark }),
-              !dark && "shadow-tooltip-light",
+              !dark && "shadow-drop-neutral-1",
               className,
             )}
           >
-            {content}
+            {isLabeled && (
+              <div className="text-caption-3-bold text-teal-600">{label}</div>
+            )}
+            <div
+              className={cn(
+                "text-caption-3-regular break-keep",
+                size === "small" && "whitespace-nowrap",
+                isLabeled ? "text-left" : "text-center",
+              )}
+            >
+              {content}
+            </div>
             <TooltipArrow size={size} dark={dark} side={side} />
           </div>,
           document.body,

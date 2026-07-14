@@ -147,18 +147,14 @@ export function AssignmentModal({
             </div>
             <div className="flex items-center gap-2.5">
               <Tooltip
+                label="팀원 수동 배정"
                 content={
-                  <div className="text-left">
-                    <p className="text-caption-2-bold text-teal-500">
-                      팀원 수동 배정
-                    </p>
-                    <p className="text-caption-2-regular text-teal-gray-600">
-                      매칭 차수나 마감 기한과 관계없이 팀원을 언제든 추가하거나
-                      해제할 수 있습니다.
-                      <br />
-                      변경 사항은 즉시 반영됩니다.
-                    </p>
-                  </div>
+                  <>
+                    매칭 차수나 마감 기한과 관계없이 팀원을 언제든 추가하거나
+                    해제할 수 있습니다.
+                    <br />
+                    변경 사항은 즉시 반영됩니다.
+                  </>
                 }
                 size="big"
                 dark={false}
