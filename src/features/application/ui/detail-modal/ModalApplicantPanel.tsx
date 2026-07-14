@@ -198,16 +198,16 @@ export function ModalApplicantPanel({
                 }
               }}
             >
-              <OptionButton value="all" size="sm">
+              <OptionButton value="all" size="xs">
                 전체
               </OptionButton>
-              <OptionButton value="1" size="sm">
+              <OptionButton value="1" size="xs">
                 1차
               </OptionButton>
-              <OptionButton value="2" size="sm">
+              <OptionButton value="2" size="xs">
                 2차
               </OptionButton>
-              <OptionButton value="3" size="sm">
+              <OptionButton value="3" size="xs">
                 3차
               </OptionButton>
             </OptionButtonGroup>
@@ -224,16 +224,16 @@ export function ModalApplicantPanel({
                 }
               }}
             >
-              <OptionButton value="all" size="sm">
+              <OptionButton value="all" size="xs">
                 전체
               </OptionButton>
-              <OptionButton value="pass" size="sm">
+              <OptionButton value="pass" size="xs">
                 합격
               </OptionButton>
-              <OptionButton value="fail" size="sm">
+              <OptionButton value="fail" size="xs">
                 불합격
               </OptionButton>
-              <OptionButton value="pending" size="sm">
+              <OptionButton value="pending" size="xs">
                 대기
               </OptionButton>
             </OptionButtonGroup>
