@@ -30,18 +30,24 @@ function TextButtonTestPage() {
             TextButton
           </h1>
           <p className="text-body-2-regular text-teal-gray-500">
-            Figma 정의의 크기, 색상, hover 상태를 확인하는 페이지입니다.
+            Figma 정의의 크기, 색상과 확장한 hover·active 상태를 확인하는
+            페이지입니다.
           </p>
         </header>
 
         <section className="flex flex-col gap-4">
           <h2 className="text-label-1-semibold text-teal-gray-700">16px</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <TextButtonSpecimen label="Neutral / Default">
               <TextButton>텍스트 버튼</TextButton>
             </TextButtonSpecimen>
             <TextButtonSpecimen label="Neutral / Hover">
               <TextButton className="underline underline-offset-3">
+                텍스트 버튼
+              </TextButton>
+            </TextButtonSpecimen>
+            <TextButtonSpecimen label="Neutral / Active">
+              <TextButton className="text-teal-gray-700 underline underline-offset-3">
                 텍스트 버튼
               </TextButton>
             </TextButtonSpecimen>
@@ -56,17 +62,33 @@ function TextButtonTestPage() {
                 텍스트 버튼
               </TextButton>
             </TextButtonSpecimen>
+            <TextButtonSpecimen label="Primary / Active">
+              <TextButton
+                color="primary"
+                className="text-teal-700 underline underline-offset-3"
+              >
+                텍스트 버튼
+              </TextButton>
+            </TextButtonSpecimen>
           </div>
         </section>
 
         <section className="flex flex-col gap-4">
           <h2 className="text-label-1-semibold text-teal-gray-700">14px</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <TextButtonSpecimen label="Neutral / Default">
               <TextButton size="14">텍스트 버튼</TextButton>
             </TextButtonSpecimen>
             <TextButtonSpecimen label="Neutral / Hover">
               <TextButton size="14" className="underline underline-offset-3">
+                텍스트 버튼
+              </TextButton>
+            </TextButtonSpecimen>
+            <TextButtonSpecimen label="Neutral / Active">
+              <TextButton
+                size="14"
+                className="text-teal-gray-900 underline underline-offset-3"
+              >
                 텍스트 버튼
               </TextButton>
             </TextButtonSpecimen>
