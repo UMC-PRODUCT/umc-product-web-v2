@@ -15,7 +15,7 @@ describe("TextButton", () => {
       "leading-6",
       "text-teal-gray-500",
       "hover:underline",
-      "hover:underline-offset-4",
+      "hover:underline-offset-3",
     )
   })
 
