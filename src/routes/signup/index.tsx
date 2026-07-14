@@ -594,7 +594,7 @@ function SignUpPage() {
 
               <TextButton
                 onClick={() => navigate({ to: "/login" })}
-                className="text-body-1-regular text-teal-gray-500 hover:decoration-teal-gray-500 px-1 py-0.5 text-center"
+                color="neutral"
               >
                 {currentStep === "EMAIL" ? "이미 계정이 있어요" : "로그인으로"}
               </TextButton>
