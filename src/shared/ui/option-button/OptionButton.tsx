@@ -86,11 +86,13 @@ export function OptionButton({
 
   if (isSegmented && _segmentedInfo) {
     const { isFirst, isLast, gapLeft } = _segmentedInfo
-    const sz = size ?? "sm"
+    const resolvedSize = size ?? "sm"
 
-    const radiusFull = sz === "xs" ? "rounded-[6px]" : "rounded-[8px]"
-    const radiusLeft = sz === "xs" ? "rounded-l-[6px]" : "rounded-l-[8px]"
-    const radiusRight = sz === "xs" ? "rounded-r-[6px]" : "rounded-r-[8px]"
+    const radiusFull = resolvedSize === "xs" ? "rounded-[6px]" : "rounded-[8px]"
+    const radiusLeft =
+      resolvedSize === "xs" ? "rounded-l-[6px]" : "rounded-l-[8px]"
+    const radiusRight =
+      resolvedSize === "xs" ? "rounded-r-[6px]" : "rounded-r-[8px]"
     const radiusClass =
       isFirst && isLast
         ? radiusFull
@@ -100,19 +102,20 @@ export function OptionButton({
             ? radiusRight
             : "rounded-none"
 
-    const heightClass = sz === "xl" ? "h-12" : sz === "xs" ? "h-7" : "h-9.5"
+    const heightClass =
+      resolvedSize === "xl" ? "h-12" : resolvedSize === "xs" ? "h-7" : "h-9.5"
 
     const selectedClass =
-      sz === "xl"
+      resolvedSize === "xl"
         ? "text-subtitle-1-medium gap-1.5 py-1 pr-7 pl-4.5"
-        : sz === "xs"
+        : resolvedSize === "xs"
           ? "text-label-2-medium gap-0.5 py-1 pr-2.5 pl-1.5"
           : "text-label-1-medium gap-1.5 py-1 pr-5 pl-3"
 
     const unselectedClass =
-      sz === "xl"
+      resolvedSize === "xl"
         ? "text-subtitle-1-medium py-1 px-7 font-normal!"
-        : sz === "xs"
+        : resolvedSize === "xs"
           ? "text-body-2-medium py-1 px-3"
           : "text-body-1-regular py-1 px-5"
 
