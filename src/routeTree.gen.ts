@@ -28,6 +28,7 @@ import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
 import { Route as TestToastRouteImport } from './routes/test/toast'
+import { Route as TestTextButtonRouteImport } from './routes/test/text-button'
 import { Route as TestSocialButtonRouteImport } from './routes/test/social-button'
 import { Route as TestRatingFaceRouteImport } from './routes/test/rating-face'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
@@ -161,6 +162,11 @@ const TestToggleRoute = TestToggleRouteImport.update({
 const TestToastRoute = TestToastRouteImport.update({
   id: '/test/toast',
   path: '/test/toast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestTextButtonRoute = TestTextButtonRouteImport.update({
+  id: '/test/text-button',
+  path: '/test/text-button',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestSocialButtonRoute = TestSocialButtonRouteImport.update({
@@ -403,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
+  '/test/text-button': typeof TestTextButtonRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
+  '/test/text-button': typeof TestTextButtonRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
@@ -520,6 +528,7 @@ export interface FileRoutesById {
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
+  '/test/text-button': typeof TestTextButtonRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
@@ -582,6 +591,7 @@ export interface FileRouteTypes {
     | '/test/question-form'
     | '/test/rating-face'
     | '/test/social-button'
+    | '/test/text-button'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
@@ -639,6 +649,7 @@ export interface FileRouteTypes {
     | '/test/question-form'
     | '/test/rating-face'
     | '/test/social-button'
+    | '/test/text-button'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
@@ -698,6 +709,7 @@ export interface FileRouteTypes {
     | '/test/question-form'
     | '/test/rating-face'
     | '/test/social-button'
+    | '/test/text-button'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
@@ -755,6 +767,7 @@ export interface RootRouteChildren {
   TestQuestionFormRoute: typeof TestQuestionFormRoute
   TestRatingFaceRoute: typeof TestRatingFaceRoute
   TestSocialButtonRoute: typeof TestSocialButtonRoute
+  TestTextButtonRoute: typeof TestTextButtonRoute
   TestToastRoute: typeof TestToastRoute
   TestToggleRoute: typeof TestToggleRoute
   TestToggleInputsRoute: typeof TestToggleInputsRoute
@@ -900,6 +913,13 @@ declare module '@tanstack/react-router' {
       path: '/test/toast'
       fullPath: '/test/toast'
       preLoaderRoute: typeof TestToastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/text-button': {
+      id: '/test/text-button'
+      path: '/test/text-button'
+      fullPath: '/test/text-button'
+      preLoaderRoute: typeof TestTextButtonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/social-button': {
@@ -1313,6 +1333,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestQuestionFormRoute: TestQuestionFormRoute,
   TestRatingFaceRoute: TestRatingFaceRoute,
   TestSocialButtonRoute: TestSocialButtonRoute,
+  TestTextButtonRoute: TestTextButtonRoute,
   TestToastRoute: TestToastRoute,
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
