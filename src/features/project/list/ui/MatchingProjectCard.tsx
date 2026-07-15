@@ -4,7 +4,7 @@ import { isRecruitDone } from "@/entities/project/model/matchingProject"
 import { DEFAULT_MATCHING_PROJECT_MOCK } from "@/entities/project/model/matchingProject.mock"
 import { cn } from "@/shared/lib/utils"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
-import MemberCount from "@/shared/ui/MemberCount"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 
 import type {
@@ -31,7 +31,7 @@ function RecruitRowItem(row: ProjectRecruitRow) {
         <span className="text-subtitle-4-semibold text-teal-gray-700 truncate">
           {part}
         </span>
-        <MemberCount size="xs" current={current} total={total} />
+        <CounterLabel size="xs" current={current} total={total} />
       </div>
       <RecruitStatusChip done={isDone} className="shrink-0" />
     </div>

@@ -4,7 +4,7 @@ import { getProjectMembers } from "@/entities/project/api/matchingProject"
 import { projectKeys } from "@/features/project/new/api"
 import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
-import MemberCount from "@/shared/ui/MemberCount"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 
 import { TeamMemberRow } from "./TeamMemberRow"
 
@@ -79,7 +79,7 @@ export function TeamMemberModal({
                 <div key={group.part} className="flex flex-col gap-2">
                   <div className="flex items-end justify-between">
                     <PartTagChip role={role} />
-                    <MemberCount
+                    <CounterLabel
                       size="xs"
                       current={group.members.length}
                       total={total}
