@@ -28,6 +28,7 @@ import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
 import { Route as TestToastRouteImport } from './routes/test/toast'
+import { Route as TestTextFieldRouteImport } from './routes/test/text-field'
 import { Route as TestTextButtonRouteImport } from './routes/test/text-button'
 import { Route as TestSocialButtonRouteImport } from './routes/test/social-button'
 import { Route as TestRatingFaceRouteImport } from './routes/test/rating-face'
@@ -162,6 +163,11 @@ const TestToggleRoute = TestToggleRouteImport.update({
 const TestToastRoute = TestToastRouteImport.update({
   id: '/test/toast',
   path: '/test/toast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestTextFieldRoute = TestTextFieldRouteImport.update({
+  id: '/test/text-field',
+  path: '/test/text-field',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestTextButtonRoute = TestTextButtonRouteImport.update({
@@ -410,6 +416,7 @@ export interface FileRoutesByFullPath {
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
+  '/test/text-field': typeof TestTextFieldRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
@@ -468,6 +475,7 @@ export interface FileRoutesByTo {
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
+  '/test/text-field': typeof TestTextFieldRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
@@ -529,6 +537,7 @@ export interface FileRoutesById {
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
+  '/test/text-field': typeof TestTextFieldRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
@@ -592,6 +601,7 @@ export interface FileRouteTypes {
     | '/test/rating-face'
     | '/test/social-button'
     | '/test/text-button'
+    | '/test/text-field'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
@@ -650,6 +660,7 @@ export interface FileRouteTypes {
     | '/test/rating-face'
     | '/test/social-button'
     | '/test/text-button'
+    | '/test/text-field'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
@@ -710,6 +721,7 @@ export interface FileRouteTypes {
     | '/test/rating-face'
     | '/test/social-button'
     | '/test/text-button'
+    | '/test/text-field'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
@@ -768,6 +780,7 @@ export interface RootRouteChildren {
   TestRatingFaceRoute: typeof TestRatingFaceRoute
   TestSocialButtonRoute: typeof TestSocialButtonRoute
   TestTextButtonRoute: typeof TestTextButtonRoute
+  TestTextFieldRoute: typeof TestTextFieldRoute
   TestToastRoute: typeof TestToastRoute
   TestToggleRoute: typeof TestToggleRoute
   TestToggleInputsRoute: typeof TestToggleInputsRoute
@@ -913,6 +926,13 @@ declare module '@tanstack/react-router' {
       path: '/test/toast'
       fullPath: '/test/toast'
       preLoaderRoute: typeof TestToastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/text-field': {
+      id: '/test/text-field'
+      path: '/test/text-field'
+      fullPath: '/test/text-field'
+      preLoaderRoute: typeof TestTextFieldRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/text-button': {
@@ -1334,6 +1354,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestRatingFaceRoute: TestRatingFaceRoute,
   TestSocialButtonRoute: TestSocialButtonRoute,
   TestTextButtonRoute: TestTextButtonRoute,
+  TestTextFieldRoute: TestTextFieldRoute,
   TestToastRoute: TestToastRoute,
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
