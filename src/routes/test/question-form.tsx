@@ -2,11 +2,10 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 
 import { FormHeader } from "@/shared/ui/FormHeader"
-import { CheckboxFieldList } from "@/shared/ui/question-field/CheckboxFieldList"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
+import { OptionFieldList } from "@/shared/ui/question-field/OptionFieldList"
 import { QuestionForm } from "@/shared/ui/question-field/QuestionForm"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
-import { RadioFieldList } from "@/shared/ui/question-field/RadioFieldList"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 export const Route = createFileRoute("/test/question-form")({
@@ -81,7 +80,11 @@ function RadioFormSection() {
       onRequiredChange={setRequired}
       onDelete={() => alert("Q4 삭제")}
     >
-      <RadioFieldList options={options} onOptionsChange={setOptions} />
+      <OptionFieldList
+        type="radio"
+        options={options}
+        onOptionsChange={setOptions}
+      />
     </QuestionForm>
   )
 }
@@ -104,7 +107,11 @@ function CheckboxFormSection() {
       onRequiredChange={setRequired}
       onDelete={() => alert("Q5 삭제")}
     >
-      <CheckboxFieldList options={options} onOptionsChange={setOptions} />
+      <OptionFieldList
+        type="checkbox"
+        options={options}
+        onOptionsChange={setOptions}
+      />
     </QuestionForm>
   )
 }
@@ -171,11 +178,11 @@ function QuestionFormTestPage() {
           />
         </Section>
 
-        <Section title="Focus=True — RadioFieldList (옵션 동적 추가)">
+        <Section title="Focus=True — OptionFieldList radio (옵션 동적 추가)">
           <RadioFormSection />
         </Section>
 
-        <Section title="Focus=True — CheckboxFieldList (옵션 동적 추가)">
+        <Section title="Focus=True — OptionFieldList checkbox (옵션 동적 추가)">
           <CheckboxFormSection />
         </Section>
 

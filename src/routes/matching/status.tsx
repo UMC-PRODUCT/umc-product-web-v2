@@ -7,6 +7,7 @@ import {
   isChapterPresident,
   isOperator,
 } from "@/entities/member/model/identity"
+import { type Chapter, CHAPTERS } from "@/entities/organization/model/chapters"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
@@ -16,7 +17,6 @@ import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"
 import { MatchingTableHead } from "@/features/matching/ui/MatchingTableHead"
 import { SectionHeader } from "@/shared/ui/SectionHeader"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 
 export const Route = createFileRoute("/matching/status")({
   beforeLoad: async ({ context, location }) => {

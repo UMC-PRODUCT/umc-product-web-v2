@@ -4,11 +4,12 @@ import { getProjectMembers } from "@/entities/project/api/matchingProject"
 import { projectKeys } from "@/features/project/new/api"
 import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
-import MemberCount from "@/shared/ui/MemberCount"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 
 import { TeamMemberRow } from "./TeamMemberRow"
 
 import type { ProjectRecruitRow } from "@/entities/project/model/matchingProject"
+import type { PartTag } from "@/shared/model/domain"
 
 const PART_LABEL: Record<string, string> = {
   PLAN: "기획",
@@ -72,15 +73,13 @@ export function TeamMemberModal({
               const partLabel = PART_LABEL[group.part] ?? group.part
               const recruitRow = recruitRows.find((r) => r.part === partLabel)
               const total = recruitRow?.total ?? group.members.length
-              const role = group.part.toLowerCase() as Parameters<
-                typeof PartTagChip
-              >[0]["role"]
+              const role = group.part.toLowerCase() as PartTag
 
               return (
                 <div key={group.part} className="flex flex-col gap-2">
                   <div className="flex items-end justify-between">
                     <PartTagChip role={role} />
-                    <MemberCount
+                    <CounterLabel
                       size="xs"
                       current={group.members.length}
                       total={total}

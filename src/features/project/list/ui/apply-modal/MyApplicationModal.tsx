@@ -12,8 +12,8 @@ import { isRecruitDone } from "@/entities/project/model/matchingProject"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { Button } from "@/shared/ui/Button"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { FormHeader } from "@/shared/ui/FormHeader"
-import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
@@ -130,7 +130,7 @@ export function MyApplicationModal({
                       <span className="text-body-2-medium text-teal-gray-700">
                         {row.part}
                       </span>
-                      <MemberCount
+                      <CounterLabel
                         size="sm"
                         current={row.current}
                         total={row.total}
