@@ -113,7 +113,7 @@ export function ToastProvider() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-20 z-9999 flex flex-col items-center"
+      className="pointer-events-none fixed inset-x-0 bottom-24 z-9999 flex flex-col items-center"
       aria-live="polite"
       aria-label="알림 목록"
     >
@@ -147,6 +147,7 @@ export function ToastProvider() {
                 remaining={remainingMap.get(toast.id) ?? toast.duration}
                 isDismissing={dismissingIds.has(toast.id)}
                 onDismiss={() => dismiss(toast.id)}
+                action={toast.action}
               />
             </div>
           </div>

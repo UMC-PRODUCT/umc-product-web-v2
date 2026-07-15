@@ -5,6 +5,8 @@ import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import RubberConeIcon from "@/shared/assets/icon/error/RubberConeIcon"
 import { cn } from "@/shared/lib/utils"
 
+import { type ToastAction } from "./useToastStore"
+
 export const FADE_OUT_DURATION = 300
 
 const toastVariants = cva(
@@ -20,8 +22,8 @@ const toastVariants = cva(
         red: "",
       },
       type: {
-        default: "justify-between shadow-drop-neutral-2",
-        time: "justify-between shadow-drop-neutral-2",
+        default: "justify-between shadow-drop-neutral-1",
+        time: "justify-between shadow-drop-neutral-1",
         notice: "justify-center shadow-drop-neutral-1",
       },
     },
@@ -45,13 +47,18 @@ const iconColorMap = {
 } as const
 
 const textColorMap = {
-  primary: "text-teal-700",
-  red: "text-error-700",
+  primary: { deep: "text-teal-700", weak: "text-teal-600" },
+  red: { deep: "text-error-700", weak: "text-error-600" },
 } as const
 
 const countdownColorMap = {
-  primary: "text-teal-600",
+  primary: "text-teal-500",
   red: "text-teal-gray-400",
+} as const
+
+const actionColorMap = {
+  primary: "text-teal-500",
+  red: "text-error-500",
 } as const
 
 interface ToastProps extends VariantProps<typeof toastVariants> {
@@ -59,6 +66,7 @@ interface ToastProps extends VariantProps<typeof toastVariants> {
   remaining: number
   isDismissing: boolean
   onDismiss: () => void
+  action?: ToastAction
 }
 
 export function Toast({
@@ -69,8 +77,18 @@ export function Toast({
   remaining,
   isDismissing,
   onDismiss,
+  action,
 }: ToastProps) {
   const resolvedColor = color ?? "primary"
+  const resolvedVariant = variant ?? "deep"
+
+  const handleAction = () => {
+    try {
+      action?.onClick()
+    } finally {
+      onDismiss()
+    }
+  }
 
   return (
     <div
@@ -93,7 +111,7 @@ export function Toast({
           <span
             className={cn(
               "text-center wrap-break-word whitespace-pre-line",
-              textColorMap[resolvedColor],
+              textColorMap[resolvedColor][resolvedVariant],
             )}
           >
             {message}
@@ -117,13 +135,24 @@ export function Toast({
             <span
               className={cn(
                 "wrap-break-word whitespace-pre-line",
-                textColorMap[resolvedColor],
+                textColorMap[resolvedColor][resolvedVariant],
               )}
             >
               {message}
             </span>
           </div>
-          {type === "time" ? (
+          {action ? (
+            <button
+              type="button"
+              onClick={handleAction}
+              className={cn(
+                "shrink-0 underline",
+                actionColorMap[resolvedColor],
+              )}
+            >
+              {action.label}
+            </button>
+          ) : type === "time" ? (
             <span
               className={cn(
                 "text-label-1-medium",
@@ -139,7 +168,7 @@ export function Toast({
               className="text-teal-gray-400 flex items-center justify-center"
               aria-label="토스트 닫기"
             >
-              <SvgCloseIcon width={20} height={20} />
+              <SvgCloseIcon width={24} height={24} />
             </button>
           )}
         </>
