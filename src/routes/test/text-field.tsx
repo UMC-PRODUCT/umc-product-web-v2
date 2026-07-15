@@ -32,7 +32,6 @@ function TextFieldTestPage() {
   const [checks, setChecks] = useState<string[]>(["옵션 1"])
   const [checksMd, setChecksMd] = useState<string[]>([])
   const [radioLg, setRadioLg] = useState("옵션 1")
-  const [radioMd, setRadioMd] = useState("")
 
   const toggleCheck = (
     list: string[],
@@ -92,20 +91,6 @@ function TextFieldTestPage() {
                 key={opt}
                 checked={radioLg === opt}
                 onChange={() => setRadioLg(opt)}
-              >
-                {opt}
-              </RadioList>
-            ))}
-          </div>
-        </Section>
-        <Section title="Radio List — Md">
-          <div className={OPTION_LIST_CLASS}>
-            {OPTIONS.map((opt) => (
-              <RadioList
-                key={opt}
-                size="md"
-                checked={radioMd === opt}
-                onChange={() => setRadioMd(opt)}
               >
                 {opt}
               </RadioList>
