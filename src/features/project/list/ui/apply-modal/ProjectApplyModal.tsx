@@ -30,6 +30,7 @@ import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { FormHeader } from "@/shared/ui/FormHeader"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
+import { OPTION_LIST_CLASS } from "@/shared/ui/input/optionList"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
 import { Modal } from "@/shared/ui/Modal"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
@@ -74,8 +75,6 @@ const FILE_ACCEPT = ".pdf,.docx,.zip"
 const FILE_ALLOWED_LABEL = "PDF, DOCX, ZIP"
 const PORTFOLIO_ALLOWED_LABEL = "PDF"
 
-const OPTION_LIST_CLASS =
-  "border-teal-gray-150 flex flex-col gap-0.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] p-1"
 const COMMON_SECTION_ID = "common"
 
 function extractUploadErrorMessage(

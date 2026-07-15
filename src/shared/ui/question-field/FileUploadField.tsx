@@ -7,6 +7,7 @@ import type { ComponentProps } from "react"
 interface FileUploadFieldProps extends Omit<ComponentProps<"div">, "children"> {
   fileName?: string | null
   placeholder?: string
+  size?: "lg" | "md"
   onUpload: () => void
   onDelete: () => void
   error?: string
@@ -15,6 +16,7 @@ interface FileUploadFieldProps extends Omit<ComponentProps<"div">, "children"> {
 export function FileUploadField({
   fileName = null,
   placeholder = "파일을 업로드해주세요.",
+  size = "lg",
   onUpload,
   onDelete,
   error,
@@ -27,7 +29,8 @@ export function FileUploadField({
     <div className="flex w-full flex-col gap-1">
       <div
         className={cn(
-          "border-teal-gray-150 flex h-15 w-full min-w-0 items-center justify-between gap-1.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] py-4 pr-4 pl-5",
+          "border-teal-gray-150 flex w-full min-w-0 items-center justify-between gap-1.5 rounded-[12px] border bg-white",
+          size === "md" ? "h-13.5 py-2.5 pr-3 pl-4" : "h-15 py-4 pr-4 pl-5",
           error && "border-error-500",
           className,
         )}
@@ -35,7 +38,12 @@ export function FileUploadField({
       >
         {isEmpty ? (
           <>
-            <span className="text-body-1-regular text-teal-gray-400 flex-1 truncate">
+            <span
+              className={cn(
+                "text-teal-gray-400 flex-1 truncate",
+                size === "md" ? "text-body-2-medium" : "text-body-1-regular",
+              )}
+            >
               {placeholder}
             </span>
             <Button
@@ -51,7 +59,12 @@ export function FileUploadField({
           <>
             <div className="flex flex-1 items-center gap-2 overflow-hidden">
               <FileClip className="text-teal-gray-700 h-5 w-5 shrink-0" />
-              <span className="text-body-1-medium truncate text-teal-600">
+              <span
+                className={cn(
+                  "truncate text-teal-600",
+                  size === "md" ? "text-body-2-medium" : "text-body-1-medium",
+                )}
+              >
                 {fileName}
               </span>
             </div>
