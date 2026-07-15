@@ -189,6 +189,7 @@ export function ModalFormPanel({
                   <OptionButton
                     value="pass"
                     disabled={statusDisabled}
+                    size="xs"
                     className="h-7.5 w-20 gap-0.5 font-normal!"
                   >
                     합격
@@ -196,6 +197,7 @@ export function ModalFormPanel({
                   <OptionButton
                     value="fail"
                     disabled={statusDisabled}
+                    size="xs"
                     className="h-7.5 w-20 gap-0.5 font-normal!"
                   >
                     불합격
@@ -204,6 +206,7 @@ export function ModalFormPanel({
                     <OptionButton
                       value="pending"
                       disabled={statusDisabled}
+                      size="xs"
                       className="h-7.5 w-20 gap-0.5 font-normal!"
                     >
                       대기
