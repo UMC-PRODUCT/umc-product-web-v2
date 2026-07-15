@@ -52,6 +52,31 @@ function TooltipTestPage() {
                 </div>
               )),
             )}
+            <div className="flex flex-col items-center gap-2">
+              <Tooltip
+                label="라벨"
+                content={
+                  <>
+                    사용자에게 정보를 안내 할 Tooltip Message
+                    <br />
+                    여러줄 가능
+                  </>
+                }
+                size="big"
+                dark={false}
+                side={side}
+              >
+                <button
+                  type="button"
+                  className="bg-teal-gray-100 text-teal-gray-700 text-label-2-medium cursor-pointer rounded-[6px] px-3 py-1.5"
+                >
+                  hover
+                </button>
+              </Tooltip>
+              <span className="text-caption-2-regular text-teal-gray-400">
+                big / light / label
+              </span>
+            </div>
           </div>
         </section>
       ))}

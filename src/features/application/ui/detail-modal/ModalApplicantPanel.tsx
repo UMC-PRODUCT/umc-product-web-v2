@@ -120,30 +120,23 @@ export function ModalApplicantPanel({
           {/* 액션 버튼 */}
           <div className="flex items-center gap-2.5">
             <Tooltip
+              label={
+                currentRound != null ? "지원자 배정 관리 Sheet" : "지원자 배정"
+              }
               content={
                 currentRound != null ? (
-                  <div className="text-left">
-                    <p className="text-caption-2-bold text-teal-500">
-                      지원자 배정 관리 Sheet
-                    </p>
-                    <p className="text-caption-2-regular text-teal-gray-600">
-                      합격/불합격 결과는 각 매칭 차수 종료 시 자동 확정됩니다.
-                      <br />각 차수 마감 전까지만 철회 가능하며, 이후에는 변경할
-                      수 없습니다.
-                    </p>
-                  </div>
+                  <>
+                    합격/불합격 결과는 각 매칭 차수 종료 시 자동 확정됩니다.
+                    <br />각 차수 마감 전까지만 철회 가능하며, 이후에는 변경할
+                    수 없습니다.
+                  </>
                 ) : (
-                  <div className="text-left">
-                    <p className="text-caption-2-bold text-teal-500">
-                      지원자 배정
-                    </p>
-                    <p className="text-caption-2-regular text-teal-gray-600">
-                      매칭 차수나 마감 기한과 관계없이 언제든 상태를 변경할 수
-                      있습니다.
-                      <br />
-                      변경 사항은 즉시 반영됩니다.
-                    </p>
-                  </div>
+                  <>
+                    매칭 차수나 마감 기한과 관계없이 언제든 상태를 변경할 수
+                    있습니다.
+                    <br />
+                    변경 사항은 즉시 반영됩니다.
+                  </>
                 )
               }
               size="big"
