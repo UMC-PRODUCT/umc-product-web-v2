@@ -436,7 +436,7 @@ export function MatchingResultRow({
             const optimisticBlock: MatchingBlockData = {
               type: "filled" as const,
               name: challenger.nickname,
-              tagVariant: "random" as RoundNumberTagVariant,
+              tagVariant: "random",
               memberId: String(challenger.id),
               part: assignTarget.part,
             }

@@ -17,12 +17,12 @@ const sizeStyles: Record<CounterLabelSize, { number: string; slash: string }> =
       slash: "w-1.25 text-right text-caption-2-regular",
     },
     sm: {
-      number: "min-w-[0.5625rem] text-center text-body-2-medium",
-      slash: "w-[0.3125rem] text-right text-body-2-medium",
+      number: "min-w-2.25 text-center text-body-2-medium",
+      slash: "w-1.25 text-right text-body-2-medium",
     },
     md: {
-      number: "min-w-[0.625rem] text-right text-body-1-medium",
-      slash: "w-[0.3125rem] text-right text-body-1-medium",
+      number: "min-w-2.5 text-right text-body-1-medium",
+      slash: "w-1.25 text-right text-body-1-medium",
     },
   }
 
