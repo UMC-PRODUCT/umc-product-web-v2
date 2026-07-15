@@ -6,7 +6,7 @@ import React from "react"
 
 import { cn } from "../lib/utils"
 
-type MemberCountSize = "xs" | "sm" | "md"
+type MemberCountSize = "xs" | "sm" | "md" | "lg"
 
 interface MemberCountProps {
   current?: number
@@ -22,11 +22,15 @@ const sizeStyles: Record<MemberCountSize, { number: string; slash: string }> = {
   },
   sm: {
     number: "min-w-[0.5625rem] text-center text-body-2-medium",
-    slash: "w-[0.3125rem] text-right text-body-2-medium",
+    slash: "w-[0.3125rem] text-right text-body-2-regular",
   },
   md: {
     number: "min-w-[0.625rem] text-right text-body-1-medium",
-    slash: "w-[0.3125rem] text-right text-body-1-medium",
+    slash: "w-[0.3125rem] text-right text-body-1-regular",
+  },
+  lg: {
+    number: "min-w-2.5 text-right text-subtitle-1-medium",
+    slash: "w-[0.3125rem] text-right text-subtitle-1-medium font-normal!",
   },
 }
 

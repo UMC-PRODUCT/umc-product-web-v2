@@ -34,6 +34,7 @@ import { Route as TestRatingFaceRouteImport } from './routes/test/rating-face'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
 import { Route as TestProjectImageCropRouteImport } from './routes/test/project-image-crop'
 import { Route as TestOptionButtonRouteImport } from './routes/test/option-button'
+import { Route as TestMemberCountRouteImport } from './routes/test/member-count'
 import { Route as TestMatchingProjectsRouteImport } from './routes/test/matching-projects'
 import { Route as TestInputBoxRouteImport } from './routes/test/input-box'
 import { Route as TestIconRouteImport } from './routes/test/icon'
@@ -192,6 +193,11 @@ const TestProjectImageCropRoute = TestProjectImageCropRouteImport.update({
 const TestOptionButtonRoute = TestOptionButtonRouteImport.update({
   id: '/test/option-button',
   path: '/test/option-button',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestMemberCountRoute = TestMemberCountRouteImport.update({
+  id: '/test/member-count',
+  path: '/test/member-count',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestMatchingProjectsRoute = TestMatchingProjectsRouteImport.update({
@@ -404,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
   '/test/matching-projects': typeof TestMatchingProjectsRoute
+  '/test/member-count': typeof TestMemberCountRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
@@ -462,6 +469,7 @@ export interface FileRoutesByTo {
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
   '/test/matching-projects': typeof TestMatchingProjectsRoute
+  '/test/member-count': typeof TestMemberCountRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
@@ -523,6 +531,7 @@ export interface FileRoutesById {
   '/test/icon': typeof TestIconRoute
   '/test/input-box': typeof TestInputBoxRoute
   '/test/matching-projects': typeof TestMatchingProjectsRoute
+  '/test/member-count': typeof TestMemberCountRoute
   '/test/option-button': typeof TestOptionButtonRoute
   '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
@@ -586,6 +595,7 @@ export interface FileRouteTypes {
     | '/test/icon'
     | '/test/input-box'
     | '/test/matching-projects'
+    | '/test/member-count'
     | '/test/option-button'
     | '/test/project-image-crop'
     | '/test/question-form'
@@ -644,6 +654,7 @@ export interface FileRouteTypes {
     | '/test/icon'
     | '/test/input-box'
     | '/test/matching-projects'
+    | '/test/member-count'
     | '/test/option-button'
     | '/test/project-image-crop'
     | '/test/question-form'
@@ -704,6 +715,7 @@ export interface FileRouteTypes {
     | '/test/icon'
     | '/test/input-box'
     | '/test/matching-projects'
+    | '/test/member-count'
     | '/test/option-button'
     | '/test/project-image-crop'
     | '/test/question-form'
@@ -762,6 +774,7 @@ export interface RootRouteChildren {
   TestIconRoute: typeof TestIconRoute
   TestInputBoxRoute: typeof TestInputBoxRoute
   TestMatchingProjectsRoute: typeof TestMatchingProjectsRoute
+  TestMemberCountRoute: typeof TestMemberCountRoute
   TestOptionButtonRoute: typeof TestOptionButtonRoute
   TestProjectImageCropRoute: typeof TestProjectImageCropRoute
   TestQuestionFormRoute: typeof TestQuestionFormRoute
@@ -955,6 +968,13 @@ declare module '@tanstack/react-router' {
       path: '/test/option-button'
       fullPath: '/test/option-button'
       preLoaderRoute: typeof TestOptionButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/member-count': {
+      id: '/test/member-count'
+      path: '/test/member-count'
+      fullPath: '/test/member-count'
+      preLoaderRoute: typeof TestMemberCountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/matching-projects': {
@@ -1328,6 +1348,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestIconRoute: TestIconRoute,
   TestInputBoxRoute: TestInputBoxRoute,
   TestMatchingProjectsRoute: TestMatchingProjectsRoute,
+  TestMemberCountRoute: TestMemberCountRoute,
   TestOptionButtonRoute: TestOptionButtonRoute,
   TestProjectImageCropRoute: TestProjectImageCropRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
