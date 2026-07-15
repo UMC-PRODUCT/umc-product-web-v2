@@ -3,7 +3,6 @@ import { SideBarMenuTitle } from "./SideBarMenuTitle"
 import type { ComponentType, SVGProps } from "react"
 
 interface SideBarMenuProps {
-  id: string
   title: string
   icon: ComponentType<SVGProps<SVGSVGElement>>
   isActive: boolean
@@ -11,7 +10,6 @@ interface SideBarMenuProps {
 }
 
 export function SideBarMenu({
-  id,
   title,
   icon,
   isActive,
@@ -20,13 +18,7 @@ export function SideBarMenu({
   return (
     <div className="flex w-42 flex-col">
       <SideBarMenuTitle title={title} icon={icon} isActive={isActive} />
-      <div
-        id={`sidebar-menu-${id}`}
-        role="region"
-        className="flex flex-col gap-1 py-0.5"
-      >
-        {children}
-      </div>
+      <div className="flex flex-col gap-1 py-0.5">{children}</div>
     </div>
   )
 }

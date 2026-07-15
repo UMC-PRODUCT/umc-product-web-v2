@@ -53,7 +53,6 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
           {visibleSections.map(({ id, title, icon, menus }) => (
             <SideBarMenu
               key={id}
-              id={id}
               title={title}
               icon={icon}
               isActive={activeSectionId === id}
