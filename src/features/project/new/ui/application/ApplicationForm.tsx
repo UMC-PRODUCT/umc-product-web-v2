@@ -352,7 +352,7 @@ export const ApplicationForm = forwardRef<
           </div>
         ))}
 
-        <div className="bp1:mb-21 mb-14 flex flex-col gap-1">
+        <div className="mb-21 flex flex-col gap-1">
           <p className="text-body-2-regular text-teal-gray-500 whitespace-pre-wrap">
             {`* 지원자의 파트에 따라 해당하는 섹션의 질문만 노출됩니다.\n* 개발(FE/BE) 섹션의 문항은 추후 기획-개발자 매칭 전 수정이 가능합니다.`}
           </p>

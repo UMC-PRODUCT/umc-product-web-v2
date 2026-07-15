@@ -62,7 +62,7 @@ export function ChallengerRecordDetail({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="bg-teal-gray-50 grid grid-cols-2 gap-x-6 gap-y-3 rounded-[12px] px-5 py-4 sm:grid-cols-4">
+      <div className="bg-teal-gray-50 grid grid-cols-4 gap-x-6 gap-y-3 rounded-[12px] px-5 py-4">
         <InfoItem label="이름" value={`${data.nickname}/${data.name}`} />
         <InfoItem label="기수" value={`${data.gisu}기`} />
         <InfoItem label="파트" value={PART_LABEL[data.part]} />

@@ -67,12 +67,12 @@ export default function Footer({ variant = "light" }: FooterProps) {
   return (
     <footer
       className={cn(
-        "max-bp1:px-9 max-bp1:py-10 flex flex-col items-center gap-2.5 self-stretch py-16 pr-14 pl-15",
+        "flex flex-col items-center gap-2.5 self-stretch py-16 pr-14 pl-15",
         s.bg,
       )}
     >
       <div className="flex flex-col items-start gap-6 self-stretch">
-        <div className="flex w-full justify-between gap-4 max-[930px]:flex-col">
+        <div className="flex w-full justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
             <UmcLogoFilled
               variant={s.logoFilledVariant}
@@ -84,7 +84,7 @@ export default function Footer({ variant = "light" }: FooterProps) {
           </div>
           <div
             className={cn(
-              "flex flex-col items-center justify-center gap-2 pt-1 whitespace-nowrap max-[930px]:items-start",
+              "flex flex-col items-center justify-center gap-2 pt-1 whitespace-nowrap",
               s.primary,
             )}
           >
@@ -144,13 +144,13 @@ export default function Footer({ variant = "light" }: FooterProps) {
                     |
                   </span>
                 </dt>
-                <dd className="flex gap-2.25 max-[930px]:flex-col max-[930px]:gap-1">
+                <dd className="flex gap-2.25">
                   <div className="text-body-3-regular flex shrink-0 flex-wrap gap-x-2.5 gap-y-0.5 tracking-[-0.02em]">
                     {members.group_1.map((item) => (
                       <span key={item}>{item}</span>
                     ))}
                   </div>
-                  <div className="max-bp1:flex-col flex gap-1.5">
+                  <div className="flex gap-1.5">
                     {members.group_2 && (
                       <div className="text-body-3-regular flex shrink-0 flex-wrap gap-x-2.5 gap-y-0.5 tracking-[-0.02em]">
                         {members.group_2.map((item) => (
@@ -174,7 +174,7 @@ export default function Footer({ variant = "light" }: FooterProps) {
 
         <nav
           aria-label="앱 다운로드 및 소셜 미디어"
-          className="max-bp1:flex-col max-bp1:items-center flex w-full flex-wrap items-center gap-x-6 gap-y-3"
+          className="flex w-full flex-wrap items-center gap-x-6 gap-y-3"
         >
           <div className="flex items-center gap-1.75">
             <UmcLogo className={cn("h-3 w-auto", s.logoColor)} />

@@ -139,7 +139,7 @@ export function MatchingProjectsListPage({
           onClick={() => setOpenFilterId(null)}
         />
       )}
-      <div className="border-teal-gray-100 bp1:rounded-[12px] bp1:border bp1:px-6 bp1:pt-8 bp1:pb-10 bp2:max-w-288 bp2:px-8.5 relative z-30 flex h-full w-full min-w-0 flex-col gap-5 bg-white px-4 pt-6 pb-8">
+      <div className="border-teal-gray-100 relative z-30 flex h-full w-full min-w-0 flex-col gap-5 rounded-[12px] border bg-white px-6 pt-8 pb-10">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 목록
@@ -149,16 +149,12 @@ export function MatchingProjectsListPage({
           </span>
         </div>
 
-        <div className="bp2:flex-row bp2:items-start bp2:justify-between relative z-30 mb-3 flex min-w-0 flex-col gap-3 self-stretch">
-          <ProjectSearchField
-            value={searchQuery}
-            onChange={setSearchQuery}
-            className="bp2:w-[28.5rem]"
-          />
+        <div className="relative z-30 mb-3 flex min-w-0 flex-col gap-3 self-stretch">
+          <ProjectSearchField value={searchQuery} onChange={setSearchQuery} />
           <div
             ref={filterAreaRef}
             className={cn(
-              "scrollbar-none bp2:w-auto bp2:overflow-visible bp2:pb-0 flex w-full min-w-0 items-center gap-2 pb-1",
+              "scrollbar-none flex w-full min-w-0 items-center gap-2 pb-1",
               openFilterId ? "overflow-visible" : "overflow-x-auto",
             )}
           >
@@ -213,7 +209,7 @@ export function MatchingProjectsListPage({
 
         <div
           className={cn(
-            "bp1:grid-cols-2 bp2:grid-cols-3 grid min-w-0 grid-cols-1 gap-5",
+            "grid min-w-0 grid-cols-2 gap-5",
             openFilterId && "pointer-events-none",
           )}
         >

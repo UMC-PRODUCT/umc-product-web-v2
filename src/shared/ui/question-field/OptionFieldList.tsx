@@ -5,7 +5,7 @@ import { cn } from "@/shared/lib/utils"
 type OptionMarkerType = "checkbox" | "radio"
 
 const MARKER_SHAPE: Record<OptionMarkerType, string> = {
-  checkbox: "rounded-[5px] md:rounded-[6px]",
+  checkbox: "rounded-[6px]",
   radio: "rounded-full",
 }
 
@@ -14,7 +14,7 @@ function OptionMarker({ type }: { type: OptionMarkerType }) {
     <span
       aria-hidden
       className={cn(
-        "border-teal-gray-300 inline-flex size-4 shrink-0 items-center justify-center border-[1.5px] bg-white md:size-5",
+        "border-teal-gray-300 inline-flex size-5 shrink-0 items-center justify-center border-[1.5px] bg-white",
         MARKER_SHAPE[type],
       )}
     />

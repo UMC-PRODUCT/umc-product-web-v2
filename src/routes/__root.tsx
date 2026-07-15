@@ -32,7 +32,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
   return (
-    <div className="bg-teal-gray-50 h-full min-h-screen max-w-full min-w-fit">
+    <div className="bg-teal-gray-50 h-full min-h-screen min-w-[1440px]">
       <HeadContent />
       <AnalyticsProvider />
       <Outlet />

@@ -47,7 +47,7 @@ export function LookupRecordForm() {
       noValidate
       className="flex w-full flex-col gap-5"
     >
-      <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-end">
+      <div className="flex w-full flex-row items-end gap-2">
         <div className="flex flex-1 flex-col gap-1.5">
           <label
             htmlFor="lookup-code"
@@ -89,14 +89,14 @@ export function LookupRecordForm() {
           size="m"
           disabled={!isCodeValid}
           isLoading={mutation.isPending}
-          className="sm:self-start"
+          className="self-start"
         >
           조회
         </Button>
       </div>
 
       {result && (
-        <div className="border-teal-gray-100 bg-teal-gray-50 grid w-full grid-cols-2 gap-x-6 gap-y-3 rounded-[12px] border px-6 py-5 sm:grid-cols-3">
+        <div className="border-teal-gray-100 bg-teal-gray-50 grid w-full grid-cols-3 gap-x-6 gap-y-3 rounded-[12px] border px-6 py-5">
           <Field label="기수" value={`${result.gisu}기`} />
           <Field label="지부" value={result.chapterName} />
           <Field label="학교" value={result.schoolName} />

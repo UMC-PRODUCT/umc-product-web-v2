@@ -538,11 +538,11 @@ export const BasicInfoForm = forwardRef<
     <form
       noValidate
       onSubmit={handleFormSubmit}
-      className="bp1:px-4 bp2:gap-14 flex flex-col justify-start gap-10 px-0 pt-4"
+      className="flex flex-col justify-start gap-10 px-4 pt-4"
     >
       <div className="flex flex-col gap-4">
         <SectionHeader index={1} title="프로젝트 카드" />
-        <div className="flex min-w-0 flex-col items-start gap-6 xl:flex-row xl:items-start">
+        <div className="flex min-w-0 flex-row items-start gap-6">
           <ProjectCardForm
             nickname={displayNickname}
             name={displayName}
@@ -557,7 +557,7 @@ export const BasicInfoForm = forwardRef<
             thumbnailUrl={uploaded.thumbnailUrl ?? undefined}
             logoUrl={uploaded.logoUrl ?? undefined}
           />
-          <div className="flex w-4/5 max-w-full min-w-0 flex-col gap-2 xl:w-78 xl:shrink-0">
+          <div className="flex w-78 max-w-full min-w-0 shrink-0 flex-col gap-2">
             <Dropdown<string>
               id="pm1-select"
               value={pm1Member?.id}

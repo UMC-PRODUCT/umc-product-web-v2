@@ -102,7 +102,7 @@ export function MatchingProjectCard({
   return (
     <div
       className={cn(
-        "bp2:max-w-[21.75rem] flex w-full min-w-0 flex-col items-center justify-end transition-[padding] duration-200 ease-out",
+        "flex w-full min-w-0 flex-col items-center justify-end transition-[padding] duration-200 ease-out",
         forcedHover && "pt-0 pb-1",
         interactiveHover && "group pt-1 pb-0 hover:pt-0 hover:pb-1",
       )}

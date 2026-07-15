@@ -39,10 +39,10 @@ function HeaderTestPage() {
       <div className="flex w-full">
         <SideBar activePathname={activePathname} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="bp2:px-8.5 bp2:pt-14.5 px-4 pt-6">
+          <div className="px-4 pt-6">
             <MatchingSegmentRegion activePathname={activePathname} />
           </div>
-          <div className="bp2:px-8.5 bp2:pt-8 flex min-w-0 flex-1 flex-col px-4 pt-6">
+          <div className="flex min-w-0 flex-1 flex-col px-4 pt-6">
             <section className="border-teal-gray-100 flex flex-col gap-4 rounded-lg border bg-white p-6">
               <div>
                 <h1 className="text-heading-6-semibold text-teal-gray-900">

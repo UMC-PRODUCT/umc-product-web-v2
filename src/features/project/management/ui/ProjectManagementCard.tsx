@@ -56,7 +56,7 @@ export function ProjectManagementCard({
   return (
     <>
       <div
-        className="border-teal-gray-100 [&:hover:not(:has(button:hover))]:bg-teal-gray-100 shadow-drop-neutral-2 bp1:p-4 bp2:flex-row bp2:items-center bp2:gap-7 bp2:py-2.5 bp2:pr-5 bp2:pl-2.5 flex w-full max-w-[56.25rem] min-w-0 cursor-pointer flex-col gap-4 rounded-2xl border bg-white p-3 transition-colors"
+        className="border-teal-gray-100 [&:hover:not(:has(button:hover))]:bg-teal-gray-100 shadow-drop-neutral-2 flex w-full max-w-[56.25rem] min-w-0 cursor-pointer flex-col gap-4 rounded-2xl border bg-white p-4 transition-colors"
         role="button"
         tabIndex={0}
         onClick={openDetailModal}
@@ -64,21 +64,21 @@ export function ProjectManagementCard({
           if (e.key === "Enter" || e.key === " ") openDetailModal()
         }}
       >
-        <div className="bg-teal-gray-200 bp2:h-[10.5625rem] bp2:w-[clamp(13rem,28vw,20rem)] flex aspect-[320/169] w-full shrink-0 overflow-hidden rounded-[0.625rem]">
+        <div className="bg-teal-gray-200 flex aspect-[320/169] w-full shrink-0 overflow-hidden rounded-[0.625rem]">
           <ProjectThumbnail
             src={cover?.src}
             alt={cover?.alt ?? `${data.title} 대표 이미지`}
           />
         </div>
 
-        <div className="bp2:self-start bp2:pt-[9px] flex min-w-0 flex-1 flex-col items-stretch gap-4">
+        <div className="flex min-w-0 flex-1 flex-col items-stretch gap-4">
           <div className="flex min-w-0 flex-col items-start gap-2 self-stretch">
             <div className="flex min-w-0 items-start justify-between gap-3 self-stretch">
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
                 <div className="shrink-0">
                   <ProjectLogo src={logoSrc ?? undefined} size={30} />
                 </div>
-                <span className="text-heading-7-semibold text-teal-gray-900 bp1:line-clamp-1 line-clamp-2 min-w-0">
+                <span className="text-heading-7-semibold text-teal-gray-900 line-clamp-1 min-w-0">
                   {data.title}
                 </span>
                 <ProjectStatusChip status={data.status} className="shrink-0" />
@@ -110,9 +110,9 @@ export function ProjectManagementCard({
               return (
                 <div
                   key={row.part}
-                  className="bp2:gap-3 flex min-w-0 items-center justify-between gap-2 self-stretch"
+                  className="flex min-w-0 items-center justify-between gap-2 self-stretch"
                 >
-                  <div className="bp2:w-[7.3125rem] bp2:flex-none bp2:shrink-0 flex min-w-0 flex-1 items-center justify-between gap-2">
+                  <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
                     <span className="text-body-2-medium text-teal-gray-700 truncate">
                       {row.part}
                     </span>

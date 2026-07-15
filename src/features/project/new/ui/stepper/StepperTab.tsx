@@ -31,7 +31,7 @@ export function StepperTab({
       tabIndex={isSelected ? 0 : -1}
       onClick={onClick}
       className={cn(
-        "bp1:justify-start bp1:gap-2 bp1:pr-5 bp1:pl-3 relative flex h-full w-full items-center justify-center gap-1.5 rounded-[12px] px-2 py-1",
+        "relative flex h-full w-full items-center justify-start gap-2 rounded-[12px] py-1 pr-5 pl-3",
         disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
       )}
     >

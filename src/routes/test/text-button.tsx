@@ -23,7 +23,7 @@ function TextButtonSpecimen({
 
 function TextButtonTestPage() {
   return (
-    <main className="bg-teal-gray-50 bp1:p-10 min-h-screen w-full p-6">
+    <main className="bg-teal-gray-50 min-h-screen w-full p-10">
       <div className="mx-auto flex w-full max-w-240 flex-col gap-10">
         <header className="flex flex-col gap-2">
           <h1 className="text-heading-6-semibold text-teal-gray-900">
@@ -37,7 +37,7 @@ function TextButtonTestPage() {
 
         <section className="flex flex-col gap-4">
           <h2 className="text-label-1-semibold text-teal-gray-700">16px</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-3 gap-4">
             <TextButtonSpecimen label="Neutral / Default">
               <TextButton>텍스트 버튼</TextButton>
             </TextButtonSpecimen>
@@ -75,7 +75,7 @@ function TextButtonTestPage() {
 
         <section className="flex flex-col gap-4">
           <h2 className="text-label-1-semibold text-teal-gray-700">14px</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-4">
             <TextButtonSpecimen label="Neutral / Default">
               <TextButton size="14">텍스트 버튼</TextButton>
             </TextButtonSpecimen>
