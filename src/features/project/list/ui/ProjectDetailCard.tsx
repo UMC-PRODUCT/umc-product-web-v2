@@ -85,10 +85,10 @@ function ProjectDetailCardSkeleton() {
   return (
     <div className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-135 min-w-0 flex-col items-start overflow-x-hidden overflow-y-auto rounded-2xl bg-white">
       <div className="bg-teal-gray-200 aspect-[540/286] w-full shrink-0 animate-pulse" />
-      <div className="bp1:p-5 flex w-full flex-col items-start p-4">
+      <div className="flex w-full flex-col items-start p-5">
         <div className="flex w-full flex-col items-start gap-6">
           <div className="flex w-full flex-col items-start gap-2.5">
-            <div className="bp1:flex-row bp1:items-center bp1:justify-between bp1:gap-4 flex w-full flex-col items-start gap-2.5">
+            <div className="flex w-full flex-row items-center justify-between gap-4">
               <div className="bg-teal-gray-150 h-6 w-full max-w-52 animate-pulse rounded-md" />
               <div className="bg-teal-gray-150 h-4 w-32 animate-pulse rounded-md" />
             </div>
@@ -103,8 +103,8 @@ function ProjectDetailCardSkeleton() {
             ))}
           </div>
         </div>
-        <div className="bp1:mt-8.5 bp1:flex-row bp1:items-start mt-6 flex w-full flex-col items-stretch gap-2.5">
-          <div className="bg-teal-gray-150 bp1:w-11 h-11 w-full animate-pulse rounded-xl" />
+        <div className="mt-8.5 flex w-full flex-row items-start gap-2.5">
+          <div className="bg-teal-gray-150 h-11 w-11 animate-pulse rounded-xl" />
           <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
           <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
         </div>
@@ -465,24 +465,24 @@ export function ProjectDetailCard({
           />
         </div>
 
-        <div className="bp1:p-5 flex w-full flex-col items-start p-4">
+        <div className="flex w-full flex-col items-start p-5">
           <div className="flex w-full flex-col items-start gap-6">
             <div className="flex w-full flex-col items-start gap-2.5">
-              <div className="bp1:flex-row bp1:items-center bp1:justify-between bp1:gap-4 flex w-full min-w-0 flex-col items-start gap-2.5">
+              <div className="flex w-full min-w-0 flex-row items-center justify-between gap-4">
                 {showLogo ? (
-                  <div className="bp1:w-auto flex w-full min-w-0 items-center gap-2">
+                  <div className="flex w-auto min-w-0 items-center gap-2">
                     <ProjectLogo src={data.logoImage?.src} />
-                    <h2 className="text-heading-6-semibold text-teal-gray-900 bp1:line-clamp-1 bp1:w-60 line-clamp-2 w-full min-w-0">
+                    <h2 className="text-heading-6-semibold text-teal-gray-900 line-clamp-1 w-60 min-w-0">
                       {data.title}
                     </h2>
                   </div>
                 ) : (
-                  <h2 className="text-heading-6-semibold text-teal-gray-900 bp1:line-clamp-1 bp1:w-60 line-clamp-2 w-full min-w-0">
+                  <h2 className="text-heading-6-semibold text-teal-gray-900 line-clamp-1 w-60 min-w-0">
                     {data.title}
                   </h2>
                 )}
 
-                <p className="text-body-2-regular text-teal-gray-500 bp1:w-auto bp1:shrink-0 bp1:text-right line-clamp-1 w-full text-left">
+                <p className="text-body-2-regular text-teal-gray-500 line-clamp-1 w-auto shrink-0 text-right">
                   {data.authorSchoolLine}
                 </p>
               </div>
@@ -517,7 +517,7 @@ export function ProjectDetailCard({
             </div>
           </div>
 
-          <div className="bp1:mt-8.5 scrollbar-none mt-6 flex w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1">
+          <div className="scrollbar-none mt-8.5 flex w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1">
             <TeamMemberButton
               variant="weak"
               className="w-auto"
