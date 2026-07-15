@@ -30,6 +30,7 @@ export function RadioList({
       type="button"
       role="radio"
       aria-checked={checked}
+      aria-disabled={disabled || undefined}
       disabled={disabled}
       onClick={() => {
         if (!checked) {

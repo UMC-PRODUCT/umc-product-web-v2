@@ -39,6 +39,7 @@ describe("RadioList", () => {
     fireEvent.click(radio)
 
     expect(radio).toBeDisabled()
+    expect(radio).toHaveAttribute("aria-disabled", "true")
     expect(screen.getByText("Radio button")).toHaveClass(
       "text-body-1-regular",
       "text-teal-gray-400",
