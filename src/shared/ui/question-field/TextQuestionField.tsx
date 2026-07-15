@@ -11,6 +11,7 @@ interface TextQuestionFieldProps {
   placeholder?: string
   maxLength?: number
   showCounter?: boolean
+  size?: "lg" | "md"
   error?: string
   className?: string
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
@@ -23,6 +24,7 @@ export function TextQuestionField({
   placeholder = "답변을 작성하세요.",
   maxLength = 200,
   showCounter = true,
+  size = "lg",
   error,
   className,
   onKeyDown,
@@ -50,6 +52,7 @@ export function TextQuestionField({
     <div className="flex w-full flex-col gap-1">
       <QuestionFieldBox
         state={state}
+        size={size}
         className={cn("w-full min-w-0", className)}
       >
         <textarea
@@ -63,7 +66,8 @@ export function TextQuestionField({
           onBlur={() => setFocused(false)}
           onKeyDown={onKeyDown}
           className={cn(
-            "text-body-1-regular text-teal-gray-900 placeholder:text-teal-gray-400",
+            size === "md" ? "text-body-2-medium" : "text-body-1-regular",
+            "text-teal-gray-900 placeholder:text-teal-gray-400",
             "w-full resize-none overflow-hidden border-none bg-transparent outline-none",
           )}
         />

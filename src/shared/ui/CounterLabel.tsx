@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority"
 
 import { cn } from "@/shared/lib/utils"
 
-const textVariants = cva("text-teal-gray-500", {
+const textVariants = cva("text-teal-gray-300", {
   variants: {
     size: {
       xs: "min-w-2 text-center text-caption-2-regular",
