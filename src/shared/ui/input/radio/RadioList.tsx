@@ -31,7 +31,11 @@ export function RadioList({
       role="radio"
       aria-checked={checked}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        if (!checked) {
+          onChange(true)
+        }
+      }}
       className={cn(
         "inline-flex items-center gap-3 rounded-[8px] p-2 transition-colors disabled:cursor-not-allowed",
         checked ? "bg-teal-50" : "enabled:hover:bg-teal-gray-50 bg-white",
