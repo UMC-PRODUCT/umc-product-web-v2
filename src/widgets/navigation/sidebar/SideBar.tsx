@@ -1,8 +1,7 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 
 import { useViewModeStore } from "@/entities/member/view-mode"
-import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
 import { cn } from "@/shared/lib/utils"
 
@@ -24,23 +23,8 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
   const mode = useViewModeStore((s) => s.mode)
   const prevModeRef = useRef(mode)
 
-  const [manualOpenSectionId, setManualOpenSectionId] = useState<string>(() => {
-    const active = resolveNavigationFromPathname(pathname, visibleSections)
-    const initialSectionId =
-      active?.section.id ?? visibleSections[0]?.id ?? SIDEBAR_ITEMS[0]?.id
-
-    return initialSectionId ?? ""
-  })
   const active = resolveNavigationFromPathname(pathname, visibleSections)
   const activeSectionId = active?.section.id
-
-  useEffect(() => {
-    const ids = new Set(visibleSections.map((section) => section.id))
-    setManualOpenSectionId((prev) => {
-      if (ids.has(prev)) return prev
-      return activeSectionId ?? visibleSections[0]?.id ?? ""
-    })
-  }, [visibleSections, activeSectionId])
 
   useEffect(() => {
     if (prevModeRef.current === mode) return
@@ -73,11 +57,6 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
               title={title}
               icon={icon}
               isActive={activeSectionId === id}
-              isOpen={activeSectionId === id || manualOpenSectionId === id}
-              onToggle={() => {
-                if (activeSectionId === id) return
-                setManualOpenSectionId((prev) => (prev === id ? "" : id))
-              }}
             >
               {menus.map((menu) => (
                 <SideBarMenuItem
