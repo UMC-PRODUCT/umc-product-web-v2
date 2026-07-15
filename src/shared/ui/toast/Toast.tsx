@@ -81,8 +81,11 @@ export function Toast({
   const resolvedVariant = variant ?? "deep"
 
   const handleAction = () => {
-    action?.onClick()
-    onDismiss()
+    try {
+      action?.onClick()
+    } finally {
+      onDismiss()
+    }
   }
 
   return (
