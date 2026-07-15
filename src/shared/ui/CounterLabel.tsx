@@ -1,6 +1,6 @@
 import { cn } from "@/shared/lib/utils"
 
-type CounterLabelSize = "xs" | "sm" | "md"
+type CounterLabelSize = "xs" | "sm" | "md" | "lg"
 
 interface CounterLabelProps {
   current: number
@@ -18,11 +18,15 @@ const sizeStyles: Record<CounterLabelSize, { number: string; slash: string }> =
     },
     sm: {
       number: "min-w-2.25 text-center text-body-2-medium",
-      slash: "w-1.25 text-right text-body-2-medium",
+      slash: "w-1.25 text-right text-body-2-regular",
     },
     md: {
       number: "min-w-2.5 text-right text-body-1-medium",
-      slash: "w-1.25 text-right text-body-1-medium",
+      slash: "w-1.25 text-right text-body-1-regular",
+    },
+    lg: {
+      number: "min-w-2.5 text-right text-subtitle-1-medium",
+      slash: "w-1.25 text-right text-subtitle-1-medium font-normal!",
     },
   }
 
