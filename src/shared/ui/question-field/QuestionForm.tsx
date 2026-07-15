@@ -69,7 +69,7 @@ export function QuestionForm({
   return (
     <article
       className={cn(
-        "bp1:px-6 bp1:pb-6 relative flex w-full flex-col items-center gap-2.5 px-4 pb-5",
+        "relative flex w-full flex-col items-center gap-2.5 px-6 pb-6",
         focused ? "" : "mt-4 pt-4",
         className,
       )}
@@ -100,7 +100,7 @@ export function QuestionForm({
       <div className="flex w-full flex-col items-end gap-4">
         {focused ? (
           <div className="flex w-full items-start gap-2">
-            <span className="text-heading-7-semibold bp1:w-7 w-6 shrink-0 text-teal-600">
+            <span className="text-heading-7-semibold w-7 shrink-0 text-teal-600">
               {index}
             </span>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -155,7 +155,7 @@ export function QuestionForm({
           />
         )}
 
-        <div className="bp1:px-1.5 flex w-full min-w-0 flex-col items-start gap-2.5 px-0">
+        <div className="flex w-full min-w-0 flex-col items-start gap-2.5 px-1.5">
           {children}
         </div>
 

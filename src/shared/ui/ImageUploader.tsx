@@ -9,7 +9,7 @@ type ImageUploaderVariant = "thumbnail" | "logo"
 
 const variantSize: Record<ImageUploaderVariant, string> = {
   thumbnail: "aspect-[540/286] w-full",
-  logo: "aspect-square w-40 max-w-full bp1:w-50",
+  logo: "aspect-square w-50 max-w-full",
 }
 
 const variantRound: Record<ImageUploaderVariant, string> = {

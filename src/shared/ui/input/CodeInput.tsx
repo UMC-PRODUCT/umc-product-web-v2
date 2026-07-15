@@ -12,7 +12,7 @@ import {
 import { cn } from "@/shared/lib/utils"
 
 const cellVariants = cva(
-  "aspect-square w-13 max-[419px]:w-12 rounded-2xl max-[419px]:rounded-xl border px-2.5 text-center text-heading-4-semibold max-[419px]:text-heading-5-semibold caret-teal-600 outline-none transition-colors",
+  "aspect-square w-13 rounded-2xl border px-2.5 text-center text-heading-4-semibold caret-teal-600 outline-none transition-colors",
   {
     variants: {
       state: {
@@ -150,11 +150,7 @@ export const CodeInput = forwardRef<HTMLDivElement, CodeInputProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          "flex gap-2.5 max-[419px]:gap-2",
-          shaking && "animate-shake",
-          className,
-        )}
+        className={cn("flex gap-2.5", shaking && "animate-shake", className)}
         onAnimationEnd={() => setShaking(false)}
       >
         {Array.from({ length }).map((_, index) => (

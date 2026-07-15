@@ -61,7 +61,7 @@ export function GeneratedCodeCard({ record }: GeneratedCodeCardProps) {
       <div className="text-display-2-medium tracking-[0.4em] text-teal-700 tabular-nums">
         {record.code}
       </div>
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3">
+      <dl className="grid grid-cols-3 gap-x-6 gap-y-2">
         <Field label="기수" value={`${record.gisu}기`} />
         <Field label="지부" value={record.chapterName} />
         <Field label="학교" value={record.schoolName} />

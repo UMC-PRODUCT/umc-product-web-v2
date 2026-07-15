@@ -47,7 +47,7 @@ export function CheckboxFieldList({
         >
           <span
             aria-hidden
-            className="border-teal-gray-300 inline-flex size-4 shrink-0 items-center justify-center rounded-[5px] border-[1.5px] bg-white md:size-5 md:rounded-[6px]"
+            className="border-teal-gray-300 inline-flex size-5 shrink-0 items-center justify-center rounded-[6px] border-[1.5px] bg-white"
           />
           <input
             type="text"

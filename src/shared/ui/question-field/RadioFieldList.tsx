@@ -47,7 +47,7 @@ export function RadioFieldList({
         >
           <span
             aria-hidden
-            className="border-teal-gray-300 inline-flex size-4 shrink-0 items-center justify-center rounded-full border-[1.5px] bg-white md:size-5"
+            className="border-teal-gray-300 inline-flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] bg-white"
           />
           <input
             type="text"

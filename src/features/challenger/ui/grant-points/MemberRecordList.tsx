@@ -53,7 +53,7 @@ export function MemberRecordList({
   }
 
   return (
-    <ul className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+    <ul className="grid w-full grid-cols-2 gap-3">
       {records.map((record, index) => {
         const isSelected = selectedChallengerId === record.challengerId
         const totalPoints = toNumberSafe(record.totalPoints)
