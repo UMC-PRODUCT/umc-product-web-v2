@@ -27,10 +27,10 @@ import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangle
 import { activeGisuQueryOptions } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { FormHeader } from "@/shared/ui/FormHeader"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
-import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import {
@@ -732,7 +732,7 @@ export const ProjectApplyModal = forwardRef<
                         <span className="text-body-2-medium text-teal-gray-700">
                           {row.part}
                         </span>
-                        <MemberCount
+                        <CounterLabel
                           size="sm"
                           current={row.current}
                           total={row.total}

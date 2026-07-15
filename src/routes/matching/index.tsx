@@ -17,10 +17,13 @@ import {
   getAllChapters,
   getAllGisu,
 } from "@/entities/organization/api/organization"
-import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   type Chapter,
   CHAPTERS,
+  isChapter,
+} from "@/entities/organization/model/chapters"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
+import {
   NoticeCardList,
   NoticeDetailContent,
   type NoticeItem,
@@ -52,12 +55,6 @@ type PendingNotice = {
   title: string
   chip?: string
   mode: "publish" | "edit"
-}
-
-function isChapter(value: unknown): value is Chapter {
-  return (
-    typeof value === "string" && CHAPTERS.some((chapter) => chapter === value)
-  )
 }
 
 function parsePage(value: unknown): number {

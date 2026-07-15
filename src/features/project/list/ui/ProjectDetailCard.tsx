@@ -33,7 +33,7 @@ import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { Button } from "@/shared/ui/Button"
 import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
-import MemberCount from "@/shared/ui/MemberCount"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
@@ -504,7 +504,7 @@ export function ProjectDetailCard({
                       <span className="text-body-2-medium text-teal-gray-700 truncate">
                         {row.part}
                       </span>
-                      <MemberCount
+                      <CounterLabel
                         size="sm"
                         current={row.current}
                         total={row.total}

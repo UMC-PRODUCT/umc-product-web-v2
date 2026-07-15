@@ -17,7 +17,8 @@ import { AssignmentModal } from "./AssignmentModal"
 import { MatchingBlock } from "./MatchingBlock"
 
 import type { Part } from "@/shared/model/domain"
-import type { NumberTagVariant } from "@/shared/ui/NumberTag"
+
+import type { RoundNumberTagVariant } from "./RoundNumberTag"
 
 // 역할 행 라벨 -> 서버 Part enum 변환
 function roleToPart(
@@ -35,7 +36,7 @@ type BlockType = "round1" | "filled" | "none" | "blocked"
 export interface MatchingBlockData {
   type: BlockType
   name?: string
-  tagVariant?: NumberTagVariant
+  tagVariant?: RoundNumberTagVariant
   memberId?: string
   part?: Part
 }
@@ -435,7 +436,7 @@ export function MatchingResultRow({
             const optimisticBlock: MatchingBlockData = {
               type: "filled" as const,
               name: challenger.nickname,
-              tagVariant: "random" as NumberTagVariant,
+              tagVariant: "random",
               memberId: String(challenger.id),
               part: assignTarget.part,
             }
