@@ -5,6 +5,8 @@ import SvgCloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import RubberConeIcon from "@/shared/assets/icon/error/RubberConeIcon"
 import { cn } from "@/shared/lib/utils"
 
+import { type ToastAction } from "./useToastStore"
+
 export const FADE_OUT_DURATION = 300
 
 const toastVariants = cva(
@@ -64,7 +66,7 @@ interface ToastProps extends VariantProps<typeof toastVariants> {
   remaining: number
   isDismissing: boolean
   onDismiss: () => void
-  action?: { label: string; onClick: () => void }
+  action?: ToastAction
 }
 
 export function Toast({
