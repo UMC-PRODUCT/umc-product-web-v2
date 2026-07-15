@@ -180,19 +180,21 @@ export function ProfileDropdown({
           {/* TODO: 기수 관리 페이지로 연결 */}
           <div className="flex flex-col gap-1 px-1.5">
             {canManageMembers && (
-              <TextButton className="text-body-2-medium text-teal-gray-700 hover:decoration-teal-gray-700 h-6 w-15">
+              <TextButton size="14" className="h-6 w-15">
                 기수 관리
               </TextButton>
             )}
             <TextButton
               onClick={() => navigate({ to: "/settings" })}
-              className="text-body-2-medium text-teal-gray-700 hover:decoration-teal-gray-700 h-6 w-15"
+              size="14"
+              className="h-6 w-15"
             >
               계정 설정
             </TextButton>
             <TextButton
               onClick={() => void handleLogout()}
-              className="text-body-2-medium text-error-500 hover:decoration-error-500 h-6 w-15"
+              size="14"
+              className="text-error-500 hover:decoration-error-500 h-6 w-15"
             >
               로그아웃
             </TextButton>
