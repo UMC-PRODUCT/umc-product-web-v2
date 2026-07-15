@@ -1,24 +1,56 @@
+import { cva, type VariantProps } from "class-variance-authority"
+
 import { cn } from "@/shared/lib/utils"
 
-type TextButtonProps = React.ComponentPropsWithoutRef<"button">
+const textButtonVariants = cva(
+  "inline-flex items-center justify-center px-1 py-0.5 text-center transition-colors hover:underline hover:underline-offset-3 active:rounded-sm active:underline active:underline-offset-3 disabled:pointer-events-none disabled:no-underline disabled:opacity-50",
+  {
+    variants: {
+      color: {
+        primary:
+          "text-teal-500 hover:decoration-teal-500 active:bg-teal-100 active:text-teal-700",
+        neutral:
+          "text-teal-gray-500 hover:decoration-teal-gray-500 active:bg-teal-gray-200 active:text-teal-gray-700",
+      },
+      size: {
+        "16": "text-[16px] leading-6 font-normal tracking-normal",
+        "14": "text-body-2-medium",
+      },
+    },
+    compoundVariants: [
+      {
+        color: "neutral",
+        size: "14",
+        className:
+          "text-teal-gray-700 hover:decoration-teal-gray-700 active:text-teal-gray-900",
+      },
+    ],
+    defaultVariants: {
+      color: "neutral",
+      size: "16",
+    },
+  },
+)
+
+interface TextButtonProps
+  extends
+    Omit<React.ComponentPropsWithoutRef<"button">, "color">,
+    VariantProps<typeof textButtonVariants> {}
 
 export function TextButton({
   className,
   disabled,
   children,
   type = "button",
+  color,
+  size,
   ...props
 }: TextButtonProps) {
   return (
     <button
       type={type}
       disabled={disabled}
-      className={cn(
-        "text-left transition-colors",
-        !disabled && "hover:underline",
-        disabled && "opacity-50",
-        className,
-      )}
+      className={cn(textButtonVariants({ color, size }), className)}
       {...props}
     >
       {children}

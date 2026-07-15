@@ -151,7 +151,7 @@ function SocialLoginPage() {
 
               <TextButton
                 onClick={() => navigate({ to: "/signup" })}
-                className="text-body-1-regular flex items-center justify-center px-1 py-0.5 text-teal-500"
+                color="primary"
               >
                 회원가입
               </TextButton>

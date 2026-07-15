@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import PersonButtonIcon from "@/shared/assets/icon/people/PersonButtonIcon"
 import { Button } from "@/shared/ui/Button"
+import { IconButton } from "@/shared/ui/button/IconButton"
 
 export const Route = createFileRoute("/test/button")({
   component: ButtonTestPage,
@@ -243,6 +245,25 @@ function ButtonTestPage() {
               })),
             )}
           />
+        </Section>
+
+        <Section title="Icon Only (IconButton)">
+          <div className="flex items-center gap-4">
+            <IconButton variant="fill" aria-label="예시 아이콘 버튼">
+              <PersonButtonIcon className="text-teal-gray-50 h-6 w-6" />
+            </IconButton>
+            <IconButton variant="weak" aria-label="예시 아이콘 버튼">
+              <PersonButtonIcon className="text-teal-gray-600 h-6 w-6" />
+            </IconButton>
+          </div>
+        </Section>
+
+        <Section title="Setting (= XL / Neutral / Weak)">
+          <div>
+            <Button size="xl" color="neutral" variant="weak">
+              버튼
+            </Button>
+          </div>
         </Section>
       </div>
     </main>
