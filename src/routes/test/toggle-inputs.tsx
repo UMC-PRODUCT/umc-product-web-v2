@@ -4,7 +4,6 @@ import { useState } from "react"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
-import { AddRadioOptionButton } from "@/shared/ui/input/radio/AddRadioOptionButton"
 import { Radio } from "@/shared/ui/input/radio/Radio"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
 
@@ -224,9 +223,6 @@ function ToggleInputsTestPage() {
             </Cell>
             <Cell label="Disabled">
               <RadioListRow disabled />
-            </Cell>
-            <Cell label="Add">
-              <AddRadioOptionButton onAdd={() => {}} />
             </Cell>
           </div>
         </Section>

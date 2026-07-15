@@ -1,24 +1,44 @@
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { cn } from "@/shared/lib/utils"
 
-import { AddOptionButton } from "../input/checkbox/AddOptionButton"
+// 체크박스(사각)/라디오(원형)는 마커 모양만 다르고 옵션 목록 편집 동작은 동일하다.
+type OptionMarkerType = "checkbox" | "radio"
 
-interface CheckboxFieldListOption {
+const MARKER_SHAPE: Record<OptionMarkerType, string> = {
+  checkbox: "rounded-[5px] md:rounded-[6px]",
+  radio: "rounded-full",
+}
+
+function OptionMarker({ type }: { type: OptionMarkerType }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "border-teal-gray-300 inline-flex size-4 shrink-0 items-center justify-center border-[1.5px] bg-white md:size-5",
+        MARKER_SHAPE[type],
+      )}
+    />
+  )
+}
+
+interface OptionFieldListOption {
   content: string
   optionId?: number
 }
 
-interface CheckboxFieldListProps {
-  options: CheckboxFieldListOption[]
-  onOptionsChange: (options: CheckboxFieldListOption[]) => void
+interface OptionFieldListProps {
+  type: OptionMarkerType
+  options: OptionFieldListOption[]
+  onOptionsChange: (options: OptionFieldListOption[]) => void
   className?: string
 }
 
-export function CheckboxFieldList({
+export function OptionFieldList({
+  type,
   options,
   onOptionsChange,
   className,
-}: CheckboxFieldListProps) {
+}: OptionFieldListProps) {
   function updateOption(index: number, value: string) {
     onOptionsChange(
       options.map((opt, i) => (i === index ? { ...opt, content: value } : opt)),
@@ -45,10 +65,7 @@ export function CheckboxFieldList({
           key={i}
           className="hover:bg-teal-gray-50 flex w-full cursor-text items-center gap-3 rounded-[8px] p-2 transition-colors"
         >
-          <span
-            aria-hidden
-            className="border-teal-gray-300 inline-flex size-4 shrink-0 items-center justify-center rounded-[5px] border-[1.5px] bg-white md:size-5 md:rounded-[6px]"
-          />
+          <OptionMarker type={type} />
           <input
             type="text"
             value={opt.content}
@@ -66,7 +83,16 @@ export function CheckboxFieldList({
           </button>
         </label>
       ))}
-      <AddOptionButton onAdd={addOption} />
+      <button
+        type="button"
+        onClick={addOption}
+        className="hover:bg-teal-gray-50 inline-flex items-center gap-3 rounded-[8px] p-2 transition-colors"
+      >
+        <OptionMarker type={type} />
+        <span className="text-body-2-regular text-teal-gray-400">
+          옵션 추가
+        </span>
+      </button>
     </div>
   )
 }
