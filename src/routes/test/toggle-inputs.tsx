@@ -214,7 +214,7 @@ function ToggleInputsTestPage() {
               <RadioListRow />
             </Cell>
             <Cell label="Hover">
-              <RadioListRow className="bg-teal-gray-50" />
+              <RadioListRow className="bg-teal-gray-50 pointer-events-none" />
             </Cell>
             <Cell label="Selected">
               <RadioListRow defaultChecked />
