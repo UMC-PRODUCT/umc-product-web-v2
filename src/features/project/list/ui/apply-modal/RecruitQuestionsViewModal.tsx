@@ -2,11 +2,11 @@ import { useMemo } from "react"
 
 import { isRecruitDone } from "@/entities/project/model/matchingProject"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { FormHeader } from "@/shared/ui/FormHeader"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
 import { OPTION_LIST_CLASS } from "@/shared/ui/input/optionList"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
-import MemberCount from "@/shared/ui/MemberCount"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import { PortfolioField } from "@/shared/ui/question-field/PortfolioField"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
@@ -70,7 +70,7 @@ export function RecruitQuestionsViewModal({
                       <span className="text-body-2-medium text-teal-gray-700">
                         {row.part}
                       </span>
-                      <MemberCount
+                      <CounterLabel
                         size="sm"
                         current={row.current}
                         total={row.total}

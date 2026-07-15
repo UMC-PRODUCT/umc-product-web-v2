@@ -30,6 +30,52 @@ export type RoleType =
   | "SCHOOL_PART_LEADER"
   | "SCHOOL_ETC_ADMIN"
 
+// 화면 표시용 역할 분류 태그. 서버 RoleType(11종)을 표시 목적으로 축약한 어휘로,
+// RoleType -> RoleTag 변환은 shared/lib/roleTagMapper의 toRoleTag가 담당한다.
+export type RoleTag =
+  | "hq"
+  | "chapter"
+  | "school"
+  | "challenger"
+  | "superadmin"
+  | "product"
+
+export const ROLE_TAG_LABEL: Record<RoleTag, string> = {
+  hq: "중앙 운영진",
+  chapter: "지부장",
+  school: "교내 운영진",
+  challenger: "챌린저",
+  superadmin: "슈퍼 어드민",
+  product: "프로덕트",
+}
+
+// 화면 표시용 파트 분류 태그. 서버 Part enum(대문자)과 달리 프로덕트 전용
+// 파트(pm/mobile-pe/web-pe)를 포함하는 표시 어휘다.
+export type PartTag =
+  | "plan"
+  | "design"
+  | "web"
+  | "ios"
+  | "android"
+  | "springboot"
+  | "nodejs"
+  | "pm"
+  | "mobile-pe"
+  | "web-pe"
+
+export const PART_TAG_LABEL: Record<PartTag, string> = {
+  plan: "PM",
+  design: "Design",
+  web: "Web",
+  ios: "iOS",
+  android: "Android",
+  springboot: "SpringBoot",
+  nodejs: "Node.js",
+  pm: "PM",
+  "mobile-pe": "Mobile PE",
+  "web-pe": "Web PE",
+}
+
 export type PointType =
   | "BEST_WORKBOOK"
   | "WARNING"

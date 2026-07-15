@@ -24,13 +24,35 @@ function Section({
   )
 }
 
-function ControlledCounter() {
-  const [value, setValue] = useState(0)
+function ControlledCounter({
+  label,
+  initialValue = 0,
+  min,
+  max,
+  step,
+  caption,
+}: {
+  label: string
+  initialValue?: number
+  min?: number
+  max?: number
+  step?: number
+  caption?: string
+}) {
+  const [value, setValue] = useState(initialValue)
   return (
     <div className="flex flex-col gap-2">
-      <Counter value={value} onChange={setValue} aria-label="수량" />
+      <Counter
+        value={value}
+        onChange={setValue}
+        min={min}
+        max={max}
+        step={step}
+        aria-label={label}
+      />
       <p className="text-caption-1-regular text-teal-gray-500">
         현재 값: <strong>{value}</strong>
+        {caption ? ` · ${caption}` : ""}
       </p>
     </div>
   )
@@ -45,49 +67,39 @@ function CounterTestPage() {
 
       <div className="flex flex-col gap-10">
         <Section title="기본 (min=0, 초기값=0)">
-          <ControlledCounter />
+          <ControlledCounter label="수량" />
         </Section>
 
         <Section title="min=1, max=5 (범위 제한)">
-          <div className="flex flex-col gap-2">
-            <Counter
-              value={3}
-              onChange={() => {}}
-              min={1}
-              max={5}
-              aria-label="제한된 수량"
-            />
-            <p className="text-caption-1-regular text-teal-gray-500">
-              value=3, min=1, max=5 (고정값 표시용)
-            </p>
-          </div>
+          <ControlledCounter
+            label="제한된 수량"
+            initialValue={3}
+            min={1}
+            max={5}
+            caption="min=1, max=5"
+          />
         </Section>
 
         <Section title="min=0, value=0 (감소 비활성)">
-          <Counter value={0} onChange={() => {}} aria-label="최솟값 상태" />
+          <ControlledCounter
+            label="최솟값 상태"
+            initialValue={0}
+            min={0}
+            caption="0에서 감소 비활성"
+          />
         </Section>
 
         <Section title="max=3, value=3 (증가 비활성)">
-          <Counter
-            value={3}
-            onChange={() => {}}
+          <ControlledCounter
+            label="최댓값 상태"
+            initialValue={3}
             max={3}
-            aria-label="최댓값 상태"
+            caption="3에서 증가 비활성"
           />
         </Section>
 
         <Section title="step=2">
-          <div className="flex flex-col gap-2">
-            <Counter
-              value={0}
-              onChange={() => {}}
-              step={2}
-              aria-label="2씩 증감"
-            />
-            <p className="text-caption-1-regular text-teal-gray-500">
-              2씩 증감 (고정값 표시용)
-            </p>
-          </div>
+          <ControlledCounter label="2씩 증감" initialValue={0} step={2} />
         </Section>
 
         <Section title="disabled">

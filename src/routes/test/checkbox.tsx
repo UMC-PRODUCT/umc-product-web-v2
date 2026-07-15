@@ -3,7 +3,7 @@ import { useState } from "react"
 
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
-import { CheckboxFieldList } from "@/shared/ui/question-field/CheckboxFieldList"
+import { OptionFieldList } from "@/shared/ui/question-field/OptionFieldList"
 
 export const Route = createFileRoute("/test/checkbox")({
   component: CheckboxTestPage,
@@ -81,12 +81,18 @@ function CheckboxListRow({
   )
 }
 
-function CheckboxFieldListSection() {
+function OptionFieldListSection() {
   const [options, setOptions] = useState([
     { content: "옵션 1" },
     { content: "옵션 2" },
   ])
-  return <CheckboxFieldList options={options} onOptionsChange={setOptions} />
+  return (
+    <OptionFieldList
+      type="checkbox"
+      options={options}
+      onOptionsChange={setOptions}
+    />
+  )
 }
 
 function CheckboxTestPage() {
@@ -345,9 +351,9 @@ function CheckboxTestPage() {
           </div>
         </Section>
 
-        <Section title="CheckboxFieldList (옵션 편집)">
+        <Section title="OptionFieldList checkbox (옵션 편집)">
           <div className="w-full max-w-sm">
-            <CheckboxFieldListSection />
+            <OptionFieldListSection />
           </div>
         </Section>
       </div>

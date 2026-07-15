@@ -6,14 +6,8 @@ import {
   isOperator,
 } from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
+import { CHAPTERS, isChapter } from "@/entities/organization/model/chapters"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { type Chapter, CHAPTERS } from "@/features/notice"
-
-function isChapter(value: unknown): value is Chapter {
-  return (
-    typeof value === "string" && (CHAPTERS as readonly string[]).includes(value)
-  )
-}
 
 export const Route = createFileRoute("/")({
   beforeLoad: async ({ context }) => {
