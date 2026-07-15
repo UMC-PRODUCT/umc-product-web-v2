@@ -97,13 +97,13 @@ export function QuestionForm({
         </button>
       )}
 
-      <div className="flex w-full flex-col items-end gap-2.5">
+      <div className="flex w-full flex-col items-end gap-4">
         {focused ? (
-          <div className="flex w-full items-start gap-1.5">
+          <div className="flex w-full items-start gap-2">
             <span className="text-heading-7-semibold bp1:w-7 w-6 shrink-0 text-teal-600">
               {index}
             </span>
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
               <div className="relative">
                 <div
                   aria-hidden
@@ -141,7 +141,7 @@ export function QuestionForm({
                   autoResize(e.target)
                 }}
                 placeholder="설명 (선택 사항)"
-                className="text-body-2-regular text-teal-gray-600 placeholder:text-teal-gray-300 w-full resize-none overflow-hidden bg-transparent outline-none"
+                className="text-body-2-regular text-teal-gray-400 placeholder:text-teal-gray-300 w-full resize-none overflow-hidden bg-transparent outline-none"
               />
             </div>
           </div>
