@@ -26,7 +26,7 @@ const sizeStyles: Record<MemberCountSize, { number: string; slash: string }> = {
   },
   md: {
     number: "min-w-[0.625rem] text-right text-body-1-medium",
-    slash: "w-[0.3125rem] text-right text-body-1-regular",
+    slash: "w-1.25 text-right text-body-1-regular",
   },
   lg: {
     number: "min-w-2.5 text-right text-subtitle-1-medium",
