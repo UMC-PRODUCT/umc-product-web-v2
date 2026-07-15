@@ -30,7 +30,7 @@ const sizeStyles: Record<MemberCountSize, { number: string; slash: string }> = {
   },
   lg: {
     number: "min-w-2.5 text-right text-subtitle-1-medium",
-    slash: "w-[0.3125rem] text-right text-subtitle-1-medium font-normal!",
+    slash: "w-1.25 text-right text-subtitle-1-medium font-normal!",
   },
 }
 
