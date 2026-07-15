@@ -7,6 +7,7 @@ export interface ToastItem {
   variant: "deep" | "weak"
   type: "default" | "time" | "notice"
   duration: number
+  action?: { label: string; onClick: () => void }
 }
 
 type AddToastOptions = Omit<ToastItem, "id">
