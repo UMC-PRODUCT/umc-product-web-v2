@@ -2,11 +2,12 @@ import { cn } from "@/shared/lib/utils"
 
 import { RadioIndicator } from "./RadioIndicator"
 
-import type { ComponentProps } from "react"
+import type { ComponentProps, ReactNode } from "react"
 
 interface RadioListProps extends Omit<ComponentProps<"button">, "onChange"> {
   checked: boolean
   onChange: (checked: boolean) => void
+  trailingIcon?: ReactNode
 }
 
 export function RadioList({
@@ -14,30 +15,49 @@ export function RadioList({
   onChange,
   children,
   className,
+  disabled = false,
+  trailingIcon,
   ...props
 }: RadioListProps) {
+  const labelClass = disabled
+    ? "text-body-1-regular text-teal-gray-400"
+    : checked
+      ? "text-body-1-medium text-teal-600"
+      : "text-body-1-regular text-teal-gray-700"
+
   return (
     <button
       type="button"
       role="radio"
       aria-checked={checked}
-      onClick={() => onChange(!checked)}
+      aria-disabled={disabled || undefined}
+      disabled={disabled}
+      onClick={() => {
+        if (!checked) {
+          onChange(true)
+        }
+      }}
       className={cn(
-        "inline-flex items-center gap-3 rounded-[8px] p-2 transition-colors",
-        checked ? "bg-teal-50" : "hover:bg-teal-gray-50 bg-white",
+        "inline-flex items-center gap-3 rounded-[8px] p-2 transition-colors disabled:cursor-not-allowed",
+        checked ? "bg-teal-50" : "enabled:hover:bg-teal-gray-50 bg-white",
         className,
       )}
       {...props}
     >
-      <RadioIndicator checked={checked} variant="list" />
-      <span
-        className={cn(
-          "text-body-2-regular",
-          checked ? "text-teal-600" : "text-teal-gray-700",
-        )}
-      >
-        {children}
-      </span>
+      <RadioIndicator checked={checked} variant="list" disabled={disabled} />
+      {trailingIcon ? (
+        <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
+          <span className={labelClass}>{children}</span>
+          <span
+            aria-hidden="true"
+            className="size-4 shrink-0 [&>svg]:size-full"
+          >
+            {trailingIcon}
+          </span>
+        </span>
+      ) : (
+        <span className={labelClass}>{children}</span>
+      )}
     </button>
   )
 }

@@ -1,5 +1,10 @@
 import { create } from "zustand"
 
+export interface ToastAction {
+  label: string
+  onClick: () => void
+}
+
 export interface ToastItem {
   id: string
   message: string
@@ -7,6 +12,7 @@ export interface ToastItem {
   variant: "deep" | "weak"
   type: "default" | "time" | "notice"
   duration: number
+  action?: ToastAction
 }
 
 type AddToastOptions = Omit<ToastItem, "id">

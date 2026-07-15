@@ -1,7 +1,6 @@
-import type { RoleType } from "@/shared/model/domain"
-import type { Role } from "@/shared/ui/chip/RoleTagChip"
+import type { RoleTag, RoleType } from "@/shared/model/domain"
 
-const ROLE_MAP: Record<RoleType, Role> = {
+const ROLE_MAP: Record<RoleType, RoleTag> = {
   CHALLENGER: "challenger",
   SUPER_ADMIN: "superadmin",
   CENTRAL_PRESIDENT: "hq",
@@ -15,6 +14,6 @@ const ROLE_MAP: Record<RoleType, Role> = {
   SCHOOL_ETC_ADMIN: "school",
 }
 
-export function toRoleTag(roleType: RoleType): Role {
+export function toRoleTag(roleType: RoleType): RoleTag {
   return ROLE_MAP[roleType]
 }

@@ -8,7 +8,7 @@ import { ProjectStatusChip } from "@/features/project/management/ui/ProjectStatu
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
-import MemberCount from "@/shared/ui/MemberCount"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 
@@ -116,7 +116,7 @@ export function ProjectManagementCard({
                     <span className="text-body-2-medium text-teal-gray-700 truncate">
                       {row.part}
                     </span>
-                    <MemberCount
+                    <CounterLabel
                       size="xs"
                       current={row.current}
                       total={row.total}
