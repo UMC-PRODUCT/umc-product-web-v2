@@ -73,6 +73,58 @@ function ToastTestPage() {
         >
           notice (서비스 공지)
         </button>
+        <button
+          type="button"
+          onClick={() =>
+            addToast({
+              message: "지원이 취소되었습니다.",
+              color: "primary",
+              variant: "deep",
+              type: "default",
+              duration: 6000,
+              action: {
+                label: "실행 취소",
+                onClick: () =>
+                  addToast({
+                    message: "실행을 취소했습니다.",
+                    color: "primary",
+                    variant: "weak",
+                    type: "default",
+                    duration: 2000,
+                  }),
+              },
+            })
+          }
+          className="text-label-1-medium w-fit rounded-[8px] bg-teal-200 px-4 py-2 text-teal-700"
+        >
+          Text Button (primary/deep, 6s)
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            addToast({
+              message: "업로드에 실패했습니다.",
+              color: "red",
+              variant: "deep",
+              type: "default",
+              duration: 6000,
+              action: {
+                label: "다시 시도",
+                onClick: () =>
+                  addToast({
+                    message: "다시 시도합니다.",
+                    color: "red",
+                    variant: "weak",
+                    type: "default",
+                    duration: 2000,
+                  }),
+              },
+            })
+          }
+          className="text-label-1-medium bg-error-200 text-error-700 w-fit rounded-[8px] px-4 py-2"
+        >
+          Text Button (red/deep, 6s)
+        </button>
       </div>
     </main>
   )
