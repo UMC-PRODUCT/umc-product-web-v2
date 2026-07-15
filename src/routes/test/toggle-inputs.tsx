@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
+import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
+import { AddRadioOptionButton } from "@/shared/ui/input/radio/AddRadioOptionButton"
 import { Radio } from "@/shared/ui/input/radio/Radio"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
 
@@ -92,12 +94,28 @@ function ControlledCheckbox({
 
 function RadioListRow({
   defaultChecked = false,
+  disabled = false,
+  trailingIcon = false,
+  className,
 }: {
   defaultChecked?: boolean
+  disabled?: boolean
+  trailingIcon?: boolean
+  className?: string
 }) {
   const [checked, setChecked] = useState(defaultChecked)
   return (
-    <RadioList checked={checked} onChange={setChecked}>
+    <RadioList
+      checked={checked}
+      onChange={setChecked}
+      disabled={disabled}
+      className={className}
+      trailingIcon={
+        trailingIcon ? (
+          <CloseIcon className="text-teal-gray-400 size-4" />
+        ) : undefined
+      }
+    >
       Radio button
     </RadioList>
   )
@@ -190,11 +208,26 @@ function ToggleInputsTestPage() {
           </div>
         </Section>
 
-        <Section title="RadioList">
+        <Section title="RadioList — Figma variants">
           <div className="bg-teal-gray-100 flex flex-col gap-2 rounded-[8px] p-4">
-            <RadioListRow />
-            <RadioListRow />
-            <RadioListRow defaultChecked />
+            <Cell label="Default">
+              <RadioListRow />
+            </Cell>
+            <Cell label="Hover">
+              <RadioListRow className="bg-teal-gray-50" />
+            </Cell>
+            <Cell label="Selected">
+              <RadioListRow defaultChecked />
+            </Cell>
+            <Cell label="Default / icon">
+              <RadioListRow trailingIcon />
+            </Cell>
+            <Cell label="Disabled">
+              <RadioListRow disabled />
+            </Cell>
+            <Cell label="Add">
+              <AddRadioOptionButton onAdd={() => {}} />
+            </Cell>
           </div>
         </Section>
 
