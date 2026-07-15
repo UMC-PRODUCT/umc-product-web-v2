@@ -14,6 +14,7 @@ import {
 } from "@/entities/member/model/identity"
 import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
+import { CHAPTERS } from "@/entities/organization/model/chapters"
 import {
   useAdminPageData,
   useChallengerPageData,
@@ -30,7 +31,6 @@ import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingP
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 export const Route = createFileRoute("/matching/applications")({
