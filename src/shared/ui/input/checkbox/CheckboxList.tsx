@@ -7,11 +7,13 @@ import type { ComponentProps } from "react"
 interface CheckboxListProps extends Omit<ComponentProps<"button">, "onChange"> {
   checked: boolean
   onChange: (checked: boolean) => void
+  size?: "lg" | "md"
 }
 
 export function CheckboxList({
   checked,
   onChange,
+  size = "lg",
   children,
   className,
   ...props
@@ -32,7 +34,7 @@ export function CheckboxList({
       <CheckboxIndicator checked={checked} variant="list" />
       <span
         className={cn(
-          "text-body-2-regular",
+          size === "md" ? "text-body-2-medium" : "text-body-1-regular",
           checked ? "text-teal-600" : "text-teal-gray-700",
         )}
       >
