@@ -1,6 +1,9 @@
 import { cva } from "class-variance-authority"
 
 import { cn } from "@/shared/lib/utils"
+import { PART_TAG_LABEL } from "@/shared/model/domain"
+
+import type { PartTag } from "@/shared/model/domain"
 
 const partTagChipVariants = cva(
   "inline-flex h-6 px-2.5 items-center justify-center rounded-[6px] py-0.5 text-label-2-medium text-teal-gray-800 shadow-drop-neutral-2",
@@ -63,23 +66,8 @@ const partTagChipVariants = cva(
   },
 )
 
-const ROLE_LABEL = {
-  plan: "PM",
-  design: "Design",
-  web: "Web",
-  ios: "iOS",
-  android: "Android",
-  springboot: "SpringBoot",
-  nodejs: "Node.js",
-  pm: "PM",
-  "mobile-pe": "Mobile PE",
-  "web-pe": "Web PE",
-} as const
-
-type Role = keyof typeof ROLE_LABEL
-
 interface PartTagChipProps {
-  role: Role
+  role: PartTag
   type?: "default" | "light"
   className?: string
 }
@@ -91,7 +79,7 @@ export function PartTagChip({
 }: PartTagChipProps) {
   return (
     <span className={cn(partTagChipVariants({ role, type }), className)}>
-      {ROLE_LABEL[role]}
+      {PART_TAG_LABEL[role]}
     </span>
   )
 }

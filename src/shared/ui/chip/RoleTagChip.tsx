@@ -1,6 +1,9 @@
 import { cva } from "class-variance-authority"
 
 import { cn } from "@/shared/lib/utils"
+import { ROLE_TAG_LABEL } from "@/shared/model/domain"
+
+import type { RoleTag } from "@/shared/model/domain"
 
 const roleTagChipVariants = cva(
   "inline-flex items-center justify-center text-center shadow-drop-neutral-2",
@@ -25,19 +28,8 @@ const roleTagChipVariants = cva(
   },
 )
 
-const ROLE_LABEL = {
-  hq: "중앙 운영진",
-  chapter: "지부장",
-  school: "교내 운영진",
-  challenger: "챌린저",
-  superadmin: "슈퍼 어드민",
-  product: "프로덕트",
-} as const
-
-export type Role = keyof typeof ROLE_LABEL
-
 interface RoleTagChipProps {
-  role: Role
+  role: RoleTag
   size?: "default" | "lg"
   className?: string
 }
@@ -49,7 +41,7 @@ export function RoleTagChip({
 }: RoleTagChipProps) {
   return (
     <span className={cn(roleTagChipVariants({ role, size }), className)}>
-      {ROLE_LABEL[role]}
+      {ROLE_TAG_LABEL[role]}
     </span>
   )
 }
