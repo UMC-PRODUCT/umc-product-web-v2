@@ -34,19 +34,27 @@ export type RoleType =
 // RoleType -> RoleTag 변환은 shared/lib/roleTagMapper의 toRoleTag가 담당한다.
 export type RoleTag =
   | "hq"
+  | "central-president"
+  | "central-vice-president"
   | "chapter"
   | "school"
+  | "school-president"
+  | "school-vice-president"
   | "challenger"
   | "superadmin"
   | "product"
 
 export const ROLE_TAG_LABEL: Record<RoleTag, string> = {
   hq: "중앙 운영진",
+  "central-president": "총괄",
+  "central-vice-president": "부총괄",
   chapter: "지부장",
   school: "교내 운영진",
+  "school-president": "교내 회장",
+  "school-vice-president": "교내 부회장",
   challenger: "챌린저",
-  superadmin: "슈퍼 어드민",
-  product: "프로덕트",
+  superadmin: "Admin",
+  product: "Product",
 }
 
 // 화면 표시용 파트 분류 태그. 서버 Part enum(대문자)과 달리 프로덕트 전용
