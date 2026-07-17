@@ -61,9 +61,14 @@ export function ApplicantListPage({
   return (
     <div className="flex w-full max-w-286.5 flex-col">
       <PageLabel
-        breadcrumb={["리크루팅", "평가 관리", EVALUATION_STAGE_LABEL[stage]]}
+        breadcrumb={[
+          { id: "recruiting", label: "리크루팅" },
+          { id: "evaluation-management", label: "평가 관리" },
+          { id: stage, label: EVALUATION_STAGE_LABEL[stage] },
+        ]}
         title={EVALUATION_STAGE_LABEL[stage]}
         description={EVALUATION_STAGE_DESCRIPTION[stage]}
+        className="pl-3"
       />
       <ChapterTabs
         value={filters.chapterTab}
