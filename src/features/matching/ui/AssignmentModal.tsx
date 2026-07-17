@@ -4,10 +4,10 @@ import { useEffect, useMemo, useState } from "react"
 import { searchMembers } from "@/entities/member/api/member"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
-import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
 import { Button } from "@/shared/ui/Button"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { SearchField } from "@/shared/ui/search-field/SearchField"
 import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 import { AssignmentChallengerRow } from "./AssignmentChallengerRow"
@@ -182,19 +182,15 @@ export function AssignmentModal({
 
           {/* 검색바 */}
           <div className="mt-8">
-            <div className="shadow-inner-neutral-2 bg-teal-gray-100 flex h-11 items-center justify-between rounded-xl px-4">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value)
-                  setSelectedId(null)
-                }}
-                placeholder="닉네임 또는 이름으로 검색하세요"
-                className="text-body-2-regular text-teal-gray-900 placeholder:text-teal-gray-400 w-full bg-transparent focus:outline-none"
-              />
-              <SearchIcon className="text-teal-gray-400 h-6 w-6 shrink-0" />
-            </div>
+            <SearchField
+              aria-label="배정할 팀원 검색"
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value)
+                setSelectedId(null)
+              }}
+              placeholder="닉네임 또는 이름으로 검색하세요"
+            />
           </div>
 
           {/* 검색 결과 */}

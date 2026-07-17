@@ -1,4 +1,3 @@
-import { Search } from "lucide-react"
 import { useState } from "react"
 
 import { CHAPTERS, isChapter } from "@/entities/organization/model/chapters"
@@ -8,6 +7,7 @@ import { cn } from "@/shared/lib/utils"
 import { PART_TAG_LABEL } from "@/shared/model/domain"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
+import { SearchField } from "@/shared/ui/search-field/SearchField"
 
 import {
   type ApplicantListFilters,
@@ -121,16 +121,13 @@ export function ApplicantFilterBar({
 
   return (
     <div className={cn("flex items-start justify-between gap-4", className)}>
-      <div className="shadow-inner-neutral-2 bg-teal-gray-100 flex h-11 w-80 shrink-0 items-center gap-2 rounded-xl px-4">
-        <input
-          type="text"
-          placeholder="지원자 명으로 검색하세요"
-          value={filters.search}
-          onChange={(e) => onFiltersChange({ search: e.target.value })}
-          className="text-body-2-regular text-teal-gray-900 placeholder:text-teal-gray-400 min-w-0 flex-1 bg-transparent outline-none"
-        />
-        <Search size={24} className="text-teal-gray-400 shrink-0" />
-      </div>
+      <SearchField
+        aria-label="지원자 검색"
+        placeholder="지원자 명으로 검색하세요"
+        value={filters.search}
+        onChange={(event) => onFiltersChange({ search: event.target.value })}
+        className="w-80 shrink-0"
+      />
       <div className="flex flex-wrap items-center justify-end gap-4">
         <span className="text-body-1-medium text-teal-gray-600 flex items-center gap-1">
           <FilterIcon className="text-teal-gray-600 size-4" />
