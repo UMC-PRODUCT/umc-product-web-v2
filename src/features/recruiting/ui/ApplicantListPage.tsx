@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 
-import RightChevronIcon from "@/shared/assets/icon/chevron/RightChevronIcon"
+import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
 import {
   APPLICANT_LIST_BASE_TIME_MOCK,
@@ -60,28 +60,11 @@ export function ApplicantListPage({
 
   return (
     <div className="flex w-full max-w-286.5 flex-col">
-      <nav aria-label="breadcrumb" className="flex items-center gap-1 pl-3">
-        {["리크루팅", "평가 관리", EVALUATION_STAGE_LABEL[stage]].map(
-          (crumb, index) => (
-            <span key={crumb} className="flex items-center gap-1">
-              {index > 0 && (
-                <RightChevronIcon className="text-teal-gray-400 size-4" />
-              )}
-              <span className="text-body-2-medium text-teal-gray-400">
-                {crumb}
-              </span>
-            </span>
-          ),
-        )}
-      </nav>
-      <div className="mt-6.5 flex flex-col gap-3 pl-3">
-        <h1 className="text-heading-5-semibold text-teal-gray-900">
-          {EVALUATION_STAGE_LABEL[stage]}
-        </h1>
-        <p className="text-body-2-regular text-teal-gray-600">
-          {EVALUATION_STAGE_DESCRIPTION[stage]}
-        </p>
-      </div>
+      <PageLabel
+        breadcrumb={["리크루팅", "평가 관리", EVALUATION_STAGE_LABEL[stage]]}
+        title={EVALUATION_STAGE_LABEL[stage]}
+        description={EVALUATION_STAGE_DESCRIPTION[stage]}
+      />
       <ChapterTabs
         value={filters.chapterTab}
         onValueChange={(chapterTab) =>
