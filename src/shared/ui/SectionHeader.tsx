@@ -1,5 +1,5 @@
 interface SectionHeaderProps {
-  index?: number
+  index: number
   title: string
   level?: 2 | 3 | 4
 }
