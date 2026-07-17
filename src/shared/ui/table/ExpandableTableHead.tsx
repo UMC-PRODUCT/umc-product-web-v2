@@ -47,12 +47,14 @@ export function ExpandableTableHead({
             >
               {expanded ? (
                 <CollapseAllIcon
+                  aria-hidden="true"
                   width={24}
                   height={24}
                   className="text-teal-700"
                 />
               ) : (
                 <ExpandAllIcon
+                  aria-hidden="true"
                   width={24}
                   height={24}
                   className="text-teal-700"
