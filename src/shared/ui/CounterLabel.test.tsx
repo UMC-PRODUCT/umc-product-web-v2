@@ -23,4 +23,20 @@ describe("CounterLabel", () => {
       expect(screen.getByText("10")).toHaveClass(numberClass)
     },
   )
+
+  it("기본 상태에서는 모든 숫자에 기존 중립 색상을 유지한다", () => {
+    render(<CounterLabel current={3} total={10} />)
+
+    expect(screen.getByText("3")).not.toHaveClass("text-teal-500")
+    expect(screen.getByText("/")).not.toHaveClass("text-teal-500")
+    expect(screen.getByText("10")).not.toHaveClass("text-teal-500")
+  })
+
+  it("현재 값 강조 상태에서는 현재 값만 강조한다", () => {
+    render(<CounterLabel current={3} total={10} emphasis="current" />)
+
+    expect(screen.getByText("3")).toHaveClass("text-teal-500")
+    expect(screen.getByText("/")).toHaveClass("text-teal-gray-600")
+    expect(screen.getByText("10")).toHaveClass("text-teal-gray-600")
+  })
 })

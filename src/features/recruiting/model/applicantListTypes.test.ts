@@ -4,6 +4,7 @@ import {
   type ApplicantRow,
   applyApplicantFilters,
   DEFAULT_APPLICANT_LIST_FILTERS,
+  formatAppliedAtParts,
 } from "./applicantListTypes"
 
 function createApplicant(
@@ -72,5 +73,14 @@ describe("applyApplicantFilters 정렬", () => {
       "first",
       "second",
     ])
+  })
+})
+
+describe("formatAppliedAtParts", () => {
+  it("지원 일시를 날짜와 시간으로 분리한다", () => {
+    expect(formatAppliedAtParts("2026-04-22T03:33:00")).toEqual({
+      date: "04/22",
+      time: "03:33",
+    })
   })
 })

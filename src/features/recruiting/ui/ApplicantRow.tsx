@@ -2,10 +2,12 @@ import FilterDropDownIcon from "@/shared/assets/icon/chevron/FilterDropDownIcon"
 import { cn } from "@/shared/lib/utils"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
+import { TimestampLabel } from "@/shared/ui/TimestampLabel"
 
 import {
   type ApplicantRow as ApplicantRowModel,
-  formatAppliedAt,
+  formatAppliedAtParts,
   formatRecruitmentType,
   getStageEvaluation,
 } from "../model/applicantListTypes"
@@ -37,6 +39,7 @@ export function ApplicantRow({
   if (!evaluation) return null
 
   const timeAt = stage === "interview" ? row.interviewAt : row.appliedAt
+  const timestamp = timeAt ? formatAppliedAtParts(timeAt) : null
 
   return (
     <div
@@ -44,17 +47,23 @@ export function ApplicantRow({
       className="border-teal-gray-150/60 hover:bg-teal-gray-50 flex h-17 items-center gap-2.5 border-b bg-white pr-5.5 pl-2.5 transition-colors"
     >
       <div className="flex min-w-0 flex-1 items-center">
-        <span
-          className={cn(
-            "text-body-2-regular gap-1.5 whitespace-nowrap",
-            APPLICANT_COLUMNS.appliedAt,
-          )}
-        >
-          <span className="text-teal-gray-900">
-            {timeAt ? formatAppliedAt(timeAt) : "-"}
+        {timestamp ? (
+          <TimestampLabel
+            date={timestamp.date}
+            time={timestamp.time}
+            action={STAGE_TIME_LABEL[stage]}
+            className={APPLICANT_COLUMNS.appliedAt}
+          />
+        ) : (
+          <span
+            className={cn(
+              "text-body-2-regular text-teal-gray-900",
+              APPLICANT_COLUMNS.appliedAt,
+            )}
+          >
+            -
           </span>
-          <span className="text-teal-gray-600">{STAGE_TIME_LABEL[stage]}</span>
-        </span>
+        )}
         <span className={APPLICANT_COLUMNS.applicant}>
           <span className="text-body-2-medium text-teal-gray-900 truncate">
             {row.applicantName}
@@ -86,17 +95,11 @@ export function ApplicantRow({
         <span className={APPLICANT_COLUMNS.progress}>
           <EvaluationStatusChip progress={evaluation.progress} />
           {stage !== "final" && (
-            <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
-              <span className="text-body-1-medium min-w-2.5 text-center text-teal-500">
-                {evaluation.doneCount}
-              </span>
-              <span className="text-body-1-regular text-teal-gray-600 w-1.25 text-right">
-                /
-              </span>
-              <span className="text-body-1-medium text-teal-gray-600 min-w-2.5 text-center">
-                {evaluation.totalCount}
-              </span>
-            </span>
+            <CounterLabel
+              current={evaluation.doneCount}
+              total={evaluation.totalCount}
+              emphasis="current"
+            />
           )}
         </span>
         <span className={APPLICANT_COLUMNS.result}>

@@ -94,10 +94,13 @@ export function formatRecruitmentType(row: ApplicantRow) {
   return `${row.additionalRound ?? 2}차 추가`
 }
 
-export function formatAppliedAt(appliedAt: string) {
+export function formatAppliedAtParts(appliedAt: string) {
   const date = new Date(appliedAt)
   const pad = (value: number) => String(value).padStart(2, "0")
-  return `${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+  return {
+    date: `${pad(date.getMonth() + 1)}/${pad(date.getDate())}`,
+    time: `${pad(date.getHours())}:${pad(date.getMinutes())}`,
+  }
 }
 
 export function formatBaseTime(date: Date) {

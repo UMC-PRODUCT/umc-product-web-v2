@@ -1,11 +1,13 @@
 import { cn } from "@/shared/lib/utils"
 
 type CounterLabelSize = "xs" | "sm" | "md" | "lg"
+type CounterLabelEmphasis = "none" | "current"
 
 interface CounterLabelProps {
   current: number
   total: number
   size?: CounterLabelSize
+  emphasis?: CounterLabelEmphasis
   className?: string
 }
 
@@ -34,6 +36,7 @@ export function CounterLabel({
   current,
   total,
   size = "md",
+  emphasis = "none",
   className,
 }: CounterLabelProps) {
   const styles = sizeStyles[size]
@@ -45,9 +48,27 @@ export function CounterLabel({
         className,
       )}
     >
-      <span className={styles.number}>{current}</span>
-      <span className={styles.slash}>/</span>
-      <span className={styles.number}>{total}</span>
+      <span
+        className={cn(styles.number, emphasis === "current" && "text-teal-500")}
+      >
+        {current}
+      </span>
+      <span
+        className={cn(
+          styles.slash,
+          emphasis === "current" && "text-teal-gray-600",
+        )}
+      >
+        /
+      </span>
+      <span
+        className={cn(
+          styles.number,
+          emphasis === "current" && "text-teal-gray-600",
+        )}
+      >
+        {total}
+      </span>
     </span>
   )
 }
