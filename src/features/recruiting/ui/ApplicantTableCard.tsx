@@ -126,7 +126,7 @@ export function ApplicantTableCard({
               setOpenDropdown((prev) => (prev === "sort" ? null : "sort"))
             }
             onRequestClose={() => setOpenDropdown(null)}
-            options={[...APPLICANT_SORT_OPTIONS]}
+            options={APPLICANT_SORT_OPTIONS}
             selectedValue={filters.sort}
             selectedLabel={
               APPLICANT_SORT_OPTIONS.find(
@@ -148,7 +148,7 @@ export function ApplicantTableCard({
               setOpenDropdown((prev) => (prev === "order" ? null : "order"))
             }
             onRequestClose={() => setOpenDropdown(null)}
-            options={[...APPLICANT_ORDER_OPTIONS]}
+            options={APPLICANT_ORDER_OPTIONS}
             selectedValue={filters.order === "" ? undefined : filters.order}
             selectedLabel={
               APPLICANT_ORDER_OPTIONS.find(
