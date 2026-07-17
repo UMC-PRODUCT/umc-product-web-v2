@@ -24,8 +24,8 @@ export default function RecruitingSideBar({
   const pathname = activePathname ?? currentPathname
   const activeSectionId = resolveRecruitingSectionId(pathname)
 
-  const [manualOpenSectionId, setManualOpenSectionId] = useState<string>(
-    () => activeSectionId ?? RECRUITING_SIDEBAR_ITEMS[0]?.id ?? "",
+  const [manualOpenSectionId, setManualOpenSectionId] = useState<string>(() =>
+    activeSectionId ? "" : (RECRUITING_SIDEBAR_ITEMS[0]?.id ?? ""),
   )
 
   return (
