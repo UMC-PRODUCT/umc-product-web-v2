@@ -5,6 +5,7 @@ import RightChevronIcon from "@/shared/assets/icon/chevron/RightChevronIcon"
 import {
   APPLICANT_LIST_BASE_TIME_MOCK,
   APPLICANT_LIST_MOCK,
+  RECRUITING_TARGET_GISU_LABEL_MOCK,
 } from "../model/applicantList.mock"
 import {
   type ApplicantListFilters,
@@ -95,7 +96,7 @@ export function ApplicantListPage({
         className="mt-6"
       />
       <h2 className="text-heading-5-semibold mt-6 px-3 text-teal-700">
-        UMC 11기
+        {RECRUITING_TARGET_GISU_LABEL_MOCK}
       </h2>
       <ApplicantTableCard
         rows={filteredRows}

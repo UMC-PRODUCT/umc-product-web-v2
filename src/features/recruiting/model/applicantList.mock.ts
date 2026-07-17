@@ -7,6 +7,8 @@ import type {
 
 export const APPLICANT_LIST_BASE_TIME_MOCK = "26-07-04 02:48"
 
+export const RECRUITING_TARGET_GISU_LABEL_MOCK = "UMC 11기"
+
 const evaluation = (
   progress: EvaluationProgress,
   doneCount: number,
