@@ -1,6 +1,5 @@
-import CollapseAllIcon from "@/shared/assets/icon/expand-collapse/CollapseAllIcon"
-import ExpandAllIcon from "@/shared/assets/icon/expand-collapse/ExpandAllIcon"
 import { cn } from "@/shared/lib/utils"
+import { ExpandableTableHead } from "@/shared/ui/table/ExpandableTableHead"
 
 export const APPLICANT_COLUMNS = {
   appliedAt: "flex min-w-36 flex-1 items-center justify-center px-4",
@@ -36,14 +35,12 @@ export function ApplicantTableHead({
   className,
 }: ApplicantTableHeadProps) {
   return (
-    <div
-      role="row"
-      className={cn(
-        "flex h-10 items-center gap-2.5 rounded-t-xl bg-teal-100 pr-5.5 pl-2.5",
-        className,
-      )}
+    <ExpandableTableHead
+      expanded={hasExpanded}
+      onToggle={onToggleAll}
+      className={cn("gap-2.5", className)}
     >
-      <div className="flex min-w-0 flex-1 items-center" role="rowheader">
+      <div className="flex min-w-0 flex-1 items-center">
         {HEAD_LABELS.map(({ key, label }) => (
           <span
             key={key}
@@ -58,18 +55,6 @@ export function ApplicantTableHead({
           </span>
         ))}
       </div>
-      <button
-        type="button"
-        aria-label={hasExpanded ? "모두 접기" : "모두 펼치기"}
-        onClick={onToggleAll}
-        className="shadow-inner-neutral-2 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-teal-100 transition-colors hover:bg-teal-200"
-      >
-        {hasExpanded ? (
-          <CollapseAllIcon width={24} height={24} className="text-teal-700" />
-        ) : (
-          <ExpandAllIcon width={24} height={24} className="text-teal-700" />
-        )}
-      </button>
-    </div>
+    </ExpandableTableHead>
   )
 }

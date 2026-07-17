@@ -1,8 +1,5 @@
-import { AnimatePresence, motion } from "motion/react"
-
-import CollapseAllIcon from "@/shared/assets/icon/expand-collapse/CollapseAllIcon"
-import ExpandAllIcon from "@/shared/assets/icon/expand-collapse/ExpandAllIcon"
 import { cn } from "@/shared/lib/utils"
+import { ExpandableTableHead } from "@/shared/ui/table/ExpandableTableHead"
 
 const COLUMNS = [
   { label: "프로젝트", width: "w-[184px]", align: "justify-center pr-4" },
@@ -28,14 +25,12 @@ export function ApplicantTableHead({
   className,
 }: ApplicantTableHeadProps) {
   return (
-    <div
-      role="row"
-      className={cn(
-        "flex h-10 items-center rounded-t-xl bg-teal-100 pr-5.5 pl-2.5",
-        className,
-      )}
+    <ExpandableTableHead
+      expanded={hasExpanded}
+      onToggle={hideExpandButton ? undefined : onToggleAll}
+      className={className}
     >
-      <div className="flex flex-1 items-center" role="rowheader">
+      <div className="flex flex-1 items-center">
         {COLUMNS.map((col) => (
           <span
             key={col.label}
@@ -50,40 +45,6 @@ export function ApplicantTableHead({
           </span>
         ))}
       </div>
-
-      {!hideExpandButton && (
-        <button
-          type="button"
-          aria-label={hasExpanded ? "모두 접기" : "모두 펼치기"}
-          onClick={onToggleAll}
-          className="shadow-inner-neutral-2 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-teal-100 transition-colors hover:bg-teal-200"
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={hasExpanded ? "collapse" : "expand"}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center justify-center"
-            >
-              {hasExpanded ? (
-                <CollapseAllIcon
-                  width={24}
-                  height={24}
-                  className="text-teal-700"
-                />
-              ) : (
-                <ExpandAllIcon
-                  width={24}
-                  height={24}
-                  className="text-teal-700"
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </button>
-      )}
-    </div>
+    </ExpandableTableHead>
   )
 }
