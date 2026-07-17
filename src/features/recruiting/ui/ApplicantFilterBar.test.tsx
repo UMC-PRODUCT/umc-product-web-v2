@@ -35,7 +35,7 @@ describe("ApplicantFilterBar 지부 필터", () => {
     render(<ApplicantFilterBarHarness />)
 
     fireEvent.click(screen.getByRole("button", { name: "지부" }))
-    fireEvent.click(screen.getByRole("button", { name: "Ferrum" }))
+    fireEvent.click(screen.getByRole("option", { name: "Ferrum" }))
 
     expect(screen.getByTestId("selected-schools")).toBeEmptyDOMElement()
     expect(screen.getByRole("button", { name: "학교" })).toBeInTheDocument()

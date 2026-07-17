@@ -32,18 +32,33 @@ export type MatchingProjectListFilterId =
   | "part"
   | "status"
 
-export type MatchingProjectListFilterDescriptor = {
+type MatchingProjectListFilterDescriptorBase = {
   id: MatchingProjectListFilterId
   label: string
-  options: ProjectFilterOption[]
+  options: readonly ProjectFilterOption[]
   className: string
   dropdownClassName?: string
-  selectedValue?: string
-  selectedValues?: string[]
   selectedLabel?: string
-  onSelect: (value: string) => void
-  multiSelect?: boolean
 }
+
+export type MatchingProjectListFilterDescriptor =
+  MatchingProjectListFilterDescriptorBase &
+    (
+      | {
+          multiSelect?: false
+          selectedValue?: string
+          onSelect: (value: string) => void
+          selectedValues?: never
+          onSelectedValuesChange?: never
+        }
+      | {
+          multiSelect: true
+          selectedValues: readonly string[]
+          onSelectedValuesChange: (values: string[]) => void
+          selectedValue?: never
+          onSelect?: never
+        }
+    )
 
 export type ProjectListSearch = {
   mock?: "projects"
@@ -196,13 +211,6 @@ export function useMatchingProjectListFilters() {
     [schoolOptions, selectedSchool],
   )
 
-  const selectedPartLabel = useMemo(() => {
-    if (selectedParts.length === 0) return undefined
-    if (selectedParts.length === 1)
-      return PART_OPTIONS.find((o) => o.value === selectedParts[0])?.label
-    return `${PART_OPTIONS.find((o) => o.value === selectedParts[0])?.label} 외 ${selectedParts.length - 1}`
-  }, [selectedParts])
-
   const selectedRecruitStatusLabel = useMemo(
     () =>
       RECRUIT_STATUS_OPTIONS.find(
@@ -211,21 +219,20 @@ export function useMatchingProjectListFilters() {
     [selectedRecruitStatus],
   )
 
-  const handlePartSelect = useCallback(
-    (value: string) => {
-      const part = value as ProjectPart
+  const handlePartsChange = useCallback(
+    (values: string[]) => {
+      const parts = values.flatMap((value) => {
+        const option = PART_OPTIONS.find(
+          (candidate) => candidate.value === value,
+        )
+        return option ? [option.value] : []
+      })
       void navigate({
-        search: (prev) => {
-          const currentParts = prev.parts ?? EMPTY_PARTS
-          const newParts = currentParts.includes(part)
-            ? currentParts.filter((selected) => selected !== part)
-            : [...currentParts, part]
-          return {
-            ...prev,
-            parts: newParts.length > 0 ? newParts : undefined,
-            page: 1,
-          }
-        },
+        search: (prev) => ({
+          ...prev,
+          parts: parts.length > 0 ? parts : undefined,
+          page: 1,
+        }),
       })
     },
     [navigate],
@@ -303,8 +310,7 @@ export function useMatchingProjectListFilters() {
       label: "파트",
       options: PART_OPTIONS,
       selectedValues: selectedParts,
-      selectedLabel: selectedPartLabel,
-      onSelect: handlePartSelect,
+      onSelectedValuesChange: handlePartsChange,
       multiSelect: true,
       ...FILTER_LAYOUT.part,
     },

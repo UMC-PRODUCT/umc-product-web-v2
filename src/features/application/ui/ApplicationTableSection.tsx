@@ -33,17 +33,6 @@ function buildSchoolOptions(projects: ProjectApplication[]) {
   return sorted.map((s) => ({ value: s, label: shortenSchoolName(s) }))
 }
 
-function buildMultiSelectLabel(
-  selected: string[],
-  options: { value: string; label: string }[],
-): string | undefined {
-  if (selected.length === 0) return undefined
-  const first =
-    options.find((o) => o.value === selected[0])?.label ?? selected[0]
-  if (selected.length === 1) return first
-  return `${first} 외 ${selected.length - 1}`
-}
-
 const PART_OPTIONS = [
   { value: "web", label: "Web" },
   { value: "ios", label: "iOS" },
@@ -208,16 +197,10 @@ export function ApplicationTableSection({
         options: schoolOptions,
         multiSelect: true,
         selectedValues: schoolFilter,
-        selectedLabel: buildMultiSelectLabel(schoolFilter, schoolOptions),
         open: openFilter === "school",
         onClick: () => toggleFilter("school"),
-        onSelect: (v: string) => {
-          setSchoolFilter((prev) => {
-            const next = prev.includes(v)
-              ? prev.filter((s) => s !== v)
-              : [...prev, v]
-            return next
-          })
+        onSelectedValuesChange: (values: string[]) => {
+          setSchoolFilter(values)
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
@@ -230,13 +213,10 @@ export function ApplicationTableSection({
         options: PART_OPTIONS,
         multiSelect: true,
         selectedValues: partFilter,
-        selectedLabel: buildMultiSelectLabel(partFilter, PART_OPTIONS),
         open: openFilter === "part",
         onClick: () => toggleFilter("part"),
-        onSelect: (v: string) => {
-          setPartFilter((prev) =>
-            prev.includes(v) ? prev.filter((s) => s !== v) : [...prev, v],
-          )
+        onSelectedValuesChange: (values: string[]) => {
+          setPartFilter(values)
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,

@@ -119,6 +119,7 @@ export function ApplicantTableCard({
           </label>
           <FilterDropdown
             label="최신 순"
+            multiSelect={false}
             className="border-teal-gray-300 text-teal-gray-900 hover:bg-teal-gray-50 h-10 bg-white"
             open={openDropdown === "sort"}
             onClick={() =>
@@ -140,6 +141,7 @@ export function ApplicantTableCard({
           />
           <FilterDropdown
             label="순서"
+            multiSelect={false}
             className="border-teal-gray-300 text-teal-gray-900 hover:bg-teal-gray-50 h-10 bg-white"
             open={openDropdown === "order"}
             onClick={() =>

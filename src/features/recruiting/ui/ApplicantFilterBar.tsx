@@ -5,7 +5,10 @@ import FilterIcon from "@/shared/assets/icon/filter/FilterIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 import { cn } from "@/shared/lib/utils"
 import { PART_TAG_LABEL } from "@/shared/model/domain"
-import { FilterDropdown } from "@/shared/ui/FilterDropDown"
+import {
+  FilterDropdown,
+  type FilterDropdownOption,
+} from "@/shared/ui/FilterDropDown"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { SearchField } from "@/shared/ui/search-field/SearchField"
 
@@ -38,25 +41,9 @@ const RESULT_OPTIONS = [
   { value: "pending", label: "대기" },
 ]
 
-type Option = { value: string; label: string }
-
-function toggleValue(values: string[], value: string) {
-  return values.includes(value)
-    ? values.filter((v) => v !== value)
-    : [...values, value]
-}
-
-function buildMultiSelectLabel(selected: string[], options: Option[]) {
-  const [first] = selected
-  if (first === undefined) return undefined
-  const firstLabel =
-    options.find((option) => option.value === first)?.label ?? first
-  return selected.length === 1
-    ? firstLabel
-    : `${firstLabel} 외 ${selected.length - 1}`
-}
-
-function buildSchoolOptions(filters: ApplicantListFilters): Option[] {
+function buildSchoolOptions(
+  filters: ApplicantListFilters,
+): FilterDropdownOption[] {
   const selectedChapters =
     filters.chapterTab === CHAPTER_ALL_VALUE
       ? filters.chapters.filter(isChapter)
@@ -93,7 +80,7 @@ export function ApplicantFilterBar({
       "chapters" | "schools" | "parts" | "progresses" | "results"
     >,
     label: string,
-    options: Option[],
+    options: FilterDropdownOption[],
     allValue?: string,
   ) => ({
     multiSelect: true as const,
@@ -104,13 +91,7 @@ export function ApplicantFilterBar({
     onClick: () => setOpenKey((prev) => (prev === key ? null : key)),
     onRequestClose: () => setOpenKey(null),
     selectedValues: filters[key],
-    selectedLabel: buildMultiSelectLabel(filters[key], options),
-    onSelect: (value: string) => {
-      const nextValues =
-        allValue !== undefined && value === allValue
-          ? []
-          : toggleValue(filters[key], value)
-
+    onSelectedValuesChange: (nextValues: string[]) => {
       if (key === "chapters") {
         onFiltersChange({ chapters: nextValues, schools: [] })
         return
