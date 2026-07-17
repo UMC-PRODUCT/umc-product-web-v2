@@ -2,7 +2,9 @@ import FilterDropDownIcon from "@/shared/assets/icon/chevron/FilterDropDownIcon"
 import { cn } from "@/shared/lib/utils"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 
-type FilterDropdownOption = {
+import type { ReactNode } from "react"
+
+export type FilterDropdownOption = {
   value: string
   label: string
 }
@@ -12,27 +14,36 @@ type FilterDropdownBaseProps = {
   open?: boolean
   onClick?: () => void
   className?: string
-  options?: FilterDropdownOption[]
+  options?: readonly FilterDropdownOption[]
   selectedLabel?: string
-  onSelect?: (value: string) => void
   dropdownClassName?: string
   onRequestClose?: () => void
 }
 
+type SingleSelectFilterDropdownProps = {
+  multiSelect?: false
+  selectedValue?: string
+  onSelect?: (value: string) => void
+  selectedValues?: never
+  onSelectedValuesChange?: never
+  allValue?: never
+  formatSelectedLabel?: never
+}
+
+interface MultiSelectFilterDropdownProps {
+  multiSelect: true
+  selectedValues: readonly string[]
+  onSelectedValuesChange: (values: string[]) => void
+  allValue?: string
+  formatSelectedLabel?: (
+    selectedOptions: readonly FilterDropdownOption[],
+  ) => ReactNode
+  selectedValue?: never
+  onSelect?: never
+}
+
 export type FilterDropdownProps = FilterDropdownBaseProps &
-  (
-    | {
-        multiSelect?: false
-        selectedValue?: string
-        selectedValues?: never
-        allValue?: never
-      }
-    | {
-        multiSelect: true
-        selectedValues: string[]
-        allValue?: string
-      }
-  )
+  (SingleSelectFilterDropdownProps | MultiSelectFilterDropdownProps)
 
 function ChevronIcon({ active }: { active: boolean }) {
   return (
@@ -55,7 +66,6 @@ export function FilterDropdown(props: FilterDropdownProps) {
     className,
     options,
     selectedLabel,
-    onSelect,
     dropdownClassName,
     onRequestClose,
   } = props
@@ -64,20 +74,54 @@ export function FilterDropdown(props: FilterDropdownProps) {
 
   const selectedValues =
     multiSelect && props.allValue !== undefined
-      ? (props.selectedValues ?? []).filter((v) => v !== props.allValue)
+      ? props.selectedValues.filter((value) => value !== props.allValue)
       : multiSelect
-        ? (props.selectedValues ?? [])
+        ? props.selectedValues
         : []
+  const selectedOptions = multiSelect
+    ? selectedValues.flatMap((value) => {
+        const option = options?.find((candidate) => candidate.value === value)
+        return option ? [option] : []
+      })
+    : []
   const hasSelection = multiSelect
     ? selectedValues.length > 0
     : Boolean(props.selectedValue)
   const highlighted = open || hasSelection
+  const firstSelectedValue = selectedValues[0]
+  const firstSelectedLabel =
+    options?.find((option) => option.value === firstSelectedValue)?.label ??
+    firstSelectedValue
+  const defaultMultiSelectLabel =
+    firstSelectedLabel === undefined
+      ? undefined
+      : selectedValues.length === 1
+        ? firstSelectedLabel
+        : `${firstSelectedLabel} 외 ${selectedValues.length - 1}`
+  const formattedSelectedLabel =
+    multiSelect && selectedOptions.length > 0
+      ? props.formatSelectedLabel?.(selectedOptions)
+      : undefined
   const displayLabel =
-    selectedLabel ?? (multiSelect ? undefined : props.selectedValue) ?? label
+    selectedLabel ??
+    formattedSelectedLabel ??
+    (multiSelect ? defaultMultiSelectLabel : props.selectedValue) ??
+    label
 
   const handleSelect = (value: string) => {
-    onSelect?.(value)
-    if (!multiSelect) onRequestClose?.()
+    if (multiSelect) {
+      const nextValues =
+        props.allValue !== undefined && value === props.allValue
+          ? []
+          : selectedValues.includes(value)
+            ? selectedValues.filter((selected) => selected !== value)
+            : [...selectedValues, value]
+      props.onSelectedValuesChange(nextValues)
+      return
+    }
+
+    props.onSelect?.(value)
+    onRequestClose?.()
   }
 
   return (
@@ -115,6 +159,7 @@ export function FilterDropdown(props: FilterDropdownProps) {
       {open && hasDropdown && (
         <div
           role="listbox"
+          aria-multiselectable={multiSelect || undefined}
           className={cn(
             "border-teal-gray-50 shadow-drop-neutral-1 absolute top-[calc(100%+0.5rem)] left-0 z-30 flex min-w-[max(100%,9.5rem)] flex-col rounded-lg border bg-white p-0.5",
             dropdownClassName,
@@ -131,6 +176,7 @@ export function FilterDropdown(props: FilterDropdownProps) {
               <DropdownItem
                 key={option.value}
                 label={option.label}
+                role="option"
                 onClick={() => handleSelect(option.value)}
                 isSelected={optionSelected}
               />

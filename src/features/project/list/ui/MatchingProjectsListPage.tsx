@@ -158,12 +158,11 @@ export function MatchingProjectsListPage({
               openFilterId ? "overflow-visible" : "overflow-x-auto",
             )}
           >
-            {filterDescriptors.map((filter) => (
-              <FilterDropdown
-                key={filter.id}
-                label={filter.label}
-                open={openFilterId === filter.id}
-                onClick={() =>
+            {filterDescriptors.map((filter) => {
+              const commonProps = {
+                label: filter.label,
+                open: openFilterId === filter.id,
+                onClick: () =>
                   setOpenFilterId((prev) => {
                     const next = prev === filter.id ? null : filter.id
                     if (next) {
@@ -172,38 +171,47 @@ export function MatchingProjectsListPage({
                       })
                     }
                     return next
-                  })
-                }
-                options={filter.options}
-                onSelect={(value) => {
-                  filter.onSelect(value)
-                  trackEvent("project_filter_select", {
-                    filter_id: filter.id,
-                    selected_count:
-                      filter.multiSelect && filter.selectedValues
-                        ? filter.selectedValues.includes(value)
-                          ? Math.max(0, filter.selectedValues.length - 1)
-                          : filter.selectedValues.length + 1
-                        : filter.selectedValue === value
-                          ? 0
-                          : 1,
-                  })
-                }}
-                selectedLabel={filter.selectedLabel}
-                onRequestClose={() => setOpenFilterId(null)}
-                dropdownClassName={filter.dropdownClassName}
-                className={filter.className}
-                {...(filter.multiSelect
-                  ? {
-                      multiSelect: true,
-                      selectedValues: filter.selectedValues ?? [],
-                    }
-                  : {
-                      multiSelect: false,
-                      selectedValue: filter.selectedValue,
-                    })}
-              />
-            ))}
+                  }),
+                options: filter.options,
+                selectedLabel: filter.selectedLabel,
+                onRequestClose: () => setOpenFilterId(null),
+                dropdownClassName: filter.dropdownClassName,
+                className: filter.className,
+              }
+
+              if (filter.multiSelect) {
+                return (
+                  <FilterDropdown
+                    key={filter.id}
+                    {...commonProps}
+                    multiSelect
+                    selectedValues={filter.selectedValues}
+                    onSelectedValuesChange={(values) => {
+                      filter.onSelectedValuesChange(values)
+                      trackEvent("project_filter_select", {
+                        filter_id: filter.id,
+                        selected_count: values.length,
+                      })
+                    }}
+                  />
+                )
+              }
+
+              return (
+                <FilterDropdown
+                  key={filter.id}
+                  {...commonProps}
+                  selectedValue={filter.selectedValue}
+                  onSelect={(value) => {
+                    filter.onSelect(value)
+                    trackEvent("project_filter_select", {
+                      filter_id: filter.id,
+                      selected_count: filter.selectedValue === value ? 0 : 1,
+                    })
+                  }}
+                />
+              )
+            })}
           </div>
         </div>
 

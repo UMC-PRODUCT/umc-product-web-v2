@@ -1,0 +1,156 @@
+import { fireEvent, render, screen } from "@testing-library/react"
+import { describe, expect, it, vi } from "vitest"
+
+import { FilterDropdown } from "./FilterDropDown"
+
+const OPTIONS = [
+  { value: "all", label: "전체" },
+  { value: "web", label: "Web" },
+  { value: "ios", label: "iOS" },
+  { value: "android", label: "Android" },
+]
+
+describe("FilterDropdown 다중 선택", () => {
+  it("선택한 값을 기존 배열에 추가하고 드롭다운을 유지한다", () => {
+    const handleChange = vi.fn()
+    const handleClose = vi.fn()
+
+    render(
+      <FilterDropdown
+        label="파트"
+        open
+        options={OPTIONS}
+        multiSelect
+        selectedValues={["web"]}
+        onSelectedValuesChange={handleChange}
+        onRequestClose={handleClose}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("option", { name: "iOS" }))
+
+    expect(handleChange).toHaveBeenCalledWith(["web", "ios"])
+    expect(handleClose).not.toHaveBeenCalled()
+    expect(screen.getByRole("listbox")).toHaveAttribute(
+      "aria-multiselectable",
+      "true",
+    )
+    expect(screen.getByRole("option", { name: "Web" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    )
+  })
+
+  it("이미 선택한 값을 배열에서 제거한다", () => {
+    const handleChange = vi.fn()
+
+    render(
+      <FilterDropdown
+        label="파트"
+        open
+        options={OPTIONS}
+        multiSelect
+        selectedValues={["web", "ios"]}
+        onSelectedValuesChange={handleChange}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("option", { name: "Web" }))
+
+    expect(handleChange).toHaveBeenCalledWith(["ios"])
+  })
+
+  it("전체 옵션을 선택하면 빈 배열로 정규화한다", () => {
+    const handleChange = vi.fn()
+
+    render(
+      <FilterDropdown
+        label="파트"
+        open
+        options={OPTIONS}
+        multiSelect
+        selectedValues={["all", "web"]}
+        onSelectedValuesChange={handleChange}
+        allValue="all"
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("option", { name: "전체" }))
+
+    expect(handleChange).toHaveBeenCalledWith([])
+  })
+
+  it("전체 값이 선택 배열에 있어도 일반 옵션만 다음 배열에 포함한다", () => {
+    const handleChange = vi.fn()
+
+    render(
+      <FilterDropdown
+        label="파트"
+        open
+        options={OPTIONS}
+        multiSelect
+        selectedValues={["all"]}
+        onSelectedValuesChange={handleChange}
+        allValue="all"
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("option", { name: "Web" }))
+
+    expect(handleChange).toHaveBeenCalledWith(["web"])
+  })
+
+  it("선택한 첫 옵션과 나머지 개수를 표시한다", () => {
+    render(
+      <FilterDropdown
+        label="파트"
+        options={OPTIONS}
+        multiSelect
+        selectedValues={["web", "ios", "android"]}
+        onSelectedValuesChange={() => undefined}
+      />,
+    )
+
+    expect(screen.getByRole("button", { name: "Web 외 2" })).toBeInTheDocument()
+  })
+
+  it("선택 옵션 포맷을 호출자가 재정의할 수 있다", () => {
+    render(
+      <FilterDropdown
+        label="파트"
+        options={OPTIONS}
+        multiSelect
+        selectedValues={["web", "ios"]}
+        onSelectedValuesChange={() => undefined}
+        formatSelectedLabel={(selectedOptions) =>
+          `${selectedOptions.length}개 선택`
+        }
+      />,
+    )
+
+    expect(screen.getByRole("button", { name: "2개 선택" })).toBeInTheDocument()
+  })
+})
+
+describe("FilterDropdown 단일 선택", () => {
+  it("같은 값을 다시 선택해도 기존 callback과 닫기 정책을 유지한다", () => {
+    const handleSelect = vi.fn()
+    const handleClose = vi.fn()
+
+    render(
+      <FilterDropdown
+        label="모집 상태"
+        open
+        options={OPTIONS}
+        selectedValue="web"
+        onSelect={handleSelect}
+        onRequestClose={handleClose}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("option", { name: "Web" }))
+
+    expect(handleSelect).toHaveBeenCalledWith("web")
+    expect(handleClose).toHaveBeenCalledOnce()
+  })
+})

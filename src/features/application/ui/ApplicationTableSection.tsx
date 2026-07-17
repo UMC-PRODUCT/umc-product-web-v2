@@ -1,4 +1,3 @@
-import { Search } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 
 import { shortenSchoolName } from "@/entities/application/model/mappers"
@@ -8,6 +7,7 @@ import {
   type FilterDropdownProps,
 } from "@/shared/ui/FilterDropDown"
 import { Pagination } from "@/shared/ui/Pagination"
+import { SearchField } from "@/shared/ui/search-field/SearchField"
 import { SectionHeader } from "@/shared/ui/SectionHeader"
 
 import { ApplicantDetailRow } from "./ApplicantDetailRow"
@@ -31,17 +31,6 @@ function buildSchoolOptions(projects: ProjectApplication[]) {
   }
   const sorted = [...schools].sort((a, b) => a.localeCompare(b, "ko"))
   return sorted.map((s) => ({ value: s, label: shortenSchoolName(s) }))
-}
-
-function buildMultiSelectLabel(
-  selected: string[],
-  options: { value: string; label: string }[],
-): string | undefined {
-  if (selected.length === 0) return undefined
-  const first =
-    options.find((o) => o.value === selected[0])?.label ?? selected[0]
-  if (selected.length === 1) return first
-  return `${first} 외 ${selected.length - 1}`
 }
 
 const PART_OPTIONS = [
@@ -208,16 +197,10 @@ export function ApplicationTableSection({
         options: schoolOptions,
         multiSelect: true,
         selectedValues: schoolFilter,
-        selectedLabel: buildMultiSelectLabel(schoolFilter, schoolOptions),
         open: openFilter === "school",
         onClick: () => toggleFilter("school"),
-        onSelect: (v: string) => {
-          setSchoolFilter((prev) => {
-            const next = prev.includes(v)
-              ? prev.filter((s) => s !== v)
-              : [...prev, v]
-            return next
-          })
+        onSelectedValuesChange: (values: string[]) => {
+          setSchoolFilter(values)
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
@@ -230,13 +213,10 @@ export function ApplicationTableSection({
         options: PART_OPTIONS,
         multiSelect: true,
         selectedValues: partFilter,
-        selectedLabel: buildMultiSelectLabel(partFilter, PART_OPTIONS),
         open: openFilter === "part",
         onClick: () => toggleFilter("part"),
-        onSelect: (v: string) => {
-          setPartFilter((prev) =>
-            prev.includes(v) ? prev.filter((s) => s !== v) : [...prev, v],
-          )
+        onSelectedValuesChange: (values: string[]) => {
+          setPartFilter(values)
           setCurrentPage(1)
         },
         onRequestClose: closeFilter,
@@ -282,19 +262,16 @@ export function ApplicationTableSection({
 
       {/* 검색 + 필터 */}
       <div className="flex items-center justify-between">
-        <div className="shadow-inner-neutral-2 bg-teal-gray-100 flex h-11 w-114 items-center gap-2 rounded-xl px-4">
-          <input
-            type="text"
-            placeholder={searchPlaceholder}
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value)
-              setCurrentPage(1)
-            }}
-            className="text-body-2-regular text-teal-gray-900 placeholder:text-teal-gray-400 min-w-0 flex-1 bg-transparent outline-none"
-          />
-          <Search size={24} className="text-teal-gray-400 shrink-0" />
-        </div>
+        <SearchField
+          aria-label="프로젝트 검색"
+          placeholder={searchPlaceholder}
+          value={searchQuery}
+          onChange={(event) => {
+            setSearchQuery(event.target.value)
+            setCurrentPage(1)
+          }}
+          className="w-114"
+        />
         <div className="flex items-center gap-2">
           {visibleFilters
             .map((name) => filters.find((f) => f.name === name))
