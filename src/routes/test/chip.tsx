@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { RoundNumberTag } from "@/features/matching/ui/RoundNumberTag"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import { LabelTag } from "@/shared/ui/tag/LabelTag"
+import { NumberTag } from "@/shared/ui/tag/NumberTag"
+import { Tag } from "@/shared/ui/tag/Tag"
 
 export const Route = createFileRoute("/test/chip")({
   component: ChipTestPage,
@@ -18,22 +22,82 @@ const PARTS = [
   "nodejs",
 ] as const
 
-const NEW_PARTS = ["pm", "design", "mobile-pe", "web-pe"] as const
+const NEW_PARTS = ["pm", "design", "web-pe", "mobile-pe"] as const
 
 const PART_TYPES = ["default", "light"] as const
 
 const ROLES = [
-  "hq",
-  "chapter",
-  "school",
-  "challenger",
   "superadmin",
   "product",
+  "central-president",
+  "central-vice-president",
+  "hq",
+  "chapter",
+  "school-president",
+  "school-vice-president",
+  "school",
+  "challenger",
+] as const
+
+const TAGS = [
+  { tone: "teal", label: "Tag" },
+  { tone: "gray", label: "Tag" },
+  { tone: "orange", label: "Tag" },
+  { tone: "red", label: "Tag" },
+] as const
+
+const LABEL_TAG_TONES = [
+  "teal",
+  "gray",
+  "purple",
+  "brown",
+  "blue",
+  "pink",
+  "yellow",
+] as const
+
+const ROUND_NUMBER_TAG_VARIANTS = [
+  "default",
+  "round1",
+  "round2",
+  "round3",
+  "random",
 ] as const
 
 function ChipTestPage() {
   return (
     <main className="bg-teal-gray-50 flex min-h-screen w-full flex-col gap-12 p-10">
+      <section className="flex flex-col gap-4">
+        <h1 className="text-heading-6-semibold text-teal-gray-900">Tag</h1>
+        <div className="flex flex-wrap gap-x-8 gap-y-4">
+          {TAGS.map(({ tone, label }) => (
+            <Tag key={tone} tone={tone}>
+              {label}
+            </Tag>
+          ))}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h1 className="text-heading-6-semibold text-teal-gray-900">
+          Label Tag
+        </h1>
+        <div className="flex flex-wrap gap-4">
+          {LABEL_TAG_TONES.map((tone) => (
+            <div key={tone} className="flex items-center gap-3">
+              <LabelTag tone={tone}>칩</LabelTag>
+              <LabelTag disabled tone={tone}>
+                칩
+              </LabelTag>
+              <LabelTag tone={tone}>닉네임/이름</LabelTag>
+              <LabelTag disabled tone={tone}>
+                닉네임/이름
+              </LabelTag>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="flex flex-col gap-4">
         <h1 className="text-heading-6-semibold text-teal-gray-900">
           Part Tag Chip
@@ -145,6 +209,31 @@ function ChipTestPage() {
             ))}
           </tbody>
         </table>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h1 className="text-heading-6-semibold text-teal-gray-900">
+          Number Tag
+        </h1>
+        <div className="flex flex-wrap items-center gap-4">
+          {[1, 2, 12].map((value) => (
+            <div key={value} className="flex items-center gap-2">
+              <NumberTag value={value} />
+              <NumberTag value={value} variant="dimmed" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h1 className="text-heading-6-semibold text-teal-gray-900">
+          Matching Round Number Tag
+        </h1>
+        <div className="flex flex-wrap items-center gap-4">
+          {ROUND_NUMBER_TAG_VARIANTS.map((variant) => (
+            <RoundNumberTag key={variant} variant={variant} />
+          ))}
+        </div>
       </section>
 
       <section className="flex flex-col gap-4">
