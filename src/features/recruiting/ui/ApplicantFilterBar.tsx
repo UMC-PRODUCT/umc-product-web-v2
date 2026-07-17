@@ -146,14 +146,16 @@ export function ApplicantFilterBar({
           <span className="text-body-1-medium text-teal-gray-600">학교별</span>
         </label>
         <div className="flex items-center gap-2">
-          <FilterDropdown
-            {...multiDropdownProps(
-              "chapters",
-              "지부",
-              CHAPTER_OPTIONS,
-              CHAPTER_ALL_VALUE,
-            )}
-          />
+          {filters.chapterTab === CHAPTER_ALL_VALUE && (
+            <FilterDropdown
+              {...multiDropdownProps(
+                "chapters",
+                "지부",
+                CHAPTER_OPTIONS,
+                CHAPTER_ALL_VALUE,
+              )}
+            />
+          )}
           <FilterDropdown
             {...multiDropdownProps("schools", "학교", schoolOptions)}
           />
