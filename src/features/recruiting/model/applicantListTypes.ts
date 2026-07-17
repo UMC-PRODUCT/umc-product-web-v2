@@ -162,8 +162,15 @@ export function applyApplicantFilters(
     return evaluation ? [{ row, evaluation }] : []
   })
 
+  const normalizedSearch = search.toLowerCase()
+
   const filtered = scoped.filter(({ row, evaluation }) => {
-    if (search && !row.applicantName.includes(search)) return false
+    if (
+      normalizedSearch &&
+      !row.applicantName.toLowerCase().includes(normalizedSearch)
+    ) {
+      return false
+    }
     if (chapters.length > 0 && !chapters.includes(row.chapter)) return false
     if (filters.schools.length > 0 && !filters.schools.includes(row.school)) {
       return false
