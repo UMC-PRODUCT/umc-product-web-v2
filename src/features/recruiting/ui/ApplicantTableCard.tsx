@@ -3,38 +3,57 @@ import { useState } from "react"
 import { cn } from "@/shared/lib/utils"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
+import { Tag, type TagTone } from "@/shared/ui/tag/Tag"
 
 import {
   APPLICANT_ORDER_OPTIONS,
   APPLICANT_SORT_OPTIONS,
   type ApplicantListFilters,
   type ApplicantRow as ApplicantRowModel,
+  getStageEvaluation,
 } from "../model/applicantListTypes"
 import { ApplicantRow } from "./ApplicantRow"
 import { ApplicantTableHead } from "./ApplicantTableHead"
 
 import type { EvaluationStage } from "../model/evaluationStage"
 
-type CardStatus = "beforeApply" | "evaluating"
+type CardStatus =
+  | "beforeRecruit"
+  | "beforeApply"
+  | "evaluating"
+  | "evaluated"
+  | "delayed"
+  | "beforeEval"
 
-const CARD_STATUS_STYLE: Record<
-  CardStatus,
-  { dot: string; text: string; label: string }
-> = {
-  beforeApply: {
-    dot: "bg-teal-gray-400",
-    text: "text-teal-gray-500",
-    label: "지원 전",
-  },
-  evaluating: {
-    dot: "bg-warning-500",
-    text: "text-warning-500",
-    label: "평가 진행 중",
-  },
+const CARD_STATUS_TAG: Record<CardStatus, { tone: TagTone; label: string }> = {
+  beforeRecruit: { tone: "gray", label: "모집 전" },
+  beforeApply: { tone: "gray", label: "지원 전" },
+  evaluating: { tone: "orange", label: "평가 진행중" },
+  evaluated: { tone: "teal", label: "평가 완료" },
+  delayed: { tone: "red", label: "평가 지연" },
+  beforeEval: { tone: "gray", label: "평가 전" },
+}
+
+function deriveCardStatus(
+  allStageRows: ApplicantRowModel[],
+  stage: EvaluationStage,
+): CardStatus {
+  const evaluations = allStageRows.flatMap((row) => {
+    const evaluation = getStageEvaluation(row, stage)
+    return evaluation ? [evaluation] : []
+  })
+
+  if (evaluations.length === 0) return "beforeApply"
+  if (evaluations.every(({ progress }) => progress === "before")) {
+    return "beforeEval"
+  }
+  const allDone = evaluations.every(({ progress }) => progress === "done")
+  return allDone ? "evaluated" : "evaluating"
 }
 
 interface ApplicantTableCardProps {
-  rows: ApplicantRowModel[]
+  visibleRows: ApplicantRowModel[]
+  allStageRows: ApplicantRowModel[]
   stage: EvaluationStage
   totalCount: number
   baseTime: string
@@ -44,7 +63,8 @@ interface ApplicantTableCardProps {
 }
 
 export function ApplicantTableCard({
-  rows,
+  visibleRows,
+  allStageRows,
   stage,
   totalCount,
   baseTime,
@@ -57,10 +77,11 @@ export function ApplicantTableCard({
   )
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
-  const isEmpty = rows.length === 0
-  const status: CardStatus = isEmpty ? "beforeApply" : "evaluating"
-  const statusStyle = CARD_STATUS_STYLE[status]
-  const hasExpanded = expandedIds.size > 0
+  const isEmpty = visibleRows.length === 0
+  const statusTag = CARD_STATUS_TAG[deriveCardStatus(allStageRows, stage)]
+  const hasExpanded = visibleRows.some((row) =>
+    expandedIds.has(row.applicationId),
+  )
 
   const toggleRow = (applicationId: string) => {
     setExpandedIds((prev) => {
@@ -73,9 +94,9 @@ export function ApplicantTableCard({
 
   const toggleAll = () => {
     setExpandedIds((prev) =>
-      prev.size > 0
+      visibleRows.some((row) => prev.has(row.applicationId))
         ? new Set<string>()
-        : new Set(rows.map((row) => row.applicationId)),
+        : new Set(visibleRows.map((row) => row.applicationId)),
     )
   }
 
@@ -176,20 +197,9 @@ export function ApplicantTableCard({
         <span className="text-body-1-regular text-teal-gray-400">
           총 {totalCount.toLocaleString()} 명
         </span>
-        <span className="ml-1 inline-flex h-6 items-center gap-1.5">
-          <span
-            className={cn("size-3 rounded-full", statusStyle.dot)}
-            aria-hidden="true"
-          />
-          <span
-            className={cn(
-              "text-label-2-medium whitespace-nowrap",
-              statusStyle.text,
-            )}
-          >
-            {statusStyle.label}
-          </span>
-        </span>
+        <Tag tone={statusTag.tone} className="ml-1">
+          {statusTag.label}
+        </Tag>
       </div>
       <div role="table" className="mt-8 flex flex-col">
         {isEmpty ? (
@@ -201,10 +211,11 @@ export function ApplicantTableCard({
         ) : (
           <>
             <ApplicantTableHead
+              stage={stage}
               hasExpanded={hasExpanded}
               onToggleAll={toggleAll}
             />
-            {rows.map((row) => (
+            {visibleRows.map((row) => (
               <ApplicantRow
                 key={row.applicationId}
                 row={row}
