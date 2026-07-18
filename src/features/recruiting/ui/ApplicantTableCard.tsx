@@ -249,7 +249,7 @@ export function ApplicantTableCard({
         </span>
         <span className="bg-teal-gray-200 h-3 w-px" aria-hidden="true" />
         <span className="text-body-1-regular text-teal-gray-400">
-          총 {visibleRows.length.toLocaleString()} 명
+          총 {rows.length.toLocaleString()} 명
         </span>
         <Tag tone={statusTag.tone} className="ml-1">
           {statusTag.label}
