@@ -62,7 +62,12 @@ export function groupRowsBySchool(
   return groupRowsByChapter(rows, chapters)
     .map(({ chapter, rows: chapterRows }) => ({
       chapter,
-      schools: SCHOOLS_BY_BRANCH[chapter]
+      schools: [
+        ...new Set([
+          ...SCHOOLS_BY_BRANCH[chapter],
+          ...chapterRows.map((row) => row.school),
+        ]),
+      ]
         .map((school) => ({
           school,
           rows: chapterRows.filter((row) => row.school === school),

@@ -118,4 +118,17 @@ describe("그룹핑", () => {
       "이화여대",
     ])
   })
+
+  it("학교 목록에 없는 학교의 지원자도 그룹에 포함한다", () => {
+    const groups = groupRowsBySchool(
+      [...rows, createApplicant("d", "Ferrum", "신규대")],
+      ["Ferrum"],
+    )
+
+    expect(groups[0]?.schools.map(({ school }) => school)).toEqual([
+      "동국대",
+      "이화여대",
+      "신규대",
+    ])
+  })
 })
