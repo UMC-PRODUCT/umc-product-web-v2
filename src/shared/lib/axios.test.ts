@@ -337,6 +337,7 @@ describe("토큰 갱신 성공", () => {
       })
     })
     const { api } = await createSubject(adapter)
+    api.defaults.headers.common.Authorization = "Bearer stale-access"
 
     await api.get("/protected/first")
     await api.get("/protected/second")
