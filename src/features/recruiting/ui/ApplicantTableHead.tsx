@@ -35,26 +35,18 @@ function columnLabel(key: ApplicantColumnKey, stage: EvaluationStage) {
 interface ApplicantTableHeadProps {
   stage: EvaluationStage
   columns?: ApplicantColumnOptions
-  hasExpanded?: boolean
-  onToggleAll?: () => void
   className?: string
 }
 
 export function ApplicantTableHead({
   stage,
   columns,
-  hasExpanded = false,
-  onToggleAll,
   className,
 }: ApplicantTableHeadProps) {
   const visibleColumns = getVisibleApplicantColumns(stage, columns)
 
   return (
-    <ExpandableTableHead
-      expanded={hasExpanded}
-      onToggle={onToggleAll}
-      className={cn("gap-2.5", className)}
-    >
+    <ExpandableTableHead className={cn("gap-2.5", className)}>
       <div className="flex min-w-0 flex-1 items-center">
         {visibleColumns.map((key) => (
           <span

@@ -43,7 +43,6 @@ const PROGRESS_OPTIONS = (["before", "inProgress", "done"] as const).map(
 const RESULT_OPTIONS = [
   { value: "pass", label: "합격" },
   { value: "fail", label: "불합격" },
-  { value: "pending", label: "대기" },
 ]
 
 function buildSchoolOptions(

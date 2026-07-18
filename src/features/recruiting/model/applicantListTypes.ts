@@ -133,11 +133,7 @@ function resultOrderRank(result: EvaluationResult | null) {
 
 function matchesResultFilter(evaluation: StageEvaluation, results: string[]) {
   if (results.length === 0) return true
-  return results.some((result) =>
-    result === "pending"
-      ? evaluation.progress === "done" && evaluation.result === null
-      : evaluation.result === result,
-  )
+  return evaluation.result !== null && results.includes(evaluation.result)
 }
 
 function compareByOrder(

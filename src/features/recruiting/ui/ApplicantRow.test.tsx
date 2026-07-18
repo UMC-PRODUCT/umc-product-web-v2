@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { render, screen } from "@testing-library/react"
+import { describe, expect, it } from "vitest"
 
 import { ApplicantRow } from "./ApplicantRow"
 
@@ -37,14 +37,7 @@ function createApplicantRow(): ApplicantRowModel {
 
 describe("ApplicantRow", () => {
   it("지원 일시와 평가 수를 공용 라벨로 표시한다", () => {
-    render(
-      <ApplicantRow
-        row={createApplicantRow()}
-        stage="document"
-        expanded={false}
-        onToggle={() => {}}
-      />,
-    )
+    render(<ApplicantRow row={createApplicantRow()} stage="document" />)
 
     expect(screen.getByText("04/22")).toBeInTheDocument()
     expect(screen.getByText("03:33")).toBeInTheDocument()
@@ -54,24 +47,19 @@ describe("ApplicantRow", () => {
     expect(screen.getByText("7")).toHaveClass("text-teal-gray-600")
   })
 
-  it("일시가 없으면 대시를 표시하고 행 토글을 유지한다", () => {
-    const onToggle = vi.fn()
-
-    render(
-      <ApplicantRow
-        row={createApplicantRow()}
-        stage="interview"
-        expanded={false}
-        onToggle={onToggle}
-      />,
-    )
+  it("일시가 없으면 대시를 표시한다", () => {
+    render(<ApplicantRow row={createApplicantRow()} stage="interview" />)
 
     expect(screen.getByText("-")).toBeInTheDocument()
-    fireEvent.click(screen.getByRole("button", { name: "지원자 상세 펼치기" }))
-    expect(onToggle).toHaveBeenCalledOnce()
   })
 
-  it("평가가 완료됐지만 결과가 없으면 대기 태그를 표시한다", () => {
+  it("행 확장 토글 버튼을 렌더하지 않는다", () => {
+    render(<ApplicantRow row={createApplicantRow()} stage="document" />)
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
+  })
+
+  it("평가가 완료됐어도 결과가 없으면 결과 태그를 표시하지 않는다", () => {
     const row = createApplicantRow()
     row.evaluations.document = {
       progress: "done",
@@ -81,29 +69,11 @@ describe("ApplicantRow", () => {
       myProgress: "done",
     }
 
-    render(
-      <ApplicantRow
-        row={row}
-        stage="document"
-        expanded={false}
-        onToggle={() => {}}
-      />,
-    )
-
-    expect(screen.getByText("대기")).toBeInTheDocument()
-  })
-
-  it("평가가 진행 중이면 대기 태그를 표시하지 않는다", () => {
-    render(
-      <ApplicantRow
-        row={createApplicantRow()}
-        stage="document"
-        expanded={false}
-        onToggle={() => {}}
-      />,
-    )
+    render(<ApplicantRow row={row} stage="document" />)
 
     expect(screen.queryByText("대기")).not.toBeInTheDocument()
+    expect(screen.queryByText("합격")).not.toBeInTheDocument()
+    expect(screen.queryByText("불합격")).not.toBeInTheDocument()
   })
 
   it("최종 평가에서는 일시 컬럼과 평가 수를 렌더하지 않는다", () => {
@@ -116,14 +86,7 @@ describe("ApplicantRow", () => {
       myProgress: "done",
     }
 
-    render(
-      <ApplicantRow
-        row={row}
-        stage="final"
-        expanded={false}
-        onToggle={() => {}}
-      />,
-    )
+    render(<ApplicantRow row={row} stage="final" />)
 
     expect(screen.queryByText("04/22")).not.toBeInTheDocument()
     expect(screen.queryByText("-")).not.toBeInTheDocument()

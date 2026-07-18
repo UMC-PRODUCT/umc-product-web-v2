@@ -79,27 +79,39 @@ describe("applyCardFilters 정렬", () => {
 })
 
 describe("applyApplicantFilters 결과 필터", () => {
-  it("대기 결과는 평가 완료지만 결과가 미확정인 지원자만 포함한다", () => {
-    const pending = createApplicant("pending", "2026-04-22T09:00:00", "가천대")
-    pending.evaluations.document.progress = "done"
+  it("합격 결과 필터는 합격자만 포함한다", () => {
+    const passed = createApplicant("passed", "2026-04-22T09:00:00", "가천대")
+    passed.evaluations.document.progress = "done"
+    passed.evaluations.document.result = "pass"
 
-    const before = createApplicant("before", "2026-04-22T09:00:00", "한성대")
-    const inProgress = createApplicant(
-      "in-progress",
-      "2026-04-22T09:00:00",
-      "건국대",
-    )
-    inProgress.evaluations.document.progress = "inProgress"
+    const failed = createApplicant("failed", "2026-04-22T09:00:00", "건국대")
+    failed.evaluations.document.progress = "done"
+    failed.evaluations.document.result = "fail"
 
     const result = applyApplicantFilters(
-      [pending, before, inProgress],
-      { ...DEFAULT_APPLICANT_LIST_FILTERS, results: ["pending"] },
+      [passed, failed],
+      { ...DEFAULT_APPLICANT_LIST_FILTERS, results: ["pass"] },
       "document",
     )
 
-    expect(result.map(({ applicationId }) => applicationId)).toEqual([
-      "pending",
-    ])
+    expect(result.map(({ applicationId }) => applicationId)).toEqual(["passed"])
+  })
+
+  it("결과가 미확정인 지원자는 결과 필터에 포함되지 않는다", () => {
+    const doneNoResult = createApplicant(
+      "done-no-result",
+      "2026-04-22T09:00:00",
+      "가천대",
+    )
+    doneNoResult.evaluations.document.progress = "done"
+
+    const result = applyApplicantFilters(
+      [doneNoResult],
+      { ...DEFAULT_APPLICANT_LIST_FILTERS, results: ["pass", "fail"] },
+      "document",
+    )
+
+    expect(result).toHaveLength(0)
   })
 })
 

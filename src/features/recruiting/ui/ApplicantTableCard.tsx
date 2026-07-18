@@ -127,7 +127,6 @@ export function ApplicantTableCard({
   const [openDropdown, setOpenDropdown] = useState<"sort" | "order" | null>(
     null,
   )
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   const rows = useMemo(
     () => applyCardFilters(visibleRows, cardFilters, stage),
@@ -139,27 +138,9 @@ export function ApplicantTableCard({
     CARD_STATUS_TAG[
       deriveCardStatus(allStageRows, cardFilters, stage, hasRecruitment)
     ]
-  const hasExpanded = rows.some((row) => expandedIds.has(row.applicationId))
 
   const handleCardFiltersChange = (partial: Partial<ApplicantCardFilters>) => {
     setCardFilters((prev) => ({ ...prev, ...partial }))
-  }
-
-  const toggleRow = (applicationId: string) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(applicationId)) next.delete(applicationId)
-      else next.add(applicationId)
-      return next
-    })
-  }
-
-  const toggleAll = () => {
-    setExpandedIds((prev) =>
-      rows.some((row) => prev.has(row.applicationId))
-        ? new Set<string>()
-        : new Set(rows.map((row) => row.applicationId)),
-    )
   }
 
   return (
@@ -276,20 +257,13 @@ export function ApplicantTableCard({
           </div>
         ) : (
           <>
-            <ApplicantTableHead
-              stage={stage}
-              columns={columns}
-              hasExpanded={hasExpanded}
-              onToggleAll={toggleAll}
-            />
+            <ApplicantTableHead stage={stage} columns={columns} />
             {rows.map((row) => (
               <ApplicantRow
                 key={row.applicationId}
                 row={row}
                 stage={stage}
                 columns={columns}
-                expanded={expandedIds.has(row.applicationId)}
-                onToggle={() => toggleRow(row.applicationId)}
               />
             ))}
           </>

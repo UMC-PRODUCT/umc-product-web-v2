@@ -1,4 +1,3 @@
-import FilterDropDownIcon from "@/shared/assets/icon/chevron/FilterDropDownIcon"
 import { cn } from "@/shared/lib/utils"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
@@ -29,30 +28,21 @@ const STAGE_TIME_LABEL: Record<EvaluationStage, string> = {
 interface ApplicantRowProps {
   row: ApplicantRowModel
   stage: EvaluationStage
-  expanded: boolean
-  onToggle: () => void
   columns?: ApplicantColumnOptions
 }
 
-export function ApplicantRow({
-  row,
-  stage,
-  expanded,
-  onToggle,
-  columns,
-}: ApplicantRowProps) {
+export function ApplicantRow({ row, stage, columns }: ApplicantRowProps) {
   const evaluation = getStageEvaluation(row, stage)
   if (!evaluation) return null
 
   const visibleColumns = new Set(getVisibleApplicantColumns(stage, columns))
   const timeAt = stage === "interview" ? row.interviewAt : row.appliedAt
   const timestamp = timeAt ? formatAppliedAtParts(timeAt) : null
-  const showPending = evaluation.progress === "done" && !evaluation.result
 
   return (
     <div
       role="row"
-      className="border-teal-gray-150/60 hover:bg-teal-gray-50 flex h-17 items-center gap-2.5 border-b bg-white pr-5.5 pl-2.5 transition-colors"
+      className="border-teal-gray-150/60 hover:bg-teal-gray-50 flex h-17 items-center border-b bg-white pr-5.5 pl-2.5 transition-colors"
     >
       <div className="flex min-w-0 flex-1 items-center">
         {visibleColumns.has("appliedAt") &&
@@ -121,27 +111,11 @@ export function ApplicantRow({
           )}
         </span>
         <span className={APPLICANT_COLUMNS.result}>
-          {evaluation.result ? (
+          {evaluation.result && (
             <StatusChipTag type="tag" value={evaluation.result} />
-          ) : (
-            showPending && <StatusChipTag type="tag" value="pending" />
           )}
         </span>
       </div>
-      <button
-        type="button"
-        aria-label={expanded ? "지원자 상세 접기" : "지원자 상세 펼치기"}
-        aria-expanded={expanded}
-        onClick={onToggle}
-        className="shadow-inner-neutral-1 flex size-7.5 shrink-0 items-center justify-center rounded-[10px] bg-white"
-      >
-        <FilterDropDownIcon
-          className={cn(
-            "text-teal-gray-700 transition-transform",
-            expanded && "rotate-180",
-          )}
-        />
-      </button>
     </div>
   )
 }
