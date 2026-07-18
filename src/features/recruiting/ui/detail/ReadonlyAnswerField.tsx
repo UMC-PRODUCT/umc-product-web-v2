@@ -115,7 +115,7 @@ function AnswerBody({ question }: { question: ApplicationQuestion }) {
     <QuestionFieldBox>
       <span
         className={cn(
-          "text-body-1-regular",
+          "text-body-1-regular wrap-break-word whitespace-pre-wrap",
           question.textValue ? "text-teal-gray-900" : "text-teal-gray-400",
         )}
       >
