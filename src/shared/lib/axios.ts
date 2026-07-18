@@ -17,7 +17,24 @@ declare module "axios" {
   }
 }
 
+const AUTH_LOGIN_PATH = "/v1/auth/login"
 const TOKEN_RENEW_PATH = "/v1/auth/token/renew"
+
+function getRequestPathname(url: string | undefined) {
+  if (!url) return null
+  return new URL(url, "https://axios.local").pathname
+}
+
+function isLoginRequest(url: string | undefined) {
+  const pathname = getRequestPathname(url)
+  return (
+    pathname === AUTH_LOGIN_PATH || pathname?.startsWith(`${AUTH_LOGIN_PATH}/`)
+  )
+}
+
+function isTokenRenewRequest(url: string | undefined) {
+  return getRequestPathname(url) === TOKEN_RENEW_PATH
+}
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -29,7 +46,7 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   config.analyticsStartTime = performance.now()
-  if (config.url?.includes(TOKEN_RENEW_PATH)) {
+  if (isTokenRenewRequest(config.url)) {
     config.headers.delete("Authorization")
     return config
   }
@@ -99,8 +116,8 @@ api.interceptors.response.use(
 
     if (
       error.response?.status !== 401 ||
-      originalRequest.url?.includes("/v1/auth/login") ||
-      originalRequest.url?.includes(TOKEN_RENEW_PATH)
+      isLoginRequest(originalRequest.url) ||
+      isTokenRenewRequest(originalRequest.url)
     ) {
       return Promise.reject(error)
     }

@@ -139,6 +139,21 @@ describe("토큰 갱신 실패", () => {
     expect(redirectToLogin).toHaveBeenCalledOnce()
   })
 
+  it("로그인 하위 경로의 401은 토큰 갱신 대상에서 제외한다", async () => {
+    const adapter = vi.fn<AxiosAdapter>(async (config) => {
+      return rejectUnauthorized(config)
+    })
+    const { api, clear, redirectToLogin } = await createSubject(adapter)
+
+    await expect(api.post("/v1/auth/login/email")).rejects.toBeInstanceOf(
+      AxiosError,
+    )
+
+    expect(adapter).toHaveBeenCalledOnce()
+    expect(clear).not.toHaveBeenCalled()
+    expect(redirectToLogin).not.toHaveBeenCalled()
+  })
+
   it("동시 요청 중 갱신이 실패하면 대기열의 요청도 모두 reject한다", async () => {
     let releaseRenew: () => void = () => undefined
     const renewGate = new Promise<void>((resolve) => {
@@ -344,4 +359,46 @@ describe("토큰 갱신 성공", () => {
 
     expect(renewAuthorizations).toEqual([undefined, undefined])
   })
+
+  it.each([
+    { authPath: TOKEN_RENEW_PATH, label: "토큰 갱신" },
+    { authPath: "/v1/auth/login/email", label: "로그인" },
+  ])(
+    "쿼리에 $label 경로가 포함된 일반 요청은 401 이후 토큰을 갱신한다",
+    async ({ authPath }) => {
+      const targetUrl = `/protected?next=${authPath}`
+      let protectedAttempt = 0
+      let renewCount = 0
+      let retryAuthorization: unknown
+      const adapter = vi.fn<AxiosAdapter>(async (config) => {
+        if (config.url === TOKEN_RENEW_PATH) {
+          renewCount += 1
+          return createResponse(config, 200, {
+            success: true,
+            result: {
+              accessToken: "new-access",
+              refreshToken: "new-refresh",
+            },
+          })
+        }
+
+        protectedAttempt += 1
+        if (protectedAttempt === 1) {
+          return rejectUnauthorized(config)
+        }
+
+        retryAuthorization = config.headers.Authorization
+        return createResponse(config, 200, {
+          success: true,
+          result: config.url,
+        })
+      })
+      const { api } = await createSubject(adapter)
+
+      await api.get(targetUrl)
+
+      expect(renewCount).toBe(1)
+      expect(retryAuthorization).toBe("Bearer new-access")
+    },
+  )
 })
