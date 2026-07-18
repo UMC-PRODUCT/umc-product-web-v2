@@ -132,6 +132,19 @@ export function ApplicantListPage({
         ? schoolGroups.length > 0
         : false
 
+  const emptyScopedSchool =
+    role !== "central" && !hasGroups
+      ? role === "schoolStaff"
+        ? RECRUITING_MY_SCHOOL_MOCK
+        : filters.schoolTab !== "all"
+          ? filters.schoolTab
+          : undefined
+      : undefined
+  const showScopedEmptyCard = role !== "central" && !hasGroups
+  const emptyScopedAllStageRows = emptyScopedSchool
+    ? allStageRows.filter((row) => row.school === emptyScopedSchool)
+    : allStageRows
+
   return (
     <div className="flex w-full max-w-286.5 flex-col">
       <PageLabel
@@ -174,7 +187,7 @@ export function ApplicantListPage({
         showAssignedToggle={role === "schoolStaff"}
         className="mt-6"
       />
-      {(viewKind === "single" || !hasGroups) && (
+      {(viewKind === "single" || !hasGroups) && !showScopedEmptyCard && (
         <>
           <h2 className="text-heading-5-semibold mt-6 px-3 text-teal-700">
             {RECRUITING_TARGET_GISU_LABEL_MOCK}
@@ -188,6 +201,23 @@ export function ApplicantListPage({
             className="mt-4"
           />
         </>
+      )}
+      {showScopedEmptyCard && (
+        <section className="flex flex-col">
+          <h2 className="text-heading-5-semibold mt-6 px-3 text-teal-700">
+            {RECRUITING_MY_CHAPTER_MOCK}
+          </h2>
+          <ApplicantTableCard
+            visibleRows={[]}
+            allStageRows={emptyScopedAllStageRows}
+            stage={stage}
+            baseTime={baseTime}
+            titleBase={emptyScopedSchool}
+            columns={schoolCardColumns}
+            hasRecruitment={hasRecruitment}
+            className="mt-4"
+          />
+        </section>
       )}
       {viewKind === "chapterGroups" &&
         chapterGroups.map(({ chapter, rows: chapterRows }) => (
