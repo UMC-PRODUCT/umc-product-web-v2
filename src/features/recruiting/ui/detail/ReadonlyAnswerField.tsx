@@ -22,7 +22,11 @@ function OptionRow({
   content: string
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div
+      role={kind}
+      aria-checked={selected}
+      className="flex items-center gap-2"
+    >
       {kind === "radio" ? (
         <RadioIndicator checked={selected} variant="primary" />
       ) : (
