@@ -17,6 +17,8 @@ declare module "axios" {
   }
 }
 
+const TOKEN_RENEW_PATH = "/v1/auth/token/renew"
+
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
@@ -27,7 +29,10 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   config.analyticsStartTime = performance.now()
-  if (config.url?.includes("/v1/auth/token/renew")) return config
+  if (config.url?.includes(TOKEN_RENEW_PATH)) {
+    config.headers.delete("Authorization")
+    return config
+  }
   const token = authBridge.getAccessToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -36,6 +41,7 @@ api.interceptors.request.use((config) => {
 })
 
 let isRefreshing = false
+let isRedirectingToLogin = false
 let pendingQueue: Array<{
   resolve: (token: string) => void
   reject: (err: unknown) => void
@@ -49,6 +55,19 @@ function drainQueue(token: string) {
 function rejectQueue(err: unknown) {
   pendingQueue.forEach(({ reject }) => reject(err))
   pendingQueue = []
+}
+
+function terminateAuthentication(
+  reason: "missing_refresh_token" | "renew_failed" | "retry_unauthorized",
+) {
+  if (isRedirectingToLogin) return
+  isRedirectingToLogin = true
+  trackEvent("auth_token_refresh_error", {
+    reason,
+    page_path: getCurrentPagePath(),
+  })
+  authBridge.clear()
+  authBridge.redirectToLogin()
 }
 
 api.interceptors.response.use(
@@ -80,20 +99,20 @@ api.interceptors.response.use(
 
     if (
       error.response?.status !== 401 ||
-      originalRequest._retry ||
-      originalRequest.url?.includes("/v1/auth/login")
+      originalRequest.url?.includes("/v1/auth/login") ||
+      originalRequest.url?.includes(TOKEN_RENEW_PATH)
     ) {
+      return Promise.reject(error)
+    }
+
+    if (originalRequest._retry) {
+      terminateAuthentication("retry_unauthorized")
       return Promise.reject(error)
     }
 
     const refreshToken = authBridge.getRefreshToken()
     if (!refreshToken) {
-      trackEvent("auth_token_refresh_error", {
-        reason: "missing_refresh_token",
-        page_path: getCurrentPagePath(),
-      })
-      authBridge.clear()
-      authBridge.redirectToLogin()
+      terminateAuthentication("missing_refresh_token")
       return Promise.reject(error)
     }
 
@@ -101,6 +120,7 @@ api.interceptors.response.use(
       return new Promise((resolve, reject) => {
         pendingQueue.push({
           resolve: (token) => {
+            originalRequest._retry = true
             originalRequest.headers = {
               ...originalRequest.headers,
               Authorization: `Bearer ${token}`,
@@ -121,10 +141,9 @@ api.interceptors.response.use(
           accessToken: string
           refreshToken: string
         }>
-      >("/v1/auth/token/renew", { refreshToken })
+      >(TOKEN_RENEW_PATH, { refreshToken })
       const { accessToken, refreshToken: newRefreshToken } = data.result
       authBridge.setTokens({ accessToken, refreshToken: newRefreshToken })
-      api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
       drainQueue(accessToken)
       originalRequest.headers = {
         ...originalRequest.headers,
@@ -132,13 +151,8 @@ api.interceptors.response.use(
       }
       return api(originalRequest)
     } catch (refreshError) {
-      trackEvent("auth_token_refresh_error", {
-        reason: "renew_failed",
-        page_path: getCurrentPagePath(),
-      })
       rejectQueue(refreshError)
-      authBridge.clear()
-      authBridge.redirectToLogin()
+      terminateAuthentication("renew_failed")
       return Promise.reject(refreshError)
     } finally {
       isRefreshing = false
