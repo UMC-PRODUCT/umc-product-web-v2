@@ -12,6 +12,7 @@ function DocumentEvaluationDetailRoute() {
   const { applicationId } = Route.useParams()
   return (
     <ApplicationEvaluationDetailPage
+      key={applicationId}
       stage="document"
       applicationId={applicationId}
     />
