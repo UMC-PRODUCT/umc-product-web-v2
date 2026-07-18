@@ -70,4 +70,29 @@ describe("ApplicantRow", () => {
     fireEvent.click(screen.getByRole("button", { name: "지원자 상세 펼치기" }))
     expect(onToggle).toHaveBeenCalledOnce()
   })
+
+  it("최종 평가에서는 일시 컬럼과 평가 수를 렌더하지 않는다", () => {
+    const row = createApplicantRow()
+    row.evaluations.final = {
+      progress: "done",
+      doneCount: 5,
+      totalCount: 5,
+      result: "pass",
+      myProgress: "done",
+    }
+
+    render(
+      <ApplicantRow
+        row={row}
+        stage="final"
+        expanded={false}
+        onToggle={() => {}}
+      />,
+    )
+
+    expect(screen.queryByText("04/22")).not.toBeInTheDocument()
+    expect(screen.queryByText("-")).not.toBeInTheDocument()
+    expect(screen.queryByText("/")).not.toBeInTheDocument()
+    expect(screen.getByText("완료")).toBeInTheDocument()
+  })
 })

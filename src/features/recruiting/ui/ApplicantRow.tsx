@@ -11,7 +11,7 @@ import {
   formatRecruitmentType,
   getStageEvaluation,
 } from "../model/applicantListTypes"
-import { APPLICANT_COLUMNS } from "./ApplicantTableHead"
+import { APPLICANT_COLUMNS } from "./applicantTableColumns"
 import { EvaluationStatusChip } from "./EvaluationStatusChip"
 
 import type { EvaluationStage } from "../model/evaluationStage"
@@ -47,23 +47,24 @@ export function ApplicantRow({
       className="border-teal-gray-150/60 hover:bg-teal-gray-50 flex h-17 items-center gap-2.5 border-b bg-white pr-5.5 pl-2.5 transition-colors"
     >
       <div className="flex min-w-0 flex-1 items-center">
-        {timestamp ? (
-          <TimestampLabel
-            date={timestamp.date}
-            time={timestamp.time}
-            action={STAGE_TIME_LABEL[stage]}
-            className={APPLICANT_COLUMNS.appliedAt}
-          />
-        ) : (
-          <span
-            className={cn(
-              "text-body-2-regular text-teal-gray-900",
-              APPLICANT_COLUMNS.appliedAt,
-            )}
-          >
-            -
-          </span>
-        )}
+        {stage !== "final" &&
+          (timestamp ? (
+            <TimestampLabel
+              date={timestamp.date}
+              time={timestamp.time}
+              action={STAGE_TIME_LABEL[stage]}
+              className={APPLICANT_COLUMNS.appliedAt}
+            />
+          ) : (
+            <span
+              className={cn(
+                "text-body-2-regular text-teal-gray-900",
+                APPLICANT_COLUMNS.appliedAt,
+              )}
+            >
+              -
+            </span>
+          ))}
         <span className={APPLICANT_COLUMNS.applicant}>
           <span className="text-body-2-medium text-teal-gray-900 truncate">
             {row.applicantName}

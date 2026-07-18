@@ -60,6 +60,8 @@ import { Route as MatchingNoticePublishRouteImport } from './routes/matching/not
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
 import { Route as LoginDefaultRouteImport } from './routes/login/default'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
+import { Route as RecruitingEvaluationsInterviewRouteImport } from './routes/recruiting/evaluations/interview'
+import { Route as RecruitingEvaluationsFinalRouteImport } from './routes/recruiting/evaluations/final'
 import { Route as RecruitingEvaluationsDocumentRouteImport } from './routes/recruiting/evaluations/document'
 import { Route as OauthKakaoCallbackRouteImport } from './routes/oauth/kakao/callback'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
@@ -331,6 +333,18 @@ const MatchingProjectsIndexRoute = MatchingProjectsIndexRouteImport.update({
   path: '/projects/',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const RecruitingEvaluationsInterviewRoute =
+  RecruitingEvaluationsInterviewRouteImport.update({
+    id: '/evaluations/interview',
+    path: '/evaluations/interview',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const RecruitingEvaluationsFinalRoute =
+  RecruitingEvaluationsFinalRouteImport.update({
+    id: '/evaluations/final',
+    path: '/evaluations/final',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
 const RecruitingEvaluationsDocumentRoute =
   RecruitingEvaluationsDocumentRouteImport.update({
     id: '/evaluations/document',
@@ -459,6 +473,8 @@ export interface FileRoutesByFullPath {
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRoute
+  '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
+  '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
@@ -520,6 +536,8 @@ export interface FileRoutesByTo {
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRoute
+  '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
+  '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
@@ -586,6 +604,8 @@ export interface FileRoutesById {
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRoute
+  '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
+  '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
@@ -653,6 +673,8 @@ export interface FileRouteTypes {
     | '/matching/projects/new'
     | '/oauth/kakao/callback'
     | '/recruiting/evaluations/document'
+    | '/recruiting/evaluations/final'
+    | '/recruiting/evaluations/interview'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
@@ -714,6 +736,8 @@ export interface FileRouteTypes {
     | '/matching/projects/new'
     | '/oauth/kakao/callback'
     | '/recruiting/evaluations/document'
+    | '/recruiting/evaluations/final'
+    | '/recruiting/evaluations/interview'
     | '/matching/projects'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
@@ -779,6 +803,8 @@ export interface FileRouteTypes {
     | '/matching/projects/new'
     | '/oauth/kakao/callback'
     | '/recruiting/evaluations/document'
+    | '/recruiting/evaluations/final'
+    | '/recruiting/evaluations/interview'
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
@@ -1192,6 +1218,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsIndexRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/recruiting/evaluations/interview': {
+      id: '/recruiting/evaluations/interview'
+      path: '/evaluations/interview'
+      fullPath: '/recruiting/evaluations/interview'
+      preLoaderRoute: typeof RecruitingEvaluationsInterviewRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/evaluations/final': {
+      id: '/recruiting/evaluations/final'
+      path: '/evaluations/final'
+      fullPath: '/recruiting/evaluations/final'
+      preLoaderRoute: typeof RecruitingEvaluationsFinalRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
     '/recruiting/evaluations/document': {
       id: '/recruiting/evaluations/document'
       path: '/evaluations/document'
@@ -1373,10 +1413,14 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
 
 interface RecruitingRouteRouteChildren {
   RecruitingEvaluationsDocumentRoute: typeof RecruitingEvaluationsDocumentRoute
+  RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
+  RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRoute
 }
 
 const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
   RecruitingEvaluationsDocumentRoute: RecruitingEvaluationsDocumentRoute,
+  RecruitingEvaluationsFinalRoute: RecruitingEvaluationsFinalRoute,
+  RecruitingEvaluationsInterviewRoute: RecruitingEvaluationsInterviewRoute,
 }
 
 const RecruitingRouteRouteWithChildren = RecruitingRouteRoute._addFileChildren(

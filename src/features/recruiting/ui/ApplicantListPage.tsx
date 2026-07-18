@@ -12,6 +12,7 @@ import {
   applyApplicantFilters,
   DEFAULT_APPLICANT_LIST_FILTERS,
   formatBaseTime,
+  getStageEvaluation,
 } from "../model/applicantListTypes"
 import {
   EVALUATION_STAGE_DESCRIPTION,
@@ -45,7 +46,11 @@ export function ApplicantListPage({
     () => (useMockData ? APPLICANT_LIST_MOCK : []),
     [useMockData],
   )
-  const filteredRows = useMemo(
+  const allStageRows = useMemo(
+    () => rows.filter((row) => getStageEvaluation(row, stage)),
+    [rows, stage],
+  )
+  const visibleRows = useMemo(
     () => applyApplicantFilters(rows, filters, stage),
     [rows, filters, stage],
   )
@@ -87,9 +92,10 @@ export function ApplicantListPage({
         {RECRUITING_TARGET_GISU_LABEL_MOCK}
       </h2>
       <ApplicantTableCard
-        rows={filteredRows}
+        visibleRows={visibleRows}
+        allStageRows={allStageRows}
         stage={stage}
-        totalCount={filteredRows.length}
+        totalCount={visibleRows.length}
         baseTime={baseTime}
         filters={filters}
         onFiltersChange={handleFiltersChange}

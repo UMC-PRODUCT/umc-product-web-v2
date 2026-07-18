@@ -29,8 +29,8 @@ export const APPLICANT_LIST_MOCK: ApplicantRow[] = [
     parts: ["design"],
     evaluations: {
       document: evaluation("done", 7, 7, "pass", "done"),
-      interview: evaluation("inProgress", 3, 7, null, "inProgress"),
-      final: null,
+      interview: evaluation("done", 7, 7, "pass", "done"),
+      final: evaluation("inProgress", 2, 5, null, "inProgress"),
     },
   },
   {
@@ -45,7 +45,7 @@ export const APPLICANT_LIST_MOCK: ApplicantRow[] = [
     evaluations: {
       document: evaluation("done", 7, 7, "pass", "done"),
       interview: evaluation("done", 7, 7, "pass", "done"),
-      final: evaluation("inProgress", 2, 5, null, "before"),
+      final: evaluation("done", 5, 5, "pass", "done"),
     },
   },
   {
@@ -105,8 +105,8 @@ export const APPLICANT_LIST_MOCK: ApplicantRow[] = [
     parts: ["web-pe", "mobile-pe"],
     evaluations: {
       document: evaluation("done", 7, 7, "pass", "done"),
-      interview: evaluation("inProgress", 5, 7, null, "done"),
-      final: null,
+      interview: evaluation("done", 7, 7, "pass", "done"),
+      final: evaluation("done", 5, 5, "fail", "done"),
     },
   },
   {
@@ -289,7 +289,7 @@ export const APPLICANT_LIST_MOCK: ApplicantRow[] = [
     evaluations: {
       document: evaluation("done", 7, 7, "pass", "done"),
       interview: evaluation("done", 7, 7, "pass", "done"),
-      final: evaluation("done", 5, 5, "fail", "done"),
+      final: evaluation("before", 0, 5, null, "before"),
     },
   },
   {
