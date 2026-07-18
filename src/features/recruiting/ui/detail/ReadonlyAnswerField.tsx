@@ -58,24 +58,36 @@ function AnswerBody({ question }: { question: ApplicationQuestion }) {
   }
 
   if (question.type === "file" || question.type === "portfolio") {
+    const link = question.textValue
+    const isEmpty = !link && question.files.length === 0
     return (
       <QuestionFieldBox className="gap-2">
-        {question.files.length === 0 ? (
+        {isEmpty && (
           <span className="text-body-1-regular text-teal-gray-400">-</span>
-        ) : (
-          question.files.map((file) => (
-            <a
-              key={file.fileId}
-              href={file.url}
-              target="_blank"
-              rel="noreferrer"
-              className="text-body-1-regular text-teal-gray-700 flex items-center gap-1.5 underline-offset-2 hover:underline"
-            >
-              <FileClip className="text-teal-gray-500 size-5 shrink-0" />
-              <span className="truncate">{file.name}</span>
-            </a>
-          ))
         )}
+        {link && (
+          <a
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            className="text-body-1-regular text-teal-gray-700 flex items-center gap-1.5 underline-offset-2 hover:underline"
+          >
+            <FileClip className="text-teal-gray-500 size-5 shrink-0" />
+            <span className="truncate">{link}</span>
+          </a>
+        )}
+        {question.files.map((file) => (
+          <a
+            key={file.fileId}
+            href={file.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-body-1-regular text-teal-gray-700 flex items-center gap-1.5 underline-offset-2 hover:underline"
+          >
+            <FileClip className="text-teal-gray-500 size-5 shrink-0" />
+            <span className="truncate">{file.name}</span>
+          </a>
+        ))}
       </QuestionFieldBox>
     )
   }
