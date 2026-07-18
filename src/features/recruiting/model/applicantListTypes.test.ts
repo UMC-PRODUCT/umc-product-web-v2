@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest"
 
 import {
   type ApplicantRow,
+  applyApplicantFilters,
   applyCardFilters,
   DEFAULT_APPLICANT_CARD_FILTERS,
+  DEFAULT_APPLICANT_LIST_FILTERS,
   formatAppliedAtParts,
 } from "./applicantListTypes"
 
@@ -72,6 +74,31 @@ describe("applyCardFilters 정렬", () => {
     expect(result.map(({ applicationId }) => applicationId)).toEqual([
       "first",
       "second",
+    ])
+  })
+})
+
+describe("applyApplicantFilters 결과 필터", () => {
+  it("대기 결과는 평가 완료지만 결과가 미확정인 지원자만 포함한다", () => {
+    const pending = createApplicant("pending", "2026-04-22T09:00:00", "가천대")
+    pending.evaluations.document.progress = "done"
+
+    const before = createApplicant("before", "2026-04-22T09:00:00", "한성대")
+    const inProgress = createApplicant(
+      "in-progress",
+      "2026-04-22T09:00:00",
+      "건국대",
+    )
+    inProgress.evaluations.document.progress = "inProgress"
+
+    const result = applyApplicantFilters(
+      [pending, before, inProgress],
+      { ...DEFAULT_APPLICANT_LIST_FILTERS, results: ["pending"] },
+      "document",
+    )
+
+    expect(result.map(({ applicationId }) => applicationId)).toEqual([
+      "pending",
     ])
   })
 })
