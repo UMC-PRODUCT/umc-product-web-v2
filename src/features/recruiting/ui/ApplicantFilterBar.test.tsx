@@ -40,4 +40,23 @@ describe("ApplicantFilterBar 지부 필터", () => {
     expect(screen.getByTestId("selected-schools")).toBeEmptyDOMElement()
     expect(screen.getByRole("button", { name: "학교" })).toBeInTheDocument()
   })
+
+  it("지부 스코프가 지정되면 학교별 체크와 지부 드롭다운을 숨긴다", () => {
+    render(
+      <ApplicantFilterBar
+        filters={DEFAULT_APPLICANT_LIST_FILTERS}
+        onFiltersChange={() => {}}
+        resultFilterLabel="서류 평가 결과"
+        chapterScope="Ferrum"
+      />,
+    )
+
+    expect(
+      screen.queryByRole("checkbox", { name: "학교별 보기" }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "지부" }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "학교" })).toBeInTheDocument()
+  })
 })

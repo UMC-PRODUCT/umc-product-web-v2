@@ -15,6 +15,7 @@ export interface StageEvaluation {
   totalCount: number
   result: EvaluationResult | null
   myProgress: EvaluationProgress
+  assignedToMe?: boolean
 }
 
 export interface ApplicantRow {
@@ -62,27 +63,37 @@ export type ApplicantOrder = (typeof APPLICANT_ORDER_OPTIONS)[number]["value"]
 export interface ApplicantListFilters {
   search: string
   bySchool: boolean
+  assignedOnly: boolean
   chapterTab: string
+  schoolTab: string
   chapters: string[]
   schools: string[]
   parts: string[]
   progresses: string[]
   results: string[]
+}
+
+export const DEFAULT_APPLICANT_LIST_FILTERS: ApplicantListFilters = {
+  search: "",
+  bySchool: false,
+  assignedOnly: false,
+  chapterTab: "all",
+  schoolTab: "all",
+  chapters: [],
+  schools: [],
+  parts: [],
+  progresses: [],
+  results: [],
+}
+
+export interface ApplicantCardFilters {
   includeRegular: boolean
   includeAdditional: boolean
   sort: ApplicantSort
   order: ApplicantOrder | ""
 }
 
-export const DEFAULT_APPLICANT_LIST_FILTERS: ApplicantListFilters = {
-  search: "",
-  bySchool: false,
-  chapterTab: "all",
-  chapters: [],
-  schools: [],
-  parts: [],
-  progresses: [],
-  results: [],
+export const DEFAULT_APPLICANT_CARD_FILTERS: ApplicantCardFilters = {
   includeRegular: true,
   includeAdditional: true,
   sort: "latest",
@@ -122,11 +133,7 @@ function resultOrderRank(result: EvaluationResult | null) {
 
 function matchesResultFilter(evaluation: StageEvaluation, results: string[]) {
   if (results.length === 0) return true
-  return results.some((result) =>
-    result === "pending"
-      ? evaluation.result === null
-      : evaluation.result === result,
-  )
+  return evaluation.result !== null && results.includes(evaluation.result)
 }
 
 function compareByOrder(
@@ -148,6 +155,13 @@ function compareByOrder(
   )
 }
 
+function scopeRowsToStage(rows: ApplicantRow[], stage: EvaluationStage) {
+  return rows.flatMap((row) => {
+    const evaluation = getStageEvaluation(row, stage)
+    return evaluation ? [{ row, evaluation }] : []
+  })
+}
+
 export function applyApplicantFilters(
   rows: ApplicantRow[],
   filters: ApplicantListFilters,
@@ -157,62 +171,77 @@ export function applyApplicantFilters(
   const chapters =
     filters.chapterTab === "all" ? filters.chapters : [filters.chapterTab]
 
-  const scoped = rows.flatMap((row) => {
-    const evaluation = getStageEvaluation(row, stage)
-    return evaluation ? [{ row, evaluation }] : []
-  })
+  const scoped = scopeRowsToStage(rows, stage)
 
   const normalizedSearch = search.toLowerCase()
 
-  const filtered = scoped.filter(({ row, evaluation }) => {
-    if (
-      normalizedSearch &&
-      !row.applicantName.toLowerCase().includes(normalizedSearch)
-    ) {
-      return false
-    }
-    if (chapters.length > 0 && !chapters.includes(row.chapter)) return false
-    if (filters.schools.length > 0 && !filters.schools.includes(row.school)) {
-      return false
-    }
-    if (
-      filters.parts.length > 0 &&
-      !row.parts.some((part) => filters.parts.includes(part))
-    ) {
-      return false
-    }
-    if (
-      filters.progresses.length > 0 &&
-      !filters.progresses.includes(evaluation.progress)
-    ) {
-      return false
-    }
-    if (!matchesResultFilter(evaluation, filters.results)) return false
-    if (!filters.includeRegular && row.recruitmentType === "regular") {
-      return false
-    }
-    if (!filters.includeAdditional && row.recruitmentType === "additional") {
-      return false
-    }
-    return true
-  })
+  return scoped
+    .filter(({ row, evaluation }) => {
+      if (
+        normalizedSearch &&
+        !row.applicantName.toLowerCase().includes(normalizedSearch)
+      ) {
+        return false
+      }
+      if (chapters.length > 0 && !chapters.includes(row.chapter)) return false
+      if (filters.schoolTab !== "all" && row.school !== filters.schoolTab) {
+        return false
+      }
+      if (filters.schools.length > 0 && !filters.schools.includes(row.school)) {
+        return false
+      }
+      if (
+        filters.parts.length > 0 &&
+        !row.parts.some((part) => filters.parts.includes(part))
+      ) {
+        return false
+      }
+      if (
+        filters.progresses.length > 0 &&
+        !filters.progresses.includes(evaluation.progress)
+      ) {
+        return false
+      }
+      if (!matchesResultFilter(evaluation, filters.results)) return false
+      if (filters.assignedOnly && !evaluation.assignedToMe) return false
+      return true
+    })
+    .map(({ row }) => row)
+}
 
-  return filtered
+export function applyCardFilters(
+  rows: ApplicantRow[],
+  cardFilters: ApplicantCardFilters,
+  stage: EvaluationStage,
+) {
+  return scopeRowsToStage(rows, stage)
+    .filter(({ row }) => {
+      if (!cardFilters.includeRegular && row.recruitmentType === "regular") {
+        return false
+      }
+      if (
+        !cardFilters.includeAdditional &&
+        row.recruitmentType === "additional"
+      ) {
+        return false
+      }
+      return true
+    })
     .sort((a, b) => {
       const byAppliedAt =
-        filters.sort === "latest"
+        cardFilters.sort === "latest"
           ? b.row.appliedAt.localeCompare(a.row.appliedAt)
           : a.row.appliedAt.localeCompare(b.row.appliedAt)
 
       if (byAppliedAt !== 0) return byAppliedAt
 
-      if (filters.order) {
+      if (cardFilters.order) {
         return compareByOrder(
           a.row,
           b.row,
           a.evaluation,
           b.evaluation,
-          filters.order,
+          cardFilters.order,
         )
       }
 

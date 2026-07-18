@@ -1,6 +1,10 @@
 import { useState } from "react"
 
-import { CHAPTERS, isChapter } from "@/entities/organization/model/chapters"
+import {
+  type Chapter,
+  CHAPTERS,
+  isChapter,
+} from "@/entities/organization/model/chapters"
 import FilterIcon from "@/shared/assets/icon/filter/FilterIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 import { cn } from "@/shared/lib/utils"
@@ -11,6 +15,7 @@ import {
 } from "@/shared/ui/FilterDropDown"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { SearchField } from "@/shared/ui/search-field/SearchField"
+import { Toggle } from "@/shared/ui/Toggle"
 
 import {
   type ApplicantListFilters,
@@ -38,12 +43,19 @@ const PROGRESS_OPTIONS = (["before", "inProgress", "done"] as const).map(
 const RESULT_OPTIONS = [
   { value: "pass", label: "합격" },
   { value: "fail", label: "불합격" },
-  { value: "pending", label: "대기" },
 ]
 
 function buildSchoolOptions(
   filters: ApplicantListFilters,
+  chapterScope?: Chapter,
 ): FilterDropdownOption[] {
+  if (chapterScope) {
+    return SCHOOLS_BY_BRANCH[chapterScope].map((school) => ({
+      value: school,
+      label: school,
+    }))
+  }
+
   const selectedChapters =
     filters.chapterTab === CHAPTER_ALL_VALUE
       ? filters.chapters.filter(isChapter)
@@ -62,6 +74,9 @@ interface ApplicantFilterBarProps {
   filters: ApplicantListFilters
   onFiltersChange: (partial: Partial<ApplicantListFilters>) => void
   resultFilterLabel: string
+  chapterScope?: Chapter
+  hideSchoolControls?: boolean
+  showAssignedToggle?: boolean
   className?: string
 }
 
@@ -69,10 +84,21 @@ export function ApplicantFilterBar({
   filters,
   onFiltersChange,
   resultFilterLabel,
+  chapterScope,
+  hideSchoolControls = false,
+  showAssignedToggle = false,
   className,
 }: ApplicantFilterBarProps) {
   const [openKey, setOpenKey] = useState<string | null>(null)
-  const schoolOptions = buildSchoolOptions(filters)
+  const schoolOptions = buildSchoolOptions(filters, chapterScope)
+  const showChapterFilter =
+    filters.chapterTab === CHAPTER_ALL_VALUE &&
+    !chapterScope &&
+    !hideSchoolControls
+  const showBySchool =
+    filters.chapterTab === CHAPTER_ALL_VALUE &&
+    !chapterScope &&
+    !hideSchoolControls
 
   const multiDropdownProps = (
     key: keyof Pick<
@@ -114,17 +140,34 @@ export function ApplicantFilterBar({
           <FilterIcon className="text-teal-gray-600 size-4" />
           필터
         </span>
-        <label className="flex cursor-pointer items-center gap-2">
-          <Checkbox
-            checked={filters.bySchool}
-            onChange={(checked) => onFiltersChange({ bySchool: checked })}
-            variant="primary"
-            aria-label="학교별 보기"
-          />
-          <span className="text-body-1-medium text-teal-gray-600">학교별</span>
-        </label>
+        {showAssignedToggle && (
+          <span className="flex items-center gap-2">
+            <span className="text-body-1-medium text-teal-gray-600">
+              내 담당 지원자
+            </span>
+            <Toggle
+              size="sm"
+              checked={filters.assignedOnly}
+              onChange={(checked) => onFiltersChange({ assignedOnly: checked })}
+              aria-label="내 담당 지원자만 보기"
+            />
+          </span>
+        )}
+        {showBySchool && (
+          <label className="flex cursor-pointer items-center gap-2">
+            <Checkbox
+              checked={filters.bySchool}
+              onChange={(checked) => onFiltersChange({ bySchool: checked })}
+              variant="primary"
+              aria-label="학교별 보기"
+            />
+            <span className="text-body-1-medium text-teal-gray-600">
+              학교별
+            </span>
+          </label>
+        )}
         <div className="flex items-center gap-2">
-          {filters.chapterTab === CHAPTER_ALL_VALUE && (
+          {showChapterFilter && (
             <FilterDropdown
               {...multiDropdownProps(
                 "chapters",
@@ -134,9 +177,11 @@ export function ApplicantFilterBar({
               )}
             />
           )}
-          <FilterDropdown
-            {...multiDropdownProps("schools", "학교", schoolOptions)}
-          />
+          {!hideSchoolControls && (
+            <FilterDropdown
+              {...multiDropdownProps("schools", "학교", schoolOptions)}
+            />
+          )}
           <FilterDropdown
             {...multiDropdownProps("parts", "지원 파트", PART_OPTIONS)}
           />

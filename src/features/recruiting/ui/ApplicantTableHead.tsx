@@ -4,55 +4,51 @@ import { ExpandableTableHead } from "@/shared/ui/table/ExpandableTableHead"
 import {
   APPLICANT_COLUMNS,
   type ApplicantColumnKey,
+  type ApplicantColumnOptions,
+  getVisibleApplicantColumns,
 } from "./applicantTableColumns"
 
 import type { EvaluationStage } from "../model/evaluationStage"
 
-function buildHeadLabels(
-  stage: EvaluationStage,
-): { key: ApplicantColumnKey; label: string }[] {
-  const labels: { key: ApplicantColumnKey; label: string }[] = []
-  if (stage !== "final") {
-    labels.push({
-      key: "appliedAt",
-      label: stage === "interview" ? "면접 일시" : "지원 일시",
-    })
+function columnLabel(key: ApplicantColumnKey, stage: EvaluationStage) {
+  if (key === "appliedAt") {
+    return stage === "interview" ? "면접 일시" : "지원 일시"
   }
-  labels.push(
-    { key: "applicant", label: "지원자" },
-    { key: "chapter", label: "지부" },
-    { key: "school", label: "학교" },
-    { key: "type", label: "유형" },
-    { key: "parts", label: "지원 파트" },
-    { key: "progress", label: "평가 상태" },
-    { key: "result", label: stage === "final" ? "최종 결과" : "평가 결과" },
-  )
-  return labels
+  if (key === "result") {
+    return stage === "final" ? "최종 결과" : "평가 결과"
+  }
+  const labels: Record<
+    Exclude<ApplicantColumnKey, "appliedAt" | "result">,
+    string
+  > = {
+    applicant: "지원자",
+    chapter: "지부",
+    school: "학교",
+    type: "유형",
+    parts: "지원 파트",
+    myEvaluation: "내 담당 평가",
+    progress: "평가 상태",
+  }
+  return labels[key]
 }
 
 interface ApplicantTableHeadProps {
   stage: EvaluationStage
-  hasExpanded?: boolean
-  onToggleAll?: () => void
+  columns?: ApplicantColumnOptions
   className?: string
 }
 
 export function ApplicantTableHead({
   stage,
-  hasExpanded = false,
-  onToggleAll,
+  columns,
   className,
 }: ApplicantTableHeadProps) {
-  const headLabels = buildHeadLabels(stage)
+  const visibleColumns = getVisibleApplicantColumns(stage, columns)
 
   return (
-    <ExpandableTableHead
-      expanded={hasExpanded}
-      onToggle={onToggleAll}
-      className={cn("gap-2.5", className)}
-    >
+    <ExpandableTableHead className={cn("gap-2.5", className)}>
       <div className="flex min-w-0 flex-1 items-center">
-        {headLabels.map(({ key, label }) => (
+        {visibleColumns.map((key) => (
           <span
             key={key}
             role="columnheader"
@@ -62,7 +58,7 @@ export function ApplicantTableHead({
               key === "parts" && "justify-center",
             )}
           >
-            {label}
+            {columnLabel(key, stage)}
           </span>
         ))}
       </div>

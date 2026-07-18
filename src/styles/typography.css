@@ -131,6 +131,11 @@
   --text-body-3-regular-leading: 1.5;
   --text-body-3-regular-tracking: 0em;
 
+  --text-body-4-regular-size: 1rem;
+  --text-body-4-regular-weight: 400;
+  --text-body-4-regular-leading: 1.6;
+  --text-body-4-regular-tracking: -0.01em;
+
   /* -------------------------
    * Label
    * ------------------------- */
@@ -372,6 +377,13 @@
   font-weight: var(--text-body-3-regular-weight);
   line-height: var(--text-body-3-regular-leading);
   letter-spacing: var(--text-body-3-regular-tracking);
+}
+
+@utility text-body-4-regular {
+  font-size: var(--text-body-4-regular-size);
+  font-weight: var(--text-body-4-regular-weight);
+  line-height: var(--text-body-4-regular-leading);
+  letter-spacing: var(--text-body-4-regular-tracking);
 }
 
 @utility text-label-1-semibold {

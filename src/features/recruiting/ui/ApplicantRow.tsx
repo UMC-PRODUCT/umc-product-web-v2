@@ -1,4 +1,3 @@
-import FilterDropDownIcon from "@/shared/assets/icon/chevron/FilterDropDownIcon"
 import { cn } from "@/shared/lib/utils"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
@@ -11,7 +10,11 @@ import {
   formatRecruitmentType,
   getStageEvaluation,
 } from "../model/applicantListTypes"
-import { APPLICANT_COLUMNS } from "./applicantTableColumns"
+import {
+  APPLICANT_COLUMNS,
+  type ApplicantColumnOptions,
+  getVisibleApplicantColumns,
+} from "./applicantTableColumns"
 import { EvaluationStatusChip } from "./EvaluationStatusChip"
 
 import type { EvaluationStage } from "../model/evaluationStage"
@@ -25,29 +28,24 @@ const STAGE_TIME_LABEL: Record<EvaluationStage, string> = {
 interface ApplicantRowProps {
   row: ApplicantRowModel
   stage: EvaluationStage
-  expanded: boolean
-  onToggle: () => void
+  columns?: ApplicantColumnOptions
 }
 
-export function ApplicantRow({
-  row,
-  stage,
-  expanded,
-  onToggle,
-}: ApplicantRowProps) {
+export function ApplicantRow({ row, stage, columns }: ApplicantRowProps) {
   const evaluation = getStageEvaluation(row, stage)
   if (!evaluation) return null
 
+  const visibleColumns = new Set(getVisibleApplicantColumns(stage, columns))
   const timeAt = stage === "interview" ? row.interviewAt : row.appliedAt
   const timestamp = timeAt ? formatAppliedAtParts(timeAt) : null
 
   return (
     <div
       role="row"
-      className="border-teal-gray-150/60 hover:bg-teal-gray-50 flex h-17 items-center gap-2.5 border-b bg-white pr-5.5 pl-2.5 transition-colors"
+      className="border-teal-gray-150/60 hover:bg-teal-gray-50 flex h-17 items-center border-b bg-white pr-5.5 pl-2.5 transition-colors"
     >
       <div className="flex min-w-0 flex-1 items-center">
-        {stage !== "final" &&
+        {visibleColumns.has("appliedAt") &&
           (timestamp ? (
             <TimestampLabel
               date={timestamp.date}
@@ -70,16 +68,20 @@ export function ApplicantRow({
             {row.applicantName}
           </span>
         </span>
-        <span className={APPLICANT_COLUMNS.chapter}>
-          <span className="text-body-2-medium text-teal-gray-900 truncate">
-            {row.chapter}
+        {visibleColumns.has("chapter") && (
+          <span className={APPLICANT_COLUMNS.chapter}>
+            <span className="text-body-2-medium text-teal-gray-900 truncate">
+              {row.chapter}
+            </span>
           </span>
-        </span>
-        <span className={APPLICANT_COLUMNS.school}>
-          <span className="text-body-2-medium text-teal-gray-900 truncate">
-            {row.school}
+        )}
+        {visibleColumns.has("school") && (
+          <span className={APPLICANT_COLUMNS.school}>
+            <span className="text-body-2-medium text-teal-gray-900 truncate">
+              {row.school}
+            </span>
           </span>
-        </span>
+        )}
         <span
           className={cn(
             "text-body-2-medium text-teal-gray-900 whitespace-nowrap",
@@ -93,6 +95,11 @@ export function ApplicantRow({
             <PartTagChip key={part} role={part} type="light" />
           ))}
         </span>
+        {visibleColumns.has("myEvaluation") && (
+          <span className={APPLICANT_COLUMNS.myEvaluation}>
+            <EvaluationStatusChip progress={evaluation.myProgress} />
+          </span>
+        )}
         <span className={APPLICANT_COLUMNS.progress}>
           <EvaluationStatusChip progress={evaluation.progress} />
           {stage !== "final" && (
@@ -109,20 +116,6 @@ export function ApplicantRow({
           )}
         </span>
       </div>
-      <button
-        type="button"
-        aria-label={expanded ? "지원자 상세 접기" : "지원자 상세 펼치기"}
-        aria-expanded={expanded}
-        onClick={onToggle}
-        className="shadow-inner-neutral-1 flex size-7.5 shrink-0 items-center justify-center rounded-[10px] bg-white"
-      >
-        <FilterDropDownIcon
-          className={cn(
-            "text-teal-gray-700 transition-transform",
-            expanded && "rotate-180",
-          )}
-        />
-      </button>
     </div>
   )
 }
