@@ -53,12 +53,22 @@ function deriveCardTitle(
 
 function deriveCardStatus(
   allStageRows: ApplicantRowModel[],
+  cardFilters: ApplicantCardFilters,
   stage: EvaluationStage,
   hasRecruitment: boolean,
 ): CardStatus {
   if (!hasRecruitment) return "beforeRecruit"
 
   const evaluations = allStageRows.flatMap((row) => {
+    if (!cardFilters.includeRegular && row.recruitmentType === "regular") {
+      return []
+    }
+    if (
+      !cardFilters.includeAdditional &&
+      row.recruitmentType === "additional"
+    ) {
+      return []
+    }
     const evaluation = getStageEvaluation(row, stage)
     return evaluation ? [evaluation] : []
   })
@@ -126,7 +136,9 @@ export function ApplicantTableCard({
 
   const isEmpty = rows.length === 0
   const statusTag =
-    CARD_STATUS_TAG[deriveCardStatus(allStageRows, stage, hasRecruitment)]
+    CARD_STATUS_TAG[
+      deriveCardStatus(allStageRows, cardFilters, stage, hasRecruitment)
+    ]
   const hasExpanded = rows.some((row) => expandedIds.has(row.applicationId))
 
   const handleCardFiltersChange = (partial: Partial<ApplicantCardFilters>) => {
