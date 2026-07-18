@@ -70,6 +70,7 @@ export function MyStageEvaluationPanel({
             onChange={(event) => setComment(event.target.value)}
             maxLength={COMMENT_MAX_LENGTH}
             disabled={locked}
+            aria-label="코멘트"
             placeholder="코멘트를 작성해주세요."
             className={cn(
               "text-body-1-regular text-teal-gray-900 placeholder:text-teal-gray-400",
