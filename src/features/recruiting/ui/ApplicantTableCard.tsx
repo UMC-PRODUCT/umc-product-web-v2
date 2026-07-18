@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
@@ -8,14 +8,17 @@ import { Tag, type TagTone } from "@/shared/ui/tag/Tag"
 import {
   APPLICANT_ORDER_OPTIONS,
   APPLICANT_SORT_OPTIONS,
-  type ApplicantListFilters,
+  type ApplicantCardFilters,
   type ApplicantRow as ApplicantRowModel,
+  applyCardFilters,
+  DEFAULT_APPLICANT_CARD_FILTERS,
   getStageEvaluation,
 } from "../model/applicantListTypes"
 import { ApplicantRow } from "./ApplicantRow"
 import { ApplicantTableHead } from "./ApplicantTableHead"
 
 import type { EvaluationStage } from "../model/evaluationStage"
+import type { ApplicantColumnOptions } from "./applicantTableColumns"
 
 type CardStatus =
   | "beforeRecruit"
@@ -34,10 +37,27 @@ const CARD_STATUS_TAG: Record<CardStatus, { tone: TagTone; label: string }> = {
   beforeEval: { tone: "gray", label: "평가 전" },
 }
 
+function deriveCardTitle(
+  titleBase: string | undefined,
+  cardFilters: ApplicantCardFilters,
+) {
+  if (!titleBase) return "전체 지원자"
+  if (cardFilters.includeRegular && !cardFilters.includeAdditional) {
+    return `${titleBase} 정규 지원자`
+  }
+  if (!cardFilters.includeRegular && cardFilters.includeAdditional) {
+    return `${titleBase} 추가 지원자`
+  }
+  return `${titleBase} 전체 지원자`
+}
+
 function deriveCardStatus(
   allStageRows: ApplicantRowModel[],
   stage: EvaluationStage,
+  hasRecruitment: boolean,
 ): CardStatus {
+  if (!hasRecruitment) return "beforeRecruit"
+
   const evaluations = allStageRows.flatMap((row) => {
     const evaluation = getStageEvaluation(row, stage)
     return evaluation ? [evaluation] : []
@@ -51,14 +71,31 @@ function deriveCardStatus(
   return allDone ? "evaluated" : "evaluating"
 }
 
+function deriveEmptyMessage(
+  cardFilters: ApplicantCardFilters,
+  hasRecruitment: boolean,
+) {
+  const additionalOnly =
+    cardFilters.includeAdditional && !cardFilters.includeRegular
+  if (!hasRecruitment) {
+    return additionalOnly
+      ? "현재 추가 모집 중인 공고가 없습니다."
+      : "현재 등록된 모집 공고가 없습니다."
+  }
+  return additionalOnly
+    ? "현재 추가 모집 지원자가 없습니다."
+    : "현재 지원자가 없습니다."
+}
+
 interface ApplicantTableCardProps {
   visibleRows: ApplicantRowModel[]
   allStageRows: ApplicantRowModel[]
   stage: EvaluationStage
-  totalCount: number
   baseTime: string
-  filters: ApplicantListFilters
-  onFiltersChange: (partial: Partial<ApplicantListFilters>) => void
+  titleBase?: string
+  columns?: ApplicantColumnOptions
+  initialCardFilters?: Partial<ApplicantCardFilters>
+  hasRecruitment?: boolean
   className?: string
 }
 
@@ -66,22 +103,35 @@ export function ApplicantTableCard({
   visibleRows,
   allStageRows,
   stage,
-  totalCount,
   baseTime,
-  filters,
-  onFiltersChange,
+  titleBase,
+  columns,
+  initialCardFilters,
+  hasRecruitment = true,
   className,
 }: ApplicantTableCardProps) {
+  const [cardFilters, setCardFilters] = useState<ApplicantCardFilters>({
+    ...DEFAULT_APPLICANT_CARD_FILTERS,
+    ...initialCardFilters,
+  })
   const [openDropdown, setOpenDropdown] = useState<"sort" | "order" | null>(
     null,
   )
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
-  const isEmpty = visibleRows.length === 0
-  const statusTag = CARD_STATUS_TAG[deriveCardStatus(allStageRows, stage)]
-  const hasExpanded = visibleRows.some((row) =>
-    expandedIds.has(row.applicationId),
+  const rows = useMemo(
+    () => applyCardFilters(visibleRows, cardFilters, stage),
+    [visibleRows, cardFilters, stage],
   )
+
+  const isEmpty = rows.length === 0
+  const statusTag =
+    CARD_STATUS_TAG[deriveCardStatus(allStageRows, stage, hasRecruitment)]
+  const hasExpanded = rows.some((row) => expandedIds.has(row.applicationId))
+
+  const handleCardFiltersChange = (partial: Partial<ApplicantCardFilters>) => {
+    setCardFilters((prev) => ({ ...prev, ...partial }))
+  }
 
   const toggleRow = (applicationId: string) => {
     setExpandedIds((prev) => {
@@ -94,9 +144,9 @@ export function ApplicantTableCard({
 
   const toggleAll = () => {
     setExpandedIds((prev) =>
-      visibleRows.some((row) => prev.has(row.applicationId))
+      rows.some((row) => prev.has(row.applicationId))
         ? new Set<string>()
-        : new Set(visibleRows.map((row) => row.applicationId)),
+        : new Set(rows.map((row) => row.applicationId)),
     )
   }
 
@@ -109,15 +159,16 @@ export function ApplicantTableCard({
     >
       <div className="flex h-10 items-center justify-between">
         <h3 className="text-heading-6-semibold text-teal-gray-700">
-          전체 지원자
+          {deriveCardTitle(titleBase, cardFilters)}
         </h3>
         <div className="flex items-center gap-4">
           <label className="flex cursor-pointer items-center gap-2">
             <Checkbox
-              checked={filters.includeRegular}
-              onChange={(checked) =>
-                onFiltersChange({ includeRegular: checked })
-              }
+              checked={cardFilters.includeRegular}
+              onChange={(checked) => {
+                if (!checked && !cardFilters.includeAdditional) return
+                handleCardFiltersChange({ includeRegular: checked })
+              }}
               variant="primary"
               aria-label="정규 모집 포함"
             />
@@ -127,10 +178,11 @@ export function ApplicantTableCard({
           </label>
           <label className="flex cursor-pointer items-center gap-2">
             <Checkbox
-              checked={filters.includeAdditional}
-              onChange={(checked) =>
-                onFiltersChange({ includeAdditional: checked })
-              }
+              checked={cardFilters.includeAdditional}
+              onChange={(checked) => {
+                if (!checked && !cardFilters.includeRegular) return
+                handleCardFiltersChange({ includeAdditional: checked })
+              }}
               variant="primary"
               aria-label="추가 모집 포함"
             />
@@ -148,14 +200,14 @@ export function ApplicantTableCard({
             }
             onRequestClose={() => setOpenDropdown(null)}
             options={APPLICANT_SORT_OPTIONS}
-            selectedValue={filters.sort}
+            selectedValue={cardFilters.sort}
             selectedLabel={
               APPLICANT_SORT_OPTIONS.find(
-                (option) => option.value === filters.sort,
+                (option) => option.value === cardFilters.sort,
               )?.label
             }
             onSelect={(value) =>
-              onFiltersChange({
+              handleCardFiltersChange({
                 sort: value === "registered" ? "registered" : "latest",
               })
             }
@@ -170,16 +222,18 @@ export function ApplicantTableCard({
             }
             onRequestClose={() => setOpenDropdown(null)}
             options={APPLICANT_ORDER_OPTIONS}
-            selectedValue={filters.order === "" ? undefined : filters.order}
+            selectedValue={
+              cardFilters.order === "" ? undefined : cardFilters.order
+            }
             selectedLabel={
               APPLICANT_ORDER_OPTIONS.find(
-                (option) => option.value === filters.order,
+                (option) => option.value === cardFilters.order,
               )?.label
             }
             onSelect={(value) =>
-              onFiltersChange({
+              handleCardFiltersChange({
                 order:
-                  filters.order === value
+                  cardFilters.order === value
                     ? ""
                     : (APPLICANT_ORDER_OPTIONS.find(
                         (option) => option.value === value,
@@ -195,7 +249,7 @@ export function ApplicantTableCard({
         </span>
         <span className="bg-teal-gray-200 h-3 w-px" aria-hidden="true" />
         <span className="text-body-1-regular text-teal-gray-400">
-          총 {totalCount.toLocaleString()} 명
+          총 {visibleRows.length.toLocaleString()} 명
         </span>
         <Tag tone={statusTag.tone} className="ml-1">
           {statusTag.label}
@@ -205,21 +259,23 @@ export function ApplicantTableCard({
         {isEmpty ? (
           <div className="flex min-h-75 items-center justify-center">
             <p className="text-body-2-regular text-teal-gray-400">
-              현재 지원자가 없습니다.
+              {deriveEmptyMessage(cardFilters, hasRecruitment)}
             </p>
           </div>
         ) : (
           <>
             <ApplicantTableHead
               stage={stage}
+              columns={columns}
               hasExpanded={hasExpanded}
               onToggleAll={toggleAll}
             />
-            {visibleRows.map((row) => (
+            {rows.map((row) => (
               <ApplicantRow
                 key={row.applicationId}
                 row={row}
                 stage={stage}
+                columns={columns}
                 expanded={expandedIds.has(row.applicationId)}
                 onToggle={() => toggleRow(row.applicationId)}
               />

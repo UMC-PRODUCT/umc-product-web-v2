@@ -1,7 +1,6 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { DEFAULT_APPLICANT_LIST_FILTERS } from "../model/applicantListTypes"
 import { ApplicantTableCard } from "./ApplicantTableCard"
 
 import type {
@@ -41,10 +40,7 @@ function renderCard(visibleRows: ApplicantRow[], allStageRows: ApplicantRow[]) {
       visibleRows={visibleRows}
       allStageRows={allStageRows}
       stage="document"
-      totalCount={visibleRows.length}
       baseTime="26-07-04 02:48"
-      filters={DEFAULT_APPLICANT_LIST_FILTERS}
-      onFiltersChange={() => {}}
     />,
   )
 }
@@ -75,5 +71,56 @@ describe("ApplicantTableCard", () => {
     renderCard([], [])
 
     expect(screen.getByText("지원 전")).toBeInTheDocument()
+  })
+
+  it("모집 공고가 없으면 모집 전 상태와 안내 문구를 표시한다", () => {
+    render(
+      <ApplicantTableCard
+        visibleRows={[]}
+        allStageRows={[]}
+        stage="document"
+        baseTime="26-07-04 02:48"
+        hasRecruitment={false}
+      />,
+    )
+
+    expect(screen.getByText("모집 전")).toBeInTheDocument()
+    expect(
+      screen.getByText("현재 등록된 모집 공고가 없습니다."),
+    ).toBeInTheDocument()
+  })
+
+  it("추가 모집만 선택하고 비어 있으면 추가 모집 문구를 표시한다", () => {
+    render(
+      <ApplicantTableCard
+        visibleRows={[]}
+        allStageRows={[]}
+        stage="document"
+        baseTime="26-07-04 02:48"
+        initialCardFilters={{ includeRegular: false }}
+      />,
+    )
+
+    expect(
+      screen.getByText("현재 추가 모집 지원자가 없습니다."),
+    ).toBeInTheDocument()
+  })
+
+  it("마지막 남은 모집 체크는 해제할 수 없다", () => {
+    render(
+      <ApplicantTableCard
+        visibleRows={[]}
+        allStageRows={[]}
+        stage="document"
+        baseTime="26-07-04 02:48"
+        initialCardFilters={{ includeRegular: false }}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "추가 모집 포함" }))
+
+    expect(
+      screen.getByRole("checkbox", { name: "추가 모집 포함" }),
+    ).toBeChecked()
   })
 })

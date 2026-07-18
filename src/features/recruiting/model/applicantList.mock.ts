@@ -1,3 +1,5 @@
+import type { Chapter } from "@/entities/organization/model/chapters"
+
 import type {
   ApplicantRow,
   EvaluationProgress,
@@ -8,6 +10,10 @@ import type {
 export const APPLICANT_LIST_BASE_TIME_MOCK = "26-07-04 02:48"
 
 export const RECRUITING_TARGET_GISU_LABEL_MOCK = "UMC 11기"
+
+export const RECRUITING_MY_CHAPTER_MOCK: Chapter = "Ferrum"
+
+export const RECRUITING_MY_SCHOOL_MOCK = "이화여대"
 
 const evaluation = (
   progress: EvaluationProgress,
@@ -74,7 +80,10 @@ export const APPLICANT_LIST_MOCK: ApplicantRow[] = [
     recruitmentType: "regular",
     parts: ["web-pe"],
     evaluations: {
-      document: evaluation("done", 7, 7, "pass", "done"),
+      document: {
+        ...evaluation("done", 7, 7, "pass", "done"),
+        assignedToMe: true,
+      },
       interview: evaluation("done", 7, 7, "pass", "done"),
       final: evaluation("done", 5, 5, "pass", "done"),
     },
@@ -334,6 +343,40 @@ export const APPLICANT_LIST_MOCK: ApplicantRow[] = [
     parts: ["mobile-pe"],
     evaluations: {
       document: evaluation("inProgress", 3, 7, null, "inProgress"),
+      interview: null,
+      final: null,
+    },
+  },
+  {
+    applicationId: "122",
+    appliedAt: "2026-04-21T20:42:00",
+    interviewAt: null,
+    applicantName: "조은별",
+    chapter: "Ferrum",
+    school: "이화여대",
+    recruitmentType: "regular",
+    parts: ["design"],
+    evaluations: {
+      document: evaluation("inProgress", 4, 7, null, "before"),
+      interview: null,
+      final: null,
+    },
+  },
+  {
+    applicationId: "123",
+    appliedAt: "2026-04-21T20:15:00",
+    interviewAt: null,
+    applicantName: "남지호",
+    chapter: "Ferrum",
+    school: "이화여대",
+    recruitmentType: "additional",
+    additionalRound: 2,
+    parts: ["pm", "design"],
+    evaluations: {
+      document: {
+        ...evaluation("done", 7, 7, null, "done"),
+        assignedToMe: true,
+      },
       interview: null,
       final: null,
     },

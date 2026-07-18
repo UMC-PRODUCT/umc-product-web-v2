@@ -11,7 +11,11 @@ import {
   formatRecruitmentType,
   getStageEvaluation,
 } from "../model/applicantListTypes"
-import { APPLICANT_COLUMNS } from "./applicantTableColumns"
+import {
+  APPLICANT_COLUMNS,
+  type ApplicantColumnOptions,
+  getVisibleApplicantColumns,
+} from "./applicantTableColumns"
 import { EvaluationStatusChip } from "./EvaluationStatusChip"
 
 import type { EvaluationStage } from "../model/evaluationStage"
@@ -27,6 +31,7 @@ interface ApplicantRowProps {
   stage: EvaluationStage
   expanded: boolean
   onToggle: () => void
+  columns?: ApplicantColumnOptions
 }
 
 export function ApplicantRow({
@@ -34,12 +39,15 @@ export function ApplicantRow({
   stage,
   expanded,
   onToggle,
+  columns,
 }: ApplicantRowProps) {
   const evaluation = getStageEvaluation(row, stage)
   if (!evaluation) return null
 
+  const visibleColumns = new Set(getVisibleApplicantColumns(stage, columns))
   const timeAt = stage === "interview" ? row.interviewAt : row.appliedAt
   const timestamp = timeAt ? formatAppliedAtParts(timeAt) : null
+  const showPending = evaluation.progress === "done" && !evaluation.result
 
   return (
     <div
@@ -47,7 +55,7 @@ export function ApplicantRow({
       className="border-teal-gray-150/60 hover:bg-teal-gray-50 flex h-17 items-center gap-2.5 border-b bg-white pr-5.5 pl-2.5 transition-colors"
     >
       <div className="flex min-w-0 flex-1 items-center">
-        {stage !== "final" &&
+        {visibleColumns.has("appliedAt") &&
           (timestamp ? (
             <TimestampLabel
               date={timestamp.date}
@@ -70,16 +78,20 @@ export function ApplicantRow({
             {row.applicantName}
           </span>
         </span>
-        <span className={APPLICANT_COLUMNS.chapter}>
-          <span className="text-body-2-medium text-teal-gray-900 truncate">
-            {row.chapter}
+        {visibleColumns.has("chapter") && (
+          <span className={APPLICANT_COLUMNS.chapter}>
+            <span className="text-body-2-medium text-teal-gray-900 truncate">
+              {row.chapter}
+            </span>
           </span>
-        </span>
-        <span className={APPLICANT_COLUMNS.school}>
-          <span className="text-body-2-medium text-teal-gray-900 truncate">
-            {row.school}
+        )}
+        {visibleColumns.has("school") && (
+          <span className={APPLICANT_COLUMNS.school}>
+            <span className="text-body-2-medium text-teal-gray-900 truncate">
+              {row.school}
+            </span>
           </span>
-        </span>
+        )}
         <span
           className={cn(
             "text-body-2-medium text-teal-gray-900 whitespace-nowrap",
@@ -93,6 +105,11 @@ export function ApplicantRow({
             <PartTagChip key={part} role={part} type="light" />
           ))}
         </span>
+        {visibleColumns.has("myEvaluation") && (
+          <span className={APPLICANT_COLUMNS.myEvaluation}>
+            <EvaluationStatusChip progress={evaluation.myProgress} />
+          </span>
+        )}
         <span className={APPLICANT_COLUMNS.progress}>
           <EvaluationStatusChip progress={evaluation.progress} />
           {stage !== "final" && (
@@ -104,8 +121,10 @@ export function ApplicantRow({
           )}
         </span>
         <span className={APPLICANT_COLUMNS.result}>
-          {evaluation.result && (
+          {evaluation.result ? (
             <StatusChipTag type="tag" value={evaluation.result} />
+          ) : (
+            showPending && <StatusChipTag type="tag" value="pending" />
           )}
         </span>
       </div>

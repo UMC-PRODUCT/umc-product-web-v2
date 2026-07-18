@@ -71,6 +71,41 @@ describe("ApplicantRow", () => {
     expect(onToggle).toHaveBeenCalledOnce()
   })
 
+  it("평가가 완료됐지만 결과가 없으면 대기 태그를 표시한다", () => {
+    const row = createApplicantRow()
+    row.evaluations.document = {
+      progress: "done",
+      doneCount: 7,
+      totalCount: 7,
+      result: null,
+      myProgress: "done",
+    }
+
+    render(
+      <ApplicantRow
+        row={row}
+        stage="document"
+        expanded={false}
+        onToggle={() => {}}
+      />,
+    )
+
+    expect(screen.getByText("대기")).toBeInTheDocument()
+  })
+
+  it("평가가 진행 중이면 대기 태그를 표시하지 않는다", () => {
+    render(
+      <ApplicantRow
+        row={createApplicantRow()}
+        stage="document"
+        expanded={false}
+        onToggle={() => {}}
+      />,
+    )
+
+    expect(screen.queryByText("대기")).not.toBeInTheDocument()
+  })
+
   it("최종 평가에서는 일시 컬럼과 평가 수를 렌더하지 않는다", () => {
     const row = createApplicantRow()
     row.evaluations.final = {

@@ -8,6 +8,12 @@ export const EVALUATION_STAGE_LABEL: Record<EvaluationStage, string> = {
   final: "최종 평가",
 }
 
+export const EVALUATION_STAGE_SHORT_LABEL: Record<EvaluationStage, string> = {
+  document: "서류",
+  interview: "면접",
+  final: "최종",
+}
+
 export const EVALUATION_STAGE_DESCRIPTION: Record<EvaluationStage, string> = {
   document: "전체 지원자의 서류 평가 현황과 결과를 확인합니다.",
   interview: "전체 지원자의 면접 평가 현황과 결과를 확인합니다.",

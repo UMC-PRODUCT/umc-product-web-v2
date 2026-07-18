@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import {
   type ApplicantRow,
-  applyApplicantFilters,
-  DEFAULT_APPLICANT_LIST_FILTERS,
+  applyCardFilters,
+  DEFAULT_APPLICANT_CARD_FILTERS,
   formatAppliedAtParts,
 } from "./applicantListTypes"
 
@@ -35,15 +35,15 @@ function createApplicant(
   }
 }
 
-describe("applyApplicantFilters 정렬", () => {
+describe("applyCardFilters 정렬", () => {
   it("등록 순을 학교순보다 우선 적용한다", () => {
     const older = createApplicant("older", "2026-04-21T09:00:00", "한성대")
     const newer = createApplicant("newer", "2026-04-22T09:00:00", "가천대")
 
-    const result = applyApplicantFilters(
+    const result = applyCardFilters(
       [newer, older],
       {
-        ...DEFAULT_APPLICANT_LIST_FILTERS,
+        ...DEFAULT_APPLICANT_CARD_FILTERS,
         sort: "registered",
         order: "school",
       },
@@ -60,10 +60,10 @@ describe("applyApplicantFilters 정렬", () => {
     const second = createApplicant("second", "2026-04-22T09:00:00", "한성대")
     const first = createApplicant("first", "2026-04-22T09:00:00", "가천대")
 
-    const result = applyApplicantFilters(
+    const result = applyCardFilters(
       [second, first],
       {
-        ...DEFAULT_APPLICANT_LIST_FILTERS,
+        ...DEFAULT_APPLICANT_CARD_FILTERS,
         order: "school",
       },
       "document",
