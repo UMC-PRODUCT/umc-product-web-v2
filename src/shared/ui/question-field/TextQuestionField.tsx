@@ -14,6 +14,8 @@ interface TextQuestionFieldProps {
   size?: "lg" | "md"
   error?: string
   className?: string
+  ariaLabel?: string
+  ariaRequired?: boolean
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
   textareaRef?: React.RefObject<HTMLTextAreaElement | null>
 }
@@ -27,6 +29,8 @@ export function TextQuestionField({
   size = "lg",
   error,
   className,
+  ariaLabel,
+  ariaRequired,
   onKeyDown,
   textareaRef: externalTextareaRef,
 }: TextQuestionFieldProps) {
@@ -61,6 +65,8 @@ export function TextQuestionField({
           value={value}
           maxLength={maxLength}
           placeholder={placeholder}
+          aria-label={ariaLabel}
+          aria-required={ariaRequired || undefined}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}

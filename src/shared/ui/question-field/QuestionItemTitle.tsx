@@ -27,7 +27,11 @@ export function QuestionItemTitle({
           ) : (
             <span className="text-teal-gray-400">질문을 작성하세요</span>
           )}
-          {required && <span className="text-error-600 ml-1">*</span>}
+          {required && (
+            <span aria-hidden="true" className="text-error-600 ml-1">
+              *
+            </span>
+          )}
         </span>
         {caption !== undefined && caption !== "" && (
           <span className="text-body-2-regular text-teal-gray-600 break-keep whitespace-pre-wrap">
