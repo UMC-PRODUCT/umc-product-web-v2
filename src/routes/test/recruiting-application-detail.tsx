@@ -16,12 +16,14 @@ function parseStage(value: unknown): EvaluationStage {
 export const Route = createFileRoute("/test/recruiting-application-detail")({
   validateSearch: (search: Record<string, unknown>) => ({
     stage: parseStage(search.stage),
+    applicationId:
+      search.applicationId != null ? String(search.applicationId) : "101",
   }),
   component: RecruitingApplicationDetailTestPage,
 })
 
 function RecruitingApplicationDetailTestPage() {
-  const { stage } = Route.useSearch()
+  const { stage, applicationId } = Route.useSearch()
   const activePathname = `/recruiting/evaluations/${stage}`
 
   return (
@@ -32,8 +34,9 @@ function RecruitingApplicationDetailTestPage() {
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="min-h-200 px-8 pt-10 pb-20">
             <ApplicationEvaluationDetailPage
+              key={applicationId}
               stage={stage}
-              applicationId="app-101"
+              applicationId={applicationId}
             />
           </div>
         </div>
