@@ -11,7 +11,9 @@ import {
   type EvaluationStage,
 } from "../../model/evaluationStage"
 import { ApplicationFormReadonly } from "./ApplicationFormReadonly"
+import { EvaluationResultToggle } from "./EvaluationResultToggle"
 import { EvaluationStepper } from "./EvaluationStepper"
+import { InterviewAnswerCards } from "./InterviewAnswerCards"
 import { MyStageEvaluationPanel } from "./MyStageEvaluationPanel"
 import { OperatorEvaluationList } from "./OperatorEvaluationList"
 
@@ -35,8 +37,14 @@ export function ApplicationEvaluationDetailPage({
   const [detail, setDetail] = useState(() =>
     getApplicationDetailMock(applicationId),
   )
+  const [finalResult, setFinalResult] = useState<EvaluationResult | null>(
+    detail.finalResult,
+  )
   const evaluation = detail.evaluations[stage]
   const listPath = STAGE_LIST_PATH[stage]
+  const showFinalResult = stage !== "document"
+  const finalResultLabel =
+    stage === "final" ? "지원자 최종 평가" : "지원자 최종 결과"
 
   const handleComplete = (result: EvaluationResult, comment: string) => {
     setDetail((prev) => {
@@ -103,6 +111,9 @@ export function ApplicationEvaluationDetailPage({
             stage={stage}
             reachedStages={detail.reachedStages}
           />
+          {stage === "interview" && detail.interview && (
+            <InterviewAnswerCards content={detail.interview} />
+          )}
           {evaluation && (
             <>
               <MyStageEvaluationPanel
@@ -112,6 +123,20 @@ export function ApplicationEvaluationDetailPage({
               />
               <OperatorEvaluationList evaluation={evaluation} />
             </>
+          )}
+          {showFinalResult && (
+            <div className="flex items-center justify-center gap-4 pt-2">
+              <span className="text-heading-7-semibold text-teal-gray-800">
+                {finalResultLabel}
+              </span>
+              <EvaluationResultToggle
+                value={finalResult}
+                onChange={setFinalResult}
+                variant="strong"
+                failLabel="최종 불합격"
+                passLabel="최종 합격"
+              />
+            </div>
           )}
         </div>
       </div>
