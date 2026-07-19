@@ -60,6 +60,25 @@ export interface StageEvaluationDetail {
   operators: OperatorEvaluation[]
 }
 
+export interface InterviewAnswerSession {
+  sessionLabel: string
+  submittedAt: string | null
+  text: string
+}
+
+export interface InterviewQuestionBlock {
+  group: "common" | "individual"
+  title: string
+  totalCountLabel?: string
+  timestampLabel?: string
+  questions: { text: string }[]
+  answers: InterviewAnswerSession[]
+}
+
+export interface InterviewContent {
+  blocks: InterviewQuestionBlock[]
+}
+
 export interface ApplicationDetail {
   applicationId: string
   applicantName: string
@@ -70,6 +89,7 @@ export interface ApplicationDetail {
   reachedStages: EvaluationStage[]
   finalResult: EvaluationResult | null
   sections: ApplicationSection[]
+  interview: InterviewContent | null
   evaluations: Record<EvaluationStage, StageEvaluationDetail | null>
 }
 

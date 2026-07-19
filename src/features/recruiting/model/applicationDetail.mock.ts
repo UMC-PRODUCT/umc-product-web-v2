@@ -13,6 +13,7 @@ import type { PartTag } from "@/shared/model/domain"
 import type {
   ApplicationDetail,
   ApplicationSection,
+  InterviewContent,
   OperatorEvaluation,
   StageEvaluationDetail,
 } from "./applicationDetail"
@@ -228,9 +229,65 @@ function buildStageDetail(
   }
 }
 
+function buildInterviewContent(row: ApplicantRow): InterviewContent {
+  const interviewEvaluation = getStageEvaluation(row, "interview")
+  const totalCountLabel = interviewEvaluation
+    ? `총 ${interviewEvaluation.totalCount}명`
+    : undefined
+  return {
+    blocks: [
+      {
+        group: "common",
+        title: "공통 질문",
+        totalCountLabel,
+        timestampLabel: "26-07-04 02:48 기준",
+        questions: [
+          { text: "UMC는 어떻게 알게 되셨나요?" },
+          { text: "재학 중이신가요, 휴학 중이신가요?" },
+          { text: "무슨 노래 좋아하세요?" },
+          { text: "MBTI가 어떻게 되세요?" },
+        ],
+        answers: [
+          {
+            sessionLabel: "이방토/이예원",
+            submittedAt: "26-07-04 02:48 기준",
+            text: "1. 학교 카톡 공지방에서 봄\n2. 휴학 중\n3. 엑스지 좋아해요\n4. 궁금하면 오백원",
+          },
+          {
+            sessionLabel: "벨라/황지원",
+            submittedAt: "26-07-04 03:04 기준",
+            text: "1. 학교 카톡 공지방에서 봤다고 함\n2. 첫 휴학 학기\n3. 엑스지 좋아한다심\n4. 궁금하면 오백원이라심",
+          },
+        ],
+      },
+      {
+        group: "individual",
+        title: "개별 질문",
+        questions: [
+          { text: "전공이 어떻게 되시나요?" },
+          { text: "오프라인 참여도 가능하신가요?" },
+          {
+            text: "포트폴리오에서 OOO 프로젝트는 무엇인가요? 참여 비율은 어떻게 되나요?",
+          },
+          { text: "개발자와 협업해 보신 경험이 있으신가요?" },
+          { text: "서비스 배포 경험이 있으신가요?" },
+        ],
+        answers: [
+          {
+            sessionLabel: "이방토/이예원",
+            submittedAt: null,
+            text: "1. 커뮤니케이션 디자인학과\n2. 네\n3. 60% 정도입니다. 사용자 기반 앱 분석 UX Research이고 실 사용자 조사로 뽑아낸 Painpoint로 개선 접근해 리뉴얼을 진행한 것입니다.\n4. ㅇㅇ 4번\n5. ㅇㅇ 3번 했어요",
+          },
+        ],
+      },
+    ],
+  }
+}
+
 const STAGES: EvaluationStage[] = ["document", "interview", "final"]
 
 function buildDetailFromRow(row: ApplicantRow): ApplicationDetail {
+  const reachedStages = STAGES.filter((stage) => getStageEvaluation(row, stage))
   return {
     applicationId: row.applicationId,
     applicantName: row.applicantName,
@@ -238,12 +295,15 @@ function buildDetailFromRow(row: ApplicantRow): ApplicationDetail {
     school: row.school,
     recruitmentLabel: `${row.school} ${RECRUITING_TARGET_GISU_LABEL_MOCK} ${formatRecruitmentType(row)} 모집`,
     parts: row.parts,
-    reachedStages: STAGES.filter((stage) => getStageEvaluation(row, stage)),
+    reachedStages,
     finalResult: getStageEvaluation(row, "final")?.result ?? null,
     sections: [
       buildBasicSection(row),
       ...row.parts.map((part) => buildPartSection(row, part)),
     ],
+    interview: reachedStages.includes("interview")
+      ? buildInterviewContent(row)
+      : null,
     evaluations: {
       document: buildStageDetail(row, "document"),
       interview: buildStageDetail(row, "interview"),

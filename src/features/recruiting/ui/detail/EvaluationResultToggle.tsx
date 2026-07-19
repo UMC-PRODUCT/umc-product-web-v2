@@ -8,6 +8,7 @@ interface EvaluationResultToggleProps {
   onChange: (value: EvaluationResult) => void
   failLabel?: string
   passLabel?: string
+  variant?: "weak" | "strong"
   disabled?: boolean
   className?: string
 }
@@ -25,9 +26,14 @@ export function EvaluationResultToggle({
   onChange,
   failLabel = "불합격",
   passLabel = "합격",
+  variant = "weak",
   disabled = false,
   className,
 }: EvaluationResultToggleProps) {
+  const selectedClass =
+    variant === "strong"
+      ? "bg-teal-600 text-white"
+      : "border border-teal-200 bg-teal-100 text-teal-500"
   return (
     <div
       role="radiogroup"
@@ -51,9 +57,7 @@ export function EvaluationResultToggle({
             className={cn(
               "text-subtitle-3-semibold flex h-11 min-w-22 items-center justify-center gap-1.5 px-7 py-1 transition-colors",
               side === "left" ? "rounded-l-[8px]" : "rounded-r-[8px]",
-              selected
-                ? "border border-teal-200 bg-teal-100 text-teal-500"
-                : "text-teal-gray-700 bg-white",
+              selected ? selectedClass : "text-teal-gray-700 bg-white",
               !disabled && !selected && "hover:bg-teal-gray-50",
               disabled && "cursor-not-allowed",
             )}
