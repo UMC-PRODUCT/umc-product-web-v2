@@ -29,6 +29,7 @@ interface RecruitingApplyFormProps {
   config: ApplyFormConfig
   initialValues?: Partial<Record<string, ApplyAnswerValue>>
   onExit?: () => void
+  onViewApplication?: () => void
   className?: string
 }
 
@@ -87,6 +88,7 @@ export function RecruitingApplyForm({
   config,
   initialValues,
   onExit,
+  onViewApplication,
   className,
 }: RecruitingApplyFormProps) {
   const addToast = useToastStore((state) => state.addToast)
@@ -202,6 +204,12 @@ export function RecruitingApplyForm({
     snapshotRef.current = JSON.stringify(getValues())
     setOpenModal(null)
     onExit?.()
+  }
+
+  const handleViewApplication = () => {
+    snapshotRef.current = JSON.stringify(getValues())
+    setOpenModal(null)
+    ;(onViewApplication ?? onExit)?.()
   }
 
   return (
@@ -365,7 +373,7 @@ export function RecruitingApplyForm({
           if (!open) setOpenModal(null)
         }}
         onCancel={handleExit}
-        onConfirm={handleExit}
+        onConfirm={handleViewApplication}
       />
     </div>
   )
