@@ -34,10 +34,14 @@ function FileAnswerField({
   value,
   onChange,
   error,
+  ariaLabel,
+  ariaRequired,
 }: {
   value: ApplyAnswerValue
   onChange: (value: ApplyAnswerValue) => void
   error?: string
+  ariaLabel?: string
+  ariaRequired?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const fileName = isApplyUploadedFile(value) ? value.name : null
@@ -48,6 +52,8 @@ function FileAnswerField({
         ref={inputRef}
         type="file"
         className="hidden"
+        aria-label={ariaLabel}
+        aria-required={ariaRequired || undefined}
         onChange={(event) => {
           const file = event.target.files?.[0]
           if (file) onChange({ name: file.name })
@@ -57,6 +63,7 @@ function FileAnswerField({
       <FileUploadField
         fileName={fileName}
         error={error}
+        ariaLabel={ariaLabel}
         onUpload={() => inputRef.current?.click()}
         onDelete={() => onChange(null)}
       />
@@ -176,6 +183,14 @@ export function ApplyAnswerField({
         />
       )
     case "file":
-      return <FileAnswerField value={value} onChange={onChange} error={error} />
+      return (
+        <FileAnswerField
+          value={value}
+          onChange={onChange}
+          error={error}
+          ariaLabel={question.title}
+          ariaRequired={question.required}
+        />
+      )
   }
 }
