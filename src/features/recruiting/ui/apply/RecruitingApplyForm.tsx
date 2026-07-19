@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useBlocker } from "@tanstack/react-router"
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 
 import { cn } from "@/shared/lib/utils"
@@ -139,10 +139,14 @@ export function RecruitingApplyForm({
     enabledSectionIds.has(section.sectionId),
   )
 
-  schemaRef.current = useMemo(
+  const schema = useMemo(
     () => buildRecruitingAnswersSchema(config.sections, enabledSectionIds),
     [config.sections, enabledSectionIds],
   )
+
+  useEffect(() => {
+    schemaRef.current = schema
+  }, [schema])
 
   const isDirtyNow = () => JSON.stringify(getValues()) !== snapshotRef.current
 
