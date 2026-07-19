@@ -32,6 +32,7 @@ import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestTextFieldRouteImport } from './routes/test/text-field'
 import { Route as TestTextButtonRouteImport } from './routes/test/text-button'
 import { Route as TestSocialButtonRouteImport } from './routes/test/social-button'
+import { Route as TestRecruitingApplicationDetailRouteImport } from './routes/test/recruiting-application-detail'
 import { Route as TestRecruitingApplicantsRouteImport } from './routes/test/recruiting-applicants'
 import { Route as TestRatingFaceRouteImport } from './routes/test/rating-face'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
@@ -71,6 +72,7 @@ import { Route as AdminChallengerRecordsRouteImport } from './routes/admin/chall
 import { Route as AdminChallengerPointsRouteImport } from './routes/admin/challenger/points'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
 import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matching/projects/announce/index'
+import { Route as RecruitingEvaluationsDocumentApplicationIdRouteImport } from './routes/recruiting/evaluations/document.$applicationId'
 import { Route as MatchingProjectsEditProjectIdRouteImport } from './routes/matching/projects/edit.$projectId'
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
@@ -190,6 +192,12 @@ const TestSocialButtonRoute = TestSocialButtonRouteImport.update({
   path: '/test/social-button',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestRecruitingApplicationDetailRoute =
+  TestRecruitingApplicationDetailRouteImport.update({
+    id: '/test/recruiting-application-detail',
+    path: '/test/recruiting-application-detail',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const TestRecruitingApplicantsRoute =
   TestRecruitingApplicantsRouteImport.update({
     id: '/test/recruiting-applicants',
@@ -395,6 +403,12 @@ const MatchingProjectsAnnounceIndexRoute =
     path: '/',
     getParentRoute: () => MatchingProjectsAnnounceRouteRoute,
   } as any)
+const RecruitingEvaluationsDocumentApplicationIdRoute =
+  RecruitingEvaluationsDocumentApplicationIdRouteImport.update({
+    id: '/$applicationId',
+    path: '/$applicationId',
+    getParentRoute: () => RecruitingEvaluationsDocumentRoute,
+  } as any)
 const MatchingProjectsEditProjectIdRoute =
   MatchingProjectsEditProjectIdRouteImport.update({
     id: '/projects/edit/$projectId',
@@ -450,6 +464,7 @@ export interface FileRoutesByFullPath {
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/recruiting-applicants': typeof TestRecruitingApplicantsRoute
+  '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
   '/test/text-field': typeof TestTextFieldRoute
@@ -472,12 +487,13 @@ export interface FileRoutesByFullPath {
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
-  '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRoute
+  '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
+  '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -514,6 +530,7 @@ export interface FileRoutesByTo {
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/recruiting-applicants': typeof TestRecruitingApplicantsRoute
+  '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
   '/test/text-field': typeof TestTextFieldRoute
@@ -535,12 +552,13 @@ export interface FileRoutesByTo {
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
-  '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRoute
+  '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
+  '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -581,6 +599,7 @@ export interface FileRoutesById {
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
   '/test/recruiting-applicants': typeof TestRecruitingApplicantsRoute
+  '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
   '/test/text-field': typeof TestTextFieldRoute
@@ -603,12 +622,13 @@ export interface FileRoutesById {
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
-  '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRoute
+  '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
+  '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -650,6 +670,7 @@ export interface FileRouteTypes {
     | '/test/question-form'
     | '/test/rating-face'
     | '/test/recruiting-applicants'
+    | '/test/recruiting-application-detail'
     | '/test/social-button'
     | '/test/text-button'
     | '/test/text-field'
@@ -678,6 +699,7 @@ export interface FileRouteTypes {
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
+    | '/recruiting/evaluations/document/$applicationId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesByTo: FileRoutesByTo
@@ -714,6 +736,7 @@ export interface FileRouteTypes {
     | '/test/question-form'
     | '/test/rating-face'
     | '/test/recruiting-applicants'
+    | '/test/recruiting-application-detail'
     | '/test/social-button'
     | '/test/text-button'
     | '/test/text-field'
@@ -741,6 +764,7 @@ export interface FileRouteTypes {
     | '/matching/projects'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
+    | '/recruiting/evaluations/document/$applicationId'
     | '/matching/projects/announce'
     | '/matching/projects/announce/notice-publish/$noticeId'
   id:
@@ -780,6 +804,7 @@ export interface FileRouteTypes {
     | '/test/question-form'
     | '/test/rating-face'
     | '/test/recruiting-applicants'
+    | '/test/recruiting-application-detail'
     | '/test/social-button'
     | '/test/text-button'
     | '/test/text-field'
@@ -808,6 +833,7 @@ export interface FileRouteTypes {
     | '/matching/projects/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
+    | '/recruiting/evaluations/document/$applicationId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesById: FileRoutesById
@@ -844,6 +870,7 @@ export interface RootRouteChildren {
   TestQuestionFormRoute: typeof TestQuestionFormRoute
   TestRatingFaceRoute: typeof TestRatingFaceRoute
   TestRecruitingApplicantsRoute: typeof TestRecruitingApplicantsRoute
+  TestRecruitingApplicationDetailRoute: typeof TestRecruitingApplicationDetailRoute
   TestSocialButtonRoute: typeof TestSocialButtonRoute
   TestTextButtonRoute: typeof TestTextButtonRoute
   TestTextFieldRoute: typeof TestTextFieldRoute
@@ -1020,6 +1047,13 @@ declare module '@tanstack/react-router' {
       path: '/test/social-button'
       fullPath: '/test/social-button'
       preLoaderRoute: typeof TestSocialButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/recruiting-application-detail': {
+      id: '/test/recruiting-application-detail'
+      path: '/test/recruiting-application-detail'
+      fullPath: '/test/recruiting-application-detail'
+      preLoaderRoute: typeof TestRecruitingApplicationDetailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/recruiting-applicants': {
@@ -1295,6 +1329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsAnnounceIndexRouteImport
       parentRoute: typeof MatchingProjectsAnnounceRouteRoute
     }
+    '/recruiting/evaluations/document/$applicationId': {
+      id: '/recruiting/evaluations/document/$applicationId'
+      path: '/$applicationId'
+      fullPath: '/recruiting/evaluations/document/$applicationId'
+      preLoaderRoute: typeof RecruitingEvaluationsDocumentApplicationIdRouteImport
+      parentRoute: typeof RecruitingEvaluationsDocumentRoute
+    }
     '/matching/projects/edit/$projectId': {
       id: '/matching/projects/edit/$projectId'
       path: '/projects/edit/$projectId'
@@ -1411,14 +1452,30 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
   MatchingRouteRouteChildren,
 )
 
+interface RecruitingEvaluationsDocumentRouteChildren {
+  RecruitingEvaluationsDocumentApplicationIdRoute: typeof RecruitingEvaluationsDocumentApplicationIdRoute
+}
+
+const RecruitingEvaluationsDocumentRouteChildren: RecruitingEvaluationsDocumentRouteChildren =
+  {
+    RecruitingEvaluationsDocumentApplicationIdRoute:
+      RecruitingEvaluationsDocumentApplicationIdRoute,
+  }
+
+const RecruitingEvaluationsDocumentRouteWithChildren =
+  RecruitingEvaluationsDocumentRoute._addFileChildren(
+    RecruitingEvaluationsDocumentRouteChildren,
+  )
+
 interface RecruitingRouteRouteChildren {
-  RecruitingEvaluationsDocumentRoute: typeof RecruitingEvaluationsDocumentRoute
+  RecruitingEvaluationsDocumentRoute: typeof RecruitingEvaluationsDocumentRouteWithChildren
   RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
   RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRoute
 }
 
 const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
-  RecruitingEvaluationsDocumentRoute: RecruitingEvaluationsDocumentRoute,
+  RecruitingEvaluationsDocumentRoute:
+    RecruitingEvaluationsDocumentRouteWithChildren,
   RecruitingEvaluationsFinalRoute: RecruitingEvaluationsFinalRoute,
   RecruitingEvaluationsInterviewRoute: RecruitingEvaluationsInterviewRoute,
 }
@@ -1471,6 +1528,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestQuestionFormRoute: TestQuestionFormRoute,
   TestRatingFaceRoute: TestRatingFaceRoute,
   TestRecruitingApplicantsRoute: TestRecruitingApplicantsRoute,
+  TestRecruitingApplicationDetailRoute: TestRecruitingApplicationDetailRoute,
   TestSocialButtonRoute: TestSocialButtonRoute,
   TestTextButtonRoute: TestTextButtonRoute,
   TestTextFieldRoute: TestTextFieldRoute,

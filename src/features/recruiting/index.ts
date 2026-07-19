@@ -9,3 +9,4 @@ export {
   type RecruitingListRole,
 } from "./model/recruitingListRole"
 export { ApplicantListPage } from "./ui/ApplicantListPage"
+export { ApplicationEvaluationDetailPage } from "./ui/detail/ApplicationEvaluationDetailPage"
