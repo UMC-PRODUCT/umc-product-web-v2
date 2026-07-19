@@ -41,14 +41,21 @@ export function ApplicantRow({ row, stage, columns }: ApplicantRowProps) {
   const visibleColumns = new Set(getVisibleApplicantColumns(stage, columns))
   const timeAt = stage === "interview" ? row.interviewAt : row.appliedAt
   const timestamp = timeAt ? formatAppliedAtParts(timeAt) : null
-  const navigable = stage === "document"
+  const navigable = stage === "document" || stage === "interview"
 
   const openDetail = () => {
-    if (!navigable) return
-    navigate({
-      to: "/recruiting/evaluations/document/$applicationId",
-      params: { applicationId: row.applicationId },
-    })
+    const params = { applicationId: row.applicationId }
+    if (stage === "document") {
+      navigate({
+        to: "/recruiting/evaluations/document/$applicationId",
+        params,
+      })
+    } else if (stage === "interview") {
+      navigate({
+        to: "/recruiting/evaluations/interview/$applicationId",
+        params,
+      })
+    }
   }
 
   return (
