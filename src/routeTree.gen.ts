@@ -14,12 +14,14 @@ import { Route as ChallengerVerificationRouteImport } from './routes/challenger-
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as RecruitingRouteRouteImport } from './routes/recruiting/route'
+import { Route as ProjectsRouteRouteImport } from './routes/projects/route'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestIndexRouteImport } from './routes/test/index'
 import { Route as SignupIndexRouteImport } from './routes/signup/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -56,6 +58,8 @@ import { Route as TestChallengerVerificationRouteImport } from './routes/test/ch
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
 import { Route as SignupOauthRouteImport } from './routes/signup/oauth'
+import { Route as ProjectsNoticeRouteImport } from './routes/projects/notice'
+import { Route as ProjectsApplicationRouteImport } from './routes/projects/application'
 import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
@@ -104,6 +108,11 @@ const RecruitingRouteRoute = RecruitingRouteRouteImport.update({
   path: '/recruiting',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsRouteRoute = ProjectsRouteRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchingRouteRoute = MatchingRouteRouteImport.update({
   id: '/matching',
   path: '/matching',
@@ -133,6 +142,11 @@ const SettingsIndexRoute = SettingsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => SettingsRouteRoute,
+} as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProjectsRouteRoute,
 } as any)
 const MatchingIndexRoute = MatchingIndexRouteImport.update({
   id: '/',
@@ -318,6 +332,16 @@ const SignupOauthRoute = SignupOauthRouteImport.update({
   path: '/signup/oauth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsNoticeRoute = ProjectsNoticeRouteImport.update({
+  id: '/notice',
+  path: '/notice',
+  getParentRoute: () => ProjectsRouteRoute,
+} as any)
+const ProjectsApplicationRoute = ProjectsApplicationRouteImport.update({
+  id: '/application',
+  path: '/application',
+  getParentRoute: () => ProjectsRouteRoute,
+} as any)
 const MatchingStatusRoute = MatchingStatusRouteImport.update({
   id: '/status',
   path: '/status',
@@ -445,6 +469,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
+  '/projects': typeof ProjectsRouteRouteWithChildren
   '/recruiting': typeof RecruitingRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
@@ -455,6 +480,8 @@ export interface FileRoutesByFullPath {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
+  '/projects/application': typeof ProjectsApplicationRoute
+  '/projects/notice': typeof ProjectsNoticeRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -491,6 +518,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
   '/test/': typeof TestIndexRoute
@@ -523,6 +551,8 @@ export interface FileRoutesByTo {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
+  '/projects/application': typeof ProjectsApplicationRoute
+  '/projects/notice': typeof ProjectsNoticeRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -559,6 +589,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/login': typeof LoginIndexRoute
   '/matching': typeof MatchingIndexRoute
+  '/projects': typeof ProjectsIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/signup': typeof SignupIndexRoute
   '/test': typeof TestIndexRoute
@@ -584,6 +615,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
+  '/projects': typeof ProjectsRouteRouteWithChildren
   '/recruiting': typeof RecruitingRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/auth-test': typeof AuthTestRoute
@@ -594,6 +626,8 @@ export interface FileRoutesById {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
+  '/projects/application': typeof ProjectsApplicationRoute
+  '/projects/notice': typeof ProjectsNoticeRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -630,6 +664,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
   '/matching/': typeof MatchingIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
   '/test/': typeof TestIndexRoute
@@ -657,6 +692,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/matching'
+    | '/projects'
     | '/recruiting'
     | '/settings'
     | '/auth-test'
@@ -667,6 +703,8 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
+    | '/projects/application'
+    | '/projects/notice'
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
@@ -703,6 +741,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/login/'
     | '/matching/'
+    | '/projects/'
     | '/settings/'
     | '/signup/'
     | '/test/'
@@ -735,6 +774,8 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
+    | '/projects/application'
+    | '/projects/notice'
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
@@ -771,6 +812,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/matching'
+    | '/projects'
     | '/settings'
     | '/signup'
     | '/test'
@@ -795,6 +837,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/matching'
+    | '/projects'
     | '/recruiting'
     | '/settings'
     | '/auth-test'
@@ -805,6 +848,8 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
+    | '/projects/application'
+    | '/projects/notice'
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
@@ -841,6 +886,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/login/'
     | '/matching/'
+    | '/projects/'
     | '/settings/'
     | '/signup/'
     | '/test/'
@@ -867,6 +913,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
+  ProjectsRouteRoute: typeof ProjectsRouteRouteWithChildren
   RecruitingRouteRoute: typeof RecruitingRouteRouteWithChildren
   SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   AuthTestRoute: typeof AuthTestRoute
@@ -949,6 +996,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecruitingRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/matching': {
       id: '/matching'
       path: '/matching'
@@ -990,6 +1044,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/'
       preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof SettingsRouteRoute
+    }
+    '/projects/': {
+      id: '/projects/'
+      path: '/'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof ProjectsRouteRoute
     }
     '/matching/': {
       id: '/matching/'
@@ -1243,6 +1304,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupOauthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/notice': {
+      id: '/projects/notice'
+      path: '/notice'
+      fullPath: '/projects/notice'
+      preLoaderRoute: typeof ProjectsNoticeRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
+    '/projects/application': {
+      id: '/projects/application'
+      path: '/application'
+      fullPath: '/projects/application'
+      preLoaderRoute: typeof ProjectsApplicationRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
     '/matching/status': {
       id: '/matching/status'
       path: '/status'
@@ -1492,6 +1567,22 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
   MatchingRouteRouteChildren,
 )
 
+interface ProjectsRouteRouteChildren {
+  ProjectsApplicationRoute: typeof ProjectsApplicationRoute
+  ProjectsNoticeRoute: typeof ProjectsNoticeRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
+}
+
+const ProjectsRouteRouteChildren: ProjectsRouteRouteChildren = {
+  ProjectsApplicationRoute: ProjectsApplicationRoute,
+  ProjectsNoticeRoute: ProjectsNoticeRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
+}
+
+const ProjectsRouteRouteWithChildren = ProjectsRouteRoute._addFileChildren(
+  ProjectsRouteRouteChildren,
+)
+
 interface RecruitingEvaluationsDocumentRouteChildren {
   RecruitingEvaluationsDocumentApplicationIdRoute: typeof RecruitingEvaluationsDocumentApplicationIdRoute
 }
@@ -1556,6 +1647,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
+  ProjectsRouteRoute: ProjectsRouteRouteWithChildren,
   RecruitingRouteRoute: RecruitingRouteRouteWithChildren,
   SettingsRouteRoute: SettingsRouteRouteWithChildren,
   AuthTestRoute: AuthTestRoute,
