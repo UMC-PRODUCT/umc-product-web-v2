@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Info } from "lucide-react"
 import { useState } from "react"
 
@@ -9,11 +9,12 @@ import { Button } from "@/shared/ui/Button"
 import { CodeInput } from "@/shared/ui/input/CodeInput"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
-export const Route = createFileRoute("/projects/application")({
+export const Route = createFileRoute("/projects/application/")({
   component: MyApplicationCodePage,
 })
 
 function MyApplicationCodePage() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [code, setCode] = useState("")
   const [emailError, setEmailError] = useState("")
@@ -65,6 +66,15 @@ function MyApplicationCodePage() {
     // 이메일이 'nohistory@example.com'인 경우 지원 내역 없음 에러 노출
     if (email === "nohistory@example.com") {
       setEmailError("지원 내역이 없는 이메일입니다.")
+      return
+    }
+
+    // 성공 조건: 코드가 '123456'인 경우 지원서 목록 페이지로 이동
+    if (code === "123456") {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("isApplicationVerified", "true")
+      }
+      navigate({ to: "/projects/application/list" })
       return
     }
 
