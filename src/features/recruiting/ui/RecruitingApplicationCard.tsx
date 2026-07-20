@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
@@ -29,6 +30,7 @@ export function RecruitingApplicationCard({
   application,
   onDelete,
 }: RecruitingApplicationCardProps) {
+  const navigate = useNavigate()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -92,6 +94,13 @@ export function RecruitingApplicationCard({
   }
 
   const deleteModalProps = getDeleteModalProps()
+
+  const handleNavigateDetail = () => {
+    navigate({
+      to: "/projects/application/$applicationId",
+      params: { applicationId: String(application.id) },
+    })
+  }
 
   return (
     <>
@@ -210,6 +219,7 @@ export function RecruitingApplicationCard({
                         type="button"
                         onClick={() => {
                           setIsDropdownOpen(false)
+                          handleNavigateDetail()
                         }}
                         className="hover:bg-teal-gray-50 flex h-10 w-35 cursor-pointer items-center rounded-[8px] bg-white px-3.5 text-left"
                       >
@@ -239,6 +249,7 @@ export function RecruitingApplicationCard({
                           type="button"
                           onClick={() => {
                             setIsDropdownOpen(false)
+                            handleNavigateDetail()
                           }}
                           className="hover:bg-teal-gray-50 flex h-10 w-35 cursor-pointer items-center rounded-[8px] bg-white px-3.5 text-left"
                         >
@@ -251,6 +262,7 @@ export function RecruitingApplicationCard({
                           type="button"
                           onClick={() => {
                             setIsDropdownOpen(false)
+                            handleNavigateDetail()
                           }}
                           className="hover:bg-teal-gray-50 flex h-10 w-35 cursor-pointer items-center rounded-[8px] bg-white px-3.5 text-left"
                         >

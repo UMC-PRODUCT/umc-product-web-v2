@@ -70,6 +70,7 @@ import { Route as RecruitingEvaluationsInterviewRouteImport } from './routes/rec
 import { Route as RecruitingEvaluationsFinalRouteImport } from './routes/recruiting/evaluations/final'
 import { Route as RecruitingEvaluationsDocumentRouteImport } from './routes/recruiting/evaluations/document'
 import { Route as ProjectsApplicationListRouteImport } from './routes/projects/application/list'
+import { Route as ProjectsApplicationApplicationIdRouteImport } from './routes/projects/application/$applicationId'
 import { Route as OauthKakaoCallbackRouteImport } from './routes/oauth/kakao/callback'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 import { Route as MatchingProjectsManagementRouteImport } from './routes/matching/projects/management'
@@ -397,6 +398,12 @@ const ProjectsApplicationListRoute = ProjectsApplicationListRouteImport.update({
   path: '/application/list',
   getParentRoute: () => ProjectsRouteRoute,
 } as any)
+const ProjectsApplicationApplicationIdRoute =
+  ProjectsApplicationApplicationIdRouteImport.update({
+    id: '/application/$applicationId',
+    path: '/application/$applicationId',
+    getParentRoute: () => ProjectsRouteRoute,
+  } as any)
 const OauthKakaoCallbackRoute = OauthKakaoCallbackRouteImport.update({
   id: '/oauth/kakao/callback',
   path: '/oauth/kakao/callback',
@@ -535,6 +542,7 @@ export interface FileRoutesByFullPath {
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
+  '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
@@ -606,6 +614,7 @@ export interface FileRoutesByTo {
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
+  '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
@@ -683,6 +692,7 @@ export interface FileRoutesById {
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
+  '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
@@ -761,6 +771,7 @@ export interface FileRouteTypes {
     | '/matching/projects/management'
     | '/matching/projects/new'
     | '/oauth/kakao/callback'
+    | '/projects/application/$applicationId'
     | '/projects/application/list'
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
@@ -832,6 +843,7 @@ export interface FileRouteTypes {
     | '/matching/projects/management'
     | '/matching/projects/new'
     | '/oauth/kakao/callback'
+    | '/projects/application/$applicationId'
     | '/projects/application/list'
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
@@ -908,6 +920,7 @@ export interface FileRouteTypes {
     | '/matching/projects/management'
     | '/matching/projects/new'
     | '/oauth/kakao/callback'
+    | '/projects/application/$applicationId'
     | '/projects/application/list'
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
@@ -1401,6 +1414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsApplicationListRouteImport
       parentRoute: typeof ProjectsRouteRoute
     }
+    '/projects/application/$applicationId': {
+      id: '/projects/application/$applicationId'
+      path: '/application/$applicationId'
+      fullPath: '/projects/application/$applicationId'
+      preLoaderRoute: typeof ProjectsApplicationApplicationIdRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
     '/oauth/kakao/callback': {
       id: '/oauth/kakao/callback'
       path: '/oauth/kakao/callback'
@@ -1590,6 +1610,7 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
 interface ProjectsRouteRouteChildren {
   ProjectsNoticeRoute: typeof ProjectsNoticeRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
+  ProjectsApplicationApplicationIdRoute: typeof ProjectsApplicationApplicationIdRoute
   ProjectsApplicationListRoute: typeof ProjectsApplicationListRoute
   ProjectsApplicationIndexRoute: typeof ProjectsApplicationIndexRoute
 }
@@ -1597,6 +1618,7 @@ interface ProjectsRouteRouteChildren {
 const ProjectsRouteRouteChildren: ProjectsRouteRouteChildren = {
   ProjectsNoticeRoute: ProjectsNoticeRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
+  ProjectsApplicationApplicationIdRoute: ProjectsApplicationApplicationIdRoute,
   ProjectsApplicationListRoute: ProjectsApplicationListRoute,
   ProjectsApplicationIndexRoute: ProjectsApplicationIndexRoute,
 }

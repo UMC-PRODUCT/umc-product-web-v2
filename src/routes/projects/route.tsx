@@ -24,10 +24,7 @@ function ProjectsLayout() {
     breadcrumb = "모집 공고"
     title = "모집 공고"
     description = "학교별 모집 공고를 확인하고 지원할 수 있습니다."
-  } else if (
-    normalizedPathname === "/projects/application" ||
-    normalizedPathname === "/projects/application/list"
-  ) {
+  } else if (normalizedPathname.startsWith("/projects/application")) {
     breadcrumb = "내 지원서"
     title = "내 지원서"
     description = "이메일과 지원 코드로 내 지원서를 확인할 수 있습니다."
