@@ -1,17 +1,15 @@
-import type { SVGProps } from "react"
+import personGraphic from "./person-graphic.png"
 
-const PersonGraphicIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 30 30"
-    fill="currentColor"
-    width={30}
-    height={30}
-    {...props}
-  >
-    <circle cx={15} cy={8.5} r={5.5} />
-    <path d="M4.5 28a10.5 10.5 0 0 1 21 0H4.5Z" />
-  </svg>
+import type { ImgHTMLAttributes } from "react"
+
+// 색을 바꿔야 하면 피그마에서 새로 export
+const PersonGraphicIcon = ({
+  width = 30,
+  height = 30,
+  alt = "",
+  ...props
+}: ImgHTMLAttributes<HTMLImageElement>) => (
+  <img src={personGraphic} width={width} height={height} alt={alt} {...props} />
 )
 
 export default PersonGraphicIcon
