@@ -25,7 +25,7 @@ function RecruitmentPostRowTestPage() {
           editable
           rightAction={
             <RecruitmentPostMoreMenu
-              status="recruiting"
+              status="OPEN"
               onPrivatize={() => alert("비공개하기")}
               onEdit={() => alert("수정하기")}
               onDuplicate={() => alert("복제하기")}
@@ -59,7 +59,7 @@ function RecruitmentPostRowTestPage() {
           editable
           rightAction={
             <RecruitmentPostMoreMenu
-              status="closed"
+              status="CLOSED"
               onPrivatize={() => alert("비공개하기")}
               onDuplicate={() => alert("복제하기")}
               onDelete={() => alert("삭제")}
@@ -79,7 +79,7 @@ function RecruitmentPostRowTestPage() {
           editable
           rightAction={
             <RecruitmentPostMoreMenu
-              status="draft"
+              status="DRAFT"
               onPublish={() => alert("공개하기")}
               onEdit={() => alert("수정하기")}
               onDuplicate={() => alert("복제하기")}
@@ -109,7 +109,7 @@ function RecruitmentPostRowTestPage() {
               editable
               rightAction={
                 <RecruitmentPostMoreMenu
-                  status="draft"
+                  status="DRAFT"
                   onPublish={() => alert("공개하기")}
                   onEdit={() => alert("수정하기")}
                   onDuplicate={() => alert("복제하기")}
@@ -124,7 +124,7 @@ function RecruitmentPostRowTestPage() {
               editable
               rightAction={
                 <RecruitmentPostMoreMenu
-                  status="draft"
+                  status="DRAFT"
                   onPublish={() => alert("공개하기")}
                   onEdit={() => alert("수정하기")}
                   onDuplicate={() => alert("복제하기")}
@@ -139,7 +139,7 @@ function RecruitmentPostRowTestPage() {
               editable
               rightAction={
                 <RecruitmentPostMoreMenu
-                  status="draft"
+                  status="DRAFT"
                   onPublish={() => alert("공개하기")}
                   onEdit={() => alert("수정하기")}
                   onDuplicate={() => alert("복제하기")}
@@ -157,7 +157,7 @@ function RecruitmentPostRowTestPage() {
               editable
               rightAction={
                 <RecruitmentPostMoreMenu
-                  status="recruiting"
+                  status="OPEN"
                   onPrivatize={() => alert("비공개하기")}
                   onEdit={() => alert("수정하기")}
                   onDuplicate={() => alert("복제하기")}

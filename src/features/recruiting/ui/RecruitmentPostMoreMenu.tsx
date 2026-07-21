@@ -46,7 +46,7 @@ export function RecruitmentPostMoreMenu({
           onOpenAutoFocus={(e) => e.preventDefault()}
           className="shadow-drop-neutral-1 border-teal-gray-50 z-1100 flex w-35 flex-col items-start gap-1 rounded-[0.625rem] border bg-white p-0.5"
         >
-          {status === "draft" ? (
+          {status === "DRAFT" ? (
             <DropdownItem label="공개하기" onClick={withClose(onPublish)} />
           ) : (
             <button
@@ -65,7 +65,7 @@ export function RecruitmentPostMoreMenu({
             </button>
           )}
 
-          {status !== "closed" && (
+          {status !== "CLOSED" && (
             <DropdownItem label="수정하기" onClick={withClose(onEdit)} />
           )}
 

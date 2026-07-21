@@ -30,7 +30,7 @@ function PostRow({ post }: { post: RecruitmentPost }) {
       endLabel={post.endLabel}
       dateLabel={post.dateLabel}
       authorLabel={post.authorLabel}
-      done={post.status === "closed"}
+      done={post.status === "CLOSED"}
       editable
       rightAction={
         <RecruitmentPostMoreMenu
@@ -54,11 +54,11 @@ export function RecruitmentPostListCard({
   const [recruitingOnly, setRecruitingOnly] = useState(false)
   const [bySchool, setBySchool] = useState(false)
   // TODO: API 연동 시 sort=NEWEST|REGISTERED|RECRUITMENT 쿼리 파라미터로 서버 정렬 연결 (RECRUITING-PUBLIC-001/ADMIN-011)
-  const [sort, setSort] = useState<RecruitmentSort>("latest")
+  const [sort, setSort] = useState<RecruitmentSort>("NEWEST")
   const [sortOpen, setSortOpen] = useState(false)
 
   const visiblePosts = recruitingOnly
-    ? posts.filter((post) => post.status === "recruiting")
+    ? posts.filter((post) => post.status === "OPEN")
     : posts
   const filteredEmpty = posts.length > 0 && visiblePosts.length === 0
 

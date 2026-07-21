@@ -113,7 +113,7 @@ export function RecruitmentListPage({
                       endLabel={post.endLabel}
                       dateLabel={post.dateLabel}
                       authorLabel={post.authorLabel}
-                      done={post.status === "closed"}
+                      done={post.status === "CLOSED"}
                     />
                   ))
                 )}
