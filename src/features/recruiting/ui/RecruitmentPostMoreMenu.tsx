@@ -5,7 +5,7 @@ import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { cn } from "@/shared/lib/utils"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 
-type RecruitmentPostStatus = "recruiting" | "closed" | "draft"
+import type { RecruitmentPostStatus } from "../model/recruitmentList"
 
 interface RecruitmentPostMoreMenuProps {
   status: RecruitmentPostStatus

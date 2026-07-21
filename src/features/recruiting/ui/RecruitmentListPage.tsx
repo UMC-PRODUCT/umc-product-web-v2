@@ -80,7 +80,11 @@ export function RecruitmentListPage({
               <h2 className="text-heading-5-semibold px-3 text-teal-700">
                 {chapter}
               </h2>
-              <RecruitmentPostListCard posts={chapterPosts} className="mt-5" />
+              <RecruitmentPostListCard
+                chapter={chapter}
+                posts={chapterPosts}
+                className="mt-5"
+              />
             </section>
           ))}
         </div>

@@ -1,3 +1,4 @@
+/* 모집 목록 관련 */
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
@@ -45,3 +46,11 @@ export function groupPostsBySchool(
     posts: posts.filter((post) => post.school === school),
   }))
 }
+
+export const RECRUITMENT_SORT_OPTIONS = [
+  { value: "latest", label: "최신 순" },
+  { value: "registered", label: "등록 순" },
+  { value: "recruiting", label: "모집 순" },
+] as const
+
+export type RecruitmentSort = (typeof RECRUITMENT_SORT_OPTIONS)[number]["value"]
