@@ -37,7 +37,7 @@ export function RecruitmentPostRow({
   return (
     <div
       className={cn(
-        "flex w-full items-center justify-between bg-white px-5 py-4.5",
+        "group flex w-full items-center justify-between bg-white px-5 py-4.5",
         className,
       )}
     >
@@ -49,7 +49,9 @@ export function RecruitmentPostRow({
         )}
 
         <div className="flex flex-col items-start">
-          <div className="text-body-1-medium text-teal-gray-900">{title}</div>
+          <div className="text-body-1-medium group-hover:text-body-1-semibold text-teal-gray-900 group-hover:text-teal-500">
+            {title}
+          </div>
 
           {isRecruiting ? (
             <div className="flex items-start gap-0.5">
