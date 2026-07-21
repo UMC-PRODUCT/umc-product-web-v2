@@ -1,3 +1,5 @@
+import { useNavigate } from "@tanstack/react-router"
+
 import { cn } from "@/shared/lib/utils"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
@@ -32,17 +34,50 @@ interface ApplicantRowProps {
 }
 
 export function ApplicantRow({ row, stage, columns }: ApplicantRowProps) {
+  const navigate = useNavigate()
   const evaluation = getStageEvaluation(row, stage)
   if (!evaluation) return null
 
   const visibleColumns = new Set(getVisibleApplicantColumns(stage, columns))
   const timeAt = stage === "interview" ? row.interviewAt : row.appliedAt
   const timestamp = timeAt ? formatAppliedAtParts(timeAt) : null
+  const navigable = stage === "document" || stage === "interview"
+
+  const openDetail = () => {
+    const params = { applicationId: row.applicationId }
+    if (stage === "document") {
+      navigate({
+        to: "/recruiting/evaluations/document/$applicationId",
+        params,
+      })
+    } else if (stage === "interview") {
+      navigate({
+        to: "/recruiting/evaluations/interview/$applicationId",
+        params,
+      })
+    }
+  }
 
   return (
     <div
       role="row"
-      className="border-teal-gray-150/60 hover:bg-teal-gray-50 flex h-17 items-center border-b bg-white pr-5.5 pl-2.5 transition-colors"
+      tabIndex={navigable ? 0 : undefined}
+      onClick={navigable ? openDetail : undefined}
+      onKeyDown={
+        navigable
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault()
+                openDetail()
+              }
+            }
+          : undefined
+      }
+      className={cn(
+        "border-teal-gray-150/60 hover:bg-teal-gray-50 flex h-17 items-center border-b bg-white pr-5.5 pl-2.5 transition-colors",
+        navigable &&
+          "focus-visible:bg-teal-gray-50 cursor-pointer outline-none",
+      )}
     >
       <div className="flex min-w-0 flex-1 items-center">
         {visibleColumns.has("appliedAt") &&

@@ -70,7 +70,7 @@ export function CtaModal({
             </div>
             <Modal.Description
               className={cn(
-                "text-subtitle-3-semibold text-teal-gray-800",
+                "text-body-1-medium text-teal-gray-800",
                 descriptionClassName,
               )}
             >

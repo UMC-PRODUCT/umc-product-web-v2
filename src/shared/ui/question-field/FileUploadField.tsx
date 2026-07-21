@@ -11,6 +11,7 @@ interface FileUploadFieldProps extends Omit<ComponentProps<"div">, "children"> {
   onUpload: () => void
   onDelete: () => void
   error?: string
+  ariaLabel?: string
 }
 
 export function FileUploadField({
@@ -20,6 +21,7 @@ export function FileUploadField({
   onUpload,
   onDelete,
   error,
+  ariaLabel,
   className,
   ...props
 }: FileUploadFieldProps) {
@@ -50,6 +52,7 @@ export function FileUploadField({
               size="xs"
               color="primary"
               onClick={onUpload}
+              aria-label={ariaLabel ? `${ariaLabel} 파일 업로드` : undefined}
               className="w-auto min-w-fit px-3"
             >
               파일 업로드
@@ -68,7 +71,12 @@ export function FileUploadField({
                 {fileName}
               </span>
             </div>
-            <Button size="xs" color="neutral" onClick={onDelete}>
+            <Button
+              size="xs"
+              color="neutral"
+              onClick={onDelete}
+              aria-label={ariaLabel ? `${ariaLabel} 파일 삭제` : undefined}
+            >
               삭제
             </Button>
           </>

@@ -1,9 +1,13 @@
 import { render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { ApplicantRow } from "./ApplicantRow"
 
 import type { ApplicantRow as ApplicantRowModel } from "../model/applicantListTypes"
+
+vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => vi.fn(),
+}))
 
 function createApplicantRow(): ApplicantRowModel {
   return {
