@@ -34,6 +34,7 @@ import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestTextFieldRouteImport } from './routes/test/text-field'
 import { Route as TestTextButtonRouteImport } from './routes/test/text-button'
 import { Route as TestSocialButtonRouteImport } from './routes/test/social-button'
+import { Route as TestRecruitmentPreviewCardRouteImport } from './routes/test/recruitment-preview-card'
 import { Route as TestRecruitmentPostRowRouteImport } from './routes/test/recruitment-post-row'
 import { Route as TestRecruitingApplyRouteImport } from './routes/test/recruiting-apply'
 import { Route as TestRecruitingApplicationDetailRouteImport } from './routes/test/recruiting-application-detail'
@@ -214,6 +215,12 @@ const TestSocialButtonRoute = TestSocialButtonRouteImport.update({
   path: '/test/social-button',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestRecruitmentPreviewCardRoute =
+  TestRecruitmentPreviewCardRouteImport.update({
+    id: '/test/recruitment-preview-card',
+    path: '/test/recruitment-preview-card',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const TestRecruitmentPostRowRoute = TestRecruitmentPostRowRouteImport.update({
   id: '/test/recruitment-post-row',
   path: '/test/recruitment-post-row',
@@ -547,6 +554,7 @@ export interface FileRoutesByFullPath {
   '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
+  '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
   '/test/text-field': typeof TestTextFieldRoute
@@ -624,6 +632,7 @@ export interface FileRoutesByTo {
   '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
+  '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
   '/test/text-field': typeof TestTextFieldRoute
@@ -705,6 +714,7 @@ export interface FileRoutesById {
   '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
+  '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
   '/test/text-field': typeof TestTextFieldRoute
@@ -788,6 +798,7 @@ export interface FileRouteTypes {
     | '/test/recruiting-application-detail'
     | '/test/recruiting-apply'
     | '/test/recruitment-post-row'
+    | '/test/recruitment-preview-card'
     | '/test/social-button'
     | '/test/text-button'
     | '/test/text-field'
@@ -865,6 +876,7 @@ export interface FileRouteTypes {
     | '/test/recruiting-application-detail'
     | '/test/recruiting-apply'
     | '/test/recruitment-post-row'
+    | '/test/recruitment-preview-card'
     | '/test/social-button'
     | '/test/text-button'
     | '/test/text-field'
@@ -945,6 +957,7 @@ export interface FileRouteTypes {
     | '/test/recruiting-application-detail'
     | '/test/recruiting-apply'
     | '/test/recruitment-post-row'
+    | '/test/recruitment-preview-card'
     | '/test/social-button'
     | '/test/text-button'
     | '/test/text-field'
@@ -1022,6 +1035,7 @@ export interface RootRouteChildren {
   TestRecruitingApplicationDetailRoute: typeof TestRecruitingApplicationDetailRoute
   TestRecruitingApplyRoute: typeof TestRecruitingApplyRoute
   TestRecruitmentPostRowRoute: typeof TestRecruitmentPostRowRoute
+  TestRecruitmentPreviewCardRoute: typeof TestRecruitmentPreviewCardRoute
   TestSocialButtonRoute: typeof TestSocialButtonRoute
   TestTextButtonRoute: typeof TestTextButtonRoute
   TestTextFieldRoute: typeof TestTextFieldRoute
@@ -1212,6 +1226,13 @@ declare module '@tanstack/react-router' {
       path: '/test/social-button'
       fullPath: '/test/social-button'
       preLoaderRoute: typeof TestSocialButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/recruitment-preview-card': {
+      id: '/test/recruitment-preview-card'
+      path: '/test/recruitment-preview-card'
+      fullPath: '/test/recruitment-preview-card'
+      preLoaderRoute: typeof TestRecruitmentPreviewCardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/recruitment-post-row': {
@@ -1809,6 +1830,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestRecruitingApplicationDetailRoute: TestRecruitingApplicationDetailRoute,
   TestRecruitingApplyRoute: TestRecruitingApplyRoute,
   TestRecruitmentPostRowRoute: TestRecruitmentPostRowRoute,
+  TestRecruitmentPreviewCardRoute: TestRecruitmentPreviewCardRoute,
   TestSocialButtonRoute: TestSocialButtonRoute,
   TestTextButtonRoute: TestTextButtonRoute,
   TestTextFieldRoute: TestTextFieldRoute,
