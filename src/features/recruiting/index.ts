@@ -14,6 +14,8 @@ export { ApplicationEvaluationDetailPage } from "./ui/detail/ApplicationEvaluati
 export { EvaluatorAllocationPage } from "./ui/evaluations/EvaluatorAllocationPage"
 export { RecruitingApplicationCard } from "./ui/RecruitingApplicationCard"
 export type { RecruitingApplication } from "./ui/RecruitingApplicationCard"
+export { RecruitmentListPage } from "./ui/RecruitmentListPage"
+export { RecruitmentPostListCard } from "./ui/RecruitmentPostListCard"
 export { RecruitmentPostMoreMenu } from "./ui/RecruitmentPostMoreMenu"
 export { RecruitmentPostRow } from "./ui/RecruitmentPostRow"
 export { RecruitmentPreviewCard } from "./ui/RecruitmentPreviewCard"

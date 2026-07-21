@@ -66,6 +66,7 @@ import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
 import { Route as LoginDefaultRouteImport } from './routes/login/default'
+import { Route as RecruitingRecruitmentsIndexRouteImport } from './routes/recruiting/recruitments/index'
 import { Route as RecruitingEvaluationsIndexRouteImport } from './routes/recruiting/evaluations/index'
 import { Route as ProjectsApplicationIndexRouteImport } from './routes/projects/application/index'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
@@ -380,6 +381,12 @@ const LoginDefaultRoute = LoginDefaultRouteImport.update({
   path: '/login/default',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecruitingRecruitmentsIndexRoute =
+  RecruitingRecruitmentsIndexRouteImport.update({
+    id: '/recruitments/',
+    path: '/recruitments/',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
 const RecruitingEvaluationsIndexRoute =
   RecruitingEvaluationsIndexRouteImport.update({
     id: '/evaluations/',
@@ -588,6 +595,7 @@ export interface FileRoutesByFullPath {
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/projects/application/': typeof ProjectsApplicationIndexRoute
   '/recruiting/evaluations/': typeof RecruitingEvaluationsIndexRoute
+  '/recruiting/recruitments/': typeof RecruitingRecruitmentsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
@@ -665,6 +673,7 @@ export interface FileRoutesByTo {
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/projects/application': typeof ProjectsApplicationIndexRoute
   '/recruiting/evaluations': typeof RecruitingEvaluationsIndexRoute
+  '/recruiting/recruitments': typeof RecruitingRecruitmentsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
@@ -748,6 +757,7 @@ export interface FileRoutesById {
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/projects/application/': typeof ProjectsApplicationIndexRoute
   '/recruiting/evaluations/': typeof RecruitingEvaluationsIndexRoute
+  '/recruiting/recruitments/': typeof RecruitingRecruitmentsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
@@ -832,6 +842,7 @@ export interface FileRouteTypes {
     | '/matching/projects/'
     | '/projects/application/'
     | '/recruiting/evaluations/'
+    | '/recruiting/recruitments/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
     | '/recruiting/evaluations/document/$applicationId'
@@ -909,6 +920,7 @@ export interface FileRouteTypes {
     | '/matching/projects'
     | '/projects/application'
     | '/recruiting/evaluations'
+    | '/recruiting/recruitments'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
     | '/recruiting/evaluations/document/$applicationId'
@@ -991,6 +1003,7 @@ export interface FileRouteTypes {
     | '/matching/projects/'
     | '/projects/application/'
     | '/recruiting/evaluations/'
+    | '/recruiting/recruitments/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
     | '/recruiting/evaluations/document/$applicationId'
@@ -1452,6 +1465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginDefaultRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recruiting/recruitments/': {
+      id: '/recruiting/recruitments/'
+      path: '/recruitments'
+      fullPath: '/recruiting/recruitments/'
+      preLoaderRoute: typeof RecruitingRecruitmentsIndexRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
     '/recruiting/evaluations/': {
       id: '/recruiting/evaluations/'
       path: '/evaluations'
@@ -1765,6 +1785,7 @@ interface RecruitingRouteRouteChildren {
   RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
   RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRouteWithChildren
   RecruitingEvaluationsIndexRoute: typeof RecruitingEvaluationsIndexRoute
+  RecruitingRecruitmentsIndexRoute: typeof RecruitingRecruitmentsIndexRoute
 }
 
 const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
@@ -1776,6 +1797,7 @@ const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
   RecruitingEvaluationsInterviewRoute:
     RecruitingEvaluationsInterviewRouteWithChildren,
   RecruitingEvaluationsIndexRoute: RecruitingEvaluationsIndexRoute,
+  RecruitingRecruitmentsIndexRoute: RecruitingRecruitmentsIndexRoute,
 }
 
 const RecruitingRouteRouteWithChildren = RecruitingRouteRoute._addFileChildren(
