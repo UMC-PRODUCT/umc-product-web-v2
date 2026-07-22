@@ -5,6 +5,7 @@ import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
 import {
+  canEditRecruitmentPost,
   groupPostsBySchool,
   RECRUITMENT_SORT_OPTIONS,
 } from "../model/recruitmentList"
@@ -14,15 +15,33 @@ import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
-import type { RecruitmentPost, RecruitmentSort } from "../model/recruitmentList"
+import type { RecruitingListRole } from "../model/recruitingListRole"
+import type {
+  RecruitmentEditScope,
+  RecruitmentPost,
+  RecruitmentSort,
+} from "../model/recruitmentList"
 
 interface RecruitmentPostListCardProps {
   chapter: Chapter
   posts: RecruitmentPost[]
+  role: RecruitingListRole
+  editScope: RecruitmentEditScope
+  schoolFilterActive?: boolean
   className?: string
 }
 
-function PostRow({ post }: { post: RecruitmentPost }) {
+function PostRow({
+  post,
+  role,
+  editScope,
+}: {
+  post: RecruitmentPost
+  role: RecruitingListRole
+  editScope: RecruitmentEditScope
+}) {
+  const editable = canEditRecruitmentPost(role, post, editScope)
+
   return (
     <RecruitmentPostRow
       title={post.title}
@@ -31,7 +50,7 @@ function PostRow({ post }: { post: RecruitmentPost }) {
       dateLabel={post.dateLabel}
       authorLabel={post.authorLabel}
       done={post.status === "CLOSED"}
-      editable
+      editable={editable}
       rightAction={
         <RecruitmentPostMoreMenu
           status={post.status}
@@ -49,18 +68,24 @@ function PostRow({ post }: { post: RecruitmentPost }) {
 export function RecruitmentPostListCard({
   chapter,
   posts,
+  role,
+  editScope,
+  schoolFilterActive = false,
   className,
 }: RecruitmentPostListCardProps) {
   const [recruitingOnly, setRecruitingOnly] = useState(false)
   const [bySchool, setBySchool] = useState(false)
+  const showBySchool = !schoolFilterActive && bySchool
   // TODO: API 연동 시 sort=NEWEST|REGISTERED|RECRUITMENT 쿼리 파라미터로 서버 정렬 연결 (RECRUITING-PUBLIC-001/ADMIN-011)
   const [sort, setSort] = useState<RecruitmentSort>("NEWEST")
   const [sortOpen, setSortOpen] = useState(false)
 
+  // DRAFT(비공개) 글은 학교별 공유 보관함에서만 노출
+  const publishedPosts = posts.filter((post) => post.status !== "DRAFT")
   const visiblePosts = recruitingOnly
-    ? posts.filter((post) => post.status === "OPEN")
-    : posts
-  const filteredEmpty = posts.length > 0 && visiblePosts.length === 0
+    ? publishedPosts.filter((post) => post.status === "OPEN")
+    : publishedPosts
+  const filteredEmpty = publishedPosts.length > 0 && visiblePosts.length === 0
 
   return (
     <section
@@ -73,7 +98,7 @@ export function RecruitmentPostListCard({
         <h3 className="text-heading-6-semibold text-teal-700">
           모집 공고 목록
         </h3>
-        {posts.length > 0 && (
+        {publishedPosts.length > 0 && (
           <div className="flex items-center gap-4">
             <label className="flex cursor-pointer items-center gap-2">
               <Checkbox
@@ -86,17 +111,19 @@ export function RecruitmentPostListCard({
                 모집 중
               </span>
             </label>
-            <label className="flex cursor-pointer items-center gap-2">
-              <Checkbox
-                checked={bySchool}
-                onChange={setBySchool}
-                variant="primary"
-                aria-label="학교별로 보기"
-              />
-              <span className="text-body-1-medium text-teal-gray-600">
-                학교별
-              </span>
-            </label>
+            {!schoolFilterActive && (
+              <label className="flex cursor-pointer items-center gap-2">
+                <Checkbox
+                  checked={bySchool}
+                  onChange={setBySchool}
+                  variant="primary"
+                  aria-label="학교별로 보기"
+                />
+                <span className="text-body-1-medium text-teal-gray-600">
+                  학교별
+                </span>
+              </label>
+            )}
             <FilterDropdown
               label="최신 순"
               multiSelect={false}
@@ -115,7 +142,7 @@ export function RecruitmentPostListCard({
           </div>
         )}
       </div>
-      {posts.length === 0 ? (
+      {publishedPosts.length === 0 ? (
         <p className="text-body-2-regular text-teal-gray-400 mt-1.125 px-5 text-center">
           등록된 모집 공고가 없습니다.
         </p>
@@ -123,11 +150,11 @@ export function RecruitmentPostListCard({
         <p className="text-body-2-regular text-teal-gray-400 mt-1.125 px-5 text-center">
           현재 모집 중인 공고가 없습니다.
         </p>
-      ) : bySchool ? (
+      ) : showBySchool ? (
         <div className="mt-5 flex flex-col gap-8 px-5">
           {groupPostsBySchool(visiblePosts, chapter).map(
             ({ school, posts: schoolPosts }) => {
-              const schoolHasPosts = posts.some(
+              const schoolHasPosts = publishedPosts.some(
                 (post) => post.school === school,
               )
               return (
@@ -142,7 +169,12 @@ export function RecruitmentPostListCard({
                     </div>
                   ) : (
                     schoolPosts.map((post) => (
-                      <PostRow key={post.postId} post={post} />
+                      <PostRow
+                        key={post.postId}
+                        post={post}
+                        role={role}
+                        editScope={editScope}
+                      />
                     ))
                   )}
                 </RecruitmentSchoolSection>
@@ -153,7 +185,12 @@ export function RecruitmentPostListCard({
       ) : (
         <div className="divide-teal-gray-100 mt-1.125 flex flex-col divide-y">
           {visiblePosts.map((post) => (
-            <PostRow key={post.postId} post={post} />
+            <PostRow
+              key={post.postId}
+              post={post}
+              role={role}
+              editScope={editScope}
+            />
           ))}
         </div>
       )}

@@ -32,6 +32,7 @@ export function RecruitmentPostRow({
   rightAction,
   className,
 }: RecruitmentPostRowProps) {
+  // TODO: API 연동 시 확인
   const isRecruiting = startLabel != null && endLabel != null
 
   return (
