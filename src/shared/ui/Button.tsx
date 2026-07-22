@@ -110,6 +110,9 @@ export function Button({
 }: ButtonProps) {
   const Comp = asChild ? Slot.Root : "button"
 
+  const resolvedVariant = variant ?? "fill"
+  const resolvedColor = color ?? "primary"
+
   const leftIcon = (() => {
     if (!icon) return null
     if (size === "xs") {
@@ -148,18 +151,30 @@ export function Button({
         icon && size === "s" && "min-h-10 rounded-[10px] py-1 pr-4 pl-2.5",
         icon && size === "m" && "min-h-11 min-w-19 py-1 pr-4 pl-3",
         isLoading && "pointer-events-none cursor-default select-none",
-        isLoading && variant === "fill" && color === "primary" && "bg-teal-700",
-        isLoading && variant === "weak" && color === "primary" && "bg-teal-200",
         isLoading &&
-          variant === "fill" &&
-          color === "neutral" &&
+          resolvedVariant === "fill" &&
+          resolvedColor === "primary" &&
+          "bg-teal-700",
+        isLoading &&
+          resolvedVariant === "weak" &&
+          resolvedColor === "primary" &&
+          "bg-teal-200",
+        isLoading &&
+          resolvedVariant === "fill" &&
+          resolvedColor === "neutral" &&
           "bg-teal-gray-700",
         isLoading &&
-          variant === "weak" &&
-          color === "neutral" &&
+          resolvedVariant === "weak" &&
+          resolvedColor === "neutral" &&
           "bg-teal-gray-200",
-        isLoading && variant === "fill" && color === "red" && "bg-error-700",
-        isLoading && variant === "weak" && color === "red" && "bg-error-200",
+        isLoading &&
+          resolvedVariant === "fill" &&
+          resolvedColor === "red" &&
+          "bg-error-700",
+        isLoading &&
+          resolvedVariant === "weak" &&
+          resolvedColor === "red" &&
+          "bg-error-200",
         className,
       )}
       {...props}
