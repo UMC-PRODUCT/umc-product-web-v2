@@ -3,9 +3,12 @@ import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
+import type { RecruitingListRole } from "./recruitingListRole"
+
 // RecruitingRoundStatus (백엔드 RoundResponse.status)와 동일한 값
 export type RecruitmentPostStatus = "DRAFT" | "OPEN" | "CLOSED"
 
+// TODO: 백엔드 명세 확인
 export interface RecruitmentPost {
   postId: string
   chapter: Chapter
@@ -23,6 +26,7 @@ export interface ChapterPostGroup {
   posts: RecruitmentPost[]
 }
 
+// TODO: API 연동 시 클라이언트 필터링 대신 searchRounds의 chapterId/schoolId 쿼리 파라미터로 대체
 export function groupPostsByChapter(
   posts: RecruitmentPost[],
   chapters: Chapter[],
@@ -46,6 +50,24 @@ export function groupPostsBySchool(
     school,
     posts: posts.filter((post) => post.school === school),
   }))
+}
+
+// TODO: API 연동 시 mock 상수 대신 실제 로그인 사용자의 소속 지부/학교로 채우기
+export interface RecruitmentEditScope {
+  myChapter?: Chapter
+  mySchool?: string
+}
+
+// central(SUPER_ADMIN/HQ_LEAD/HQ_ADMIN)은 전체 편집 가능,
+// chapterAdmin(CHAPTER_ADMIN)은 본인 지부만, schoolStaff(SCHOOL_ADMIN/SCHOOL_STAFF)는 본인 학교만 편집 가능
+export function canEditRecruitmentPost(
+  role: RecruitingListRole,
+  post: RecruitmentPost,
+  scope: RecruitmentEditScope,
+): boolean {
+  if (role === "central") return true
+  if (role === "chapterAdmin") return post.chapter === scope.myChapter
+  return post.school === scope.mySchool
 }
 
 export const RECRUITMENT_SORT_OPTIONS = [

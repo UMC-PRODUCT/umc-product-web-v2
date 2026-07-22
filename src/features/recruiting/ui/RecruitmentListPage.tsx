@@ -1,21 +1,22 @@
 import { useState } from "react"
 
 import { CHAPTERS, isChapter } from "@/entities/organization/model/chapters"
+import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
+import { IconButton } from "@/shared/ui/button/IconButton"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
-import {
-  groupPostsByChapter,
-  groupPostsBySchool,
-} from "../model/recruitmentList"
+import { groupPostsByChapter } from "../model/recruitmentList"
 import {
   RECRUITING_MY_CHAPTER_MOCK,
+  RECRUITING_MY_SCHOOL_MOCK,
   RECRUITMENT_LIST_MOCK,
 } from "../model/recruitmentList.mock"
 import { ChapterTabs } from "./ChapterTabs"
+import { RecruitmentCreateButton } from "./RecruitmentCreateButton"
+import { RecruitmentDraftArchiveCard } from "./RecruitmentDraftArchiveCard"
 import { RecruitmentPostListCard } from "./RecruitmentPostListCard"
-import { RecruitmentPostRow } from "./RecruitmentPostRow"
-import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
+import { RecruitmentSchoolSearchDropdown } from "./RecruitmentSchoolSearchDropdown"
 import { SchoolTabs } from "./SchoolTabs"
 
 import type { RecruitingListRole } from "../model/recruitingListRole"
@@ -32,6 +33,8 @@ export function RecruitmentListPage({
 }: RecruitmentListPageProps) {
   const [chapterTab, setChapterTab] = useState("all")
   const [schoolTab, setSchoolTab] = useState("all")
+  const [schoolSearchOpen, setSchoolSearchOpen] = useState(false)
+  const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
 
   const scopeChapters =
     chapterTab === "all"
@@ -40,10 +43,17 @@ export function RecruitmentListPage({
         ? [chapterTab]
         : []
   const chapterGroups = groupPostsByChapter(posts, scopeChapters)
-  const schoolGroups = groupPostsBySchool(posts, RECRUITING_MY_CHAPTER_MOCK)
-  const visibleSchoolGroups = schoolGroups.filter(
-    ({ school }) => schoolTab === "all" || school === schoolTab,
+  const myChapterPosts = posts.filter(
+    (post) => post.chapter === RECRUITING_MY_CHAPTER_MOCK,
   )
+  const myScopedPosts =
+    schoolTab === "all"
+      ? myChapterPosts
+      : myChapterPosts.filter((post) => post.school === schoolTab)
+  const editScope = {
+    myChapter: RECRUITING_MY_CHAPTER_MOCK,
+    mySchool: RECRUITING_MY_SCHOOL_MOCK,
+  }
 
   return (
     <div className="flex w-full max-w-286.5 flex-col">
@@ -60,11 +70,14 @@ export function RecruitmentListPage({
       {role === "central" && (
         <ChapterTabs
           value={chapterTab}
-          onValueChange={setChapterTab}
+          onValueChange={(value) => {
+            setChapterTab(value)
+            setSelectedSchool(null)
+          }}
           className="mt-8"
         />
       )}
-      {role === "chapterAdmin" && (
+      {(role === "chapterAdmin" || role === "schoolStaff") && (
         <SchoolTabs
           schools={SCHOOLS_BY_BRANCH[RECRUITING_MY_CHAPTER_MOCK]}
           value={schoolTab}
@@ -75,51 +88,126 @@ export function RecruitmentListPage({
 
       {role === "central" && (
         <div className="mt-8 flex flex-col gap-11">
-          {chapterGroups.map(({ chapter, posts: chapterPosts }) => (
-            <section key={chapter} className="flex flex-col">
-              <h2 className="text-heading-5-semibold px-3 text-teal-700">
-                {chapter}
-              </h2>
-              <RecruitmentPostListCard
-                chapter={chapter}
-                posts={chapterPosts}
-                className="mt-5"
-              />
-            </section>
-          ))}
+          {chapterGroups.map(({ chapter, posts: chapterPosts }) => {
+            const scopedPosts = selectedSchool
+              ? chapterPosts.filter((post) => post.school === selectedSchool)
+              : chapterPosts
+
+            return (
+              <section key={chapter} className="flex flex-col">
+                <div className="flex items-end justify-between px-3">
+                  <div className="relative flex items-center gap-2.5">
+                    <h2 className="text-heading-5-semibold text-teal-700">
+                      {selectedSchool ?? chapter}
+                    </h2>
+                    {chapterTab !== "all" && (
+                      <IconButton
+                        variant="weak"
+                        aria-label="학교 검색"
+                        onClick={() => setSchoolSearchOpen((prev) => !prev)}
+                        className="bg-teal-gray-100 text-teal-gray-700 hover:bg-teal-gray-150 h-7.5 min-h-7.5 w-7.5 min-w-0 rounded-[0.625rem] p-0"
+                      >
+                        <DownChevronIcon className="h-4 w-4" />
+                      </IconButton>
+                    )}
+                    <RecruitmentSchoolSearchDropdown
+                      open={schoolSearchOpen}
+                      chapter={chapter}
+                      onOpenChange={setSchoolSearchOpen}
+                      onSelect={(school) => setSelectedSchool(school)}
+                    />
+                  </div>
+                  {chapterTab !== "all" && (
+                    <RecruitmentCreateButton
+                      onClick={() => alert("모집 공고")}
+                      className="translate-y-1"
+                    />
+                  )}
+                </div>
+                <RecruitmentPostListCard
+                  chapter={chapter}
+                  posts={scopedPosts}
+                  role={role}
+                  editScope={editScope}
+                  schoolFilterActive={selectedSchool !== null}
+                  className="mt-5"
+                />
+                {chapterTab !== "all" && (
+                  <div className="mt-11 flex flex-col gap-5">
+                    <h2 className="text-heading-5-semibold pl-3 text-teal-700">
+                      {chapter}
+                    </h2>
+                    <RecruitmentDraftArchiveCard
+                      chapter={chapter}
+                      posts={scopedPosts}
+                      role={role}
+                      editScope={editScope}
+                      selectedSchool={selectedSchool}
+                    />
+                  </div>
+                )}
+              </section>
+            )
+          })}
         </div>
       )}
 
       {role === "chapterAdmin" && (
-        <section className="flex flex-col">
-          <h2 className="text-heading-5-semibold mt-6 px-3 text-teal-700">
-            {RECRUITING_MY_CHAPTER_MOCK}
+        <section className="mt-8 flex flex-col">
+          <h2 className="text-heading-5-semibold pl-3 text-teal-700">
+            {schoolTab === "all" ? RECRUITING_MY_CHAPTER_MOCK : schoolTab}
           </h2>
-          <div className="mt-4 flex flex-col gap-8">
-            {visibleSchoolGroups.map(({ school, posts: schoolPosts }) => (
-              <RecruitmentSchoolSection key={school} schoolName={school}>
-                {schoolPosts.length === 0 ? (
-                  <div className="flex w-full items-center justify-center bg-white py-10">
-                    <p className="text-body-2-regular text-teal-gray-400">
-                      등록된 모집 공고가 없습니다.
-                    </p>
-                  </div>
-                ) : (
-                  schoolPosts.map((post) => (
-                    <RecruitmentPostRow
-                      key={post.postId}
-                      title={post.title}
-                      startLabel={post.startLabel}
-                      endLabel={post.endLabel}
-                      dateLabel={post.dateLabel}
-                      authorLabel={post.authorLabel}
-                      done={post.status === "CLOSED"}
-                    />
-                  ))
-                )}
-              </RecruitmentSchoolSection>
-            ))}
+          <RecruitmentPostListCard
+            chapter={RECRUITING_MY_CHAPTER_MOCK}
+            posts={myScopedPosts}
+            role={role}
+            editScope={editScope}
+            schoolFilterActive={schoolTab !== "all"}
+            className="mt-5"
+          />
+          <div className="mt-11 flex flex-col gap-5">
+            <h2 className="text-heading-5-semibold pl-3 text-teal-700">
+              {schoolTab === "all" ? RECRUITING_MY_CHAPTER_MOCK : schoolTab}
+            </h2>
+            <RecruitmentDraftArchiveCard
+              chapter={RECRUITING_MY_CHAPTER_MOCK}
+              posts={myScopedPosts}
+              role={role}
+              editScope={editScope}
+              selectedSchool={schoolTab === "all" ? null : schoolTab}
+            />
           </div>
+        </section>
+      )}
+
+      {role === "schoolStaff" && (
+        <section className="mt-8 flex flex-col">
+          <h2 className="text-heading-5-semibold pl-3 text-teal-700">
+            {schoolTab === "all" ? RECRUITING_MY_CHAPTER_MOCK : schoolTab}
+          </h2>
+          <RecruitmentPostListCard
+            chapter={RECRUITING_MY_CHAPTER_MOCK}
+            posts={myScopedPosts}
+            role={role}
+            editScope={editScope}
+            schoolFilterActive={schoolTab !== "all"}
+            className="mt-5"
+          />
+          {schoolTab === RECRUITING_MY_SCHOOL_MOCK && (
+            <div className="mt-11 flex flex-col gap-5">
+              <h2 className="text-heading-5-semibold pl-3 text-teal-700">
+                {schoolTab}
+              </h2>
+              <RecruitmentDraftArchiveCard
+                chapter={RECRUITING_MY_CHAPTER_MOCK}
+                posts={myScopedPosts}
+                role={role}
+                editScope={editScope}
+                selectedSchool={schoolTab}
+                title="공유 보관함"
+              />
+            </div>
+          )}
         </section>
       )}
     </div>
