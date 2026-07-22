@@ -1,4 +1,5 @@
 import PersonGraphicIcon from "@/shared/assets/icon/people/PersonGraphicIcon"
+import { GraphTimestampLabel } from "@/shared/ui/GraphTimestampLabel"
 
 interface StatCardProps {
   title: string
@@ -30,9 +31,7 @@ export function StatCard({ title, count, footer }: StatCardProps) {
           </p>
         </div>
         {footer.type === "timestamp" && (
-          <p className="text-body-1-regular text-teal-gray-400">
-            {footer.date} {footer.time} 기준
-          </p>
+          <GraphTimestampLabel date={footer.date} time={footer.time} />
         )}
         {footer.type === "ratio" && (
           <p className="text-subtitle-1-medium text-teal-gray-500">
