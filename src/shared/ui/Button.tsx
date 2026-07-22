@@ -17,6 +17,7 @@ const buttonVariants = cva(
         primary: "",
         neutral: "",
         white: "",
+        red: "",
       },
       size: {
         xl: "h-14 min-h-14 min-w-24 py-1 px-8 gap-2.5 text-heading-7-semibold",
@@ -50,6 +51,18 @@ const buttonVariants = cva(
         color: "neutral",
         className:
           "bg-teal-gray-150 text-teal-gray-600 hover:bg-teal-gray-200 disabled:bg-teal-gray-100 disabled:text-teal-gray-300",
+      },
+      {
+        variant: "fill",
+        color: "red",
+        className:
+          "bg-error-600 text-white hover:bg-error-700 disabled:bg-error-300 disabled:text-teal-gray-50",
+      },
+      {
+        variant: "weak",
+        color: "red",
+        className:
+          "bg-error-100 text-error-600 hover:bg-error-200 disabled:bg-error-100 disabled:text-error-300",
       },
       {
         variant: "fill",
@@ -145,6 +158,8 @@ export function Button({
           variant === "weak" &&
           color === "neutral" &&
           "bg-teal-gray-200",
+        isLoading && variant === "fill" && color === "red" && "bg-error-700",
+        isLoading && variant === "weak" && color === "red" && "bg-error-200",
         className,
       )}
       {...props}
