@@ -56,7 +56,7 @@ export const RECRUITING_SIDEBAR_ITEMS: RecruitingSideBarSection[] = [
       {
         id: "recruiting-evaluations-assignment",
         title: "평가 담당자 배정",
-        to: "/recruiting/evaluations/assignment",
+        to: "/recruiting/evaluations/",
       },
       {
         id: "recruiting-evaluations-document",
