@@ -9,7 +9,7 @@ export const Route = createFileRoute("/test/button")({
 })
 
 const VARIANTS = ["fill", "weak"] as const
-const COLORS = ["primary", "neutral"] as const
+const COLORS = ["primary", "neutral", "red"] as const
 const SIZES = ["xs", "s", "m", "lg", "xl"] as const
 
 function Section({
