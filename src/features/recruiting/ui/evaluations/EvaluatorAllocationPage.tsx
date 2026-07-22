@@ -58,6 +58,10 @@ export function EvaluatorAllocationPage() {
     }
   }
 
+  function handleDragCancel() {
+    setActiveStaff(null)
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     setActiveStaff(null)
@@ -78,6 +82,7 @@ export function EvaluatorAllocationPage() {
       sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
     >
       <div
         className="flex w-full max-w-286.5 flex-col gap-8"
