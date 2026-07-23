@@ -11,8 +11,8 @@ import type { RecruitmentPostStatus } from "../model/recruitmentList"
 
 interface RecruitmentPostMoreMenuProps {
   status: RecruitmentPostStatus
-  onPublish?: () => void
-  onPrivatize?: () => void
+  onPublish: () => void
+  onPrivatize: () => void
   onEdit?: () => void
   onDuplicate: () => void
   onDelete: () => void
@@ -48,7 +48,7 @@ export function RecruitmentPostMoreMenu({
 
   const handlePublishClick = () => {
     setPopoverOpen(false)
-    onPublish?.()
+    onPublish()
     // 공개된 글은 같은 페이지의 "모집 공고 목록"에 바로 보이므로 이동 액션은 불필요
     addToast({
       message: "모집이 공개되었습니다.",
@@ -137,7 +137,13 @@ export function RecruitmentPostMoreMenu({
       <CtaModal
         open={privatizeConfirmOpen}
         title="모집을 비공개할까요?"
-        content="모집을 비공개하면 지원자에게 더 이상 보이지 않습니다. 공고는 해당 학교의 공유 보관함으로 이동됩니다."
+        content={
+          <>
+            모집을 비공개하면 지원자에게 더 이상 보이지 않습니다.
+            <br />
+            공고는 해당 학교의 공유 보관함으로 이동됩니다.
+          </>
+        }
         cancelText="돌아가기"
         confirmText="비공개하기"
         variant="success"
@@ -145,7 +151,7 @@ export function RecruitmentPostMoreMenu({
         onCancel={() => setPrivatizeConfirmOpen(false)}
         onConfirm={() => {
           setPrivatizeConfirmOpen(false)
-          onPrivatize?.()
+          onPrivatize()
           addToast({
             message: "모집 공고가 비공개되었습니다.",
             color: "primary",
