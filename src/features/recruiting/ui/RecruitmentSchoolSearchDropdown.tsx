@@ -73,7 +73,12 @@ export function RecruitmentSchoolSearchDropdown({
           </li>
         ) : (
           filteredSchools.map((school) => (
-            <li key={school} role="option" className="w-full">
+            <li
+              key={school}
+              role="option"
+              aria-selected={false}
+              className="w-full"
+            >
               <DropdownItem
                 label={school}
                 onClick={() => {

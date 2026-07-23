@@ -21,7 +21,6 @@ interface RecruitmentPostRowProps {
   // 임시저장 상태일 때
   dateLabel?: string
   authorLabel?: string
-  onMoreClick?: () => void
   rightAction?: ReactNode
   className?: string
 }

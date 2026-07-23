@@ -2,17 +2,13 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { RecruitmentPreviewCard } from "@/features/recruiting"
 
+import type { ReactNode } from "react"
+
 export const Route = createFileRoute("/test/recruitment-preview-card")({
   component: RecruitmentPreviewCardTestPage,
 })
 
-function Section({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
       <h2 className="border-teal-gray-100 text-label-1-semibold text-teal-gray-500 border-b pb-1">
