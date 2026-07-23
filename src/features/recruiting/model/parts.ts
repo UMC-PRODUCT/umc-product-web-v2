@@ -1,0 +1,45 @@
+// 리크루팅 파트(트랙) 메타 단일 소스. 키/라벨/색을 여기서만 정의해
+// 카드마다 색이 어긋나거나 중복 정의되는 드리프트를 막는다.
+export type PartKey = "pm" | "design" | "webPe" | "mobilePe"
+
+export interface PartMeta {
+  key: PartKey
+  label: string
+  // 막대 그래프/툴팁 점에 쓰는 진한 액센트. "r, g, b" 성분 문자열(rgba 합성용).
+  accent: string
+  // 도넛 세그먼트/막대 베이스/범례에 쓰는 파스텔 토큰.
+  chip300: string
+  // 도넛 호버 강조에 쓰는 진한 토큰.
+  chip500: string
+}
+
+export const PARTS: PartMeta[] = [
+  {
+    key: "pm",
+    label: "PM",
+    accent: "167, 108, 222",
+    chip300: "var(--color-chip-pm-300)",
+    chip500: "var(--color-chip-pm-500)",
+  },
+  {
+    key: "design",
+    label: "Design",
+    accent: "226, 107, 167",
+    chip300: "var(--color-chip-design-300)",
+    chip500: "var(--color-chip-design-500)",
+  },
+  {
+    key: "webPe",
+    label: "Web PE",
+    accent: "216, 178, 77",
+    chip300: "var(--color-chip-web-pe-300)",
+    chip500: "var(--color-chip-web-pe-500)",
+  },
+  {
+    key: "mobilePe",
+    label: "Mobile PE",
+    accent: "110, 143, 245",
+    chip300: "var(--color-chip-mobile-pe-300)",
+    chip500: "var(--color-chip-mobile-pe-500)",
+  },
+]

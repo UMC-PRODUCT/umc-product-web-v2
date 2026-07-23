@@ -1,8 +1,9 @@
+import { PARTS } from "@/features/recruiting/model/parts"
 import { cn } from "@/shared/lib/utils"
 
 import type { CSSProperties } from "react"
 
-import type { PartKey } from "@/features/recruiting/ui/dashboard/PartDistributionCard"
+import type { PartKey } from "@/features/recruiting/model/parts"
 
 // 파트별 상세: 지원 수(applied)는 항상, 평가 수(evaluated)는 평가현황에서만.
 // evaluated가 하나라도 있으면 평가 모드로 렌더한다.
@@ -10,13 +11,6 @@ export type PartBreakdown = Record<
   PartKey,
   { applied: number; evaluated?: number }
 >
-
-const PARTS: { key: PartKey; label: string; dot: string }[] = [
-  { key: "pm", label: "PM", dot: "rgb(167, 108, 222)" },
-  { key: "design", label: "Design", dot: "rgb(226, 107, 167)" },
-  { key: "webPe", label: "Web PE", dot: "rgb(216, 178, 77)" },
-  { key: "mobilePe", label: "Mobile PE", dot: "rgb(110, 143, 245)" },
-]
 
 interface PartBreakdownTooltipContentProps {
   name: string
@@ -118,7 +112,7 @@ function PartBreakdownTooltipContent({
               )}
             >
               <div className="flex items-center gap-1">
-                <PartDot color={part.dot} />
+                <PartDot color={`rgb(${part.accent})`} />
                 <p className="text-caption-3-regular text-teal-gray-700 whitespace-nowrap">
                   {part.label}
                 </p>

@@ -1,49 +1,14 @@
 import { useState } from "react"
 
+import { PARTS } from "@/features/recruiting/model/parts"
 import { cn } from "@/shared/lib/utils"
 
-// 파트 구성(라벨/순서/색)은 리크루팅 트랙 통합 이후 고정값으로 간주 - 하드코딩.
-// 값(count/total)만 서버 데이터라 props로 받는다.
-export type PartKey = "pm" | "design" | "webPe" | "mobilePe"
+import type { PartKey } from "@/features/recruiting/model/parts"
 
-// color: 기본(파스텔 300). hoverColor/hoverOpacity: 호버 시 진한 색(500)으로 강조.
-// 디자인 파트만 500 opacity 70%, 나머지는 80%.
-const PARTS: {
-  key: PartKey
-  label: string
-  color: string
-  hoverColor: string
-  hoverOpacity: number
-}[] = [
-  {
-    key: "pm",
-    label: "PM",
-    color: "var(--color-chip-pm-300)",
-    hoverColor: "var(--color-chip-pm-500)",
-    hoverOpacity: 0.8,
-  },
-  {
-    key: "design",
-    label: "Design",
-    color: "var(--color-chip-design-300)",
-    hoverColor: "var(--color-chip-design-500)",
-    hoverOpacity: 0.7,
-  },
-  {
-    key: "webPe",
-    label: "Web PE",
-    color: "var(--color-chip-web-pe-300)",
-    hoverColor: "var(--color-chip-web-pe-500)",
-    hoverOpacity: 0.8,
-  },
-  {
-    key: "mobilePe",
-    label: "Mobile PE",
-    color: "var(--color-chip-mobile-pe-300)",
-    hoverColor: "var(--color-chip-mobile-pe-500)",
-    hoverOpacity: 0.8,
-  },
-]
+// 호버 강조 불투명도: 디자인 파트만 70%, 나머지는 80%.
+function hoverOpacity(key: PartKey): number {
+  return key === "design" ? 0.7 : 0.8
+}
 
 type PartValue =
   | { type: "application"; count: number }
@@ -158,8 +123,8 @@ export function PartDistributionCard({
                     cy={DONUT_CENTER}
                     r={RING_RADIUS}
                     fill="none"
-                    stroke={hovered ? part.hoverColor : part.color}
-                    strokeOpacity={hovered ? part.hoverOpacity : 1}
+                    stroke={hovered ? part.chip500 : part.chip300}
+                    strokeOpacity={hovered ? hoverOpacity(part.key) : 1}
                     strokeWidth={RING_WIDTH}
                     strokeDasharray={`${dash} ${RING_CIRCUMFERENCE - dash}`}
                     strokeDashoffset={-(start + SEGMENT_GAP / 2)}
@@ -206,7 +171,7 @@ export function PartDistributionCard({
               <div className="flex items-center gap-1.5">
                 <span
                   className="size-3 shrink-0 rounded-full"
-                  style={{ backgroundColor: part.color }}
+                  style={{ backgroundColor: part.chip300 }}
                 />
                 <p className="text-body-1-medium text-teal-gray-800 w-18">
                   {part.label}

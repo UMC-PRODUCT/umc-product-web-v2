@@ -1,9 +1,10 @@
 import { CHAPTERS } from "@/entities/organization/model/chapters"
+import { PARTS } from "@/features/recruiting/model/parts"
 import { GraphTooltip } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
+import type { PartKey, PartMeta } from "@/features/recruiting/model/parts"
 import type { PartBreakdown } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
-import type { PartKey } from "@/features/recruiting/ui/dashboard/PartDistributionCard"
 
 interface SchoolDatum {
   chapter: Chapter
@@ -25,58 +26,23 @@ const SCHOOLS_PER_ROW = 15
 const BAR_BAND_HEIGHT_PX = 100
 const BAR_MIN_HEIGHT_PX = 2
 
-// 파트별 막대 스타일: 베이스는 chip-{part}-300, 그 위에 액센트(rgb) 세로
-// 그라데이션을 덧씌운다. 액센트 색/최상단 불투명도는 파트마다 달라 피그마 값을 그대로 사용.
-// accent 값은 범례 점 색상과 동일.
-const PARTS: {
-  key: PartKey
-  label: string
-  accent: string
-  baseColor: string
-  topOpacity: number
-  midOpacity: number
-}[] = [
-  {
-    key: "pm",
-    label: "PM",
-    accent: "167, 108, 222",
-    baseColor: "var(--color-chip-pm-300)",
-    topOpacity: 0.7,
-    midOpacity: 0.5,
-  },
-  {
-    key: "design",
-    label: "Design",
-    accent: "226, 107, 167",
-    baseColor: "var(--color-chip-design-300)",
-    topOpacity: 0.6,
-    midOpacity: 0.5,
-  },
-  {
-    key: "webPe",
-    label: "Web PE",
-    accent: "216, 178, 77",
-    baseColor: "var(--color-chip-web-pe-300)",
-    topOpacity: 0.7,
-    midOpacity: 0.5,
-  },
-  {
-    key: "mobilePe",
-    label: "Mobile PE",
-    accent: "110, 143, 245",
-    baseColor: "var(--color-chip-mobile-pe-300)",
-    topOpacity: 0.5,
-    midOpacity: 0.4,
-  },
-]
+// 막대 세로 그라데이션의 파트별 불투명도(피그마 값). 렌더링 전용이라 로컬 유지.
+const GRADIENT_OPACITY: Record<PartKey, { top: number; mid: number }> = {
+  pm: { top: 0.7, mid: 0.5 },
+  design: { top: 0.6, mid: 0.5 },
+  webPe: { top: 0.7, mid: 0.5 },
+  mobilePe: { top: 0.5, mid: 0.4 },
+}
 
-function barBackground(part: (typeof PARTS)[number]): string {
+// 파트별 막대 스타일: 베이스는 파스텔(chip300), 그 위에 액센트(rgb) 세로 그라데이션.
+function barBackground(part: PartMeta): string {
+  const { top, mid } = GRADIENT_OPACITY[part.key]
   return [
     `linear-gradient(180deg,`,
-    `rgba(${part.accent}, ${part.topOpacity}) 47.596%,`,
-    `rgba(${part.accent}, ${part.midOpacity}) 75%,`,
+    `rgba(${part.accent}, ${top}) 47.596%,`,
+    `rgba(${part.accent}, ${mid}) 75%,`,
     `rgba(${part.accent}, 0.25) 100%)`,
-    `, ${part.baseColor}`,
+    `, ${part.chip300}`,
   ].join(" ")
 }
 

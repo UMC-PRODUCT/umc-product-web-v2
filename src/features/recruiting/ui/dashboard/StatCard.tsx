@@ -21,11 +21,7 @@ export function StatCard({ title, count, footer }: StatCardProps) {
       <h3 className="text-heading-6-semibold text-teal-700">{title}</h3>
       <div className="flex w-full flex-col items-center gap-1.5 px-7.5 pt-3.25 pb-14">
         <div className="flex w-full items-center justify-center gap-3">
-          <PersonGraphicIcon
-            width={36}
-            height={36}
-            className="shrink-0 text-teal-500"
-          />
+          <PersonGraphicIcon width={36} height={36} className="shrink-0" />
           <p className="text-display-2-medium whitespace-nowrap text-teal-500">
             {count.toLocaleString()} 명
           </p>
