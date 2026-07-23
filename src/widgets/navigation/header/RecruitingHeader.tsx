@@ -1,0 +1,114 @@
+import { Link, useLocation } from "@tanstack/react-router"
+
+import { useMe } from "@/entities/member/hooks/useMe"
+import {
+  isAnyOperator,
+  isCentralStaff,
+  isSuperAdmin,
+} from "@/entities/member/model/identity"
+import { useAuthStore } from "@/entities/member/store/authStore"
+import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
+import HeaderButton from "@/widgets/navigation/header/HeaderButton"
+import NavigationButton from "@/widgets/navigation/header/NavigationButton"
+import Profile from "@/widgets/navigation/header/Profile"
+import {
+  type RecruitingStatus,
+  RecruitingStatusButton,
+} from "@/widgets/navigation/header/RecruitingStatusButton"
+
+interface RecruitingHeaderProps {
+  // 모집 상태(진행 전/중/마감 + D-day). 생략 시 임시 기본값 사용.
+  recruitingStatus?: RecruitingStatus
+  activePathname?: string
+}
+
+// TODO: 모집 상태는 서버에서 내려줄 예정. 연동 전까지 임시 값(진행중 D-22).
+const DEFAULT_RECRUITING_STATUS: RecruitingStatus = { phase: "open", dDay: 22 }
+
+type NavItem = { label: string; to: string }
+
+function isNavActive(pathname: string, to: string): boolean {
+  if (to === "/") return pathname === "/"
+  return pathname === to || pathname.startsWith(to + "/")
+}
+
+export default function RecruitingHeader({
+  recruitingStatus = DEFAULT_RECRUITING_STATUS,
+  activePathname,
+}: RecruitingHeaderProps) {
+  const location = useLocation()
+  const pathname = activePathname ?? location.pathname
+  const { data: me } = useMe()
+  const isAuthed = useAuthStore((s) => s.isAuthed)
+
+  const showRecruiting = isAnyOperator(me)
+  const showSettings = isSuperAdmin(me) || isCentralStaff(me)
+
+  const navItems: NavItem[] = [
+    { label: "소개", to: "/intro" },
+    // TODO: 모집 안내 페이지 연결
+    { label: "모집 안내", to: "/" },
+    // TODO: 프로젝트 페이지 연결
+    { label: "프로젝트", to: "/projects" },
+    ...(showRecruiting
+      ? [
+          {
+            label: "리크루팅",
+            to: "/recruiting/dashboard/applications",
+          } satisfies NavItem,
+        ]
+      : []),
+    ...(showSettings
+      ? [{ label: "설정", to: "/settings" } satisfies NavItem]
+      : []),
+  ]
+
+  return (
+    <header className="bg-teal-gray-50 shadow-drop-neutral-3 relative z-50 flex h-20 min-h-20 w-full items-center justify-between overflow-visible">
+      <Link to="/" className="flex w-55 items-center pl-10">
+        <UmcLogo className="text-teal-gray-700 h-5.5 w-17.5" />
+      </Link>
+
+      <nav className="bg-teal-gray-50 border-teal-gray-100 flex shrink-0 items-center gap-1.5 rounded-full border p-1.5 drop-shadow-[0_0_8px_rgba(10,86,80,0.04)]">
+        {navItems.map((item) => (
+          <NavigationButton
+            key={item.label}
+            label={item.label}
+            to={item.to}
+            selected={isNavActive(pathname, item.to)}
+            className="min-w-18 px-4.5"
+          />
+        ))}
+      </nav>
+
+      <div className="flex items-center justify-end gap-4 pr-8.5">
+        {isAuthed ? (
+          <>
+            <RecruitingStatusButton status={recruitingStatus} />
+            <HeaderButton
+              label="문의사항"
+              type="text"
+              className="border-teal-gray-150 h-10 border"
+            />
+            <Profile />
+          </>
+        ) : (
+          <>
+            <HeaderButton
+              label="문의사항"
+              type="text"
+              className="border-teal-gray-150 h-10 border"
+            />
+            <RecruitingStatusButton status={recruitingStatus} />
+            <Link
+              to="/login"
+              className="text-label-1-semibold flex h-10 min-w-16 items-center justify-center rounded-[10px] bg-teal-100 px-5 text-center tracking-[-0.32px] text-teal-600"
+            >
+              로그인
+            </Link>
+          </>
+        )}
+      </div>
+    </header>
+  )
+}
