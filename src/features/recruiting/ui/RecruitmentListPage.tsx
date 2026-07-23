@@ -67,17 +67,18 @@ export function RecruitmentListPage({
         description="지부별, 학교별 모집 공고를 확인하고 관리합니다."
         className="pl-3"
       />
-      {role === "central" && (
+      {(role === "central" || role === "chapterAdmin") && (
         <ChapterTabs
           value={chapterTab}
           onValueChange={(value) => {
             setChapterTab(value)
             setSelectedSchool(null)
           }}
+          allLabel={role === "chapterAdmin" ? "지부 전체" : "전체"}
           className="mt-8"
         />
       )}
-      {(role === "chapterAdmin" || role === "schoolStaff") && (
+      {role === "schoolStaff" && (
         <SchoolTabs
           schools={SCHOOLS_BY_BRANCH[RECRUITING_MY_CHAPTER_MOCK]}
           value={schoolTab}
@@ -86,7 +87,7 @@ export function RecruitmentListPage({
         />
       )}
 
-      {role === "central" && (
+      {(role === "central" || role === "chapterAdmin") && (
         <div className="mt-8 flex flex-col gap-11">
           {chapterGroups.map(({ chapter, posts: chapterPosts }) => {
             const scopedPosts = selectedSchool
@@ -117,12 +118,14 @@ export function RecruitmentListPage({
                       onSelect={(school) => setSelectedSchool(school)}
                     />
                   </div>
-                  {chapterTab !== "all" && (
-                    <RecruitmentCreateButton
-                      onClick={() => alert("모집 공고")}
-                      className="translate-y-1"
-                    />
-                  )}
+                  {chapterTab !== "all" &&
+                    (role === "central" ||
+                      chapter === RECRUITING_MY_CHAPTER_MOCK) && (
+                      <RecruitmentCreateButton
+                        onClick={() => alert("모집 공고")}
+                        className="translate-y-1"
+                      />
+                    )}
                 </div>
                 <RecruitmentPostListCard
                   chapter={chapter}
@@ -150,34 +153,6 @@ export function RecruitmentListPage({
             )
           })}
         </div>
-      )}
-
-      {role === "chapterAdmin" && (
-        <section className="mt-8 flex flex-col">
-          <h2 className="text-heading-5-semibold pl-3 text-teal-700">
-            {schoolTab === "all" ? RECRUITING_MY_CHAPTER_MOCK : schoolTab}
-          </h2>
-          <RecruitmentPostListCard
-            chapter={RECRUITING_MY_CHAPTER_MOCK}
-            posts={myScopedPosts}
-            role={role}
-            editScope={editScope}
-            schoolFilterActive={schoolTab !== "all"}
-            className="mt-5"
-          />
-          <div className="mt-11 flex flex-col gap-5">
-            <h2 className="text-heading-5-semibold pl-3 text-teal-700">
-              {schoolTab === "all" ? RECRUITING_MY_CHAPTER_MOCK : schoolTab}
-            </h2>
-            <RecruitmentDraftArchiveCard
-              chapter={RECRUITING_MY_CHAPTER_MOCK}
-              posts={myScopedPosts}
-              role={role}
-              editScope={editScope}
-              selectedSchool={schoolTab === "all" ? null : schoolTab}
-            />
-          </div>
-        </section>
       )}
 
       {role === "schoolStaff" && (

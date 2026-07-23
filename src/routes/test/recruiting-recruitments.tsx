@@ -10,7 +10,7 @@ import Header from "@/widgets/navigation/header/Header"
 import RecruitingSideBar from "@/widgets/navigation/sidebar/RecruitingSideBar"
 
 function parseRole(value: unknown): RecruitingListRole {
-  return isRecruitingListRole(value) ? value : "central"
+  return isRecruitingListRole(value) ? value : "schoolStaff"
 }
 
 export const Route = createFileRoute("/test/recruiting-recruitments")({
