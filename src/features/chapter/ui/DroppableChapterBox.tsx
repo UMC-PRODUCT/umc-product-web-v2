@@ -97,10 +97,10 @@ export function DroppableChapterBox({
                       e.stopPropagation()
                       handleStartEdit()
                     }}
-                    className="flex cursor-pointer items-center"
+                    className="flex cursor-pointer items-center pl-2"
                     aria-label="지부명 수정"
                   >
-                    <EditIcon className="text-teal-gray-400 size-4 pl-2" />
+                    <EditIcon className="text-teal-gray-400 size-4" />
                   </button>
                 )}
               </>
