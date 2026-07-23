@@ -2,7 +2,7 @@ import { cn } from "@/shared/lib/utils"
 import { ChallengerLinkButton } from "@/shared/ui/button/ChallengerLinkButton"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
-import { TimestampLabel } from "@/shared/ui/TimestampLabel"
+import { TimestampLabel } from "@/shared/ui/timestamp/TimestampLabel"
 
 import type { Role, StatusValue } from "@/entities/application/model/types"
 
