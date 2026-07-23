@@ -99,6 +99,9 @@ export function RecruitmentDraftArchiveCard({
 
   // 임시 보관함(공유 보관함)에는 비공개 처리된 DRAFT 상태 글만 노출
   const draftPosts = posts.filter((post) => post.status === "DRAFT")
+  const selectedSchoolPosts = selectedSchool
+    ? draftPosts.filter((post) => post.school === selectedSchool)
+    : draftPosts
 
   return (
     <section
@@ -141,14 +144,14 @@ export function RecruitmentDraftArchiveCard({
       <div className="mt-5 flex flex-col gap-8 px-5">
         {selectedSchool ? (
           <RecruitmentSchoolSection schoolName={selectedSchool}>
-            {draftPosts.length === 0 ? (
+            {selectedSchoolPosts.length === 0 ? (
               <div className="flex w-full items-center justify-center bg-white py-10">
                 <p className="text-body-2-regular text-teal-gray-400">
                   등록된 임시 보관글이 없습니다.
                 </p>
               </div>
             ) : (
-              draftPosts.map((post) => (
+              selectedSchoolPosts.map((post) => (
                 <DraftPostRow
                   key={post.postId}
                   post={post}
