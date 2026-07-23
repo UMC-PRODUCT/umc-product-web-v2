@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { ChapterTabs } from "@/features/recruiting/ui/ChapterTabs"
@@ -13,7 +13,7 @@ import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
-export const Route = createFileRoute("/manage/school")({
+export const Route = createFileRoute("/manage/school/")({
   component: SchoolManagePage,
 })
 
@@ -51,12 +51,15 @@ function SchoolManagePage() {
 
           <div className="flex items-center gap-4">
             <Button
+              asChild
               size="m"
               color="primary"
               variant="fill"
               className="flex items-center gap-1 py-[11px] pr-3.5 pl-3"
             >
-              <PlusIcon className="h-4 w-4" /> 학교 등록
+              <Link to="/manage/school/register">
+                <PlusIcon className="h-4 w-4" /> 학교 등록
+              </Link>
             </Button>
 
             <SchoolSortDropdown
@@ -68,12 +71,19 @@ function SchoolManagePage() {
 
         <div className="grid w-full grid-cols-2 gap-2">
           {MOCK_SCHOOLS.map((school) => (
-            <SchoolCard
+            <Link
               key={school.id}
-              branch={school.branch}
-              name={school.name}
-              count={school.count}
-            />
+              to="/manage/school/$schoolId"
+              params={{ schoolId: school.id }}
+              className="block w-full text-left"
+            >
+              <SchoolCard
+                branch={school.branch}
+                name={school.name}
+                count={school.count}
+                className="cursor-pointer"
+              />
+            </Link>
           ))}
         </div>
       </div>
