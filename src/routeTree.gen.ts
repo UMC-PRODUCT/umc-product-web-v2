@@ -16,6 +16,7 @@ import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as RecruitingRouteRouteImport } from './routes/recruiting/route'
 import { Route as ProjectsRouteRouteImport } from './routes/projects/route'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
+import { Route as ManageRouteRouteImport } from './routes/manage/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestIndexRouteImport } from './routes/test/index'
@@ -23,6 +24,7 @@ import { Route as SignupIndexRouteImport } from './routes/signup/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
+import { Route as ManageIndexRouteImport } from './routes/manage/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as TestUsabilitySurveyRouteImport } from './routes/test/usability-survey'
@@ -67,6 +69,9 @@ import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
+import { Route as ManageSchoolRouteImport } from './routes/manage/school'
+import { Route as ManageCurriculumRouteImport } from './routes/manage/curriculum'
+import { Route as ManageChapterRouteImport } from './routes/manage/chapter'
 import { Route as LoginDefaultRouteImport } from './routes/login/default'
 import { Route as RecruitingRecruitmentsIndexRouteImport } from './routes/recruiting/recruitments/index'
 import { Route as RecruitingEvaluationsIndexRouteImport } from './routes/recruiting/evaluations/index'
@@ -128,6 +133,11 @@ const MatchingRouteRoute = MatchingRouteRouteImport.update({
   path: '/matching',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ManageRouteRoute = ManageRouteRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -162,6 +172,11 @@ const MatchingIndexRoute = MatchingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MatchingRouteRoute,
+} as any)
+const ManageIndexRoute = ManageIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ManageRouteRoute,
 } as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
   id: '/login/',
@@ -389,6 +404,21 @@ const MatchingApplicationsRoute = MatchingApplicationsRouteImport.update({
   path: '/applications',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const ManageSchoolRoute = ManageSchoolRouteImport.update({
+  id: '/school',
+  path: '/school',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
+const ManageCurriculumRoute = ManageCurriculumRouteImport.update({
+  id: '/curriculum',
+  path: '/curriculum',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
+const ManageChapterRoute = ManageChapterRouteImport.update({
+  id: '/chapter',
+  path: '/chapter',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
 const LoginDefaultRoute = LoginDefaultRouteImport.update({
   id: '/login/default',
   path: '/login/default',
@@ -536,6 +566,7 @@ const MatchingProjectsAnnounceNoticePublishNoticeIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/manage': typeof ManageRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
   '/projects': typeof ProjectsRouteRouteWithChildren
   '/recruiting': typeof RecruitingRouteRouteWithChildren
@@ -544,6 +575,9 @@ export interface FileRoutesByFullPath {
   '/challenger-verification': typeof ChallengerVerificationRoute
   '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
+  '/manage/chapter': typeof ManageChapterRoute
+  '/manage/curriculum': typeof ManageCurriculumRoute
+  '/manage/school': typeof ManageSchoolRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -588,6 +622,7 @@ export interface FileRoutesByFullPath {
   '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/manage/': typeof ManageIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/projects/': typeof ProjectsIndexRoute
   '/settings/': typeof SettingsIndexRoute
@@ -625,6 +660,9 @@ export interface FileRoutesByTo {
   '/challenger-verification': typeof ChallengerVerificationRoute
   '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
+  '/manage/chapter': typeof ManageChapterRoute
+  '/manage/curriculum': typeof ManageCurriculumRoute
+  '/manage/school': typeof ManageSchoolRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -669,6 +707,7 @@ export interface FileRoutesByTo {
   '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin': typeof AdminIndexRoute
   '/login': typeof LoginIndexRoute
+  '/manage': typeof ManageIndexRoute
   '/matching': typeof MatchingIndexRoute
   '/projects': typeof ProjectsIndexRoute
   '/settings': typeof SettingsIndexRoute
@@ -702,6 +741,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/manage': typeof ManageRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
   '/projects': typeof ProjectsRouteRouteWithChildren
   '/recruiting': typeof RecruitingRouteRouteWithChildren
@@ -710,6 +750,9 @@ export interface FileRoutesById {
   '/challenger-verification': typeof ChallengerVerificationRoute
   '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
+  '/manage/chapter': typeof ManageChapterRoute
+  '/manage/curriculum': typeof ManageCurriculumRoute
+  '/manage/school': typeof ManageSchoolRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -754,6 +797,7 @@ export interface FileRoutesById {
   '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/manage/': typeof ManageIndexRoute
   '/matching/': typeof MatchingIndexRoute
   '/projects/': typeof ProjectsIndexRoute
   '/settings/': typeof SettingsIndexRoute
@@ -789,6 +833,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/manage'
     | '/matching'
     | '/projects'
     | '/recruiting'
@@ -797,6 +842,9 @@ export interface FileRouteTypes {
     | '/challenger-verification'
     | '/intro'
     | '/login/default'
+    | '/manage/chapter'
+    | '/manage/curriculum'
+    | '/manage/school'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -841,6 +889,7 @@ export interface FileRouteTypes {
     | '/test/usability-survey'
     | '/admin/'
     | '/login/'
+    | '/manage/'
     | '/matching/'
     | '/projects/'
     | '/settings/'
@@ -878,6 +927,9 @@ export interface FileRouteTypes {
     | '/challenger-verification'
     | '/intro'
     | '/login/default'
+    | '/manage/chapter'
+    | '/manage/curriculum'
+    | '/manage/school'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -922,6 +974,7 @@ export interface FileRouteTypes {
     | '/test/usability-survey'
     | '/admin'
     | '/login'
+    | '/manage'
     | '/matching'
     | '/projects'
     | '/settings'
@@ -954,6 +1007,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/manage'
     | '/matching'
     | '/projects'
     | '/recruiting'
@@ -962,6 +1016,9 @@ export interface FileRouteTypes {
     | '/challenger-verification'
     | '/intro'
     | '/login/default'
+    | '/manage/chapter'
+    | '/manage/curriculum'
+    | '/manage/school'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -1006,6 +1063,7 @@ export interface FileRouteTypes {
     | '/test/usability-survey'
     | '/admin/'
     | '/login/'
+    | '/manage/'
     | '/matching/'
     | '/projects/'
     | '/settings/'
@@ -1040,6 +1098,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  ManageRouteRoute: typeof ManageRouteRouteWithChildren
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
   ProjectsRouteRoute: typeof ProjectsRouteRouteWithChildren
   RecruitingRouteRoute: typeof RecruitingRouteRouteWithChildren
@@ -1142,6 +1201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/manage': {
+      id: '/manage'
+      path: '/manage'
+      fullPath: '/manage'
+      preLoaderRoute: typeof ManageRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -1190,6 +1256,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/matching/'
       preLoaderRoute: typeof MatchingIndexRouteImport
       parentRoute: typeof MatchingRouteRoute
+    }
+    '/manage/': {
+      id: '/manage/'
+      path: '/'
+      fullPath: '/manage/'
+      preLoaderRoute: typeof ManageIndexRouteImport
+      parentRoute: typeof ManageRouteRoute
     }
     '/login/': {
       id: '/login/'
@@ -1499,6 +1572,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingApplicationsRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/manage/school': {
+      id: '/manage/school'
+      path: '/school'
+      fullPath: '/manage/school'
+      preLoaderRoute: typeof ManageSchoolRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
+    '/manage/curriculum': {
+      id: '/manage/curriculum'
+      path: '/curriculum'
+      fullPath: '/manage/curriculum'
+      preLoaderRoute: typeof ManageCurriculumRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
+    '/manage/chapter': {
+      id: '/manage/chapter'
+      path: '/chapter'
+      fullPath: '/manage/chapter'
+      preLoaderRoute: typeof ManageChapterRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
     '/login/default': {
       id: '/login/default'
       path: '/login/default'
@@ -1693,6 +1787,24 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface ManageRouteRouteChildren {
+  ManageChapterRoute: typeof ManageChapterRoute
+  ManageCurriculumRoute: typeof ManageCurriculumRoute
+  ManageSchoolRoute: typeof ManageSchoolRoute
+  ManageIndexRoute: typeof ManageIndexRoute
+}
+
+const ManageRouteRouteChildren: ManageRouteRouteChildren = {
+  ManageChapterRoute: ManageChapterRoute,
+  ManageCurriculumRoute: ManageCurriculumRoute,
+  ManageSchoolRoute: ManageSchoolRoute,
+  ManageIndexRoute: ManageIndexRoute,
+}
+
+const ManageRouteRouteWithChildren = ManageRouteRoute._addFileChildren(
+  ManageRouteRouteChildren,
+)
+
 interface MatchingNoticePublishRouteChildren {
   MatchingNoticePublishNoticeIdRoute: typeof MatchingNoticePublishNoticeIdRoute
 }
@@ -1860,6 +1972,7 @@ const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  ManageRouteRoute: ManageRouteRouteWithChildren,
   MatchingRouteRoute: MatchingRouteRouteWithChildren,
   ProjectsRouteRoute: ProjectsRouteRouteWithChildren,
   RecruitingRouteRoute: RecruitingRouteRouteWithChildren,
