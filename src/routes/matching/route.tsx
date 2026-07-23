@@ -2,7 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import Footer from "@/widgets/footer/Footer"
-import Header from "@/widgets/navigation/header/Header"
+import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 import { MatchingSegmentRegion } from "@/widgets/navigation/sidebar/MatchingSegmentRegion"
 import SideBar from "@/widgets/navigation/sidebar/SideBar"
 
@@ -19,11 +19,11 @@ export const Route = createFileRoute("/matching")({
 function MatchingLayout() {
   return (
     <main className="flex h-full min-h-screen w-full flex-col">
-      <Header />
+      <RecruitingHeader />
       <div className="flex w-full flex-1">
         <SideBar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="min-h-[800px] px-4 pt-6">
+          <div className="min-h-200 px-4 pt-6">
             <MatchingSegmentRegion />
             <div className="flex min-w-0 flex-1 flex-col pt-6 pb-20">
               <Outlet />
