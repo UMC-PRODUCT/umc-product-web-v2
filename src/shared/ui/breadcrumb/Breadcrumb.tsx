@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 
-import RightChevronIcon from "@/shared/assets/icon/chevron/RightChevronIcon"
+import RightChevronIconSmall from "@/shared/assets/icon/chevron/RightChevronIconSmall"
 
 export interface BreadcrumbItem {
   id: string
@@ -25,9 +25,9 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
           return (
             <li key={item.id} className="flex items-center gap-1">
               {index > 0 && (
-                <RightChevronIcon
+                <RightChevronIconSmall
                   aria-hidden="true"
-                  className="text-teal-gray-400 size-4"
+                  className="text-teal-gray-300 size-4"
                 />
               )}
               {item.to && !isCurrent ? (
