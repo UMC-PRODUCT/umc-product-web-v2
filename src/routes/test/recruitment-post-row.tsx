@@ -26,6 +26,7 @@ function RecruitmentPostRowTestPage() {
           rightAction={
             <RecruitmentPostMoreMenu
               status="OPEN"
+              onPublish={() => {}}
               onPrivatize={() => {}}
               onEdit={() => console.info("TODO: 모집 공고 수정")}
               onDuplicate={() => {}}
@@ -60,6 +61,7 @@ function RecruitmentPostRowTestPage() {
           rightAction={
             <RecruitmentPostMoreMenu
               status="CLOSED"
+              onPublish={() => {}}
               onPrivatize={() => {}}
               onDuplicate={() => {}}
               onDelete={() => {}}
@@ -81,6 +83,7 @@ function RecruitmentPostRowTestPage() {
             <RecruitmentPostMoreMenu
               status="DRAFT"
               onPublish={() => {}}
+              onPrivatize={() => {}}
               onEdit={() => console.info("TODO: 모집 공고 수정")}
               onDuplicate={() => {}}
               onDelete={() => {}}
@@ -111,6 +114,7 @@ function RecruitmentPostRowTestPage() {
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
                   onPublish={() => {}}
+                  onPrivatize={() => {}}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
                   onDuplicate={() => {}}
                   onDelete={() => {}}
@@ -126,6 +130,7 @@ function RecruitmentPostRowTestPage() {
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
                   onPublish={() => {}}
+                  onPrivatize={() => {}}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
                   onDuplicate={() => {}}
                   onDelete={() => {}}
@@ -141,6 +146,7 @@ function RecruitmentPostRowTestPage() {
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
                   onPublish={() => {}}
+                  onPrivatize={() => {}}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
                   onDuplicate={() => {}}
                   onDelete={() => {}}
@@ -158,6 +164,7 @@ function RecruitmentPostRowTestPage() {
               rightAction={
                 <RecruitmentPostMoreMenu
                   status="OPEN"
+                  onPublish={() => {}}
                   onPrivatize={() => {}}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
                   onDuplicate={() => {}}
