@@ -69,6 +69,8 @@ import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/pro
 import { Route as RecruitingEvaluationsInterviewRouteImport } from './routes/recruiting/evaluations/interview'
 import { Route as RecruitingEvaluationsFinalRouteImport } from './routes/recruiting/evaluations/final'
 import { Route as RecruitingEvaluationsDocumentRouteImport } from './routes/recruiting/evaluations/document'
+import { Route as RecruitingDashboardEvaluationsRouteImport } from './routes/recruiting/dashboard/evaluations'
+import { Route as RecruitingDashboardApplicationsRouteImport } from './routes/recruiting/dashboard/applications'
 import { Route as ProjectsApplicationListRouteImport } from './routes/projects/application/list'
 import { Route as ProjectsApplicationApplicationIdRouteImport } from './routes/projects/application/$applicationId'
 import { Route as OauthKakaoCallbackRouteImport } from './routes/oauth/kakao/callback'
@@ -393,6 +395,18 @@ const RecruitingEvaluationsDocumentRoute =
     path: '/evaluations/document',
     getParentRoute: () => RecruitingRouteRoute,
   } as any)
+const RecruitingDashboardEvaluationsRoute =
+  RecruitingDashboardEvaluationsRouteImport.update({
+    id: '/dashboard/evaluations',
+    path: '/dashboard/evaluations',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const RecruitingDashboardApplicationsRoute =
+  RecruitingDashboardApplicationsRouteImport.update({
+    id: '/dashboard/applications',
+    path: '/dashboard/applications',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
 const ProjectsApplicationListRoute = ProjectsApplicationListRouteImport.update({
   id: '/application/list',
   path: '/application/list',
@@ -544,6 +558,8 @@ export interface FileRoutesByFullPath {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
+  '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
@@ -616,6 +632,8 @@ export interface FileRoutesByTo {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
+  '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
@@ -694,6 +712,8 @@ export interface FileRoutesById {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
+  '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
@@ -773,6 +793,8 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/projects/application/$applicationId'
     | '/projects/application/list'
+    | '/recruiting/dashboard/applications'
+    | '/recruiting/dashboard/evaluations'
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
@@ -845,6 +867,8 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/projects/application/$applicationId'
     | '/projects/application/list'
+    | '/recruiting/dashboard/applications'
+    | '/recruiting/dashboard/evaluations'
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
@@ -922,6 +946,8 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/projects/application/$applicationId'
     | '/projects/application/list'
+    | '/recruiting/dashboard/applications'
+    | '/recruiting/dashboard/evaluations'
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
@@ -1407,6 +1433,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecruitingEvaluationsDocumentRouteImport
       parentRoute: typeof RecruitingRouteRoute
     }
+    '/recruiting/dashboard/evaluations': {
+      id: '/recruiting/dashboard/evaluations'
+      path: '/dashboard/evaluations'
+      fullPath: '/recruiting/dashboard/evaluations'
+      preLoaderRoute: typeof RecruitingDashboardEvaluationsRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/dashboard/applications': {
+      id: '/recruiting/dashboard/applications'
+      path: '/dashboard/applications'
+      fullPath: '/recruiting/dashboard/applications'
+      preLoaderRoute: typeof RecruitingDashboardApplicationsRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
     '/projects/application/list': {
       id: '/projects/application/list'
       path: '/application/list'
@@ -1658,12 +1698,16 @@ const RecruitingEvaluationsInterviewRouteWithChildren =
   )
 
 interface RecruitingRouteRouteChildren {
+  RecruitingDashboardApplicationsRoute: typeof RecruitingDashboardApplicationsRoute
+  RecruitingDashboardEvaluationsRoute: typeof RecruitingDashboardEvaluationsRoute
   RecruitingEvaluationsDocumentRoute: typeof RecruitingEvaluationsDocumentRouteWithChildren
   RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
   RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRouteWithChildren
 }
 
 const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
+  RecruitingDashboardApplicationsRoute: RecruitingDashboardApplicationsRoute,
+  RecruitingDashboardEvaluationsRoute: RecruitingDashboardEvaluationsRoute,
   RecruitingEvaluationsDocumentRoute:
     RecruitingEvaluationsDocumentRouteWithChildren,
   RecruitingEvaluationsFinalRoute: RecruitingEvaluationsFinalRoute,

@@ -33,3 +33,33 @@
     animation: none;
   }
 }
+
+/* 스크롤은 되지만 스크롤바는 안 보이게. 카드 내부 리스트처럼 스크롤이
+   콘텐츠임을 암시하지 않아도 되는 좁은 영역에 사용 */
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* 피그마에 커스텀 스크롤바가 명시적으로 그려진 영역용 - 얇은 회색 막대만
+   보이게 근사치로 구현(피그마의 절대좌표 thumb 정밀 재현은 생략) */
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-teal-gray-300);
+    border-radius: 1000px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
