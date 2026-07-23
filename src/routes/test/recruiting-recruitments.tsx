@@ -16,12 +16,13 @@ function parseRole(value: unknown): RecruitingListRole {
 export const Route = createFileRoute("/test/recruiting-recruitments")({
   validateSearch: (search: Record<string, unknown>) => ({
     role: parseRole(search.role),
+    empty: search.empty === true || search.empty === "true",
   }),
   component: RecruitingRecruitmentsTestPage,
 })
 
 function RecruitingRecruitmentsTestPage() {
-  const { role } = Route.useSearch()
+  const { role, empty } = Route.useSearch()
   const activePathname = "/recruiting/recruitments"
 
   return (
@@ -31,7 +32,7 @@ function RecruitingRecruitmentsTestPage() {
         <RecruitingSideBar activePathname={activePathname} />
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="min-h-200 px-8 pt-10 pb-20">
-            <RecruitmentListPage role={role} />
+            <RecruitmentListPage role={role} useMockData={!empty} />
           </div>
         </div>
       </div>

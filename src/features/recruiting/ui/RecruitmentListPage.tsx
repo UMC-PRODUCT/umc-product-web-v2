@@ -24,19 +24,21 @@ import type { RecruitmentPost } from "../model/recruitmentList"
 
 interface RecruitmentListPageProps {
   role?: RecruitingListRole
-  posts?: RecruitmentPost[]
+  useMockData?: boolean
 }
 
 export function RecruitmentListPage({
   role = "central",
-  posts: initialPosts = RECRUITMENT_LIST_MOCK,
+  useMockData = false,
 }: RecruitmentListPageProps) {
   const [chapterTab, setChapterTab] = useState("all")
   const [schoolTab, setSchoolTab] = useState("all")
   const [schoolSearchOpen, setSchoolSearchOpen] = useState(false)
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
   // mock 전용 로컬 상태: API 연동 시 이 useState/핸들러들은 react-query mutation으로 교체됨
-  const [posts, setPosts] = useState(initialPosts)
+  const [posts, setPosts] = useState<RecruitmentPost[]>(
+    useMockData ? RECRUITMENT_LIST_MOCK : [],
+  )
   const lastDeletedPostRef = useRef<RecruitmentPost | null>(null)
 
   const handlePrivatize = (postId: string) => {
