@@ -27,6 +27,10 @@ interface RecruitmentDraftArchiveCardProps {
   posts: RecruitmentPost[]
   role: RecruitingListRole
   editScope: RecruitmentEditScope
+  onPublish: (postId: string) => void
+  onDuplicate: (postId: string) => void
+  onDelete: (postId: string) => void
+  onUndoDelete: () => void
   selectedSchool?: string | null
   title?: string
   className?: string
@@ -36,10 +40,18 @@ function DraftPostRow({
   post,
   role,
   editScope,
+  onPublish,
+  onDuplicate,
+  onDelete,
+  onUndoDelete,
 }: {
   post: RecruitmentPost
   role: RecruitingListRole
   editScope: RecruitmentEditScope
+  onPublish: (postId: string) => void
+  onDuplicate: (postId: string) => void
+  onDelete: (postId: string) => void
+  onUndoDelete: () => void
 }) {
   return (
     <RecruitmentPostRow
@@ -48,16 +60,19 @@ function DraftPostRow({
       endLabel={post.endLabel}
       dateLabel={post.dateLabel}
       authorLabel={post.authorLabel}
-      done={post.status === "CLOSED"}
+      status={post.status}
       editable={canEditRecruitmentPost(role, post, editScope)}
       rightAction={
         <RecruitmentPostMoreMenu
           status={post.status}
-          onPublish={() => alert("공개하기")}
-          onPrivatize={() => alert("비공개하기")}
-          onEdit={() => alert("수정하기")}
-          onDuplicate={() => alert("복제하기")}
-          onDelete={() => alert("삭제")}
+          onPublish={() => onPublish(post.postId)}
+          // 임시 보관함 안에서는 이미 DRAFT라 비공개 액션이 노출되지 않음
+          onPrivatize={() => {}}
+          // TODO: 모집 공고 수정 페이지 라우트 연결
+          onEdit={() => console.info("TODO: 모집 공고 수정", post.postId)}
+          onDuplicate={() => onDuplicate(post.postId)}
+          onDelete={() => onDelete(post.postId)}
+          onUndoDelete={onUndoDelete}
         />
       }
     />
@@ -69,6 +84,10 @@ export function RecruitmentDraftArchiveCard({
   posts,
   role,
   editScope,
+  onPublish,
+  onDuplicate,
+  onDelete,
+  onUndoDelete,
   selectedSchool = null,
   title = "학교별 공유 보관함",
   className,
@@ -135,6 +154,10 @@ export function RecruitmentDraftArchiveCard({
                   post={post}
                   role={role}
                   editScope={editScope}
+                  onPublish={onPublish}
+                  onDuplicate={onDuplicate}
+                  onDelete={onDelete}
+                  onUndoDelete={onUndoDelete}
                 />
               ))
             )}
@@ -156,6 +179,10 @@ export function RecruitmentDraftArchiveCard({
                       post={post}
                       role={role}
                       editScope={editScope}
+                      onPublish={onPublish}
+                      onDuplicate={onDuplicate}
+                      onDelete={onDelete}
+                      onUndoDelete={onUndoDelete}
                     />
                   ))
                 )}

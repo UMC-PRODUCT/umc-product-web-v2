@@ -6,9 +6,14 @@ import { RecruitmentStatusChip } from "./RecruitmentStatusChip"
 
 import type { ReactNode } from "react"
 
+import type { RecruitmentPostStatus } from "../model/recruitmentList"
+
 interface RecruitmentPostRowProps {
   title: string
   editable?: boolean
+  // status가 있으면 이 값을 기준으로 모집중/임시저장 뷰를 정확히 판단한다.
+  // (없으면 하위호환으로 label 유무 + done으로 판단)
+  status?: RecruitmentPostStatus
   // 모집중 상태일 때
   startLabel?: string
   endLabel?: string
@@ -24,6 +29,7 @@ interface RecruitmentPostRowProps {
 export function RecruitmentPostRow({
   title,
   editable = false,
+  status,
   startLabel,
   endLabel,
   done = false,
@@ -32,8 +38,9 @@ export function RecruitmentPostRow({
   rightAction,
   className,
 }: RecruitmentPostRowProps) {
-  // TODO: API 연동 시 확인
-  const isRecruiting = startLabel != null && endLabel != null
+  const isRecruiting =
+    status != null ? status !== "DRAFT" : startLabel != null && endLabel != null
+  const isClosed = status != null ? status === "CLOSED" : done
 
   return (
     <div
@@ -45,7 +52,7 @@ export function RecruitmentPostRow({
       <div className="flex items-start gap-3">
         {isRecruiting && (
           <div className="pt-px">
-            <RecruitmentStatusChip done={done} />
+            <RecruitmentStatusChip done={isClosed} />
           </div>
         )}
 

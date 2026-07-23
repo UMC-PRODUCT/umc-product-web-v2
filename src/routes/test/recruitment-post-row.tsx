@@ -26,10 +26,10 @@ function RecruitmentPostRowTestPage() {
           rightAction={
             <RecruitmentPostMoreMenu
               status="OPEN"
-              onPrivatize={() => alert("비공개하기")}
-              onEdit={() => alert("수정하기")}
-              onDuplicate={() => alert("복제하기")}
-              onDelete={() => alert("삭제")}
+              onPrivatize={() => {}}
+              onEdit={() => console.info("TODO: 모집 공고 수정")}
+              onDuplicate={() => {}}
+              onDelete={() => {}}
             />
           }
         />
@@ -60,9 +60,9 @@ function RecruitmentPostRowTestPage() {
           rightAction={
             <RecruitmentPostMoreMenu
               status="CLOSED"
-              onPrivatize={() => alert("비공개하기")}
-              onDuplicate={() => alert("복제하기")}
-              onDelete={() => alert("삭제")}
+              onPrivatize={() => {}}
+              onDuplicate={() => {}}
+              onDelete={() => {}}
             />
           }
         />
@@ -80,10 +80,10 @@ function RecruitmentPostRowTestPage() {
           rightAction={
             <RecruitmentPostMoreMenu
               status="DRAFT"
-              onPublish={() => alert("공개하기")}
-              onEdit={() => alert("수정하기")}
-              onDuplicate={() => alert("복제하기")}
-              onDelete={() => alert("삭제")}
+              onPublish={() => {}}
+              onEdit={() => console.info("TODO: 모집 공고 수정")}
+              onDuplicate={() => {}}
+              onDelete={() => {}}
             />
           }
         />
@@ -110,10 +110,10 @@ function RecruitmentPostRowTestPage() {
               rightAction={
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
-                  onPublish={() => alert("공개하기")}
-                  onEdit={() => alert("수정하기")}
-                  onDuplicate={() => alert("복제하기")}
-                  onDelete={() => alert("삭제")}
+                  onPublish={() => {}}
+                  onEdit={() => console.info("TODO: 모집 공고 수정")}
+                  onDuplicate={() => {}}
+                  onDelete={() => {}}
                 />
               }
             />
@@ -125,10 +125,10 @@ function RecruitmentPostRowTestPage() {
               rightAction={
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
-                  onPublish={() => alert("공개하기")}
-                  onEdit={() => alert("수정하기")}
-                  onDuplicate={() => alert("복제하기")}
-                  onDelete={() => alert("삭제")}
+                  onPublish={() => {}}
+                  onEdit={() => console.info("TODO: 모집 공고 수정")}
+                  onDuplicate={() => {}}
+                  onDelete={() => {}}
                 />
               }
             />
@@ -140,10 +140,10 @@ function RecruitmentPostRowTestPage() {
               rightAction={
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
-                  onPublish={() => alert("공개하기")}
-                  onEdit={() => alert("수정하기")}
-                  onDuplicate={() => alert("복제하기")}
-                  onDelete={() => alert("삭제")}
+                  onPublish={() => {}}
+                  onEdit={() => console.info("TODO: 모집 공고 수정")}
+                  onDuplicate={() => {}}
+                  onDelete={() => {}}
                 />
               }
             />
@@ -158,10 +158,10 @@ function RecruitmentPostRowTestPage() {
               rightAction={
                 <RecruitmentPostMoreMenu
                   status="OPEN"
-                  onPrivatize={() => alert("비공개하기")}
-                  onEdit={() => alert("수정하기")}
-                  onDuplicate={() => alert("복제하기")}
-                  onDelete={() => alert("삭제")}
+                  onPrivatize={() => {}}
+                  onEdit={() => console.info("TODO: 모집 공고 수정")}
+                  onDuplicate={() => {}}
+                  onDelete={() => {}}
                 />
               }
             />

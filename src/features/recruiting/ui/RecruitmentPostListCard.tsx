@@ -27,6 +27,12 @@ interface RecruitmentPostListCardProps {
   posts: RecruitmentPost[]
   role: RecruitingListRole
   editScope: RecruitmentEditScope
+  onPrivatize: (postId: string) => void
+  onDuplicate: (postId: string) => void
+  onDelete: (postId: string) => void
+  onUndoDelete: () => void
+  onNavigateToArchive: (school: string) => void
+  archiveVisibleOnPage: boolean
   schoolFilterActive?: boolean
   className?: string
 }
@@ -35,10 +41,22 @@ function PostRow({
   post,
   role,
   editScope,
+  onPrivatize,
+  onDuplicate,
+  onDelete,
+  onUndoDelete,
+  onNavigateToArchive,
+  archiveVisibleOnPage,
 }: {
   post: RecruitmentPost
   role: RecruitingListRole
   editScope: RecruitmentEditScope
+  onPrivatize: (postId: string) => void
+  onDuplicate: (postId: string) => void
+  onDelete: (postId: string) => void
+  onUndoDelete: () => void
+  onNavigateToArchive: (school: string) => void
+  archiveVisibleOnPage: boolean
 }) {
   const editable = canEditRecruitmentPost(role, post, editScope)
 
@@ -49,16 +67,20 @@ function PostRow({
       endLabel={post.endLabel}
       dateLabel={post.dateLabel}
       authorLabel={post.authorLabel}
-      done={post.status === "CLOSED"}
+      status={post.status}
       editable={editable}
       rightAction={
         <RecruitmentPostMoreMenu
           status={post.status}
-          onPublish={() => alert("공개하기")}
-          onPrivatize={() => alert("비공개하기")}
-          onEdit={() => alert("수정하기")}
-          onDuplicate={() => alert("복제하기")}
-          onDelete={() => alert("삭제")}
+          onPublish={() => {}}
+          onPrivatize={() => onPrivatize(post.postId)}
+          // TODO: 모집 공고 수정 페이지 라우트 연결
+          onEdit={() => console.info("TODO: 모집 공고 수정", post.postId)}
+          onDuplicate={() => onDuplicate(post.postId)}
+          onDelete={() => onDelete(post.postId)}
+          onUndoDelete={onUndoDelete}
+          showArchiveLink={!archiveVisibleOnPage}
+          onNavigateToArchive={() => onNavigateToArchive(post.school)}
         />
       }
     />
@@ -70,6 +92,12 @@ export function RecruitmentPostListCard({
   posts,
   role,
   editScope,
+  onPrivatize,
+  onDuplicate,
+  onDelete,
+  onUndoDelete,
+  onNavigateToArchive,
+  archiveVisibleOnPage,
   schoolFilterActive = false,
   className,
 }: RecruitmentPostListCardProps) {
@@ -174,6 +202,12 @@ export function RecruitmentPostListCard({
                         post={post}
                         role={role}
                         editScope={editScope}
+                        onPrivatize={onPrivatize}
+                        onDuplicate={onDuplicate}
+                        onDelete={onDelete}
+                        onUndoDelete={onUndoDelete}
+                        onNavigateToArchive={onNavigateToArchive}
+                        archiveVisibleOnPage={archiveVisibleOnPage}
                       />
                     ))
                   )}
@@ -190,6 +224,12 @@ export function RecruitmentPostListCard({
               post={post}
               role={role}
               editScope={editScope}
+              onPrivatize={onPrivatize}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
+              onUndoDelete={onUndoDelete}
+              onNavigateToArchive={onNavigateToArchive}
+              archiveVisibleOnPage={archiveVisibleOnPage}
             />
           ))}
         </div>

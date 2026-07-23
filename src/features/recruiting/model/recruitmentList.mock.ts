@@ -16,6 +16,8 @@ export const RECRUITMENT_LIST_MOCK: RecruitmentPost[] = [
     status: "OPEN",
     startLabel: "2026-07-01 00:00",
     endLabel: "07-14 23:59",
+    dateLabel: "2026.07.01",
+    authorLabel: "이방토/이예원 · 이화여대",
   },
   {
     postId: "2",
@@ -25,6 +27,8 @@ export const RECRUITMENT_LIST_MOCK: RecruitmentPost[] = [
     status: "CLOSED",
     startLabel: "2026-06-01 00:00",
     endLabel: "06-14 23:59",
+    dateLabel: "2026.06.01",
+    authorLabel: "이방토/이예원 · 홍익대 서울",
   },
   {
     postId: "3",
@@ -32,7 +36,9 @@ export const RECRUITMENT_LIST_MOCK: RecruitmentPost[] = [
     school: RECRUITING_MY_SCHOOL_MOCK,
     title: "이화여대 UMC 11기 1차 추가 모집",
     status: "DRAFT",
-    dateLabel: "2026-07-20 00:00",
+    startLabel: "2026-07-20 00:00",
+    endLabel: "08-03 23:59",
+    dateLabel: "2026.07.20",
     authorLabel: "이방토/이예원 · 이화여대",
   },
 ]
