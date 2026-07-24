@@ -28,11 +28,11 @@ import {
   toServerMatchingType,
 } from "@/features/matching/model/matchingRoundMock"
 import { BranchSelector } from "@/features/matching/ui/BranchSelector"
-import { Calendar } from "@/features/matching/ui/Calendar"
 import { CalendarScheduleList } from "@/features/matching/ui/CalendarScheduleList"
 import { RoundForm } from "@/features/matching/ui/RoundForm"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { Button } from "@/shared/ui/Button"
+import { Calendar } from "@/shared/ui/calendar/Calendar"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { SectionHeader } from "@/shared/ui/SectionHeader"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"

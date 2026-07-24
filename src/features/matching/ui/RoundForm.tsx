@@ -1,7 +1,6 @@
 import { cn } from "@/shared/lib/utils"
-
-import { DateTextBox } from "./DateTextBox"
-import { TimeTextBox } from "./TimeTextBox"
+import { DateTextBox } from "@/shared/ui/date-text-box/DateTextBox"
+import { TimeTextBox } from "@/shared/ui/date-text-box/TimeTextBox"
 
 interface RoundFormProps {
   title: string
