@@ -72,6 +72,7 @@ import { Route as RecruitingRecruitmentsIndexRouteImport } from './routes/recrui
 import { Route as RecruitingEvaluationsIndexRouteImport } from './routes/recruiting/evaluations/index'
 import { Route as ProjectsApplicationIndexRouteImport } from './routes/projects/application/index'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
+import { Route as RecruitingHistoryArchiveRouteImport } from './routes/recruiting/history/archive'
 import { Route as RecruitingEvaluationsInterviewRouteImport } from './routes/recruiting/evaluations/interview'
 import { Route as RecruitingEvaluationsFinalRouteImport } from './routes/recruiting/evaluations/final'
 import { Route as RecruitingEvaluationsDocumentRouteImport } from './routes/recruiting/evaluations/document'
@@ -417,6 +418,12 @@ const MatchingProjectsIndexRoute = MatchingProjectsIndexRouteImport.update({
   path: '/projects/',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const RecruitingHistoryArchiveRoute =
+  RecruitingHistoryArchiveRouteImport.update({
+    id: '/history/archive',
+    path: '/history/archive',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
 const RecruitingEvaluationsInterviewRoute =
   RecruitingEvaluationsInterviewRouteImport.update({
     id: '/evaluations/interview',
@@ -607,6 +614,7 @@ export interface FileRoutesByFullPath {
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/projects/application/': typeof ProjectsApplicationIndexRoute
   '/recruiting/evaluations/': typeof RecruitingEvaluationsIndexRoute
@@ -687,6 +695,7 @@ export interface FileRoutesByTo {
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/projects/application': typeof ProjectsApplicationIndexRoute
   '/recruiting/evaluations': typeof RecruitingEvaluationsIndexRoute
@@ -773,6 +782,7 @@ export interface FileRoutesById {
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/projects/application/': typeof ProjectsApplicationIndexRoute
   '/recruiting/evaluations/': typeof RecruitingEvaluationsIndexRoute
@@ -860,6 +870,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/recruiting/history/archive'
     | '/matching/projects/'
     | '/projects/application/'
     | '/recruiting/evaluations/'
@@ -940,6 +951,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/recruiting/history/archive'
     | '/matching/projects'
     | '/projects/application'
     | '/recruiting/evaluations'
@@ -1025,6 +1037,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/recruiting/history/archive'
     | '/matching/projects/'
     | '/projects/application/'
     | '/recruiting/evaluations/'
@@ -1534,6 +1547,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsIndexRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/recruiting/history/archive': {
+      id: '/recruiting/history/archive'
+      path: '/history/archive'
+      fullPath: '/recruiting/history/archive'
+      preLoaderRoute: typeof RecruitingHistoryArchiveRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
     '/recruiting/evaluations/interview': {
       id: '/recruiting/evaluations/interview'
       path: '/evaluations/interview'
@@ -1825,6 +1845,7 @@ interface RecruitingRouteRouteChildren {
   RecruitingEvaluationsDocumentRoute: typeof RecruitingEvaluationsDocumentRouteWithChildren
   RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
   RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRouteWithChildren
+  RecruitingHistoryArchiveRoute: typeof RecruitingHistoryArchiveRoute
   RecruitingEvaluationsIndexRoute: typeof RecruitingEvaluationsIndexRoute
   RecruitingRecruitmentsIndexRoute: typeof RecruitingRecruitmentsIndexRoute
 }
@@ -1837,6 +1858,7 @@ const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
   RecruitingEvaluationsFinalRoute: RecruitingEvaluationsFinalRoute,
   RecruitingEvaluationsInterviewRoute:
     RecruitingEvaluationsInterviewRouteWithChildren,
+  RecruitingHistoryArchiveRoute: RecruitingHistoryArchiveRoute,
   RecruitingEvaluationsIndexRoute: RecruitingEvaluationsIndexRoute,
   RecruitingRecruitmentsIndexRoute: RecruitingRecruitmentsIndexRoute,
 }
