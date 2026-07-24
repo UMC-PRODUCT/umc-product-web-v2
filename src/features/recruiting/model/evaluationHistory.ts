@@ -3,6 +3,11 @@ import type { PartTag } from "@/shared/model/domain"
 
 import type { EvaluationResult } from "./applicantListTypes"
 
+export const EVALUATION_RESULT_LABEL: Record<EvaluationResult, string> = {
+  pass: "합격",
+  fail: "불합격",
+}
+
 // 처리 이력 한 건 = 지원자 1명을 담당자 1명이 처리한 기록.
 // ApplicantRow(지원자 1명 = 1행)와는 단위 자체가 다르므로 별도 타입으로 둔다.
 export interface EvaluationHistoryEntry {
@@ -36,6 +41,9 @@ export const EVALUATION_HISTORY_PROGRESS_LABEL: Record<
   done: "최종 평가 완료",
 }
 
+// ChapterTabs/필터의 "전체" 값. evaluationHistory 관련 파일 전체에서 이 상수 하나만 쓴다.
+export const EVALUATION_HISTORY_CHAPTER_TAB_ALL = "all"
+
 export type EvaluationHistorySort = "latest" | "oldest"
 
 export const EVALUATION_HISTORY_SORT_OPTIONS: {
@@ -59,7 +67,7 @@ export interface EvaluationHistoryFilters {
 export const DEFAULT_EVALUATION_HISTORY_FILTERS: EvaluationHistoryFilters = {
   search: "",
   bySchool: false,
-  chapterTab: "all",
+  chapterTab: EVALUATION_HISTORY_CHAPTER_TAB_ALL,
   chapters: [],
   schools: [],
   parts: [],
@@ -67,7 +75,7 @@ export const DEFAULT_EVALUATION_HISTORY_FILTERS: EvaluationHistoryFilters = {
 }
 
 // applicantListTypes.ts의 applyApplicantFilters 구조를 따른다.
-// chapterTab이 "all"이 아니면(ChapterTabs에서 특정 지부를 골랐으면) chapters
+// chapterTab이 "전체"가 아니면(ChapterTabs에서 특정 지부를 골랐으면) chapters
 // 드롭다운 값 대신 chapterTab 하나만 스코프로 취급한다.
 export function applyEvaluationHistoryFilters(
   rows: EvaluationHistoryEntry[],
@@ -75,7 +83,9 @@ export function applyEvaluationHistoryFilters(
 ): EvaluationHistoryEntry[] {
   const search = filters.search.trim().toLowerCase()
   const chapters =
-    filters.chapterTab === "all" ? filters.chapters : [filters.chapterTab]
+    filters.chapterTab === EVALUATION_HISTORY_CHAPTER_TAB_ALL
+      ? filters.chapters
+      : [filters.chapterTab]
 
   return rows.filter((row) => {
     if (search) {
@@ -117,7 +127,7 @@ export function sortEvaluationHistory(
   sort: EvaluationHistorySort,
 ): EvaluationHistoryEntry[] {
   const sorted = [...rows].sort((a, b) =>
-    a.processedAt.localeCompare(b.processedAt),
+    a.processedAt < b.processedAt ? -1 : a.processedAt > b.processedAt ? 1 : 0,
   )
   return sort === "latest" ? sorted.reverse() : sorted
 }
@@ -164,7 +174,11 @@ export function groupEvaluationHistoryByEvaluator(
   )
 
   groups.sort((a, b) =>
-    a.earliestProcessedAt.localeCompare(b.earliestProcessedAt),
+    a.earliestProcessedAt < b.earliestProcessedAt
+      ? -1
+      : a.earliestProcessedAt > b.earliestProcessedAt
+        ? 1
+        : 0,
   )
 
   return groups.map(({ evaluatorId, evaluatorLabel, rows: groupRows }) => ({
@@ -240,7 +254,7 @@ export function toEvaluationHistoryCsv(rows: EvaluationHistoryEntry[]): string {
       row.applicant.chapter,
       row.applicant.school,
       row.applicant.name,
-      row.applicant.result === "pass" ? "합격" : "불합격",
+      EVALUATION_RESULT_LABEL[row.applicant.result],
       row.evaluator.chapter,
       row.evaluator.school,
       row.evaluator.position,
