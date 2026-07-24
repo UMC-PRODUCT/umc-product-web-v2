@@ -69,7 +69,6 @@ import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
-import { Route as ManageCurriculumRouteImport } from './routes/manage/curriculum'
 import { Route as ManageChapterRouteImport } from './routes/manage/chapter'
 import { Route as LoginDefaultRouteImport } from './routes/login/default'
 import { Route as RecruitingRecruitmentsIndexRouteImport } from './routes/recruiting/recruitments/index'
@@ -77,6 +76,7 @@ import { Route as RecruitingEvaluationsIndexRouteImport } from './routes/recruit
 import { Route as ProjectsApplicationIndexRouteImport } from './routes/projects/application/index'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
 import { Route as ManageSchoolIndexRouteImport } from './routes/manage/school/index'
+import { Route as ManageCurriculumIndexRouteImport } from './routes/manage/curriculum/index'
 import { Route as RecruitingEvaluationsInterviewRouteImport } from './routes/recruiting/evaluations/interview'
 import { Route as RecruitingEvaluationsFinalRouteImport } from './routes/recruiting/evaluations/final'
 import { Route as RecruitingEvaluationsDocumentRouteImport } from './routes/recruiting/evaluations/document'
@@ -90,6 +90,8 @@ import { Route as MatchingProjectsManagementRouteImport } from './routes/matchin
 import { Route as MatchingNoticePublishNoticeIdRouteImport } from './routes/matching/notice-publish.$noticeId'
 import { Route as ManageSchoolRegisterRouteImport } from './routes/manage/school/register'
 import { Route as ManageSchoolSchoolIdRouteImport } from './routes/manage/school/$schoolId'
+import { Route as ManageCurriculumEditRouteImport } from './routes/manage/curriculum/edit'
+import { Route as ManageCurriculumCreateRouteImport } from './routes/manage/curriculum/create'
 import { Route as AdminChallengerRecordsRouteImport } from './routes/admin/challenger/records'
 import { Route as AdminChallengerPointsRouteImport } from './routes/admin/challenger/points'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
@@ -406,11 +408,6 @@ const MatchingApplicationsRoute = MatchingApplicationsRouteImport.update({
   path: '/applications',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
-const ManageCurriculumRoute = ManageCurriculumRouteImport.update({
-  id: '/curriculum',
-  path: '/curriculum',
-  getParentRoute: () => ManageRouteRoute,
-} as any)
 const ManageChapterRoute = ManageChapterRouteImport.update({
   id: '/chapter',
   path: '/chapter',
@@ -447,6 +444,11 @@ const MatchingProjectsIndexRoute = MatchingProjectsIndexRouteImport.update({
 const ManageSchoolIndexRoute = ManageSchoolIndexRouteImport.update({
   id: '/school/',
   path: '/school/',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
+const ManageCurriculumIndexRoute = ManageCurriculumIndexRouteImport.update({
+  id: '/curriculum/',
+  path: '/curriculum/',
   getParentRoute: () => ManageRouteRoute,
 } as any)
 const RecruitingEvaluationsInterviewRoute =
@@ -522,6 +524,16 @@ const ManageSchoolSchoolIdRoute = ManageSchoolSchoolIdRouteImport.update({
   path: '/school/$schoolId',
   getParentRoute: () => ManageRouteRoute,
 } as any)
+const ManageCurriculumEditRoute = ManageCurriculumEditRouteImport.update({
+  id: '/curriculum/edit',
+  path: '/curriculum/edit',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
+const ManageCurriculumCreateRoute = ManageCurriculumCreateRouteImport.update({
+  id: '/curriculum/create',
+  path: '/curriculum/create',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
 const AdminChallengerRecordsRoute = AdminChallengerRecordsRouteImport.update({
   id: '/challenger/records',
   path: '/challenger/records',
@@ -588,7 +600,6 @@ export interface FileRoutesByFullPath {
   '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
-  '/manage/curriculum': typeof ManageCurriculumRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -642,6 +653,8 @@ export interface FileRoutesByFullPath {
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
+  '/manage/curriculum/create': typeof ManageCurriculumCreateRoute
+  '/manage/curriculum/edit': typeof ManageCurriculumEditRoute
   '/manage/school/$schoolId': typeof ManageSchoolSchoolIdRoute
   '/manage/school/register': typeof ManageSchoolRegisterRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
@@ -655,6 +668,7 @@ export interface FileRoutesByFullPath {
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/manage/curriculum/': typeof ManageCurriculumIndexRoute
   '/manage/school/': typeof ManageSchoolIndexRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/projects/application/': typeof ProjectsApplicationIndexRoute
@@ -675,7 +689,6 @@ export interface FileRoutesByTo {
   '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
-  '/manage/curriculum': typeof ManageCurriculumRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -728,6 +741,8 @@ export interface FileRoutesByTo {
   '/test': typeof TestIndexRoute
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
+  '/manage/curriculum/create': typeof ManageCurriculumCreateRoute
+  '/manage/curriculum/edit': typeof ManageCurriculumEditRoute
   '/manage/school/$schoolId': typeof ManageSchoolSchoolIdRoute
   '/manage/school/register': typeof ManageSchoolRegisterRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
@@ -741,6 +756,7 @@ export interface FileRoutesByTo {
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/manage/curriculum': typeof ManageCurriculumIndexRoute
   '/manage/school': typeof ManageSchoolIndexRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/projects/application': typeof ProjectsApplicationIndexRoute
@@ -767,7 +783,6 @@ export interface FileRoutesById {
   '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
-  '/manage/curriculum': typeof ManageCurriculumRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -821,6 +836,8 @@ export interface FileRoutesById {
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
+  '/manage/curriculum/create': typeof ManageCurriculumCreateRoute
+  '/manage/curriculum/edit': typeof ManageCurriculumEditRoute
   '/manage/school/$schoolId': typeof ManageSchoolSchoolIdRoute
   '/manage/school/register': typeof ManageSchoolRegisterRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
@@ -834,6 +851,7 @@ export interface FileRoutesById {
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/manage/curriculum/': typeof ManageCurriculumIndexRoute
   '/manage/school/': typeof ManageSchoolIndexRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/projects/application/': typeof ProjectsApplicationIndexRoute
@@ -861,7 +879,6 @@ export interface FileRouteTypes {
     | '/intro'
     | '/login/default'
     | '/manage/chapter'
-    | '/manage/curriculum'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -915,6 +932,8 @@ export interface FileRouteTypes {
     | '/matching/projects/announce'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
+    | '/manage/curriculum/create'
+    | '/manage/curriculum/edit'
     | '/manage/school/$schoolId'
     | '/manage/school/register'
     | '/matching/notice-publish/$noticeId'
@@ -928,6 +947,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/manage/curriculum/'
     | '/manage/school/'
     | '/matching/projects/'
     | '/projects/application/'
@@ -948,7 +968,6 @@ export interface FileRouteTypes {
     | '/intro'
     | '/login/default'
     | '/manage/chapter'
-    | '/manage/curriculum'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -1001,6 +1020,8 @@ export interface FileRouteTypes {
     | '/test'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
+    | '/manage/curriculum/create'
+    | '/manage/curriculum/edit'
     | '/manage/school/$schoolId'
     | '/manage/school/register'
     | '/matching/notice-publish/$noticeId'
@@ -1014,6 +1035,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/manage/curriculum'
     | '/manage/school'
     | '/matching/projects'
     | '/projects/application'
@@ -1039,7 +1061,6 @@ export interface FileRouteTypes {
     | '/intro'
     | '/login/default'
     | '/manage/chapter'
-    | '/manage/curriculum'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -1093,6 +1114,8 @@ export interface FileRouteTypes {
     | '/matching/projects/announce'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
+    | '/manage/curriculum/create'
+    | '/manage/curriculum/edit'
     | '/manage/school/$schoolId'
     | '/manage/school/register'
     | '/matching/notice-publish/$noticeId'
@@ -1106,6 +1129,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/manage/curriculum/'
     | '/manage/school/'
     | '/matching/projects/'
     | '/projects/application/'
@@ -1596,13 +1620,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingApplicationsRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
-    '/manage/curriculum': {
-      id: '/manage/curriculum'
-      path: '/curriculum'
-      fullPath: '/manage/curriculum'
-      preLoaderRoute: typeof ManageCurriculumRouteImport
-      parentRoute: typeof ManageRouteRoute
-    }
     '/manage/chapter': {
       id: '/manage/chapter'
       path: '/chapter'
@@ -1650,6 +1667,13 @@ declare module '@tanstack/react-router' {
       path: '/school'
       fullPath: '/manage/school/'
       preLoaderRoute: typeof ManageSchoolIndexRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
+    '/manage/curriculum/': {
+      id: '/manage/curriculum/'
+      path: '/curriculum'
+      fullPath: '/manage/curriculum/'
+      preLoaderRoute: typeof ManageCurriculumIndexRouteImport
       parentRoute: typeof ManageRouteRoute
     }
     '/recruiting/evaluations/interview': {
@@ -1743,6 +1767,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManageSchoolSchoolIdRouteImport
       parentRoute: typeof ManageRouteRoute
     }
+    '/manage/curriculum/edit': {
+      id: '/manage/curriculum/edit'
+      path: '/curriculum/edit'
+      fullPath: '/manage/curriculum/edit'
+      preLoaderRoute: typeof ManageCurriculumEditRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
+    '/manage/curriculum/create': {
+      id: '/manage/curriculum/create'
+      path: '/curriculum/create'
+      fullPath: '/manage/curriculum/create'
+      preLoaderRoute: typeof ManageCurriculumCreateRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
     '/admin/challenger/records': {
       id: '/admin/challenger/records'
       path: '/challenger/records'
@@ -1827,19 +1865,23 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 
 interface ManageRouteRouteChildren {
   ManageChapterRoute: typeof ManageChapterRoute
-  ManageCurriculumRoute: typeof ManageCurriculumRoute
   ManageIndexRoute: typeof ManageIndexRoute
+  ManageCurriculumCreateRoute: typeof ManageCurriculumCreateRoute
+  ManageCurriculumEditRoute: typeof ManageCurriculumEditRoute
   ManageSchoolSchoolIdRoute: typeof ManageSchoolSchoolIdRoute
   ManageSchoolRegisterRoute: typeof ManageSchoolRegisterRoute
+  ManageCurriculumIndexRoute: typeof ManageCurriculumIndexRoute
   ManageSchoolIndexRoute: typeof ManageSchoolIndexRoute
 }
 
 const ManageRouteRouteChildren: ManageRouteRouteChildren = {
   ManageChapterRoute: ManageChapterRoute,
-  ManageCurriculumRoute: ManageCurriculumRoute,
   ManageIndexRoute: ManageIndexRoute,
+  ManageCurriculumCreateRoute: ManageCurriculumCreateRoute,
+  ManageCurriculumEditRoute: ManageCurriculumEditRoute,
   ManageSchoolSchoolIdRoute: ManageSchoolSchoolIdRoute,
   ManageSchoolRegisterRoute: ManageSchoolRegisterRoute,
+  ManageCurriculumIndexRoute: ManageCurriculumIndexRoute,
   ManageSchoolIndexRoute: ManageSchoolIndexRoute,
 }
 
