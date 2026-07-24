@@ -93,13 +93,6 @@ export interface ApplicationDetail {
   evaluations: Record<EvaluationStage, StageEvaluationDetail | null>
 }
 
-export function getStageEvaluationDetail(
-  detail: ApplicationDetail,
-  stage: EvaluationStage,
-) {
-  return detail.evaluations[stage]
-}
-
 export function getMyEvaluation(evaluation: StageEvaluationDetail) {
   return evaluation.operators.find(
     (operator) => operator.evaluatorId === evaluation.myEvaluatorId,
