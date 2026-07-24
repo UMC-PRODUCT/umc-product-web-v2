@@ -4,7 +4,7 @@ import { cn } from "@/shared/lib/utils"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 import { CounterLabel } from "@/shared/ui/CounterLabel"
-import { TimestampLabel } from "@/shared/ui/TimestampLabel"
+import { TimestampLabel } from "@/shared/ui/timestamp/TimestampLabel"
 
 import {
   type ApplicantRow as ApplicantRowModel,

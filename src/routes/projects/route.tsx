@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router"
 
 import RightChevronIconFilled from "@/shared/assets/icon/chevron/filled/RightChevronIconFilled"
 import Footer from "@/widgets/footer/Footer"
-import Header from "@/widgets/navigation/header/Header"
+import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 import SideBar from "@/widgets/navigation/sidebar/SideBar"
 
 export const Route = createFileRoute("/projects")({
@@ -37,11 +37,11 @@ function ProjectsLayout() {
 
   return (
     <main className="flex h-full min-h-screen w-full flex-col">
-      <Header />
+      <RecruitingHeader />
       <div className="flex w-full flex-1">
         <SideBar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="min-h-[800px] pt-10 pl-8">
+          <div className="min-h-200 pt-10 pl-8">
             <div className="flex flex-col gap-6.5 pl-3">
               <div className="flex h-5.5 items-center gap-1">
                 <p className="text-body-2-medium text-teal-gray-400">
