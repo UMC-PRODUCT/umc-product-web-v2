@@ -18,7 +18,8 @@ export function SchoolCard({
   return (
     <div
       className={cn(
-        "shadow-drop-neutral-2 flex h-[107px] w-full gap-4 rounded-[16px] bg-white p-4",
+        "shadow-drop-neutral-2 flex h-[107px] w-full gap-4 rounded-[16px] border border-transparent bg-white p-4 transition-colors",
+        "hover:border-teal-gray-200",
         className,
       )}
     >
