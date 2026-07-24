@@ -3,23 +3,30 @@ import {
   type DragEndEvent,
   DragOverlay,
   type DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
 } from "@dnd-kit/core"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
+  assignSchoolToChapter,
   type ChapterData,
+  clearAllChapterSchools,
+  clearChapterSchools,
+  detachSchool,
   INITIAL_CHAPTERS,
   INITIAL_UNASSIGNED_SCHOOLS,
+  isDuplicateChapterName,
+  isSchool,
+  resolveDropTargetId,
   type School,
+  UNASSIGNED_PANEL_ID,
+  withSchoolsAppended,
 } from "../model/chapterManagement"
 import { DroppableChapterBox } from "./DroppableChapterBox"
 import { SchoolChip } from "./SchoolChip"
@@ -31,69 +38,35 @@ export function ChapterManagePage() {
     INITIAL_UNASSIGNED_SCHOOLS,
   )
   const [chapters, setChapters] = useState<ChapterData[]>(INITIAL_CHAPTERS)
-  const [selectedChipId, setSelectedChipId] = useState<string | null>(null)
-  const [activeSchool, setActiveSchool] = useState<School | null>(null)
   const [activeSchoolVariant, setActiveSchoolVariant] = useState<
     "waiting" | "assigned"
   >("waiting")
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    }),
-  )
-
   const assignedSchools = chapters.flatMap((ch) => ch.assignedSchools)
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (
-        document.activeElement?.tagName === "INPUT" ||
-        document.activeElement?.tagName === "TEXTAREA"
-      ) {
-        return
-      }
+  function handleRemoveAssignedSchool(schoolId: string) {
+    const target = assignedSchools.find((school) => school.id === schoolId)
+    if (!target) return
+    setChapters((prev) => detachSchool(prev, schoolId))
+    setUnassignedSchools((prev) => withSchoolsAppended(prev, [target]))
+  }
 
-      if (e.key === "Escape") {
-        setSelectedChipId(null)
-        return
-      }
-
-      if (selectedChipId && (e.key === "Delete" || e.key === "Backspace")) {
-        const targetSchool = chapters
-          .flatMap((ch) => ch.assignedSchools)
-          .find((s) => s.id === selectedChipId)
-
-        if (targetSchool) {
-          setChapters((prevChapters) =>
-            prevChapters.map((ch) => ({
-              ...ch,
-              assignedSchools: ch.assignedSchools.filter(
-                (s) => s.id !== selectedChipId,
-              ),
-            })),
-          )
-
-          setUnassignedSchools((prev) => {
-            if (prev.some((s) => s.id === targetSchool.id)) return prev
-            return [...prev, targetSchool]
-          })
-        }
-        setSelectedChipId(null)
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [selectedChipId, chapters])
+  const {
+    sensors,
+    selectedChipId,
+    setSelectedChipId,
+    activeItem: activeSchool,
+    setActiveItem: setActiveSchool,
+  } = useChipAssignment<School>({
+    onRemoveSelected: handleRemoveAssignedSchool,
+  })
 
   function handleDragStart(event: DragStartEvent) {
-    const school = event.active.data.current as School | undefined
-    if (school) {
-      setActiveSchool(school)
-      const isWaiting = unassignedSchools.some((s) => s.id === school.id)
-      setActiveSchoolVariant(isWaiting ? "waiting" : "assigned")
-    }
+    const school = event.active.data.current
+    if (!isSchool(school)) return
+    setActiveSchool(school)
+    const isWaiting = unassignedSchools.some((s) => s.id === school.id)
+    setActiveSchoolVariant(isWaiting ? "waiting" : "assigned")
   }
 
   function handleDragCancel() {
@@ -105,106 +78,39 @@ export function ChapterManagePage() {
     setActiveSchool(null)
     if (!over) return
 
-    const school = active.data.current as School | undefined
-    if (!school) return
+    const school = active.data.current
+    if (!isSchool(school)) return
 
-    const overId = String(over.id)
+    const targetId = resolveDropTargetId(
+      chapters,
+      unassignedSchools,
+      String(over.id),
+    )
+    if (!targetId) return
 
-    let targetId = overId
-
-    const isChapter = chapters.some((ch) => ch.id === overId)
-    if (!isChapter) {
-      const parentChapter = chapters.find((ch) =>
-        ch.assignedSchools.some(
-          (s) => `chapter-assigned-${s.id}` === overId || s.id === overId,
-        ),
-      )
-      if (parentChapter) {
-        targetId = parentChapter.id
-      } else if (
-        overId === "unassigned-schools-panel" ||
-        overId.startsWith("waiting-") ||
-        overId.startsWith("panel-assigned-") ||
-        unassignedSchools.some((s) => s.id === overId)
-      ) {
-        targetId = "unassigned-schools-panel"
-      }
-    }
-
-    // Safety check: if targetId is neither a valid chapter nor unassigned panel, ignore
-    if (
-      targetId !== "unassigned-schools-panel" &&
-      !chapters.some((ch) => ch.id === targetId)
-    ) {
+    if (targetId === UNASSIGNED_PANEL_ID) {
+      setChapters((prev) => detachSchool(prev, school.id))
+      setUnassignedSchools((prev) => withSchoolsAppended(prev, [school]))
       return
     }
 
-    if (targetId === "unassigned-schools-panel") {
-      setChapters((prev) =>
-        prev.map((ch) => ({
-          ...ch,
-          assignedSchools: ch.assignedSchools.filter((s) => s.id !== school.id),
-        })),
-      )
-      setUnassignedSchools((prev) => {
-        if (prev.some((s) => s.id === school.id)) return prev
-        return [...prev, school]
-      })
-    } else {
-      setChapters((prev) =>
-        prev.map((ch) => {
-          if (ch.id === targetId) {
-            if (ch.assignedSchools.some((s) => s.id === school.id)) {
-              return ch
-            }
-            return {
-              ...ch,
-              assignedSchools: [...ch.assignedSchools, school],
-            }
-          }
-          return {
-            ...ch,
-            assignedSchools: ch.assignedSchools.filter(
-              (s) => s.id !== school.id,
-            ),
-          }
-        }),
-      )
-      setUnassignedSchools((prev) => prev.filter((s) => s.id !== school.id))
-    }
+    setChapters((prev) => assignSchoolToChapter(prev, targetId, school))
+    setUnassignedSchools((prev) => prev.filter((s) => s.id !== school.id))
   }
 
   function handleClearAll() {
-    const allAssigned = chapters.flatMap((ch) => ch.assignedSchools)
-    setUnassignedSchools((prev) => {
-      const existingIds = new Set(prev.map((s) => s.id))
-      const newSchools = allAssigned.filter((s) => !existingIds.has(s.id))
-      return [...prev, ...newSchools]
-    })
-    setChapters((prev) =>
-      prev.map((ch) => ({
-        ...ch,
-        assignedSchools: [],
-      })),
-    )
+    setUnassignedSchools((prev) => withSchoolsAppended(prev, assignedSchools))
+    setChapters(clearAllChapterSchools)
     setSelectedChipId(null)
   }
 
   function handleClearChapter(chapterId: string) {
     const chapter = chapters.find((ch) => ch.id === chapterId)
     if (!chapter) return
-    setUnassignedSchools((prev) => {
-      const existingIds = new Set(prev.map((s) => s.id))
-      const newSchools = chapter.assignedSchools.filter(
-        (s) => !existingIds.has(s.id),
-      )
-      return [...prev, ...newSchools]
-    })
-    setChapters((prev) =>
-      prev.map((ch) =>
-        ch.id === chapterId ? { ...ch, assignedSchools: [] } : ch,
-      ),
+    setUnassignedSchools((prev) =>
+      withSchoolsAppended(prev, chapter.assignedSchools),
     )
+    setChapters((prev) => clearChapterSchools(prev, chapterId))
     setSelectedChipId(null)
   }
 
@@ -213,13 +119,9 @@ export function ChapterManagePage() {
     if (!chapterToDelete) return
     const targetIndex = chapters.indexOf(chapterToDelete)
 
-    setUnassignedSchools((prev) => {
-      const existingIds = new Set(prev.map((s) => s.id))
-      const newSchools = chapterToDelete.assignedSchools.filter(
-        (s) => !existingIds.has(s.id),
-      )
-      return [...prev, ...newSchools]
-    })
+    setUnassignedSchools((prev) =>
+      withSchoolsAppended(prev, chapterToDelete.assignedSchools),
+    )
 
     setChapters((prev) => prev.filter((ch) => ch.id !== chapterId))
     setSelectedChipId(null)
@@ -264,25 +166,19 @@ export function ChapterManagePage() {
   }
 
   function handleUpdateChapterName(id: string, name: string): boolean {
-    const trimmed = name.trim()
-    if (trimmed !== "") {
-      const isDuplicate = chapters.some(
-        (ch) => ch.id !== id && ch.name.trim() === trimmed,
-      )
-      if (isDuplicate) {
-        addToast({
-          message: "이미 있는 지부 이름입니다.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-        return false
-      }
+    if (isDuplicateChapterName(chapters, id, name)) {
+      addToast({
+        message: "이미 있는 지부 이름입니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return false
     }
 
     setChapters((prev) =>
-      prev.map((ch) => (ch.id === id ? { ...ch, name: trimmed } : ch)),
+      prev.map((ch) => (ch.id === id ? { ...ch, name: name.trim() } : ch)),
     )
     return true
   }

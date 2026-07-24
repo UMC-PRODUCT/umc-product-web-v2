@@ -7,6 +7,7 @@ import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
+import { ASSIGNED_CHIP_PREFIX } from "../model/chapterManagement"
 import { SchoolChip } from "./SchoolChip"
 
 import type { ChapterData } from "../model/chapterManagement"
@@ -159,7 +160,7 @@ export function DroppableChapterBox({
           {chapter.assignedSchools.map((school) => (
             <SchoolChip
               key={school.id}
-              dragId={`chapter-assigned-${school.id}`}
+              dragId={`${ASSIGNED_CHIP_PREFIX}${school.id}`}
               school={school}
               variant="assigned"
               draggable={true}
