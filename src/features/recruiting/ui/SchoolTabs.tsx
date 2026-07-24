@@ -15,7 +15,7 @@ export function SchoolTabs({
   className,
 }: SchoolTabsProps) {
   const items = [
-    { value: "all", label: "전체" },
+    { value: "all", label: "학교 전체" },
     ...schools.map((school) => ({ value: school, label: school })),
   ]
 
