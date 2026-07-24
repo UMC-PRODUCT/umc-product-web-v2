@@ -80,7 +80,13 @@ export const RECRUITING_SIDEBAR_ITEMS: RecruitingSideBarSection[] = [
     title: "히스토리",
     icon: TeamIcon,
     to: "/recruiting/history",
-    menus: [],
+    menus: [
+      {
+        id: "recruiting-history-archive",
+        title: "평가 이력",
+        to: "/recruiting/history/archive",
+      },
+    ],
   },
 ]
 
