@@ -675,9 +675,9 @@ export interface FileRoutesByFullPath {
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/manage/curriculum/': typeof ManageCurriculumIndexRoute
   '/manage/school/': typeof ManageSchoolIndexRoute
-  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/projects/application/': typeof ProjectsApplicationIndexRoute
   '/recruiting/evaluations/': typeof RecruitingEvaluationsIndexRoute
@@ -764,9 +764,9 @@ export interface FileRoutesByTo {
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/manage/curriculum': typeof ManageCurriculumIndexRoute
   '/manage/school': typeof ManageSchoolIndexRoute
-  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
   '/projects/application': typeof ProjectsApplicationIndexRoute
   '/recruiting/evaluations': typeof RecruitingEvaluationsIndexRoute
@@ -860,9 +860,9 @@ export interface FileRoutesById {
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/manage/curriculum/': typeof ManageCurriculumIndexRoute
   '/manage/school/': typeof ManageSchoolIndexRoute
-  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
   '/projects/application/': typeof ProjectsApplicationIndexRoute
   '/recruiting/evaluations/': typeof RecruitingEvaluationsIndexRoute
@@ -957,9 +957,9 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/recruiting/history/archive'
     | '/manage/curriculum/'
     | '/manage/school/'
-    | '/recruiting/history/archive'
     | '/matching/projects/'
     | '/projects/application/'
     | '/recruiting/evaluations/'
@@ -1046,9 +1046,9 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/recruiting/history/archive'
     | '/manage/curriculum'
     | '/manage/school'
-    | '/recruiting/history/archive'
     | '/matching/projects'
     | '/projects/application'
     | '/recruiting/evaluations'
@@ -1141,9 +1141,9 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/recruiting/history/archive'
     | '/manage/curriculum/'
     | '/manage/school/'
-    | '/recruiting/history/archive'
     | '/matching/projects/'
     | '/projects/application/'
     | '/recruiting/evaluations/'
@@ -1688,6 +1688,7 @@ declare module '@tanstack/react-router' {
       fullPath: '/manage/curriculum/'
       preLoaderRoute: typeof ManageCurriculumIndexRouteImport
       parentRoute: typeof ManageRouteRoute
+    }
     '/recruiting/history/archive': {
       id: '/recruiting/history/archive'
       path: '/history/archive'
