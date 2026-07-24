@@ -16,14 +16,16 @@ import {
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { SearchField } from "@/shared/ui/search-field/SearchField"
 
+import {
+  EVALUATION_HISTORY_CHAPTER_TAB_ALL,
+  EVALUATION_RESULT_LABEL,
+} from "../../model/evaluationHistory"
 import { DownloadButton } from "./DownloadButton"
 
 import type { EvaluationHistoryFilters } from "../../model/evaluationHistory"
 
-const CHAPTER_ALL_VALUE = "all"
-
 const CHAPTER_OPTIONS = [
-  { value: CHAPTER_ALL_VALUE, label: "지부 전체" },
+  { value: EVALUATION_HISTORY_CHAPTER_TAB_ALL, label: "지부 전체" },
   ...CHAPTERS.map((chapter) => ({ value: chapter, label: chapter })),
 ]
 
@@ -31,10 +33,10 @@ const PART_OPTIONS = (["pm", "design", "web-pe", "mobile-pe"] as const).map(
   (part) => ({ value: part, label: PART_TAG_LABEL[part] }),
 )
 
-const RESULT_OPTIONS = [
-  { value: "pass", label: "합격" },
-  { value: "fail", label: "불합격" },
-]
+const RESULT_OPTIONS = (["pass", "fail"] as const).map((result) => ({
+  value: result,
+  label: EVALUATION_RESULT_LABEL[result],
+}))
 
 // 지부를 하나도 안 골랐으면 전체 지부의 학교를 다 유효한 것으로 취급한다.
 function schoolsForChapters(chapters: Chapter[]): string[] {
@@ -54,7 +56,7 @@ function buildSchoolOptions(
   }
 
   const selectedChapters =
-    filters.chapterTab === CHAPTER_ALL_VALUE
+    filters.chapterTab === EVALUATION_HISTORY_CHAPTER_TAB_ALL
       ? filters.chapters.filter(isChapter)
       : [filters.chapterTab].filter(isChapter)
 
@@ -149,7 +151,7 @@ export function EvaluationHistoryFilterBar({
               "chapters",
               "지부",
               CHAPTER_OPTIONS,
-              CHAPTER_ALL_VALUE,
+              EVALUATION_HISTORY_CHAPTER_TAB_ALL,
             )}
           />
           <FilterDropdown
