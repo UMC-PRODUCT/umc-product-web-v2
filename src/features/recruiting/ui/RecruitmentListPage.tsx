@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 
 import { CHAPTERS, isChapter } from "@/entities/organization/model/chapters"
@@ -31,6 +32,7 @@ export function RecruitmentListPage({
   role = "central",
   useMockData = false,
 }: RecruitmentListPageProps) {
+  const navigate = useNavigate()
   const [chapterTab, setChapterTab] = useState("all")
   const [schoolTab, setSchoolTab] = useState("all")
   const [schoolSearchOpen, setSchoolSearchOpen] = useState(false)
@@ -182,8 +184,9 @@ export function RecruitmentListPage({
                   </div>
                   {canSeeArchive && (
                     <RecruitmentCreateButton
-                      // TODO: 모집 공고 생성 페이지 라우트 연결
-                      onClick={() => console.info("TODO: 모집 공고 생성")}
+                      onClick={() =>
+                        navigate({ to: "/recruiting/recruitments/new" })
+                      }
                       className="translate-y-1"
                     />
                   )}
