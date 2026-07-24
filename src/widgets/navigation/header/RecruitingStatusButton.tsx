@@ -1,12 +1,10 @@
 import { cn } from "@/shared/lib/utils"
 
-export type RecruitingPhase = "before" | "open" | "closed"
-
-export interface RecruitingStatus {
-  phase: RecruitingPhase
-  // before: 모집 시작까지 남은 일수 / open: 지원 마감까지 남은 일수. closed면 미사용.
-  dDay?: number
-}
+// before/open은 D-day가 필수, closed는 D-day 없음(discriminated union으로 D-undefined 방지).
+export type RecruitingStatus =
+  | { phase: "before"; dDay: number } // 모집 시작까지 남은 일수
+  | { phase: "open"; dDay: number } // 지원 마감까지 남은 일수
+  | { phase: "closed" }
 
 // 헤더 우측의 모집 상태 표시. 상호작용 없는 라벨 전용 버튼(디자인상 '버튼' 형태).
 // before: "모집 시작 D-n" / open: "지원하기 D-n"(마감일 기준) / closed: "모집 마감"
@@ -28,17 +26,14 @@ export function RecruitingStatusButton({
     )
   }
 
-  const label =
-    status.phase === "before" ? `모집 시작 D-${status.dDay}` : "모집 마감"
-
-  return (
-    <span
-      className={cn(
-        base,
-        "text-label-1-medium border-teal-gray-150 text-teal-gray-400 shadow-inner-neutral-1 border bg-white",
-      )}
-    >
-      {label}
-    </span>
+  const grayClassName = cn(
+    base,
+    "text-label-1-medium border-teal-gray-150 text-teal-gray-400 shadow-inner-neutral-1 border bg-white",
   )
+
+  if (status.phase === "before") {
+    return <span className={grayClassName}>모집 시작 D-{status.dDay}</span>
+  }
+
+  return <span className={grayClassName}>모집 마감</span>
 }

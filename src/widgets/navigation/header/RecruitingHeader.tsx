@@ -17,15 +17,13 @@ import {
 } from "@/widgets/navigation/header/RecruitingStatusButton"
 
 interface RecruitingHeaderProps {
-  // 모집 상태(진행 전/중/마감 + D-day). 생략 시 임시 기본값 사용.
+  // 모집 상태(진행 전/중/마감 + D-day). 서버에서 내려줄 예정.
+  // 없으면 상태 버튼을 렌더하지 않는다(연동 전 고정값 노출 방지).
   recruitingStatus?: RecruitingStatus
   activePathname?: string
 }
 
-// TODO: 모집 상태는 서버에서 내려줄 예정. 연동 전까지 임시 값(진행중 D-22).
-const DEFAULT_RECRUITING_STATUS: RecruitingStatus = { phase: "open", dDay: 22 }
-
-type NavItem = { label: string; to: string }
+type NavItem = { label: string; to: string; disabled?: boolean }
 
 function isNavActive(pathname: string, to: string): boolean {
   if (to === "/") return pathname === "/"
@@ -33,7 +31,7 @@ function isNavActive(pathname: string, to: string): boolean {
 }
 
 export default function RecruitingHeader({
-  recruitingStatus = DEFAULT_RECRUITING_STATUS,
+  recruitingStatus,
   activePathname,
 }: RecruitingHeaderProps) {
   const location = useLocation()
@@ -46,9 +44,9 @@ export default function RecruitingHeader({
 
   const navItems: NavItem[] = [
     { label: "소개", to: "/intro" },
-    // TODO: 모집 안내 페이지 연결
-    { label: "모집 안내", to: "/" },
-    // TODO: 프로젝트 페이지 연결
+    // TODO: 모집 안내 랜딩 라우트 확정 전까지 비활성(홈으로 오연결 방지)
+    { label: "모집 안내", to: "/", disabled: true },
+    // TODO: 프로젝트 라우트 확정(/projects vs /matching/projects)
     { label: "프로젝트", to: "/projects" },
     ...(showRecruiting
       ? [
@@ -76,6 +74,7 @@ export default function RecruitingHeader({
             label={item.label}
             to={item.to}
             selected={isNavActive(pathname, item.to)}
+            disabled={item.disabled}
             className="min-w-18 px-4.5"
           />
         ))}
@@ -84,7 +83,9 @@ export default function RecruitingHeader({
       <div className="flex items-center justify-end gap-4 pr-8.5">
         {isAuthed ? (
           <>
-            <RecruitingStatusButton status={recruitingStatus} />
+            {recruitingStatus && (
+              <RecruitingStatusButton status={recruitingStatus} />
+            )}
             <HeaderButton
               label="문의사항"
               type="text"
@@ -99,7 +100,9 @@ export default function RecruitingHeader({
               type="text"
               className="border-teal-gray-150 h-10 border"
             />
-            <RecruitingStatusButton status={recruitingStatus} />
+            {recruitingStatus && (
+              <RecruitingStatusButton status={recruitingStatus} />
+            )}
             <Link
               to="/login"
               className="text-label-1-semibold flex h-10 min-w-16 items-center justify-center rounded-[10px] bg-teal-100 px-5 text-center tracking-[-0.32px] text-teal-600"

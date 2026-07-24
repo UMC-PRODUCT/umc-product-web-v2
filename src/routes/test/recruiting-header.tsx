@@ -75,7 +75,7 @@ function RecruitingHeaderTestPage() {
 
     if (role === "guest") {
       useAuthStore.setState({ isAuthed: false })
-      queryClient.setQueryData(authKeys.me, undefined)
+      queryClient.removeQueries({ queryKey: authKeys.me })
     } else {
       useAuthStore.setState({ isAuthed: true })
       queryClient.setQueryData(authKeys.me, makeMe(SCENARIO_ROLE_TYPE[role]))
