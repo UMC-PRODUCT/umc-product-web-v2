@@ -1,6 +1,7 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { AxiosError } from "axios"
-import { createRef } from "react"
+import { createRef, type ReactElement } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
@@ -36,6 +37,20 @@ vi.mock("@/entities/project/api/matchingProject", async (importOriginal) => ({
 }))
 
 const originalScrollIntoView = HTMLElement.prototype.scrollIntoView
+
+function renderWithQuery(ui: ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  })
+
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  )
+}
 
 const project: MatchingProject = {
   id: "1",
@@ -82,7 +97,7 @@ describe("ProjectApplyModal radio answer", () => {
   it("선택된 단일 선택지를 다시 누르면 선택을 해제한다", async () => {
     vi.stubEnv("VITE_DEV_MATCHING_ROUND_ID", "1")
 
-    render(
+    renderWithQuery(
       <ProjectApplyModal
         data={project}
         projectId={1}
@@ -153,7 +168,7 @@ describe("ProjectApplyModal draft hydration", () => {
       },
     } as never)
 
-    render(
+    renderWithQuery(
       <ProjectApplyModal
         data={project}
         projectId={1}
@@ -201,7 +216,7 @@ describe("ProjectApplyModal draft hydration", () => {
       },
     } as never)
 
-    render(
+    renderWithQuery(
       <ProjectApplyModal
         data={project}
         projectId={1}
@@ -245,7 +260,7 @@ describe("ProjectApplyModal requestClose (배경 클릭/ESC)", () => {
     const ref = createRef<ProjectApplyModalHandle>()
     const onBack = vi.fn()
 
-    render(
+    renderWithQuery(
       <ProjectApplyModal
         ref={ref}
         data={project}
@@ -273,7 +288,7 @@ describe("ProjectApplyModal requestClose (배경 클릭/ESC)", () => {
     const ref = createRef<ProjectApplyModalHandle>()
     const onBack = vi.fn()
 
-    render(
+    renderWithQuery(
       <ProjectApplyModal
         ref={ref}
         data={project}
