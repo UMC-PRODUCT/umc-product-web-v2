@@ -146,14 +146,18 @@ export function EvaluationHistoryFilterBar({
           <span className="text-body-1-medium text-teal-gray-600">학교별</span>
         </label>
         <div className="flex items-center gap-2">
-          <FilterDropdown
-            {...multiDropdownProps(
-              "chapters",
-              "지부",
-              CHAPTER_OPTIONS,
-              EVALUATION_HISTORY_CHAPTER_TAB_ALL,
-            )}
-          />
+          {/* "전체" 탭에서만 보인다. 특정 지부 탭(chapterScope)에서는 ChapterTabs 자체가
+              스코프를 정하므로 이 드롭다운은 숨긴다(디자인 확정, 2026-07-24). */}
+          {!chapterScope && (
+            <FilterDropdown
+              {...multiDropdownProps(
+                "chapters",
+                "지부",
+                CHAPTER_OPTIONS,
+                EVALUATION_HISTORY_CHAPTER_TAB_ALL,
+              )}
+            />
+          )}
           <FilterDropdown
             {...multiDropdownProps("schools", "학교", schoolOptions)}
           />
