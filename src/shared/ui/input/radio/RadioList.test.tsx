@@ -47,7 +47,7 @@ describe("RadioList", () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
-  it("이미 선택된 상태를 다시 클릭해도 변경 이벤트를 발생시키지 않는다", () => {
+  it("기본값에서는 이미 선택된 상태를 다시 클릭해도 변경 이벤트를 발생시키지 않는다", () => {
     const onChange = vi.fn()
 
     render(
@@ -59,5 +59,33 @@ describe("RadioList", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Radio button" }))
 
     expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it("allowDeselect가 있으면 선택된 상태를 다시 클릭할 때 해제를 알린다", () => {
+    const onChange = vi.fn()
+
+    render(
+      <RadioList checked allowDeselect onChange={onChange}>
+        Radio button
+      </RadioList>,
+    )
+
+    fireEvent.click(screen.getByRole("radio", { name: "Radio button" }))
+
+    expect(onChange).toHaveBeenCalledWith(false)
+  })
+
+  it("allowDeselect가 있어도 미선택 상태를 클릭하면 선택을 알린다", () => {
+    const onChange = vi.fn()
+
+    render(
+      <RadioList checked={false} allowDeselect onChange={onChange}>
+        Radio button
+      </RadioList>,
+    )
+
+    fireEvent.click(screen.getByRole("radio", { name: "Radio button" }))
+
+    expect(onChange).toHaveBeenCalledWith(true)
   })
 })

@@ -7,6 +7,7 @@ import type { ComponentProps, ReactNode } from "react"
 interface RadioListProps extends Omit<ComponentProps<"button">, "onChange"> {
   checked: boolean
   onChange: (checked: boolean) => void
+  allowDeselect?: boolean
   trailingIcon?: ReactNode
 }
 
@@ -16,6 +17,7 @@ export function RadioList({
   children,
   className,
   disabled = false,
+  allowDeselect = false,
   trailingIcon,
   ...props
 }: RadioListProps) {
@@ -35,6 +37,10 @@ export function RadioList({
       onClick={() => {
         if (!checked) {
           onChange(true)
+          return
+        }
+        if (allowDeselect) {
+          onChange(false)
         }
       }}
       className={cn(
