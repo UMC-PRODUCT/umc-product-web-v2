@@ -80,16 +80,23 @@ export function DroppableChapterBox({
               />
             ) : (
               <>
-                <span
-                  onClick={chapter.name.trim() ? undefined : handleStartEdit}
-                  className={`text-heading-6-semibold pl-1.5 ${
-                    chapter.name.trim()
-                      ? "text-teal-700"
-                      : "cursor-pointer text-gray-400"
-                  }`}
-                >
-                  {chapter.name.trim() || "지부명을 입력해주세요"}
-                </span>
+                {chapter.name.trim() ? (
+                  <span className="text-heading-6-semibold pl-1.5 text-teal-700">
+                    {chapter.name.trim()}
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleStartEdit()
+                    }}
+                    aria-label="지부명 입력"
+                    className="text-heading-6-semibold cursor-pointer pl-1.5 text-gray-400"
+                  >
+                    지부명을 입력해주세요
+                  </button>
+                )}
                 {chapter.name.trim() !== "" && (
                   <button
                     type="button"
@@ -137,7 +144,7 @@ export function DroppableChapterBox({
         </div>
 
         <span className="text-teal-gray-400 text-body-2-regular">
-          총 0개 학교
+          총 {chapter.assignedSchools.length}개 학교
         </span>
       </div>
 

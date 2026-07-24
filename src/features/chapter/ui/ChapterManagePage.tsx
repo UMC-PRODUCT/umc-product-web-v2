@@ -54,6 +54,11 @@ export function ChapterManagePage() {
         return
       }
 
+      if (e.key === "Escape") {
+        setSelectedChipId(null)
+        return
+      }
+
       if (selectedChipId && (e.key === "Delete" || e.key === "Backspace")) {
         const targetSchool = chapters
           .flatMap((ch) => ch.assignedSchools)
