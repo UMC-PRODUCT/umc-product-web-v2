@@ -11,9 +11,6 @@ import {
   type EvaluationHistoryEntry,
   type EvaluationHistoryProgress,
   type EvaluationHistorySort,
-  groupEvaluationHistoryByEvaluator,
-  groupEvaluationHistoryBySchool,
-  sortEvaluationHistory,
 } from "../../model/evaluationHistory"
 import { EvaluationHistoryTable } from "./EvaluationHistoryTable"
 
@@ -27,10 +24,15 @@ const EVALUATION_HISTORY_PROGRESS_TONE: Record<
 }
 
 interface EvaluationHistoryCardProps {
+  // 이미 정렬/그룹 순서가 적용된 채로 전달된다(archive.tsx의 orderEvaluationHistoryRows).
+  // CSV 다운로드와 화면이 같은 순서를 보게 하려고 정렬은 상위에서 담당한다.
   rows: EvaluationHistoryEntry[]
   baseTime: string
   progress: EvaluationHistoryProgress
-  bySchool: boolean
+  sort: EvaluationHistorySort
+  onSortChange: (sort: EvaluationHistorySort) => void
+  byEvaluator: boolean
+  onByEvaluatorChange: (checked: boolean) => void
   className?: string
 }
 
@@ -38,24 +40,13 @@ export function EvaluationHistoryCard({
   rows,
   baseTime,
   progress,
-  bySchool,
+  sort,
+  onSortChange,
+  byEvaluator,
+  onByEvaluatorChange,
   className,
 }: EvaluationHistoryCardProps) {
-  const [sort, setSort] = useState<EvaluationHistorySort>("latest")
-  const [byEvaluator, setByEvaluator] = useState(false)
   const [sortOpen, setSortOpen] = useState(false)
-
-  // "담당자별"/"학교별" 둘 다 별도 헤더 행 없이, 그룹 단위로 뭉쳐서 행 순서만 바꾼다.
-  // 담당자별이 켜져 있으면 그게 우선이고, 아니면 학교별을 본다.
-  const visibleRows = byEvaluator
-    ? groupEvaluationHistoryByEvaluator(rows, sort).flatMap(
-        (group) => group.rows,
-      )
-    : bySchool
-      ? groupEvaluationHistoryBySchool(rows).flatMap((group) =>
-          sortEvaluationHistory(group.rows, sort),
-        )
-      : sortEvaluationHistory(rows, sort)
 
   return (
     <section
@@ -72,7 +63,7 @@ export function EvaluationHistoryCard({
           <label className="flex cursor-pointer items-center gap-2">
             <Checkbox
               checked={byEvaluator}
-              onChange={setByEvaluator}
+              onChange={onByEvaluatorChange}
               variant="primary"
               aria-label="담당자별 보기"
             />
@@ -95,7 +86,7 @@ export function EvaluationHistoryCard({
               )?.label
             }
             onSelect={(value) =>
-              setSort(value === "oldest" ? "oldest" : "latest")
+              onSortChange(value === "oldest" ? "oldest" : "latest")
             }
           />
         </div>
@@ -114,7 +105,7 @@ export function EvaluationHistoryCard({
         </Tag>
       </div>
 
-      <EvaluationHistoryTable rows={visibleRows} className="mt-8" />
+      <EvaluationHistoryTable rows={rows} className="mt-8" />
     </section>
   )
 }

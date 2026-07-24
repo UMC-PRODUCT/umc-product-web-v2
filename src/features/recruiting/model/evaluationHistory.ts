@@ -214,6 +214,31 @@ export function groupEvaluationHistoryBySchool(
   }))
 }
 
+export interface EvaluationHistoryOrderOptions {
+  sort: EvaluationHistorySort
+  byEvaluator: boolean
+  bySchool: boolean
+}
+
+// 화면(EvaluationHistoryCard)과 CSV 다운로드가 항상 같은 순서를 쓰도록 단일 함수로 통일.
+// 우선순위: 담당자별 > 학교별 > 기본 정렬.
+export function orderEvaluationHistoryRows(
+  rows: EvaluationHistoryEntry[],
+  { sort, byEvaluator, bySchool }: EvaluationHistoryOrderOptions,
+): EvaluationHistoryEntry[] {
+  if (byEvaluator) {
+    return groupEvaluationHistoryByEvaluator(rows, sort).flatMap(
+      (group) => group.rows,
+    )
+  }
+  if (bySchool) {
+    return groupEvaluationHistoryBySchool(rows).flatMap((group) =>
+      sortEvaluationHistory(group.rows, sort),
+    )
+  }
+  return sortEvaluationHistory(rows, sort)
+}
+
 export function formatHistoryProcessedAt(processedAt: string) {
   const date = new Date(processedAt)
   const pad = (value: number) => String(value).padStart(2, "0")

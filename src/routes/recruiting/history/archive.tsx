@@ -7,9 +7,14 @@ import {
   applyEvaluationHistoryFilters,
   DEFAULT_EVALUATION_HISTORY_FILTERS,
   type EvaluationHistoryFilters,
+  type EvaluationHistorySort,
+  orderEvaluationHistoryRows,
   toEvaluationHistoryCsv,
 } from "@/features/recruiting/model/evaluationHistory"
-import { EVALUATION_HISTORY_MOCK } from "@/features/recruiting/model/evaluationHistory.mock"
+import {
+  EVALUATION_HISTORY_BASE_TIME_MOCK,
+  EVALUATION_HISTORY_MOCK,
+} from "@/features/recruiting/model/evaluationHistory.mock"
 import { ChapterTabs } from "@/features/recruiting/ui/ChapterTabs"
 import { EvaluationHistoryCard } from "@/features/recruiting/ui/history/EvaluationHistoryCard"
 import { EvaluationHistoryFilterBar } from "@/features/recruiting/ui/history/EvaluationHistoryFilterBar"
@@ -19,14 +24,13 @@ export const Route = createFileRoute("/recruiting/history/archive")({
   component: RouteComponent,
 })
 
-// TODO: 실제 기준 시각으로 교체(baseTime 만드는 방식은 applicantListTypes.ts의
-// formatBaseTime(new Date()) 참고). 지금은 목업 고정값 사용.
-const BASE_TIME_MOCK = "26-07-04 02:48"
-
 function RouteComponent() {
   const [filters, setFilters] = useState<EvaluationHistoryFilters>(
     DEFAULT_EVALUATION_HISTORY_FILTERS,
   )
+  // 카드의 정렬/담당자별 상태를 여기서 갖고 있어야 CSV 다운로드가 화면과 같은 순서를 쓸 수 있다.
+  const [sort, setSort] = useState<EvaluationHistorySort>("latest")
+  const [byEvaluator, setByEvaluator] = useState(false)
 
   const handleFiltersChange = (partial: Partial<EvaluationHistoryFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }))
@@ -41,10 +45,20 @@ function RouteComponent() {
     [filters],
   )
 
+  const orderedRows = useMemo(
+    () =>
+      orderEvaluationHistoryRows(visibleRows, {
+        sort,
+        byEvaluator,
+        bySchool: filters.bySchool,
+      }),
+    [visibleRows, sort, byEvaluator, filters.bySchool],
+  )
+
   const sectionTitle = chapterScope ?? RECRUITING_TARGET_GISU_LABEL_MOCK
 
   const handleDownload = () => {
-    const csv = toEvaluationHistoryCsv(visibleRows)
+    const csv = toEvaluationHistoryCsv(orderedRows)
     // 맨 앞 BOM: 엑셀에서 한글 CSV 깨짐 방지
     const blob = new Blob(["\uFEFF" + csv], {
       type: "text/csv;charset=utf-8;",
@@ -93,11 +107,14 @@ function RouteComponent() {
       </h2>
 
       <EvaluationHistoryCard
-        rows={visibleRows}
-        baseTime={BASE_TIME_MOCK}
+        rows={orderedRows}
+        baseTime={EVALUATION_HISTORY_BASE_TIME_MOCK}
         // TODO: 실제로는 서버가 내려주는 진행 상태를 써야 함. 지금은 row 유무로만 임시 판단
         progress={visibleRows.length === 0 ? "before" : "done"}
-        bySchool={filters.bySchool}
+        sort={sort}
+        onSortChange={setSort}
+        byEvaluator={byEvaluator}
+        onByEvaluatorChange={setByEvaluator}
         className="mt-4"
       />
     </div>
