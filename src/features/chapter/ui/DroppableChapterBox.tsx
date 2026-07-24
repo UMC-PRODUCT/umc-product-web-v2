@@ -109,6 +109,7 @@ export function DroppableChapterBox({
 
           <div className="flex items-center gap-0.5">
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation()
                 onClear()
@@ -122,6 +123,7 @@ export function DroppableChapterBox({
             </button>
 
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation()
                 setIsDeleteModalOpen(true)

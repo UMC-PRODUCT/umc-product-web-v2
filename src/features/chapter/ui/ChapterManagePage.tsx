@@ -306,6 +306,7 @@ export function ChapterManagePage() {
         <div className="relative flex w-full flex-col gap-4">
           <div className="absolute -top-10.5 right-0.5 flex gap-2">
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation()
                 handleAddChapter()
@@ -319,6 +320,7 @@ export function ChapterManagePage() {
             </button>
 
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation()
                 handleClearAll()
