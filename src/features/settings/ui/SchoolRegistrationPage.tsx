@@ -1,4 +1,4 @@
-import { type ChangeEvent, useRef, useState } from "react"
+import { type ChangeEvent, useEffect, useRef, useState } from "react"
 
 import {
   showRequiredFieldsMissingToast,
@@ -39,11 +39,24 @@ export function SchoolRegistrationPage({
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const logoPreviewRef = useRef<string | null>(null)
+  logoPreviewRef.current = logoPreview
+
+  useEffect(() => {
+    return () => {
+      if (logoPreviewRef.current) {
+        URL.revokeObjectURL(logoPreviewRef.current)
+      }
+    }
+  }, [])
 
   const handleLogoChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setLogoFile(file)
+    if (logoPreview) {
+      URL.revokeObjectURL(logoPreview)
+    }
     setLogoPreview(URL.createObjectURL(file))
   }
 
