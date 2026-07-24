@@ -9,7 +9,7 @@ import {
 import { isOperator } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { cn } from "@/shared/lib/utils"
-import Header from "@/widgets/navigation/header/Header"
+import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -37,7 +37,7 @@ function AdminLayout() {
 
   return (
     <main className="h-full min-h-screen w-full">
-      <Header />
+      <RecruitingHeader />
       <nav className="border-teal-gray-100 border-b bg-white">
         <ul className="mx-auto flex w-full max-w-300 items-center gap-2 px-8.5">
           {ADMIN_NAV.map((item) => {

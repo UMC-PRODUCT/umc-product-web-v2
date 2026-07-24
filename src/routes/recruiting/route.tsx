@@ -2,7 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import Footer from "@/widgets/footer/Footer"
-import Header from "@/widgets/navigation/header/Header"
+import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 import RecruitingSideBar from "@/widgets/navigation/sidebar/RecruitingSideBar"
 
 export const Route = createFileRoute("/recruiting")({
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/recruiting")({
 function RecruitingLayout() {
   return (
     <main className="flex h-full min-h-screen w-full flex-col">
-      <Header />
+      <RecruitingHeader />
       <div className="flex w-full flex-1">
         <RecruitingSideBar />
         <div className="flex min-w-0 flex-1 flex-col">

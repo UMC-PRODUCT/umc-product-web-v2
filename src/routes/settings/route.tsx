@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import Header from "@/widgets/navigation/header/Header"
+import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/settings")({
 function SettingsLayout() {
   return (
     <main className="h-full min-h-screen w-full">
-      <Header />
+      <RecruitingHeader />
       <Outlet />
     </main>
   )

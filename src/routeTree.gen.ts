@@ -37,6 +37,7 @@ import { Route as TestSocialButtonRouteImport } from './routes/test/social-butto
 import { Route as TestRecruitmentPreviewCardRouteImport } from './routes/test/recruitment-preview-card'
 import { Route as TestRecruitmentPostRowRouteImport } from './routes/test/recruitment-post-row'
 import { Route as TestRecruitingRecruitmentsRouteImport } from './routes/test/recruiting-recruitments'
+import { Route as TestRecruitingHeaderRouteImport } from './routes/test/recruiting-header'
 import { Route as TestRecruitingApplyRouteImport } from './routes/test/recruiting-apply'
 import { Route as TestRecruitingApplicationDetailRouteImport } from './routes/test/recruiting-application-detail'
 import { Route as TestRecruitingApplicantsRouteImport } from './routes/test/recruiting-applicants'
@@ -234,6 +235,11 @@ const TestRecruitingRecruitmentsRoute =
     path: '/test/recruiting-recruitments',
     getParentRoute: () => rootRouteImport,
   } as any)
+const TestRecruitingHeaderRoute = TestRecruitingHeaderRouteImport.update({
+  id: '/test/recruiting-header',
+  path: '/test/recruiting-header',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestRecruitingApplyRoute = TestRecruitingApplyRouteImport.update({
   id: '/test/recruiting-apply',
   path: '/test/recruiting-apply',
@@ -567,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/test/recruiting-applicants': typeof TestRecruitingApplicantsRoute
   '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
+  '/test/recruiting-header': typeof TestRecruitingHeaderRoute
   '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
   '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
@@ -647,6 +654,7 @@ export interface FileRoutesByTo {
   '/test/recruiting-applicants': typeof TestRecruitingApplicantsRoute
   '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
+  '/test/recruiting-header': typeof TestRecruitingHeaderRoute
   '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
   '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
@@ -731,6 +739,7 @@ export interface FileRoutesById {
   '/test/recruiting-applicants': typeof TestRecruitingApplicantsRoute
   '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
+  '/test/recruiting-header': typeof TestRecruitingHeaderRoute
   '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
   '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
@@ -817,6 +826,7 @@ export interface FileRouteTypes {
     | '/test/recruiting-applicants'
     | '/test/recruiting-application-detail'
     | '/test/recruiting-apply'
+    | '/test/recruiting-header'
     | '/test/recruiting-recruitments'
     | '/test/recruitment-post-row'
     | '/test/recruitment-preview-card'
@@ -897,6 +907,7 @@ export interface FileRouteTypes {
     | '/test/recruiting-applicants'
     | '/test/recruiting-application-detail'
     | '/test/recruiting-apply'
+    | '/test/recruiting-header'
     | '/test/recruiting-recruitments'
     | '/test/recruitment-post-row'
     | '/test/recruitment-preview-card'
@@ -980,6 +991,7 @@ export interface FileRouteTypes {
     | '/test/recruiting-applicants'
     | '/test/recruiting-application-detail'
     | '/test/recruiting-apply'
+    | '/test/recruiting-header'
     | '/test/recruiting-recruitments'
     | '/test/recruitment-post-row'
     | '/test/recruitment-preview-card'
@@ -1060,6 +1072,7 @@ export interface RootRouteChildren {
   TestRecruitingApplicantsRoute: typeof TestRecruitingApplicantsRoute
   TestRecruitingApplicationDetailRoute: typeof TestRecruitingApplicationDetailRoute
   TestRecruitingApplyRoute: typeof TestRecruitingApplyRoute
+  TestRecruitingHeaderRoute: typeof TestRecruitingHeaderRoute
   TestRecruitingRecruitmentsRoute: typeof TestRecruitingRecruitmentsRoute
   TestRecruitmentPostRowRoute: typeof TestRecruitmentPostRowRoute
   TestRecruitmentPreviewCardRoute: typeof TestRecruitmentPreviewCardRoute
@@ -1274,6 +1287,13 @@ declare module '@tanstack/react-router' {
       path: '/test/recruiting-recruitments'
       fullPath: '/test/recruiting-recruitments'
       preLoaderRoute: typeof TestRecruitingRecruitmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/recruiting-header': {
+      id: '/test/recruiting-header'
+      path: '/test/recruiting-header'
+      fullPath: '/test/recruiting-header'
+      preLoaderRoute: typeof TestRecruitingHeaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/recruiting-apply': {
@@ -1872,6 +1892,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestRecruitingApplicantsRoute: TestRecruitingApplicantsRoute,
   TestRecruitingApplicationDetailRoute: TestRecruitingApplicationDetailRoute,
   TestRecruitingApplyRoute: TestRecruitingApplyRoute,
+  TestRecruitingHeaderRoute: TestRecruitingHeaderRoute,
   TestRecruitingRecruitmentsRoute: TestRecruitingRecruitmentsRoute,
   TestRecruitmentPostRowRoute: TestRecruitmentPostRowRoute,
   TestRecruitmentPreviewCardRoute: TestRecruitmentPreviewCardRoute,
