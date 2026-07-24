@@ -37,9 +37,6 @@ export function ApplicationEvaluationDetailPage({
   const [detail, setDetail] = useState(() =>
     getApplicationDetailMock(applicationId),
   )
-  const [finalResult, setFinalResult] = useState<EvaluationResult | null>(
-    detail.finalResult,
-  )
   const evaluation = detail.evaluations[stage]
   const listPath = STAGE_LIST_PATH[stage]
   const showFinalResult = stage !== "document"
@@ -130,8 +127,10 @@ export function ApplicationEvaluationDetailPage({
                 {finalResultLabel}
               </span>
               <EvaluationResultToggle
-                value={finalResult}
-                onChange={setFinalResult}
+                value={detail.finalResult}
+                onChange={(next) =>
+                  setDetail((prev) => ({ ...prev, finalResult: next }))
+                }
                 variant="strong"
                 failLabel="최종 불합격"
                 passLabel="최종 합격"

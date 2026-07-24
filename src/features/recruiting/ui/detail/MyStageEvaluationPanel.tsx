@@ -1,9 +1,8 @@
 import { useState } from "react"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
-import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
-import { CounterLabel } from "@/shared/ui/CounterLabel"
+import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 import {
   getMyEvaluation,
@@ -22,7 +21,10 @@ const COMMENT_MAX_LENGTH = 500
 interface MyStageEvaluationPanelProps {
   evaluation: StageEvaluationDetail
   stage: EvaluationStage
-  onComplete: (result: EvaluationResult, comment: string) => void
+  onComplete: (
+    result: EvaluationResult,
+    comment: string,
+  ) => void | Promise<void>
 }
 
 export function MyStageEvaluationPanel({
@@ -31,13 +33,35 @@ export function MyStageEvaluationPanel({
   onComplete,
 }: MyStageEvaluationPanelProps) {
   const myEvaluation = getMyEvaluation(evaluation)
-  const [result, setResult] = useState<EvaluationResult | null>(
-    myEvaluation?.result ?? null,
-  )
-  const [comment, setComment] = useState(myEvaluation?.comment ?? "")
+  const savedResult = myEvaluation?.result ?? null
+  const savedComment = myEvaluation?.comment ?? ""
+  const savedKey = `${savedResult ?? ""}|${savedComment}`
+
+  const [syncKey, setSyncKey] = useState(savedKey)
+  const [result, setResult] = useState<EvaluationResult | null>(savedResult)
+  const [comment, setComment] = useState(savedComment)
+  const [submitting, setSubmitting] = useState(false)
+
+  if (syncKey !== savedKey) {
+    setSyncKey(savedKey)
+    setResult(savedResult)
+    setComment(savedComment)
+  }
 
   const shortLabel = EVALUATION_STAGE_SHORT_LABEL[stage]
   const locked = evaluation.locked
+  const submitted = myEvaluation?.progress === "done"
+  const dirty = result !== savedResult || comment !== savedComment
+
+  const handleSubmit = async () => {
+    if (result === null || submitting) return
+    setSubmitting(true)
+    try {
+      await onComplete(result, comment)
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <section className="border-teal-gray-100 flex flex-col gap-5 rounded-[16px] border bg-white p-6">
@@ -64,37 +88,24 @@ export function MyStageEvaluationPanel({
 
       <div className="flex flex-col gap-2">
         <span className="text-body-2-medium text-teal-gray-700">코멘트</span>
-        <div className="border-teal-gray-100 flex min-h-30 w-full flex-col gap-1.5 rounded-[12px] border bg-white px-5 py-4">
-          <textarea
-            value={comment}
-            onChange={(event) => setComment(event.target.value)}
-            maxLength={COMMENT_MAX_LENGTH}
-            disabled={locked}
-            aria-label="코멘트"
-            placeholder="코멘트를 작성해주세요."
-            className={cn(
-              "text-body-1-regular text-teal-gray-900 placeholder:text-teal-gray-400",
-              "w-full flex-1 resize-none border-none bg-transparent outline-none",
-              "disabled:cursor-not-allowed",
-            )}
-          />
-          <CounterLabel
-            current={comment.length}
-            total={COMMENT_MAX_LENGTH}
-            size="sm"
-            className="self-end"
-          />
-        </div>
+        <TextQuestionField
+          value={comment}
+          onChange={setComment}
+          maxLength={COMMENT_MAX_LENGTH}
+          placeholder="코멘트를 작성해주세요."
+          ariaLabel="코멘트"
+          disabled={locked}
+          className="min-h-30"
+        />
       </div>
 
       {!locked && (
         <div className="flex justify-end">
           <Button
             size="m"
-            disabled={result === null}
-            onClick={() => {
-              if (result !== null) onComplete(result, comment)
-            }}
+            isLoading={submitting}
+            disabled={result === null || (submitted && !dirty)}
+            onClick={handleSubmit}
           >
             평가 완료
           </Button>
