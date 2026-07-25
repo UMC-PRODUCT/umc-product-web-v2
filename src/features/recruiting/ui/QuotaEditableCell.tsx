@@ -80,6 +80,7 @@ export function QuotaEditableCell({
           inputMode="numeric"
           maxLength={4}
           value={inputValue}
+          aria-label={`${partName} TO`}
           onFocus={handleFocus}
           onBlur={handleBlur}
           onChange={handleChange}
