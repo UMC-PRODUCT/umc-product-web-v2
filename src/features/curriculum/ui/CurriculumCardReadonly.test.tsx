@@ -84,4 +84,15 @@ describe("CurriculumCardReadonly", () => {
     expect(screen.getByText("Hug 익히기")).toBeInTheDocument()
     expect(screen.getByText("미션 A")).toBeInTheDocument()
   })
+
+  it("수정 버튼에서 Enter를 눌러도 펼치기 토글이 실행되지 않는다", () => {
+    const onToggleExpand = vi.fn()
+    renderCard({ onEdit: vi.fn(), onToggleExpand })
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "수정" }), {
+      key: "Enter",
+    })
+
+    expect(onToggleExpand).not.toHaveBeenCalled()
+  })
 })
