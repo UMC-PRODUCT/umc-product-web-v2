@@ -69,6 +69,8 @@ export const INITIAL_CHAPTERS: ChapterData[] = [
 
 export const UNASSIGNED_PANEL_ID = "unassigned-schools-panel"
 export const ASSIGNED_CHIP_PREFIX = "chapter-assigned-"
+export const WAITING_CHIP_PREFIX = "waiting-"
+export const PANEL_ASSIGNED_CHIP_PREFIX = "panel-assigned-"
 
 export function isSchool(value: unknown): value is School {
   return (
@@ -168,8 +170,8 @@ export function resolveDropTargetId(
 
   if (
     overId === UNASSIGNED_PANEL_ID ||
-    overId.startsWith("waiting-") ||
-    overId.startsWith("panel-assigned-") ||
+    overId.startsWith(WAITING_CHIP_PREFIX) ||
+    overId.startsWith(PANEL_ASSIGNED_CHIP_PREFIX) ||
     unassignedSchools.some((school) => school.id === overId)
   ) {
     return UNASSIGNED_PANEL_ID
