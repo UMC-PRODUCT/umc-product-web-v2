@@ -38,6 +38,7 @@ export function RecruitmentPreviewCard({
           {onFooterChange ? (
             <input
               type="text"
+              aria-label="꼬릿말"
               value={footer ?? ""}
               onChange={(e) => onFooterChange(e.target.value)}
               placeholder={emptyFooterPlaceholder}
