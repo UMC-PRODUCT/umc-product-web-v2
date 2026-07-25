@@ -1,22 +1,83 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { Button } from "@/shared/ui/Button"
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
   getAllChaptersQuotaData,
   getChapterQuotaData,
   RECRUITMENT_QUOTA_MOCK,
 } from "../model/recruitmentQuota.mock"
-import { ChapterQuotaTableCard } from "./ChapterQuotaTableCard"
+import {
+  type AllocationStatus,
+  ChapterQuotaTableCard,
+} from "./ChapterQuotaTableCard"
 import { ChapterTabs } from "./ChapterTabs"
 import { QuotaApplicantStatusCard } from "./QuotaApplicantStatusCard"
 
 export function RecruitmentQuotaPage() {
   const [chapterTab, setChapterTab] = useState("all")
+  const [isDirty, setIsDirty] = useState(false)
+  const [allocationStatus, setAllocationStatus] =
+    useState<AllocationStatus>("TO 설정 전")
+  const [autoModalOpen, setAutoModalOpen] = useState(false)
+  const [autoAllocateTrigger, setAutoAllocateTrigger] = useState(0)
+
+  const addToast = useToastStore((state) => state.addToast)
 
   const isAll = chapterTab === "all"
+
+  const handleTabChange = (nextValue: string) => {
+    setChapterTab(nextValue)
+    setIsDirty(false)
+    setAllocationStatus("TO 설정 전")
+  }
+
+  const handleConfirmAutoAllocate = () => {
+    setAutoModalOpen(false)
+    setAutoAllocateTrigger((prev) => prev + 1)
+    setAllocationStatus("자동 배정 중")
+
+    addToast({
+      message: "이제부터 모집 인원이 자동으로 배정됩니다.",
+      color: "primary",
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
+  }
+
+  const handleManualEdit = useCallback(() => {
+    setAllocationStatus((prev) => {
+      if (prev === "자동 배정 중") {
+        addToast({
+          message: "직접 수정되어 자동 배정이 해제되었습니다.",
+          color: "primary",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+      return "임의 배정 중"
+    })
+  }, [addToast])
+
+  const handleErrorExceeded = useCallback(
+    (partName: string, maxAllowed: number) => {
+      const particle = partName.endsWith("PE") ? "는" : "은"
+      addToast({
+        message: `현재 ${partName}${particle} ${maxAllowed}명까지만 배정할 수 있습니다.`,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+    [addToast],
+  )
 
   const allChaptersData = getAllChaptersQuotaData(RECRUITMENT_QUOTA_MOCK)
 
@@ -61,7 +122,7 @@ export function RecruitmentQuotaPage() {
         className="pl-3"
       />
 
-      <ChapterTabs value={chapterTab} onValueChange={setChapterTab} />
+      <ChapterTabs value={chapterTab} onValueChange={handleTabChange} />
 
       <div className="flex w-full flex-col gap-6">
         <p className="text-heading-3-semibold px-3 text-teal-700">
@@ -90,7 +151,8 @@ export function RecruitmentQuotaPage() {
                     {showAutoAllocateButton && (
                       <button
                         type="button"
-                        className="border-teal-gray-400/15 box-border flex h-8.5 items-center gap-1 rounded-[10px] border bg-white pr-3 pl-2"
+                        onClick={() => setAutoModalOpen(true)}
+                        className="border-teal-gray-400/15 hover:bg-teal-gray-50 box-border flex h-8.5 cursor-pointer items-center gap-1 rounded-[10px] border bg-white pr-3 pl-2 transition-colors"
                       >
                         <ResetIcon className="text-teal-gray-400 size-4" />
                         <span className="text-label-1-medium text-teal-gray-700">
@@ -100,8 +162,15 @@ export function RecruitmentQuotaPage() {
                     )}
 
                     {showSaveButton && (
-                      <Button size="xs" color="primary" variant="fill">
-                        저장
+                      <Button
+                        size="xs"
+                        color="primary"
+                        variant="fill"
+                        disabled={!isDirty}
+                        className="w-auto px-3"
+                        onClick={() => {}}
+                      >
+                        {isDirty ? "저장" : "저장 완료"}
                       </Button>
                     )}
                   </div>
@@ -130,16 +199,41 @@ export function RecruitmentQuotaPage() {
                 {isAll ? (
                   allChaptersData.map((chapterData) => (
                     <ChapterQuotaTableCard
+                      status={allocationStatus}
+                      onDirtyChange={() => setIsDirty(true)}
+                      onManualEdit={handleManualEdit}
+                      onErrorExceeded={handleErrorExceeded}
+                      autoAllocateTrigger={autoAllocateTrigger}
                       key={chapterData.chapter}
                       data={chapterData}
                     />
                   ))
                 ) : (
-                  <ChapterQuotaTableCard data={selectedChapterData!} />
+                  <ChapterQuotaTableCard
+                    data={selectedChapterData!}
+                    status={allocationStatus}
+                    onDirtyChange={() => setIsDirty(true)}
+                    onManualEdit={handleManualEdit}
+                    onErrorExceeded={handleErrorExceeded}
+                    autoAllocateTrigger={autoAllocateTrigger}
+                  />
                 )}
               </div>
             )}
           </div>
+
+          {/* 자동 배정 확인 CtaModal */}
+          <CtaModal
+            open={autoModalOpen}
+            title="자동 배정을 하시겠습니까?"
+            content="이전 설정은 초기화되고, 각 파트별 모집 인원이 모든 학교에 골고루 자동 배정됩니다."
+            cancelText="취소"
+            confirmText="자동 배정하기"
+            variant="warning"
+            onOpenChange={setAutoModalOpen}
+            onCancel={() => setAutoModalOpen(false)}
+            onConfirm={handleConfirmAutoAllocate}
+          />
         </div>
       </div>
     </div>
