@@ -226,8 +226,19 @@ export function RecruitmentQuotaPage() {
           <CtaModal
             open={autoModalOpen}
             title="자동 배정을 하시겠습니까?"
-            content="이전 설정은 초기화되고, 각 파트별 모집 인원이 모든 학교에 골고루 자동 배정됩니다."
-            cancelText="취소"
+            content={
+              <p className="w-full break-keep">
+                지원자 현황에 따라 실시간으로
+                <br />
+                <span className="text-teal-500">
+                  PM : Design : PE = 1 : 1 : 5 비율
+                </span>
+                로 자동 배정됩니다.
+                <br />
+                이후 지부 상황에 맞게 직접 수정할 수 있습니다.
+              </p>
+            }
+            cancelText="돌아가기"
             confirmText="자동 배정하기"
             variant="warning"
             onOpenChange={setAutoModalOpen}
