@@ -3,13 +3,15 @@ import { SortableContext } from "@dnd-kit/sortable"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { CurriculumCard } from "./CurriculumCard"
+import { CurriculumCardEditable } from "./CurriculumCardEditable"
 
 import type { CurriculumItem } from "../model/curriculumData"
 
 const TITLE_PLACEHOLDER = "커리큘럼 이름을 작성하세요"
 
-function buildCurriculum(overrides: Partial<CurriculumItem> = {}) {
+function buildCurriculum(
+  overrides: Partial<CurriculumItem> = {},
+): CurriculumItem {
   return {
     id: "c1",
     number: "01",
@@ -25,56 +27,26 @@ function buildCurriculum(overrides: Partial<CurriculumItem> = {}) {
       },
     ],
     ...overrides,
-  } satisfies CurriculumItem
+  }
 }
 
 function renderCard(
-  props: Partial<React.ComponentProps<typeof CurriculumCard>> = {},
+  props: Partial<React.ComponentProps<typeof CurriculumCardEditable>> = {},
 ) {
   const curriculum = props.curriculum ?? buildCurriculum()
   return render(
     <DndContext>
       <SortableContext items={[curriculum.id]}>
-        <CurriculumCard curriculum={curriculum} isExpanded={false} {...props} />
+        <CurriculumCardEditable curriculum={curriculum} {...props} />
       </SortableContext>
     </DndContext>,
   )
 }
 
-describe("CurriculumCard 조회 모드", () => {
-  it("번호와 제목, 구성 요약을 보여준다", () => {
-    const { container } = renderCard()
-
-    expect(screen.getByText("01")).toBeInTheDocument()
-    expect(screen.getByText("Figma 기초")).toBeInTheDocument()
-    expect(container.textContent).toContain("워크북 2개")
-    expect(container.textContent).toContain("미션 5개")
-  })
-
-  it("제목을 입력 필드로 노출하지 않는다", () => {
-    renderCard()
-
-    expect(
-      screen.queryByPlaceholderText(TITLE_PLACEHOLDER),
-    ).not.toBeInTheDocument()
-  })
-
-  it("펼치기 토글을 키보드로 조작할 수 있다", () => {
-    const onToggleExpand = vi.fn()
-    renderCard({ onToggleExpand })
-
-    fireEvent.keyDown(screen.getAllByRole("button")[0] as HTMLElement, {
-      key: "Enter",
-    })
-
-    expect(onToggleExpand).toHaveBeenCalled()
-  })
-})
-
-describe("CurriculumCard 편집 모드", () => {
+describe("CurriculumCardEditable", () => {
   it("제목을 입력으로 편집할 수 있다", () => {
     const onUpdateCurriculumTitle = vi.fn()
-    renderCard({ isEditable: true, onUpdateCurriculumTitle })
+    renderCard({ onUpdateCurriculumTitle })
 
     const input = screen.getByPlaceholderText(TITLE_PLACEHOLDER)
     expect(input).toHaveValue("Figma 기초")
@@ -85,7 +57,7 @@ describe("CurriculumCard 편집 모드", () => {
 
   it("워크북 추가 버튼을 노출한다", () => {
     const onAddWorkbook = vi.fn()
-    renderCard({ isEditable: true, onAddWorkbook })
+    renderCard({ onAddWorkbook })
 
     fireEvent.click(screen.getByRole("button", { name: "워크북" }))
 
@@ -93,11 +65,27 @@ describe("CurriculumCard 편집 모드", () => {
   })
 
   it("제목이 비어 있으면 번호를 00으로 대체한다", () => {
-    renderCard({
-      isEditable: true,
-      curriculum: buildCurriculum({ title: "" }),
-    })
+    renderCard({ curriculum: buildCurriculum({ title: "" }) })
 
     expect(screen.getByText("00")).toBeInTheDocument()
+  })
+
+  it("워크북 제목과 미션을 입력으로 편집할 수 있다", () => {
+    const onUpdateWorkbookTitle = vi.fn()
+    renderCard({ onUpdateWorkbookTitle })
+
+    const workbookTitle =
+      screen.getByPlaceholderText("워크북 이름을 작성하세요")
+    fireEvent.change(workbookTitle, { target: { value: "Fill 익히기" } })
+
+    expect(onUpdateWorkbookTitle).toHaveBeenCalledWith(0, "Fill 익히기")
+  })
+
+  it("펼치기 토글 없이 워크북을 항상 노출한다", () => {
+    renderCard()
+
+    expect(
+      screen.getAllByPlaceholderText("미션을 작성하세요").length,
+    ).toBeGreaterThan(0)
   })
 })

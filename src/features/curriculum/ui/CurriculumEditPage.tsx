@@ -7,7 +7,7 @@ import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
 import { useCurriculumEditor } from "../hooks/useCurriculumEditor"
 import { INITIAL_CURRICULUM_DATA } from "../model/curriculumData"
-import { CurriculumCard } from "./CurriculumCard"
+import { CurriculumCardEditable } from "./CurriculumCardEditable"
 
 interface CurriculumEditPageProps {
   part?: string
@@ -78,10 +78,9 @@ export function CurriculumEditPage({
           >
             <div className="flex w-full flex-col gap-2.5">
               {curriculums.map((item) => (
-                <CurriculumCard
+                <CurriculumCardEditable
                   key={item.id}
                   curriculum={item}
-                  isEditable
                   autoFocusTitle={item.id === focusId}
                   onUpdateCurriculumTitle={(title) =>
                     handleUpdateCurriculumTitle(item.id, title)
