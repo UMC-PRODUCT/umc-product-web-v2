@@ -5,7 +5,7 @@ import { Button } from "@/shared/ui/Button"
 import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
-import { RecruitmentSectionHeader } from "../.."
+import { RecruitmentSectionHeader } from "../RecruitmentSectionHeader"
 
 const ANNOUNCEMENT_MAX_LENGTH = 10000
 
@@ -131,6 +131,7 @@ export function RecruitmentAnnouncementForm({
           setTimeout(() => {
             setIsPublishing(false)
             setIsPublished(true)
+            savedSnapshotRef.current = announcement
             setOpenModal("complete")
           }, 600)
         }}
