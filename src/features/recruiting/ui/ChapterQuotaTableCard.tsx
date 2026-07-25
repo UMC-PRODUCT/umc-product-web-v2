@@ -99,21 +99,20 @@ export function ChapterQuotaTableCard({
     partKey: "pm" | "design" | "webPe" | "mobilePe",
     newValue: number,
   ) => {
-    setSchoolsData((prev) => {
-      const next = prev.map((school) => {
-        if (school.schoolName !== schoolName) return school
-        const updated = { ...school, [partKey]: newValue }
-        const total =
-          updated.pm + updated.design + updated.webPe + updated.mobilePe
-        return { ...updated, total }
-      })
-
-      if (checkIsAllValid(next)) {
-        setLastValidSchoolsData(next)
-      }
-
-      return next
+    const nextSchoolsData = schoolsData.map((school) => {
+      if (school.schoolName !== schoolName) return school
+      const updated = { ...school, [partKey]: newValue }
+      const total =
+        updated.pm + updated.design + updated.webPe + updated.mobilePe
+      return { ...updated, total }
     })
+
+    setSchoolsData(nextSchoolsData)
+
+    if (checkIsAllValid(nextSchoolsData)) {
+      setLastValidSchoolsData(nextSchoolsData)
+    }
+
     onDirtyChange?.(true)
     onManualEdit?.()
   }
