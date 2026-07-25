@@ -3,7 +3,6 @@ import { useNavigate } from "@tanstack/react-router"
 import { cn } from "@/shared/lib/utils"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
-import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { TimestampLabel } from "@/shared/ui/timestamp/TimestampLabel"
 
 import {
@@ -23,7 +22,7 @@ import type { EvaluationStage } from "../model/evaluationStage"
 
 const STAGE_TIME_LABEL: Record<EvaluationStage, string> = {
   document: "지원",
-  interview: "면접",
+  interview: "지원",
   final: "지원",
 }
 
@@ -39,21 +38,23 @@ export function ApplicantRow({ row, stage, columns }: ApplicantRowProps) {
   if (!evaluation) return null
 
   const visibleColumns = new Set(getVisibleApplicantColumns(stage, columns))
-  const timeAt = stage === "interview" ? row.interviewAt : row.appliedAt
-  const timestamp = timeAt ? formatAppliedAtParts(timeAt) : null
+  const timestamp = row.appliedAt ? formatAppliedAtParts(row.appliedAt) : null
   const navigable = stage === "document" || stage === "interview"
 
   const openDetail = () => {
     const params = { applicationId: row.applicationId }
+    const search = { roundId: row.roundId }
     if (stage === "document") {
       navigate({
         to: "/recruiting/evaluations/document/$applicationId",
         params,
+        search,
       })
     } else if (stage === "interview") {
       navigate({
         to: "/recruiting/evaluations/interview/$applicationId",
         params,
+        search,
       })
     }
   }
@@ -137,13 +138,6 @@ export function ApplicantRow({ row, stage, columns }: ApplicantRowProps) {
         )}
         <span className={APPLICANT_COLUMNS.progress}>
           <EvaluationStatusChip progress={evaluation.progress} />
-          {stage !== "final" && (
-            <CounterLabel
-              current={evaluation.doneCount}
-              total={evaluation.totalCount}
-              emphasis="current"
-            />
-          )}
         </span>
         <span className={APPLICANT_COLUMNS.result}>
           {evaluation.result && (

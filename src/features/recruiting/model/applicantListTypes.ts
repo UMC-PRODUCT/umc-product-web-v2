@@ -1,4 +1,3 @@
-import type { Chapter } from "@/entities/organization/model/chapters"
 import type { PartTag } from "@/shared/model/domain"
 
 import type { EvaluationStage } from "./evaluationStage"
@@ -11,19 +10,16 @@ export type EvaluationResult = "pass" | "fail"
 
 export interface StageEvaluation {
   progress: EvaluationProgress
-  doneCount: number
-  totalCount: number
   result: EvaluationResult | null
   myProgress: EvaluationProgress
-  assignedToMe?: boolean
 }
 
 export interface ApplicantRow {
   applicationId: string
+  roundId: string
   appliedAt: string
-  interviewAt: string | null
   applicantName: string
-  chapter: Chapter
+  chapter: string
   school: string
   recruitmentType: RecruitmentType
   additionalRound?: number
@@ -62,8 +58,6 @@ export type ApplicantOrder = (typeof APPLICANT_ORDER_OPTIONS)[number]["value"]
 
 export interface ApplicantListFilters {
   search: string
-  bySchool: boolean
-  assignedOnly: boolean
   chapterTab: string
   schoolTab: string
   chapters: string[]
@@ -75,8 +69,6 @@ export interface ApplicantListFilters {
 
 export const DEFAULT_APPLICANT_LIST_FILTERS: ApplicantListFilters = {
   search: "",
-  bySchool: false,
-  assignedOnly: false,
   chapterTab: "all",
   schoolTab: "all",
   chapters: [],
@@ -203,7 +195,6 @@ export function applyApplicantFilters(
         return false
       }
       if (!matchesResultFilter(evaluation, filters.results)) return false
-      if (filters.assignedOnly && !evaluation.assignedToMe) return false
       return true
     })
     .map(({ row }) => row)

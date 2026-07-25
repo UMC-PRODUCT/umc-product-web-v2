@@ -13,9 +13,7 @@ import {
   FilterDropdown,
   type FilterDropdownOption,
 } from "@/shared/ui/FilterDropDown"
-import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { SearchField } from "@/shared/ui/search-field/SearchField"
-import { Toggle } from "@/shared/ui/Toggle"
 
 import {
   type ApplicantListFilters,
@@ -33,12 +31,10 @@ const PART_OPTIONS = (["pm", "design", "web-pe", "mobile-pe"] as const).map(
   (part) => ({ value: part, label: PART_TAG_LABEL[part] }),
 )
 
-const PROGRESS_OPTIONS = (["before", "inProgress", "done"] as const).map(
-  (progress) => ({
-    value: progress,
-    label: EVALUATION_PROGRESS_LABEL[progress],
-  }),
-)
+const PROGRESS_OPTIONS = (["inProgress", "done"] as const).map((progress) => ({
+  value: progress,
+  label: EVALUATION_PROGRESS_LABEL[progress],
+}))
 
 const RESULT_OPTIONS = [
   { value: "pass", label: "합격" },
@@ -76,7 +72,6 @@ interface ApplicantFilterBarProps {
   resultFilterLabel: string
   chapterScope?: Chapter
   hideSchoolControls?: boolean
-  showAssignedToggle?: boolean
   className?: string
 }
 
@@ -86,16 +81,11 @@ export function ApplicantFilterBar({
   resultFilterLabel,
   chapterScope,
   hideSchoolControls = false,
-  showAssignedToggle = false,
   className,
 }: ApplicantFilterBarProps) {
   const [openKey, setOpenKey] = useState<string | null>(null)
   const schoolOptions = buildSchoolOptions(filters, chapterScope)
   const showChapterFilter =
-    filters.chapterTab === CHAPTER_ALL_VALUE &&
-    !chapterScope &&
-    !hideSchoolControls
-  const showBySchool =
     filters.chapterTab === CHAPTER_ALL_VALUE &&
     !chapterScope &&
     !hideSchoolControls
@@ -140,32 +130,6 @@ export function ApplicantFilterBar({
           <FilterIcon className="text-teal-gray-600 size-4" />
           필터
         </span>
-        {showAssignedToggle && (
-          <span className="flex items-center gap-2">
-            <span className="text-body-1-medium text-teal-gray-600">
-              내 담당 지원자
-            </span>
-            <Toggle
-              size="sm"
-              checked={filters.assignedOnly}
-              onChange={(checked) => onFiltersChange({ assignedOnly: checked })}
-              aria-label="내 담당 지원자만 보기"
-            />
-          </span>
-        )}
-        {showBySchool && (
-          <label className="flex cursor-pointer items-center gap-2">
-            <Checkbox
-              checked={filters.bySchool}
-              onChange={(checked) => onFiltersChange({ bySchool: checked })}
-              variant="primary"
-              aria-label="학교별 보기"
-            />
-            <span className="text-body-1-medium text-teal-gray-600">
-              학교별
-            </span>
-          </label>
-        )}
         <div className="flex items-center gap-2">
           {showChapterFilter && (
             <FilterDropdown

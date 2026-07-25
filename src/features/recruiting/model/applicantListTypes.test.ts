@@ -16,8 +16,8 @@ function createApplicant(
 ): ApplicantRow {
   return {
     applicationId,
+    roundId: "9001",
     appliedAt,
-    interviewAt: null,
     applicantName: applicationId,
     chapter: "Chromium",
     school,
@@ -26,8 +26,6 @@ function createApplicant(
     evaluations: {
       document: {
         progress: "before",
-        doneCount: 0,
-        totalCount: 1,
         result: null,
         myProgress: "before",
       },

@@ -171,6 +171,8 @@ function buildPartSection(
   }
 }
 
+const OPERATOR_COUNT = 7
+
 const OPERATOR_NAME_POOL = [
   "벨라/황지원",
   "박방토/박예원",
@@ -191,10 +193,8 @@ function buildStageDetail(
   if (!stageEvaluation) return null
 
   const myDone = stageEvaluation.myProgress === "done"
-  const othersDone = Math.max(
-    0,
-    myDone ? stageEvaluation.doneCount - 1 : stageEvaluation.doneCount,
-  )
+  const othersDone =
+    stageEvaluation.progress === "done" ? OPERATOR_COUNT - 1 : 0
 
   const me: OperatorEvaluation = {
     evaluatorId: "op-me",
@@ -206,7 +206,7 @@ function buildStageDetail(
   }
 
   const others: OperatorEvaluation[] = Array.from(
-    { length: Math.max(0, stageEvaluation.totalCount - 1) },
+    { length: OPERATOR_COUNT - 1 },
     (_, index): OperatorEvaluation => {
       const done = index < othersDone
       return {
@@ -232,7 +232,7 @@ function buildStageDetail(
 function buildInterviewContent(row: ApplicantRow): InterviewContent {
   const interviewEvaluation = getStageEvaluation(row, "interview")
   const totalCountLabel = interviewEvaluation
-    ? `총 ${interviewEvaluation.totalCount}명`
+    ? `총 ${OPERATOR_COUNT}명`
     : undefined
   return {
     blocks: [
