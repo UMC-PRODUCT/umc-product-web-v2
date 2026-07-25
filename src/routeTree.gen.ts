@@ -42,7 +42,6 @@ import { Route as TestRecruitingRecruitmentsRouteImport } from './routes/test/re
 import { Route as TestRecruitingHeaderRouteImport } from './routes/test/recruiting-header'
 import { Route as TestRecruitingApplyRouteImport } from './routes/test/recruiting-apply'
 import { Route as TestRecruitingApplicationDetailRouteImport } from './routes/test/recruiting-application-detail'
-import { Route as TestRecruitingApplicantsRouteImport } from './routes/test/recruiting-applicants'
 import { Route as TestRatingFaceRouteImport } from './routes/test/rating-face'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
 import { Route as TestProjectImageCropRouteImport } from './routes/test/project-image-crop'
@@ -271,12 +270,6 @@ const TestRecruitingApplicationDetailRoute =
   TestRecruitingApplicationDetailRouteImport.update({
     id: '/test/recruiting-application-detail',
     path: '/test/recruiting-application-detail',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const TestRecruitingApplicantsRoute =
-  TestRecruitingApplicantsRouteImport.update({
-    id: '/test/recruiting-applicants',
-    path: '/test/recruiting-applicants',
     getParentRoute: () => rootRouteImport,
   } as any)
 const TestRatingFaceRoute = TestRatingFaceRouteImport.update({
@@ -647,7 +640,6 @@ export interface FileRoutesByFullPath {
   '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
-  '/test/recruiting-applicants': typeof TestRecruitingApplicantsRoute
   '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
   '/test/recruiting-header': typeof TestRecruitingHeaderRoute
@@ -739,7 +731,6 @@ export interface FileRoutesByTo {
   '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
-  '/test/recruiting-applicants': typeof TestRecruitingApplicantsRoute
   '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
   '/test/recruiting-header': typeof TestRecruitingHeaderRoute
@@ -836,7 +827,6 @@ export interface FileRoutesById {
   '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
-  '/test/recruiting-applicants': typeof TestRecruitingApplicantsRoute
   '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
   '/test/recruiting-header': typeof TestRecruitingHeaderRoute
@@ -935,7 +925,6 @@ export interface FileRouteTypes {
     | '/test/project-image-crop'
     | '/test/question-form'
     | '/test/rating-face'
-    | '/test/recruiting-applicants'
     | '/test/recruiting-application-detail'
     | '/test/recruiting-apply'
     | '/test/recruiting-header'
@@ -1027,7 +1016,6 @@ export interface FileRouteTypes {
     | '/test/project-image-crop'
     | '/test/question-form'
     | '/test/rating-face'
-    | '/test/recruiting-applicants'
     | '/test/recruiting-application-detail'
     | '/test/recruiting-apply'
     | '/test/recruiting-header'
@@ -1123,7 +1111,6 @@ export interface FileRouteTypes {
     | '/test/project-image-crop'
     | '/test/question-form'
     | '/test/rating-face'
-    | '/test/recruiting-applicants'
     | '/test/recruiting-application-detail'
     | '/test/recruiting-apply'
     | '/test/recruiting-header'
@@ -1215,7 +1202,6 @@ export interface RootRouteChildren {
   TestProjectImageCropRoute: typeof TestProjectImageCropRoute
   TestQuestionFormRoute: typeof TestQuestionFormRoute
   TestRatingFaceRoute: typeof TestRatingFaceRoute
-  TestRecruitingApplicantsRoute: typeof TestRecruitingApplicantsRoute
   TestRecruitingApplicationDetailRoute: typeof TestRecruitingApplicationDetailRoute
   TestRecruitingApplyRoute: typeof TestRecruitingApplyRoute
   TestRecruitingHeaderRoute: typeof TestRecruitingHeaderRoute
@@ -1468,13 +1454,6 @@ declare module '@tanstack/react-router' {
       path: '/test/recruiting-application-detail'
       fullPath: '/test/recruiting-application-detail'
       preLoaderRoute: typeof TestRecruitingApplicationDetailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/test/recruiting-applicants': {
-      id: '/test/recruiting-applicants'
-      path: '/test/recruiting-applicants'
-      fullPath: '/test/recruiting-applicants'
-      preLoaderRoute: typeof TestRecruitingApplicantsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/rating-face': {
@@ -2151,7 +2130,6 @@ const rootRouteChildren: RootRouteChildren = {
   TestProjectImageCropRoute: TestProjectImageCropRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
   TestRatingFaceRoute: TestRatingFaceRoute,
-  TestRecruitingApplicantsRoute: TestRecruitingApplicantsRoute,
   TestRecruitingApplicationDetailRoute: TestRecruitingApplicationDetailRoute,
   TestRecruitingApplyRoute: TestRecruitingApplyRoute,
   TestRecruitingHeaderRoute: TestRecruitingHeaderRoute,
