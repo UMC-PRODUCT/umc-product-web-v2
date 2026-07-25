@@ -4,6 +4,226 @@
  */
 
 export interface paths {
+  "/api/v1/recruiting/rounds/{roundId}/applications/{applicationId}/evaluations/{stage}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 평가 목록 조회
+     * @description CurrentMember에게 공개 가능한 단계별 평가 목록만 조회합니다.
+     */
+    get: operations["RECRUITING-EVALUATION-002"]
+    /**
+     * 내 평가 등록 및 수정
+     * @description CurrentMember 평가자의 단계별 평가를 등록하거나 해당 전형의 최종 판정 전까지 수정합니다.
+     */
+    put: operations["RECRUITING-EVALUATION-001"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/public/applications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * 익명 지원서 수정
+     * @description 서류 접수 마감 전 익명 초안 또는 제출 완료 지원서의 기본 정보와 선택 트랙 범위 답변을 수정합니다.
+     */
+    put: operations["RECRUITING-PUBLIC-005"]
+    /**
+     * 익명 지원서 초안 생성
+     * @description 개인정보 처리방침 동의를 검증하고 익명 Form 응답과 지원서 초안을 생성합니다. 지원 키는 이 응답에서만 제공합니다.
+     */
+    post: operations["RECRUITING-PUBLIC-003"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/applications/{applicationId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * 지원서 초안 수정
+     * @description 로그인 회원이 본인의 지원 기본 정보와 답변을 저장합니다.
+     */
+    put: operations["RECRUITING-APPLICATION-002"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/applications/{applicationId}/interview-schedule/availability": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * 면접 가능 일정 제출 (미구현)
+     * @description Form SCHEDULE 응답을 직접 제출하는 기능은 Form 엔진 연동 전까지 사용할 수 없습니다.
+     */
+    put: operations["RECRUITING-SCHEDULE-001"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/seasons/{seasonId}/rounds/{roundId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * 모집 차수 설정 변경
+     * @description 모집 기간, 트랙, 2지망 정책과 면접 설정을 변경합니다.
+     */
+    put: operations["RECRUITING-ADMIN-014"]
+    post?: never
+    /**
+     * 모집 Round 삭제
+     * @description 지원서와 Form 응답이 없는 DRAFT Round와 소유한 Form 구조를 완전히 삭제합니다.
+     */
+    delete: operations["RECRUITING-ADMIN-017"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/seasons/{seasonId}/rounds/{roundId}/form": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * 지원 Form 전체 구조 Upsert
+     * @description Round가 DRAFT일 때 section, question, option과 COMMON/TRACK 정책을 하나의 요청으로 동기화합니다.
+     */
+    put: operations["RECRUITING-ADMIN-021"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/seasons/{seasonId}/quotas": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * 모집 시즌 트랙별 목표 인원 교체
+     * @description 현재 READY 및 REGISTERED 인원을 보호하면서 트랙별 목표 인원을 교체합니다.
+     */
+    put: operations["RECRUITING-ADMIN-004"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/rounds/{roundId}/questions/{questionId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * 공통 면접 질문 수정
+     * @description 첫 면접 평가 제출 전 공통 질문을 수정합니다.
+     */
+    put: operations["RECRUITING-ADMIN-042"]
+    post?: never
+    /**
+     * 공통 면접 질문 비활성화
+     * @description 첫 면접 평가 제출 전 공통 질문을 비활성화합니다.
+     */
+    delete: operations["RECRUITING-ADMIN-043"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/applications/{applicationId}/questions/{questionId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * 지원서별 면접 질문 수정
+     * @description 첫 면접 평가 제출 전 지원서별 질문을 수정합니다.
+     */
+    put: operations["RECRUITING-ADMIN-046"]
+    post?: never
+    /**
+     * 지원서별 면접 질문 비활성화
+     * @description 첫 면접 평가 제출 전 지원서별 질문을 비활성화합니다.
+     */
+    delete: operations["RECRUITING-ADMIN-047"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/applications/{applicationId}/interview-schedule/confirmation": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * 면접 일정 확정
+     * @description CurrentMember 운영 권한으로 저장된 가능 일정 응답에 대한 면접 시간을 확정합니다. overlap 조회와 이메일 발송은 수행하지 않습니다.
+     */
+    put: operations["RECRUITING-ADMIN-052"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/projects/{projectId}/part-quotas": {
     parameters: {
       query?: never
@@ -13,10 +233,10 @@ export interface paths {
     }
     get?: never
     /**
-     * [PROJECT-105] 파트별 정원 일괄 갱신
+     * 파트별 정원 일괄 갱신
      * @description PUT 시멘틱 — 본문이 곧 새 상태가 된다. 본문에 없는 기존 파트는 삭제. quota ≥ 1. 운영진 검토 단계 액션 — 본인 지부장 또는 총괄단만 호출 가능.
      */
-    put: operations["updatePartQuotas"]
+    put: operations["PROJECT-105"]
     post?: never
     delete?: never
     options?: never
@@ -24,21 +244,59 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/projects/{projectId}/applications/me": {
+  "/api/v1/projects/{projectId}/applications/{applicationId}": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    get?: never
     /**
-     * [APPLY-002] 챌린저 지원서 임시저장
-     * @description 본문이 곧 답변의 새 전체 상태가 된다. 본인의 DRAFT 지원서에서만 호출 가능.
+     * 지원서 단건 상세 조회
+     * @description 지원자, 매칭 차수, 상태, 제출/처리 시각, 지원 폼, 답변, 첨부 파일을 함께 조회합니다.
+     *     지원자 본인이 조회할 때 해당 매칭 차수의 `decisionDeadline` 전이면 제출 이후 상태의 `status` 는 `null` 입니다.
+     *     `decisionDeadline` 이 지나면 상태와 무관하게 `status` 를 반환합니다.
+     *     지원서 내용과 답변은 그대로 포함합니다.
+     *     <p>
+     *     조회 권한:
+     *     <ul>
+     *       <li>SUBMITTED/APPROVED/REJECTED: 다음 호출자가 조회할 수 있습니다.
+     *         <ul>
+     *           <li>지원자 본인</li>
+     *           <li>해당 프로젝트의 PO</li>
+     *           <li>해당 프로젝트의 Sub-PO (ACTIVE PLAN 멤버)</li>
+     *           <li>전역 SUPER_ADMIN</li>
+     *           <li>해당 프로젝트 기수의 Central Core (총괄/부총괄)</li>
+     *           <li>해당 프로젝트 지부의 지부장 (같은 기수)</li>
+     *         </ul>
+     *       </li>
+     *       <li>DRAFT(임시저장): 지원자 본인만 조회할 수 있습니다.</li>
+     *     </ul>
+     *     권한이 없으면 403(AUTHORIZATION-0002)을 반환합니다.
+     *     <p>
+     *     경로의 `projectId` 와 지원서의 프로젝트가 다르면 404(PROJECT-0021)를 반환합니다.
      */
-    put: operations["updateDraft"]
+    get: operations["APPLY-102"]
+    /**
+     * 챌린저 지원서 임시저장
+     * @description 요청 본문을 답변의 새 전체 상태로 저장합니다. 본인의 초안 지원서에서만 호출할 수 있습니다.
+     */
+    put: operations["APPLY-002"]
     post?: never
-    delete?: never
+    /**
+     * 챌린저 지원서 철회
+     * @description 지원서를 CANCELLED 로 soft delete 합니다.
+     *
+     *     정책:
+     *     - 가능 상태: DRAFT, SUBMITTED
+     *     - 불가 상태: APPROVED, REJECTED (이미 종결), CANCELLED (이중 취소)
+     *     - 시간 제약: 지원한 매칭 차수가 OPEN 인 동안만 (startsAt <= now <= endsAt). PM 선발이 시작된 차수 종료 후에는 철회 불가
+     *     - 행위자: 지원자 본인만 (운영진 강제 철회는 별도 API, 추후 작업)
+     *
+     *     철회 후 동일 매칭 차수에 재지원 가능 (DB partial unique index 가 활성 지원서 1개 보장).
+     *     Form 응답 본문은 보존됨.
+     */
+    delete: operations["APPLY-005"]
     options?: never
     head?: never
     patch?: never
@@ -52,37 +310,17 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-106-GET] 지원 폼 조회
+     * 지원 폼 조회
      * @description 프로젝트의 지원 폼 구조를 조회한다.
      *     호출자가 PM/총괄단/프로젝트 지부의 지부장이면 전체 섹션, 일반 챌린저이면 본인 파트가 매칭된 PART 섹션과 COMMON 섹션만 노출된다.
      *     프로젝트 기수에 챌린저 레코드가 없는 외부 사용자는 403. 폼이 없으면 ApiResponse.result = null.
      */
-    get: operations["get"]
+    get: operations["PROJECT-106-GET"]
     /**
-     * [PROJECT-106] 지원 폼 저장
-     * @description 본문이 곧 폼의 새 상태가 된다 (PUT 시멘틱). 폼이 없으면 생성하고, 있으면 섹션/질문/옵션을 본문 구조와 일치하도록 동기화한다. DRAFT/PENDING_REVIEW 상태에서만 호출 가능.
+     * 지원 폼 저장
+     * @description 요청 본문을 지원 폼의 새 전체 상태로 저장합니다. 폼이 없으면 생성하고, 있으면 섹션, 질문, 옵션을 본문 구조와 맞춥니다. DRAFT 또는 PENDING_REVIEW 상태에서만 호출할 수 있습니다.
      */
-    put: operations["upsert"]
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/notification/fcm/token": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    /**
-     * [FCM-001] FCM 토큰 등록
-     * @description 사용자의 FCM 토큰을 등록하거나 업데이트합니다. 이미 등록된 토큰이 있으면 갱신됩니다.
-     */
-    put: operations["refreshFcmToken"]
+    put: operations["PROJECT-106"]
     post?: never
     delete?: never
     options?: never
@@ -99,22 +337,39 @@ export interface paths {
     }
     get?: never
     /**
-     * [NOTICE-VOTE-002] 공지사항 투표 응답 수정/취소
+     * 공지사항 투표 응답 수정/취소
      * @description 기존에 제출한 공지사항 투표 응답의 선택지를 교체하거나 취소합니다.
      *     - 투표 기간(OPEN) 내에서만 가능합니다.
      *     - `optionIds`를 비어있는 배열 `[]` 로 보내면 기존 응답이 취소됩니다 (응답 삭제).
      *     - 비어있지 않으면 기존 응답이 새 선택지로 교체됩니다.
      *     - 기존 응답이 없으면 `FORM_RESPONSE_NOT_FOUND`.
      */
-    put: operations["updateOrCancelVoteResponse"]
+    put: operations["NOTICE-VOTE-002"]
     /**
-     * [NOTICE-VOTE-001] 공지사항 투표 응답 제출
+     * 공지사항 투표 응답 제출
      * @description 공지사항 투표에 응답을 제출합니다.
      *     - 투표 기간(OPEN) 내에서만 가능합니다. 시작 전이면 `VOTE_NOT_STARTED`, 종료 후면 `VOTE_CLOSED`.
      *     - 이미 제출한 응답이 있으면 `FORM_RESPONSE_ALREADY_EXISTS`. 수정 또는 취소는 PUT을 사용하세요.
      *     - 단일 선택(RADIO) 투표는 `optionIds`에 1개, 복수 선택(CHECKBOX)은 여러 개.
      */
-    post: operations["submitVoteResponse"]
+    post: operations["NOTICE-VOTE-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/series/{seriesId}/contents": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** 시리즈 콘텐츠 전체 교체 */
+    put: operations["BLOG-SERIES-008"]
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -173,7 +428,16 @@ export interface paths {
      *     createDraft 를 호출합니다.
      */
     post: operations["SEED-003"]
-    delete?: never
+    /**
+     * 프로젝트 시딩 데이터 삭제
+     * @description 특정 기수의 프로젝트 관련 데이터를 물리 삭제합니다.
+     *     삭제 범위는 Project, ProjectMember, ProjectPartQuota, ProjectApplication,
+     *     ProjectApplicationForm/Policy, 해당 기수 Chapter 의 ProjectMatchingRound,
+     *     그리고 프로젝트 지원 폼이 생성한 form Form/FormSection/Question/QuestionOption/
+     *     FormResponse/Answer/AnswerChoice/legacy SingleAnswer 입니다.
+     *     gisuId 가 null 이면 활성 기수를 대상으로 합니다. prod 환경에서는 노출되지 않습니다.
+     */
+    delete: operations["SEED-003-D"]
     options?: never
     head?: never
     patch?: never
@@ -216,7 +480,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SEED-006] 지원서 시나리오 시딩
+     * 지원서 시나리오 시딩
      * @description 지정 매칭 차수 + 지부를 기준으로, 아직 팀에 합류하지 않은 ACTIVE 챌린저들이
      *     지부의 IN_PROGRESS 프로젝트에 지원서를 제출하는 시나리오를 실행합니다.
      *
@@ -233,7 +497,7 @@ export interface paths {
      *     ProjectMember 등록은 시딩 책임 밖입니다. 매칭 완료(APPROVED → ProjectMember 일괄 등록)는
      *     차수 종료 시점의 autoDecide 가 처리합니다.
      */
-    post: operations["seedProjectApplications"]
+    post: operations["SEED-006"]
     delete?: never
     options?: never
     head?: never
@@ -291,6 +555,28 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/test/seed/member": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 테스트 멤버 단건 생성
+     * @description 이름, 닉네임, 학교 ID, 이메일을 받아 ID/PW 멤버를 1명 생성합니다.
+     *     rawPassword 를 생략하거나 공백으로 보내면 app.seed.default-password 를 사용합니다.
+     *     활성 필수 약관은 모두 동의한 것으로 자동 처리합니다.
+     */
+    post: operations["SEED-001-M"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/test/seed/curriculum": {
     parameters: {
       query?: never
@@ -331,6 +617,49 @@ export interface paths {
      *     chapterIds 가 null/empty 면 해당 기수의 모든 Chapter 가 대상입니다.
      */
     post: operations["SEED-002"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/test/seed/challenger": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 테스트 챌린저 단건 생성
+     * @description memberId, gisuId, part로 챌린저 1명을 만듭니다.
+     */
+    post: operations["SEED-002-C"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/test/seed/challenger-role": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 테스트 챌린저 역할 단건 생성
+     * @description challengerId, roleType, gisuId 를 받아 운영진 역할을 1개 부여합니다.
+     *     중앙 운영진 역할은 organizationId 없이 생성할 수 있고,
+     *     CHAPTER_PRESIDENT 는 organizationId 에 chapterId, SCHOOL_PRESIDENT 등 학교 역할은
+     *     organizationId 에 schoolId 를 전달합니다.
+     */
+    post: operations["SEED-002-R"]
     delete?: never
     options?: never
     head?: never
@@ -380,7 +709,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SCHEDULE-C001] 일정 생성
+     * 일정 생성
      * @description 일정을 생성합니다. `location` 필드를 작성하지 않으실 경우 비대면 일정으로 간주됩니다.
      *
      *     스터디 일정을 생성하고자 하는 경우에는, 반드시 별도의 API를 이용해서 생성해야 합니다.
@@ -409,7 +738,7 @@ export interface paths {
      *
      *     생성된 일정의 ID 값을 반환합니다.
      */
-    post: operations["create"]
+    post: operations["SCHEDULE-C001"]
     delete?: never
     options?: never
     head?: never
@@ -426,13 +755,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SCHEDULE-C003] 출석 요청하기
+     * 출석 요청하기
      * @description 특정 일정에 대한 출석을 요청합니다. 반환값으로 변경된 출석 상태 및 관련된 정보들을 제공합니다.
      *
      *     - 이미 출석 요청을 한 경우, 에러가 반환됩니다. (사유 출석 요청 및 이미 출석/지각/결석으로 확정된 경우 등)
      *     - 일정의 출석 시작 가능 시간이 아직 도래하지 않은 경우 및 일정 종료 시간이 경과된 이후에는 에러가 반환됩니다.
      */
-    post: operations["requestAttendance"]
+    post: operations["SCHEDULE-C003"]
     delete?: never
     options?: never
     head?: never
@@ -449,12 +778,12 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SCHEDULE-C004] 출석 요청이 불가능한 경우, 사유 제출하기
+     * 출석 요청이 불가능한 경우, 사유 제출하기
      * @description 위치 인증이 안되거나, 개인 사정이 있어 결석하지만 출석 인정을 요구하는 경우 사유를 제출하기 위하여 사용합니다.
      *
      *     위치 정보는 클라이언트 단에서 잡히는 경우에 한하여 제공하면 됩니다. 단, 사유는 반드시 제출하여야 합니다.
      */
-    post: operations["excuseAttendance"]
+    post: operations["SCHEDULE-C004"]
     delete?: never
     options?: never
     head?: never
@@ -471,7 +800,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SCHEDULE-C005] [운영진용] 출석 요청 승인/거절
+     * [운영진용] 출석 요청 승인/거절
      * @description 일정에 대한 출석 요청을 승인 또는 거절합니다.
      *
      *     결정 권한은 아래와 같습니다. (기준은, 일정이 포함된 기수 기준입니다)
@@ -480,7 +809,7 @@ export interface paths {
      *     여러 개의 요청을 한 번에 처리할 수 있도록, DecideAttendanceRequest를 배열로 받습니다.
      *     모든 요청이 성공적으로 처리된 경우에만 성공으로 반환합니다. (Transaction)
      */
-    post: operations["decideAttendances"]
+    post: operations["SCHEDULE-C005"]
     delete?: never
     options?: never
     head?: never
@@ -497,12 +826,12 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CURRICULUM-001] 커리큘럼 생성
+     * 커리큘럼 생성
      * @description 기수, 파트에 대한 상위 객체인 커리큘럼을 생성합니다.
      *
      *     단, 동일한 기수에 동일한 파트에 대한 커리큘럼은 존재할 수 없습니다.
      */
-    post: operations["createCurriculum"]
+    post: operations["CURRICULUM-001"]
     delete?: never
     options?: never
     head?: never
@@ -519,13 +848,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CURRICULUM-004] 각 커리큘럼에 새로운 주차 생성
+     * 각 커리큘럼에 새로운 주차 생성
      * @description 상위 객체인 커리큘럼에 각 주차별 커리큘럼을 생성합니다.
      *
      *     각 커리큘럼에 대해서, 주차별 커리큘럼은 최대 2개 (MAIN, EXTRA) 생성 가능합니다.
      *     주차별 커리큘럼 내에 원본 워크북 수와는 다른 개념입니다!
      */
-    post: operations["createWeeklyCurriculum"]
+    post: operations["CURRICULUM-004"]
     delete?: never
     options?: never
     head?: never
@@ -542,13 +871,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [ORIGINAL-WORKBOOK-001] 중앙파트장용: 원본 워크북 추가 (READY 상태)
+     * 중앙파트장용: 원본 워크북 추가 (READY 상태)
      * @description 주차별 커리큘럼에 원본 워크북을 추가합니다. 생성 즉시 **배포 준비(READY)** 상태가 됩니다.
      *
      *     READY 상태의 워크북은 배포 시점(주차 시작 2주 전)에 스케줄러에 의해 자동 배포될 수 있습니다.
      *     임시저장이 필요한 경우 `/draft` 엔드포인트를 사용하세요.
      */
-    post: operations["createOriginalWorkbook"]
+    post: operations["ORIGINAL-WORKBOOK-001"]
     delete?: never
     options?: never
     head?: never
@@ -565,13 +894,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [ORIGINAL-WORKBOOK-MISSION-001] 중앙파트장용: 원본 워크북에 미션 추가
+     * 중앙파트장용: 원본 워크북에 미션 추가
      * @description 미션을 추가합니다.
      *
      *     - 이미 배포된 OriginalWorkbook에 대해서는, 필수가 아닌 미션만 추가가 가능합니다.
      *     - 배포되지 않은 OriginalWorkbook에 대해서는 따로 제한이 없습니다.
      */
-    post: operations["createOriginalWorkbookMission"]
+    post: operations["ORIGINAL-WORKBOOK-MISSION-001"]
     delete?: never
     options?: never
     head?: never
@@ -588,7 +917,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [ORIGINAL-WORKBOOK-002] 중앙파트장용: 원본 워크북 임시저장 (DRAFT 상태)
+     * 중앙파트장용: 원본 워크북 임시저장 (DRAFT 상태)
      * @description 주차별 커리큘럼에 원본 워크북을 **임시저장(DRAFT)** 상태로 추가합니다.
      *
      *     DRAFT 상태의 워크북은 스케줄러 자동 배포 대상에서 제외됩니다.
@@ -596,7 +925,7 @@ export interface paths {
      *
      *     상태 전환 흐름: `DRAFT` → `READY` → `RELEASED`
      */
-    post: operations["createOriginalWorkbookAsDraft"]
+    post: operations["ORIGINAL-WORKBOOK-002"]
     delete?: never
     options?: never
     head?: never
@@ -613,11 +942,11 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CHALLENGER-WORKBOOK-004] 회장단용: 특정 워크북 인정 처리
+     * 회장단 워크북 인정
      * @description 특정 워크북에 대해 미션을 제출하지 않아도 벌점이 부과되지 않도록 인정 처리합니다.
      *     인정 처리에 대한 철회는 제공하지 않습니다.
      */
-    post: operations["excuseChallengerWorkbook"]
+    post: operations["CHALLENGER-WORKBOOK-004"]
     delete?: never
     options?: never
     head?: never
@@ -634,7 +963,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CHALLENGER-WORKBOOK-005] 베스트 워크북 선정
+     * 베스트 워크북 선정
      * @description 스터디 그룹에서 특정 주차의 베스트 워크북을 선정합니다.
      *
      *     - 주차별로 스터디 그룹 당 한 명만 지정이 가능합니다.
@@ -645,7 +974,7 @@ export interface paths {
      *         - 단, 사유 란은 하나이므로 N명이 사유를 작성하고자 하는 경우 해당 란에 같이 작성해주세요.
      *     - 다른 사람을 베스트 워크북으로 선정하고자 하는 경우, 철회 후 다시 선정해야 합니다.
      */
-    post: operations["createWeeklyBestWorkbook"]
+    post: operations["CHALLENGER-WORKBOOK-005"]
     delete?: never
     options?: never
     head?: never
@@ -662,7 +991,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CHALLENGER-WORKBOOK-MISSION-001] 챌린저용: 워크북 내 미션 제출
+     * 챌린저용: 워크북 내 미션 제출
      * @description 미션을 제출합니다.
      *
      *     #### 소속된 스터디 그룹에 주차별 일정이 등록된 경우의 동작
@@ -677,7 +1006,7 @@ export interface paths {
      *
      *     > p.s. 미션의 LATE 처리는 createdAt이 아닌 updatedAt을 기준으로 합니다.
      */
-    post: operations["createOriginalWorkbookMission_1"]
+    post: operations["CHALLENGER-WORKBOOK-MISSION-001"]
     delete?: never
     options?: never
     head?: never
@@ -694,7 +1023,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CHALLENGER-WORKBOOK-MISSION-004] 운영진용: 제출된 미션에 대한 피드백 작성
+     * 운영진용: 제출된 미션에 대한 피드백 작성
      * @description 챌린저가 제출한 미션에 대한 피드백을 작성합니다.
      *
      *     - 스터디 그룹의 일정이 등록된 경우에만, 해당 일자의 00:00 이후에 피드백 작성이 가능합니다.
@@ -708,7 +1037,7 @@ export interface paths {
      *     - 선택인 미션에 대한 피드백은 필수적이지 않습니다.
      *         - 선택 미션에 대한 피드백은 기간이 경과된 이후에 작성하여도 불이익이 존재하지 않습니다.
      */
-    post: operations["createMissionFeedback"]
+    post: operations["CHALLENGER-WORKBOOK-MISSION-004"]
     delete?: never
     options?: never
     head?: never
@@ -725,7 +1054,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CHALLENGER-WORKBOOK-001] 챌린저용: 특정 원본 워크북 배포 요청
+     * 챌린저용: 특정 원본 워크북 배포 요청
      * @description 커리큘럼 조회를 통해 받은 OriginalWorkbookId를 통해서 배포 요청을 합니다.
      *
      *     여러 개의 원본 워크북을 한 번에 배포받는 경우
@@ -740,7 +1069,7 @@ export interface paths {
      *
      *     > BFF 패턴을 적용하여, 생성된 ChallengerWorkbook에 대한 정보를 반환합니다.
      */
-    post: operations["requestSingleChallengerWorkbookDeploy"]
+    post: operations["CHALLENGER-WORKBOOK-001"]
     delete?: never
     options?: never
     head?: never
@@ -759,7 +1088,7 @@ export interface paths {
     /**
      * 사용자 피드백 응답 제출
      * @description 지정한 피드백 템플릿에 대한 응답을 즉시 제출합니다.
-     *     동일 폼에 이미 응답한 경우 Survey 도메인에서 중복 응답 예외가 발생합니다.
+     *     동일 폼에 이미 응답한 경우 Form 도메인에서 중복 응답 예외가 발생합니다.
      */
     post: operations["submit"]
     delete?: never
@@ -768,7 +1097,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/trophies": {
+  "/api/v1/umc-product/squads": {
     parameters: {
       query?: never
       header?: never
@@ -776,16 +1105,126 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [TROPHY-101] 상장 목록 조회
-     * @description 주차, 학교, 파트로 상장 목록을 조회합니다.
+     * UMC PRODUCT 스쿼드 목록 조회
+     * @description active로 활성 상태를, activeOn으로 해당 날짜에 유효한 Squad를 필터링합니다.
      */
-    get: operations["getTrophies"]
+    get: operations["UMC-PRODUCT-SQUAD-101"]
     put?: never
     /**
-     * [TROPHY-001] 베스트 워크북 생성
-     * @description 주차별 베스트 워크북을 생성합니다.
+     * UMC PRODUCT 스쿼드 생성
+     * @description 코드, 이름, 달력 날짜 기준 운영 기간, 정렬 순서, 활성 여부를 저장합니다.
      */
-    post: operations["createTrophy"]
+    post: operations["UMC-PRODUCT-SQUAD-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/umc-product/squads/{squadId}/participants": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** UMC PRODUCT Squad 참여 생성 */
+    post: operations["UMC-PRODUCT-SQUAD-004"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/umc-product/members": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * UMC PRODUCT 멤버 검색
+     * @description Chapter, Product Leadership, 포지션, Squad, 활동 기준일로 멤버를 페이지 조회합니다.
+     */
+    get: operations["UMC-PRODUCT-MEMBER-101"]
+    put?: never
+    /**
+     * UMC PRODUCT 멤버 생성
+     * @description 기본 프로필과 한 개 이상의 활동 기간으로 UMC PRODUCT 멤버를 등록합니다.
+     */
+    post: operations["UMC-PRODUCT-MEMBER-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/umc-product/members/{memberId}/product-leaderships": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** UMC PRODUCT Leadership 생성 */
+    post: operations["UMC-PRODUCT-MEMBER-009"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/umc-product/members/{memberId}/chapter-memberships": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** UMC PRODUCT 멤버 Chapter 소속 생성 */
+    post: operations["UMC-PRODUCT-MEMBER-006"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/umc-product/members/{memberId}/activity-periods": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** UMC PRODUCT 멤버 활동 기간 생성 */
+    post: operations["UMC-PRODUCT-MEMBER-003"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/umc-product/chapters": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** UMC PRODUCT Chapter 목록 조회 */
+    get: operations["UMC-PRODUCT-CHAPTER-101"]
+    put?: never
+    /** UMC PRODUCT Chapter 생성 */
+    post: operations["UMC-PRODUCT-CHAPTER-001"]
     delete?: never
     options?: never
     head?: never
@@ -799,13 +1238,14 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get?: never
+    /** 활성 약관 전체 조회 */
+    get: operations["TERM-104"]
     put?: never
     /**
-     * [TERM-001] 약관 생성
-     * @description 약관 삭제는 지원하지 않습니다. 새로운 약관을 생성하면 기존 약관이 비활성화됩니다.
+     * 약관 생성
+     * @description 새 약관을 생성하면 기존 약관은 비활성화됩니다.
      */
-    post: operations["createTerms"]
+    post: operations["TERM-001"]
     delete?: never
     options?: never
     head?: never
@@ -822,7 +1262,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [STUDY-GROUP-001] 스터디 그룹 생성
+     * 스터디 그룹 생성
      * @description 스터디 그룹을 생성합니다. 스터디 그룹은 특정 기수에 속해야 하며, 파트를 명시해야 합니다.
      *
      *     스터디원 및 담당 파트장은 모두 `memberId` 로 명시해주시면 됩니다.
@@ -830,7 +1270,7 @@ export interface paths {
      *     스터디원의 경우, 같은 기수에 동일한 파트의 다른 스터디에 속해있지 않아야 합니다. (e.g. 9기에 SpringBoot 스터디 2개에 들어가는 것은 불가능)
      *     파트장은 관계 없습니다.
      */
-    post: operations["create_1"]
+    post: operations["STUDY-GROUP-001"]
     delete?: never
     options?: never
     head?: never
@@ -847,13 +1287,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [STUDY-GROUP-SCHEDULE-001] 스터디 그룹 일정 생성
+     * 스터디 그룹 일정 생성
      * @description 스터디 그룹 일정을 생성합니다.
      *     **'Schedule V2 | Command'**의 **'일정 생성 API'**를 사용하신 후 이 API를 호출해주세요.
      *
      *     > ⚠️ **주의 : ** 이 API를 사용하기 전, '일정 생성 API'를 사용하실 때는 사용자 본인을 무조건 참여자로 넣는 로직은 생략해주세요.
      */
-    post: operations["create_2"]
+    post: operations["STUDY-GROUP-SCHEDULE-001"]
     delete?: never
     options?: never
     head?: never
@@ -869,8 +1309,8 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** [STORAGE-002] 파일 업로드 완료 처리 */
-    post: operations["confirmUpload"]
+    /** 파일 업로드 완료 등록 */
+    post: operations["STORAGE-002"]
     delete?: never
     options?: never
     head?: never
@@ -887,14 +1327,14 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [STORAGE-001] 파일 업로드를 위한 Signed URL을 생성합니다.
-     * @description 파일 카테고리는 Schema를 참고하세요. (추후 변경 가능)
+     * 파일 업로드용 Signed URL 생성
+     * @description 파일 카테고리는 Schema를 참고합니다.
      *
-     *     업로드 완료 후 반드시 "파일 업로드 완료" API를 호출해야 정상적으로 파일 등록이 완료됩니다.
+     *     파일 업로드 후 "파일 업로드 완료 처리"를 호출해야 등록이 끝납니다.
      *
-     *     Content-type는 MIME 타입을 정확히 기재하여야 하며, fileName은 확장자를 포함하여야 합니다.
+     *     Content-Type에는 MIME 타입을, fileName에는 확장자를 포함한 파일명을 전달합니다.
      */
-    post: operations["prepareUpload"]
+    post: operations["STORAGE-001"]
     delete?: never
     options?: never
     head?: never
@@ -911,15 +1351,331 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [SCHOOL-001] 학교 생성
+     * 학교 생성
      * @description 새로운 학교를 등록합니다
      */
-    post: operations["createSchool"]
+    post: operations["SCHOOL-001"]
     /**
-     * [SCHOOL-003] 학교 삭제
+     * 학교 삭제
      * @description 여러 학교를 일괄 삭제합니다
      */
-    delete: operations["deleteSchools"]
+    delete: operations["SCHOOL-003"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/public/applications/submit": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 익명 지원서 제출
+     * @description 선택한 트랙과 실제 조건부 이동 경로의 필수 문항을 검증한 뒤 익명 지원서를 제출합니다.
+     */
+    post: operations["RECRUITING-PUBLIC-006"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/public/applications/lookup": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 익명 지원서 조회
+     * @description 지원 이메일과 지원 키로 지원서와 Form 답변을 조회합니다. 전형 결과는 각 발표 시각부터 제공합니다.
+     */
+    post: operations["RECRUITING-PUBLIC-004"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/public/applications/cancel": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 익명 지원서 철회
+     * @description 지원 이메일과 지원 키를 검증하고 초안 또는 제출 완료 지원서를 철회합니다.
+     */
+    post: operations["RECRUITING-PUBLIC-007"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/applications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 지원서 초안 생성
+     * @description 로그인 회원이 지원 폼에 대한 지원서 초안을 생성합니다.
+     */
+    post: operations["RECRUITING-APPLICATION-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/applications/{applicationId}/submit": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 지원서 제출
+     * @description 작성 중인 지원서를 최종 제출 상태로 변경합니다. 제출 IP는 요청 본문 값이 없으면 서버가 확인한 원격 주소를 사용합니다.
+     */
+    post: operations["RECRUITING-APPLICATION-003"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/seasons": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 모집 시즌 생성
+     * @description 기수와 학교에 대한 모집 시즌과 초기 트랙별 목표 인원을 생성합니다.
+     */
+    post: operations["RECRUITING-ADMIN-002"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/seasons/{seasonId}/rounds": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 모집 차수 생성
+     * @description 모집 기간, 트랙, 2지망 정책과 면접 설정을 포함한 차수를 생성합니다. INFRA_PLUS는 모집할 수 없으며 면접 Round의 availability Form은 OPEN 전까지 설정·게시해야 합니다.
+     */
+    post: operations["RECRUITING-ADMIN-013"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/seasons/{seasonId}/rounds/{roundId}/clone": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 모집 Round 복제
+     * @description Round 설정, 지원 Form 전체 구조와 활성 공통 질문을 대상 Season의 새 DRAFT Round로 복제합니다.
+     */
+    post: operations["RECRUITING-ADMIN-016"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/rounds/{roundId}/questions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 공통 면접 질문 조회
+     * @description 차수의 활성 공통 면접 질문을 순서대로 조회합니다.
+     */
+    get: operations["RECRUITING-ADMIN-044"]
+    put?: never
+    /**
+     * 공통 면접 질문 생성
+     * @description 차수 공통 면접 질문을 생성합니다.
+     */
+    post: operations["RECRUITING-ADMIN-041"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/rounds/{roundId}/evaluators/{memberId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 평가자 추가
+     * @description CurrentMember 운영 권한으로 path의 회원을 서류·면접 공통 평가자 whitelist에 추가합니다.
+     */
+    post: operations["RECRUITING-ADMIN-031"]
+    /**
+     * 평가자 제거
+     * @description CurrentMember 운영 권한으로 서류·면접 공통 평가자 whitelist 등록을 제거합니다.
+     */
+    delete: operations["RECRUITING-ADMIN-032"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/applications/{applicationId}/registration/registered": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 챌린저 등록 확정
+     * @description 중앙 운영진 CurrentMember 권한으로 READY 지원자를 REGISTERED로 전환하고 Challenger 등록 use case에 위임합니다.
+     */
+    post: operations["RECRUITING-ADMIN-073"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/applications/{applicationId}/registration/ready": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 등록 준비
+     * @description 중앙 운영진 CurrentMember 권한으로 최종 합격자의 트랙 쿼터를 예약해 READY로 전환합니다.
+     */
+    post: operations["RECRUITING-ADMIN-071"]
+    /**
+     * 등록 준비 취소
+     * @description 중앙 운영진 CurrentMember 권한으로 READY 예약을 취소하고 쿼터를 반환합니다.
+     */
+    delete: operations["RECRUITING-ADMIN-072"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/applications/{applicationId}/questions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 지원서별 면접 질문 조회
+     * @description 지원서의 활성 개별 면접 질문을 순서대로 조회합니다.
+     */
+    get: operations["RECRUITING-ADMIN-048"]
+    put?: never
+    /**
+     * 지원서별 면접 질문 생성
+     * @description INTERVIEW 평가자가 지원서별 면접 질문을 생성합니다.
+     */
+    post: operations["RECRUITING-ADMIN-045"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/applications/{applicationId}/interview/skip": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 면접 생략
+     * @description CurrentMember 운영 권한으로 서류 합격 지원서를 면접 생략 상태로 전환합니다. 권한은 use case가 실제 지원서 소속으로 검증합니다.
+     */
+    post: operations["RECRUITING-ADMIN-062"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/applications/{applicationId}/interview-schedule/request": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 면접 가능 일정 요청 재시도
+     * @description 자동 일정 요청이 없으면 생성하고, 메일 발송 실패 상태이면 Outbox 재시도를 요청합니다. 이미 처리 중이거나 발송된 요청은 기존 일정 ID를 반환합니다.
+     */
+    post: operations["RECRUITING-ADMIN-051"]
+    delete?: never
     options?: never
     head?: never
     patch?: never
@@ -933,16 +1689,16 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-001] 프로젝트 목록 조회
+     * 프로젝트 목록 조회
      * @description 기수/지부/파트 등으로 필터링된 프로젝트 목록을 페이지 조회합니다.
      */
-    get: operations["searchProjects"]
+    get: operations["PROJECT-001"]
     put?: never
     /**
-     * [PROJECT-101] 프로젝트 Draft 생성
+     * 프로젝트 초안 생성
      * @description PM(PLAN 파트 챌린저)이 빈 DRAFT 상태의 프로젝트를 생성합니다. 페이지 진입 시 GET /me/draft로 사전 확인 후 호출 권장. 동일 PM·동일 기수 중복 생성 시 409.
      */
-    post: operations["createDraft"]
+    post: operations["PROJECT-101"]
     delete?: never
     options?: never
     head?: never
@@ -959,10 +1715,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [PROJECT-104] 프로젝트 소유권 양도
+     * 프로젝트 소유권 양도
      * @description 메인 PM을 다른 PLAN 파트 챌린저에게 양도합니다. 현재 PM 또는 운영진이 호출 가능. 종료 상태에서는 호출 불가.
      */
-    post: operations["transferOwnership"]
+    post: operations["PROJECT-104"]
     delete?: never
     options?: never
     head?: never
@@ -979,10 +1735,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [PROJECT-107] 프로젝트 제출
+     * 프로젝트 제출
      * @description DRAFT 상태의 프로젝트를 제출하여 PENDING_REVIEW로 전이합니다. 작성자(creator)만 호출 가능.
      */
-    post: operations["submit_1"]
+    post: operations["PROJECT-107"]
     delete?: never
     options?: never
     head?: never
@@ -999,10 +1755,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [PROJECT-108] 프로젝트 공개
+     * 프로젝트 공개
      * @description PENDING_REVIEW → IN_PROGRESS 전이. 같은 트랜잭션에서 지원 폼도 PUBLISHED 로 전환. 파트별 정원 1개 이상 + 지원 폼 등록 필수. 운영진(본인 지부장 또는 Central Core)만 호출 가능 — PM 도 차단.
      */
-    post: operations["publish"]
+    post: operations["PROJECT-108"]
     delete?: never
     options?: never
     head?: never
@@ -1017,16 +1773,16 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-003] 프로젝트 팀원 구성 조회
+     * 프로젝트 팀원 구성 조회
      * @description 프로젝트의 PM/보조 PM/파트별 멤버를 조회합니다. 권한에 따라 실명이 마스킹됩니다.
      */
-    get: operations["getMembers"]
+    get: operations["PROJECT-003"]
     put?: never
     /**
-     * [PROJECT-004] 프로젝트 팀원 추가
+     * 프로젝트 팀원 추가
      * @description 프로젝트에 멤버를 추가합니다. 보조 PM 추가는 part = PLAN. DRAFT 단계에선 PM 본인만, IN_PROGRESS 에선 운영진(중앙 총괄단)도 호출 가능.
      */
-    post: operations["addMember"]
+    post: operations["PROJECT-004"]
     delete?: never
     options?: never
     head?: never
@@ -1041,42 +1797,43 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [APPLY-101] PM/운영진 단일 프로젝트 지원자 목록 조회
-     * @description 단일 프로젝트의 지원자 목록을 조회한다. 임시저장(DRAFT) 지원서는 제외되며, SUBMITTED/APPROVED/REJECTED 만 노출.
+     * PM/운영진 단일 프로젝트 지원자 목록 조회
+     * @description 단일 프로젝트의 제출된 지원자 목록을 조회합니다. 임시저장(DRAFT) 지원서는 포함하지 않습니다.
      *
-     *     정렬: matchingRound.phase ASC -> submittedAt ASC. 같은 파트끼리 묶기는 클라이언트가 처리한다.
+     *     정렬은 매칭 차수, 지원 파트, 제출 시각 순입니다. 같은 차수와 파트 안에서는 먼저 제출한 지원서를 먼저 보여줍니다.
      *     <p>
      *     필터:
      *     <ul>
-     *       <li>matchingRoundId -- 매칭 차수 단일 필터</li>
-     *       <li>part -- 지원자(챌린저) 의 파트 필터</li>
-     *       <li>status -- 지원 상태 (SUBMITTED / APPROVED / REJECTED). 미지정 시 전체. DRAFT 입력 시 도메인 예외(APPLICATION_DRAFT_FILTER_NOT_ALLOWED) 발생.</li>
+     *       <li>matchingRoundId: 매칭 차수 ID</li>
+     *       <li>part: 지원자(챌린저) 파트</li>
+     *       <li>status: 지원 상태. SUBMITTED, APPROVED, REJECTED 만 사용할 수 있습니다.
+     *           DRAFT 를 보내면 APPLICATION_DRAFT_FILTER_NOT_ALLOWED 오류를 반환합니다.</li>
      *     </ul>
      *     <p>
-     *     권한: 다음 호출자만 통과한다. 그 외에는 권한 부재를 '지원자 0건' 으로 위장하여 빈 리스트를 반환한다.
+     *     다음 권한이 있으면 조회할 수 있습니다. 권한이 없으면 빈 목록을 반환합니다.
      *     <ul>
      *       <li>해당 프로젝트의 PO</li>
      *       <li>해당 프로젝트의 보조 PM (ACTIVE PLAN 멤버)</li>
      *       <li>SUPER_ADMIN</li>
      *       <li>해당 프로젝트 기수의 Central Core (총괄/부총괄)</li>
      *       <li>해당 프로젝트 지부의 지부장 (같은 기수)</li>
-     *       <li>해당 프로젝트 학교의 회장 (SCHOOL_PRESIDENT, 같은 기수)</li>
+     *       <li>해당 프로젝트 지부에 속한 학교 회장단 (SCHOOL_PRESIDENT/SCHOOL_VICE_PRESIDENT, 같은 기수)</li>
      *     </ul>
      */
-    get: operations["getProjectApplicants"]
+    get: operations["APPLY-101"]
     put?: never
     /**
-     * [APPLY-001] 챌린저 지원서 Draft 생성
-     * @description 챌린저가 특정 프로젝트의 지원서를 DRAFT 상태로 생성합니다. 이미 DRAFT 지원서가 있으면 기존 application 정보 반환.
+     * 챌린저 지원서 초안 생성
+     * @description 챌린저가 프로젝트 지원서 초안을 생성합니다. 이미 초안이 있으면 기존 지원서 정보를 반환합니다.
      */
-    post: operations["createDraft_1"]
+    post: operations["APPLY-001"]
     delete?: never
     options?: never
     head?: never
     patch?: never
     trace?: never
   }
-  "/api/v1/projects/{projectId}/applications/me/submit": {
+  "/api/v1/projects/{projectId}/applications/{applicationId}/submit": {
     parameters: {
       query?: never
       header?: never
@@ -1086,10 +1843,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [APPLY-003] 챌린저 지원서 최종 제출
-     * @description DRAFT -> SUBMITTED 전이. 필수 답변 누락 시 400. 본인의 DRAFT 지원서에서만 호출 가능.
+     * 챌린저 지원서 최종 제출
+     * @description 지원서를 초안에서 제출 상태로 변경합니다. 필수 답변이 빠지면 400을 반환합니다. 본인의 초안 지원서에서만 호출할 수 있습니다.
      */
-    post: operations["submit_2"]
+    post: operations["APPLY-003"]
     delete?: never
     options?: never
     head?: never
@@ -1106,10 +1863,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [PROJECT-110] 프로젝트 중단
+     * 프로젝트 중단
      * @description IN_PROGRESS 상태의 프로젝트를 ABORTED 로 전이합니다. ACTIVE ProjectMember 는 WITHDRAWN, 진행 중(DRAFT/SUBMITTED) ProjectApplication 은 CANCELLED 로 일괄 동기화. 운영진(본인 지부장 또는 Central Core) 만 호출 가능.
      */
-    post: operations["abort"]
+    post: operations["PROJECT-110"]
     delete?: never
     options?: never
     head?: never
@@ -1124,17 +1881,17 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-MATCHING-001] 매칭 차수 목록 조회
+     * 매칭 차수 목록 조회
      * @description 매칭 차수 목록을 조회합니다.
      *     - chapterId가 있으면 해당 지부의 매칭 차수만 startsAt 오름차순으로 반환합니다.
      *     - time이 있으면 해당 시점에 지원 가능한 매칭 차수(startsAt <= time <= endsAt)만 반환합니다.
      *     - time 기준 조회는 결과가 최대 1건이 되도록 chapterId와 함께 요청해야 하며, chapterId 없이 time만 요청하면 400을 반환합니다.
      *     - time이 없고 chapterId도 없으면 전체 매칭 차수를 startsAt 오름차순으로 반환합니다.
      */
-    get: operations["list"]
+    get: operations["PROJECT-MATCHING-001"]
     put?: never
     /**
-     * [PROJECT-MATCHING-101] 매칭 차수 생성
+     * 매칭 차수 생성
      * @description 매칭 차수를 생성합니다.
      *     - 중앙운영사무국 총괄단 이상은 모든 지부에 생성할 수 있습니다.
      *     - 지부장은 본인 지부에만 생성할 수 있습니다.
@@ -1142,7 +1899,7 @@ export interface paths {
      *     - 같은 지부 내 기존 매칭 차수와 startsAt ~ decisionDeadline 기간이 중복되면 409를 반환합니다.
      *     - 동일 지부 내 type + phase 조합은 DB Unique Key로도 중복을 제한합니다.
      */
-    post: operations["create_3"]
+    post: operations["PROJECT-MATCHING-101"]
     delete?: never
     options?: never
     head?: never
@@ -1159,16 +1916,16 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [PROJECT-MATCHING-201] 매칭 차수 자동 선발 실행 (운영진 수동 트리거)
+     * 매칭 차수 자동 선발 수동 실행
      * @description 결정 마감(decisionDeadline) 이후 매칭 차수의 자동 선발을 실행합니다.
-     *     - 중앙운영사무국 총괄단 이상은 모든 지부의 매칭 차수에 대해 실행할 수 있습니다.
-     *     - 지부장은 본인 지부의 매칭 차수만 실행할 수 있습니다.
+     *     - 중앙운영사무국 총괄단 이상은 모든 지부의 매칭 차수에서 자동 선발을 실행할 수 있습니다.
+     *     - 지부장은 본인 지부의 매칭 차수에서만 자동 선발을 실행할 수 있습니다.
      *     - 결정 마감 시각이 지나기 전에는 실행할 수 없으며 400을 반환합니다.
      *     - 이미 자동 선발이 실행된 매칭 차수에 대해서는 멱등 (no-op).
      *     - 정책 매트릭스(디자이너 / 개발자)에 따라 SUBMITTED 우선 random 보충 후 부족하면 REJECTED 까지 override 합니다.
      *     - 합격자에게는 ProjectMember 가 자동으로 생성됩니다.
      */
-    post: operations["autoDecide"]
+    post: operations["PROJECT-MATCHING-201"]
     delete?: never
     options?: never
     head?: never
@@ -1183,16 +1940,16 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [POST-102] 게시글 목록 조회
+     * 게시글 목록 조회
      * @description 카테고리별로 게시글 목록을 조회합니다. (최신순 정렬)
      */
-    get: operations["getPostList"]
+    get: operations["POST-102"]
     put?: never
     /**
-     * [POST-001] 일반 게시글 생성
+     * 일반 게시글 생성
      * @description 일반 게시글을 생성합니다. 번개글은 별도 API를 사용하세요.
      */
-    post: operations["createPost"]
+    post: operations["POST-001"]
     delete?: never
     options?: never
     head?: never
@@ -1209,10 +1966,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [POST-007] 게시글 스크랩 토글
-     * @description 게시글 스크랩을 토글합니다. 이미 스크랩한 경우 취소됩니다.
+     * 게시글 스크랩 토글
+     * @description 게시글 스크랩을 추가하거나 취소합니다.
      */
-    post: operations["toggleScrap"]
+    post: operations["POST-007"]
     delete?: never
     options?: never
     head?: never
@@ -1229,10 +1986,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [REPORT-001] 게시글 신고
-     * @description 게시글을 신고합니다. 중복 신고는 불가능합니다.
+     * 게시글 신고
+     * @description 게시글을 신고합니다. 같은 게시글은 한 번만 신고할 수 있습니다.
      */
-    post: operations["reportPost"]
+    post: operations["REPORT-001"]
     delete?: never
     options?: never
     head?: never
@@ -1249,10 +2006,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [POST-006] 게시글 좋아요 토글
-     * @description 게시글 좋아요를 토글합니다. 이미 좋아요한 경우 취소됩니다.
+     * 게시글 좋아요 토글
+     * @description 게시글 좋아요를 누르거나 취소합니다.
      */
-    post: operations["toggleLike"]
+    post: operations["POST-006"]
     delete?: never
     options?: never
     head?: never
@@ -1267,16 +2024,16 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [COMMENT-101] 댓글 목록 조회
+     * 댓글 목록 조회
      * @description 게시글의 댓글 목록을 조회합니다.
      */
-    get: operations["getComments"]
+    get: operations["COMMENT-101"]
     put?: never
     /**
-     * [COMMENT-001] 댓글 작성
+     * 댓글 작성
      * @description 게시글에 댓글을 작성합니다.
      */
-    post: operations["createComment"]
+    post: operations["COMMENT-001"]
     delete?: never
     options?: never
     head?: never
@@ -1293,10 +2050,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [COMMENT-003] 댓글 좋아요 토글
-     * @description 댓글 좋아요를 토글합니다. 이미 좋아요한 경우 취소됩니다.
+     * 댓글 좋아요 토글
+     * @description 댓글 좋아요를 누르거나 취소합니다.
      */
-    post: operations["toggleCommentLike"]
+    post: operations["COMMENT-003"]
     delete?: never
     options?: never
     head?: never
@@ -1313,10 +2070,47 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [POST-002] 번개글 생성
+     * 번개글 생성
      * @description 번개 모임 게시글을 생성합니다.
      */
-    post: operations["createLightningPost"]
+    post: operations["POST-002"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/fcm/installations": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * FCM installation 등록
+     * @description 앱 installation의 현재 회원과 FCM 토큰을 등록하거나 갱신합니다.
+     */
+    post: operations["FCM-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/admin/fcm/messages": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** 관리자 FCM 알림 발송 요청 */
+    post: operations["FCM-ADMIN-001"]
     delete?: never
     options?: never
     head?: never
@@ -1331,7 +2125,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [NOTICE-001] 공지사항 전체 조회
+     * 공지사항 전체 조회
      * @description `noticeTab` 값으로 챌린저 공지(`CHALLENGER`)와 운영진 공지(`CHALLENGER` 외)를 구분
      *     CHALLENGER 공지는 운영진 공지가 아닌 일반공지를 의미함. 운영진 공지가 아닌 이상 `noticeTab`은 항상 `CHALLENGER`로 고정되어야 함.
      *     운영진 공지를 조회할 때에는 조회자의 ROLE에 따라 CENTRAL_MEMBER, SCHOOL_CORE, SCHOOL_PART_LEADER 중 하나로 요청해야 하며, 이 값에 따라 조회 가능한 공지의 범위가 달라짐.
@@ -1355,10 +2149,10 @@ export interface paths {
      *         - schoolId 미입력 + noticeTab이 SCHOOL_CORE인 경우 → 학교회장단 대상 공지, 총괄단과 중앙운영진 작성 가능
      *         - schoolId 미입력 + noticeTab이 SCHOOL_PART_LEADER인 경우 → 학교 파트장 대상 공지, 총괄단과 중앙운영진 작성 가능
      */
-    get: operations["getAllNotices"]
+    get: operations["NOTICE-001"]
     put?: never
     /**
-     * [NOTICE-201] 공지사항 생성
+     * 공지사항 생성
      * @description - `mustRead=true`: 필독 공지로 지정 → 목록 최상단 고정 (UPMS에서 사용, 앱공지에서는 false로 설정)
      *
      *     ---
@@ -1387,7 +2181,7 @@ export interface paths {
      *     | 해당 학교 파트장 전체 + 상위 운영진 | `SCHOOL_PART_LEADER` | schoolId | null 또는 `[]` | 해당 학교 회장단 |
      *     | 해당 학교 특정 파트 파트장 + 상위 운영진 | `SCHOOL_PART_LEADER` | schoolId | `["SPRINGBOOT"]` | 해당 학교 회장단 |
      */
-    post: operations["createNotice"]
+    post: operations["NOTICE-201"]
     delete?: never
     options?: never
     head?: never
@@ -1404,10 +2198,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [NOTICE-103] 공지사항 투표 추가
+     * 공지사항 투표 추가
      * @description 공지사항에 투표를 1개 생성하여 연결합니다. 투표 생성과 공지 연결이 한 번에 처리됩니다.
      */
-    post: operations["addNoticeVote"]
+    post: operations["NOTICE-103"]
     delete?: never
     options?: never
     head?: never
@@ -1424,10 +2218,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [NOTICE-204] 공지사항 리마인더 발송
+     * 공지사항 리마인더 발송
      * @description 공지를 읽지 않은 사용자에게 푸시 알림을 재발송합니다. 읽음 현황 API(GET /notices/{noticeId}/status)에서 UNREAD 사용자 목록을 먼저 조회한 뒤, 리마인드할 챌린저 ID들을 targetIds로 전달하세요.
      */
-    post: operations["sendNoticeReminder"]
+    post: operations["NOTICE-204"]
     delete?: never
     options?: never
     head?: never
@@ -1444,10 +2238,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [NOTICE-205] 공지사항 읽음 처리
+     * 공지사항 읽음 등록
      * @description 공지사항을 읽음 처리합니다.
      */
-    post: operations["recordNoticeRead"]
+    post: operations["NOTICE-205"]
     delete?: never
     options?: never
     head?: never
@@ -1463,16 +2257,16 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** [NOTICE-102] 첫 공지 생성 시 공지사항 링크를 추가하는 API입니다. */
-    post: operations["addNoticeLinks"]
+    /** 첫 공지 생성 시 공지사항 링크 추가 */
+    post: operations["NOTICE-102"]
     delete?: never
     options?: never
     head?: never
     /**
-     * [NOTICE-105] 공지사항 링크 전체 수정
+     * 공지사항 링크 전체 수정
      * @description 요청받은 새 목록으로 교체합니다. 빈 배열([])을 보내면 모든 링크가 삭제됩니다.
      */
-    patch: operations["replaceNoticeLinks"]
+    patch: operations["NOTICE-105"]
     trace?: never
   }
   "/api/v1/notices/{noticeId}/images": {
@@ -1485,18 +2279,18 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [NOTICE-101] 공지사항 이미지 추가
+     * 공지사항 이미지 추가
      * @description 첫 공지 생성 시 공지사항 이미지를 추가하는 API입니다. 파일 업로드 API로 먼저 이미지를 업로드한 뒤, 받은 이미지 ID를 전달하세요.
      */
-    post: operations["addNoticeImages"]
+    post: operations["NOTICE-101"]
     delete?: never
     options?: never
     head?: never
     /**
-     * [NOTICE-104] 공지사항 이미지 전체 수정
+     * 공지사항 이미지 전체 수정
      * @description 요청받은 새 목록으로 교체합니다. 빈 배열([])을 보내면 모든 이미지가 삭제됩니다.
      */
-    patch: operations["replaceNoticeImages"]
+    patch: operations["NOTICE-104"]
     trace?: never
   }
   "/api/v1/member/register/oauth": {
@@ -1509,14 +2303,14 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [REGISTER-001] OAuth 회원가입
+     * OAuth 회원가입
      * @description ### ⚠️ `register/oauth` 엔드포인트를 사용해주셔야 합니다. 기존 엔트포인트는 `v2.0.0`이 Production에 배포될 때 제거될 예정입니다.
      *
      *
      *     OAuth2 로그인을 통해서 oAuthVerificationToken 및 Email 인증을 통한 emailVerificationToken을 발급받은 후,
      *     해당 토큰들을 첨부해서 회원가입을 진행해주세요.
      */
-    post: operations["registerMemberByOAuth"]
+    post: operations["REGISTER-001"]
     delete?: never
     options?: never
     head?: never
@@ -1533,14 +2327,14 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [REGISTER-001] OAuth 회원가입
+     * OAuth 회원가입
      * @description ### ⚠️ `register/oauth` 엔드포인트를 사용해주셔야 합니다. 기존 엔트포인트는 `v2.0.0`이 Production에 배포될 때 제거될 예정입니다.
      *
      *
      *     OAuth2 로그인을 통해서 oAuthVerificationToken 및 Email 인증을 통한 emailVerificationToken을 발급받은 후,
      *     해당 토큰들을 첨부해서 회원가입을 진행해주세요.
      */
-    post: operations["registerMemberByOAuth_1"]
+    post: operations["REGISTER-001_1"]
     delete?: never
     options?: never
     head?: never
@@ -1557,13 +2351,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [REGISTER-003] 이메일/PW 이용 회원가입
+     * 이메일/PW 이용 회원가입
      * @description ADR-017 에 따라 도입된 이메일 기반 회원가입 엔드포인트입니다.
      *
      *     로그인 식별자를 별도로 받지 않으며, `emailVerificationToken` 으로 검증된 이메일이
      *     그대로 로그인 식별자로 사용됩니다.
      */
-    post: operations["registerMemberByEmail"]
+    post: operations["REGISTER-003"]
     delete?: never
     options?: never
     head?: never
@@ -1580,10 +2374,35 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [OAUTH-001] 로그인용 OAuth 수단 추가
-     * @description 같은 OAuth Provider도 여러 개 추가할 수 있습니다. 단, Provider+ProviderId 조합은 시스템 전체에서 고유하여야 합니다.
+     * 로그인용 OAuth 수단 추가
+     * @description 로그인용 OAuth 수단을 추가합니다.
+     *     Provider+ProviderId 조합은 시스템 전체에서 고유해야 하며, 한 회원은 같은 Provider를 하나만 연결할 수 있습니다.
      */
-    post: operations["addMemberOAuth"]
+    post: operations["OAUTH-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/maintenance/admin": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 점검 윈도우 전체 목록
+     * @description 활성, 예약, 종료 상태의 모든 점검 윈도우를 최신순으로 조회합니다.
+     */
+    get: operations["MAINT-003"]
+    put?: never
+    /**
+     * 점검 윈도우 생성
+     * @description 즉시 또는 예약 점검 윈도우를 생성합니다. SUPER_ADMIN 권한이 필요합니다.
+     */
+    post: operations["MAINT-001"]
     delete?: never
     options?: never
     head?: never
@@ -1598,16 +2417,16 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [GISU-101] 기수 목록 조회
+     * 기수 목록 조회
      * @description 기수 목록을 최신순(generation 내림차순)으로 페이징 조회합니다
      */
-    get: operations["getGisuList"]
+    get: operations["GISU-101"]
     put?: never
     /**
-     * [GISU-001] 기수 생성
+     * 기수 생성
      * @description 새로운 기수를 생성합니다.
      */
-    post: operations["createGisu"]
+    post: operations["GISU-001"]
     delete?: never
     options?: never
     head?: never
@@ -1624,10 +2443,115 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [GISU-003] 활성 기수 변경
+     * 활성 기수 변경
      * @description 해당 기수를 활성 상태로 변경합니다. 기존 활성 기수는 비활성화됩니다.
      */
-    post: operations["updateActiveGisu"]
+    post: operations["GISU-003"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/threads": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Community thread 목록 조회 */
+    get: operations["COMMUNITY-THREAD-101"]
+    put?: never
+    /** Community thread 생성 */
+    post: operations["COMMUNITY-THREAD-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}/pin": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Community thread pin */
+    post: operations["COMMUNITY-THREAD-004"]
+    /** Community thread unpin */
+    delete: operations["COMMUNITY-THREAD-005"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}/mute": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Community thread mute */
+    post: operations["COMMUNITY-THREAD-006"]
+    /** Community thread unmute */
+    delete: operations["COMMUNITY-THREAD-007"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}/leave": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Community thread leave */
+    post: operations["COMMUNITY-THREAD-010"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}/invite": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Community thread member 초대 */
+    post: operations["COMMUNITY-THREAD-008"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/messages/{messageId}/report": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Thread message 신고 */
+    post: operations["COMMUNITY-THREAD-REPORT-001"]
     delete?: never
     options?: never
     head?: never
@@ -1644,10 +2568,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [REPORT-002] 댓글 신고
-     * @description 댓글을 신고합니다. 중복 신고는 불가능합니다.
+     * 댓글 신고
+     * @description 댓글을 신고합니다. 같은 댓글은 한 번만 신고할 수 있습니다.
      */
-    post: operations["reportComment"]
+    post: operations["REPORT-002"]
     delete?: never
     options?: never
     head?: never
@@ -1662,18 +2586,18 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CHAPTER-101] 지부 목록 조회
+     * 지부 목록 조회
      * @description deprecated: 기수별로 조회하는 API를 사용해주세요.
      *
      *     전체 지부 목록을 조회합니다
      */
-    get: operations["getAllChapters"]
+    get: operations["CHAPTER-101"]
     put?: never
     /**
-     * [CHAPTER-001] 지부 생성
+     * 지부 생성
      * @description 새로운 지부를 생성합니다. 소속 학교를 함께 지정할 수 있습니다.
      */
-    post: operations["createChapter"]
+    post: operations["CHAPTER-001"]
     delete?: never
     options?: never
     head?: never
@@ -1689,8 +2613,8 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** [CHAPTER-002] 지부 일괄 생성 */
-    post: operations["createChapterBulk"]
+    /** 지부 일괄 생성 */
+    post: operations["CHAPTER-002"]
     delete?: never
     options?: never
     head?: never
@@ -1706,8 +2630,8 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** [CHALLENGER-001] 챌린저 생성 */
-    post: operations["createChallenger"]
+    /** 챌린저 생성 */
+    post: operations["CHALLENGER-001"]
     delete?: never
     options?: never
     head?: never
@@ -1724,10 +2648,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [POINT-001] 챌린저 상벌점 부여
-     * @description 회장단 이상 가능합니다.
+     * 챌린저 상벌점 부여
+     * @description 회장단 이상 권한이 필요합니다.
      */
-    post: operations["grantChallengerPoints"]
+    post: operations["POINT-001"]
     delete?: never
     options?: never
     head?: never
@@ -1743,8 +2667,8 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** [CHALLENGER-003] 챌린저 비활성화 (제명/탈부 처리) */
-    post: operations["deactivateChallenger"]
+    /** 챌린저 비활성화 */
+    post: operations["CHALLENGER-003"]
     delete?: never
     options?: never
     head?: never
@@ -1761,10 +2685,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CHALLENGER-002] 챌린저 batch 생성
-     * @description 한 번에 여러 건의 챌린저를 등록합니다. 기존에 `bulk`로 되어 있는 엔드포인트를 수정하였습니다.
+     * 챌린저 일괄 생성
+     * @description 여러 챌린저를 한 번에 등록합니다.
      */
-    post: operations["bulkCreateChallenger"]
+    post: operations["CHALLENGER-002"]
     delete?: never
     options?: never
     head?: never
@@ -1781,11 +2705,11 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CHALLENGER-RECORD-002] [ADMIN] 과거 챌린저 기록을 위한 코드 생성 기능
+     * 과거 챌린저 기록용 코드 생성
      * @description 중앙운영사무국 총괄단만 사용 가능한 기능입니다. 9기 이전 기수의 챌린저 기록을 업로드하고,
      *     각 기록을 모든 회원이 추가할 수 있도록 6자리 코드를 생성하여 발급합니다.
      */
-    post: operations["createChallengerRecord"]
+    post: operations["CHALLENGER-RECORD-002"]
     delete?: never
     options?: never
     head?: never
@@ -1802,13 +2726,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CHALLENGER-RECORD-001] 6자리 코드를 이용해서 회원(계정)에 챌린저 기록 추가
+     * 6자리 코드를 이용해서 회원(계정)에 챌린저 기록 추가
      * @description 각 챌린저 활동 기록에 대해서 발급된 6자리 코드를 입력하여,
      *     현재 로그인한 계정에 챌린저 기록 및 권한을 추가하는 기능입니다.
      *
      *     각 코드는 1회만 생성 가능하며, 어떤 계정에, 언제 사용되었는지 기록됩니다.
      */
-    post: operations["addChallengerRecordToMember"]
+    post: operations["CHALLENGER-RECORD-001"]
     delete?: never
     options?: never
     head?: never
@@ -1825,13 +2749,152 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CHALLENGER-RECORD-003] [ADMIN] 챌린저 기록용 코드 벌크 추가
+     * 챌린저 기록용 코드 일괄 추가
      * @description Response는 생성된 챌린저 기록의 ID 리스트입니다. (성능 상 이슈로 각각에 대해서는 id 및 code로 조회하는 API 이용)
      *
      *     중앙운영사무국 총괄단만 사용 가능한 기능입니다. 9기 이전 기수의 챌린저 기록을 업로드하고,
      *     각 기록을 모든 회원이 추가할 수 있도록 6자리 코드를 생성하여 발급합니다.
      */
-    post: operations["createChallengerRecordBulk"]
+    post: operations["CHALLENGER-RECORD-003"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/certificates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 본인 인증서 목록 조회 */
+    get: operations["CERTIFICATE-002"]
+    put?: never
+    /** 본인 인증서 셀프 발급 */
+    post: operations["CERTIFICATE-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/certificates/admin": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** 운영진 인증서 발급 */
+    post: operations["ADMIN-CERTIFICATE-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/series": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 공개 시리즈 목록 조회 */
+    get: operations["BLOG-SERIES-001"]
+    put?: never
+    /** 시리즈 생성 */
+    post: operations["BLOG-SERIES-005"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/contents": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 공개 콘텐츠 목록 조회 */
+    get: operations["BLOG-CONTENT-001"]
+    put?: never
+    /** 콘텐츠 생성 */
+    post: operations["BLOG-CONTENT-004"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/contents/{type}/{slug}/like": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 콘텐츠 좋아요 상태 조회
+     * @description 콘텐츠 좋아요 수와 현재 사용자의 좋아요 여부를 조회합니다.
+     */
+    get: operations["BLOG-001"]
+    put?: never
+    /**
+     * 콘텐츠 좋아요 토글
+     * @description 콘텐츠 좋아요를 누르거나 취소합니다.
+     */
+    post: operations["BLOG-002"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/contents/{type}/{slug}/comments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 댓글 목록 조회
+     * @description 최상위 댓글을 커서 기반으로 조회하고 1단계 대댓글을 포함합니다.
+     */
+    get: operations["BLOG-003"]
+    put?: never
+    /**
+     * 댓글 작성
+     * @description 콘텐츠에 댓글 또는 1단계 대댓글을 작성합니다.
+     */
+    post: operations["BLOG-004"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/contents/{type}/{slug}/comments/{commentId}/like": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 댓글 좋아요 토글
+     * @description 댓글 좋아요를 누르거나 취소합니다.
+     */
+    post: operations["BLOG-007"]
     delete?: never
     options?: never
     head?: never
@@ -1848,10 +2911,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [PERMISSION-002] 리소스 권한 배치 조회
-     * @description 여러 리소스에 대해 현재 사용자의 권한을 한 번에 조회합니다. 유효하지 않은 query가 하나라도 있으면 요청 전체가 실패합니다.
+     * 리소스 권한 배치 조회
+     * @description 여러 리소스의 권한을 한 번에 조회합니다. 유효하지 않은 query가 있으면 요청 전체가 실패합니다.
      */
-    post: operations["batchGetResourcePermission"]
+    post: operations["PERMISSION-002"]
     delete?: never
     options?: never
     head?: never
@@ -1868,10 +2931,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [STAFF-001] 운영진 기록 생성
-     * @description ChallengerRole, 즉 운영진 기록을 생성합니다. 총괄단만 가능합니다.
+     * 운영진 기록 생성
+     * @description 운영진 기록을 생성합니다. 총괄단 권한이 필요합니다.
      */
-    post: operations["createChallengerRole"]
+    post: operations["STAFF-001"]
     delete?: never
     options?: never
     head?: never
@@ -1888,11 +2951,135 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [TOKEN-001] AccessToken 재발급
+     * Access Token 재발급
      * @description RefreshToken을 이용해서 AccessToken을 재발급합니다.
      *     Header에 AccessToken을 포함할 필요는 없지만, 만료된 토큰이나 잘못된 토큰을 401 뜨니까 주의하세요.
      */
-    post: operations["renewAccessToken"]
+    post: operations["TOKEN-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/sso/oauth/token": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** SSO OAuth token 교환 */
+    post: operations["SSO-OAUTH-002"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/sso/logout": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Auth App 브라우저 로그아웃 */
+    post: operations["SSO-LOGIN-003"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/sso/kakao": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Kakao 기반 SSO 로그인 */
+    post: operations["SSO-LOGIN-004"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/sso/google": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Google 기반 SSO 로그인 */
+    post: operations["SSO-LOGIN-005"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/sso/email": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** email/password 기반 Auth App 브라우저 로그인 */
+    post: operations["SSO-LOGIN-001"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/sso/apple": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Apple 기반 SSO 로그인 */
+    post: operations["SSO-LOGIN-006"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/logout": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * 로그아웃
+     * @description RefreshToken을 서버 allow-list에서 제거합니다.
+     *     AccessToken 없이 RefreshToken만으로 호출할 수 있으며, 만료된 AccessToken이 Authorization 헤더에 있어도 무관합니다.
+     *     이미 제거된 토큰은 멱등하게 성공합니다.
+     */
+    post: operations["TOKEN-002"]
     delete?: never
     options?: never
     head?: never
@@ -1909,20 +3096,21 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [LOGIN-005] Kakao 로그인
+     * Kakao 로그인
      * @description Web에서 Redirect 방식으로 사용하려면 아래의 Link를 참고해주세요.
      *
      *     [Local](http://localhost:8080/api/v1/auth/oauth2/authorization/kakao)
      *     [Development](https://dev.api.umc.it.kr/api/v1/auth/oauth2/authorization/kakao)
      *     [Production](https://api.umc.it.kr/api/v1/auth/oauth2/authorization/kakao)
      *
-     *     Kakao 측에서 제공받은 accessToken을 통해 서버가 진위여부를 판단할 수 있도록 해야 합니다.
+     *     Kakao 측에서 제공받은 OIDC `idToken`을 전달해주세요.
+     *     기존 클라이언트 호환을 위해 `accessToken`도 일시적으로 허용하지만, 신규 클라이언트는 OIDC `idToken`을 사용해야 합니다.
      *
      *     **응답 설명:**
      *     - `success=true, code=LOGIN_SUCCESS`: 기존 회원 로그인 성공. accessToken, refreshToken 발급됨.
      *     - `success=true, code=REGISTER_REQUIRED`: OAuth 인증 성공, 회원가입 필요. oAuthVerificationToken 발급됨.
      */
-    post: operations["kakaoOAuthLogin"]
+    post: operations["LOGIN-005"]
     delete?: never
     options?: never
     head?: never
@@ -1939,11 +3127,12 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [LOGIN-006] Kakao 로그인 (Authorization Code 흐름)
+     * Kakao 인가 코드 로그인
      * @description 표준 OAuth2 authorization code grant 흐름을 사용하는 클라이언트(주로 웹)를 위한 엔드포인트입니다.
      *
      *     Kakao 로그인 페이지에서 받은 `authorizationCode`와 인가 요청 시 사용한 `redirectUri`를 함께 전달해주세요.
-     *     서버가 Kakao token endpoint를 호출해 access token으로 교환한 뒤, 사용자 정보를 조회하여 인증을 처리합니다.
+     *     서버가 Kakao token endpoint를 호출해 토큰으로 교환한 뒤, 응답에 `id_token`이 있으면 OIDC 서명 검증으로 인증을 처리합니다.
+     *     `id_token`이 없는 legacy 응답은 기존 access token userinfo 조회로 fallback합니다.
      *
      *     `redirectUri`는 서버 화이트리스트에 등록된 값과 일치해야 하며, 일치하지 않으면 `INVALID_OAUTH_REDIRECT_URI` 에러가 발생합니다.
      *     모바일 네이티브 SDK 사용 시에는 기존 `/login/kakao` 엔드포인트(access token)를 그대로 사용해주세요.
@@ -1952,7 +3141,7 @@ export interface paths {
      *     - `success=true, code=LOGIN_SUCCESS`: 기존 회원 로그인 성공. accessToken, refreshToken 발급됨.
      *     - `success=true, code=REGISTER_REQUIRED`: OAuth 인증 성공, 회원가입 필요. oAuthVerificationToken 발급됨.
      */
-    post: operations["kakaoOAuthCodeLogin"]
+    post: operations["LOGIN-006"]
     delete?: never
     options?: never
     head?: never
@@ -1969,20 +3158,21 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [LOGIN-001] Google 로그인
+     * Google 로그인
      * @description Web에서 Redirect 방식으로 사용하려면 아래의 Link를 참고해주세요.
      *
      *     [Local](http://localhost:8080/api/v1/auth/oauth2/authorization/google)
      *     [Development](https://dev.api.umc.it.kr/api/v1/auth/oauth2/authorization/google)
      *     [Production](https://api.umc.it.kr/api/v1/auth/oauth2/authorization/google)
      *
-     *     Google 측에서 제공받은 idToken을 통해 서버가 진위여부를 판단할 수 있도록 해야 합니다.
+     *     Google 측에서 제공받은 `idToken`을 전달해주세요.
+     *     기존 클라이언트 호환을 위해 `accessToken`도 일시적으로 허용하지만, 신규 클라이언트는 OIDC `idToken`을 사용해야 합니다.
      *
      *     **응답 설명:**
      *     - `success=true, code=LOGIN_SUCCESS`: 기존 회원 로그인 성공. accessToken, refreshToken 발급됨.
      *     - `success=true, code=REGISTER_REQUIRED`: OAuth 인증 성공, 회원가입 필요. oAuthVerificationToken 발급됨.
      */
-    post: operations["googleOAuthLogin"]
+    post: operations["LOGIN-001"]
     delete?: never
     options?: never
     head?: never
@@ -1999,10 +3189,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [LOGIN-011] 이메일/PW 로그인
+     * 이메일과 비밀번호로 로그인
      * @description email/password 로 인증하여 AccessToken/RefreshToken 을 발급받습니다. clientType(ANDROID, IOS, WEB)을 함께 전달하면 AccessToken claim 으로 반영됩니다.
      */
-    post: operations["loginByEmail"]
+    post: operations["LOGIN-011"]
     delete?: never
     options?: never
     head?: never
@@ -2019,7 +3209,7 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [LOGIN-010] Apple 로그인
+     * Apple 로그인
      * @description Web에서 Redirect 방식으로 사용하려면 아래의 Link를 참고해주세요.
      *
      *     [Local](http://localhost:8080/api/v1/auth/oauth2/authorization/apple)
@@ -2030,7 +3220,7 @@ export interface paths {
      *     Apple은 플랫폼별로 서로 다른 client_id(iOS Bundle ID vs Web Services ID)를 사용하므로
      *     `clientType`(ANDROID, IOS, WEB)을 정확히 명시해야 토큰 교환이 가능합니다.
      */
-    post: operations["appleOAuthLogin"]
+    post: operations["LOGIN-010"]
     delete?: never
     options?: never
     head?: never
@@ -2047,15 +3237,15 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [EMAIL-002] 이메일 인증 코드 발송
+     * 이메일 인증 코드 발송
      * @description 인증을 요청하는 이메일로 인증 코드를 발송합니다.
      *
      *     이메일 인증코드는 6자리의 숫자로만 구성되어 있습니다.
      *
-     *     purpose 는 회원가입(REGISTER) 또는 비밀번호 초기화(PASSWORD_RESET) 중 하나여야 하며,
+     *     purpose 는 회원가입(REGISTER), 비밀번호 초기화(PASSWORD_RESET), 이메일 변경(CHANGE_EMAIL) 중 하나여야 하며,
      *     cross-purpose 공격 방어를 위해 세션 단위로 고정됩니다.
      */
-    post: operations["sendEmailVerification"]
+    post: operations["EMAIL-002"]
     delete?: never
     options?: never
     head?: never
@@ -2072,13 +3262,13 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [EMAIL-003] 이메일 인증 코드 재전송
+     * 이메일 인증 코드 재전송
      * @description 기존 이메일 인증 세션의 인증 코드를 재발급하고 이메일을 재전송합니다.
      *
      *     기존 인증 코드는 무효화되며, 만료 시간이 갱신됩니다.
      *     이미 인증이 완료된 세션에는 재전송할 수 없습니다.
      */
-    post: operations["resendEmailVerification"]
+    post: operations["EMAIL-003"]
     delete?: never
     options?: never
     head?: never
@@ -2095,12 +3285,12 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [EMAIL-001] 6자리 인증코드로 이메일 인증
+     * 6자리 인증코드로 이메일 인증
      * @description 이메일로 발송된 인증코드를 통해서 이메일 인증을 완료합니다.
      *
      *     emailVerificationToken을 발급하며, 해당 토큰을 회원가입 시에 제공해야 합니다.
      */
-    post: operations["verifyEmailByCode"]
+    post: operations["EMAIL-001"]
     delete?: never
     options?: never
     head?: never
@@ -2117,172 +3307,10 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * [CREDENTIAL-002] 비밀번호 자격증명 최초 등록
+     * 비밀번호 자격증명 최초 등록
      * @description OAuth 로 가입한 회원이 이메일/비밀번호로 로그인할 수 있도록 비밀번호를 추가 등록합니다. 이메일은 회원의 기존 Member.email 을 그대로 사용합니다.
      */
-    post: operations["registerCredential"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/admin/maintenance": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * [MAINT-003] 점검 윈도우 전체 목록
-     * @description 활성/예약/종료 모든 점검 윈도우를 최신순으로 조회합니다.
-     */
-    get: operations["listAll"]
-    put?: never
-    /**
-     * [MAINT-001] 점검 윈도우 생성
-     * @description 즉시 또는 예약 점검 윈도우를 생성합니다. SUPER_ADMIN 만 호출할 수 있습니다.
-     */
-    post: operations["start"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/admin/figma/watched-files": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** [FIGMA-008] 폴링 대상 파일 목록 조회 (enabled 필터) */
-    get: operations["listFiles"]
-    put?: never
-    /** [FIGMA-003] 폴링 대상 파일 등록 */
-    post: operations["register"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/admin/figma/watched-files/{watchedFileId}/enable": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** [FIGMA-005] 폴링 대상 파일 활성화 */
-    post: operations["enable"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/admin/figma/sync": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * [FIGMA-006] 활성 파일 전체 즉시 동기화
-     * @description 정기 폴링 스케줄러가 도는 동기화 로직을 즉시 한 번 실행한다.
-     *     마지막 cursor 이후의 새 댓글만 Discord 로 보내고, cursor 를 전진시키며,
-     *     dispatch 기록을 남긴다. 같은 호출을 두 번 해도 같은 댓글이 두 번 발송되지 않는다(멱등).
-     *     스케줄러가 늦거나 즉시 반영이 필요할 때 사용한다.
-     */
-    post: operations["syncAll"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/admin/figma/sync/watched-files/{watchedFileId}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * [FIGMA-007] 특정 파일 즉시 동기화 (enabled 무관)
-     * @description 지정한 watchedFileId 한 개만 즉시 동기화한다. 해당 파일의 enabled 여부와 무관하게 동작한다.
-     *     sync 전체와 동일하게 Discord 발송, cursor 갱신, dispatch 기록을 모두 수행하며 멱등하다.
-     */
-    post: operations["syncOne"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/admin/figma/routing-domains": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** [FIGMA-016] 라우팅 도메인 목록 조회 (mention 본문 미포함) */
-    get: operations["listDomains"]
-    put?: never
-    /** [FIGMA-011] 라우팅 도메인 등록 */
-    post: operations["registerDomain"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/admin/figma/routing-domains/{domainId}/mentions": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** [FIGMA-018] 라우팅 도메인의 담당자 mention 목록 조회 */
-    get: operations["listMentions"]
-    put?: never
-    /** [FIGMA-013] 라우팅 도메인에 담당자 mention 추가 */
-    post: operations["addMention"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/admin/figma/digest": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * [FIGMA-015] 특정 시간대 catch-up
-     * @description [from, to] 시간창의 댓글을 도메인별로 묶어 Discord 로 보내고 JSON 요약을 반환한다.
-     *     cursor 를 갱신하지 않고 force=true 로 dispatch 기록도 무시하므로,
-     *     동일 시간창을 여러 번 호출하면 그때마다 다시 발송된다(비-멱등).
-     *     정기 sync 와 무관한 운영진의 catch-up / 회고용 도구.
-     */
-    post: operations["digest"]
+    post: operations["CREDENTIAL-002"]
     delete?: never
     options?: never
     head?: never
@@ -2297,17 +3325,17 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SCHEDULE-Q003] 일정 상세 조회
+     * 일정 상세 조회
      * @description 단일 일정에 대한 정보를 상세하게 조회합니다.
      *     일정의 기본 정보 및 참여자에 대한 정보를 포함해서 전송합니다.
      *
      *     참여자의 출석 현황 등에 대해서는 별도의 출석 현황 확인 API를 이용해 주세요.
      */
-    get: operations["details"]
+    get: operations["SCHEDULE-Q003"]
     put?: never
     post?: never
     /**
-     * [SCHEDULE-C006] 일정 삭제
+     * 일정 삭제
      * @description 일정을 삭제합니다.
      *
      *     - 일정에 연결된 모든 참여자(ScheduleParticipant) 정보도 함께 삭제됩니다.
@@ -2316,13 +3344,13 @@ export interface paths {
      *
      *     삭제 가능 권한:
      *     - 일정 생성자 본인
-     *     - 해당 일정이 진행되는 기수의 최고 운영 관리자(`SUPER_ADMIN`)
+     *     - 전역 시스템 관리자(`SUPER_ADMIN`)
      */
-    delete: operations["delete"]
+    delete: operations["SCHEDULE-C006"]
     options?: never
     head?: never
     /**
-     * [SCHEDULE-C002] 일정 수정
+     * 일정 수정
      * @description 일정과 관련된 모든 정보를 수정합니다. 제공되지 않은 필드는 변경하지 않는 것으로 간주합니다.
      *
      *     ---
@@ -2339,7 +3367,7 @@ export interface paths {
      *     * **`true`** : **출석 O** 일정으로 전환 (반드시 `attendancePolicy` 데이터를 함께 전송해야 함)
      *     * **`false`** : **출석 X** 일정으로 전환 (기존 출석 정책 데이터 삭제)
      */
-    patch: operations["edit"]
+    patch: operations["SCHEDULE-C002"]
     trace?: never
   }
   "/api/v2/curriculums/{curriculumId}": {
@@ -2353,20 +3381,20 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [CURRICULUM-003] 중앙운영사무국 총괄단용: 커리큘럼 삭제
+     * 중앙운영사무국 총괄단용: 커리큘럼 삭제
      * @description - 커리큘럼 내부에 포함된 주차별 커리큘럼이 존재하는 경우 삭제하지 못합니다.
      *     - 중앙운영사무국 총괄단 이상의 권한을 보유한 경우에만 삭제가 가능합니다.
      */
-    delete: operations["deleteCurriculum"]
+    delete: operations["CURRICULUM-003"]
     options?: never
     head?: never
     /**
-     * [CURRICULUM-002] 커리큘럼 수정
+     * 커리큘럼 수정
      * @description 상위 객체인 커리큘럼을 수정합니다.
      *
      *     기수, 파트 등은 수정이 불가능하며 커리큘럼의 이름만 수정 가능합니다.
      */
-    patch: operations["editCurriculum"]
+    patch: operations["CURRICULUM-002"]
     trace?: never
   }
   "/api/v2/curriculums/weekly/{weeklyCurriculumId}": {
@@ -2380,16 +3408,16 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [CURRICULUM-006] 주차별 커리큘럼 삭제
+     * 주차별 커리큘럼 삭제
      * @description 주차별 커리큘럼을 삭제합니다.
      *
      *     - 포함된 주차별 워크북이 하나라도 존재하면 삭제가 불가능합니다.
      */
-    delete: operations["deleteWeeklyCurriculum"]
+    delete: operations["CURRICULUM-006"]
     options?: never
     head?: never
     /**
-     * [CURRICULUM-005] 주차별 커리큘럼 수정
+     * 주차별 커리큘럼 수정
      * @description 주차별 커리큘럼 자체를 수정합니다.
      *
      *     - 제목은 상시로 수정이 가능합니다.
@@ -2398,7 +3426,7 @@ export interface paths {
      *     - 주차는 이미 설정되지 않은 주차로만 수정이 가능합니다.
      *     - UK 제약을 어기는 수정은 불허합니다. (e.g. 정규, 부록 -> 정규, 정규 불가능)
      */
-    patch: operations["editWeeklyCurriculum"]
+    patch: operations["CURRICULUM-005"]
     trace?: never
   }
   "/api/v2/curriculums/original-workbooks/{originalWorkbookId}": {
@@ -2409,25 +3437,25 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [WORKBOOK-101] OriginalWorkbook 상세 조회
+     * OriginalWorkbook 상세 조회
      * @description 원본 워크북을 조회합니다. 원본 워크북의 파트와 기수에 해당 파트의 스터디 그룹에 속해 있어야 합니다.
      */
-    get: operations["getOriginalWorkbook"]
+    get: operations["WORKBOOK-101"]
     put?: never
     post?: never
     /**
-     * [ORIGINAL-WORKBOOK-004] 중앙파트장용: 원본 워크북 삭제
+     * 중앙파트장용: 원본 워크북 삭제
      * @description 배포받은 사용자가 존재하는 경우에는 삭제가 불가능합니다.
      */
-    delete: operations["deleteOriginalWorkbook"]
+    delete: operations["ORIGINAL-WORKBOOK-004"]
     options?: never
     head?: never
     /**
-     * [ORIGINAL-WORKBOOK-003] 중앙파트장용: 원본 워크북 수정
+     * 중앙파트장용: 원본 워크북 수정
      * @description 원본 워크북의 제목 및 내용 등을 수정할 수 있습니다.
      *     따로 제한 없이 수정이 가능하며, 수정에 따른 책임은 중앙 파트장에게 있습니다.
      */
-    patch: operations["editOriginalWorkbook"]
+    patch: operations["ORIGINAL-WORKBOOK-003"]
     trace?: never
   }
   "/api/v2/curriculums/original-workbooks/status": {
@@ -2444,7 +3472,7 @@ export interface paths {
     options?: never
     head?: never
     /**
-     * [ORIGINAL-WORKBOOK-005] 중앙파트장용: 원본 워크북 상태 일괄 변경
+     * 중앙파트장용: 원본 워크북 상태 일괄 변경
      * @description 여러 원본 워크북의 상태를 한 번에 변경합니다.
      *     요청 중 하나라도 실패하면 **모든 요청이 함께 롤백**됩니다.
      *
@@ -2457,7 +3485,7 @@ export interface paths {
      *     | RELEASED | any | ❌ (배포 후 되돌리기 불가) |
      *     | DRAFT | RELEASED | ❌ (READY 경유 필수) |
      */
-    patch: operations["changeOriginalWorkbookStatus"]
+    patch: operations["ORIGINAL-WORKBOOK-005"]
     trace?: never
   }
   "/api/v2/curriculums/original-workbooks/missions/{originalWorkbookMissionId}": {
@@ -2471,18 +3499,18 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [ORIGINAL-WORKBOOK-MISSION-003] 중앙파트장용: 원본 워크북의 미션 삭제
+     * 중앙파트장용: 원본 워크북의 미션 삭제
      * @description 미션을 삭제합니다.
      *
      *     이미 제출한 사람이 있는 미션을 제외하고는 시점과 관계없이 삭제할 수 있습니다.
      *
      *     수정과 마찬가지로 모든 변경에 대한 책임은 중앙 파트장에게 있습니다.
      */
-    delete: operations["deleteOriginalMission"]
+    delete: operations["ORIGINAL-WORKBOOK-MISSION-003"]
     options?: never
     head?: never
     /**
-     * [ORIGINAL-WORKBOOK-MISSION-002] 중앙파트장용: 원본 워크북의 미션 수정
+     * 중앙파트장용: 원본 워크북의 미션 수정
      * @description 미션을 수정합니다.
      *
      *     관련된 모든 필드 (제목, 설명, 제출 유형 등)을 수정할 수 있으며, 제공되지 않은 값은 유지되는 것으로 간주합니다.
@@ -2490,7 +3518,7 @@ export interface paths {
      *
      *     모든 변경으로 인한 책임은 변경한 중앙 파트장에게 있습니다. 주의하세요!
      */
-    patch: operations["editOriginalMission"]
+    patch: operations["ORIGINAL-WORKBOOK-MISSION-002"]
     trace?: never
   }
   "/api/v2/curriculums/challenger-workbooks/{challengerWorkbookId}": {
@@ -2501,33 +3529,33 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [WORKBOOK-102] ChallengerWorkbook 상세 조회
+     * ChallengerWorkbook 상세 조회
      * @description 챌린저 워크북과 그에 연관된 미션 제출물 및 피드백을 조회합니다.
      *
      *     꼭 본인이 아니더라도, 같은 기수에 활동한 챌린저 전원은 확인할 수 있습니다.
      *     기획단 결정사항에 따라서 미션 제출 내역 및 피드백 내용까지 볼 수 있습니다.
      */
-    get: operations["getChallengerWorkbook"]
+    get: operations["WORKBOOK-102"]
     put?: never
     post?: never
     /**
-     * [CHALLENGER-WORKBOOK-003] 챌린저 워크북 삭제
+     * 챌린저 워크북 삭제
      * @description 부정적인 방법으로 배포된 챌린저 워크북을 강제로 삭제합니다.
      *     챌린저는 본인 워크북이라도 삭제할 수 없습니다.
      *
      *     **중요**: 챌린저 워크북이 삭제된 이후, 해당 워크북과 연관된 모든 미션 제출 기록 및 피드백도 함께 삭제됩니다.
      *     따라서, 챌린저가 해당 워크북에 대해 제출했던 모든 미션 기록이 사라지게 됩니다.
      */
-    delete: operations["deleteChallengerWorkbook"]
+    delete: operations["CHALLENGER-WORKBOOK-003"]
     options?: never
     head?: never
     /**
-     * [CHALLENGER-WORKBOOK-002] 챌린저 워크북 수정
+     * 챌린저 워크북 수정
      * @description 자신의 워크북의 내용을 수정합니다.
      *
      *     *근데 아마도 쓸 일 없을거에요.*
      */
-    patch: operations["editChallengerWorkbook"]
+    patch: operations["CHALLENGER-WORKBOOK-002"]
     trace?: never
   }
   "/api/v2/curriculums/challenger-workbooks/weekly-best/{weeklyBestWorkbookId}": {
@@ -2541,22 +3569,22 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [CHALLENGER-WORKBOOK-007] 베스트 워크북 선정 철회
+     * 베스트 워크북 선정 철회
      * @description 베스트 워크북 선정을 철회합니다.
      *     해당 주차가 종료된 이후 1주일 뒤까지만 철회가 가능합니다.
      */
-    delete: operations["deleteWeeklyBestWorkbook"]
+    delete: operations["CHALLENGER-WORKBOOK-007"]
     options?: never
     head?: never
     /**
-     * [CHALLENGER-WORKBOOK-006] 베스트 워크북 선정 사유 수정
+     * 베스트 워크북 선정 사유 수정
      * @description 베스트 워크북으로 선정한 사유를 수정합니다.
      *
      *     **중요**: Path Param의 weeklyBestWorkbookId는 WeeklyBestWorkbook Entity의 PK 값입니다.
      *
      *     `BestWorkbookResponse`에서 제공되는 `weeklyBestWorkbookEntityId`를 제공하여야 합니다.
      */
-    patch: operations["editWeeklyBestWorkbookReason"]
+    patch: operations["CHALLENGER-WORKBOOK-006"]
     trace?: never
   }
   "/api/v2/curriculums/challenger-workbooks/missions/{missionSubmissionId}": {
@@ -2570,16 +3598,16 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [CHALLENGER-WORKBOOK-MISSION-003] 챌린저용: 제출한 워크북 미션 철회
+     * 챌린저용: 제출한 워크북 미션 철회
      * @description 이미 제출한 미션을 철회합니다.
      *
      *     기간과 관계없이 철회가 가능하나, 그 후 재제출이 불가능해 LATE 처리가 되어 벌점이 부과될 수 있는 부분은 삭제한 사람에게 책임이 있습니다.
      */
-    delete: operations["deleteOriginalMission_1"]
+    delete: operations["CHALLENGER-WORKBOOK-MISSION-003"]
     options?: never
     head?: never
     /**
-     * [CHALLENGER-WORKBOOK-MISSION-002] 챌린저용: 제출한 워크북 미션 수정
+     * 챌린저용: 제출한 워크북 미션 수정
      * @description 이미 제출된 미션의 내용을 수정합니다.
      *
      *     #### 소속된 스터디 그룹에 주차별 일정이 등록된 경우의 동작
@@ -2591,7 +3619,7 @@ export interface paths {
      *     - 그 이후: 불가능
      *     - 주차별 일정이 등록되는 순간, updatedAt을 기준으로 해당 일정 시작일 00:00 이후에 수정된 미션은 모두 LATE 처리되어 벌점이 부과됩니다.
      */
-    patch: operations["editOriginalMission_1"]
+    patch: operations["CHALLENGER-WORKBOOK-MISSION-002"]
     trace?: never
   }
   "/api/v2/curriculums/challenger-workbooks/missions/feedback/{missionFeedbackId}": {
@@ -2605,24 +3633,161 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [CHALLENGER-WORKBOOK-MISSION-006] 운영진용: 제출된 미션에 대한 피드백 삭제
+     * 운영진용: 제출된 미션에 대한 피드백 삭제
      * @description 챌린저에게 제공된 피드백을 삭제합니다.
      *     삭제로 인한 벌점 부과 등의 책임은 삭제한 본인에게 있습니다.
      *
      *     해당 기수 종료 이후에는 피드백 삭제가 불가능합니다.
      */
-    delete: operations["deleteMissionFeedback"]
+    delete: operations["CHALLENGER-WORKBOOK-MISSION-006"]
     options?: never
     head?: never
     /**
-     * [CHALLENGER-WORKBOOK-MISSION-005] 운영진용: 제출된 미션에 대한 피드백 수정
+     * 운영진용: 제출된 미션에 대한 피드백 수정
      * @description 챌린저에게 제공된 피드백을 수정합니다.
      *
      *     - 작성일 기준 2주가 경과되기 전까지만 수정이 가능합니다.
      *     - PASS->FAIL 처리는 불가능합니다.
      *     - 피드백 최초 작성 일자 기준으로 벌점이 부과되기 때문에 수정은 벌점 부과와는 대부분의 경우에서 무관합니다.
      */
-    patch: operations["editMissionFeedback"]
+    patch: operations["CHALLENGER-WORKBOOK-MISSION-005"]
+    trace?: never
+  }
+  "/api/v1/umc-product/squads/{squadId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * UMC PRODUCT 스쿼드 삭제
+     * @description 참여 이력이 있는 Squad는 삭제할 수 없습니다.
+     */
+    delete: operations["UMC-PRODUCT-SQUAD-003"]
+    options?: never
+    head?: never
+    /**
+     * UMC PRODUCT 스쿼드 수정
+     * @description 기존 참여 이력이 변경 후 Squad 기간을 벗어나면 수정을 거부합니다.
+     */
+    patch: operations["UMC-PRODUCT-SQUAD-002"]
+    trace?: never
+  }
+  "/api/v1/umc-product/squads/{squadId}/participants/{participantId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** UMC PRODUCT Squad 참여 삭제 */
+    delete: operations["UMC-PRODUCT-SQUAD-006"]
+    options?: never
+    head?: never
+    /** UMC PRODUCT Squad 참여 수정 */
+    patch: operations["UMC-PRODUCT-SQUAD-005"]
+    trace?: never
+  }
+  "/api/v1/umc-product/members/{memberId}/profile": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * UMC PRODUCT 멤버 프로필 수정
+     * @description UMC PRODUCT 멤버의 소개와 UMC PRODUCT 전용 프로필 이미지를 수정합니다. 본인 또는 멤버 프로필 관리 권한을 가진 요청자만 호출할 수 있습니다.
+     */
+    patch: operations["UMC-PRODUCT-MEMBER-002"]
+    trace?: never
+  }
+  "/api/v1/umc-product/members/{memberId}/product-leaderships/{leadershipId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** UMC PRODUCT Leadership 삭제 */
+    delete: operations["UMC-PRODUCT-MEMBER-011"]
+    options?: never
+    head?: never
+    /** UMC PRODUCT Leadership 수정 */
+    patch: operations["UMC-PRODUCT-MEMBER-010"]
+    trace?: never
+  }
+  "/api/v1/umc-product/members/{memberId}/chapter-memberships/{chapterMembershipId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** UMC PRODUCT 멤버 Chapter 소속 삭제 */
+    delete: operations["UMC-PRODUCT-MEMBER-008"]
+    options?: never
+    head?: never
+    /** UMC PRODUCT 멤버 Chapter 소속 수정 */
+    patch: operations["UMC-PRODUCT-MEMBER-007"]
+    trace?: never
+  }
+  "/api/v1/umc-product/members/{memberId}/activity-periods/{periodId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** UMC PRODUCT 멤버 활동 기간 삭제 */
+    delete: operations["UMC-PRODUCT-MEMBER-005"]
+    options?: never
+    head?: never
+    /** UMC PRODUCT 멤버 활동 기간 수정 */
+    patch: operations["UMC-PRODUCT-MEMBER-004"]
+    trace?: never
+  }
+  "/api/v1/umc-product/chapters/{chapterId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * UMC PRODUCT Chapter 삭제
+     * @description 하위 Part가 있는 Chapter는 삭제할 수 없으며 비활성화해야 합니다.
+     */
+    delete: operations["UMC-PRODUCT-CHAPTER-003"]
+    options?: never
+    head?: never
+    /** UMC PRODUCT Chapter 수정 */
+    patch: operations["UMC-PRODUCT-CHAPTER-002"]
     trace?: never
   }
   "/api/v1/study-groups/{studyGroupId}": {
@@ -2633,24 +3798,24 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [STUDY-GROUP-102] 스터디 그룹 정보 조회
+     * 스터디 그룹 정보 조회
      * @description `studyGroupId` 에 해당하는 스터디 그룹의 정보를 조회합니다. (그룹명, 파트, 기수, 스터디원, 파트장 정보)
      */
-    get: operations["getStudyGroupInfo"]
+    get: operations["STUDY-GROUP-102"]
     put?: never
     post?: never
     /**
-     * [STUDY-GROUP-007] 스터디 그룹 삭제
+     * 스터디 그룹 삭제
      * @description 스터디 그룹을 삭제합니다.
      */
-    delete: operations["delete_1"]
+    delete: operations["STUDY-GROUP-007"]
     options?: never
     head?: never
     /**
-     * [STUDY-GROUP-002] 스터디 그룹 수정 (이름만 가능)
+     * 스터디 그룹 수정 (이름만 가능)
      * @description 스터디 그룹의 이름을 수정합니다. 파트 수정은 별도로 불가능하며, 스터디원 및 파트장 수정은 별도의 API 사용 바랍니다.
      */
-    patch: operations["update"]
+    patch: operations["STUDY-GROUP-002"]
     trace?: never
   }
   "/api/v1/study-groups/{studyGroupId}/mentors/{mentorId}": {
@@ -2664,17 +3829,17 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [STUDY-GROUP-006] 스터디 그룹에 담당 파트장 제거
+     * 스터디 그룹에 담당 파트장 제거
      * @description 스터디 그룹에서 파트장을 제거합니다.
      */
-    delete: operations["deleteMentor"]
+    delete: operations["STUDY-GROUP-006"]
     options?: never
     head?: never
     /**
-     * [STUDY-GROUP-004] 스터디 그룹에 담당 파트장 추가
+     * 스터디 그룹에 담당 파트장 추가
      * @description 스터디 그룹에 파트장을 추가합니다.
      */
-    patch: operations["addMentor"]
+    patch: operations["STUDY-GROUP-004"]
     trace?: never
   }
   "/api/v1/study-groups/{studyGroupId}/members/{memberId}": {
@@ -2688,17 +3853,17 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [STUDY-GROUP-005] 스터디 그룹에 스터디원 제거
+     * 스터디 그룹에 스터디원 제거
      * @description 스터디 그룹에서 스터디원을 제거합니다.
      */
-    delete: operations["deleteMember"]
+    delete: operations["STUDY-GROUP-005"]
     options?: never
     head?: never
     /**
-     * [STUDY-GROUP-003] 스터디 그룹에 스터디원 추가
+     * 스터디 그룹에 스터디원 추가
      * @description 스터디 그룹에 스터디원을 추가합니다.
      */
-    patch: operations["addMember_1"]
+    patch: operations["STUDY-GROUP-003"]
     trace?: never
   }
   "/api/v1/schools/{schoolId}": {
@@ -2709,20 +3874,20 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SCHOOL-102] 학교 상세 조회
+     * 학교 상세 조회
      * @description 학교 상세 정보를 조회합니다
      */
-    get: operations["getSchoolDetail"]
+    get: operations["SCHOOL-102"]
     put?: never
     post?: never
     delete?: never
     options?: never
     head?: never
     /**
-     * [SCHOOL-002] 학교 수정
+     * 학교 수정
      * @description 학교 정보를 수정합니다. 입력된 필드만 수정됩니다.
      */
-    patch: operations["updateSchool"]
+    patch: operations["SCHOOL-002"]
     trace?: never
   }
   "/api/v1/schools/{schoolId}/unassign": {
@@ -2739,10 +3904,10 @@ export interface paths {
     options?: never
     head?: never
     /**
-     * [SCHOOL-005] 학교 지부 배정 해제
+     * 학교 지부 배정 해제
      * @description 학교를 지부에서 제외하여 배정 대기 상태로 변경합니다.
      */
-    patch: operations["unassignFromChapter"]
+    patch: operations["SCHOOL-005"]
     trace?: never
   }
   "/api/v1/schools/{schoolId}/assign": {
@@ -2759,10 +3924,114 @@ export interface paths {
     options?: never
     head?: never
     /**
-     * [SCHOOL-004] 학교 지부 배정
+     * 학교 지부 배정
      * @description 학교를 특정 지부에 배정합니다. 다른 지부에 있던 학교면 이동 처리됩니다.
      */
-    patch: operations["assignToChapter"]
+    patch: operations["SCHOOL-004"]
+    trace?: never
+  }
+  "/api/v1/recruiting/applications/{applicationId}/cancel": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * 지원서 철회
+     * @description 제출 전후의 지원서를 지원자 요청에 따라 철회합니다.
+     */
+    patch: operations["RECRUITING-APPLICATION-004"]
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/seasons/{seasonId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 모집 시즌 설정 조회
+     * @description 시즌의 트랙별 목표 인원과 차수별 모집 설정을 조회합니다.
+     */
+    get: operations["RECRUITING-ADMIN-001"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * 모집 시즌 수정
+     * @description 시즌에 속한 운영진이 공유할 메모를 수정합니다.
+     */
+    patch: operations["RECRUITING-ADMIN-003"]
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/seasons/{seasonId}/rounds/{roundId}/status": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * 모집 차수 상태 변경
+     * @description Round와 지원 Form 상태를 함께 변경합니다. 지원서와 Form 응답이 없는 OPEN Round만 DRAFT로 되돌릴 수 있고, CLOSED는 다시 열거나 DRAFT로 되돌릴 수 없습니다.
+     */
+    patch: operations["RECRUITING-ADMIN-015"]
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/applications/{applicationId}/final-decision": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * 최종 합불 결정
+     * @description 학교 회장단 또는 중앙 운영진 CurrentMember 권한으로 최종 합불을 결정합니다. 권한은 use case가 실제 지원서 소속으로 검증합니다.
+     */
+    patch: operations["RECRUITING-ADMIN-063"]
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/applications/{applicationId}/document-decision": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * 서류 합불 결정
+     * @description 학교 회장단 또는 중앙 운영진 CurrentMember 권한으로 서류 합불을 결정합니다. 합격 시 면접 차수는 일정 요청을 자동 생성하고, 면접 미진행 차수는 면접 생략 상태로 전환합니다.
+     */
+    patch: operations["RECRUITING-ADMIN-061"]
     trace?: never
   }
   "/api/v1/projects/{projectId}": {
@@ -2773,24 +4042,46 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-002] 프로젝트 상세 조회
+     * 프로젝트 상세 조회
      * @description 단건 프로젝트 상세 정보를 조회합니다. 권한에 따라 실명 정보가 마스킹됩니다.
      */
-    get: operations["getDetail"]
+    get: operations["PROJECT-002"]
     put?: never
     post?: never
     /**
-     * [PROJECT-109] 프로젝트 삭제
-     * @description DRAFT / PENDING_REVIEW 상태의 프로젝트를 hard delete 합니다. 연관 ProjectMember / PartQuota / ApplicationForm + survey Form 까지 cascade 삭제. PO 본인 또는 운영진(본인 지부장 / 해당 기수 총괄단)만 호출 가능. IN_PROGRESS 이상은 abort 엔드포인트 사용.
+     * 프로젝트 삭제
+     * @description DRAFT / PENDING_REVIEW 상태의 프로젝트를 hard delete 합니다. 연관 ProjectMember / PartQuota / ApplicationForm + form Form 까지 cascade 삭제. PO 본인 또는 운영진(본인 지부장 / 해당 기수 총괄단)만 호출 가능. IN_PROGRESS 이상은 abort 엔드포인트 사용.
      */
-    delete: operations["delete_2"]
+    delete: operations["PROJECT-109"]
     options?: never
     head?: never
     /**
-     * [PROJECT-102] 프로젝트 기본정보 수정
+     * 프로젝트 기본정보 수정
      * @description 프로젝트 기본정보를 부분 업데이트합니다. DRAFT/PENDING_REVIEW/IN_PROGRESS 모두 허용, 종료 상태(COMPLETED/ABORTED)는 수정 불가. 소유권 양도는 별도 엔드포인트.
      */
-    patch: operations["update_1"]
+    patch: operations["PROJECT-102"]
+    trace?: never
+  }
+  "/api/v1/projects/{projectId}/members/{memberId}/status": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * 프로젝트 팀원 상태 변경 (soft delete)
+     * @description 멤버 행을 보존한 채 status 를 변경합니다(COMPLETED/WITHDRAWN/DISMISSED 등).
+     *     변경 사유(reason)는 필수입니다.
+     *     종료(COMPLETED/ABORTED) 프로젝트와 메인 PM 은 거부됩니다. 동일 멤버 재등록이 필요하면 hard delete(DELETE) 를 사용하세요.
+     */
+    patch: operations["PROJECT-006"]
     trace?: never
   }
   "/api/v1/projects/{projectId}/applications/{applicationId}/decision": {
@@ -2807,13 +4098,14 @@ export interface paths {
     options?: never
     head?: never
     /**
-     * [APPLY-103] 지원서 합/불 결정 (단일 PATCH)
-     * @description PM 이 지원서의 status 를 토글합니다.
-     *     - 매칭 차수 진행 중에만 가능 (decisionDeadline 까지)
-     *     - SUBMITTED ↔ APPROVED ↔ REJECTED 자유 토글 (재토글 허용)
-     *     - PENDING 입력은 도메인의 SUBMITTED 로 매핑되어 결정을 "대기" 로 되돌림
+     * 지원서 합격 여부 결정
+     * @description PM 또는 SUPER_ADMIN 이 지원서의 status 를 토글합니다.
+     *     - PM: 매칭 차수 진행 중에만 가능 (decisionDeadline 까지)
+     *     - SUPER_ADMIN: 매칭 차수 시간과 관계없이 가능
+     *     - APPROVED ↔ REJECTED 재토글 허용
+     *     - REJECTED 처리 후 매칭 규칙의 최소선발 수를 만족하지 못하면 거절
      */
-    patch: operations["decide"]
+    patch: operations["APPLY-103"]
     trace?: never
   }
   "/api/v1/project/matching-rounds/{matchingRoundId}": {
@@ -2827,17 +4119,17 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [PROJECT-MATCHING-103] 매칭 차수 삭제
+     * 매칭 차수 삭제
      * @description 매칭 차수를 삭제합니다.
      *     - 중앙운영사무국 총괄단 이상은 모든 지부의 매칭 차수를 삭제할 수 있습니다.
      *     - 지부장은 본인 지부의 매칭 차수만 삭제할 수 있습니다.
      *     - 해당 매칭 차수를 참조하는 지원서가 하나라도 있으면 삭제할 수 없으며 409를 반환합니다.
      */
-    delete: operations["delete_3"]
+    delete: operations["PROJECT-MATCHING-103"]
     options?: never
     head?: never
     /**
-     * [PROJECT-MATCHING-102] 매칭 차수 수정
+     * 매칭 차수 수정
      * @description 매칭 차수 정보를 부분 수정합니다.
      *     - 중앙운영사무국 총괄단 이상은 모든 지부의 매칭 차수를 수정할 수 있습니다.
      *     - 지부장은 본인 지부의 매칭 차수만 수정할 수 있습니다.
@@ -2847,7 +4139,7 @@ export interface paths {
      *     - 기존 값과 요청 값을 병합한 최종 결과가 startsAt < endsAt < decisionDeadline 순서를 만족해야 합니다.
      *     - 같은 지부 내 다른 매칭 차수와 startsAt ~ decisionDeadline 기간이 중복되면 409를 반환합니다.
      */
-    patch: operations["update_2"]
+    patch: operations["PROJECT-MATCHING-102"]
     trace?: never
   }
   "/api/v1/posts/{postId}": {
@@ -2858,24 +4150,24 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [POST-101] 게시글 상세 조회
+     * 게시글 상세 조회
      * @description 게시글 상세 정보를 조회합니다. (댓글 수, 좋아요/스크랩 여부 포함)
      */
-    get: operations["getPostDetail"]
+    get: operations["POST-101"]
     put?: never
     post?: never
     /**
-     * [POST-005] 게시글 삭제
+     * 게시글 삭제
      * @description 게시글을 삭제합니다.
      */
-    delete: operations["deletePost"]
+    delete: operations["POST-005"]
     options?: never
     head?: never
     /**
-     * [POST-003] 일반 게시글 수정
+     * 일반 게시글 수정
      * @description 일반 게시글의 제목, 내용, 카테고리를 수정합니다.
      */
-    patch: operations["updatePost"]
+    patch: operations["POST-003"]
     trace?: never
   }
   "/api/v1/posts/{postId}/lightning": {
@@ -2892,10 +4184,10 @@ export interface paths {
     options?: never
     head?: never
     /**
-     * [POST-004] 번개글 수정
+     * 번개글 수정
      * @description 번개 게시글의 제목, 내용, 모임 정보를 수정합니다.
      */
-    patch: operations["updateLightningPost"]
+    patch: operations["POST-004"]
     trace?: never
   }
   "/api/v1/notices/{noticeId}": {
@@ -2906,24 +4198,24 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [NOTICE-003] 공지사항 상세 조회
+     * 공지사항 상세 조회
      * @description 특정 공지사항의 상세 정보를 조회합니다. READ 권한이 없으면 403을 반환합니다.
      */
-    get: operations["getNotice"]
+    get: operations["NOTICE-003"]
     put?: never
     post?: never
     /**
-     * [NOTICE-202] 공지사항 삭제
+     * 공지사항 삭제
      * @description 공지사항을 삭제합니다.
      */
-    delete: operations["deleteNotice"]
+    delete: operations["NOTICE-202"]
     options?: never
     head?: never
     /**
-     * [NOTICE-203] 공지사항 수정
+     * 공지사항 수정
      * @description 공지사항 내용을 수정합니다. mustRead=true로 설정하면 UPMS 필독 공지로 지정되어 목록 최상단에 고정되며, false로 변경하면 고정이 해제됩니다.
      */
-    patch: operations["updateNotice"]
+    patch: operations["NOTICE-203"]
     trace?: never
   }
   "/api/v1/member": {
@@ -2937,14 +4229,14 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [MEMBER-003] 회원 탈퇴
+     * 회원 탈퇴
      * @description Google/Kakao OAuth 연동이 있는 경우 해당 Provider의 Access Token을 함께 전달하면 Provider측 연결도 해제됩니다.
      */
-    delete: operations["deleteMember_1"]
+    delete: operations["MEMBER-003"]
     options?: never
     head?: never
-    /** [MEMBER-001] 내 회원 정보 수정 */
-    patch: operations["editMemberInfo"]
+    /** 내 회원 정보 수정 */
+    patch: operations["MEMBER-001"]
     trace?: never
   }
   "/api/v1/member/profile/links": {
@@ -2960,8 +4252,84 @@ export interface paths {
     delete?: never
     options?: never
     head?: never
-    /** [MEMBER-002] 내 회원 프로필 링크 수정 */
-    patch: operations["editMemberProfile"]
+    /** 내 회원 프로필 링크 수정 */
+    patch: operations["MEMBER-002"]
+    trace?: never
+  }
+  "/api/v1/member/email": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * 내 이메일 변경
+     * @description CHANGE_EMAIL 용도로 발급된 emailVerificationToken 으로 새 이메일 소유를 확인한 뒤 회원 이메일을 변경합니다.
+     */
+    patch: operations["MEMBER-005"]
+    trace?: never
+  }
+  "/api/v1/maintenance/admin/{windowId}/end": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /**
+     * 점검 윈도우 강제 종료
+     * @description 지정한 점검 윈도우를 즉시 종료합니다. SUPER_ADMIN 권한이 필요합니다.
+     */
+    patch: operations["MAINT-002"]
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Community thread 상세 조회 */
+    get: operations["COMMUNITY-THREAD-102"]
+    put?: never
+    post?: never
+    /** Community thread soft delete */
+    delete: operations["COMMUNITY-THREAD-003"]
+    options?: never
+    head?: never
+    /** Community thread metadata 수정 */
+    patch: operations["COMMUNITY-THREAD-002"]
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}/members/{memberId}/role": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Community thread member role 변경 */
+    patch: operations["COMMUNITY-THREAD-011"]
     trace?: never
   }
   "/api/v1/challenger/{challengerId}/part": {
@@ -2977,8 +4345,8 @@ export interface paths {
     delete?: never
     options?: never
     head?: never
-    /** [CHALLENGER-004] 챌린저 파트 변경 */
-    patch: operations["editChallengerInfo"]
+    /** 챌린저 파트 변경 */
+    patch: operations["CHALLENGER-004"]
     trace?: never
   }
   "/api/v1/challenger/points/{challengerPointId}": {
@@ -2992,17 +4360,94 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [POINT-003] 챌린저 상벌점 삭제
-     * @description 총괄단만 가능합니다.
+     * 챌린저 상벌점 삭제
+     * @description 총괄단 권한이 필요합니다.
      */
-    delete: operations["deleteChallengerPoint"]
+    delete: operations["POINT-003"]
     options?: never
     head?: never
     /**
-     * [POINT-002] 챌린저 상벌점 사유 수정
-     * @description 회장단 이상 가능합니다.
+     * 챌린저 상벌점 사유 수정
+     * @description 회장단 이상 권한이 필요합니다.
      */
-    patch: operations["editChallengerPoints"]
+    patch: operations["POINT-002"]
+    trace?: never
+  }
+  "/api/v1/certificates/admin/{certificateId}/revoke": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** 운영진 인증서 폐기 */
+    patch: operations["ADMIN-CERTIFICATE-002"]
+    trace?: never
+  }
+  "/api/v1/blog/series/{seriesId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** 시리즈 삭제 */
+    delete: operations["BLOG-SERIES-007"]
+    options?: never
+    head?: never
+    /** 시리즈 수정 */
+    patch: operations["BLOG-SERIES-006"]
+    trace?: never
+  }
+  "/api/v1/blog/contents/{type}/{slug}/comments/{commentId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * 댓글 삭제
+     * @description 작성자 본인 또는 슈퍼 관리자가 댓글을 삭제합니다.
+     */
+    delete: operations["BLOG-006"]
+    options?: never
+    head?: never
+    /**
+     * 댓글 수정
+     * @description 본인이 작성한 댓글을 수정합니다.
+     */
+    patch: operations["BLOG-005"]
+    trace?: never
+  }
+  "/api/v1/blog/contents/{contentId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** 콘텐츠 삭제 */
+    delete: operations["BLOG-CONTENT-006"]
+    options?: never
+    head?: never
+    /** 콘텐츠 수정 */
+    patch: operations["BLOG-CONTENT-005"]
     trace?: never
   }
   "/api/v1/auth/password": {
@@ -3019,10 +4464,10 @@ export interface paths {
     options?: never
     head?: never
     /**
-     * [CREDENTIAL-003] 비밀번호 변경
+     * 비밀번호 변경
      * @description 현재 비밀번호 검증 후 새 비밀번호로 교체합니다.
      */
-    patch: operations["changePassword"]
+    patch: operations["CREDENTIAL-003"]
     trace?: never
   }
   "/api/v1/auth/password/reset": {
@@ -3039,67 +4484,10 @@ export interface paths {
     options?: never
     head?: never
     /**
-     * [CREDENTIAL-007] 비밀번호 초기화
+     * 비밀번호 초기화
      * @description 비밀번호를 잊은 회원이 이메일 인증으로 발급받은 emailVerificationToken 을 사용해 현재 비밀번호 없이 새 비밀번호로 교체합니다. 사용자 열거 방지를 위해 회원 없음/자격증명 미등록 등의 사유는 모두 동일한 메시지로 응답합니다.
      */
-    patch: operations["resetPasswordByEmail"]
-    trace?: never
-  }
-  "/api/v1/admin/maintenance/{windowId}/end": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    /**
-     * [MAINT-002] 점검 윈도우 강제 종료
-     * @description 지정한 점검 윈도우를 즉시 종료합니다. SUPER_ADMIN 만 호출할 수 있습니다.
-     */
-    patch: operations["forceEnd"]
-    trace?: never
-  }
-  "/api/v1/admin/figma/routing-domains/{domainId}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** [FIGMA-017] 라우팅 도메인 단건 조회 (mention 포함) */
-    get: operations["getDomain"]
-    put?: never
-    post?: never
-    /** [FIGMA-012] 라우팅 도메인 삭제 (mention 도 cascade) */
-    delete: operations["deleteDomain"]
-    options?: never
-    head?: never
-    /** [FIGMA-019] 라우팅 도메인 수정 (설명 · webhook URL · fallback) */
-    patch: operations["updateDomain"]
-    trace?: never
-  }
-  "/api/v1/admin/figma/routing-domains/mentions/{mentionId}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post?: never
-    /** [FIGMA-014] 담당자 mention 삭제 */
-    delete: operations["removeMention"]
-    options?: never
-    head?: never
-    /** [FIGMA-020] 담당자 mention 수정 (Discord ID · 라벨) */
-    patch: operations["updateMention"]
+    patch: operations["CREDENTIAL-007"]
     trace?: never
   }
   "/test/webhook/aop-test": {
@@ -3210,7 +4598,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** 헬스 체크 API */
+    /** 헬스 체크 */
     get: operations["TEST-011"]
     put?: never
     post?: never
@@ -3228,10 +4616,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [개발용] 파일 ID를 기반으로 접근 가능한 URL을 조회합니다.
-     * @description local 및 development 환경에서만 사용 가능합니다.
+     * 파일 접근 URL 조회
+     * @description local과 development 환경에서만 사용할 수 있습니다.
      *
-     *     크롤링을 방지하기 위한 절차입니다. 파일이 정상적으로 업로드되었는지 확인하는 용도로만 사용하세요.
+     *     파일 업로드 상태 확인 용도로만 사용합니다.
      */
     get: operations["TEST-001"]
     put?: never
@@ -3250,10 +4638,27 @@ export interface paths {
       cookie?: never
     }
     /**
-     * 인증된 사용자인지 여부를 확인합니다.
-     * @description 인증되지 않은 사용자인 경우 401을 반환합니다.
+     * 인증 상태 확인
+     * @description 인증되지 않은 사용자는 401을 반환합니다.
      */
     get: operations["TEST-012"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/test/certificates/preview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 인증서 PDF 템플릿 미리보기 */
+    get: operations["TEST-CERTIFICATE-001"]
     put?: never
     post?: never
     delete?: never
@@ -3287,14 +4692,14 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SCHEDULE-Q005] [운영진용] 단일 일정 출석 현황 조회
+     * [운영진용] 단일 일정 출석 현황 조회
      * @description Query Param을 이용해서 상세한 필터링을 제공하며, 그 기준은 아래와 같습니다.
      *
      *     #### 출석 상태 필터링
      *     `attendanceStatus`를 통해서 요청 상태를 필터링할 수 있습니다.
      *     제공되지 않은 경우, 모든 상태에 대해서 반환합니다.
      */
-    get: operations["getAttendanceInfo"]
+    get: operations["SCHEDULE-Q005"]
     put?: never
     post?: never
     delete?: never
@@ -3311,14 +4716,14 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SCHEDULE-Q002] 내 일정 조회
+     * 내 일정 조회
      * @description 로그인한 사용자가 참여하는 일정 중 Query Param의 `from`, `to` 사이에 시작일이 있는 일정을 모두 조회합니다.
      *
      *     활동-출석 체크 UI에서 활용하기 위해서는 `isAttendanceRequired` 필드를 `true`로 해서 출석을 트래킹하는 API에 대해서만 조회하면 됩니다.
      *
      *     운영진이 출석 승인 대기가 필요한 일정을 조회하는 부분은 다른 API를 이용해주세요.
      */
-    get: operations["mySchedules"]
+    get: operations["SCHEDULE-Q002"]
     put?: never
     post?: never
     delete?: never
@@ -3335,7 +4740,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SCHEDULE-Q001] 일정 생성, 수정 관련 권한 조회
+     * 일정 생성, 수정 관련 권한 조회
      * @description 현재 사용자의 일정 생성, 수정 관련 권한을 조회합니다. 일정 생성, 수정 화면에서 사용하시면 됩니다.
      *
      *     다른 세부적인 생성/수정/삭제 권한 등은 Authorization 도메인의 API를 사용해주세요.
@@ -3344,7 +4749,7 @@ export interface paths {
      *     - `canCreateAttendanceRequiredSchedule` : 출석 정책 포함 일정 생성 가능 여부 (운영진 : true, 일반 챌린저 : false)
      *     - `maxParticipantCount` : 직책별 최대 초대 가능 인원
      */
-    get: operations["getCapabilities"]
+    get: operations["SCHEDULE-Q001"]
     put?: never
     post?: never
     delete?: never
@@ -3361,7 +4766,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SCHEDULE-Q004] [운영진용] 일정들의 출석 현황 조회
+     * [운영진용] 일정들의 출석 현황 조회
      * @description Query Param을 이용해서 상세한 필터링을 제공하며, 그 기준은 아래와 같습니다.
      *
      *     #### 기간 필터링 (시작 시간 기준)
@@ -3379,7 +4784,7 @@ export interface paths {
      *     - 교내 파트장 : 본인 생성 일정 + 본인 멘토 스터디 그룹 일정
      *     - 기타 운영진 : 본인 생성 일정
      */
-    get: operations["getAttendanceInfoList"]
+    get: operations["SCHEDULE-Q004"]
     put?: never
     post?: never
     delete?: never
@@ -3396,7 +4801,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [MEMBER-202] 회원 검색 v2
+     * 회원 검색 v2
      * @description 회원 단위 검색 결과를 반환합니다.
      *
      *     - `currentChallenger` : 활성 기수 챌린저 우선, 없으면 최신 기수 챌린저
@@ -3404,11 +4809,12 @@ export interface paths {
      *     - `isAdminInActiveGisu` : 회원이 현재 활성 기수에 운영진 ChallengerRole을 하나라도 보유하는지
      *
      *     검색 조건/필터는 v1과 동일합니다.
+     *     챌린저 기록이 하나라도 있는 회원만 사용할 수 있습니다. 챌린저 기록이 없으면 403을 반환합니다.
      *
      *     검색 결과에는 본인 외 회원이 포함되므로, 로그인 식별자인 이메일은 평문 노출을 피하기 위해
      *     컨트롤러 단에서 마스킹 처리되어 응답됩니다.
      */
-    get: operations["searchMembersV2"]
+    get: operations["MEMBER-202"]
     put?: never
     post?: never
     delete?: never
@@ -3425,7 +4831,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [MEMBER-201] 내 종합 정보 조회
+     * 내 종합 정보 조회
      * @description 현재 로그인한 사용자의 통합 정보를 반환합니다.
      *
      *     - 기본 프로필 및 소셜 링크
@@ -3438,7 +4844,33 @@ export interface paths {
      *       - 휴지기에는 `currentGisuMemberInfo = null`
      *     - `challengerHistory` : 모든 기수의 챌린저 이력 (최신 기수 우선). 기수별 상벌점 포함.
      */
-    get: operations["getMySummary"]
+    get: operations["MEMBER-201"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v2/gisu": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 기수 조직 정보 조회
+     * @description `id`, `generation`, `active` 중 정확히 하나의 조회 기준으로 기수 조직 정보를 조회합니다.
+     *
+     *     - `id`, `generation`은 반복 query param으로 여러 값을 전달할 수 있으며 중복 값은 제거됩니다.
+     *     - `active=true`는 활성 기수 1개를 조회합니다. `active=false`는 유효하지 않은 조회 기준입니다.
+     *     - `includeChapter=true`이면 기수 내 지부 정보를 포함합니다.
+     *     - `includeSchool=true`이면 기수 내 학교 정보를 포함합니다.
+     *     - `includeChapter=true&includeSchool=true`이면 지부 내 학교 정보와 기수 내 학교 정보를 모두 포함합니다.
+     */
+    get: operations["GISU-201"]
     put?: never
     post?: never
     delete?: never
@@ -3455,7 +4887,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [WORKBOOK-103] 베스트 워크북 조회
+     * 베스트 워크북 조회
      * @description 베스트 워크북을 조회합니다. Cursor Pagination이 적용되었습니다.
      *
      *     Query Param으로 아래와 같은 필터를 적용할 수 있으며,
@@ -3467,7 +4899,7 @@ export interface paths {
      *     - (다중 선택 가능) 주차
      *     - (다중 선택 가능) 스터디 그룹 ID
      */
-    get: operations["getBestWorkbooks"]
+    get: operations["WORKBOOK-103"]
     put?: never
     post?: never
     delete?: never
@@ -3484,7 +4916,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CURRICULUM-102] 내 커리큘럼 진행 상황 조회
+     * 내 커리큘럼 진행 상황 조회
      * @description 해당 기수에 사용자가 속한 스터디 그룹에 따라 커리큘럼을 반환합니다.
      *     커리큘럼에 따라서 각 사용자의 워크북이 존재하는 경우에는 포함됩니다.
      *
@@ -3499,7 +4931,7 @@ export interface paths {
      *     지정한 기수에서 본인의 커리큘럼 진행 상황을 조회합니다.
      *     각 주차별 워크북의 상태(기본/진행중/제출완료/통과/실패)를 반환합니다.
      */
-    get: operations["getMyProgress"]
+    get: operations["CURRICULUM-102"]
     put?: never
     post?: never
     delete?: never
@@ -3516,7 +4948,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CURRICULUM-101] 특정 기수의 파트별 커리큘럼 조회
+     * 특정 기수의 파트별 커리큘럼 조회
      * @description 요청을 보낸 사람과 관계없이, 해당 기수의 커리큘럼 목록을 조회하기 위해서 사용합니다.
      *
      *     예상되는 사용처는 아래와 같습니다.
@@ -3529,7 +4961,7 @@ export interface paths {
      *
      *     `weekNo` 파라미터를 지정하면 해당 주차의 워크북만 반환합니다.
      */
-    get: operations["getCurriculum"]
+    get: operations["CURRICULUM-101"]
     put?: never
     post?: never
     delete?: never
@@ -3546,7 +4978,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CHALLENGER-201] 챌린저 검색 v2
+     * 챌린저 검색 v2
      * @description 챌린저 단위 페이지네이션 검색입니다.
      *
      *     - 같은 회원이 여러 기수에 참여했다면 기수별 챌린저가 각각 별도 row로 반환됩니다.
@@ -3556,8 +4988,9 @@ export interface paths {
      *     - 검색 결과에는 본인 외 회원이 포함되므로, 로그인 식별자인 이메일은 평문 노출을 피하기 위해
      *       컨트롤러 단에서 마스킹 처리되어 응답됩니다.
      *     - 회원 단위로 묶인 검색이 필요하다면 `/api/v2/member/search` 를 사용해 주세요.
+     *     - 챌린저 기록이 하나라도 있는 회원만 사용할 수 있습니다. 챌린저 기록이 없으면 403을 반환합니다.
      */
-    get: operations["searchChallengersV2"]
+    get: operations["CHALLENGER-201"]
     put?: never
     post?: never
     delete?: never
@@ -3576,11 +5009,11 @@ export interface paths {
     /**
      * 사용자 피드백 템플릿 조회
      * @description 요청자의 챌린저 이력 및 운영진 역할을 기반으로 TargetType을 자동 판별하여,
-     *     해당 context에 맞는 활성 피드백 템플릿(Survey 폼 전체 구조 포함)을 반환합니다.
+     *     해당 context에 맞는 활성 피드백 템플릿(Form 폼 전체 구조 포함)을 반환합니다.
      *     활성 기수가 없거나 해당 context + targetType 조합의 템플릿이 없으면 result = null.
      *
      *     [조건부 렌더링 - ADMIN / APPLICATION_MONITORING 템플릿]
-     *     현재 Survey 엔진은 조건부 렌더링을 지원하지 않으므로, 프론트엔드에서 직접 처리해야 합니다.
+     *     현재 Form 엔진은 조건부 렌더링을 지원하지 않으므로, 프론트엔드에서 직접 처리해야 합니다.
      *     questions 및 options 배열은 orderNo 기준 오름차순으로 정렬되어 내려오며, 조건에 따라 숨길 질문도 포함되어 있습니다.
      *     (예: '필요한 정보를 찾는 데 어려움이 있었나요?' 질문에서 '조금 있었어요' 또는 '많이 있었어요' 선택 시 자유 서술 텍스트 박스 표시)
      */
@@ -3593,6 +5026,50 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/umc-product/organization-chart": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * UMC PRODUCT 조직도 조회
+     * @description 활성 Chapter와 하위 활성 Part, KST 오늘 날짜에 유효한 Squad를 반환합니다.
+     */
+    get: operations["UMC-PRODUCT-ORGANIZATION-CHART-101"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/umc-product/members/{memberId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * UMC PRODUCT 멤버 상세 조회
+     * @description 멤버 기본 정보와 활동 기간, Chapter 소속, Product Leadership, Squad 참여 이력을 반환합니다.
+     */
+    get: operations["UMC-PRODUCT-MEMBER-102"]
+    put?: never
+    post?: never
+    /**
+     * UMC PRODUCT 멤버 삭제
+     * @description 연결된 Squad 참여, Chapter 소속, Leadership, 활동 기간을 순서대로 삭제한 뒤 멤버를 삭제합니다.
+     */
+    delete: operations["UMC-PRODUCT-MEMBER-012"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/terms/{termsId}": {
     parameters: {
       query?: never
@@ -3600,8 +5077,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TERM-102] 약관 ID로 약관 조회 */
-    get: operations["getTermsById"]
+    /** 약관 ID로 약관 조회 */
+    get: operations["TERM-102"]
     put?: never
     post?: never
     delete?: never
@@ -3617,8 +5094,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TERM-101] 약관 유형으로 약관 조회 */
-    get: operations["getTerms"]
+    /** 약관 유형으로 약관 조회 */
+    get: operations["TERM-101"]
     put?: never
     post?: never
     delete?: never
@@ -3634,8 +5111,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [TERM-103] 내 필수 약관 재동의 상태 조회 */
-    get: operations["getMyRequiredTermConsentStatus"]
+    /** 내 필수 약관 재동의 상태 조회 */
+    get: operations["TERM-103"]
     put?: never
     post?: never
     delete?: never
@@ -3652,10 +5129,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SYSTEM-001] 시스템 점검 상태 조회
+     * 시스템 점검 상태 조회
      * @description 현재 점검 활성 여부와 다음 예약 점검 정보를 반환합니다. 점검 중에도 항상 통과합니다.
      */
-    get: operations["getStatus"]
+    get: operations["SYSTEM-001"]
     put?: never
     post?: never
     delete?: never
@@ -3672,10 +5149,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [STUDY-GROUP-101] 내가 관리하는 스터디 그룹 목록 조회
+     * 내가 관리하는 스터디 그룹 목록 조회
      * @description 로그인한 유저의 학교/파트 기반으로 스터디 그룹 목록을 조회합니다. cursor 기반 무한스크롤.
      */
-    get: operations["getStudyGroups"]
+    get: operations["STUDY-GROUP-101"]
     put?: never
     post?: never
     delete?: never
@@ -3692,11 +5169,11 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SCHOOL-103] 배정 대기 중인 학교 목록 조회
+     * 배정 대기 중인 학교 목록 조회
      * @deprecated
      * @description 특정 기수에서 어떤 지부에도 속하지 않은 학교 목록을 조회합니다
      */
-    get: operations["getUnassignedSchools"]
+    get: operations["SCHOOL-103"]
     put?: never
     post?: never
     delete?: never
@@ -3713,11 +5190,11 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SCHOOL-104] 학교 링크 조회
+     * 학교 링크 조회
      * @deprecated
      * @description 학교의 공식 링크 정보를 조회합니다
      */
-    get: operations["getSchoolLink"]
+    get: operations["SCHOOL-104"]
     put?: never
     post?: never
     delete?: never
@@ -3733,6 +5210,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
+    /** @deprecated */
     get: operations["getSchoolListsByGisu"]
     put?: never
     post?: never
@@ -3750,10 +5228,210 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [SCHOOL-101] 학교 전체 목록 조회
+     * 학교 전체 목록 조회
      * @description 전체 학교 목록을 이름순으로 조회합니다. 학교 ID와 이름만 반환합니다.
      */
-    get: operations["getAllSchools"]
+    get: operations["SCHOOL-101"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/rounds/{roundId}/applications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 평가용 지원서 목록 조회
+     * @description Round의 제출된 지원서를 상태·지원 트랙으로 필터링하고 본인의 단계별 평가 여부와 함께 조회합니다.
+     */
+    get: operations["RECRUITING-EVALUATION-003"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/rounds/{roundId}/applications/{applicationId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 평가용 지원서 상세 조회
+     * @description 지원자 기본 정보와 Form 답변을 조회합니다. 초안은 평가자에게 공개하지 않습니다.
+     */
+    get: operations["RECRUITING-EVALUATION-004"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/public/rounds": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 공개 모집 목록 조회
+     * @description 로그인 없이 지원 가능한 모집 또는 종료된 모집을 조회합니다. DRAFT와 운영진 내부 설정은 반환하지 않으며 학교의 현재 지부 정보와 시즌별로 묶어 제공합니다.
+     */
+    get: operations["RECRUITING-PUBLIC-001"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/public/forms/{applicationFormId}/structure": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 지원 Form 구조 조회
+     * @description 지원자가 선택한 1·2지망에 필요한 공통 및 트랙 section만 조회합니다.
+     */
+    get: operations["RECRUITING-PUBLIC-002"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/applications/{applicationId}/interview-schedule": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 면접 일정 조회
+     * @description CurrentMember가 조회 가능한 지원서의 기본 면접 일정 정보를 조회합니다. 연락처와 메일 오류는 반환하지 않습니다.
+     */
+    get: operations["RECRUITING-SCHEDULE-002"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/summary": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 지원 현황 요약 조회
+     * @description 운영진이 여러 학교와 Round의 지원서 상태별 집계를 조회합니다. 모집 목록이 아니라 현황 대시보드용 집계 API입니다.
+     */
+    get: operations["RECRUITING-ADMIN-081"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/statistics.csv": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 지원 현황 CSV 다운로드
+     * @description 지원서 본문과 원본 이메일을 제외한 학교별 지원 현황 CSV를 다운로드합니다.
+     */
+    get: operations["RECRUITING-ADMIN-082"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/seasons/{seasonId}/rounds/title-availability": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 모집 제목 사용 가능 여부 조회
+     * @description 같은 시즌에서 대소문자를 무시한 모집 제목 중복 여부를 미리 확인합니다. 실제 생성·수정에서도 같은 검증을 반복하고 DB unique index가 최종 중복을 방어합니다.
+     */
+    get: operations["RECRUITING-ADMIN-012"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/rounds": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 모집 차수 목록 조회
+     * @description 권한이 있는 운영진이 편집·관리 화면에서 DRAFT, OPEN, CLOSED 모집을 Season별로 조회합니다. 공개 모집 탐색과 달리 Season 메모, 연락처와 Form 설정을 포함합니다.
+     */
+    get: operations["RECRUITING-ADMIN-011"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/rounds/{roundId}/evaluators": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 평가자 목록 조회
+     * @description 모집 차수의 서류·면접 공통 평가자 whitelist를 조회합니다.
+     */
+    get: operations["RECRUITING-ADMIN-033"]
     put?: never
     post?: never
     delete?: never
@@ -3770,69 +5448,24 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-STAT-001] 단건 프로젝트 지원/매칭 현황 조회
-     * @description 프로젝트 ID와 함께 멤버 목록을 포함하고 있고, FE단 재가공을 최소화해드리기 위해서 `roundApplicationStatistics` 및 `schoolApplicationStatistics` 필드를 두고 있습니다.
+     * 단건 프로젝트 지원/매칭 현황 조회 (Deprecated)
+     * @deprecated
+     * @description deprecated: `/api/v1/projects/statistics?projectIds={projectId}`를 사용해주세요.
+     *
+     *     프로젝트 ID와 함께 멤버 목록을 포함하고 있고, FE단 재가공을 최소화해드리기 위해서 `roundApplicationStatistics` 및 `schoolApplicationStatistics` 필드를 두고 있습니다.
      *
      *     각 항목이 매칭 차수별 지원률, N차 매칭에서의 학교별 및 총 지원자 수를 포함하고 있습니다.
      *     프로젝트 멤버 목록의 경우 각 멤버가 해당 프로젝트에 작성한 지원 이력을 포함하고 있으며,
      *     없거나 (강제배정/랜덤매칭) 여러 건 (떨어지고 재 지원하는 경우) 이 존재할 수 있어 배열로 구성되어 있습니다.
      *
      *     지원자 목록은(특정 프로젝트에 대한 지원서 조회) `/api/v1/projects/{projectId}/applications`를 호출하셔서 활용하셔야 합니다.
+     *
+     *     권한: 해당 프로젝트의 PO/Sub-PM(본인 프로젝트), 총괄단, 해당 지부장, 해당 지부 소속 학교 회장/부회장만 조회할 수 있습니다. 그 외에는 403.
      */
-    get: operations["getProjectStatistics"]
+    get: operations["PROJECT-STAT-001"]
     put?: never
     post?: never
     delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/projects/{projectId}/applications/{applicationId}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * [APPLY-102] 지원서 단건 상세 조회
-     * @description 지원서 단건의 메타(지원자/매칭 차수/상태/시각) + 폼 구조(지원자 파트 기준 마스킹) + 제출된 답변 본문 + 첨부 파일 메타까지 한 번에 반환한다.
-     *     <p>
-     *     권한 (L2 @CheckAccess READ):
-     *     <ul>
-     *       <li>SUBMITTED/APPROVED/REJECTED -- 다음 호출자만 통과:
-     *         <ul>
-     *           <li>지원자 본인</li>
-     *           <li>해당 프로젝트의 PO</li>
-     *           <li>해당 프로젝트의 Sub-PO (ACTIVE PLAN 멤버)</li>
-     *           <li>해당 프로젝트 기수의 Central Core (총괄/부총괄/SUPER_ADMIN)</li>
-     *           <li>해당 프로젝트 지부의 지부장 (같은 기수)</li>
-     *         </ul>
-     *       </li>
-     *       <li>DRAFT(임시저장) -- 지원자 본인만 통과</li>
-     *     </ul>
-     *     권한 부재 시 403(AUTHORIZATION-0002) 반환.
-     *     <p>
-     *     정합성: path 의 projectId 와 application 의 form.project.id 가 다르면 404(PROJECT-0021) 로 위장하여 다른 프로젝트의 지원서 존재 여부를 은닉한다.
-     */
-    get: operations["getApplicationDetail"]
-    put?: never
-    post?: never
-    /**
-     * [APPLY-005] 챌린저 지원서 철회
-     * @description 지원서를 CANCELLED 로 soft delete 합니다.
-     *
-     *     정책:
-     *     - 가능 상태: DRAFT, SUBMITTED
-     *     - 불가 상태: APPROVED, REJECTED (이미 종결), CANCELLED (이중 취소)
-     *     - 시간 제약: 지원한 매칭 차수가 OPEN 인 동안만 (startsAt <= now <= endsAt). PM 선발이 시작된 차수 종료 후에는 철회 불가
-     *     - 행위자: 지원자 본인만 (운영진 강제 철회는 별도 API, 추후 작업)
-     *
-     *     철회 후 동일 매칭 차수에 재지원 가능 (DB partial unique index 가 활성 지원서 1개 보장).
-     *     Survey 응답 본문은 보존됨.
-     */
-    delete: operations["cancel"]
     options?: never
     head?: never
     patch?: never
@@ -3846,25 +5479,80 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-STAT-002] 지부 전체 프로젝트 지원/매칭 현황 조회
-     * @description chapterId에 속한 전체 프로젝트를 대상으로 ACTIVE ProjectMember 목록과
-     *     각 멤버가 해당 프로젝트에 작성한 지원 이력을 프로젝트별로 반환합니다.
-     *     summary에는 차수별 지원 완료 인원/지원 가능 총원, 학교 순위, 학교별 매칭 인원,
-     *     프로젝트별 차수 인원 수를 함께 반환합니다.
+     * 프로젝트 지원 현황 조회
+     * @description 프로젝트 지원 현황 조회 API입니다.
+     *     projectIds 또는 chapterId 중 정확히 하나만 query parameter로 제공해야 합니다.
      *
-     *     지부 내 회장단 이상의 운영진이 매칭 통계를 조회할 때 활용합니다.
+     *     - projectIds 제공: 요청한 프로젝트의 지원 현황을 `projects` 배열로 반환합니다. 단건은 1개 값으로 요청하고, 다건은 같은 지부 프로젝트만 요청할 수 있습니다.
+     *     - chapterId 제공: 지부 전체 프로젝트 지원 현황을 반환합니다.
      *
-     *     지부 내 모든 프로젝트 목록 및 각 프로젝트에 대한 프로젝트 멤버를 포함하고 있으며,
+     *     지부 내 모든 프로젝트 목록 및 각 프로젝트에 대한 프로젝트 멤버를 포함하며,
      *     이는 `/api/v1/projects/{projectId}/statistics` 에서 제공하는 것과 동일한 형태입니다.
+     *     추가로 BFF 패턴을 적용하여 FE단 데이터 가공 책임을 줄이기 위해 `summary` 필드를 제공합니다.
      *
-     *     추가로 BFF 패턴을 적용하여 FE단 데이터 가공 책임을 줄이기 위해 `summary` 필드를 제공하고 있습니다.
+     *     응답 필드 설명:
+     *     - projects: 프로젝트별 지원 현황 목록입니다.
+     *     - projects[].projectMembers: 해당 프로젝트에 최종 합류한 ACTIVE ProjectMember 목록입니다.
+     *     - projects[].projectMembers[].applications: 해당 멤버가 해당 프로젝트에 작성한 지원 이력입니다. 강제 배정처럼 지원서 없이 합류한 경우 빈 배열입니다.
+     *     - projects[].roundApplicationStatistics: 프로젝트 단위의 매칭 차수별 지원서 수와 지원 가능 인원 수입니다.
+     *     - projects[].schoolApplicationStatistics: 프로젝트 단위의 매칭 차수별 학교 지원자 수입니다. 같은 차수 안에서는 memberId 기준으로 중복 제거합니다.
+     *     - summary.roundApplicationStatistics: 조회 범위 전체의 매칭 차수별 지원서 수와 지원 가능 인원 수입니다. `appliedMemberCount`는 지원서 수 합계이고, `availableMemberCount`는 지원 가능 챌린저 총원에서 이전 차수까지 이미 ProjectMember로 합류한 인원을 제외한 값입니다.
+     *     - summary.roundSchoolRankings: 조회 범위 전체의 매칭 차수별 학교 지원자 수입니다. 같은 차수 안에서는 memberId 기준으로 중복 제거합니다.
+     *     - summary.schoolMatchingStatistics: 학교별 지원 가능 총원, 매칭 완료 인원, 한 번이라도 지원한 인원 수입니다. `totalMemberCount`는 지원 가능한 ACTIVE 챌린저 수, `matchedMemberCount`는 ACTIVE ProjectMember 수, `appliedMemberCount`는 조회 범위에서 한 번이라도 지원한 memberId 기준 unique 인원 수입니다.
+     *     - summary.projectRoundStatistics: 프로젝트별 매칭 차수 지원 현황입니다. `appliedMemberCount`는 프로젝트와 차수 안에서 memberId 기준으로 중복 제거한 지원자 수이고, `matchedMemberCount`는 해당 프로젝트와 차수에서 매칭 완료된 인원 수입니다.
      *
-     *     - roundApplicationStatistics: N차 매칭 지원 현황 카드에 활용합니다. 각 매칭 차수별 정보 (매칭 종류 및 차수) 와 각 차수별 지원자 수 & 지원 가능했던 인원
-     *     - roundSchoolRankings: N차 매칭 지원 Top N에 활용합니다. 각 차수별로, 각 학교별 지원자 수
-     *     - schoolMatchingStatistics: 총원 N명 카드에 활용합니다. 차수와 무관하게, 각 학교별 총 매칭 완료 인원 & 지원 가능 총원
-     *     - projectRoundStatistics: 프로젝트별 지원 현황 필드에 활용합니다. 각 프로젝트별로, 각 매칭 차수별 정보 (매칭 종류 & 차수) 와 지원자 수
+     *     프로젝트별 지원자 목록은 `/api/v1/projects/{projectId}/applications`를 호출해서 조회해야 합니다.
+     *     공개 매칭 요약은 `/api/v1/projects/statistics/matchings`를 호출해서 조회해야 합니다.
+     *
+     *     권한: projectIds 조회는 각 프로젝트의 PO/Sub-PM(본인 프로젝트), 총괄단, 해당 지부장, 해당 지부 소속 학교 회장/부회장만 조회할 수 있습니다.
+     *     chapterId 조회는 총괄단(모든 지부), 해당 지부장, 해당 지부 소속 학교 회장/부회장만 조회할 수 있습니다. 그 외에는 403.
      */
-    get: operations["listChapterProjectStatistics"]
+    get: operations["PROJECT-STAT-002"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/projects/statistics/matchings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 지부 공개 프로젝트 매칭 요약 조회
+     * @description 로그인 사용자 누구나 조회할 수 있는 지부 내 공개 프로젝트 매칭 요약입니다.
+     *     멤버 ID와 지원서 ID는 노출하지 않고 ProjectMember 기준 집계 숫자만 반환합니다.
+     *
+     *     집계 대상 프로젝트는 공개 프로젝트 목록과 동일하게 IN_PROGRESS, COMPLETED 상태만 포함합니다.
+     *     차수 귀속은 각 ProjectMember가 해당 프로젝트에 작성한 APPROVED 지원서 중 가장 오래된 매칭 차수를 사용합니다.
+     *     합격 지원서가 없으면 차수별 집계에서 제외하고 unclassifiedMatchingStatistics에 별도 집계합니다.
+     */
+    get: operations["PROJECT-STAT-003"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/projects/permissions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 프로젝트 capability 일괄 조회
+     * @description 프로젝트 단위 화면 분기용 권한과 상태 기반 capability를 조회합니다. 권한이 없어도 false capability를 반환합니다.
+     */
+    get: operations["PROJECT-PERMISSIONS-001"]
     put?: never
     post?: never
     delete?: never
@@ -3881,10 +5569,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-007] 프로젝트 팀원 구성 일괄 조회
+     * 프로젝트 팀원 구성 일괄 조회
      * @description 복수의 projectId에 대한 팀원 구성을 조회합니다. 권한이 없거나 조회에 실패한 프로젝트는 결과에서 제외됩니다.
      */
-    get: operations["getBatchMembers"]
+    get: operations["PROJECT-007"]
     put?: never
     post?: never
     delete?: never
@@ -3901,10 +5589,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-006] 내가 관리하는 프로젝트 목록
-     * @description 역할별 자동 scope: 중앙 총괄단은 전체, 지부장은 본인 지부, 학교 회장단은 본인 학교, PM 챌린저는 본인 owner 프로젝트. 일반 챌린저는 빈 페이지.
+     * 내가 관리하는 프로젝트 목록
+     * @description 역할별 자동 scope: 중앙 총괄단은 전체, 지부장과 학교 회장단은 본인이 속한 지부 전체, PM 챌린저는 본인 owner 프로젝트. 일반 챌린저는 빈 페이지.
      */
-    get: operations["searchManaged"]
+    get: operations["PROJECT-006_1"]
     put?: never
     post?: never
     delete?: never
@@ -3921,10 +5609,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PROJECT-103] 내 Draft 조회
+     * 내 초안 프로젝트 조회
      * @description 요청자(PM)가 작성 중인 Draft 프로젝트를 조회합니다. 없으면 null.
      */
-    get: operations["getMyDraft"]
+    get: operations["PROJECT-103"]
     put?: never
     post?: never
     delete?: never
@@ -3941,27 +5629,61 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [APPLY-004] 본인 지원 내역 목록 조회
-     * @description 요청자의 챌린저 파트 기준으로 매칭 종류를 자동 결정해 본인 지원 내역을 조회한다.
+     * 본인 지원 내역 목록 조회
+     * @description 요청자의 챌린저 파트에 맞는 매칭 종류로 본인 지원 내역을 조회합니다.
      *     <p>
-     *     응답 카드는 두 데이터원에서 합성된다.
+     *     응답에는 다음 카드가 포함될 수 있습니다.
      *     <ul>
-     *       <li>application 카드 -- 본인이 제출한 지원서. matchingRound.id/type/phase 가 실제 라운드 값으로 채워진다.</li>
-     *       <li>RANDOM_MATCHING 카드 -- 본인이 ACTIVE 멤버이면서 application 이 없는 케이스 (THIRD 라운드 종료 후 자동 랜덤 매칭 또는 운영진 강제 배정).
-     *           matchingRound.id 는 null, phase 는 RANDOM_MATCHING, status 는 ACTIVE = 합격 의미이므로 APPROVED 로 표시된다. 도메인상 0 또는 1 건.</li>
+     *       <li>지원서 카드: 본인이 제출한 지원서입니다.
+     *           `matchingRound.id`, `matchingRound.type`, `matchingRound.phase` 에 실제 매칭 차수 정보를 담습니다.</li>
+     *       <li>랜덤 매칭 카드: 지원서 없이 프로젝트 멤버로 확정된 경우입니다.
+     *           `matchingRound.id` 는 `null`, `matchingRound.phase` 는 `RANDOM_MATCHING`,
+     *           `status` 는 `APPROVED` 입니다. 한 기수에서 최대 1건입니다.</li>
      *     </ul>
      *     <p>
-     *     정렬: application 카드는 매칭 라운드 시작일 ASC -> 지원서 갱신일 DESC, RANDOM_MATCHING 카드는 결과 리스트 끝에 append.
+     *     정렬은 매칭 차수 시작일 오름차순, 지원서 갱신일 내림차순입니다. 랜덤 매칭 카드는 목록 마지막에 둡니다.
      *     <p>
      *     `status` 파라미터 :
      *     <ul>
-     *       <li>미지정 -> DRAFT(임시저장) 제외 application 전체 + RANDOM_MATCHING 카드 합성</li>
-     *       <li>명시 시 해당 상태의 application 만 조회. RANDOM_MATCHING 카드는 application status 시맨틱 외부 데이터원이므로 합성하지 않는다.</li>
+     *       <li>보내지 않으면 임시저장(DRAFT)을 제외한 지원서와 랜덤 매칭 카드를 함께 조회합니다.</li>
+     *       <li>보내면 해당 상태를 확인할 수 있는 지원서만 조회합니다.
+     *           제출 이후 상태는 해당 매칭 차수의 `decisionDeadline` 이 지난 뒤 확인할 수 있습니다.
+     *           랜덤 매칭 카드는 포함하지 않습니다.</li>
      *     </ul>
      *     <p>
-     *     요청자가 해당 기수 챌린저가 아니거나 PLAN 또는 ADMIN 이면 빈 리스트를 반환한다.
+     *     요청자가 해당 기수 챌린저가 아니거나 지원 대상 파트가 아니면 빈 목록을 반환합니다.
      */
-    get: operations["getMyApplications"]
+    get: operations["APPLY-004"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/projects/applications": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * PM/운영진 복수 프로젝트 지원자 목록 조회
+     * @description 복수 프로젝트의 제출된 지원자 목록을 프로젝트별로 조회합니다. 임시저장(DRAFT) 지원서는 포함하지 않습니다.
+     *     권한이 없거나 존재하지 않는 프로젝트는 해당 projectId 의 값을 빈 목록으로 반환합니다.
+     *     <p>
+     *     필터:
+     *     <ul>
+     *       <li>projectIds: 프로젝트 ID 목록. 최대 100개까지 조회할 수 있습니다.</li>
+     *       <li>matchingRoundId: 매칭 차수 ID</li>
+     *       <li>part: 지원자(챌린저) 파트</li>
+     *       <li>status: 지원 상태. SUBMITTED, APPROVED, REJECTED 만 사용할 수 있습니다.
+     *           DRAFT 를 보내면 APPLICATION_DRAFT_FILTER_NOT_ALLOWED 오류를 반환합니다.</li>
+     *     </ul>
+     */
+    get: operations["APPLY-101-BATCH"]
     put?: never
     post?: never
     delete?: never
@@ -3978,10 +5700,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [POST-103] 게시글 검색
+     * 게시글 검색
      * @description 제목과 본문에서 키워드를 검색합니다. 관련도순(제목 시작 > 제목 포함 > 본문 포함)으로 정렬됩니다.
      */
-    get: operations["search"]
+    get: operations["POST-103"]
     put?: never
     post?: never
     delete?: never
@@ -3998,10 +5720,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [POST-106] 스크랩한 글 조회
+     * 스크랩한 글 조회
      * @description 멤버가 스크랩한 게시글 목록을 조회합니다. (전 기수 포함, 최신 스크랩 순)
      */
-    get: operations["getScrappedPosts"]
+    get: operations["POST-106"]
     put?: never
     post?: never
     delete?: never
@@ -4018,10 +5740,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [POST-104] 내가 쓴 글 조회
+     * 내가 쓴 글 조회
      * @description 멤버가 작성한 게시글 목록을 조회합니다. (전 기수 포함, 최신순 정렬)
      */
-    get: operations["getMyPosts"]
+    get: operations["POST-104"]
     put?: never
     post?: never
     delete?: never
@@ -4038,10 +5760,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [POST-105] 댓글 단 글 조회
+     * 댓글 단 글 조회
      * @description 멤버가 댓글을 단 게시글 목록을 조회합니다. (전 기수 포함, 최신 댓글 순)
      */
-    get: operations["getCommentedPosts"]
+    get: operations["POST-105"]
     put?: never
     post?: never
     delete?: never
@@ -4058,14 +5780,14 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [NOTICE-005] 공지사항 읽음 현황 상세 조회
+     * 공지사항 읽음 현황 상세 조회
      * @description 공지사항을 읽은/안읽은 사용자 목록을 커서 기반 페이징으로 조회합니다.
      *
      *     - `status=READ` → 읽은 사람 목록
      *     - `status=UNREAD` → 안 읽은 사람 목록
      *     - `filterType`으로 지부/학교별 필터링 가능 (리마인더 발송 대상 선택에 활용)
      */
-    get: operations["getNoticeReadStatus"]
+    get: operations["NOTICE-005"]
     put?: never
     post?: never
     delete?: never
@@ -4082,10 +5804,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [NOTICE-004] 공지사항 읽음 통계 조회
+     * 공지사항 읽음 통계 조회
      * @description 공지사항의 전체 대상자 수, 읽은 수, 안 읽은 수 통계를 조회합니다.
      */
-    get: operations["getNoticeReadStatics"]
+    get: operations["NOTICE-004"]
     put?: never
     post?: never
     delete?: never
@@ -4102,12 +5824,12 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [NOTICE-002] 공지사항 검색
+     * 공지사항 검색
      * @description 키워드로 공지사항을 검색합니다. 제목과 내용에서 검색합니다.
      *
      *     **targetNoticeTab 필드 및 필터 조건은 전체 조회와 동일하게 적용됩니다.**
      */
-    get: operations["searchNotices"]
+    get: operations["NOTICE-002"]
     put?: never
     post?: never
     delete?: never
@@ -4124,13 +5846,15 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [MEMBER-103] 회원 검색
+     * 회원 검색
      * @description 이름, 닉네임, 이메일, 학교명으로 검색하며 기수/파트/지부/학교별 필터링을 지원합니다.
+     *
+     *     챌린저 기록이 하나라도 있는 회원만 사용할 수 있습니다. 챌린저 기록이 없으면 403을 반환합니다.
      *
      *     검색 결과에는 본인 외 회원이 포함되므로, 로그인 식별자인 이메일은 평문 노출을 피하기 위해
      *     컨트롤러 단에서 마스킹 처리되어 응답됩니다.
      */
-    get: operations["searchMembers"]
+    get: operations["MEMBER-103"]
     put?: never
     post?: never
     delete?: never
@@ -4146,8 +5870,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [MEMBER-101] memberId로 회원 정보 조회 */
-    get: operations["getMemberProfile"]
+    /** memberId로 회원 정보 조회 */
+    get: operations["MEMBER-101"]
     put?: never
     post?: never
     delete?: never
@@ -4163,8 +5887,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [MEMBER-102] 내 프로필 조회 */
-    get: operations["getMyProfile"]
+    /** 내 프로필 조회 */
+    get: operations["MEMBER-102"]
     put?: never
     post?: never
     delete?: never
@@ -4180,8 +5904,25 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [OAUTH-101] 현재 회원 계정과 연동된 OAuth 정보 조회 */
-    get: operations["getMyOAuthInfos"]
+    /** 현재 회원 계정과 연동된 OAuth 정보 조회 */
+    get: operations["OAUTH-101"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/maintenance/admin/{windowId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 점검 윈도우 단건 조회 */
+    get: operations["MAINT-004"]
     put?: never
     post?: never
     delete?: never
@@ -4197,14 +5938,19 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get: operations["getGisu"]
+    /**
+     * 기수 단건 조회
+     * @deprecated
+     * @description deprecated: `/api/v2/gisu?id={gisuId}`를 사용해주세요.
+     */
+    get: operations["GISU-100"]
     put?: never
     post?: never
     /**
-     * [GISU-002] 기수 삭제
+     * 기수 삭제
      * @description 기수를 삭제합니다. 연결된 지부 또는 학교가 있으면 삭제할 수 없습니다.
      */
-    delete: operations["deleteGisu"]
+    delete: operations["GISU-002"]
     options?: never
     head?: never
     patch?: never
@@ -4218,10 +5964,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [GISU-102] 기수 전체 목록 조회
+     * 기수 전체 목록 조회
      * @description deprecated: 페이징 조회 API를 사용해주세요. 전체 기수 목록을 최신순(generation 내림차순)으로 조회합니다. 기수 ID와 기수 번호만 반환합니다.
      */
-    get: operations["getAllGisu"]
+    get: operations["GISU-102"]
     put?: never
     post?: never
     delete?: never
@@ -4238,10 +5984,95 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [GISU-103] 활성화된 기수 조회
-     * @description 현재 활성화된 기수의 ID와 기수 번호를 조회합니다.
+     * 활성화된 기수 조회
+     * @deprecated
+     * @description deprecated: `/api/v2/gisu?active=true`를 사용해주세요. 현재 활성화된 기수의 ID와 기수 번호를 조회합니다.
      */
-    get: operations["getActiveGisu"]
+    get: operations["GISU-103"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/docs/error-codes": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations["getErrorCodeCatalog"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}/messages": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Community thread message history 조회 */
+    get: operations["COMMUNITY-THREAD-105"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}/members": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Community thread member 조회 */
+    get: operations["COMMUNITY-THREAD-103"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}/invitable": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 초대 가능한 회원 조회 */
+    get: operations["COMMUNITY-THREAD-104"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/admin/thread-message-reports": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Thread message 신고 admin inbox */
+    get: operations["COMMUNITY-THREAD-REPORT-101"]
     put?: never
     post?: never
     delete?: never
@@ -4258,17 +6089,17 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CHAPTER-103] 지부 ID로 지부 조회
+     * 지부 ID로 지부 조회
      * @description deprecated: 제공하는 정보가 없는 API로 제거 후 필요 시 다시 제작할 예정입니다.
      */
-    get: operations["getChapterById"]
+    get: operations["CHAPTER-103"]
     put?: never
     post?: never
     /**
-     * [CHAPTER-003] 지부 삭제
+     * 지부 삭제
      * @description 지부를 삭제합니다. 소속 학교는 삭제되지 않습니다.
      */
-    delete: operations["deleteChapter"]
+    delete: operations["CHAPTER-003"]
     options?: never
     head?: never
     patch?: never
@@ -4282,10 +6113,13 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CHAPTER-102] 기수별 지부 및 소속 학교 목록 조회
-     * @description 특정 기수의 모든 지부와 각 지부에 속한 학교 목록을 조회합니다
+     * 기수별 지부 및 소속 학교 목록 조회
+     * @deprecated
+     * @description deprecated: `/api/v2/gisu?id={gisuId}&includeChapter=true&includeSchool=true`를 사용해주세요.
+     *
+     *     특정 기수의 모든 지부와 각 지부에 속한 학교 목록을 조회합니다
      */
-    get: operations["getChaptersWithSchoolsByGisuId"]
+    get: operations["CHAPTER-102"]
     put?: never
     post?: never
     delete?: never
@@ -4301,12 +6135,12 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [CHALLENGER-101] 챌린저 정보 조회 */
-    get: operations["getChallengerInfo"]
+    /** 챌린저 정보 조회 */
+    get: operations["CHALLENGER-101"]
     put?: never
     post?: never
-    /** [CHALLENGER-005] [주의] 챌린저 삭제 (Hard Delete) */
-    delete: operations["deleteChallenger"]
+    /** 챌린저 물리 삭제 */
+    delete: operations["CHALLENGER-005"]
     options?: never
     head?: never
     patch?: never
@@ -4320,10 +6154,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CHALLENGER-103] 챌린저 검색 (Offset 기반)
-     * @description Cursor 기반 검색과 동일한 검색 조건을 활용합니다. `search/cursor`의 설명을 읽어주세요.
+     * 챌린저 오프셋 기반 검색
+     * @description 커서 기반 검색과 같은 조건을 사용합니다.
      */
-    get: operations["searchChallenger"]
+    get: operations["CHALLENGER-103"]
     put?: never
     post?: never
     delete?: never
@@ -4340,13 +6174,13 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CHALLENGER-104] deprecated: 챌린저 전체 검색 (Cursor 기반, 일정 생성용)
+     * 사용 중단 예정 챌린저 전체 검색
      * @deprecated
      * @description `search/cursor` 및 `search/offset` API를 사용해주세요.
      *
      *     전체 챌린저를 대상으로 이름 또는 닉네임을 이용해 챌린저를 검색합니다.
      */
-    get: operations["globalSearchChallenger"]
+    get: operations["CHALLENGER-104"]
     put?: never
     post?: never
     delete?: never
@@ -4363,7 +6197,7 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CHALLENGER-102] 챌린저 검색 (Cursor 기반)
+     * 챌린저 커서 기반 검색
      * @description 가능한 필터는 이름, 닉네임, 학교, 지부, 파트, 기수 입니다.
      *      이름과 닉네임은, 통합하여 keyword 파라미터로 전달할 수도 있으며 keyword가 제공된 경우 name/nickname 파라미터는 무시됩니다. (즉, keyword가 있으면 name/nickname은 검색 조건에서 제외됩니다)
      *      제공된 파라미터들은 모두 AND 조건으로 검색됩니다. (keyword가 제공된 경우, name/nickname 파라미터를 제외한 나머지 파라미터와 AND 연산됩니다)
@@ -4372,7 +6206,7 @@ export interface paths {
      *      e.g. `keyword=하늘&name=경운&schoolId=1` -> 이름 또는 닉네임에 "하늘"이 포함되고, 소속 학교 ID가 1인 챌린저 검색 (name에 전달된 "경운"은 무시됨)
      *      e.g. `name=홍&nickname=길동&part=WEB` -> 이름에 "홍"이 포함되고, 닉네임에 "길동"이 포함되고, 파트가 WEB인 챌린저 검색
      */
-    get: operations["cursorSearchChallenger"]
+    get: operations["CHALLENGER-102"]
     put?: never
     post?: never
     delete?: never
@@ -4388,8 +6222,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [CHALLENGER-RECORD-102] ID로 ChallengerRecord 조회 */
-    get: operations["getChallengerRecordById"]
+    /** ID로 ChallengerRecord 조회 */
+    get: operations["CHALLENGER-RECORD-102"]
     put?: never
     post?: never
     delete?: never
@@ -4405,8 +6239,178 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** [CHALLENGER-RECORD-101] 코드로 ChallengerRecord 조회 */
-    get: operations["getChallengerRecordByCode"]
+    /** 코드로 ChallengerRecord 조회 */
+    get: operations["CHALLENGER-RECORD-101"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/certificates/{certificateId}/download": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 본인 인증서 다운로드 URL 발급 */
+    get: operations["CERTIFICATE-003"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/certificates/verify/{serialNumber}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 인증서 진위 확인 */
+    get: operations["CERTIFICATE-004"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/series/{type}/{slug}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 공개 시리즈 상세 조회 */
+    get: operations["BLOG-SERIES-002"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/series/{type}/{slug}/contents": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 공개 시리즈 콘텐츠 목록 조회 */
+    get: operations["BLOG-SERIES-003"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/series/{seriesId}/preview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 시리즈 미리보기 조회 */
+    get: operations["BLOG-SERIES-004"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/seo/paths": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** SEO public path 목록 조회 */
+    get: operations["BLOG-CONTENT-007"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/hashtags": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 공개 해시태그 목록 조회 */
+    get: operations["BLOG-HASHTAG-001"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/hashtags/{slug}/contents": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 공개 해시태그 콘텐츠 목록 조회 */
+    get: operations["BLOG-HASHTAG-002"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/contents/{type}/{slug}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 공개 콘텐츠 상세 조회 */
+    get: operations["BLOG-CONTENT-002"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/blog/contents/{contentId}/preview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 콘텐츠 미리보기 조회 */
+    get: operations["BLOG-CONTENT-003"]
     put?: never
     post?: never
     delete?: never
@@ -4423,10 +6427,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [PERMISSION-001] 리소스 권한 조회
-     * @description 특정 리소스에 대해 현재 사용자가 가진 권한을 조회합니다. permissionType을 지정하면 해당 권한만 평가합니다.
+     * 리소스 권한 조회
+     * @description 현재 사용자의 리소스 권한을 조회합니다. permissionType을 지정하면 해당 권한만 평가합니다.
      */
-    get: operations["getResourcePermission"]
+    get: operations["PERMISSION-001"]
     put?: never
     post?: never
     delete?: never
@@ -4443,18 +6447,52 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [STAFF-101] 운영진 기록 조회
+     * 운영진 기록 조회
      * @deprecated
-     * @description deprecate: 내 프로필 조회 등에서 확인할 수 있는 정보인 관계로 중복 API를 제거합니다.
+     * @description 사용 중단 예정입니다. 내 프로필 조회에서 같은 정보를 제공합니다.
      */
-    get: operations["getChallengerRole"]
+    get: operations["STAFF-101"]
     put?: never
     post?: never
     /**
-     * [STAFF-002] 운영진 기록 삭제
-     * @description 부여된 운영진 권한(기록)을 삭제합니다.
+     * 운영진 기록 삭제
+     * @description 부여된 운영진 기록을 삭제합니다.
      */
-    delete: operations["deleteChallengerRole"]
+    delete: operations["STAFF-002"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/sso/oauth/authorize": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** SSO OAuth authorization code 발급 */
+    get: operations["SSO-OAUTH-001"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/auth/sso/me": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 현재 Auth App 브라우저 로그인 조회 */
+    get: operations["SSO-LOGIN-002"]
+    put?: never
+    post?: never
+    delete?: never
     options?: never
     head?: never
     patch?: never
@@ -4468,10 +6506,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [CREDENTIAL-005] 이메일 사용 가능 여부 조회
+     * 이메일 사용 가능 여부 조회
      * @description email 형식이 유효하고 아직 사용되지 않았는지 확인합니다. 형식이 잘못되면 400 응답입니다.
      */
-    get: operations["checkEmailAvailability"]
+    get: operations["CREDENTIAL-005"]
     put?: never
     post?: never
     delete?: never
@@ -4480,15 +6518,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/schools/summary": {
+  "/api/v1/audit/admin/audit-logs": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [DASHBOARD-100] 학교별 현황 조회 */
-    get: operations["getSchoolSummaries"]
+    /** 감사 로그 검색 */
+    get: operations["AUDIT-001"]
     put?: never
     post?: never
     delete?: never
@@ -4497,15 +6535,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/maintenance/{windowId}": {
+  "/api/v1/analytics/admin/schools/summary": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [MAINT-004] 점검 윈도우 단건 조회 */
-    get: operations["getOne"]
+    /** 학교별 현황 조회 */
+    get: operations["DASHBOARD-100"]
     put?: never
     post?: never
     delete?: never
@@ -4514,25 +6552,41 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/figma/watched-files/{watchedFileId}": {
+  "/api/v1/analytics/admin/dashboard/summary": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [FIGMA-009] 폴링 대상 파일 단건 조회 (sync 상태 포함) */
-    get: operations["getFile"]
+    /** 운영진 대시보드 요약 조회 */
+    get: operations["DASHBOARD-001"]
     put?: never
     post?: never
-    /** [FIGMA-004] 폴링 대상 파일 비활성화 */
-    delete: operations["disable"]
+    delete?: never
     options?: never
     head?: never
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/figma/preview": {
+  "/api/v1/analytics/admin/dashboard/risk-challengers": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 운영진 대시보드 위험군 챌린저 조회 */
+    get: operations["DASHBOARD-003"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/analytics/admin/dashboard/operations": {
     parameters: {
       query?: never
       header?: never
@@ -4540,16 +6594,10 @@ export interface paths {
       cookie?: never
     }
     /**
-     * [FIGMA-010] 특정 시간대 미리보기 (Discord 발송 X, dispatch / cursor 비변경)
-     * @description [from, to] 시간창의 댓글이 어떤 도메인으로 묶여 갈지를 발송 없이 응답한다.
-     *     Discord 발송, cursor 갱신, dispatch 기록을 모두 건너뛴다.
-     *     응답의 각 댓글에는 alreadyDispatched 가 포함되어 운영진이
-     *     "이 중 무엇이 다음 sync 에서 실제로 발송될지" 를 사전 검증할 수 있다.
-     *
-     *     from / to 를 생략하면 기본값으로 (now - 2 * pollInterval) ~ now 시간창을 사용한다.
-     *     watchedFileId 를 함께 넘기면 해당 파일 한정으로 동작하며, enabled 여부와 무관하다.
+     * 운영 현황 집계 조회
+     * @deprecated
      */
-    get: operations["preview"]
+    get: operations["DASHBOARD-005"]
     put?: never
     post?: never
     delete?: never
@@ -4558,15 +6606,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/figma/oauth": {
+  "/api/v1/analytics/admin/dashboard/operations/study-groups": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [FIGMA-001] Figma OAuth authorize URL 발급 */
-    get: operations["start_1"]
+    /** 운영 현황 - 스터디 그룹 및 일정 생성 현황 조회 */
+    get: operations["DASHBOARD-009"]
     put?: never
     post?: never
     delete?: never
@@ -4575,15 +6623,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/figma/oauth/callback": {
+  "/api/v1/analytics/admin/dashboard/operations/signups": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [FIGMA-002] Figma OAuth 콜백 처리 */
-    get: operations["callback"]
+    /** 운영 현황 - 기간별 신규 가입자 현황 조회 */
+    get: operations["DASHBOARD-010"]
     put?: never
     post?: never
     delete?: never
@@ -4592,15 +6640,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/dashboard/summary": {
+  "/api/v1/analytics/admin/dashboard/operations/schools": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [DASHBOARD-001] 운영진 대시보드 요약 조회 */
-    get: operations["getSummary"]
+    /** 운영 현황 - 지부별 학교/챌린저 현황 조회 */
+    get: operations["DASHBOARD-006"]
     put?: never
     post?: never
     delete?: never
@@ -4609,15 +6657,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/dashboard/risk-challengers": {
+  "/api/v1/analytics/admin/dashboard/operations/points": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [DASHBOARD-003] 운영진 대시보드 위험군 챌린저 조회 */
-    get: operations["getRiskChallengers"]
+    /** 운영 현황 - 지부 내 파트별 상벌점 부여 현황 조회 */
+    get: operations["DASHBOARD-007"]
     put?: never
     post?: never
     delete?: never
@@ -4626,15 +6674,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/dashboard/operations": {
+  "/api/v1/analytics/admin/dashboard/operations/attendance": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [DASHBOARD-005] 운영 현황 집계 조회 */
-    get: operations["getOperationsOverview"]
+    /** 운영 현황 - 일정 및 출석 생성 현황 조회 */
+    get: operations["DASHBOARD-008"]
     put?: never
     post?: never
     delete?: never
@@ -4643,15 +6691,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/dashboard/context": {
+  "/api/v1/analytics/admin/dashboard/context": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [DASHBOARD-004] 운영진 대시보드 권한 컨텍스트 조회 */
-    get: operations["getContext"]
+    /** 운영진 대시보드 권한 컨텍스트 조회 */
+    get: operations["DASHBOARD-004"]
     put?: never
     post?: never
     delete?: never
@@ -4660,32 +6708,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/v1/admin/dashboard/action-queue": {
+  "/api/v1/analytics/admin/dashboard/action-queue": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** [DASHBOARD-002] 운영진 대시보드 액션 큐 조회 */
-    get: operations["getActionQueue"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/api/v1/admin/audit-logs": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** [AUDIT-001] 감사 로그 검색 */
-    get: operations["search_1"]
+    /** 운영진 대시보드 액션 큐 조회 */
+    get: operations["DASHBOARD-002"]
     put?: never
     post?: never
     delete?: never
@@ -4705,16 +6736,16 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [SCHEDULE-C007] 일정 강제 삭제
+     * 일정 강제 삭제
      * @description 출석 기록 존재 여부와 관계 없이 일정을 강제로 삭제합니다.
      *
      *     - 일정에 연결된 모든 참여자(ScheduleParticipant) 정보도 함께 삭제됩니다.
      *     - 출석 기록이 있는 일정 또한 삭제 가능합니다.
      *
      *     강제 삭제 가능 권한:
-     *     - 해당 일정이 진행되는 기수의 최고 운영 관리자(`SUPER_ADMIN`)
+     *     - 전역 시스템 관리자(`SUPER_ADMIN`)
      */
-    delete: operations["forceDelete"]
+    delete: operations["SCHEDULE-C007"]
     options?: never
     head?: never
     patch?: never
@@ -4730,8 +6761,8 @@ export interface paths {
     get?: never
     put?: never
     post?: never
-    /** [STORAGE-003] 파일 삭제 */
-    delete: operations["deleteFile"]
+    /** 파일 삭제 */
+    delete: operations["STORAGE-003"]
     options?: never
     head?: never
     patch?: never
@@ -4748,10 +6779,14 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [PROJECT-005] 프로젝트 팀원 제거
-     * @description 프로젝트에서 멤버를 제거합니다. DRAFT/PENDING_REVIEW 단계는 hard delete (실수 정정), IN_PROGRESS 단계는 soft delete (히스토리 보존). 메인 PM 은 양도 API 로 변경해야 합니다.
+     * 프로젝트 팀원 제거 (hard delete)
+     * @description 프로젝트에서 멤버 행을 완전히 삭제합니다. 동일 멤버를 같은 프로젝트에 재등록할 수 있습니다.
+     *     DRAFT/PENDING_REVIEW/IN_PROGRESS 프로젝트 단계에서만 가능하며, 종료(COMPLETED/ABORTED) 프로젝트는 이력 보존을 위해 거부됩니다.
+     *     상태 변경 히스토리를 남겨야 하면 [PROJECT-006] API 를 사용하세요.
+     *     메인 PM 은 양도 API 로 변경해야 합니다.
+     *     reason 은 DB 에는 남지 않고 감사 로그로만 기록됩니다.
      */
-    delete: operations["removeMember"]
+    delete: operations["PROJECT-005"]
     options?: never
     head?: never
     patch?: never
@@ -4768,10 +6803,30 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [COMMENT-002] 댓글 삭제
+     * 댓글 삭제
      * @description 본인이 작성한 댓글을 삭제합니다.
      */
-    delete: operations["deleteComment"]
+    delete: operations["COMMENT-002"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/notifications/fcm/installations/{installationId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * FCM installation 해제
+     * @description 현재 회원이 소유한 앱 installation의 FCM 토큰을 비활성화합니다.
+     */
+    delete: operations["FCM-004"]
     options?: never
     head?: never
     patch?: never
@@ -4788,10 +6843,10 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [FCM-002] Legacy 토픽 구독 해제
+     * 기존 토픽 구독 해제
      * @description FCM Topic에 실행 환경 관련 Prefix가 붙기 전에 구독중이던 모든 Legacy Topic을 구독 해제합니다.
      */
-    delete: operations["unsubscribeAllMemberLegacyTopics"]
+    delete: operations["FCM-002"]
     options?: never
     head?: never
     patch?: never
@@ -4808,10 +6863,10 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [NOTICE-106] 공지사항 투표 삭제
+     * 공지사항 투표 삭제
      * @description 공지사항 수정시 필요한 경우 해당 공지에 연결된 투표를 삭제합니다. 공지사항과 투표의 연결도 함께 제거됩니다.
      */
-    delete: operations["deleteNoticeVote"]
+    delete: operations["NOTICE-106"]
     options?: never
     head?: never
     patch?: never
@@ -4828,10 +6883,10 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [MEMBER-004] 관리자 권한으로 회원 게정 삭제 (Hard Delete)
-     * @description 총괄단 권한이 필요합니다. (적용 전)
+     * 관리자 권한으로 회원 계정 물리 삭제
+     * @description 총괄단 권한이 필요합니다. 회원 계정을 물리 삭제합니다.
      */
-    delete: operations["deleteMember_2"]
+    delete: operations["MEMBER-004"]
     options?: never
     head?: never
     patch?: never
@@ -4848,11 +6903,30 @@ export interface paths {
     put?: never
     post?: never
     /**
-     * [OAUTH-002] 로그인용 OAuth 수단 제거
+     * 로그인용 OAuth 수단 제거
      * @description memberOAuthId로 식별해서 제거 처리를 진행합니다.
+     *         비밀번호 credential이 등록된 회원은 마지막 OAuth도 제거할 수 있습니다.
+     *         비밀번호 credential이 없는 회원은 로그인 수단 유지를 위해 OAuth가 최소 1개 남아야 합니다.
      *         Google/Kakao OAuth의 경우 해당 Provider의 Access Token을 함께 전달하면 OAuth Provider측 연결도 해제됩니다.
      */
-    delete: operations["deleteMemberOAuth"]
+    delete: operations["OAUTH-002"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/community/threads/{threadId}/members/{memberId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Community thread member kick */
+    delete: operations["COMMUNITY-THREAD-009"]
     options?: never
     head?: never
     patch?: never
@@ -4862,6 +6936,330 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    /** @description 단계별 지원서 평가 확정 요청 */
+    SubmitRecruitingEvaluationRequest: {
+      /**
+       * @description 평가 결정
+       * @example APPROVED
+       * @enum {string}
+       */
+      decision: "APPROVED" | "REJECTED"
+      /**
+       * @description 평가 의견
+       * @example 지원 동기와 경험이 평가 기준을 충족합니다.
+       */
+      comment?: string
+    }
+    /** @description Form 질문 답변 */
+    AnswerRequest: {
+      /**
+       * Format: int64
+       * @description Form 질문 ID
+       * @example 7
+       */
+      questionId: number
+      /** @description 텍스트 답변 */
+      textValue?: string
+      /** @description 선택한 Form 옵션 ID 목록 */
+      selectedOptionIds?: number[]
+      /** @description 첨부 파일 ID 목록 */
+      fileIds?: string[]
+    }
+    /** @description 익명 지원서 수정 요청 */
+    UpdateAnonymousRecruitingApplicationRequest: {
+      /**
+       * Format: email
+       * @description 현재 지원서에 저장된 이메일
+       * @example applicant@example.org
+       */
+      credentialEmail: string
+      /**
+       * @description 지원서 생성 시 발급된 6자리 키
+       * @example A1B2C3
+       */
+      applicationKey: string
+      /**
+       * @description 수정할 지원자 이름
+       * @example 홍길동
+       */
+      applicantName: string
+      /**
+       * Format: email
+       * @description 수정할 지원자 이메일
+       * @example new-applicant@example.org
+       */
+      applicantEmail: string
+      /**
+       * @description 1지망 모집 트랙
+       * @example PLAN
+       * @enum {string}
+       */
+      firstChoice:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * @description 2지망 모집 트랙
+       * @example DESIGN
+       * @enum {string}
+       */
+      secondChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** @description Form 질문별 답변 목록 */
+      answers: components["schemas"]["AnswerRequest"][]
+    }
+    /** @description 지원서 기본 상태 응답 */
+    RecruitingApplicationResponse: {
+      /**
+       * Format: int64
+       * @description 지원서 ID
+       * @example 100
+       */
+      applicationId?: number
+      /**
+       * @description 지원서 상태
+       * @example SUBMITTED
+       * @enum {string}
+       */
+      status?:
+        | "DRAFT"
+        | "SUBMITTED"
+        | "DOCUMENT_FAILED"
+        | "INTERVIEW_ASSIGNED"
+        | "INTERVIEW_SKIPPED"
+        | "FINAL_PASSED"
+        | "FINAL_FAILED"
+        | "CANCELLED"
+    }
+    /** @description 지원서 초안 수정 요청 */
+    UpdateRecruitingApplicationDraftRequest: {
+      /**
+       * @description 지원자 이름
+       * @example 홍길동
+       */
+      applicantName: string
+      /**
+       * Format: email
+       * @description 지원자 이메일
+       * @example applicant@example.org
+       */
+      applicantEmail: string
+      /**
+       * @description 1지망 모집 트랙
+       * @example PLAN
+       * @enum {string}
+       */
+      firstChoice:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * @description 2지망 모집 트랙
+       * @example DESIGN
+       * @enum {string}
+       */
+      secondChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** @description Form 질문별 답변 목록 */
+      answers: components["schemas"]["AnswerRequest"][]
+    }
+    /** @description 모집 차수 설정 변경 요청 */
+    UpdateRecruitingRoundRequest: {
+      /**
+       * @description 모집 제목
+       * @example 15기 본모집
+       */
+      title: string
+      /** @description 모집 대상 트랙 목록 */
+      recruitableTracks: (
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      )[]
+      /**
+       * @description 2지망 지원 허용 여부
+       * @example true
+       */
+      secondChoiceEnabled?: boolean
+      /**
+       * Format: date-time
+       * @description 서류 접수 시작 시각
+       */
+      documentStartAt: string
+      /**
+       * Format: date-time
+       * @description 서류 접수 종료 시각
+       */
+      documentEndAt: string
+      /**
+       * Format: date-time
+       * @description 서류 결과 공개 시각
+       */
+      documentResultPublishedAt: string
+      /**
+       * @description 면접 진행 여부
+       * @example true
+       */
+      interviewRequired?: boolean
+      /**
+       * Format: date-time
+       * @description 면접 기간 시작 시각
+       */
+      interviewStartAt?: string
+      /**
+       * Format: date-time
+       * @description 면접 기간 종료 시각
+       */
+      interviewEndAt?: string
+      /**
+       * Format: date-time
+       * @description 최종 결과 공개 시각
+       */
+      finalResultPublishedAt: string
+      /**
+       * Format: int64
+       * @description 면접 가능 일정 Form ID
+       * @example 100
+       */
+      availabilityFormId?: number
+      /** @description 지원자 안내 문구 */
+      announcement?: string
+      /** @description 문의 연락처 */
+      contactText?: string
+    }
+    OptionRequest: {
+      /** Format: int64 */
+      optionId?: number
+      content: string
+      other?: boolean
+      nextSectionKey?: string
+    }
+    QuestionRequest: {
+      /** Format: int64 */
+      questionId?: number
+      /** @enum {string} */
+      type:
+        | "SHORT_TEXT"
+        | "LONG_TEXT"
+        | "RADIO"
+        | "CHECKBOX"
+        | "DROPDOWN"
+        | "SCHEDULE"
+        | "FILE"
+        | "PORTFOLIO"
+      title: string
+      description?: string
+      required?: boolean
+      options?: components["schemas"]["OptionRequest"][]
+    }
+    SectionRequest: {
+      /** Format: int64 */
+      sectionId?: number
+      clientKey: string
+      title: string
+      description?: string
+      /** @enum {string} */
+      type: "COMMON" | "TRACK"
+      /** @enum {string} */
+      track?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      questions?: components["schemas"]["QuestionRequest"][]
+    }
+    /** @description Recruiting 지원 Form 전체 구조 Upsert 요청 */
+    UpsertRecruitingApplicationFormRequest: {
+      description?: string
+      sections: components["schemas"]["SectionRequest"][]
+    }
+    /** @description 생성된 리크루팅 리소스 ID 응답 */
+    RecruitingIdResponse: {
+      /**
+       * Format: int64
+       * @description 생성된 리소스 ID
+       * @example 1
+       */
+      id?: number
+    }
+    /** @description 모집 시즌의 트랙별 목표 인원 */
+    RecruitingSeasonTrackQuotaRequest: {
+      /**
+       * @description 모집 트랙
+       * @example PLAN
+       * @enum {string}
+       */
+      track:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * Format: int32
+       * @description 목표 인원
+       * @example 5
+       */
+      targetCount: number
+    }
+    /** @description 모집 시즌 트랙별 목표 인원 전체 교체 요청 */
+    ReplaceRecruitingSeasonTrackQuotasRequest: {
+      /** @description 교체할 트랙별 목표 인원 목록 */
+      quotas: components["schemas"]["RecruitingSeasonTrackQuotaRequest"][]
+    }
+    /** @description 면접 질문 생성 또는 수정 요청 */
+    RecruitingInterviewQuestionRequest: {
+      /**
+       * @description 면접 질문 본문
+       * @example 지원 동기를 구체적으로 설명해 주세요.
+       */
+      content: string
+      /**
+       * Format: int32
+       * @description 질문 노출 순서
+       * @example 0
+       */
+      orderNo: number
+    }
+    /** @description 면접 일정 확정 요청 */
+    ConfirmRecruitingInterviewScheduleRequest: {
+      /**
+       * Format: date-time
+       * @description 면접 시작 시각
+       */
+      startsAt: string
+      /**
+       * Format: date-time
+       * @description 면접 종료 시각
+       */
+      endsAt: string
+      /**
+       * @description 면접 장소 또는 접속 링크
+       * @example 온라인 회의실 A
+       */
+      location: string
+      /**
+       * @description 확정 시점 연락처 스냅샷
+       * @example 문의: recruit@example.org
+       */
+      contactSnapshot: string
+      periodValid?: boolean
+    }
     Entry: {
       /** @enum {string} */
       part:
@@ -4958,12 +7356,57 @@ export interface components {
       description?: string
       sections?: components["schemas"]["ApplicationFormSection"][]
     }
-    FcmRegistrationRequest: {
-      fcmToken: string
-    }
     UpdateNoticeVoteResponseRequest: {
       /** @description 선택한 옵션 ID 목록. 빈 배열로 보내면 기존 응답이 취소됩니다. */
       optionIds?: number[]
+    }
+    ReplaceBlogSeriesContentsRequest: {
+      contentIds: number[]
+    }
+    /** @description 블로그 댓글 작성자 응답 */
+    AuthorResponse: {
+      /**
+       * Format: int64
+       * @description 회원 ID. 비회원 작성자면 null
+       * @example 1
+       */
+      id?: number
+      /**
+       * @description 회원 이름
+       * @example 홍길동
+       */
+      name?: string
+      /**
+       * @description 닉네임
+       * @example spring-master
+       */
+      nickname?: string
+      /**
+       * @description 프로필 이미지 URL
+       * @example https://example.com/profile.png
+       */
+      profileImageUrl?: string
+    }
+    BlogSeriesResponse: {
+      /** Format: int64 */
+      id?: number
+      /** @enum {string} */
+      type?: "ENGINEERING" | "DESIGN" | "PRODUCT" | "RELEASE"
+      slug?: string
+      title?: string
+      description?: string
+      thumbnailUrl?: string
+      author?: components["schemas"]["AuthorResponse"]
+      /** Format: int32 */
+      contentCount?: number
+      /** Format: date-time */
+      updatedAt?: string
+      canonicalPath?: string
+      seoTitle?: string
+      seoDescription?: string
+      ogImageUrl?: string
+      canEdit?: boolean
+      canDelete?: boolean
     }
     SeedProjectsRequest: {
       /** Format: int32 */
@@ -5169,6 +7612,20 @@ export interface components {
       skipped?: boolean
       reason?: string
     }
+    CreateSeedMemberRequest: {
+      name: string
+      nickname: string
+      /** Format: int64 */
+      schoolId: number
+      /** Format: email */
+      email: string
+      rawPassword?: string
+    }
+    CreateSeedMemberResponse: {
+      /** Format: int64 */
+      memberId?: number
+      email?: string
+    }
     SeedCurriculumRequest: {
       /** Format: int64 */
       gisuId?: number
@@ -5255,6 +7712,101 @@ export interface components {
       /** Format: int32 */
       totalFailed?: number
       perCellSummary?: components["schemas"]["PerCellSummary"][]
+    }
+    CreateSeedChallengerRequest: {
+      /** Format: int64 */
+      memberId: number
+      /** Format: int64 */
+      gisuId: number
+      /** @enum {string} */
+      part:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+    }
+    CreateSeedChallengerResponse: {
+      /** Format: int64 */
+      challengerId?: number
+      /** Format: int64 */
+      memberId?: number
+      /** Format: int64 */
+      gisuId?: number
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+    }
+    CreateSeedChallengerRoleRequest: {
+      /** Format: int64 */
+      challengerId: number
+      /** @enum {string} */
+      roleType:
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+      /** Format: int64 */
+      organizationId?: number
+      /** @enum {string} */
+      responsiblePart?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** Format: int64 */
+      gisuId: number
+      organizationIdValid?: boolean
+    }
+    CreateSeedChallengerRoleResponse: {
+      /** Format: int64 */
+      challengerRoleId?: number
+      /** Format: int64 */
+      challengerId?: number
+      /** @enum {string} */
+      roleType?:
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+      /** Format: int64 */
+      organizationId?: number
+      /** @enum {string} */
+      responsiblePart?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** Format: int64 */
+      gisuId?: number
     }
     FcmTestSendRequest: {
       /** Format: int64 */
@@ -5361,7 +7913,7 @@ export interface components {
     }
     ScheduleAttendanceRequest: {
       /**
-       * @description 클라이언트 측의 위치 인증 여부, 비대면 일정일 경우 false
+       * @description 클라이언트 위치 인증 여부. 비대면 일정이면 false
        * @example true
        */
       locationVerified: boolean
@@ -5413,7 +7965,7 @@ export interface components {
     }
     ExcuseScheduleAttendanceRequest: {
       /**
-       * @description (필수 값) 클라이언트 측의 위치 인증 여부, 비대면 일정일 경우 false
+       * @description 클라이언트 위치 인증 여부. 비대면 일정이면 false
        * @example true
        */
       isVerified?: boolean
@@ -5430,7 +7982,7 @@ export interface components {
        */
       longitude?: number
       /**
-       * @description 사유 출석 사유
+       * @description 사유 출석 신청 사유
        * @example 위치 인증이 안 되어서 사유 출석 제출합니다.
        */
       excuseReason: string
@@ -5443,7 +7995,7 @@ export interface components {
        */
       participantMemberId: number
       /**
-       * @description (필수 값) 출석 요청 승인 여부
+       * @description 출석 요청 승인 여부
        * @example true
        */
       isApproved?: boolean
@@ -5492,12 +8044,16 @@ export interface components {
     }
     CreateOriginalWorkbookMissionRequest: {
       /** Format: int64 */
-      originalWorkbookId?: number
-      title?: string
+      originalWorkbookId: number
+      title: string
       description?: string
       /** @enum {string} */
-      missionType?: "LINK" | "MEMO" | "PLAIN"
-      isNecessary?: boolean
+      missionType: "LINK" | "MEMO" | "PLAIN"
+      isNecessary: boolean
+    }
+    CreateOriginalWorkbookMissionResponse: {
+      /** Format: int64 */
+      originalWorkbookMissionId?: number
     }
     CreateBestWorkbookRequest: {
       /** Format: int64 */
@@ -5585,68 +8141,130 @@ export interface components {
       /** Format: int64 */
       formResponseId?: number
     }
-    CreateTrophyRequest: {
+    CreateUmcProductSquadRequest: {
+      code: string
+      name: string
+      description?: string
+      /**
+       * Format: date
+       * @example 2026-07-13
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2026-12-31
+       */
+      endDate?: string
       /** Format: int32 */
-      week?: number
-      title?: string
-      content?: string
-      url?: string
+      sortOrder?: number
+      active?: boolean
     }
-    /** @description 상장 응답 */
-    TrophyResponse: {
+    CreateUmcProductSquadParticipantRequest: {
+      /** Format: int64 */
+      umcProductMemberId: number
+      /** @enum {string} */
+      role: "MEMBER" | "SQUAD_LEAD"
+      /** @enum {string} */
+      position:
+        | "UNSPECIFIED"
+        | "PRODUCT_OWNER"
+        | "PRODUCT_DESIGNER"
+        | "IOS_DEVELOPER"
+        | "ANDROID_DEVELOPER"
+        | "WEB_DEVELOPER"
+        | "SERVER_DEVELOPER"
+        | "ETC"
+      responsibilityTitle?: string
+      responsibilityDescription?: string
       /**
-       * Format: int64
-       * @description 상장 ID
-       * @example 1
+       * Format: date
+       * @example 2026-07-13
        */
-      trophyId?: number
+      startDate: string
       /**
-       * Format: int64
-       * @description 챌린저 ID
-       * @example 123
+       * Format: date
+       * @example 2026-12-31
        */
-      challengerId?: number
+      endDate?: string
+    }
+    CreateUmcProductMemberRequest: {
+      /** Format: int64 */
+      memberId: number
+      introduction?: string
+      profileImageId?: string
+      activityPeriods: components["schemas"]["UmcProductActivityPeriodRequest"][]
+    }
+    UmcProductActivityPeriodRequest: {
       /**
-       * Format: int32
-       * @description 주차
-       * @example 3
+       * Format: date
+       * @example 2026-07-13
        */
-      week?: number
+      startDate: string
       /**
-       * @description 챌린저 이름
-       * @example 홍길동
+       * Format: date
+       * @example 2026-12-31
        */
-      challengerName?: string
+      endDate?: string
+    }
+    CreateUmcProductLeadershipRequest: {
+      /** @enum {string} */
+      role: "UMC_PRODUCT_VICE_LEAD" | "UMC_PRODUCT_LEAD"
       /**
-       * @description 챌린저 프로필 이미지
-       * @example https://example.com/profile.jpg
+       * Format: date
+       * @example 2026-07-13
        */
-      challengerProfileImage?: string
+      startDate: string
       /**
-       * @description 학교명
-       * @example 서울대학교
+       * Format: date
+       * @example 2026-12-31
        */
-      school?: string
+      endDate?: string
+    }
+    CreateUmcProductChapterMembershipRequest: {
+      /** Format: int64 */
+      chapterId: number
+      /** @enum {string} */
+      position:
+        | "UNSPECIFIED"
+        | "PRODUCT_OWNER"
+        | "PRODUCT_DESIGNER"
+        | "IOS_DEVELOPER"
+        | "ANDROID_DEVELOPER"
+        | "WEB_DEVELOPER"
+        | "SERVER_DEVELOPER"
+        | "ETC"
+      responsibilityTitle?: string
+      responsibilityDescription?: string
       /**
-       * @description 파트
-       * @example SPRINGBOOT
+       * Format: date
+       * @example 2026-07-13
        */
-      part?: string
+      startDate: string
       /**
-       * @description 상장 제목
-       * @example 3주차 최우수 챌린저
+       * Format: date
+       * @example 2026-12-31
        */
-      title?: string
+      endDate?: string
+    }
+    CreateUmcProductMemberActivityPeriodRequest: {
       /**
-       * @description 상장 내용
-       * @example 3주차 미션을 성실히 수행하여...
+       * Format: date
+       * @example 2026-07-13
        */
-      content?: string
+      startDate: string
       /**
-       * @description 상장 노션 링크
-       * @example https://www.notion.so/trophy-page-12345
+       * Format: date
+       * @example 2026-12-31
        */
-      url?: string
+      endDate?: string
+    }
+    CreateUmcProductChapterRequest: {
+      code: string
+      name: string
+      description?: string
+      /** Format: int32 */
+      sortOrder?: number
+      active?: boolean
     }
     CreateTermRequest: {
       /**
@@ -5752,8 +8370,10 @@ export interface components {
         | "WORKBOOK_SUBMISSION"
         | "SCHOOL_LOGO"
         | "PORTFOLIO"
+        | "CERTIFICATE"
         | "PROJECT_THUMBNAIL"
         | "PROJECT_LOGO"
+        | "UMC_PRODUCT_PROFILE_IMAGE"
         | "ETC"
     }
     ApiResponsePrepareUploadResponse: {
@@ -5810,6 +8430,371 @@ export interface components {
        * @example https://open.kakao.com/o/example
        */
       url: string
+    }
+    /** @description 익명 지원서 초안 생성 요청 */
+    CreateAnonymousRecruitingApplicationDraftRequest: {
+      /**
+       * Format: int64
+       * @description 리크루팅 지원 폼 ID
+       * @example 10
+       */
+      applicationFormId: number
+      /**
+       * @description 지원자 이름
+       * @example 홍길동
+       */
+      applicantName: string
+      /**
+       * Format: email
+       * @description 지원자 이메일
+       * @example applicant@example.org
+       */
+      applicantEmail: string
+      /**
+       * @description 1지망 모집 트랙
+       * @example PLAN
+       * @enum {string}
+       */
+      firstChoice:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * @description 2지망 모집 트랙
+       * @example DESIGN
+       * @enum {string}
+       */
+      secondChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * Format: int64
+       * @description 동의한 개인정보 처리방침 약관 ID
+       * @example 3
+       */
+      privacyTermId: number
+      /**
+       * @description 개인정보 처리방침 동의 여부
+       * @example true
+       */
+      privacyAgreed?: boolean
+    }
+    /** @description 지원서 초안 생성 응답 */
+    RecruitingApplicationCreatedResponse: {
+      /**
+       * Format: int64
+       * @description 지원서 ID
+       * @example 100
+       */
+      applicationId?: number
+      /**
+       * @description 지원서 생성 시 한 번 반환되는 application key
+       * @example A1B2C3
+       */
+      applicationKey?: string
+      /**
+       * @description 지원서 상태
+       * @example DRAFT
+       * @enum {string}
+       */
+      status?:
+        | "DRAFT"
+        | "SUBMITTED"
+        | "DOCUMENT_FAILED"
+        | "INTERVIEW_ASSIGNED"
+        | "INTERVIEW_SKIPPED"
+        | "FINAL_PASSED"
+        | "FINAL_FAILED"
+        | "CANCELLED"
+    }
+    /** @description 익명 지원서 제출 요청 */
+    SubmitAnonymousRecruitingApplicationRequest: {
+      /**
+       * Format: email
+       * @description 현재 지원서에 저장된 이메일
+       * @example applicant@example.org
+       */
+      email: string
+      /**
+       * @description 지원서 생성 시 발급된 6자리 키
+       * @example A1B2C3
+       */
+      applicationKey: string
+    }
+    /** @description 익명 지원서 조회 자격 증명 */
+    RecruitingApplicationCredentialRequest: {
+      /**
+       * Format: email
+       * @description 지원 시 입력한 이메일
+       * @example applicant@example.org
+       */
+      email: string
+      /**
+       * @description 지원서 생성 시 발급된 6자리 키
+       * @example A1B2C3
+       */
+      applicationKey: string
+    }
+    /** @description Form 질문 답변 */
+    AnswerResponse: {
+      /**
+       * Format: int64
+       * @description Form 질문 ID
+       */
+      questionId?: number
+      /** @description 텍스트 답변 */
+      textValue?: string
+      /** @description 선택한 Form 옵션 ID 목록 */
+      selectedOptionIds?: number[]
+      /** @description 첨부 파일 ID 목록 */
+      fileIds?: string[]
+      /** @description 선택한 일정 목록 */
+      times?: string[]
+    }
+    /** @description 익명 지원자가 자격 증명으로 조회한 지원서 */
+    RecruitingPublicApplicationResponse: {
+      /**
+       * Format: int64
+       * @description 지원서 ID
+       * @example 100
+       */
+      applicationId?: number
+      /**
+       * @description 지원자 이름
+       * @example 홍길동
+       */
+      applicantName?: string
+      /**
+       * @description 정규화된 지원자 이메일
+       * @example applicant@example.org
+       */
+      applicantEmail?: string
+      /**
+       * @description 1지망 모집 트랙
+       * @example PLAN
+       * @enum {string}
+       */
+      firstChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * @description 2지망 모집 트랙
+       * @example DESIGN
+       * @enum {string}
+       */
+      secondChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** @description 제출 완료 여부 */
+      submitted?: boolean
+      /** @description 지원 취소 여부 */
+      cancelled?: boolean
+      /** @description 현재 수정 가능 여부 */
+      editable?: boolean
+      /**
+       * @description 서류 결과. 발표 전에는 PENDING
+       * @enum {string}
+       */
+      documentResult?: "PENDING" | "APPROVED" | "REJECTED"
+      /**
+       * @description 최종 결과. 발표 전에는 PENDING
+       * @enum {string}
+       */
+      finalResult?: "PENDING" | "APPROVED" | "REJECTED"
+      /**
+       * @description 최종 합격 트랙. 최종 발표 후 합격한 경우에만 제공
+       * @enum {string}
+       */
+      acceptedTrack?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** @description Form 답변 목록 */
+      answers?: components["schemas"]["AnswerResponse"][]
+    }
+    /** @description 지원서 초안 생성 요청 */
+    CreateRecruitingApplicationDraftRequest: {
+      /**
+       * Format: int64
+       * @description 리크루팅 지원 폼 연결 ID
+       * @example 10
+       */
+      applicationFormId: number
+      /**
+       * @description 지원자 이름
+       * @example 홍길동
+       */
+      applicantName: string
+      /**
+       * Format: email
+       * @description 지원자 이메일
+       * @example applicant@example.org
+       */
+      applicantEmail: string
+      /**
+       * @description 1지망 모집 트랙
+       * @example PLAN
+       * @enum {string}
+       */
+      firstChoice:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * @description 2지망 모집 트랙
+       * @example DESIGN
+       * @enum {string}
+       */
+      secondChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+    }
+    /** @description 지원서 제출 요청 */
+    SubmitRecruitingApplicationRequest: {
+      /**
+       * @description 클라이언트가 전달한 제출 IP. 비어 있으면 서버가 확인한 원격 주소를 사용합니다.
+       * @example 127.0.0.1
+       */
+      submittedIp?: string
+    }
+    /** @description 모집 시즌 생성 요청 */
+    CreateRecruitingSeasonRequest: {
+      /**
+       * Format: int64
+       * @description 모집 대상 기수 ID
+       * @example 15
+       */
+      gisuId: number
+      /**
+       * Format: int64
+       * @description 모집을 진행하는 학교 ID
+       * @example 10
+       */
+      schoolId: number
+      /** @description 초기 트랙별 목표 인원 목록 */
+      quotas?: components["schemas"]["RecruitingSeasonTrackQuotaRequest"][]
+    }
+    /** @description 모집 차수 생성 요청 */
+    CreateRecruitingRoundRequest: {
+      /**
+       * @description 모집 제목
+       * @example 15기 본모집
+       */
+      title: string
+      /**
+       * @description 모집 차수 유형
+       * @example REGULAR
+       * @enum {string}
+       */
+      type: "REGULAR" | "ADDITIONAL"
+      /**
+       * Format: int32
+       * @description 추가모집 차수 번호. 본모집이면 비워둘 수 있습니다.
+       * @example 1
+       */
+      roundNo?: number
+      /** @description 모집 대상 트랙 목록 */
+      recruitableTracks: (
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      )[]
+      /**
+       * @description 2지망 지원 허용 여부
+       * @example true
+       */
+      secondChoiceEnabled?: boolean
+      /**
+       * Format: date-time
+       * @description 서류 접수 시작 시각
+       */
+      documentStartAt: string
+      /**
+       * Format: date-time
+       * @description 서류 접수 종료 시각
+       */
+      documentEndAt: string
+      /**
+       * Format: date-time
+       * @description 서류 결과 공개 시각
+       */
+      documentResultPublishedAt: string
+      /**
+       * @description 면접 진행 여부
+       * @example true
+       */
+      interviewRequired?: boolean
+      /**
+       * Format: date-time
+       * @description 면접 기간 시작 시각
+       */
+      interviewStartAt?: string
+      /**
+       * Format: date-time
+       * @description 면접 기간 종료 시각
+       */
+      interviewEndAt?: string
+      /**
+       * Format: date-time
+       * @description 최종 결과 공개 시각
+       */
+      finalResultPublishedAt: string
+      /**
+       * Format: int64
+       * @description 면접 가능 일정 Form ID
+       * @example 100
+       */
+      availabilityFormId?: number
+      /** @description 지원자 안내 문구 */
+      announcement?: string
+      /** @description 문의 연락처 */
+      contactText?: string
+    }
+    /** @description 모집 Round 복제 요청 */
+    CloneRecruitingRoundRequest: {
+      /** Format: int64 */
+      targetSeasonId: number
+      title: string
+      /** @enum {string} */
+      type: "REGULAR" | "ADDITIONAL"
+      /** Format: int32 */
+      roundNo?: number
+    }
+    /** @description 면접 생략 요청 */
+    SkipRecruitingInterviewRequest: {
+      /**
+       * @description 면접 생략 사유 또는 운영진 메모
+       * @example 학교 정책상 면접 전형을 진행하지 않습니다.
+       */
+      reason?: string
+    }
+    /** @description 면접 가능 일정 제출 요청 생성 */
+    RequestRecruitingInterviewScheduleRequest: {
+      /**
+       * @description 지원자에게 표시할 연락처 스냅샷
+       * @example 문의: recruit@example.org
+       */
+      contactSnapshot: string
     }
     CreateDraftProjectRequest: {
       /** Format: int64 */
@@ -6141,6 +9126,50 @@ export interface components {
        */
       openChatUrl?: string
     }
+    FcmRegistrationRequest: {
+      installationId: string
+      fcmToken: string
+      platform?: string
+      appVersion?: string
+    }
+    FcmAdminSendRequest: {
+      target: components["schemas"]["Target"]
+      message: components["schemas"]["Message"]
+    }
+    Message: {
+      title: string
+      body: string
+      data?: {
+        [key: string]: string
+      }
+      imageUrl?: string
+      deepLink?: string
+    }
+    Target: {
+      memberIds?: number[]
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      chapterId?: number
+      /** Format: int64 */
+      schoolId?: number
+      parts?: (
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      )[]
+    }
+    FcmAdminSendResponse: {
+      /** Format: uuid */
+      requestId?: string
+      /** Format: date-time */
+      queuedAt?: string
+    }
     /** @description 공지사항 생성 요청 */
     CreateNoticeRequest: {
       /** @description 공지사항 제목 */
@@ -6156,7 +9185,7 @@ export interface components {
       mustRead: boolean
       targetInfo: components["schemas"]["NoticeTargetInfo"]
     }
-    /** @description 공지 대상 범위 설정. null인 필드는 '전체'를 의미합니다. 예) targetGisuId만 입력 → 해당 기수 전체 / targetChapterId도 입력 → 해당 지부만 / targetParts도 입력 → 해당 파트만 / minTargetRole에 CHALLENGER 외 값 입력 → 운영진 공지 */
+    /** @description 공지 대상 범위. null인 필드는 전체 대상. 예) targetGisuId만 입력하면 해당 기수 전체, targetChapterId도 입력하면 해당 지부만, targetParts도 입력하면 해당 파트만, targetNoticeTab이 CHALLENGER가 아니면 운영진 공지 */
     NoticeTargetInfo: {
       /**
        * Format: int64
@@ -6172,12 +9201,12 @@ export interface components {
       targetChapterId?: number
       /**
        * Format: int64
-       * @description 대상 학교 ID. null이면 전체 학교 대상. 교내운영진 공지 시 필수
+       * @description 대상 학교 ID. null이면 전체 학교 대상. 교내 운영진 공지이면 필수
        * @example 5
        */
       targetSchoolId?: number
       /**
-       * @description 대상 파트 목록. 빈 배열([])이면 모든 파트 대상. 특정 파트만 지정하면 해당 파트 챌린저/파트장에게만 공지됨
+       * @description 대상 파트 목록. 빈 배열이면 모든 파트 대상. 특정 파트만 지정하면 해당 파트 챌린저와 파트장에게만 공지
        * @example [
        *       "SPRINGBOOT",
        *       "WEB"
@@ -6194,7 +9223,7 @@ export interface components {
         | "ADMIN"
       )[]
       /**
-       * @description 대상 역할 하한선. CHALLENGER면 일반 챌린저 공지. CENTRAL_MEMBER/SCHOOL_CORE/SCHOOL_PART_LEADER면 운영진 공지.
+       * @description 대상 역할 하한선. CHALLENGER면 일반 챌린저 공지. CENTRAL_MEMBER, SCHOOL_CORE, SCHOOL_PART_LEADER면 운영진 공지
        * @example CHALLENGER
        * @enum {string}
        */
@@ -6238,7 +9267,7 @@ export interface components {
       /** @description 선택한 옵션 ID 목록. 단일 선택이면 1개, 복수 선택이면 N개. */
       optionIds?: number[]
     }
-    /** @description 공지 리마인더 발송 요청. 공지를 읽지 않은 사용자에게 푸시 알림을 재발송합니다. */
+    /** @description 공지 리마인더 발송 요청. 공지를 읽지 않은 사용자에게 푸시 알림을 다시 보냅니다. */
     SendNoticeReminderRequest: {
       targetIds: number[]
     }
@@ -6283,7 +9312,7 @@ export interface components {
        * @example 1
        */
       schoolId: number
-      /** @description (deprecated) 프로필 이미지 fileId 값, UI에 존재하지 않아 향후 제거 예정입니다. */
+      /** @description 사용 중단 예정 프로필 이미지 fileId. UI에서 사용하지 않아 이후 제거 예정 */
       profileImageId?: string
       /** @description 약관 동의 목록 */
       termsAgreements: components["schemas"]["TermConsentStatus"][]
@@ -6348,470 +9377,6 @@ export interface components {
       memberId?: number
       /** @enum {string} */
       provider?: "GOOGLE" | "APPLE" | "KAKAO"
-    }
-    CreateGisuRequest: {
-      /** Format: int64 */
-      generation: number
-      /** Format: date-time */
-      startAt: string
-      /** Format: date-time */
-      endAt: string
-    }
-    /** @description 지부 생성 요청 */
-    CreateChapterRequest: {
-      /**
-       * Format: int64
-       * @description 기수 ID
-       * @example 1
-       */
-      gisuId: number
-      /**
-       * @description 지부명
-       * @example 서울
-       */
-      name: string
-      /**
-       * @description 소속 학교 ID 목록
-       * @example [
-       *       1,
-       *       2,
-       *       3
-       *     ]
-       */
-      schoolIds?: number[]
-    }
-    CreateChallengerInfoRequest: {
-      /** Format: int64 */
-      memberId: number
-      /** @enum {string} */
-      part:
-        | "PLAN"
-        | "DESIGN"
-        | "WEB"
-        | "ANDROID"
-        | "IOS"
-        | "NODEJS"
-        | "SPRINGBOOT"
-        | "ADMIN"
-      /** Format: int64 */
-      gisuId: number
-    }
-    ChallengerInfoResponse: {
-      /** Format: int64 */
-      challengerId?: number
-      /** Format: int64 */
-      memberId?: number
-      /** Format: int64 */
-      gisuId?: number
-      /** Format: int64 */
-      gisu?: number
-      /** Format: int64 */
-      chapterId?: number
-      chapterName?: string
-      /** @enum {string} */
-      part?:
-        | "PLAN"
-        | "DESIGN"
-        | "WEB"
-        | "ANDROID"
-        | "IOS"
-        | "NODEJS"
-        | "SPRINGBOOT"
-        | "ADMIN"
-      /** @enum {string} */
-      challengerStatus?: "ACTIVE" | "GRADUATED" | "EXPELLED" | "WITHDRAWN"
-      challengerPoints?: components["schemas"]["ChallengerPointInfo"][]
-      points?: components["schemas"]["ChallengerPointInfo"][]
-      /** Format: double */
-      totalPoints?: number
-      roles?: components["schemas"]["ChallengerRoleResponse"][]
-      name?: string
-      nickname?: string
-      email?: string
-      /** Format: int64 */
-      schoolId?: number
-      schoolName?: string
-      profileImageLink?: string
-      /** @enum {string} */
-      memberStatus?: "ACTIVE" | "INACTIVE" | "WITHDRAWN"
-      /** @enum {string} */
-      status?: "ACTIVE" | "INACTIVE" | "WITHDRAWN"
-    }
-    ChallengerPointInfo: {
-      /** Format: int64 */
-      id?: number
-      /** Format: int64 */
-      challengerId?: number
-      /** @enum {string} */
-      pointType?:
-        | "BEST_WORKBOOK"
-        | "WARNING"
-        | "OUT"
-        | "CUSTOM"
-        | "BLOG_CHALLENGE"
-        | "BEST_WORKBOOK_V2"
-        | "UMC_EVENT_REVIEW"
-        | "PEER_REVIEW_SUBMISSION"
-        | "NO_WORKBOOK_MISSION"
-        | "STUDY_LATE"
-        | "STUDY_ABSENT"
-        | "EVENT_LATE"
-        | "EVENT_EARLY_LEAVE"
-        | "EVENT_LATE_CANCEL"
-        | "EVENT_NO_SHOW"
-        | "PART_LEAD_FEEDBACK_LATE"
-        | "SCHOOL_CORE_MEETING_ABSENT"
-        | "SCHOOL_CORE_TASK_NOT_COMPLETED"
-      /** Format: double */
-      point?: number
-      description?: string
-      /** Format: date-time */
-      createdAt?: string
-    }
-    ChallengerRoleResponse: {
-      /** Format: int64 */
-      challengerRoleId?: number
-      /** Format: int64 */
-      challengerId?: number
-      /** @enum {string} */
-      roleType?:
-        | "SUPER_ADMIN"
-        | "CENTRAL_PRESIDENT"
-        | "CENTRAL_VICE_PRESIDENT"
-        | "CENTRAL_OPERATING_TEAM_MEMBER"
-        | "CENTRAL_EDUCATION_TEAM_MEMBER"
-        | "CHAPTER_PRESIDENT"
-        | "SCHOOL_PRESIDENT"
-        | "SCHOOL_VICE_PRESIDENT"
-        | "SCHOOL_PART_LEADER"
-        | "SCHOOL_ETC_ADMIN"
-      /** @enum {string} */
-      organizationType?: "CENTRAL" | "CHAPTER" | "SCHOOL"
-      /** Format: int64 */
-      organizationId?: number
-      /** @enum {string} */
-      responsiblePart?:
-        | "PLAN"
-        | "DESIGN"
-        | "WEB"
-        | "ANDROID"
-        | "IOS"
-        | "NODEJS"
-        | "SPRINGBOOT"
-        | "ADMIN"
-      /** Format: int64 */
-      gisuId?: number
-      /** Format: int64 */
-      gisu?: number
-    }
-    GrantChallengerPointRequest: {
-      /** @enum {string} */
-      pointType:
-        | "BEST_WORKBOOK"
-        | "WARNING"
-        | "OUT"
-        | "CUSTOM"
-        | "BLOG_CHALLENGE"
-        | "BEST_WORKBOOK_V2"
-        | "UMC_EVENT_REVIEW"
-        | "PEER_REVIEW_SUBMISSION"
-        | "NO_WORKBOOK_MISSION"
-        | "STUDY_LATE"
-        | "STUDY_ABSENT"
-        | "EVENT_LATE"
-        | "EVENT_EARLY_LEAVE"
-        | "EVENT_LATE_CANCEL"
-        | "EVENT_NO_SHOW"
-        | "PART_LEAD_FEEDBACK_LATE"
-        | "SCHOOL_CORE_MEETING_ABSENT"
-        | "SCHOOL_CORE_TASK_NOT_COMPLETED"
-      /** Format: int32 */
-      pointValue?: number
-      description?: string
-    }
-    DeactivateChallengerRequest: {
-      /** @enum {string} */
-      deactivationType: "WITHDRAW" | "EXPEL"
-      /** Format: int64 */
-      modifiedBy: number
-      reason: string
-    }
-    CreateChallengerRecordRequest: {
-      /** Format: int64 */
-      gisuId: number
-      /** Format: int64 */
-      chapterId: number
-      /** Format: int64 */
-      schoolId: number
-      /** @enum {string} */
-      part:
-        | "PLAN"
-        | "DESIGN"
-        | "WEB"
-        | "ANDROID"
-        | "IOS"
-        | "NODEJS"
-        | "SPRINGBOOT"
-        | "ADMIN"
-      memberName: string
-      /** @enum {string} */
-      challengerRoleType?:
-        | "SUPER_ADMIN"
-        | "CENTRAL_PRESIDENT"
-        | "CENTRAL_VICE_PRESIDENT"
-        | "CENTRAL_OPERATING_TEAM_MEMBER"
-        | "CENTRAL_EDUCATION_TEAM_MEMBER"
-        | "CHAPTER_PRESIDENT"
-        | "SCHOOL_PRESIDENT"
-        | "SCHOOL_VICE_PRESIDENT"
-        | "SCHOOL_PART_LEADER"
-        | "SCHOOL_ETC_ADMIN"
-    }
-    ChallengerRecordResponse: {
-      code?: string
-      /** @enum {string} */
-      part?:
-        | "PLAN"
-        | "DESIGN"
-        | "WEB"
-        | "ANDROID"
-        | "IOS"
-        | "NODEJS"
-        | "SPRINGBOOT"
-        | "ADMIN"
-      /** Format: int64 */
-      gisuId?: number
-      /** Format: int64 */
-      gisu?: number
-      /** Format: int64 */
-      schoolId?: number
-      schoolName?: string
-      /** Format: int64 */
-      chapterId?: number
-      chapterName?: string
-      memberName?: string
-      /** @enum {string} */
-      challengerRoleType?:
-        | "SUPER_ADMIN"
-        | "CENTRAL_PRESIDENT"
-        | "CENTRAL_VICE_PRESIDENT"
-        | "CENTRAL_OPERATING_TEAM_MEMBER"
-        | "CENTRAL_EDUCATION_TEAM_MEMBER"
-        | "CHAPTER_PRESIDENT"
-        | "SCHOOL_PRESIDENT"
-        | "SCHOOL_VICE_PRESIDENT"
-        | "SCHOOL_PART_LEADER"
-        | "SCHOOL_ETC_ADMIN"
-      /** Format: int64 */
-      organizationId?: number
-    }
-    AddChallengerRecordToMemberRequest: {
-      code: string
-    }
-    BatchResourcePermissionRequest: {
-      queries: components["schemas"]["ResourcePermissionQueryRequest"][]
-    }
-    ResourcePermissionQueryRequest: {
-      /** @enum {string} */
-      resourceType:
-        | "AUDIT"
-        | "SCHEDULE"
-        | "ATTENDANCE"
-        | "ATTENDANCE_SHEET"
-        | "ATTENDANCE_RECORD"
-        | "NOTICE"
-        | "CURRICULUM"
-        | "WORKBOOK_SUBMISSION"
-        | "ORIGINAL_WORKBOOK"
-        | "GISU"
-        | "CHAPTER"
-        | "SCHOOL"
-        | "STUDY_GROUP"
-        | "COMMUNITY_POST"
-        | "COMMUNITY_COMMENT"
-        | "RECRUITMENT"
-        | "MEMBER"
-        | "ANALYTICS"
-        | "TERM"
-        | "CHALLENGER"
-        | "CHALLENGER_ROLE"
-        | "CHALLENGER_POINT"
-        | "CHALLENGER_RECORD"
-        | "FCM"
-        | "PROJECT"
-        | "PROJECT_APPLICATION"
-        | "FIGMA"
-      resourceIds?: number[]
-      permissionTypes?: (
-        | "READ"
-        | "WRITE"
-        | "EDIT"
-        | "DELETE"
-        | "FORCE_DELETE"
-        | "APPROVE"
-        | "CHECK"
-        | "MANAGE"
-        | "RELEASE"
-      )[]
-    }
-    BatchResourcePermissionResponse: {
-      results?: components["schemas"]["ResourcePermissionResponse"][]
-    }
-    PermissionInfo: {
-      /** @enum {string} */
-      permissionType?:
-        | "READ"
-        | "WRITE"
-        | "EDIT"
-        | "DELETE"
-        | "FORCE_DELETE"
-        | "APPROVE"
-        | "CHECK"
-        | "MANAGE"
-        | "RELEASE"
-      hasPermission?: boolean
-    }
-    ResourcePermissionResponse: {
-      /** @enum {string} */
-      resourceType?:
-        | "AUDIT"
-        | "SCHEDULE"
-        | "ATTENDANCE"
-        | "ATTENDANCE_SHEET"
-        | "ATTENDANCE_RECORD"
-        | "NOTICE"
-        | "CURRICULUM"
-        | "WORKBOOK_SUBMISSION"
-        | "ORIGINAL_WORKBOOK"
-        | "GISU"
-        | "CHAPTER"
-        | "SCHOOL"
-        | "STUDY_GROUP"
-        | "COMMUNITY_POST"
-        | "COMMUNITY_COMMENT"
-        | "RECRUITMENT"
-        | "MEMBER"
-        | "ANALYTICS"
-        | "TERM"
-        | "CHALLENGER"
-        | "CHALLENGER_ROLE"
-        | "CHALLENGER_POINT"
-        | "CHALLENGER_RECORD"
-        | "FCM"
-        | "PROJECT"
-        | "PROJECT_APPLICATION"
-        | "FIGMA"
-      /** Format: int64 */
-      resourceId?: number
-      permissions?: components["schemas"]["PermissionInfo"][]
-    }
-    CreateChallengerRoleRequest: {
-      /** Format: int64 */
-      challengerId?: number
-      /** @enum {string} */
-      roleType?:
-        | "SUPER_ADMIN"
-        | "CENTRAL_PRESIDENT"
-        | "CENTRAL_VICE_PRESIDENT"
-        | "CENTRAL_OPERATING_TEAM_MEMBER"
-        | "CENTRAL_EDUCATION_TEAM_MEMBER"
-        | "CHAPTER_PRESIDENT"
-        | "SCHOOL_PRESIDENT"
-        | "SCHOOL_VICE_PRESIDENT"
-        | "SCHOOL_PART_LEADER"
-        | "SCHOOL_ETC_ADMIN"
-      /** Format: int64 */
-      organizationId?: number
-      /** @enum {string} */
-      responsiblePart?:
-        | "PLAN"
-        | "DESIGN"
-        | "WEB"
-        | "ANDROID"
-        | "IOS"
-        | "NODEJS"
-        | "SPRINGBOOT"
-        | "ADMIN"
-      /** Format: int64 */
-      gisuId?: number
-    }
-    CreateChallengerRoleResponse: {
-      /** Format: int64 */
-      challengerRoleId?: number
-    }
-    RenewAccessTokenRequest: {
-      refreshToken?: string
-    }
-    RenewAccessTokenResponse: {
-      accessToken?: string
-      refreshToken?: string
-    }
-    KakaoLoginRequest: {
-      accessToken?: string
-      /** @enum {string} */
-      clientType?: "ANDROID" | "IOS" | "WEB"
-    }
-    OAuthLoginResponse: {
-      /** @enum {string} */
-      provider?: "GOOGLE" | "APPLE" | "KAKAO"
-      success?: boolean
-      code?: string
-      oAuthVerificationToken?: string
-      accessToken?: string
-      refreshToken?: string
-    }
-    KakaoCodeLoginRequest: {
-      authorizationCode: string
-      redirectUri: string
-      /** @enum {string} */
-      clientType?: "ANDROID" | "IOS" | "WEB"
-    }
-    GoogleLoginRequest: {
-      accessToken?: string
-      /** @enum {string} */
-      clientType?: "ANDROID" | "IOS" | "WEB"
-    }
-    LoginByEmailRequest: {
-      email: string
-      password: string
-      /** @enum {string} */
-      clientType?: "ANDROID" | "IOS" | "WEB"
-    }
-    LocalLoginResponse: {
-      /** Format: int64 */
-      memberId?: number
-      accessToken?: string
-      refreshToken?: string
-    }
-    AppleLoginRequest: {
-      authorizationCode: string
-      /** @enum {string} */
-      clientType: "ANDROID" | "IOS" | "WEB"
-    }
-    SendEmailVerificationRequest: {
-      /** Format: email */
-      email: string
-      /** @enum {string} */
-      purpose: "REGISTER" | "PASSWORD_RESET"
-    }
-    SendEmailVerificationResponse: {
-      /** Format: int64 */
-      emailVerificationId?: number
-    }
-    ResendEmailVerificationRequest: {
-      /** Format: int64 */
-      emailVerificationId?: number
-    }
-    CompleteEmailVerificationRequest: {
-      /** Format: int64 */
-      emailVerificationId?: number
-      verificationCode?: string
-    }
-    CompleteEmailVerificationResponse: {
-      emailVerificationToken?: string
-    }
-    RegisterCredentialRequest: {
-      rawPassword: string
     }
     /** @description 점검 시작 요청 */
     StartMaintenanceRequest: {
@@ -6916,50 +9481,886 @@ export interface components {
        */
       createdAt?: string
     }
-    RegisterFigmaWatchedFileRequest: {
-      fileKey: string
-      displayName: string
-    }
-    RegisterFigmaWatchedFileResponse: {
+    CreateGisuRequest: {
       /** Format: int64 */
-      watchedFileId?: number
+      generation: number
+      /** Format: date-time */
+      startAt: string
+      /** Format: date-time */
+      endAt: string
     }
-    RegisterFigmaRoutingDomainRequest: {
-      domainKey: string
+    CreateCommunityThreadRequest: {
+      title: string
       description?: string
-      discordWebhookUrl: string
-      fallback?: boolean
-    }
-    RegisterFigmaRoutingDomainResponse: {
-      /** Format: int64 */
-      domainId?: number
-    }
-    AddFigmaRoutingMentionRequest: {
-      mentionId: string
       /** @enum {string} */
-      mentionType: "ROLE" | "USER"
-      displayLabel?: string
+      category: "STUDY" | "QNA" | "PROJECT" | "FREE"
+      icon: string
+      memberIds?: number[]
     }
-    AddFigmaRoutingMentionResponse: {
+    CommunityThreadDetailResponse: {
+      threadId?: string
+      title?: string
+      description?: string
+      /** @enum {string} */
+      category?: "STUDY" | "QNA" | "PROJECT" | "FREE"
+      icon?: string
+      memberCount?: string
+      unreadCount?: string
+      maxMembers?: string
+      isPinned?: boolean
+      isMuted?: boolean
+      /** @enum {string} */
+      myRole?: "OWNER" | "ADMIN" | "MEMBER"
+      lastMessage?: components["schemas"]["CommunityThreadLastMessageResponse"]
+      createdBy?: string
+      /** Format: date-time */
+      createdAt?: string
+      /** Format: date-time */
+      updatedAt?: string
+      shareUrl?: string
+      /** Format: date-time */
+      deletedAt?: string
+    }
+    CommunityThreadLastMessageResponse: {
+      preview?: string
+      senderName?: string
+      /** Format: date-time */
+      createdAt?: string
+    }
+    CommunityThreadMemberMutationResponse: {
+      threadId?: string
+      memberId?: string
+      /** @enum {string} */
+      role?: "OWNER" | "ADMIN" | "MEMBER"
+      /** @enum {string} */
+      state?: "ACTIVE" | "LEFT" | "KICKED"
+      memberCount?: string
+    }
+    InviteCommunityThreadMembersRequest: {
+      memberIds: number[]
+    }
+    CommunityThreadInvitationResponse: {
+      invitedMembers?: components["schemas"]["CommunityThreadMemberResponse"][]
+      memberCount?: string
+    }
+    CommunityThreadMemberResponse: {
+      memberId?: string
+      name?: string
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      generation?: string
+      /** @enum {string} */
+      role?: "OWNER" | "ADMIN" | "MEMBER"
+      /** Format: date-time */
+      joinedAt?: string
+      /** @enum {string} */
+      state?: "ACTIVE" | "LEFT" | "KICKED"
+    }
+    ReportCommunityThreadMessageRequest: {
+      /** @enum {string} */
+      reason: "SPAM" | "ABUSE" | "INAPPROPRIATE" | "PRIVACY" | "ETC"
+    }
+    CommunityThreadMessageReportReceiptResponse: {
+      reportId?: string
+      messageId?: string
+      /** @enum {string} */
+      reason?: "SPAM" | "ABUSE" | "INAPPROPRIATE" | "PRIVACY" | "ETC"
+      /** Format: date-time */
+      createdAt?: string
+    }
+    /** @description 지부 생성 요청 */
+    CreateChapterRequest: {
+      /**
+       * Format: int64
+       * @description 기수 ID
+       * @example 1
+       */
+      gisuId: number
+      /**
+       * @description 지부명
+       * @example 서울
+       */
+      name: string
+      /**
+       * @description 소속 학교 ID 목록
+       * @example [
+       *       1,
+       *       2,
+       *       3
+       *     ]
+       */
+      schoolIds?: number[]
+    }
+    CreateChallengerInfoRequest: {
       /** Format: int64 */
-      mentionId?: number
+      memberId: number
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      tracks?: (
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      )[]
+      /** Format: int64 */
+      gisuId: number
+      partOrTracksPresent?: boolean
     }
-    DomainResult: {
-      domainKey?: string
-      /** Format: int32 */
-      commentCount?: number
-      sent?: boolean
+    ChallengerInfoResponse: {
+      /** Format: int64 */
+      challengerId?: number
+      /** Format: int64 */
+      memberId?: number
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      gisu?: number
+      /** Format: int64 */
+      chapterId?: number
+      chapterName?: string
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      tracks?: (
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      )[]
+      /** @enum {string} */
+      challengerStatus?: "ACTIVE" | "GRADUATED" | "EXPELLED" | "WITHDRAWN"
+      challengerPoints?: components["schemas"]["ChallengerPointInfo"][]
+      points?: components["schemas"]["ChallengerPointInfo"][]
+      /** Format: double */
+      totalPoints?: number
+      roles?: components["schemas"]["ChallengerRoleResponse"][]
+      name?: string
+      nickname?: string
+      email?: string
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      profileImageLink?: string
+      /** @enum {string} */
+      memberStatus?: "ACTIVE" | "INACTIVE" | "WITHDRAWN"
+      /** @enum {string} */
+      status?: "ACTIVE" | "INACTIVE" | "WITHDRAWN"
     }
-    FigmaDigestSummary: {
+    ChallengerPointInfo: {
+      /** Format: int64 */
+      id?: number
+      /** Format: int64 */
+      challengerId?: number
+      /** @enum {string} */
+      pointType?:
+        | "BEST_WORKBOOK"
+        | "WARNING"
+        | "OUT"
+        | "CUSTOM"
+        | "BLOG_CHALLENGE"
+        | "BEST_WORKBOOK_V2"
+        | "UMC_EVENT_REVIEW"
+        | "PEER_REVIEW_SUBMISSION"
+        | "NO_WORKBOOK_MISSION"
+        | "STUDY_LATE"
+        | "STUDY_ABSENT"
+        | "EVENT_LATE"
+        | "EVENT_EARLY_LEAVE"
+        | "EVENT_LATE_CANCEL"
+        | "EVENT_NO_SHOW"
+        | "PART_LEAD_FEEDBACK_LATE"
+        | "SCHOOL_CORE_MEETING_ABSENT"
+        | "SCHOOL_CORE_TASK_NOT_COMPLETED"
+      /** Format: double */
+      point?: number
+      description?: string
       /** Format: date-time */
-      from?: string
+      createdAt?: string
+    }
+    ChallengerRoleResponse: {
+      /** Format: int64 */
+      challengerRoleId?: number
+      /** Format: int64 */
+      challengerId?: number
+      /** @enum {string} */
+      roleType?:
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+      /** @enum {string} */
+      organizationType?: "CENTRAL" | "CHAPTER" | "SCHOOL"
+      /** Format: int64 */
+      organizationId?: number
+      /** @enum {string} */
+      responsiblePart?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      gisu?: number
+    }
+    GrantChallengerPointRequest: {
+      /** @enum {string} */
+      pointType:
+        | "BEST_WORKBOOK"
+        | "WARNING"
+        | "OUT"
+        | "CUSTOM"
+        | "BLOG_CHALLENGE"
+        | "BEST_WORKBOOK_V2"
+        | "UMC_EVENT_REVIEW"
+        | "PEER_REVIEW_SUBMISSION"
+        | "NO_WORKBOOK_MISSION"
+        | "STUDY_LATE"
+        | "STUDY_ABSENT"
+        | "EVENT_LATE"
+        | "EVENT_EARLY_LEAVE"
+        | "EVENT_LATE_CANCEL"
+        | "EVENT_NO_SHOW"
+        | "PART_LEAD_FEEDBACK_LATE"
+        | "SCHOOL_CORE_MEETING_ABSENT"
+        | "SCHOOL_CORE_TASK_NOT_COMPLETED"
+      /** Format: int32 */
+      pointValue?: number
+      description?: string
+    }
+    DeactivateChallengerRequest: {
+      /** @enum {string} */
+      deactivationType: "WITHDRAW" | "EXPEL"
+      /** Format: int64 */
+      modifiedBy: number
+      reason: string
+    }
+    CreateChallengerRecordRequest: {
+      /** Format: int64 */
+      gisuId: number
+      /** Format: int64 */
+      chapterId: number
+      /** Format: int64 */
+      schoolId: number
+      /** @enum {string} */
+      part:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      memberName: string
+      /** @enum {string} */
+      challengerRoleType?:
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+    }
+    ChallengerRecordResponse: {
+      code?: string
+      /** @enum {string} */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      gisu?: number
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      /** Format: int64 */
+      chapterId?: number
+      chapterName?: string
+      memberName?: string
+      /** @enum {string} */
+      challengerRoleType?:
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+      /** Format: int64 */
+      organizationId?: number
+    }
+    AddChallengerRecordToMemberRequest: {
+      code: string
+    }
+    IssueCertificateRequest: {
+      /** @enum {string} */
+      template:
+        | "UMC_COURSE_COMPLETION"
+        | "UMC_COURSE_MERIT"
+        | "UMC_DEMO_DAY_GRAND_PRIZE"
+        | "UMC_DEMO_DAY_FIRST_PRIZE"
+        | "UMC_DEMO_DAY_SECOND_PRIZE"
+        | "UMC_DEMO_DAY_PARTICIPATION_PRIZE"
+        | "UMC_DEMO_DAY_AWS_SPECIAL_PRIZE"
+        | "UMC_DEMO_DAY_BEST_CHALLENGER"
+        | "UMC_HACKATHON_CERTIFICATION_OF_COMPLETION"
+        | "UMC_HACKATHON_GRAND_PRIZE"
+        | "UMC_HACKATHON_FIRST_PRIZE"
+        | "UMC_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_GRAND_PRIZE"
+        | "NEORDINARY_HACKATHON_FIRST_PRIZE"
+        | "NEORDINARY_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_CERTIFICATION_OF_COMPLETION"
+      /** Format: int64 */
+      gisuId: number
+    }
+    CertificateIssueResponse: {
+      /** Format: int64 */
+      certificateId?: number
+      serialNumber?: string
+      /** @enum {string} */
+      template?:
+        | "UMC_COURSE_COMPLETION"
+        | "UMC_COURSE_MERIT"
+        | "UMC_DEMO_DAY_GRAND_PRIZE"
+        | "UMC_DEMO_DAY_FIRST_PRIZE"
+        | "UMC_DEMO_DAY_SECOND_PRIZE"
+        | "UMC_DEMO_DAY_PARTICIPATION_PRIZE"
+        | "UMC_DEMO_DAY_AWS_SPECIAL_PRIZE"
+        | "UMC_DEMO_DAY_BEST_CHALLENGER"
+        | "UMC_HACKATHON_CERTIFICATION_OF_COMPLETION"
+        | "UMC_HACKATHON_GRAND_PRIZE"
+        | "UMC_HACKATHON_FIRST_PRIZE"
+        | "UMC_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_GRAND_PRIZE"
+        | "NEORDINARY_HACKATHON_FIRST_PRIZE"
+        | "NEORDINARY_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_CERTIFICATION_OF_COMPLETION"
+      /** @enum {string} */
+      issuer?: "UNIVERSITY_MAKEUS_CHALLENGE" | "NEORDINARY"
+      /** @enum {string} */
+      status?: "ISSUED" | "REVOKED" | "EXPIRED"
       /** Format: date-time */
-      to?: string
+      issuedAt?: string
+      /** Format: date-time */
+      expiresAt?: string
+    }
+    /** @description 운영진 인증서 발급 요청 */
+    AdminIssueCertificateRequest: {
+      /**
+       * @description PDF 배경과 문구 규칙을 선택하는 템플릿입니다. 수료증/공로증/상장은 이 값을 사용합니다.
+       * @example UMC_DEMO_DAY_FIRST_PRIZE
+       * @enum {string}
+       */
+      template:
+        | "UMC_COURSE_COMPLETION"
+        | "UMC_COURSE_MERIT"
+        | "UMC_DEMO_DAY_GRAND_PRIZE"
+        | "UMC_DEMO_DAY_FIRST_PRIZE"
+        | "UMC_DEMO_DAY_SECOND_PRIZE"
+        | "UMC_DEMO_DAY_PARTICIPATION_PRIZE"
+        | "UMC_DEMO_DAY_AWS_SPECIAL_PRIZE"
+        | "UMC_DEMO_DAY_BEST_CHALLENGER"
+        | "UMC_HACKATHON_CERTIFICATION_OF_COMPLETION"
+        | "UMC_HACKATHON_GRAND_PRIZE"
+        | "UMC_HACKATHON_FIRST_PRIZE"
+        | "UMC_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_GRAND_PRIZE"
+        | "NEORDINARY_HACKATHON_FIRST_PRIZE"
+        | "NEORDINARY_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_CERTIFICATION_OF_COMPLETION"
+      /**
+       * Format: int64
+       * @description 인증서를 받을 회원 ID
+       * @example 1
+       */
+      recipientMemberId: number
+      /**
+       * Format: int64
+       * @description 인증서에 표시하고 자격을 판정할 기수 ID
+       * @example 7
+       */
+      gisuId: number
+      /**
+       * @description 공로증/상장 제목 override입니다. 비우면 template의 기본 상명이 사용됩니다.
+       * @example 커스텀 공로상
+       */
+      meritTitle?: string
+      /**
+       * @description 공로증/상장 본문 override입니다. 비우면 template과 기수 정보로 기본 문구를 생성합니다.
+       * @example 탁월한 기여를 인정하여 이 상장을 수여합니다.
+       */
+      meritDescription?: string
+      /**
+       * @description 동일 범위 유효 인증서가 있을 때 기존 인증서를 폐기하고 재발급할지 여부
+       * @example false
+       */
+      reissue?: boolean
+    }
+    BlogSeriesRequest: {
+      type: string
+      slug: string
+      title: string
+      description?: string
+      thumbnailUrl?: string
+      seoTitle?: string
+      seoDescription?: string
+      ogImageUrl?: string
+    }
+    BlogContentRequest: {
+      type: string
+      slug: string
+      title: string
+      summary?: string
+      thumbnailUrl?: string
+      content: string
+      /** @enum {string} */
+      status?: "DRAFT" | "PUBLISHED" | "DELETED"
+      seoTitle?: string
+      seoDescription?: string
+      ogImageUrl?: string
+      hashtags?: string[]
+    }
+    BlogContentResponse: {
+      /** Format: int64 */
+      id?: number
+      /** @enum {string} */
+      type?: "ENGINEERING" | "DESIGN" | "PRODUCT" | "RELEASE"
+      slug?: string
+      title?: string
+      summary?: string
+      thumbnailUrl?: string
+      content?: string
+      /** @enum {string} */
+      status?: "DRAFT" | "PUBLISHED" | "DELETED"
+      author?: components["schemas"]["AuthorResponse"]
+      /** Format: date-time */
+      publishedAt?: string
+      /** Format: date-time */
+      updatedAt?: string
+      canonicalPath?: string
+      seoTitle?: string
+      seoDescription?: string
+      ogImageUrl?: string
+      series?: components["schemas"]["BlogSeriesSummaryResponse"][]
+      hashtags?: components["schemas"]["BlogHashtagResponse"][]
+      canEdit?: boolean
+      canDelete?: boolean
+    }
+    BlogHashtagResponse: {
+      /** Format: int64 */
+      id?: number
+      name?: string
+      slug?: string
       /** Format: int32 */
-      totalComments?: number
+      contentCount?: number
+    }
+    BlogSeriesSummaryResponse: {
+      /** Format: int64 */
+      id?: number
+      /** @enum {string} */
+      type?: "ENGINEERING" | "DESIGN" | "PRODUCT" | "RELEASE"
+      slug?: string
+      title?: string
+      description?: string
+      thumbnailUrl?: string
+      author?: components["schemas"]["AuthorResponse"]
       /** Format: int32 */
-      unmatchedCount?: number
-      domains?: components["schemas"]["DomainResult"][]
+      contentCount?: number
+      /** Format: date-time */
+      updatedAt?: string
+      canonicalPath?: string
+      seoTitle?: string
+      seoDescription?: string
+      ogImageUrl?: string
+      canEdit?: boolean
+      canDelete?: boolean
+    }
+    /** @description 블로그 좋아요 응답 */
+    BlogLikeResponse: {
+      /**
+       * @description 현재 사용자의 좋아요 여부
+       * @example true
+       */
+      likedByMe?: boolean
+      /**
+       * Format: int32
+       * @description 좋아요 수
+       * @example 42
+       */
+      likeCount?: number
+    }
+    CreateBlogCommentRequest: {
+      content?: string
+      /** Format: int64 */
+      parentCommentId?: number
+      anonymous?: boolean
+      nickname?: string
+    }
+    /** @description 블로그 댓글 응답 */
+    BlogCommentResponse: {
+      /**
+       * Format: int64
+       * @description 댓글 ID
+       * @example 1
+       */
+      id?: number
+      author?: components["schemas"]["AuthorResponse"]
+      /**
+       * @description 댓글 내용
+       * @example 좋은 글 감사합니다.
+       */
+      content?: string
+      /**
+       * Format: date-time
+       * @description 작성일시
+       * @example 2026-06-03T10:30:00Z
+       */
+      createdAt?: string
+      /**
+       * @description 현재 사용자의 댓글 좋아요 여부
+       * @example false
+       */
+      likedByMe?: boolean
+      /**
+       * Format: int32
+       * @description 댓글 좋아요 수
+       * @example 3
+       */
+      likeCount?: number
+      /**
+       * @description 삭제 상태
+       * @example NONE
+       * @enum {string}
+       */
+      deletionType?: "NONE" | "USER_DELETED" | "ADMIN_DELETED"
+      /**
+       * @description 대댓글 작성 가능 여부
+       * @example true
+       */
+      canReply?: boolean
+      /**
+       * @description 내가 수정할 수 있는지 여부
+       * @example true
+       */
+      canEdit?: boolean
+      /**
+       * @description 내가 삭제할 수 있는지 여부
+       * @example true
+       */
+      canDelete?: boolean
+      /** @description 1단계 대댓글 목록 */
+      replies?: components["schemas"]["BlogCommentResponse"][]
+    }
+    BatchResourcePermissionRequest: {
+      queries: components["schemas"]["ResourcePermissionQueryRequest"][]
+    }
+    ResourcePermissionQueryRequest: {
+      /** @enum {string} */
+      resourceType:
+        | "AUDIT"
+        | "SCHEDULE"
+        | "ATTENDANCE"
+        | "ATTENDANCE_SHEET"
+        | "ATTENDANCE_RECORD"
+        | "NOTICE"
+        | "CURRICULUM"
+        | "WORKBOOK_SUBMISSION"
+        | "ORIGINAL_WORKBOOK"
+        | "GISU"
+        | "CHAPTER"
+        | "SCHOOL"
+        | "STUDY_GROUP"
+        | "COMMUNITY_POST"
+        | "COMMUNITY_COMMENT"
+        | "BLOG_CONTENT"
+        | "BLOG_SERIES"
+        | "BLOG_COMMENT"
+        | "RECRUITMENT"
+        | "MEMBER"
+        | "ANALYTICS"
+        | "TERM"
+        | "CHALLENGER"
+        | "CHALLENGER_ROLE"
+        | "CHALLENGER_POINT"
+        | "CHALLENGER_RECORD"
+        | "FCM"
+        | "PROJECT"
+        | "PROJECT_APPLICATION"
+      resourceIds?: number[]
+      permissionTypes?: (
+        | "READ"
+        | "WRITE"
+        | "EDIT"
+        | "DELETE"
+        | "FORCE_DELETE"
+        | "APPROVE"
+        | "CHECK"
+        | "MANAGE"
+        | "RELEASE"
+      )[]
+    }
+    BatchResourcePermissionResponse: {
+      results?: components["schemas"]["ResourcePermissionResponse"][]
+    }
+    PermissionInfo: {
+      /** @enum {string} */
+      permissionType?:
+        | "READ"
+        | "WRITE"
+        | "EDIT"
+        | "DELETE"
+        | "FORCE_DELETE"
+        | "APPROVE"
+        | "CHECK"
+        | "MANAGE"
+        | "RELEASE"
+      hasPermission?: boolean
+    }
+    ResourcePermissionResponse: {
+      /** @enum {string} */
+      resourceType?:
+        | "AUDIT"
+        | "SCHEDULE"
+        | "ATTENDANCE"
+        | "ATTENDANCE_SHEET"
+        | "ATTENDANCE_RECORD"
+        | "NOTICE"
+        | "CURRICULUM"
+        | "WORKBOOK_SUBMISSION"
+        | "ORIGINAL_WORKBOOK"
+        | "GISU"
+        | "CHAPTER"
+        | "SCHOOL"
+        | "STUDY_GROUP"
+        | "COMMUNITY_POST"
+        | "COMMUNITY_COMMENT"
+        | "BLOG_CONTENT"
+        | "BLOG_SERIES"
+        | "BLOG_COMMENT"
+        | "RECRUITMENT"
+        | "MEMBER"
+        | "ANALYTICS"
+        | "TERM"
+        | "CHALLENGER"
+        | "CHALLENGER_ROLE"
+        | "CHALLENGER_POINT"
+        | "CHALLENGER_RECORD"
+        | "FCM"
+        | "PROJECT"
+        | "PROJECT_APPLICATION"
+      /** Format: int64 */
+      resourceId?: number
+      permissions?: components["schemas"]["PermissionInfo"][]
+    }
+    CreateChallengerRoleRequest: {
+      /** Format: int64 */
+      challengerId?: number
+      /** @enum {string} */
+      roleType?:
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+      /** Format: int64 */
+      organizationId?: number
+      /** @enum {string} */
+      responsiblePart?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** Format: int64 */
+      gisuId?: number
+    }
+    CreateChallengerRoleResponse: {
+      /** Format: int64 */
+      challengerRoleId?: number
+    }
+    RenewAccessTokenRequest: {
+      refreshToken: string
+    }
+    RenewAccessTokenResponse: {
+      accessToken?: string
+      refreshToken?: string
+    }
+    SsoTokenRequest: {
+      grant_type: string
+      code: string
+      client_id: string
+      redirect_uri: string
+      code_verifier: string
+    }
+    SsoMemberInfo: {
+      /** Format: int64 */
+      id?: number
+      name?: string
+      nickname?: string
+      email?: string
+    }
+    SsoTokenResponse: {
+      accessToken?: string
+      refreshToken?: string
+      /** Format: int64 */
+      expiresIn?: number
+      tokenType?: string
+      member?: components["schemas"]["SsoMemberInfo"]
+      linkedOAuthProviders?: ("GOOGLE" | "APPLE" | "KAKAO")[]
+    }
+    SsoOAuthTokenLoginRequest: {
+      idToken?: string
+      accessToken?: string
+    }
+    SsoSocialLoginResponse: {
+      /** @enum {string} */
+      provider?: "GOOGLE" | "APPLE" | "KAKAO"
+      code?: string
+      /** Format: int64 */
+      memberId?: number
+      /** Format: date-time */
+      expiresAt?: string
+      oAuthVerificationToken?: string
+    }
+    SsoBrowserLoginByEmailRequest: {
+      email: string
+      password: string
+    }
+    SsoBrowserLoginResponse: {
+      /** Format: int64 */
+      memberId?: number
+      /** Format: date-time */
+      expiresAt?: string
+    }
+    SsoAppleLoginRequest: {
+      authorizationCode: string
+    }
+    LogoutRequest: {
+      refreshToken: string
+    }
+    KakaoLoginRequest: {
+      idToken?: string
+      accessToken?: string
+      /** @enum {string} */
+      clientType?: "ANDROID" | "IOS" | "WEB"
+    }
+    OAuthLoginResponse: {
+      /** @enum {string} */
+      provider?: "GOOGLE" | "APPLE" | "KAKAO"
+      success?: boolean
+      code?: string
+      oAuthVerificationToken?: string
+      accessToken?: string
+      refreshToken?: string
+    }
+    KakaoCodeLoginRequest: {
+      authorizationCode: string
+      redirectUri: string
+      /** @enum {string} */
+      clientType?: "ANDROID" | "IOS" | "WEB"
+    }
+    GoogleLoginRequest: {
+      idToken?: string
+      accessToken?: string
+      /** @enum {string} */
+      clientType?: "ANDROID" | "IOS" | "WEB"
+    }
+    LoginByEmailRequest: {
+      email: string
+      password: string
+      /** @enum {string} */
+      clientType?: "ANDROID" | "IOS" | "WEB"
+    }
+    LocalLoginResponse: {
+      /** Format: int64 */
+      memberId?: number
+      accessToken?: string
+      refreshToken?: string
+    }
+    AppleLoginRequest: {
+      authorizationCode: string
+      /** @enum {string} */
+      clientType: "ANDROID" | "IOS" | "WEB"
+    }
+    SendEmailVerificationRequest: {
+      /** Format: email */
+      email: string
+      /** @enum {string} */
+      purpose: "REGISTER" | "PASSWORD_RESET" | "CHANGE_EMAIL"
+    }
+    SendEmailVerificationResponse: {
+      /** Format: int64 */
+      emailVerificationId?: number
+    }
+    ResendEmailVerificationRequest: {
+      /** Format: int64 */
+      emailVerificationId?: number
+    }
+    CompleteEmailVerificationRequest: {
+      /** Format: int64 */
+      emailVerificationId?: number
+      verificationCode?: string
+    }
+    CompleteEmailVerificationResponse: {
+      emailVerificationToken?: string
+    }
+    RegisterCredentialRequest: {
+      rawPassword: string
     }
     EditScheduleRequest: {
       /**
@@ -7051,6 +10452,114 @@ export interface components {
       missionType?: "LINK" | "MEMO" | "PLAIN"
       isNecessary?: boolean
     }
+    UpdateUmcProductSquadRequest: {
+      code?: string
+      name?: string
+      description?: string
+      /**
+       * Format: date
+       * @example 2026-07-13
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2026-12-31
+       */
+      endDate?: string
+      /** Format: int32 */
+      sortOrder?: number
+      active?: boolean
+    }
+    UpdateUmcProductSquadParticipantRequest: {
+      /** @enum {string} */
+      role: "MEMBER" | "SQUAD_LEAD"
+      /** @enum {string} */
+      position:
+        | "UNSPECIFIED"
+        | "PRODUCT_OWNER"
+        | "PRODUCT_DESIGNER"
+        | "IOS_DEVELOPER"
+        | "ANDROID_DEVELOPER"
+        | "WEB_DEVELOPER"
+        | "SERVER_DEVELOPER"
+        | "ETC"
+      responsibilityTitle?: string
+      responsibilityDescription?: string
+      /**
+       * Format: date
+       * @example 2026-07-13
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2026-12-31
+       */
+      endDate?: string
+    }
+    UpdateUmcProductMemberProfileRequest: {
+      introduction?: string
+      profileImageId?: string
+    }
+    UpdateUmcProductLeadershipRequest: {
+      /** @enum {string} */
+      role: "UMC_PRODUCT_VICE_LEAD" | "UMC_PRODUCT_LEAD"
+      /**
+       * Format: date
+       * @example 2026-07-13
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2026-12-31
+       */
+      endDate?: string
+    }
+    UpdateUmcProductChapterMembershipRequest: {
+      /** Format: int64 */
+      chapterId: number
+      /** @enum {string} */
+      position:
+        | "UNSPECIFIED"
+        | "PRODUCT_OWNER"
+        | "PRODUCT_DESIGNER"
+        | "IOS_DEVELOPER"
+        | "ANDROID_DEVELOPER"
+        | "WEB_DEVELOPER"
+        | "SERVER_DEVELOPER"
+        | "ETC"
+      responsibilityTitle?: string
+      responsibilityDescription?: string
+      /**
+       * Format: date
+       * @example 2026-07-13
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2026-12-31
+       */
+      endDate?: string
+    }
+    UpdateUmcProductMemberActivityPeriodRequest: {
+      /**
+       * Format: date
+       * @example 2026-07-13
+       */
+      startDate: string
+      /**
+       * Format: date
+       * @example 2026-12-31
+       */
+      endDate?: string
+    }
+    UpdateUmcProductChapterRequest: {
+      code?: string
+      name?: string
+      description?: string
+      /** Format: int32 */
+      sortOrder?: number
+      active?: boolean
+    }
     /** @description 스터디 그룹 수정 요청 */
     UpdateStudyGroupRequest: {
       /**
@@ -7103,6 +10612,68 @@ export interface components {
        */
       chapterId: number
     }
+    /** @description 지원서 철회 요청 */
+    CancelRecruitingApplicationRequest: {
+      /**
+       * @description 철회 사유
+       * @example 개인 사정으로 지원을 철회합니다.
+       */
+      reason?: string
+    }
+    /** @description 모집 시즌 수정 요청 */
+    UpdateRecruitingSeasonRequest: {
+      /** @description 시즌 내 운영진 공유 메모 */
+      memo?: string
+    }
+    /** @description 모집 차수 상태 변경 요청 */
+    UpdateRecruitingRoundStatusRequest: {
+      /**
+       * @description 변경할 모집 차수 상태
+       * @example OPEN
+       * @enum {string}
+       */
+      status: "DRAFT" | "OPEN" | "CLOSED"
+    }
+    /** @description 지원서 합불 결정 요청 */
+    RecruitingDecisionRequest: {
+      /**
+       * @description 합격 또는 불합격 결정
+       * @example PASS
+       * @enum {string}
+       */
+      decision: "PASS" | "FAIL"
+      /**
+       * @description 최종 합격 트랙. PASS 결정에만 필요합니다.
+       * @example PLAN
+       * @enum {string}
+       */
+      acceptedTrack?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * @description 결정 사유 또는 운영진 메모
+       * @example 서류 평가 기준을 충족했습니다.
+       */
+      reason?: string
+      acceptedTrackValid?: boolean
+    }
+    /** @description 서류 합불 결정 요청 */
+    RecruitingDocumentDecisionRequest: {
+      /**
+       * @description 서류 합격 또는 불합격 결정
+       * @example PASS
+       * @enum {string}
+       */
+      decision: "PASS" | "FAIL"
+      /**
+       * @description 결정 사유 또는 운영진 메모
+       * @example 서류 평가 기준을 충족했습니다.
+       */
+      reason?: string
+    }
     UpdateProjectRequest: {
       name?: string
       description?: string
@@ -7110,9 +10681,14 @@ export interface components {
       thumbnailFileId?: string
       logoFileId?: string
     }
+    ChangeProjectMemberStatusRequest: {
+      /** @enum {string} */
+      status: "ACTIVE" | "COMPLETED" | "WITHDRAWN" | "DISMISSED"
+      reason: string
+    }
     UpdateApplicationDecisionRequest: {
       /** @enum {string} */
-      status: "APPROVED" | "REJECTED" | "PENDING"
+      status: "APPROVED" | "REJECTED"
       reason?: string
     }
     UpdateProjectMatchingRoundRequest: {
@@ -7211,7 +10787,6 @@ export interface components {
       challengerId?: number
       /** @enum {string} */
       roleType?:
-        | "SUPER_ADMIN"
         | "CENTRAL_PRESIDENT"
         | "CENTRAL_VICE_PRESIDENT"
         | "CENTRAL_OPERATING_TEAM_MEMBER"
@@ -7273,6 +10848,20 @@ export interface components {
       type?: "LINKEDIN" | "INSTAGRAM" | "GITHUB" | "BLOG" | "PERSONAL"
       link?: string
     }
+    ChangeMemberEmailRequest: {
+      emailVerificationToken: string
+    }
+    UpdateCommunityThreadRequest: {
+      title?: string
+      description?: string
+      /** @enum {string} */
+      category?: "STUDY" | "QNA" | "PROJECT" | "FREE"
+      icon?: string
+    }
+    ChangeCommunityThreadMemberRoleRequest: {
+      /** @enum {string} */
+      role: "OWNER" | "ADMIN" | "MEMBER"
+    }
     EditChallengerPartRequest: {
       /** @enum {string} */
       newPart:
@@ -7288,6 +10877,12 @@ export interface components {
     EditChallengerPointRequest: {
       newDescription: string
     }
+    RevokeCertificateRequest: {
+      reason: string
+    }
+    UpdateBlogCommentRequest: {
+      content?: string
+    }
     ChangePasswordRequest: {
       currentPassword: string
       newPassword: string
@@ -7295,15 +10890,6 @@ export interface components {
     ResetPasswordByEmailRequest: {
       emailVerificationToken: string
       newPassword: string
-    }
-    UpdateFigmaRoutingDomainRequest: {
-      description?: string
-      discordWebhookUrl: string
-      fallback?: boolean
-    }
-    UpdateFigmaRoutingMentionRequest: {
-      mentionId: string
-      displayLabel?: string
     }
     TestAopAlarmResponse: {
       content?: string
@@ -7326,8 +10912,10 @@ export interface components {
         | "WORKBOOK_SUBMISSION"
         | "SCHOOL_LOGO"
         | "PORTFOLIO"
+        | "CERTIFICATE"
         | "PROJECT_THUMBNAIL"
         | "PROJECT_LOGO"
+        | "UMC_PRODUCT_PROFILE_IMAGE"
         | "ETC"
       contentType?: string
       /** Format: int64 */
@@ -7339,6 +10927,34 @@ export interface components {
       code?: string
       message?: string
       result?: string
+    }
+    CertificatePdfPreviewRequest: {
+      /** @enum {string} */
+      template:
+        | "UMC_COURSE_COMPLETION"
+        | "UMC_COURSE_MERIT"
+        | "UMC_DEMO_DAY_GRAND_PRIZE"
+        | "UMC_DEMO_DAY_FIRST_PRIZE"
+        | "UMC_DEMO_DAY_SECOND_PRIZE"
+        | "UMC_DEMO_DAY_PARTICIPATION_PRIZE"
+        | "UMC_DEMO_DAY_AWS_SPECIAL_PRIZE"
+        | "UMC_DEMO_DAY_BEST_CHALLENGER"
+        | "UMC_HACKATHON_CERTIFICATION_OF_COMPLETION"
+        | "UMC_HACKATHON_GRAND_PRIZE"
+        | "UMC_HACKATHON_FIRST_PRIZE"
+        | "UMC_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_GRAND_PRIZE"
+        | "NEORDINARY_HACKATHON_FIRST_PRIZE"
+        | "NEORDINARY_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_CERTIFICATION_OF_COMPLETION"
+      issuanceNumber?: string
+      recipientName?: string
+      recipientSchoolName?: string
+      /** Format: int64 */
+      gisuGeneration?: number
+      meritTitle?: string
+      meritDescription?: string
+      verificationUrl?: string
     }
     ScheduleAttendancePolicyInfoResponse: {
       /** Format: date-time */
@@ -7571,7 +11187,6 @@ export interface components {
       /** Format: double */
       totalPoints?: number
       roleTypes?: (
-        | "SUPER_ADMIN"
         | "CENTRAL_PRESIDENT"
         | "CENTRAL_VICE_PRESIDENT"
         | "CENTRAL_OPERATING_TEAM_MEMBER"
@@ -7594,7 +11209,6 @@ export interface components {
       isAdmin?: boolean
       /** @description 활성 기수에 가지고 있는 역할 목록 */
       roleTypes?: (
-        | "SUPER_ADMIN"
         | "CENTRAL_PRESIDENT"
         | "CENTRAL_VICE_PRESIDENT"
         | "CENTRAL_OPERATING_TEAM_MEMBER"
@@ -7612,6 +11226,8 @@ export interface components {
       name?: string
       nickname?: string
       email?: string
+      /** @description 로컬 계정 비밀번호 자격증명 보유 여부 */
+      hasLocalCredential?: boolean
       /** Format: int64 */
       schoolId?: number
       schoolName?: string
@@ -7627,6 +11243,109 @@ export interface components {
       currentGisuMemberInfo?: components["schemas"]["CurrentGisuMemberInfo"]
       /** @description 모든 챌린저 기록 (최신 기수 우선) */
       challengerHistory?: components["schemas"]["ChallengerHistoryV2"][]
+    }
+    /** @description 기수 조직 조회 조건 */
+    GisuOrganizationQueryRequest: {
+      /**
+       * @description 기수 ID 목록. 중복 값은 제거됩니다.
+       * @example 1
+       */
+      id?: number[]
+      /**
+       * @description 기수 번호 목록. 중복 값은 제거됩니다.
+       * @example 10
+       */
+      generation?: number[]
+      /**
+       * @description 활성 기수만 조회할지 여부. true만 허용
+       * @example true
+       */
+      active?: boolean
+      /**
+       * @description 기수 내 지부 정보 포함 여부
+       * @example false
+       */
+      includeChapter?: boolean
+      /**
+       * @description 기수 내 학교 정보 포함 여부
+       * @example false
+       */
+      includeSchool?: boolean
+    }
+    /** @description 지부 정보 */
+    ChapterItem: {
+      /**
+       * Format: int64
+       * @description 지부 ID
+       * @example 1
+       */
+      id?: number
+      /**
+       * @description 지부명
+       * @example 서울
+       */
+      name?: string
+    }
+    /** @description 기수 정보 */
+    GisuItem: {
+      /**
+       * Format: int64
+       * @description 기수 ID
+       * @example 1
+       */
+      gisuId?: number
+      /**
+       * Format: int64
+       * @description 기수 번호
+       * @example 10
+       */
+      generation?: number
+      /**
+       * Format: date-time
+       * @description 시작일
+       * @example 2026-03-01T00:00:00Z
+       */
+      startAt?: string
+      /**
+       * Format: date-time
+       * @description 종료일
+       * @example 2026-08-31T23:59:59Z
+       */
+      endAt?: string
+      /**
+       * @description 활성 여부
+       * @example true
+       */
+      isActive?: boolean
+      /** @description 기수 내 지부 목록 */
+      chapters?: components["schemas"]["ChapterItem"][]
+      /** @description 기수 내 학교 목록 */
+      schools?: components["schemas"]["SchoolItem"][]
+    }
+    /** @description 기수 조직 조회 v2 응답 */
+    GisuOrganizationV2Response: {
+      /** @description 기수 목록 */
+      gisus?: components["schemas"]["GisuItem"][]
+    }
+    /** @description 학교 정보 */
+    SchoolItem: {
+      /**
+       * Format: int64
+       * @description 학교 ID
+       * @example 1
+       */
+      schoolId?: number
+      /**
+       * @description 학교명
+       * @example 서울대학교
+       */
+      schoolName?: string
+    }
+    SchoolLinkItem: {
+      title?: string
+      /** @enum {string} */
+      type?: "KAKAO" | "YOUTUBE" | "INSTAGRAM"
+      url?: string
     }
     BestWorkbookResponse: {
       /** Format: int64 */
@@ -7782,7 +11501,6 @@ export interface components {
        */
       challengerStatus?: "ACTIVE" | "GRADUATED" | "EXPELLED" | "WITHDRAWN"
       roleTypes?: (
-        | "SUPER_ADMIN"
         | "CENTRAL_PRESIDENT"
         | "CENTRAL_VICE_PRESIDENT"
         | "CENTRAL_OPERATING_TEAM_MEMBER"
@@ -7870,6 +11588,172 @@ export interface components {
       targetType?: "NEW_CHALLENGER" | "EXPERIENCED_CHALLENGER" | "ADMIN"
       form?: components["schemas"]["FeedbackForm"]
     }
+    UmcProductSquadListResponse: {
+      squads?: components["schemas"]["UmcProductSquadResponse"][]
+    }
+    UmcProductSquadResponse: {
+      /** Format: int64 */
+      squadId?: number
+      code?: string
+      name?: string
+      description?: string
+      /** Format: date */
+      startDate?: string
+      /** Format: date */
+      endDate?: string
+      /** Format: int32 */
+      sortOrder?: number
+      active?: boolean
+    }
+    UmcProductChapterResponse: {
+      /** Format: int64 */
+      chapterId?: number
+      code?: string
+      name?: string
+      description?: string
+      /** Format: int32 */
+      sortOrder?: number
+      active?: boolean
+    }
+    UmcProductOrganizationChartResponse: {
+      chapters?: components["schemas"]["UmcProductChapterResponse"][]
+      squads?: components["schemas"]["UmcProductSquadResponse"][]
+    }
+    Pageable: {
+      /** Format: int32 */
+      page?: number
+      /** Format: int32 */
+      size?: number
+      sort?: string[]
+    }
+    UmcProductChapterMembershipResponse: {
+      /** Format: int64 */
+      chapterMembershipId?: number
+      /** Format: int64 */
+      activityPeriodId?: number
+      /** Format: int64 */
+      chapterId?: number
+      chapter?: components["schemas"]["UmcProductChapterResponse"]
+      /** @enum {string} */
+      position?:
+        | "UNSPECIFIED"
+        | "PRODUCT_OWNER"
+        | "PRODUCT_DESIGNER"
+        | "IOS_DEVELOPER"
+        | "ANDROID_DEVELOPER"
+        | "WEB_DEVELOPER"
+        | "SERVER_DEVELOPER"
+        | "ETC"
+      positionName?: string
+      responsibilityTitle?: string
+      responsibilityDescription?: string
+      /** Format: date */
+      startDate?: string
+      /** Format: date */
+      endDate?: string
+    }
+    UmcProductLeadershipResponse: {
+      /** Format: int64 */
+      leadershipId?: number
+      /** Format: int64 */
+      activityPeriodId?: number
+      /** @enum {string} */
+      role?: "UMC_PRODUCT_VICE_LEAD" | "UMC_PRODUCT_LEAD"
+      roleName?: string
+      /** Format: date */
+      startDate?: string
+      /** Format: date */
+      endDate?: string
+    }
+    UmcProductMemberActivityPeriodResponse: {
+      /** Format: int64 */
+      activityPeriodId?: number
+      /** Format: date */
+      startDate?: string
+      /** Format: date */
+      endDate?: string
+    }
+    UmcProductMemberPageResponse: {
+      content?: components["schemas"]["UmcProductMemberResponse"][]
+      /** Format: int32 */
+      page?: number
+      /** Format: int32 */
+      size?: number
+      /** Format: int64 */
+      totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
+      hasNext?: boolean
+      hasPrevious?: boolean
+    }
+    UmcProductMemberResponse: {
+      /** Format: int64 */
+      umcProductMemberId?: number
+      /** Format: int64 */
+      memberId?: number
+      memberName?: string
+      memberNickname?: string
+      memberSchoolName?: string
+      memberProfileImageId?: string
+      memberProfileImageUrl?: string
+      introduction?: string
+      umcProductProfileImageId?: string
+      umcProductProfileImageUrl?: string
+      activityPeriods?: components["schemas"]["UmcProductMemberActivityPeriodResponse"][]
+      chapterMemberships?: components["schemas"]["UmcProductChapterMembershipResponse"][]
+      productLeaderships?: components["schemas"]["UmcProductLeadershipResponse"][]
+      squadParticipations?: components["schemas"]["UmcProductSquadParticipationResponse"][]
+    }
+    UmcProductSquadParticipationResponse: {
+      /** Format: int64 */
+      squadParticipantId?: number
+      /** Format: int64 */
+      activityPeriodId?: number
+      /** Format: int64 */
+      squadId?: number
+      squad?: components["schemas"]["UmcProductSquadResponse"]
+      /** @enum {string} */
+      role?: "MEMBER" | "SQUAD_LEAD"
+      roleName?: string
+      /** @enum {string} */
+      position?:
+        | "UNSPECIFIED"
+        | "PRODUCT_OWNER"
+        | "PRODUCT_DESIGNER"
+        | "IOS_DEVELOPER"
+        | "ANDROID_DEVELOPER"
+        | "WEB_DEVELOPER"
+        | "SERVER_DEVELOPER"
+        | "ETC"
+      positionName?: string
+      responsibilityTitle?: string
+      responsibilityDescription?: string
+      /** Format: date */
+      startDate?: string
+      /** Format: date */
+      endDate?: string
+    }
+    UmcProductChapterListResponse: {
+      chapters?: components["schemas"]["UmcProductChapterResponse"][]
+    }
+    ActiveTermResponse: {
+      /** Format: int64 */
+      id?: number
+      /** @enum {string} */
+      type?: "SERVICE" | "PRIVACY" | "MARKETING" | "LOCATION"
+      typeDescription?: string
+      link?: string
+      isMandatory?: boolean
+      /** Format: int64 */
+      version?: number
+      /** Format: date-time */
+      createdAt?: string
+      /** Format: date-time */
+      updatedAt?: string
+    }
+    ActiveTermsResponse: {
+      terms?: components["schemas"]["ActiveTermResponse"][]
+    }
     TermResponse: {
       /** Format: int64 */
       id?: number
@@ -7924,7 +11808,7 @@ export interface components {
       studyGroupId?: number
       /**
        * @description 스터디 그룹명
-       * @example 프로덕트팀 짱짱맨
+       * @example UMC PRODUCT 짱짱맨
        */
       name?: string
       /** Format: int64 */
@@ -8003,12 +11887,6 @@ export interface components {
        */
       updatedAt?: string
     }
-    SchoolLinkItem: {
-      title?: string
-      /** @enum {string} */
-      type?: "KAKAO" | "YOUTUBE" | "INSTAGRAM"
-      url?: string
-    }
     /** @description 학교 정보 */
     UnassignedSchoolItem: {
       /**
@@ -8065,6 +11943,480 @@ export interface components {
     SchoolNameListResponse: {
       /** @description 학교 목록 */
       schools?: components["schemas"]["SchoolNameItem"][]
+    }
+    PageResponseRecruitingApplicationSummaryResponse: {
+      content?: components["schemas"]["RecruitingApplicationSummaryResponse"][]
+      /** Format: int32 */
+      page?: number
+      /** Format: int32 */
+      size?: number
+      /** Format: int64 */
+      totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
+      hasNext?: boolean
+      hasPrevious?: boolean
+    }
+    /** @description 평가용 지원서 요약 */
+    RecruitingApplicationSummaryResponse: {
+      /** Format: int64 */
+      applicationId?: number
+      applicantName?: string
+      email?: string
+      /** Format: int64 */
+      applicantMemberId?: number
+      /** @enum {string} */
+      firstChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** @enum {string} */
+      secondChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** @enum {string} */
+      acceptedTrack?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** @enum {string} */
+      status?:
+        | "DRAFT"
+        | "SUBMITTED"
+        | "DOCUMENT_FAILED"
+        | "INTERVIEW_ASSIGNED"
+        | "INTERVIEW_SKIPPED"
+        | "FINAL_PASSED"
+        | "FINAL_FAILED"
+        | "CANCELLED"
+      /** @enum {string} */
+      registrationStatus?: "NOT_READY" | "READY" | "REGISTERED"
+      /** Format: date-time */
+      submittedAt?: string
+      documentEvaluatedByMe?: boolean
+      interviewEvaluatedByMe?: boolean
+    }
+    /** @description 평가용 지원서 상세 */
+    RecruitingApplicationDetailResponse: {
+      application?: components["schemas"]["RecruitingApplicationSummaryResponse"]
+      /** Format: int64 */
+      formResponseId?: number
+      answers?: components["schemas"]["AnswerResponse"][]
+    }
+    /** @description 단계별 지원서 평가 응답 */
+    RecruitingEvaluationResponse: {
+      /**
+       * Format: int64
+       * @description 평가 ID
+       * @example 7
+       */
+      id?: number
+      /**
+       * Format: int64
+       * @description 지원서 ID
+       * @example 40
+       */
+      applicationId?: number
+      /**
+       * Format: int64
+       * @description 평가자 회원 ID
+       * @example 99
+       */
+      evaluatorMemberId?: number
+      /**
+       * @description 평가 단계
+       * @example DOCUMENT
+       * @enum {string}
+       */
+      stage?: "DOCUMENT" | "INTERVIEW"
+      /**
+       * @description 평가 결정
+       * @example APPROVED
+       * @enum {string}
+       */
+      decision?: "APPROVED" | "REJECTED"
+      /**
+       * @description 평가 의견
+       * @example 평가 기준을 충족합니다.
+       */
+      comment?: string
+      /**
+       * Format: date-time
+       * @description 평가 제출 시각
+       */
+      submittedAt?: string
+    }
+    /** @description 시즌별 공개 모집 목록 */
+    RecruitingPublicRoundGroupResponse: {
+      /** Format: int64 */
+      seasonId?: number
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      chapterId?: number
+      chapterName?: string
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      rounds?: components["schemas"]["RoundResponse"][]
+    }
+    RoundResponse: {
+      /** Format: int64 */
+      roundId?: number
+      title?: string
+      /** @enum {string} */
+      type?: "REGULAR" | "ADDITIONAL"
+      /** Format: int32 */
+      roundNo?: number
+      recruitableTracks?: (
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      )[]
+      secondChoiceEnabled?: boolean
+      /** Format: date-time */
+      documentStartAt?: string
+      /** Format: date-time */
+      documentEndAt?: string
+      /** Format: date-time */
+      documentResultPublishedAt?: string
+      interviewRequired?: boolean
+      /** Format: date-time */
+      interviewStartAt?: string
+      /** Format: date-time */
+      interviewEndAt?: string
+      /** Format: date-time */
+      finalResultPublishedAt?: string
+      announcement?: string
+      /** Format: int64 */
+      applicationFormId?: number
+      /** Format: int64 */
+      formId?: number
+      applicationOpen?: boolean
+    }
+    /** @description Form question option */
+    OptionResponse: {
+      /** Format: int64 */
+      optionId?: number
+      content?: string
+      /** Format: int64 */
+      orderNo?: number
+      other?: boolean
+      /**
+       * Format: int64
+       * @description 조건부 이동 대상 section ID
+       */
+      nextSectionId?: number
+    }
+    /** @description Form question */
+    QuestionResponse: {
+      /** Format: int64 */
+      questionId?: number
+      title?: string
+      description?: string
+      /** @enum {string} */
+      type?:
+        | "SHORT_TEXT"
+        | "LONG_TEXT"
+        | "RADIO"
+        | "CHECKBOX"
+        | "DROPDOWN"
+        | "SCHEDULE"
+        | "FILE"
+        | "PORTFOLIO"
+      required?: boolean
+      /** Format: int64 */
+      orderNo?: number
+      options?: components["schemas"]["OptionResponse"][]
+    }
+    /** @description 지원자가 선택한 트랙 범위의 리크루팅 Form 구조 */
+    RecruitingApplicationFormStructureResponse: {
+      /**
+       * Format: int64
+       * @description Form ID
+       */
+      formId?: number
+      /**
+       * Format: int64
+       * @description Form 생성 회원 ID
+       */
+      createdMemberId?: number
+      /** @description 모집명으로 사용하는 Form 제목 */
+      title?: string
+      /** @description Form 설명 */
+      description?: string
+      /**
+       * @description Form 상태
+       * @enum {string}
+       */
+      status?: "DRAFT" | "PUBLISHED" | "CLOSED"
+      /** @description 익명 응답 허용 여부 */
+      anonymous?: boolean
+      /** @description 중복 응답 허용 여부 */
+      allowDuplicateResponses?: boolean
+      /**
+       * Format: date-time
+       * @description Form 생성 시각
+       */
+      createdAt?: string
+      /**
+       * Format: date-time
+       * @description Form 수정 시각
+       */
+      updatedAt?: string
+      /** @description 선택 트랙 범위에 포함된 section 목록 */
+      sections?: components["schemas"]["SectionResponse"][]
+    }
+    /** @description Form section */
+    SectionResponse: {
+      /** Format: int64 */
+      sectionId?: number
+      title?: string
+      description?: string
+      /** Format: int64 */
+      orderNo?: number
+      questions?: components["schemas"]["QuestionResponse"][]
+    }
+    /** @description 면접 일정 응답 */
+    RecruitingInterviewScheduleResponse: {
+      /**
+       * Format: int64
+       * @description 면접 일정 ID
+       * @example 1
+       */
+      id?: number
+      /**
+       * Format: int64
+       * @description 지원서 ID
+       * @example 40
+       */
+      applicationId?: number
+      /**
+       * @description 면접 일정 상태
+       * @example CONFIRMED
+       * @enum {string}
+       */
+      status?:
+        | "AVAILABILITY_REQUESTED"
+        | "AVAILABILITY_SUBMITTED"
+        | "CONFIRMED"
+        | "CANCELLED"
+      /**
+       * Format: date-time
+       * @description 면접 시작 시각
+       */
+      startsAt?: string
+      /**
+       * Format: date-time
+       * @description 면접 종료 시각
+       */
+      endsAt?: string
+      /**
+       * @description 면접 장소 또는 접속 링크
+       * @example 온라인 회의실 A
+       */
+      location?: string
+    }
+    /** @description 지원 현황 상태별 집계 응답 */
+    RecruitingStatusSummaryResponse: {
+      /**
+       * Format: int64
+       * @description 전체 지원서 수
+       * @example 120
+       */
+      totalCount?: number
+      /** @description 지원서 상태별 지원서 수 */
+      countByStatus?: {
+        [key: string]: number
+      }
+      schools?: components["schemas"]["SchoolSummaryResponse"][]
+    }
+    RoundSummaryResponse: {
+      /** Format: int64 */
+      roundId?: number
+      roundTitle?: string
+      /** @enum {string} */
+      roundType?: "REGULAR" | "ADDITIONAL"
+      /** Format: int32 */
+      roundNo?: number
+      /** Format: int64 */
+      totalCount?: number
+      countByStatus?: {
+        [key: string]: number
+      }
+    }
+    SchoolSummaryResponse: {
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      /** Format: int64 */
+      chapterId?: number
+      chapterName?: string
+      /** Format: int64 */
+      totalCount?: number
+      countByStatus?: {
+        [key: string]: number
+      }
+      rounds?: components["schemas"]["RoundSummaryResponse"][]
+    }
+    /** @description 트랙별 모집 목표 인원 */
+    QuotaResponse: {
+      /**
+       * @description 모집 트랙
+       * @example PLAN
+       * @enum {string}
+       */
+      track?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * Format: int32
+       * @description 목표 인원
+       * @example 5
+       */
+      targetCount?: number
+    }
+    /** @description 모집 시즌의 쿼터와 차수 설정 응답 */
+    RecruitingSeasonConfigurationResponse: {
+      /**
+       * Format: int64
+       * @description 모집 시즌 ID
+       * @example 10
+       */
+      id?: number
+      /**
+       * Format: int64
+       * @description 기수 ID
+       * @example 15
+       */
+      gisuId?: number
+      /**
+       * Format: int64
+       * @description 학교 ID
+       * @example 3
+       */
+      schoolId?: number
+      /** @description 시즌 운영진 공유 메모 */
+      memo?: string
+      /** @description 트랙별 목표 인원 */
+      quotas?: components["schemas"]["QuotaResponse"][]
+      /** @description 모집 차수 설정 */
+      rounds?: components["schemas"]["RoundResponse"][]
+    }
+    /** @description 모집 제목 사용 가능 여부 */
+    RecruitingRoundTitleAvailabilityResponse: {
+      available?: boolean
+    }
+    /** @description 기수와 현재 학교 소속을 반영한 모집 시즌 목록 응답 */
+    RecruitingSeasonSummaryResponse: {
+      /**
+       * Format: int64
+       * @description 모집 시즌 ID
+       * @example 10
+       */
+      seasonId?: number
+      /**
+       * Format: int64
+       * @description 기수 ID
+       * @example 15
+       */
+      gisuId?: number
+      /**
+       * Format: int64
+       * @description 현재 지부 ID
+       * @example 2
+       */
+      chapterId?: number
+      /**
+       * @description 현재 지부명
+       * @example 서울 지부
+       */
+      chapterName?: string
+      /**
+       * Format: int64
+       * @description 학교 ID
+       * @example 3
+       */
+      schoolId?: number
+      /**
+       * @description 학교명
+       * @example 한국대학교
+       */
+      schoolName?: string
+      /** @description 시즌 운영진 공유 메모 */
+      memo?: string
+      /** @description 시즌에 속한 모집 차수 */
+      rounds?: components["schemas"]["RoundResponse"][]
+    }
+    /** @description 활성 면접 질문 응답 */
+    RecruitingInterviewQuestionResponse: {
+      /**
+       * Format: int64
+       * @description 면접 질문 ID
+       * @example 1
+       */
+      id?: number
+      /**
+       * Format: int64
+       * @description 모집 차수 ID. 공통 질문에만 존재합니다.
+       * @example 20
+       */
+      roundId?: number
+      /**
+       * Format: int64
+       * @description 지원서 ID. 개별 질문에만 존재합니다.
+       * @example 40
+       */
+      applicationId?: number
+      /**
+       * @description 질문 본문
+       * @example 지원 동기를 설명해 주세요.
+       */
+      content?: string
+      /**
+       * Format: int32
+       * @description 질문 노출 순서
+       * @example 0
+       */
+      orderNo?: number
+      /**
+       * @description 활성 여부
+       * @example true
+       */
+      active?: boolean
+    }
+    /** @description 모집 차수 평가자 응답 */
+    RecruitingRoundEvaluatorResponse: {
+      /**
+       * Format: int64
+       * @description 평가자 등록 ID
+       * @example 1
+       */
+      id?: number
+      /**
+       * Format: int64
+       * @description 모집 차수 ID
+       * @example 20
+       */
+      roundId?: number
+      /**
+       * Format: int64
+       * @description 평가자 회원 ID
+       * @example 99
+       */
+      memberId?: number
     }
     MemberBrief: {
       /** Format: int64 */
@@ -8193,10 +12545,10 @@ export interface components {
        * @enum {string}
        */
       status?: "ACTIVE" | "COMPLETED" | "WITHDRAWN" | "DISMISSED"
-      /** @description 해당 멤버가 이 프로젝트에 작성한 지원 이력. 강제 배정이면 빈 목록입니다. */
+      /** @description 해당 멤버가 이 프로젝트에 작성한 지원 이력. 강제 배정이면 빈 목록 */
       applications?: components["schemas"]["ProjectMemberApplicationStatisticsResponse"][]
     }
-    /** @description 프로젝트 지원/매칭 현황 통합 응답 */
+    /** @description 프로젝트 지원/매칭 현황 응답 */
     ProjectStatisticsResponse: {
       /**
        * Format: int64
@@ -8243,6 +12595,14 @@ export interface components {
        */
       applicantCount?: number
     }
+    MatchedRoundInfo: {
+      /** Format: int64 */
+      id?: number
+      /** @enum {string} */
+      type?: "PLAN_DESIGN" | "PLAN_DEVELOPER"
+      /** @enum {string} */
+      phase?: "FIRST" | "SECOND" | "THIRD"
+    }
     PartGroup: {
       /** @enum {string} */
       part?:
@@ -8254,13 +12614,21 @@ export interface components {
         | "NODEJS"
         | "SPRINGBOOT"
         | "ADMIN"
-      members?: components["schemas"]["MemberBrief"][]
+      members?: components["schemas"]["ProjectMemberBrief"][]
+    }
+    ProjectMemberBrief: {
+      /** Format: int64 */
+      memberId?: number
+      nickname?: string
+      name?: string
+      schoolName?: string
+      matchedRoundInfo?: components["schemas"]["MatchedRoundInfo"]
     }
     ProjectMembersResponse: {
       /** Format: int64 */
       projectId?: number
-      productOwner?: components["schemas"]["MemberBrief"]
-      coProductOwners?: components["schemas"]["MemberBrief"][]
+      productOwner?: components["schemas"]["ProjectMemberBrief"]
+      coProductOwners?: components["schemas"]["ProjectMemberBrief"][]
       partGroups?: components["schemas"]["PartGroup"][]
     }
     Applicant: {
@@ -8286,7 +12654,7 @@ export interface components {
       /** @enum {string} */
       type?: "PLAN_DESIGN" | "PLAN_DEVELOPER"
       /** @enum {string} */
-      phase?: "FIRST" | "SECOND" | "THIRD"
+      phase?: "FIRST" | "SECOND" | "THIRD" | "RANDOM_MATCHING"
     }
     ProjectApplicantResponse: {
       /** Format: int64 */
@@ -8413,7 +12781,7 @@ export interface components {
       description?: string
       sections?: components["schemas"]["ApplicationFormSection"][]
     }
-    /** @description 지부 전체 프로젝트 지원/매칭 현황 BFF 응답 */
+    /** @description 지부 전체 프로젝트 지원/매칭 현황 응답 */
     ChapterProjectStatisticsResponse: {
       /**
        * Format: int64
@@ -8430,7 +12798,7 @@ export interface components {
       roundApplicationStatistics?: components["schemas"]["RoundApplicationStatisticsResponse"][]
       /** @description 매칭 차수별 지원자 학교 순위 */
       roundSchoolRankings?: components["schemas"]["RoundSchoolApplicationStatisticsResponse"][]
-      /** @description 학교별 총 매칭 인원 수와 총원 */
+      /** @description 학교별 지원 가능 총원, 지원 완료 인원 수, 매칭 완료 인원 수 */
       schoolMatchingStatistics?: components["schemas"]["SchoolMatchingStatisticsResponse"][]
       /** @description 프로젝트별 매칭 차수 인원 수 */
       projectRoundStatistics?: components["schemas"]["ProjectRoundMemberStatisticsResponse"][]
@@ -8459,7 +12827,7 @@ export interface components {
       /** @description 매칭 차수별 인원 수 */
       matchingRounds?: components["schemas"]["ProjectRoundMemberCountResponse"][]
     }
-    /** @description 학교별 총 매칭 인원 수와 총원 */
+    /** @description 학교별 지원 가능 총원, 지원 완료 인원 수, 매칭 완료 인원 수 */
     SchoolMatchingStatisticsResponse: {
       /**
        * Format: int64
@@ -8476,6 +12844,114 @@ export interface components {
        * @description 학교별 지원 가능 총원
        */
       totalMemberCount?: number
+      /**
+       * Format: int64
+       * @description 매칭 차수 중 한 번이라도 지원한 인원 수
+       */
+      appliedMemberCount?: number
+    }
+    /** @description 지부별 공개 프로젝트 매칭 요약 응답 */
+    ChapterProjectMatchingStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 지부 ID
+       */
+      chapterId?: number
+      /** @description 매칭 차수별 ProjectMember 기준 매칭 현황 */
+      roundMatchingStatistics?: components["schemas"]["RoundMatchingStatisticsResponse"][]
+      /** @description 학교별 매칭 인원 수와 총원 */
+      schoolMatchingStatistics?: components["schemas"]["SchoolMatchingStatisticsResponse"][]
+      unclassifiedMatchingStatistics?: components["schemas"]["UnclassifiedMatchingStatisticsResponse"]
+    }
+    /** @description 프로젝트별 매칭 완료 인원 수 */
+    ProjectMatchingCountResponse: {
+      /**
+       * Format: int64
+       * @description 프로젝트 ID
+       */
+      projectId?: number
+      /**
+       * Format: int64
+       * @description 매칭 완료 인원 수
+       */
+      matchedMemberCount?: number
+    }
+    /** @description 매칭 차수별 ProjectMember 기준 매칭 현황 */
+    RoundMatchingStatisticsResponse: {
+      matchingRound?: components["schemas"]["ProjectMatchingRoundStatisticsResponse"]
+      /**
+       * Format: int64
+       * @description 매칭 완료 인원 수
+       */
+      matchedMemberCount?: number
+      /**
+       * Format: int64
+       * @description 지원 가능 인원 수
+       */
+      availableMemberCount?: number
+      /** @description 프로젝트별 매칭 완료 인원 수 */
+      projects?: components["schemas"]["ProjectMatchingCountResponse"][]
+    }
+    /** @description 합격 지원서가 없어 매칭 차수에 귀속할 수 없는 ProjectMember 통계 */
+    UnclassifiedMatchingStatisticsResponse: {
+      /**
+       * Format: int64
+       * @description 매칭 차수 미분류 인원 수
+       */
+      matchedMemberCount?: number
+      /** @description 프로젝트별 매칭 차수 미분류 인원 수 */
+      projects?: components["schemas"]["ProjectMatchingCountResponse"][]
+    }
+    ApplicationFormPermissionsResponse: {
+      canRead?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canCreate?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canEdit?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canPublish?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canDelete?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+    }
+    ApplicationPermissionsResponse: {
+      canCreate?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canReadList?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canDecide?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+    }
+    MemberPermissionsResponse: {
+      canRead?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canCreate?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canDelete?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+    }
+    PartQuotaPermissionsResponse: {
+      canEdit?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+    }
+    ProjectPermissionCapabilityInfo: {
+      allowed?: boolean
+      reasonCode?: string
+      reason?: string
+    }
+    ProjectPermissionResponse: {
+      /** Format: int64 */
+      projectId?: number
+      exists?: boolean
+      canEditInfo?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canTransferOwnership?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canDelete?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      applicationForm?: components["schemas"]["ApplicationFormPermissionsResponse"]
+      partQuota?: components["schemas"]["PartQuotaPermissionsResponse"]
+      status?: components["schemas"]["StatusPermissionsResponse"]
+      application?: components["schemas"]["ApplicationPermissionsResponse"]
+      member?: components["schemas"]["MemberPermissionsResponse"]
+      statistics?: components["schemas"]["StatisticsPermissionsResponse"]
+    }
+    ProjectPermissionsResponse: {
+      projects?: components["schemas"]["ProjectPermissionResponse"][]
+    }
+    StatisticsPermissionsResponse: {
+      canRead?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+    }
+    StatusPermissionsResponse: {
+      canRequestReview?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canPublish?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canComplete?: components["schemas"]["ProjectPermissionCapabilityInfo"]
+      canAbort?: components["schemas"]["ProjectPermissionCapabilityInfo"]
     }
     ManagedProjectSummaryResponse: {
       /** Format: int64 */
@@ -8860,7 +13336,6 @@ export interface components {
         | "SPRINGBOOT"
         | "ADMIN"
       roleTypes?: (
-        | "SUPER_ADMIN"
         | "CENTRAL_PRESIDENT"
         | "CENTRAL_VICE_PRESIDENT"
         | "CENTRAL_OPERATING_TEAM_MEMBER"
@@ -8876,13 +13351,6 @@ export interface components {
       /** Format: int64 */
       totalCount?: number
       page?: components["schemas"]["PageResponseSearchMemberItemResponse"]
-    }
-    Pageable: {
-      /** Format: int32 */
-      page?: number
-      /** Format: int32 */
-      size?: number
-      sort?: string[]
     }
     /** @description 기수 목록 페이징 응답 */
     GisuPageResponse: {
@@ -9001,19 +13469,155 @@ export interface components {
       /** Format: int64 */
       gisu?: number
     }
-    /** @description 지부 정보 */
-    ChapterItem: {
-      /**
-       * Format: int64
-       * @description 지부 ID
-       * @example 1
-       */
-      id?: number
-      /**
-       * @description 지부명
-       * @example 서울
-       */
+    ErrorCodeCatalogItemResponse: {
+      /** Format: int32 */
+      sequence?: number
+      domain?: string
+      code?: string
       name?: string
+      /** Format: int32 */
+      httpStatus?: number
+      httpStatusName?: string
+      message?: string
+      description?: string
+      clientAction?: string
+      retryable?: boolean
+      severity?: string
+      deprecated?: boolean
+      replacementCode?: string
+      owners?: string[]
+      tags?: string[]
+      source?: components["schemas"]["ErrorCodeCatalogSourceResponse"]
+    }
+    ErrorCodeCatalogResponse: {
+      /** Format: int32 */
+      schemaVersion?: number
+      service?: string
+      generatedAt?: string
+      /** Format: int32 */
+      totalCount?: number
+      items?: components["schemas"]["ErrorCodeCatalogItemResponse"][]
+    }
+    ErrorCodeCatalogSourceResponse: {
+      enumName?: string
+      file?: string
+      /** Format: int32 */
+      line?: number
+    }
+    CommunityThreadListResponse: {
+      pinned?: components["schemas"]["CommunityThreadSummaryResponse"][]
+      threads?: components["schemas"]["CommunityThreadSummaryResponse"][]
+      nextOffset?: string
+      total?: string
+    }
+    CommunityThreadSummaryResponse: {
+      threadId?: string
+      title?: string
+      description?: string
+      /** @enum {string} */
+      category?: "STUDY" | "QNA" | "PROJECT" | "FREE"
+      icon?: string
+      memberCount?: string
+      unreadCount?: string
+      maxMembers?: string
+      isPinned?: boolean
+      isMuted?: boolean
+      /** @enum {string} */
+      myRole?: "OWNER" | "ADMIN" | "MEMBER"
+      lastMessage?: components["schemas"]["CommunityThreadLastMessageResponse"]
+      createdBy?: string
+      /** Format: date-time */
+      createdAt?: string
+      /** Format: date-time */
+      updatedAt?: string
+    }
+    CommunityThreadMessagePageResponse: {
+      messages?: components["schemas"]["CommunityThreadMessageResponse"][]
+      hasMore?: boolean
+      nextBefore?: string
+    }
+    CommunityThreadMessageResponse: {
+      messageId?: string
+      threadId?: string
+      senderId?: string
+      senderName?: string
+      content?: string
+      /** @enum {string} */
+      type?: "TEXT" | "IMAGE" | "SYSTEM"
+      /** @enum {string} */
+      status?: "SENT"
+      fileMetadataIds?: string[]
+      mentions?: components["schemas"]["Mention"][]
+      replyTo?: components["schemas"]["ReplyTo"]
+      reactions?: components["schemas"]["Reaction"][]
+      /** Format: date-time */
+      createdAt?: string
+      /** Format: date-time */
+      editedAt?: string
+      /** Format: date-time */
+      deletedAt?: string
+    }
+    Mention: {
+      memberId?: string
+      name?: string
+    }
+    Reaction: {
+      emoji?: string
+      count?: string
+      reactedByMe?: boolean
+    }
+    ReplyTo: {
+      messageId?: string
+      senderName?: string
+      snippet?: string
+    }
+    CommunityThreadMemberPageResponse: {
+      items?: components["schemas"]["CommunityThreadMemberResponse"][]
+      nextOffset?: string
+      total?: string
+    }
+    CommunityThreadInvitablePageResponse: {
+      items?: components["schemas"]["CommunityThreadInvitableResponse"][]
+      nextOffset?: string
+      total?: string
+    }
+    CommunityThreadInvitableResponse: {
+      memberId?: string
+      /** @description 최신 Challenger ID. Challenger 이력이 없으면 null */
+      challengerId?: string
+      name?: string
+      /**
+       * @description 최신 Challenger 파트. Challenger 이력이 없으면 null
+       * @enum {string}
+       */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB"
+        | "ANDROID"
+        | "IOS"
+        | "NODEJS"
+        | "SPRINGBOOT"
+        | "ADMIN"
+      /** @description 최신 Challenger 기수. Challenger 이력이 없으면 null */
+      generation?: string
+    }
+    CommunityThreadMessageAdminReportResponse: {
+      reportId?: string
+      threadId?: string
+      messageId?: string
+      /** @enum {string} */
+      reason?: "SPAM" | "ABUSE" | "INAPPROPRIATE" | "PRIVACY" | "ETC"
+      /** @enum {string} */
+      status?: "PENDING" | "APPROVED" | "REJECTED"
+      reporterId?: string
+      /** Format: date-time */
+      createdAt?: string
+    }
+    CommunityThreadMessageReportPageResponse: {
+      items?: components["schemas"]["CommunityThreadMessageAdminReportResponse"][]
+      nextOffset?: string
+      total?: string
     }
     /** @description 지부 목록 응답 */
     ChapterListResponse: {
@@ -9040,20 +13644,6 @@ export interface components {
     ChapterWithSchoolsResponse: {
       /** @description 지부 목록 */
       chapters?: components["schemas"]["ChapterWithSchools"][]
-    }
-    /** @description 학교 정보 */
-    SchoolItem: {
-      /**
-       * Format: int64
-       * @description 학교 ID
-       * @example 1
-       */
-      schoolId?: number
-      /**
-       * @description 학교명
-       * @example 서울대학교
-       */
-      schoolName?: string
     }
     PageResponseSearchChallengerItemResponse: {
       content?: components["schemas"]["SearchChallengerItemResponse"][]
@@ -9110,7 +13700,6 @@ export interface components {
       pointSum?: number
       profileImageLink?: string
       roleTypes?: (
-        | "SUPER_ADMIN"
         | "CENTRAL_PRESIDENT"
         | "CENTRAL_VICE_PRESIDENT"
         | "CENTRAL_OPERATING_TEAM_MEMBER"
@@ -9165,9 +13754,245 @@ export interface components {
       cursor?: components["schemas"]["CursorResponseSearchChallengerItemResponse"]
       partCounts?: components["schemas"]["PartCountResponse"][]
     }
+    CertificateResponse: {
+      /** Format: int64 */
+      certificateId?: number
+      serialNumber?: string
+      /** @enum {string} */
+      template?:
+        | "UMC_COURSE_COMPLETION"
+        | "UMC_COURSE_MERIT"
+        | "UMC_DEMO_DAY_GRAND_PRIZE"
+        | "UMC_DEMO_DAY_FIRST_PRIZE"
+        | "UMC_DEMO_DAY_SECOND_PRIZE"
+        | "UMC_DEMO_DAY_PARTICIPATION_PRIZE"
+        | "UMC_DEMO_DAY_AWS_SPECIAL_PRIZE"
+        | "UMC_DEMO_DAY_BEST_CHALLENGER"
+        | "UMC_HACKATHON_CERTIFICATION_OF_COMPLETION"
+        | "UMC_HACKATHON_GRAND_PRIZE"
+        | "UMC_HACKATHON_FIRST_PRIZE"
+        | "UMC_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_GRAND_PRIZE"
+        | "NEORDINARY_HACKATHON_FIRST_PRIZE"
+        | "NEORDINARY_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_CERTIFICATION_OF_COMPLETION"
+      /** @enum {string} */
+      issuer?: "UNIVERSITY_MAKEUS_CHALLENGE" | "NEORDINARY"
+      /** @enum {string} */
+      status?: "ISSUED" | "REVOKED" | "EXPIRED"
+      recipientName?: string
+      /** Format: int64 */
+      gisuId?: number
+      /** Format: int64 */
+      gisuGeneration?: number
+      meritTitle?: string
+      /** Format: date-time */
+      issuedAt?: string
+      /** Format: date-time */
+      expiresAt?: string
+    }
+    CertificateDownloadResponse: {
+      /** Format: int64 */
+      certificateId?: number
+      serialNumber?: string
+      downloadUrl?: string
+      /** Format: date-time */
+      expiresAt?: string
+    }
+    CertificateVerificationResponse: {
+      valid?: boolean
+      status?: string
+      /** @enum {string} */
+      template?:
+        | "UMC_COURSE_COMPLETION"
+        | "UMC_COURSE_MERIT"
+        | "UMC_DEMO_DAY_GRAND_PRIZE"
+        | "UMC_DEMO_DAY_FIRST_PRIZE"
+        | "UMC_DEMO_DAY_SECOND_PRIZE"
+        | "UMC_DEMO_DAY_PARTICIPATION_PRIZE"
+        | "UMC_DEMO_DAY_AWS_SPECIAL_PRIZE"
+        | "UMC_DEMO_DAY_BEST_CHALLENGER"
+        | "UMC_HACKATHON_CERTIFICATION_OF_COMPLETION"
+        | "UMC_HACKATHON_GRAND_PRIZE"
+        | "UMC_HACKATHON_FIRST_PRIZE"
+        | "UMC_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_GRAND_PRIZE"
+        | "NEORDINARY_HACKATHON_FIRST_PRIZE"
+        | "NEORDINARY_HACKATHON_SECOND_PRIZE"
+        | "NEORDINARY_HACKATHON_CERTIFICATION_OF_COMPLETION"
+      /** @enum {string} */
+      issuer?: "UNIVERSITY_MAKEUS_CHALLENGE" | "NEORDINARY"
+      /** Format: int64 */
+      gisuGeneration?: number
+      recipientName?: string
+      /** Format: date-time */
+      issuedAt?: string
+      /** Format: date-time */
+      expiresAt?: string
+    }
+    CursorResponseBlogSeriesSummaryResponse: {
+      content?: components["schemas"]["BlogSeriesSummaryResponse"][]
+      /** Format: int64 */
+      nextCursor?: number
+      hasNext?: boolean
+    }
+    BlogContentSummaryResponse: {
+      /** Format: int64 */
+      id?: number
+      /** @enum {string} */
+      type?: "ENGINEERING" | "DESIGN" | "PRODUCT" | "RELEASE"
+      slug?: string
+      title?: string
+      summary?: string
+      thumbnailUrl?: string
+      /** @enum {string} */
+      status?: "DRAFT" | "PUBLISHED" | "DELETED"
+      author?: components["schemas"]["AuthorResponse"]
+      /** Format: date-time */
+      publishedAt?: string
+      /** Format: date-time */
+      updatedAt?: string
+      canonicalPath?: string
+      seoTitle?: string
+      seoDescription?: string
+      ogImageUrl?: string
+      series?: components["schemas"]["BlogSeriesSummaryResponse"][]
+      hashtags?: components["schemas"]["BlogHashtagResponse"][]
+      canEdit?: boolean
+      canDelete?: boolean
+    }
+    CursorResponseBlogContentSummaryResponse: {
+      content?: components["schemas"]["BlogContentSummaryResponse"][]
+      /** Format: int64 */
+      nextCursor?: number
+      hasNext?: boolean
+    }
+    BlogSeoPathsResponse: {
+      paths?: components["schemas"]["PathResponse"][]
+    }
+    PathResponse: {
+      type?: string
+      path?: string
+      /** Format: date-time */
+      updatedAt?: string
+    }
+    CursorResponseBlogHashtagResponse: {
+      content?: components["schemas"]["BlogHashtagResponse"][]
+      /** Format: int64 */
+      nextCursor?: number
+      hasNext?: boolean
+    }
+    CursorResponseBlogCommentResponse: {
+      content?: components["schemas"]["BlogCommentResponse"][]
+      /** Format: int64 */
+      nextCursor?: number
+      hasNext?: boolean
+    }
     EmailAvailabilityResponse: {
       email?: string
       available?: boolean
+    }
+    ApiResponsePageAuditLogInfo: {
+      success?: boolean
+      code?: string
+      message?: string
+      result?: components["schemas"]["PageAuditLogInfo"]
+    }
+    AuditLogInfo: {
+      /** Format: int64 */
+      id?: number
+      /** @enum {string} */
+      domain?:
+        | "COMMON"
+        | "AUTHENTICATION"
+        | "AUTHORIZATION"
+        | "MEMBER"
+        | "CHALLENGER"
+        | "ORGANIZATION"
+        | "CURRICULUM"
+        | "SCHEDULE"
+        | "COMMUNITY"
+        | "NOTICE"
+        | "FCM"
+        | "FORM"
+        | "RECRUITMENT"
+        | "TERMS"
+        | "EMAIL"
+        | "STORAGE"
+        | "WEBHOOK"
+        | "AUDIT_LOG"
+        | "PROJECT"
+        | "LLM"
+        | "ANALYTICS"
+        | "CHAT"
+        | "MAINTENANCE"
+        | "FEEDBACK"
+        | "BLOG"
+        | "DOCUMENTATION"
+        | "CERTIFICATE"
+      /** @enum {string} */
+      action?:
+        | "CREATE"
+        | "UPDATE"
+        | "DELETE"
+        | "APPROVE"
+        | "REJECT"
+        | "CHECK"
+        | "SUBMIT"
+        | "REGISTER"
+        | "WITHDRAW"
+        | "LOGIN"
+        | "LINK"
+        | "UNLINK"
+        | "ACCESS_DENIED"
+        | "PUBLISH"
+        | "CANCEL"
+        | "REMIND"
+        | "REORDER"
+        | "FINALIZE"
+      targetType?: string
+      targetId?: string
+      /** Format: int64 */
+      actorMemberId?: number
+      description?: string
+      details?: string
+      ipAddress?: string
+      /** Format: date-time */
+      createdAt?: string
+    }
+    PageAuditLogInfo: {
+      /** Format: int32 */
+      totalPages?: number
+      /** Format: int64 */
+      totalElements?: number
+      /** Format: int32 */
+      size?: number
+      content?: components["schemas"]["AuditLogInfo"][]
+      /** Format: int32 */
+      number?: number
+      sort?: components["schemas"]["SortObject"]
+      pageable?: components["schemas"]["PageableObject"]
+      /** Format: int32 */
+      numberOfElements?: number
+      first?: boolean
+      last?: boolean
+      empty?: boolean
+    }
+    PageableObject: {
+      /** Format: int64 */
+      offset?: number
+      sort?: components["schemas"]["SortObject"]
+      paged?: boolean
+      /** Format: int32 */
+      pageSize?: number
+      /** Format: int32 */
+      pageNumber?: number
+      unpaged?: boolean
+    }
+    SortObject: {
+      empty?: boolean
+      unsorted?: boolean
+      sorted?: boolean
     }
     AdminSchoolSummaryResponse: {
       /** Format: int64 */
@@ -9211,79 +14036,6 @@ export interface components {
       /** Format: int64 */
       challengerId?: number
       name?: string
-    }
-    FigmaWatchedFileResponse: {
-      /** Format: int64 */
-      id?: number
-      fileKey?: string
-      displayName?: string
-      enabled?: boolean
-      /** Format: date-time */
-      lastSyncedAt?: string
-      lastError?: string
-    }
-    FigmaRoutingDomainMentionResponse: {
-      /** Format: int64 */
-      id?: number
-      /** Format: int64 */
-      domainId?: number
-      mentionId?: string
-      /** @enum {string} */
-      mentionType?: "ROLE" | "USER"
-      displayLabel?: string
-    }
-    FigmaRoutingDomainResponse: {
-      /** Format: int64 */
-      id?: number
-      domainKey?: string
-      description?: string
-      discordWebhookUrlMasked?: string
-      fallback?: boolean
-      /** Format: int32 */
-      mentionCount?: number
-      mentions?: components["schemas"]["FigmaRoutingDomainMentionResponse"][]
-    }
-    Comment: {
-      commentId?: string
-      message?: string
-      authorName?: string
-      fileKey?: string
-      fileDisplayName?: string
-      nodeId?: string
-      pageName?: string
-      classifiedDomainKey?: string
-      /** Format: date-time */
-      createdAt?: string
-      alreadyDispatched?: boolean
-    }
-    DomainGroup: {
-      domainKey?: string
-      webhookUrl?: string
-      fallback?: boolean
-      mentionRenders?: string[]
-      sent?: boolean
-      comments?: components["schemas"]["Comment"][]
-    }
-    FigmaSummaryResult: {
-      /** Format: date-time */
-      from?: string
-      /** Format: date-time */
-      to?: string
-      /** Format: int32 */
-      totalComments?: number
-      /** Format: int32 */
-      unmatchedCount?: number
-      /** Format: int32 */
-      skippedAlreadyDispatchedCount?: number
-      domains?: components["schemas"]["DomainGroup"][]
-    }
-    FigmaOAuthAuthorizeResponse: {
-      authorizeUrl?: string
-      state?: string
-    }
-    FigmaOAuthCallbackResponse: {
-      /** Format: int64 */
-      integrationId?: number
     }
     AdminDashboardSummaryResponse: {
       /** Format: int64 */
@@ -9432,6 +14184,38 @@ export interface components {
       /** Format: int64 */
       studyGroupScheduleCount?: number
     }
+    AdminOperationsStudyGroupsResponse: {
+      /** Format: int64 */
+      studyGroupCount?: number
+      /** Format: int64 */
+      studyGroupScheduleCount?: number
+    }
+    AdminOperationsSignupsResponse: {
+      signupBuckets?: components["schemas"]["SignupBucketResponse"][]
+    }
+    AdminOperationsSchoolsResponse: {
+      chapters?: components["schemas"]["ChapterStatusResponse"][]
+    }
+    ChapterStatusResponse: {
+      /** Format: int64 */
+      chapterId?: number
+      chapterName?: string
+      schools?: components["schemas"]["SchoolChallengerStatusResponse"][]
+    }
+    AdminOperationsPointsResponse: {
+      pointGrantStatuses?: components["schemas"]["ChapterPartPointGrantStatusResponse"][]
+    }
+    AdminOperationsAttendanceResponse: {
+      /** Format: int64 */
+      scheduleCount?: number
+      /** Format: int64 */
+      attendanceRequiredScheduleCount?: number
+      /** Format: int64 */
+      attendanceRecordCount?: number
+      attendanceStatusCounts?: {
+        [key: string]: number
+      }
+    }
     AdminDashboardContextResponse: {
       /** @enum {string} */
       roleType?:
@@ -9472,95 +14256,43 @@ export interface components {
       /** Format: int64 */
       upcomingGraduationCount?: number
     }
-    ApiResponsePageAuditLogInfo: {
-      success?: boolean
-      code?: string
-      message?: string
-      result?: components["schemas"]["PageAuditLogInfo"]
-    }
-    AuditLogInfo: {
+    DeleteSeedProjectDataRequest: {
       /** Format: int64 */
-      id?: number
-      /** @enum {string} */
-      domain?:
-        | "COMMON"
-        | "AUTHENTICATION"
-        | "AUTHORIZATION"
-        | "MEMBER"
-        | "CHALLENGER"
-        | "ORGANIZATION"
-        | "CURRICULUM"
-        | "SCHEDULE"
-        | "COMMUNITY"
-        | "NOTICE"
-        | "FCM"
-        | "SURVEY"
-        | "RECRUITMENT"
-        | "TERMS"
-        | "EMAIL"
-        | "STORAGE"
-        | "WEBHOOK"
-        | "AUDIT_LOG"
-        | "PROJECT"
-        | "FIGMA"
-        | "LLM"
-        | "ANALYTICS"
-        | "MAINTENANCE"
-        | "FEEDBACK"
-      /** @enum {string} */
-      action?:
-        | "CREATE"
-        | "UPDATE"
-        | "DELETE"
-        | "APPROVE"
-        | "REJECT"
-        | "CHECK"
-        | "SUBMIT"
-        | "REGISTER"
-        | "WITHDRAW"
-      targetType?: string
-      targetId?: string
-      /** Format: int64 */
-      actorMemberId?: number
-      description?: string
-      details?: string
-      ipAddress?: string
-      /** Format: date-time */
-      createdAt?: string
+      gisuId?: number
     }
-    PageAuditLogInfo: {
-      /** Format: int32 */
-      totalPages?: number
+    DeleteSeedProjectDataResponse: {
       /** Format: int64 */
-      totalElements?: number
+      gisuId?: number
       /** Format: int32 */
-      size?: number
-      content?: components["schemas"]["AuditLogInfo"][]
+      deletedProjects?: number
       /** Format: int32 */
-      number?: number
-      sort?: components["schemas"]["SortObject"]
-      pageable?: components["schemas"]["PageableObject"]
+      deletedProjectMembers?: number
       /** Format: int32 */
-      numberOfElements?: number
-      first?: boolean
-      last?: boolean
-      empty?: boolean
-    }
-    PageableObject: {
-      /** Format: int64 */
-      offset?: number
-      sort?: components["schemas"]["SortObject"]
-      unpaged?: boolean
+      deletedProjectApplications?: number
       /** Format: int32 */
-      pageNumber?: number
-      paged?: boolean
+      deletedProjectApplicationForms?: number
       /** Format: int32 */
-      pageSize?: number
-    }
-    SortObject: {
-      empty?: boolean
-      unsorted?: boolean
-      sorted?: boolean
+      deletedProjectApplicationFormPolicies?: number
+      /** Format: int32 */
+      deletedProjectPartQuotas?: number
+      /** Format: int32 */
+      deletedProjectMatchingRounds?: number
+      /** Format: int32 */
+      deletedSurveyForms?: number
+      /** Format: int32 */
+      deletedSurveyFormSections?: number
+      /** Format: int32 */
+      deletedSurveyQuestions?: number
+      /** Format: int32 */
+      deletedSurveyQuestionOptions?: number
+      /** Format: int32 */
+      deletedSurveyFormResponses?: number
+      /** Format: int32 */
+      deletedSurveyAnswers?: number
+      /** Format: int32 */
+      deletedSurveyAnswerChoices?: number
+      /** Format: int32 */
+      deletedSurveySingleAnswers?: number
     }
     /** @description 학교 삭제 요청 */
     DeleteSchoolsRequest: {
@@ -9597,7 +14329,364 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-  updatePartQuotas: {
+  "RECRUITING-EVALUATION-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+        applicationId: number
+        stage: "DOCUMENT" | "INTERVIEW"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingEvaluationResponse"][]
+        }
+      }
+    }
+  }
+  "RECRUITING-EVALUATION-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+        applicationId: number
+        stage: "DOCUMENT" | "INTERVIEW"
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubmitRecruitingEvaluationRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-PUBLIC-005": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAnonymousRecruitingApplicationRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-PUBLIC-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateAnonymousRecruitingApplicationDraftRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationCreatedResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-APPLICATION-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateRecruitingApplicationDraftRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-SCHEDULE-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description RECRUITING-0419: 면접 가능 일정 응답 제출 기능 미구현 */
+      501: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-014": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seasonId: number
+        roundId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateRecruitingRoundRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-017": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seasonId: number
+        roundId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-021": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seasonId: number
+        roundId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpsertRecruitingApplicationFormRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingIdResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seasonId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReplaceRecruitingSeasonTrackQuotasRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-042": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+        questionId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecruitingInterviewQuestionRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-043": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+        questionId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-046": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+        questionId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecruitingInterviewQuestionRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-047": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+        questionId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-052": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConfirmRecruitingInterviewScheduleRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "PROJECT-105": {
     parameters: {
       query?: never
       header?: never
@@ -9621,12 +14710,36 @@ export interface operations {
       }
     }
   }
-  updateDraft: {
+  "APPLY-102": {
     parameters: {
       query?: never
       header?: never
       path: {
         projectId: number
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ProjectApplicationDetailResponse"]
+        }
+      }
+    }
+  }
+  "APPLY-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        projectId: number
+        applicationId: number
       }
       cookie?: never
     }
@@ -9647,7 +14760,31 @@ export interface operations {
       }
     }
   }
-  get: {
+  "APPLY-005": {
+    parameters: {
+      query?: {
+        reason?: string
+      }
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ProjectApplicationStatusResponse"]
+        }
+      }
+    }
+  }
+  "PROJECT-106-GET": {
     parameters: {
       query?: never
       header?: never
@@ -9669,7 +14806,7 @@ export interface operations {
       }
     }
   }
-  upsert: {
+  "PROJECT-106": {
     parameters: {
       query?: never
       header?: never
@@ -9695,43 +14832,7 @@ export interface operations {
       }
     }
   }
-  refreshFcmToken: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FcmRegistrationRequest"]
-      }
-    }
-    responses: {
-      /** @description 토큰 등록 성공 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description MEMBER-0001: 사용자를 찾을 수 없습니다. */
-      404: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description FCM-0004: FCM 토픽 구독에 실패했습니다. */
-      500: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  updateOrCancelVoteResponse: {
+  "NOTICE-VOTE-002": {
     parameters: {
       query?: never
       header?: never
@@ -9755,7 +14856,7 @@ export interface operations {
       }
     }
   }
-  submitVoteResponse: {
+  "NOTICE-VOTE-001": {
     parameters: {
       query?: never
       header?: never
@@ -9776,6 +14877,32 @@ export interface operations {
           [name: string]: unknown
         }
         content?: never
+      }
+    }
+  }
+  "BLOG-SERIES-008": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seriesId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReplaceBlogSeriesContentsRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogSeriesResponse"]
+        }
       }
     }
   }
@@ -9846,6 +14973,30 @@ export interface operations {
       }
     }
   }
+  "SEED-003-D": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["DeleteSeedProjectDataRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["DeleteSeedProjectDataResponse"]
+        }
+      }
+    }
+  }
   "SEED-003-S": {
     parameters: {
       query?: never
@@ -9870,7 +15021,7 @@ export interface operations {
       }
     }
   }
-  seedProjectApplications: {
+  "SEED-006": {
     parameters: {
       query?: never
       header?: never
@@ -9942,6 +15093,30 @@ export interface operations {
       }
     }
   }
+  "SEED-001-M": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSeedMemberRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CreateSeedMemberResponse"]
+        }
+      }
+    }
+  }
   "SEED-004": {
     parameters: {
       query?: never
@@ -9990,6 +15165,54 @@ export interface operations {
       }
     }
   }
+  "SEED-002-C": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSeedChallengerRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CreateSeedChallengerResponse"]
+        }
+      }
+    }
+  }
+  "SEED-002-R": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSeedChallengerRoleRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CreateSeedChallengerRoleResponse"]
+        }
+      }
+    }
+  }
   "TEST-002": {
     parameters: {
       query?: never
@@ -10034,7 +15257,7 @@ export interface operations {
       }
     }
   }
-  create: {
+  "SCHEDULE-C001": {
     parameters: {
       query?: never
       header?: never
@@ -10057,12 +15280,12 @@ export interface operations {
         }
       }
       /**
-       * @description SCHEDULE-0006 : 시작 시간은 종료 시간보다 이전이어야 합니다.<br>
-       *     SCHEDULE-0010 : 태그는 최소 1개 이상 선택해야 합니다.<br>
-       *     SCHEDULE-0025 : 현재 기수의 일정만 생성할 수 있습니다.<br>
-       *     SCHEDULE-0030 : 초대 가능한 최대 참여자 수를 초과했습니다.<br>
-       *     SCHEDULE-0032 : 초대하려는 참여자에 유효하지 않은 사용자가 포함되어 있습니다.<br>
-       *     CHALLENGER-0009 : 활성 또는 수료 상태의 사용자만 일정 생성이 가능합니다.
+       * @description SCHEDULE-0006 : 시작 시간은 종료 시간보다 빨라야 해요. 시간을 다시 선택해주세요.<br>
+       *     SCHEDULE-0010 : 태그를 1개 이상 선택해주세요.<br>
+       *     SCHEDULE-0025 : 현재 기수의 일정만 만들 수 있어요. 기수를 확인해주세요.<br>
+       *     SCHEDULE-0030 : 초대 가능한 참여자 수를 초과했어요. 참여자를 줄여주세요.<br>
+       *     SCHEDULE-0032 : 초대할 수 없는 참여자가 포함되어 있어요. 참여자 목록을 확인해주세요.<br>
+       *     CHALLENGER-0009 : 일정을 만들려면 챌린저 상태가 활동 중이거나 수료여야 해요.
        */
       400: {
         headers: {
@@ -10071,9 +15294,9 @@ export interface operations {
         content?: never
       }
       /**
-       * @description AUTHORIZATION-0001 : 권한이 없습니다.<br>
-       *     SCHEDULE-0029 : 일정을 생성할 수 없습니다. 챌린저 활동 이력이 필요합니다.<br>
-       *     SCHEDULE-0031 : 출석을 요하는 일정을 생성할 권한이 없습니다.
+       * @description AUTHORIZATION-0001 : 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요.<br>
+       *     SCHEDULE-0029 : 일정을 만들려면 챌린저 활동 이력이 필요해요. 활동 기록을 확인해주세요.<br>
+       *     SCHEDULE-0031 : 출석이 필요한 일정을 만들 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요.
        */
       403: {
         headers: {
@@ -10083,7 +15306,7 @@ export interface operations {
       }
     }
   }
-  requestAttendance: {
+  "SCHEDULE-C003": {
     parameters: {
       query?: never
       header?: never
@@ -10108,12 +15331,12 @@ export interface operations {
         }
       }
       /**
-       * @description SCHEDULE-0011 : 기존 출석 요청이 존재합니다.<br>
-       *     SCHEDULE-0018 : 종료된 일정에 대한 출석 요청은 허용되지 않습니다.<br>
-       *     SCHEDULE-0019 : 출석 가능한 시간 이전입니다. 출석 가능한 시간 이후에 다시 시도해주세요.<br>
-       *     SCHEDULE-0021 : 출석 정책이 존재하지 않아 출석 요청이 불가능한 일정입니다.<br>
-       *     SCHEDULE-0022 : 일정에 대한 참석자 정보가 존재하지 않습니다.<br>
-       *     SCHEDULE-0023 : 사용자의 출석 인증 범위 내의 존재 여부가 확인되지 않습니다.
+       * @description SCHEDULE-0011 : 이미 출석 요청이 있어요. 기존 요청을 확인해주세요.<br>
+       *     SCHEDULE-0018 : 종료된 일정에는 출석을 요청할 수 없어요. 일정 시간을 확인해주세요.<br>
+       *     SCHEDULE-0019 : 아직 출석할 수 있는 시간이 아니에요. 출석 가능 시간 이후에 다시 시도해주세요.<br>
+       *     SCHEDULE-0021 : 출석 정책이 없는 일정이에요. 출석 정책을 먼저 설정해주세요.<br>
+       *     SCHEDULE-0022 : 일정 참석자 정보를 찾을 수 없어요. 참석자 목록을 확인해주세요.<br>
+       *     SCHEDULE-0023 : 출석 인증 범위 안에 있는지 확인하지 못했어요. 위치를 확인한 뒤 다시 시도해주세요.
        */
       400: {
         headers: {
@@ -10121,14 +15344,14 @@ export interface operations {
         }
         content?: never
       }
-      /** @description AUTHORIZATION-0002 : 해당 리소스에 접근할 권한이 없습니다. */
+      /** @description AUTHORIZATION-0002 : 이 항목에 접근할 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요. */
       403: {
         headers: {
           [name: string]: unknown
         }
         content?: never
       }
-      /** @description SCHEDULE-0009 : 일정을 찾을 수 없습니다. */
+      /** @description SCHEDULE-0009 : 일정을 찾을 수 없어요. 선택한 일정을 확인해주세요. */
       404: {
         headers: {
           [name: string]: unknown
@@ -10137,7 +15360,7 @@ export interface operations {
       }
     }
   }
-  excuseAttendance: {
+  "SCHEDULE-C004": {
     parameters: {
       query?: never
       header?: never
@@ -10162,10 +15385,10 @@ export interface operations {
         }
       }
       /**
-       * @description SCHEDULE-0013 : 출석 사유 제출은 첫 요청, 결석 또는 지각 상태에서만 가능합니다.<br>
-       *     SCHEDULE-0016 : 출석 인정을 요청하는 사유가 제공되지 않았거나 비어있습니다.<br>
-       *     SCHEDULE-0021 : 출석 정책이 존재하지 않아 출석 요청이 불가능한 일정입니다.<br>
-       *     SCHEDULE-0022 : 일정에 대한 참석자 정보가 존재하지 않습니다.
+       * @description SCHEDULE-0013 : 첫 요청, 결석 또는 지각 상태에서만 출석 사유를 제출할 수 있어요. 출석 상태를 확인해주세요.<br>
+       *     SCHEDULE-0016 : 출석 인정을 요청하려면 사유를 입력해주세요.<br>
+       *     SCHEDULE-0021 : 출석 정책이 없는 일정이에요. 출석 정책을 먼저 설정해주세요.<br>
+       *     SCHEDULE-0022 : 일정 참석자 정보를 찾을 수 없어요. 참석자 목록을 확인해주세요.
        */
       400: {
         headers: {
@@ -10173,14 +15396,14 @@ export interface operations {
         }
         content?: never
       }
-      /** @description AUTHORIZATION-0002 : 해당 리소스에 접근할 권한이 없습니다. */
+      /** @description AUTHORIZATION-0002 : 이 항목에 접근할 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요. */
       403: {
         headers: {
           [name: string]: unknown
         }
         content?: never
       }
-      /** @description SCHEDULE-0009 : 일정을 찾을 수 없습니다. */
+      /** @description SCHEDULE-0009 : 일정을 찾을 수 없어요. 선택한 일정을 확인해주세요. */
       404: {
         headers: {
           [name: string]: unknown
@@ -10189,7 +15412,7 @@ export interface operations {
       }
     }
   }
-  decideAttendances: {
+  "SCHEDULE-C005": {
     parameters: {
       query?: never
       header?: never
@@ -10214,12 +15437,12 @@ export interface operations {
         }
       }
       /**
-       * @description SCHEDULE-0012 : 출석 요청이 존재하지 않습니다. 출석 요청을 생성하고 다시 시도해주세요.<br>
-       *     SCHEDULE-0014 : 현재 출석 상태에서는 승인이 불가능합니다.<br>
-       *     SCHEDULE-0015 : 출석 요청에 대한 거절을 할 수 없는 상태입니다.<br>
-       *     SCHEDULE-0017 : 해당 출석 요청은 운영진의 승인 또는 기각을 필요로 하는 상태가 아닙니다.<br>
-       *     SCHEDULE-0021 : 출석 정책이 존재하지 않아 출석 요청이 불가능한 일정입니다.<br>
-       *     SCHEDULE-0022 : 일정에 대한 참석자 정보가 존재하지 않습니다.
+       * @description SCHEDULE-0012 : 출석 요청이 없어요. 출석 요청을 먼저 생성해주세요.<br>
+       *     SCHEDULE-0014 : 현재 출석 상태에서는 승인할 수 없어요. 출석 상태를 확인해주세요.<br>
+       *     SCHEDULE-0015 : 현재 출석 상태에서는 거절할 수 없어요. 출석 상태를 확인해주세요.<br>
+       *     SCHEDULE-0017 : 운영진 확인이 필요한 출석 요청이 아니에요. 출석 상태를 확인해주세요.<br>
+       *     SCHEDULE-0021 : 출석 정책이 없는 일정이에요. 출석 정책을 먼저 설정해주세요.<br>
+       *     SCHEDULE-0022 : 일정 참석자 정보를 찾을 수 없어요. 참석자 목록을 확인해주세요.
        */
       400: {
         headers: {
@@ -10227,7 +15450,7 @@ export interface operations {
         }
         content?: never
       }
-      /** @description AUTHORIZATION-0002 : 해당 리소스에 접근할 권한이 없습니다. */
+      /** @description AUTHORIZATION-0002 : 이 항목에 접근할 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요. */
       403: {
         headers: {
           [name: string]: unknown
@@ -10243,7 +15466,7 @@ export interface operations {
       }
     }
   }
-  createCurriculum: {
+  "CURRICULUM-001": {
     parameters: {
       query?: never
       header?: never
@@ -10267,7 +15490,7 @@ export interface operations {
       }
     }
   }
-  createWeeklyCurriculum: {
+  "CURRICULUM-004": {
     parameters: {
       query?: never
       header?: never
@@ -10291,7 +15514,7 @@ export interface operations {
       }
     }
   }
-  createOriginalWorkbook: {
+  "ORIGINAL-WORKBOOK-001": {
     parameters: {
       query?: never
       header?: never
@@ -10315,7 +15538,7 @@ export interface operations {
       }
     }
   }
-  createOriginalWorkbookMission: {
+  "ORIGINAL-WORKBOOK-MISSION-001": {
     parameters: {
       query?: never
       header?: never
@@ -10333,11 +15556,13 @@ export interface operations {
         headers: {
           [name: string]: unknown
         }
-        content?: never
+        content: {
+          "*/*": components["schemas"]["CreateOriginalWorkbookMissionResponse"]
+        }
       }
     }
   }
-  createOriginalWorkbookAsDraft: {
+  "ORIGINAL-WORKBOOK-002": {
     parameters: {
       query?: never
       header?: never
@@ -10361,7 +15586,7 @@ export interface operations {
       }
     }
   }
-  excuseChallengerWorkbook: {
+  "CHALLENGER-WORKBOOK-004": {
     parameters: {
       query?: never
       header?: never
@@ -10385,7 +15610,7 @@ export interface operations {
       }
     }
   }
-  createWeeklyBestWorkbook: {
+  "CHALLENGER-WORKBOOK-005": {
     parameters: {
       query?: never
       header?: never
@@ -10407,7 +15632,7 @@ export interface operations {
       }
     }
   }
-  createOriginalWorkbookMission_1: {
+  "CHALLENGER-WORKBOOK-MISSION-001": {
     parameters: {
       query?: never
       header?: never
@@ -10429,7 +15654,7 @@ export interface operations {
       }
     }
   }
-  createMissionFeedback: {
+  "CHALLENGER-WORKBOOK-MISSION-004": {
     parameters: {
       query?: never
       header?: never
@@ -10451,7 +15676,7 @@ export interface operations {
       }
     }
   }
-  requestSingleChallengerWorkbookDeploy: {
+  "CHALLENGER-WORKBOOK-001": {
     parameters: {
       query: {
         originalWorkbookIds: number[]
@@ -10497,12 +15722,11 @@ export interface operations {
       }
     }
   }
-  getTrophies: {
+  "UMC-PRODUCT-SQUAD-101": {
     parameters: {
       query?: {
-        week?: number
-        school?: string
-        part?: string
+        active?: boolean
+        activeOn?: string
       }
       header?: never
       path?: never
@@ -10516,12 +15740,12 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "*/*": components["schemas"]["TrophyResponse"][]
+          "*/*": components["schemas"]["UmcProductSquadListResponse"]
         }
       }
     }
   }
-  createTrophy: {
+  "UMC-PRODUCT-SQUAD-001": {
     parameters: {
       query?: never
       header?: never
@@ -10530,7 +15754,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateTrophyRequest"]
+        "application/json": components["schemas"]["CreateUmcProductSquadRequest"]
       }
     }
     responses: {
@@ -10540,12 +15764,241 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "*/*": components["schemas"]["TrophyResponse"]
+          "*/*": number
         }
       }
     }
   }
-  createTerms: {
+  "UMC-PRODUCT-SQUAD-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        squadId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateUmcProductSquadParticipantRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": number
+        }
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-101": {
+    parameters: {
+      query: {
+        chapterId?: number
+        leadershipRole?: "UMC_PRODUCT_VICE_LEAD" | "UMC_PRODUCT_LEAD"
+        position?:
+          | "UNSPECIFIED"
+          | "PRODUCT_OWNER"
+          | "PRODUCT_DESIGNER"
+          | "IOS_DEVELOPER"
+          | "ANDROID_DEVELOPER"
+          | "WEB_DEVELOPER"
+          | "SERVER_DEVELOPER"
+          | "ETC"
+        squadId?: number
+        activeOn?: string
+        pageable: components["schemas"]["Pageable"]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["UmcProductMemberPageResponse"]
+        }
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateUmcProductMemberRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": number
+        }
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-009": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateUmcProductLeadershipRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": number
+        }
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-006": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateUmcProductChapterMembershipRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": number
+        }
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateUmcProductMemberActivityPeriodRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": number
+        }
+      }
+    }
+  }
+  "UMC-PRODUCT-CHAPTER-101": {
+    parameters: {
+      query?: {
+        active?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["UmcProductChapterListResponse"]
+        }
+      }
+    }
+  }
+  "UMC-PRODUCT-CHAPTER-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateUmcProductChapterRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": number
+        }
+      }
+    }
+  }
+  "TERM-104": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ActiveTermsResponse"]
+        }
+      }
+    }
+  }
+  "TERM-001": {
     parameters: {
       query?: never
       header?: never
@@ -10569,7 +16022,7 @@ export interface operations {
       }
     }
   }
-  create_1: {
+  "STUDY-GROUP-001": {
     parameters: {
       query?: never
       header?: never
@@ -10598,7 +16051,7 @@ export interface operations {
       }
     }
   }
-  create_2: {
+  "STUDY-GROUP-SCHEDULE-001": {
     parameters: {
       query?: never
       header?: never
@@ -10634,7 +16087,7 @@ export interface operations {
       }
     }
   }
-  confirmUpload: {
+  "STORAGE-002": {
     parameters: {
       query?: never
       header?: never
@@ -10656,7 +16109,7 @@ export interface operations {
       }
     }
   }
-  prepareUpload: {
+  "STORAGE-001": {
     parameters: {
       query?: never
       header?: never
@@ -10680,7 +16133,7 @@ export interface operations {
       }
     }
   }
-  createSchool: {
+  "SCHOOL-001": {
     parameters: {
       query?: never
       header?: never
@@ -10716,7 +16169,7 @@ export interface operations {
       }
     }
   }
-  deleteSchools: {
+  "SCHOOL-003": {
     parameters: {
       query?: never
       header?: never
@@ -10745,7 +16198,456 @@ export interface operations {
       }
     }
   }
-  searchProjects: {
+  "RECRUITING-PUBLIC-006": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubmitAnonymousRecruitingApplicationRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-PUBLIC-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecruitingApplicationCredentialRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingPublicApplicationResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-PUBLIC-007": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecruitingApplicationCredentialRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-APPLICATION-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateRecruitingApplicationDraftRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationCreatedResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-APPLICATION-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SubmitRecruitingApplicationRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateRecruitingSeasonRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingIdResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-013": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seasonId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateRecruitingRoundRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingIdResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-016": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seasonId: number
+        roundId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CloneRecruitingRoundRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingIdResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-044": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingInterviewQuestionResponse"][]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-041": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecruitingInterviewQuestionRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingIdResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-031": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+        memberId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingIdResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-032": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+        memberId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-073": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-071": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-072": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-048": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingInterviewQuestionResponse"][]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-045": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecruitingInterviewQuestionRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingIdResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-062": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SkipRecruitingInterviewRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-051": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestRecruitingInterviewScheduleRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingIdResponse"]
+        }
+      }
+    }
+  }
+  "PROJECT-001": {
     parameters: {
       query: {
         gisuId: number
@@ -10794,7 +16696,7 @@ export interface operations {
       }
     }
   }
-  createDraft: {
+  "PROJECT-101": {
     parameters: {
       query?: never
       header?: never
@@ -10818,7 +16720,7 @@ export interface operations {
       }
     }
   }
-  transferOwnership: {
+  "PROJECT-104": {
     parameters: {
       query?: never
       header?: never
@@ -10844,7 +16746,7 @@ export interface operations {
       }
     }
   }
-  submit_1: {
+  "PROJECT-107": {
     parameters: {
       query?: never
       header?: never
@@ -10866,7 +16768,7 @@ export interface operations {
       }
     }
   }
-  publish: {
+  "PROJECT-108": {
     parameters: {
       query?: never
       header?: never
@@ -10888,7 +16790,7 @@ export interface operations {
       }
     }
   }
-  getMembers: {
+  "PROJECT-003": {
     parameters: {
       query?: never
       header?: never
@@ -10910,7 +16812,7 @@ export interface operations {
       }
     }
   }
-  addMember: {
+  "PROJECT-004": {
     parameters: {
       query?: never
       header?: never
@@ -10936,7 +16838,7 @@ export interface operations {
       }
     }
   }
-  getProjectApplicants: {
+  "APPLY-101": {
     parameters: {
       query?: {
         matchingRoundId?: number
@@ -10949,7 +16851,10 @@ export interface operations {
           | "NODEJS"
           | "SPRINGBOOT"
           | "ADMIN"
-        /** @description 지원 상태 필터 (선택). 허용 값: SUBMITTED / APPROVED / REJECTED. DRAFT 입력 시 도메인 예외(APPLICATION_DRAFT_FILTER_NOT_ALLOWED). */
+        /**
+         * @description 지원 상태 필터입니다. DRAFT 는 지원자 목록에서 사용할 수 없습니다.
+         *     허용 값: SUBMITTED / APPROVED / REJECTED.
+         */
         status?: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED" | "CANCELLED"
       }
       header?: never
@@ -10971,7 +16876,7 @@ export interface operations {
       }
     }
   }
-  createDraft_1: {
+  "APPLY-001": {
     parameters: {
       query?: never
       header?: never
@@ -10997,12 +16902,13 @@ export interface operations {
       }
     }
   }
-  submit_2: {
+  "APPLY-003": {
     parameters: {
       query?: never
       header?: never
       path: {
         projectId: number
+        applicationId: number
       }
       cookie?: never
     }
@@ -11019,7 +16925,7 @@ export interface operations {
       }
     }
   }
-  abort: {
+  "PROJECT-110": {
     parameters: {
       query?: never
       header?: never
@@ -11043,7 +16949,7 @@ export interface operations {
       }
     }
   }
-  list: {
+  "PROJECT-MATCHING-001": {
     parameters: {
       query?: {
         chapterId?: number
@@ -11066,7 +16972,7 @@ export interface operations {
       }
     }
   }
-  create_3: {
+  "PROJECT-MATCHING-101": {
     parameters: {
       query?: never
       header?: never
@@ -11090,7 +16996,7 @@ export interface operations {
       }
     }
   }
-  autoDecide: {
+  "PROJECT-MATCHING-201": {
     parameters: {
       query?: never
       header?: never
@@ -11110,7 +17016,7 @@ export interface operations {
       }
     }
   }
-  getPostList: {
+  "POST-102": {
     parameters: {
       query?: {
         /** @description 카테고리 (LIGHTNING: 번개, QUESTION: 질문, FREE: 자유). 미지정시 전체 조회 */
@@ -11139,7 +17045,7 @@ export interface operations {
       }
     }
   }
-  createPost: {
+  "POST-001": {
     parameters: {
       query?: never
       header?: never
@@ -11163,7 +17069,7 @@ export interface operations {
       }
     }
   }
-  toggleScrap: {
+  "POST-007": {
     parameters: {
       query?: never
       header?: never
@@ -11185,7 +17091,7 @@ export interface operations {
       }
     }
   }
-  reportPost: {
+  "REPORT-001": {
     parameters: {
       query?: never
       header?: never
@@ -11205,7 +17111,7 @@ export interface operations {
       }
     }
   }
-  toggleLike: {
+  "POST-006": {
     parameters: {
       query?: never
       header?: never
@@ -11227,7 +17133,7 @@ export interface operations {
       }
     }
   }
-  getComments: {
+  "COMMENT-101": {
     parameters: {
       query?: never
       header?: never
@@ -11249,7 +17155,7 @@ export interface operations {
       }
     }
   }
-  createComment: {
+  "COMMENT-001": {
     parameters: {
       query?: never
       header?: never
@@ -11275,7 +17181,7 @@ export interface operations {
       }
     }
   }
-  toggleCommentLike: {
+  "COMMENT-003": {
     parameters: {
       query?: never
       header?: never
@@ -11298,7 +17204,7 @@ export interface operations {
       }
     }
   }
-  createLightningPost: {
+  "POST-002": {
     parameters: {
       query?: never
       header?: never
@@ -11322,7 +17228,60 @@ export interface operations {
       }
     }
   }
-  getAllNotices: {
+  "FCM-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FcmRegistrationRequest"]
+      }
+    }
+    responses: {
+      /** @description 토큰 등록 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description installationId 또는 FCM 토큰 형식 오류 */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "FCM-ADMIN-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FcmAdminSendRequest"]
+      }
+    }
+    responses: {
+      /** @description Accepted */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["FcmAdminSendResponse"]
+        }
+      }
+    }
+  }
+  "NOTICE-001": {
     parameters: {
       query: {
         /**
@@ -11395,7 +17354,7 @@ export interface operations {
       }
     }
   }
-  createNotice: {
+  "NOTICE-201": {
     parameters: {
       query?: never
       header?: never
@@ -11428,7 +17387,7 @@ export interface operations {
       }
     }
   }
-  addNoticeVote: {
+  "NOTICE-103": {
     parameters: {
       query?: never
       header?: never
@@ -11458,7 +17417,7 @@ export interface operations {
       }
     }
   }
-  sendNoticeReminder: {
+  "NOTICE-204": {
     parameters: {
       query?: never
       header?: never
@@ -11500,7 +17459,7 @@ export interface operations {
       }
     }
   }
-  recordNoticeRead: {
+  "NOTICE-205": {
     parameters: {
       query?: never
       header?: never
@@ -11528,7 +17487,7 @@ export interface operations {
       }
     }
   }
-  addNoticeLinks: {
+  "NOTICE-102": {
     parameters: {
       query?: never
       header?: never
@@ -11558,7 +17517,7 @@ export interface operations {
       }
     }
   }
-  replaceNoticeLinks: {
+  "NOTICE-105": {
     parameters: {
       query?: never
       header?: never
@@ -11586,7 +17545,7 @@ export interface operations {
       }
     }
   }
-  addNoticeImages: {
+  "NOTICE-101": {
     parameters: {
       query?: never
       header?: never
@@ -11616,7 +17575,7 @@ export interface operations {
       }
     }
   }
-  replaceNoticeImages: {
+  "NOTICE-104": {
     parameters: {
       query?: never
       header?: never
@@ -11644,7 +17603,7 @@ export interface operations {
       }
     }
   }
-  registerMemberByOAuth: {
+  "REGISTER-001": {
     parameters: {
       query?: never
       header?: never
@@ -11668,7 +17627,7 @@ export interface operations {
       }
     }
   }
-  registerMemberByOAuth_1: {
+  "REGISTER-001_1": {
     parameters: {
       query?: never
       header?: never
@@ -11692,7 +17651,7 @@ export interface operations {
       }
     }
   }
-  registerMemberByEmail: {
+  "REGISTER-003": {
     parameters: {
       query?: never
       header?: never
@@ -11716,7 +17675,7 @@ export interface operations {
       }
     }
   }
-  addMemberOAuth: {
+  "OAUTH-001": {
     parameters: {
       query?: never
       header?: never
@@ -11740,7 +17699,51 @@ export interface operations {
       }
     }
   }
-  getGisuList: {
+  "MAINT-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["MaintenanceWindowResponse"][]
+        }
+      }
+    }
+  }
+  "MAINT-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StartMaintenanceRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["MaintenanceWindowResponse"]
+        }
+      }
+    }
+  }
+  "GISU-101": {
     parameters: {
       query: {
         pageable: components["schemas"]["Pageable"]
@@ -11762,7 +17765,7 @@ export interface operations {
       }
     }
   }
-  createGisu: {
+  "GISU-001": {
     parameters: {
       query?: never
       header?: never
@@ -11795,7 +17798,7 @@ export interface operations {
       }
     }
   }
-  updateActiveGisu: {
+  "GISU-003": {
     parameters: {
       query?: never
       header?: never
@@ -11823,7 +17826,218 @@ export interface operations {
       }
     }
   }
-  reportComment: {
+  "COMMUNITY-THREAD-101": {
+    parameters: {
+      query?: {
+        filter?: string
+        q?: string
+        offset?: number
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadListResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCommunityThreadRequest"]
+      }
+    }
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadDetailResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadDetailResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-005": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadDetailResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-006": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadDetailResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-007": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadDetailResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-010": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadMemberMutationResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-008": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InviteCommunityThreadMembersRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadInvitationResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-REPORT-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        messageId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportCommunityThreadMessageRequest"]
+      }
+    }
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadMessageReportReceiptResponse"]
+        }
+      }
+    }
+  }
+  "REPORT-002": {
     parameters: {
       query?: never
       header?: never
@@ -11843,7 +18057,7 @@ export interface operations {
       }
     }
   }
-  getAllChapters: {
+  "CHAPTER-101": {
     parameters: {
       query?: never
       header?: never
@@ -11863,7 +18077,7 @@ export interface operations {
       }
     }
   }
-  createChapter: {
+  "CHAPTER-001": {
     parameters: {
       query?: never
       header?: never
@@ -11914,7 +18128,7 @@ export interface operations {
       }
     }
   }
-  createChapterBulk: {
+  "CHAPTER-002": {
     parameters: {
       query?: never
       header?: never
@@ -11938,7 +18152,7 @@ export interface operations {
       }
     }
   }
-  createChallenger: {
+  "CHALLENGER-001": {
     parameters: {
       query?: never
       header?: never
@@ -11962,7 +18176,7 @@ export interface operations {
       }
     }
   }
-  grantChallengerPoints: {
+  "POINT-001": {
     parameters: {
       query?: never
       header?: never
@@ -11988,7 +18202,7 @@ export interface operations {
       }
     }
   }
-  deactivateChallenger: {
+  "CHALLENGER-003": {
     parameters: {
       query?: never
       header?: never
@@ -12012,7 +18226,7 @@ export interface operations {
       }
     }
   }
-  bulkCreateChallenger: {
+  "CHALLENGER-002": {
     parameters: {
       query?: never
       header?: never
@@ -12036,7 +18250,7 @@ export interface operations {
       }
     }
   }
-  createChallengerRecord: {
+  "CHALLENGER-RECORD-002": {
     parameters: {
       query?: never
       header?: never
@@ -12060,7 +18274,7 @@ export interface operations {
       }
     }
   }
-  addChallengerRecordToMember: {
+  "CHALLENGER-RECORD-001": {
     parameters: {
       query?: never
       header?: never
@@ -12082,7 +18296,7 @@ export interface operations {
       }
     }
   }
-  createChallengerRecordBulk: {
+  "CHALLENGER-RECORD-003": {
     parameters: {
       query?: never
       header?: never
@@ -12106,7 +18320,299 @@ export interface operations {
       }
     }
   }
-  batchGetResourcePermission: {
+  "CERTIFICATE-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CertificateResponse"][]
+        }
+      }
+    }
+  }
+  "CERTIFICATE-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IssueCertificateRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CertificateIssueResponse"]
+        }
+      }
+    }
+  }
+  "ADMIN-CERTIFICATE-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AdminIssueCertificateRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CertificateIssueResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-SERIES-001": {
+    parameters: {
+      query?: {
+        type?: string
+        cursor?: number
+        size?: number
+        sort?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CursorResponseBlogSeriesSummaryResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-SERIES-005": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BlogSeriesRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogSeriesResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-CONTENT-001": {
+    parameters: {
+      query?: {
+        type?: string
+        seriesSlug?: string
+        hashtagSlug?: string
+        cursor?: number
+        size?: number
+        sort?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CursorResponseBlogContentSummaryResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-CONTENT-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BlogContentRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogContentResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        type: string
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogLikeResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        type: string
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogLikeResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-003": {
+    parameters: {
+      query?: {
+        cursor?: number
+        size?: number
+        sort?: string
+      }
+      header?: never
+      path: {
+        type: string
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CursorResponseBlogCommentResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        type: string
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateBlogCommentRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogCommentResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-007": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        type: string
+        slug: string
+        commentId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogLikeResponse"]
+        }
+      }
+    }
+  }
+  "PERMISSION-002": {
     parameters: {
       query?: never
       header?: never
@@ -12130,7 +18636,7 @@ export interface operations {
       }
     }
   }
-  createChallengerRole: {
+  "STAFF-001": {
     parameters: {
       query?: never
       header?: never
@@ -12154,7 +18660,7 @@ export interface operations {
       }
     }
   }
-  renewAccessToken: {
+  "TOKEN-001": {
     parameters: {
       query?: never
       header?: never
@@ -12178,7 +18684,165 @@ export interface operations {
       }
     }
   }
-  kakaoOAuthLogin: {
+  "SSO-OAUTH-002": {
+    parameters: {
+      query: {
+        request: components["schemas"]["SsoTokenRequest"]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SsoTokenResponse"]
+        }
+      }
+    }
+  }
+  "SSO-LOGIN-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "SSO-LOGIN-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SsoOAuthTokenLoginRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SsoSocialLoginResponse"]
+        }
+      }
+    }
+  }
+  "SSO-LOGIN-005": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SsoOAuthTokenLoginRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SsoSocialLoginResponse"]
+        }
+      }
+    }
+  }
+  "SSO-LOGIN-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SsoBrowserLoginByEmailRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SsoBrowserLoginResponse"]
+        }
+      }
+    }
+  }
+  "SSO-LOGIN-006": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SsoAppleLoginRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SsoSocialLoginResponse"]
+        }
+      }
+    }
+  }
+  "TOKEN-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LogoutRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "LOGIN-005": {
     parameters: {
       query?: never
       header?: never
@@ -12202,7 +18866,7 @@ export interface operations {
       }
     }
   }
-  kakaoOAuthCodeLogin: {
+  "LOGIN-006": {
     parameters: {
       query?: never
       header?: never
@@ -12226,7 +18890,7 @@ export interface operations {
       }
     }
   }
-  googleOAuthLogin: {
+  "LOGIN-001": {
     parameters: {
       query?: never
       header?: never
@@ -12250,7 +18914,7 @@ export interface operations {
       }
     }
   }
-  loginByEmail: {
+  "LOGIN-011": {
     parameters: {
       query?: never
       header?: never
@@ -12274,7 +18938,7 @@ export interface operations {
       }
     }
   }
-  appleOAuthLogin: {
+  "LOGIN-010": {
     parameters: {
       query?: never
       header?: never
@@ -12298,7 +18962,7 @@ export interface operations {
       }
     }
   }
-  sendEmailVerification: {
+  "EMAIL-002": {
     parameters: {
       query?: never
       header?: never
@@ -12322,7 +18986,7 @@ export interface operations {
       }
     }
   }
-  resendEmailVerification: {
+  "EMAIL-003": {
     parameters: {
       query?: never
       header?: never
@@ -12344,7 +19008,7 @@ export interface operations {
       }
     }
   }
-  verifyEmailByCode: {
+  "EMAIL-001": {
     parameters: {
       query?: never
       header?: never
@@ -12368,7 +19032,7 @@ export interface operations {
       }
     }
   }
-  registerCredential: {
+  "CREDENTIAL-002": {
     parameters: {
       query?: never
       header?: never
@@ -12390,270 +19054,7 @@ export interface operations {
       }
     }
   }
-  listAll: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["MaintenanceWindowResponse"][]
-        }
-      }
-    }
-  }
-  start: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StartMaintenanceRequest"]
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["MaintenanceWindowResponse"]
-        }
-      }
-    }
-  }
-  listFiles: {
-    parameters: {
-      query?: {
-        enabled?: boolean
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["FigmaWatchedFileResponse"][]
-        }
-      }
-    }
-  }
-  register: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RegisterFigmaWatchedFileRequest"]
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["RegisterFigmaWatchedFileResponse"]
-        }
-      }
-    }
-  }
-  enable: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        watchedFileId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  syncAll: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  syncOne: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        watchedFileId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  listDomains: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["FigmaRoutingDomainResponse"][]
-        }
-      }
-    }
-  }
-  registerDomain: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RegisterFigmaRoutingDomainRequest"]
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["RegisterFigmaRoutingDomainResponse"]
-        }
-      }
-    }
-  }
-  listMentions: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        domainId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["FigmaRoutingDomainMentionResponse"][]
-        }
-      }
-    }
-  }
-  addMention: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        domainId: number
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AddFigmaRoutingMentionRequest"]
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["AddFigmaRoutingMentionResponse"]
-        }
-      }
-    }
-  }
-  digest: {
-    parameters: {
-      query: {
-        from: string
-        to: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["FigmaDigestSummary"]
-        }
-      }
-    }
-  }
-  details: {
+  "SCHEDULE-Q003": {
     parameters: {
       query?: never
       header?: never
@@ -12673,14 +19074,14 @@ export interface operations {
           "*/*": components["schemas"]["ScheduleInfoResponse"]
         }
       }
-      /** @description AUTHORIZATION-0002 : 해당 리소스에 접근할 권한이 없습니다. */
+      /** @description AUTHORIZATION-0002 : 이 항목에 접근할 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요. */
       403: {
         headers: {
           [name: string]: unknown
         }
         content?: never
       }
-      /** @description SCHEDULE-0009 : 일정을 찾을 수 없습니다. */
+      /** @description SCHEDULE-0009 : 일정을 찾을 수 없어요. 선택한 일정을 확인해주세요. */
       404: {
         headers: {
           [name: string]: unknown
@@ -12689,7 +19090,7 @@ export interface operations {
       }
     }
   }
-  delete: {
+  "SCHEDULE-C006": {
     parameters: {
       query?: never
       header?: never
@@ -12707,14 +19108,14 @@ export interface operations {
         }
         content?: never
       }
-      /** @description SCHEDULE-0033 : 출석 기록이 존재하는 일정은 삭제할 수 없습니다. */
+      /** @description SCHEDULE-0033 : 출석 기록이 있는 일정은 삭제할 수 없어요. 출석 기록을 먼저 확인해주세요. */
       400: {
         headers: {
           [name: string]: unknown
         }
         content?: never
       }
-      /** @description AUTHORIZATION-0002 : 해당 리소스에 접근할 권한이 없습니다. */
+      /** @description AUTHORIZATION-0002 : 이 항목에 접근할 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요. */
       403: {
         headers: {
           [name: string]: unknown
@@ -12730,7 +19131,7 @@ export interface operations {
       }
     }
   }
-  edit: {
+  "SCHEDULE-C002": {
     parameters: {
       query?: never
       header?: never
@@ -12755,14 +19156,14 @@ export interface operations {
         }
       }
       /**
-       * @description SCHEDULE-0006 : 시작 시간은 종료 시간보다 이전이어야 합니다.<br>
-       *     SCHEDULE-0010 : 태그는 최소 1개 이상 선택해야 합니다.<br>
-       *     SCHEDULE-0020 : 대면 일정은 위치 정보가 필수입니다.<br>
-       *     SCHEDULE-0024 : 비대면 일정으로 변경 시 위치 정보를 포함할 수 없습니다.<br>
-       *     SCHEDULE-0027 : 출석을 요하는 일정의 출석 정책은 필수입니다.<br>
-       *     SCHEDULE-0028 : 시작된 일정은 수정이 불가합니다.<br>
-       *     SCHEDULE-0030 : 초대 가능한 최대 참여자 수를 초과했습니다.<br>
-       *     SCHEDULE-0032 : 초대하려는 참여자에 유효하지 않은 사용자가 포함되어 있습니다.
+       * @description SCHEDULE-0006 : 시작 시간은 종료 시간보다 빨라야 해요. 시간을 다시 선택해주세요.<br>
+       *     SCHEDULE-0010 : 태그를 1개 이상 선택해주세요.<br>
+       *     SCHEDULE-0020 : 대면 일정에는 위치 정보가 필요해요. 위치를 입력해주세요.<br>
+       *     SCHEDULE-0024 : 비대면 일정에는 위치 정보를 포함할 수 없어요. 위치 정보를 제거해주세요.<br>
+       *     SCHEDULE-0027 : 출석이 필요한 일정에는 출석 정책을 설정해주세요.<br>
+       *     SCHEDULE-0028 : 이미 시작된 일정은 수정할 수 없어요. 일정 시간을 확인해주세요.<br>
+       *     SCHEDULE-0030 : 초대 가능한 참여자 수를 초과했어요. 참여자를 줄여주세요.<br>
+       *     SCHEDULE-0032 : 초대할 수 없는 참여자가 포함되어 있어요. 참여자 목록을 확인해주세요.
        */
       400: {
         headers: {
@@ -12771,8 +19172,8 @@ export interface operations {
         content?: never
       }
       /**
-       * @description AUTHORIZATION-0002 : 해당 리소스에 접근할 권한이 없습니다.<br>
-       *     SCHEDULE-0031 : 출석을 요하는 일정을 생성할 권한이 없습니다.
+       * @description AUTHORIZATION-0002 : 이 항목에 접근할 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요.<br>
+       *     SCHEDULE-0031 : 출석이 필요한 일정을 만들 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요.
        */
       403: {
         headers: {
@@ -12780,7 +19181,7 @@ export interface operations {
         }
         content?: never
       }
-      /** @description SCHEDULE-0009 : 일정을 찾을 수 없습니다. */
+      /** @description SCHEDULE-0009 : 일정을 찾을 수 없어요. 선택한 일정을 확인해주세요. */
       404: {
         headers: {
           [name: string]: unknown
@@ -12789,7 +19190,7 @@ export interface operations {
       }
     }
   }
-  deleteCurriculum: {
+  "CURRICULUM-003": {
     parameters: {
       query?: never
       header?: never
@@ -12809,7 +19210,7 @@ export interface operations {
       }
     }
   }
-  editCurriculum: {
+  "CURRICULUM-002": {
     parameters: {
       query?: never
       header?: never
@@ -12833,7 +19234,7 @@ export interface operations {
       }
     }
   }
-  deleteWeeklyCurriculum: {
+  "CURRICULUM-006": {
     parameters: {
       query?: never
       header?: never
@@ -12853,7 +19254,7 @@ export interface operations {
       }
     }
   }
-  editWeeklyCurriculum: {
+  "CURRICULUM-005": {
     parameters: {
       query?: never
       header?: never
@@ -12877,7 +19278,7 @@ export interface operations {
       }
     }
   }
-  getOriginalWorkbook: {
+  "WORKBOOK-101": {
     parameters: {
       query?: never
       header?: never
@@ -12899,7 +19300,7 @@ export interface operations {
       }
     }
   }
-  deleteOriginalWorkbook: {
+  "ORIGINAL-WORKBOOK-004": {
     parameters: {
       query?: never
       header?: never
@@ -12919,7 +19320,7 @@ export interface operations {
       }
     }
   }
-  editOriginalWorkbook: {
+  "ORIGINAL-WORKBOOK-003": {
     parameters: {
       query?: never
       header?: never
@@ -12943,7 +19344,7 @@ export interface operations {
       }
     }
   }
-  changeOriginalWorkbookStatus: {
+  "ORIGINAL-WORKBOOK-005": {
     parameters: {
       query?: never
       header?: never
@@ -12965,7 +19366,7 @@ export interface operations {
       }
     }
   }
-  deleteOriginalMission: {
+  "ORIGINAL-WORKBOOK-MISSION-003": {
     parameters: {
       query?: never
       header?: never
@@ -12985,7 +19386,7 @@ export interface operations {
       }
     }
   }
-  editOriginalMission: {
+  "ORIGINAL-WORKBOOK-MISSION-002": {
     parameters: {
       query?: never
       header?: never
@@ -13009,7 +19410,7 @@ export interface operations {
       }
     }
   }
-  getChallengerWorkbook: {
+  "WORKBOOK-102": {
     parameters: {
       query?: never
       header?: never
@@ -13031,7 +19432,7 @@ export interface operations {
       }
     }
   }
-  deleteChallengerWorkbook: {
+  "CHALLENGER-WORKBOOK-003": {
     parameters: {
       query?: never
       header?: never
@@ -13055,7 +19456,7 @@ export interface operations {
       }
     }
   }
-  editChallengerWorkbook: {
+  "CHALLENGER-WORKBOOK-002": {
     parameters: {
       query?: never
       header?: never
@@ -13079,7 +19480,7 @@ export interface operations {
       }
     }
   }
-  deleteWeeklyBestWorkbook: {
+  "CHALLENGER-WORKBOOK-007": {
     parameters: {
       query?: never
       header?: never
@@ -13099,7 +19500,7 @@ export interface operations {
       }
     }
   }
-  editWeeklyBestWorkbookReason: {
+  "CHALLENGER-WORKBOOK-006": {
     parameters: {
       query?: never
       header?: never
@@ -13123,7 +19524,7 @@ export interface operations {
       }
     }
   }
-  deleteOriginalMission_1: {
+  "CHALLENGER-WORKBOOK-MISSION-003": {
     parameters: {
       query?: never
       header?: never
@@ -13143,7 +19544,7 @@ export interface operations {
       }
     }
   }
-  editOriginalMission_1: {
+  "CHALLENGER-WORKBOOK-MISSION-002": {
     parameters: {
       query?: never
       header?: never
@@ -13167,7 +19568,7 @@ export interface operations {
       }
     }
   }
-  deleteMissionFeedback: {
+  "CHALLENGER-WORKBOOK-MISSION-006": {
     parameters: {
       query?: never
       header?: never
@@ -13187,7 +19588,7 @@ export interface operations {
       }
     }
   }
-  editMissionFeedback: {
+  "CHALLENGER-WORKBOOK-MISSION-005": {
     parameters: {
       query?: never
       header?: never
@@ -13211,7 +19612,303 @@ export interface operations {
       }
     }
   }
-  getStudyGroupInfo: {
+  "UMC-PRODUCT-SQUAD-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        squadId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-SQUAD-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        squadId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUmcProductSquadRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-SQUAD-006": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        squadId: number
+        participantId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-SQUAD-005": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        squadId: number
+        participantId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUmcProductSquadParticipantRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUmcProductMemberProfileRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-011": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+        leadershipId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-010": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+        leadershipId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUmcProductLeadershipRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-008": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+        chapterMembershipId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-007": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+        chapterMembershipId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUmcProductChapterMembershipRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-005": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+        periodId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+        periodId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUmcProductMemberActivityPeriodRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-CHAPTER-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        chapterId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "UMC-PRODUCT-CHAPTER-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        chapterId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUmcProductChapterRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "STUDY-GROUP-102": {
     parameters: {
       query?: never
       header?: never
@@ -13243,7 +19940,7 @@ export interface operations {
       }
     }
   }
-  delete_1: {
+  "STUDY-GROUP-007": {
     parameters: {
       query?: never
       header?: never
@@ -13271,7 +19968,7 @@ export interface operations {
       }
     }
   }
-  update: {
+  "STUDY-GROUP-002": {
     parameters: {
       query?: never
       header?: never
@@ -13303,7 +20000,7 @@ export interface operations {
       }
     }
   }
-  deleteMentor: {
+  "STUDY-GROUP-006": {
     parameters: {
       query?: never
       header?: never
@@ -13324,7 +20021,7 @@ export interface operations {
       }
     }
   }
-  addMentor: {
+  "STUDY-GROUP-004": {
     parameters: {
       query?: never
       header?: never
@@ -13345,7 +20042,7 @@ export interface operations {
       }
     }
   }
-  deleteMember: {
+  "STUDY-GROUP-005": {
     parameters: {
       query?: never
       header?: never
@@ -13366,7 +20063,7 @@ export interface operations {
       }
     }
   }
-  addMember_1: {
+  "STUDY-GROUP-003": {
     parameters: {
       query?: never
       header?: never
@@ -13387,7 +20084,7 @@ export interface operations {
       }
     }
   }
-  getSchoolDetail: {
+  "SCHOOL-102": {
     parameters: {
       query?: never
       header?: never
@@ -13419,7 +20116,7 @@ export interface operations {
       }
     }
   }
-  updateSchool: {
+  "SCHOOL-002": {
     parameters: {
       query?: never
       header?: never
@@ -13451,7 +20148,7 @@ export interface operations {
       }
     }
   }
-  unassignFromChapter: {
+  "SCHOOL-005": {
     parameters: {
       query?: never
       header?: never
@@ -13483,7 +20180,7 @@ export interface operations {
       }
     }
   }
-  assignToChapter: {
+  "SCHOOL-004": {
     parameters: {
       query?: never
       header?: never
@@ -13515,7 +20212,152 @@ export interface operations {
       }
     }
   }
-  getDetail: {
+  "RECRUITING-APPLICATION-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CancelRecruitingApplicationRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-001": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seasonId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingSeasonConfigurationResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seasonId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateRecruitingSeasonRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-015": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seasonId: number
+        roundId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateRecruitingRoundStatusRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-063": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecruitingDecisionRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "RECRUITING-ADMIN-061": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecruitingDocumentDecisionRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "PROJECT-002": {
     parameters: {
       query?: never
       header?: never
@@ -13537,7 +20379,7 @@ export interface operations {
       }
     }
   }
-  delete_2: {
+  "PROJECT-109": {
     parameters: {
       query?: never
       header?: never
@@ -13557,7 +20399,7 @@ export interface operations {
       }
     }
   }
-  update_1: {
+  "PROJECT-102": {
     parameters: {
       query?: never
       header?: never
@@ -13583,7 +20425,32 @@ export interface operations {
       }
     }
   }
-  decide: {
+  "PROJECT-006": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        projectId: number
+        memberId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangeProjectMemberStatusRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "APPLY-103": {
     parameters: {
       query?: never
       header?: never
@@ -13610,7 +20477,7 @@ export interface operations {
       }
     }
   }
-  delete_3: {
+  "PROJECT-MATCHING-103": {
     parameters: {
       query?: never
       header?: never
@@ -13630,7 +20497,7 @@ export interface operations {
       }
     }
   }
-  update_2: {
+  "PROJECT-MATCHING-102": {
     parameters: {
       query?: never
       header?: never
@@ -13654,7 +20521,7 @@ export interface operations {
       }
     }
   }
-  getPostDetail: {
+  "POST-101": {
     parameters: {
       query?: never
       header?: never
@@ -13676,7 +20543,7 @@ export interface operations {
       }
     }
   }
-  deletePost: {
+  "POST-005": {
     parameters: {
       query?: never
       header?: never
@@ -13696,7 +20563,7 @@ export interface operations {
       }
     }
   }
-  updatePost: {
+  "POST-003": {
     parameters: {
       query?: never
       header?: never
@@ -13722,7 +20589,7 @@ export interface operations {
       }
     }
   }
-  updateLightningPost: {
+  "POST-004": {
     parameters: {
       query?: never
       header?: never
@@ -13748,7 +20615,7 @@ export interface operations {
       }
     }
   }
-  getNotice: {
+  "NOTICE-003": {
     parameters: {
       query?: never
       header?: never
@@ -13792,7 +20659,7 @@ export interface operations {
       }
     }
   }
-  deleteNotice: {
+  "NOTICE-202": {
     parameters: {
       query?: never
       header?: never
@@ -13820,7 +20687,7 @@ export interface operations {
       }
     }
   }
-  updateNotice: {
+  "NOTICE-203": {
     parameters: {
       query?: never
       header?: never
@@ -13859,7 +20726,7 @@ export interface operations {
       }
     }
   }
-  deleteMember_1: {
+  "MEMBER-003": {
     parameters: {
       query?: never
       header?: never
@@ -13883,7 +20750,7 @@ export interface operations {
       }
     }
   }
-  editMemberInfo: {
+  "MEMBER-001": {
     parameters: {
       query?: never
       header?: never
@@ -13907,7 +20774,7 @@ export interface operations {
       }
     }
   }
-  editMemberProfile: {
+  "MEMBER-002": {
     parameters: {
       query?: never
       header?: never
@@ -13931,7 +20798,150 @@ export interface operations {
       }
     }
   }
-  editChallengerInfo: {
+  "MEMBER-005": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangeMemberEmailRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["MemberInfoResponse"]
+        }
+      }
+    }
+  }
+  "MAINT-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        windowId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["MaintenanceWindowResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-102": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadDetailResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadDetailResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateCommunityThreadRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadDetailResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-011": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+        memberId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangeCommunityThreadMemberRoleRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadMemberMutationResponse"]
+        }
+      }
+    }
+  }
+  "CHALLENGER-004": {
     parameters: {
       query?: never
       header?: never
@@ -13957,7 +20967,7 @@ export interface operations {
       }
     }
   }
-  deleteChallengerPoint: {
+  "POINT-003": {
     parameters: {
       query?: never
       header?: never
@@ -13977,7 +20987,7 @@ export interface operations {
       }
     }
   }
-  editChallengerPoints: {
+  "POINT-002": {
     parameters: {
       query?: never
       header?: never
@@ -14001,7 +21011,173 @@ export interface operations {
       }
     }
   }
-  changePassword: {
+  "ADMIN-CERTIFICATE-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        certificateId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RevokeCertificateRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "BLOG-SERIES-007": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seriesId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "BLOG-SERIES-006": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seriesId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BlogSeriesRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogSeriesResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-006": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        type: string
+        slug: string
+        commentId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "BLOG-005": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        type: string
+        slug: string
+        commentId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateBlogCommentRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogCommentResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-CONTENT-006": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contentId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "BLOG-CONTENT-005": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contentId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BlogContentRequest"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogContentResponse"]
+        }
+      }
+    }
+  }
+  "CREDENTIAL-003": {
     parameters: {
       query?: never
       header?: never
@@ -14023,7 +21199,7 @@ export interface operations {
       }
     }
   }
-  resetPasswordByEmail: {
+  "CREDENTIAL-007": {
     parameters: {
       query?: never
       header?: never
@@ -14038,138 +21214,6 @@ export interface operations {
     responses: {
       /** @description OK */
       200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  forceEnd: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        windowId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["MaintenanceWindowResponse"]
-        }
-      }
-    }
-  }
-  getDomain: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        domainId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["FigmaRoutingDomainResponse"]
-        }
-      }
-    }
-  }
-  deleteDomain: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        domainId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  updateDomain: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        domainId: number
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateFigmaRoutingDomainRequest"]
-      }
-    }
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  removeMention: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        mentionId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  updateMention: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        mentionId: number
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateFigmaRoutingMentionRequest"]
-      }
-    }
-    responses: {
-      /** @description No Content */
-      204: {
         headers: {
           [name: string]: unknown
         }
@@ -14250,7 +21294,7 @@ export interface operations {
     parameters: {
       query: {
         email: string
-        purpose?: "REGISTER" | "PASSWORD_RESET"
+        purpose?: "REGISTER" | "PASSWORD_RESET" | "CHANGE_EMAIL"
       }
       header?: never
       path?: never
@@ -14372,6 +21416,28 @@ export interface operations {
       }
     }
   }
+  "TEST-CERTIFICATE-001": {
+    parameters: {
+      query: {
+        request: components["schemas"]["CertificatePdfPreviewRequest"]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/pdf": string
+        }
+      }
+    }
+  }
   "TEST-006": {
     parameters: {
       query: {
@@ -14394,7 +21460,7 @@ export interface operations {
       }
     }
   }
-  getAttendanceInfo: {
+  "SCHEDULE-Q005": {
     parameters: {
       query?: {
         attendanceStatus?:
@@ -14426,8 +21492,8 @@ export interface operations {
         }
       }
       /**
-       * @description SCHEDULE-0021 : 출석 정책이 존재하지 않아 출석 요청이 불가능한 일정입니다.<br>
-       *     SCHEDULE-0026 : 일정의 참여자가 아닙니다.
+       * @description SCHEDULE-0021 : 출석 정책이 없는 일정이에요. 출석 정책을 먼저 설정해주세요.<br>
+       *     SCHEDULE-0026 : 일정 참여자만 출석할 수 있어요. 참여자 목록을 확인해주세요.
        */
       400: {
         headers: {
@@ -14435,7 +21501,7 @@ export interface operations {
         }
         content?: never
       }
-      /** @description AUTHORIZATION-0002 : 해당 리소스에 접근할 권한이 없습니다. */
+      /** @description AUTHORIZATION-0002 : 이 항목에 접근할 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요. */
       403: {
         headers: {
           [name: string]: unknown
@@ -14451,7 +21517,7 @@ export interface operations {
       }
     }
   }
-  mySchedules: {
+  "SCHEDULE-Q002": {
     parameters: {
       query: {
         from: string
@@ -14473,7 +21539,7 @@ export interface operations {
           "*/*": components["schemas"]["ScheduleInfoResponse"][]
         }
       }
-      /** @description AUTHORIZATION-0001 : 권한이 없습니다. */
+      /** @description AUTHORIZATION-0001 : 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요. */
       403: {
         headers: {
           [name: string]: unknown
@@ -14482,7 +21548,7 @@ export interface operations {
       }
     }
   }
-  getCapabilities: {
+  "SCHEDULE-Q001": {
     parameters: {
       query?: never
       header?: never
@@ -14502,7 +21568,7 @@ export interface operations {
       }
     }
   }
-  getAttendanceInfoList: {
+  "SCHEDULE-Q004": {
     parameters: {
       query?: {
         from?: string
@@ -14533,21 +21599,21 @@ export interface operations {
           "*/*": components["schemas"]["AdminScheduleInfoResponse"][]
         }
       }
-      /** @description SCHEDULE-0026 : 일정의 참여자가 아닙니다. */
+      /** @description SCHEDULE-0026 : 일정 참여자만 출석할 수 있어요. 참여자 목록을 확인해주세요. */
       400: {
         headers: {
           [name: string]: unknown
         }
         content?: never
       }
-      /** @description AUTHORIZATION-0001 : 권한이 없습니다. */
+      /** @description AUTHORIZATION-0001 : 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요. */
       403: {
         headers: {
           [name: string]: unknown
         }
         content?: never
       }
-      /** @description SCHEDULE-0009 : 일정을 찾을 수 없습니다. */
+      /** @description SCHEDULE-0009 : 일정을 찾을 수 없어요. 선택한 일정을 확인해주세요. */
       404: {
         headers: {
           [name: string]: unknown
@@ -14556,7 +21622,7 @@ export interface operations {
       }
     }
   }
-  searchMembersV2: {
+  "MEMBER-202": {
     parameters: {
       query?: {
         /** @description Zero-based page index (0..N) */
@@ -14596,7 +21662,7 @@ export interface operations {
       }
     }
   }
-  getMySummary: {
+  "MEMBER-201": {
     parameters: {
       query?: never
       header?: never
@@ -14616,7 +21682,29 @@ export interface operations {
       }
     }
   }
-  getBestWorkbooks: {
+  "GISU-201": {
+    parameters: {
+      query: {
+        request: components["schemas"]["GisuOrganizationQueryRequest"]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["GisuOrganizationV2Response"]
+        }
+      }
+    }
+  }
+  "WORKBOOK-103": {
     parameters: {
       query?: {
         gisuId?: number
@@ -14651,7 +21739,7 @@ export interface operations {
       }
     }
   }
-  getMyProgress: {
+  "CURRICULUM-102": {
     parameters: {
       query: {
         gisuId: number
@@ -14673,7 +21761,7 @@ export interface operations {
       }
     }
   }
-  getCurriculum: {
+  "CURRICULUM-101": {
     parameters: {
       query: {
         gisuId: number
@@ -14705,7 +21793,7 @@ export interface operations {
       }
     }
   }
-  searchChallengersV2: {
+  "CHALLENGER-201": {
     parameters: {
       query?: {
         /** @description Zero-based page index (0..N) */
@@ -14770,7 +21858,69 @@ export interface operations {
       }
     }
   }
-  getTermsById: {
+  "UMC-PRODUCT-ORGANIZATION-CHART-101": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["UmcProductOrganizationChartResponse"]
+        }
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-102": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["UmcProductMemberResponse"]
+        }
+      }
+    }
+  }
+  "UMC-PRODUCT-MEMBER-012": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        memberId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "TERM-102": {
     parameters: {
       query?: never
       header?: never
@@ -14792,7 +21942,7 @@ export interface operations {
       }
     }
   }
-  getTerms: {
+  "TERM-101": {
     parameters: {
       query?: never
       header?: never
@@ -14814,7 +21964,7 @@ export interface operations {
       }
     }
   }
-  getMyRequiredTermConsentStatus: {
+  "TERM-103": {
     parameters: {
       query?: never
       header?: never
@@ -14834,7 +21984,7 @@ export interface operations {
       }
     }
   }
-  getStatus: {
+  "SYSTEM-001": {
     parameters: {
       query?: never
       header?: never
@@ -14854,7 +22004,7 @@ export interface operations {
       }
     }
   }
-  getStudyGroups: {
+  "STUDY-GROUP-101": {
     parameters: {
       query?: {
         /** @description 페이지 커서 (첫 페이지는 null) */
@@ -14879,7 +22029,7 @@ export interface operations {
       }
     }
   }
-  getUnassignedSchools: {
+  "SCHOOL-103": {
     parameters: {
       query: {
         /**
@@ -14905,7 +22055,7 @@ export interface operations {
       }
     }
   }
-  getSchoolLink: {
+  "SCHOOL-104": {
     parameters: {
       query?: never
       header?: never
@@ -14959,7 +22109,7 @@ export interface operations {
       }
     }
   }
-  getAllSchools: {
+  "SCHOOL-101": {
     parameters: {
       query?: never
       header?: never
@@ -14979,7 +22129,313 @@ export interface operations {
       }
     }
   }
-  getProjectStatistics: {
+  "RECRUITING-EVALUATION-003": {
+    parameters: {
+      query?: {
+        statuses?: (
+          | "DRAFT"
+          | "SUBMITTED"
+          | "DOCUMENT_FAILED"
+          | "INTERVIEW_ASSIGNED"
+          | "INTERVIEW_SKIPPED"
+          | "FINAL_PASSED"
+          | "FINAL_FAILED"
+          | "CANCELLED"
+        )[]
+        tracks?: (
+          | "PLAN"
+          | "DESIGN"
+          | "WEB_PRODUCT_ENGINEER"
+          | "MOBILE_PRODUCT_ENGINEER"
+          | "INFRA_PLUS"
+        )[]
+        /** @description Zero-based page index (0..N) */
+        page?: number
+        /** @description The size of the page to be returned */
+        size?: number
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[]
+      }
+      header?: never
+      path: {
+        roundId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["PageResponseRecruitingApplicationSummaryResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-EVALUATION-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationDetailResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-PUBLIC-001": {
+    parameters: {
+      query: {
+        gisuId: number
+        chapterId?: number
+        schoolIds?: number[]
+        roundIds?: number[]
+        schoolName?: string
+        seasonId?: number
+        track?:
+          | "PLAN"
+          | "DESIGN"
+          | "WEB_PRODUCT_ENGINEER"
+          | "MOBILE_PRODUCT_ENGINEER"
+          | "INFRA_PLUS"
+        phase?: "OPEN" | "PAST"
+        sort?: "NEWEST" | "REGISTERED" | "RECRUITMENT"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingPublicRoundGroupResponse"][]
+        }
+      }
+    }
+  }
+  "RECRUITING-PUBLIC-002": {
+    parameters: {
+      query: {
+        firstChoice:
+          | "PLAN"
+          | "DESIGN"
+          | "WEB_PRODUCT_ENGINEER"
+          | "MOBILE_PRODUCT_ENGINEER"
+          | "INFRA_PLUS"
+        secondChoice?:
+          | "PLAN"
+          | "DESIGN"
+          | "WEB_PRODUCT_ENGINEER"
+          | "MOBILE_PRODUCT_ENGINEER"
+          | "INFRA_PLUS"
+      }
+      header?: never
+      path: {
+        applicationFormId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingApplicationFormStructureResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-SCHEDULE-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        applicationId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingInterviewScheduleResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-081": {
+    parameters: {
+      query: {
+        gisuId: number
+        schoolIds?: number[]
+        roundIds?: number[]
+        schoolName?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingStatusSummaryResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-082": {
+    parameters: {
+      query: {
+        gisuId: number
+        schoolId?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": string
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-012": {
+    parameters: {
+      query: {
+        title: string
+        excludedRoundId?: number
+      }
+      header?: never
+      path: {
+        seasonId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingRoundTitleAvailabilityResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-011": {
+    parameters: {
+      query: {
+        /**
+         * @description 조회할 기수 ID
+         * @example 15
+         */
+        gisuId: number
+        /**
+         * @description 현재 학교 소속 기준 지부 ID
+         * @example 2
+         */
+        chapterId?: number
+        /**
+         * @description 학교 ID
+         * @example 3
+         */
+        schoolId?: number
+        /**
+         * @description 모집 시즌 ID
+         * @example 10
+         */
+        seasonId?: number
+        /** @description 모집 트랙 */
+        track?:
+          | "PLAN"
+          | "DESIGN"
+          | "WEB_PRODUCT_ENGINEER"
+          | "MOBILE_PRODUCT_ENGINEER"
+          | "INFRA_PLUS"
+        /** @description 정렬 기준 */
+        sort?: "NEWEST" | "REGISTERED" | "RECRUITMENT"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingSeasonSummaryResponse"][]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-033": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        roundId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingRoundEvaluatorResponse"][]
+        }
+      }
+    }
+  }
+  "PROJECT-STAT-001": {
     parameters: {
       query?: never
       header?: never
@@ -15002,58 +22458,13 @@ export interface operations {
       }
     }
   }
-  getApplicationDetail: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        projectId: number
-        applicationId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["ProjectApplicationDetailResponse"]
-        }
-      }
-    }
-  }
-  cancel: {
+  "PROJECT-STAT-002": {
     parameters: {
       query?: {
-        reason?: string
-      }
-      header?: never
-      path: {
-        applicationId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["ProjectApplicationStatusResponse"]
-        }
-      }
-    }
-  }
-  listChapterProjectStatistics: {
-    parameters: {
-      query: {
-        /** @description 지부 ID */
-        chapterId: number
+        /** @description 프로젝트 ID 목록. chapterId와 동시에 제공할 수 없습니다. 단건 조회는 값 1개로 요청합니다. */
+        projectIds?: number[]
+        /** @description 지부 ID. projectIds와 동시에 제공할 수 없습니다. */
+        chapterId?: number
       }
       header?: never
       path?: never
@@ -15072,7 +22483,52 @@ export interface operations {
       }
     }
   }
-  getBatchMembers: {
+  "PROJECT-STAT-003": {
+    parameters: {
+      query: {
+        /** @description 지부 ID */
+        chapterId: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ChapterProjectMatchingStatisticsResponse"]
+        }
+      }
+    }
+  }
+  "PROJECT-PERMISSIONS-001": {
+    parameters: {
+      query: {
+        ids: number[]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ProjectPermissionsResponse"]
+        }
+      }
+    }
+  }
+  "PROJECT-007": {
     parameters: {
       query: {
         projectIds: number[]
@@ -15096,7 +22552,7 @@ export interface operations {
       }
     }
   }
-  searchManaged: {
+  "PROJECT-006_1": {
     parameters: {
       query: {
         gisuId: number
@@ -15125,7 +22581,7 @@ export interface operations {
       }
     }
   }
-  getMyDraft: {
+  "PROJECT-103": {
     parameters: {
       query: {
         gisuId: number
@@ -15147,11 +22603,14 @@ export interface operations {
       }
     }
   }
-  getMyApplications: {
+  "APPLY-004": {
     parameters: {
       query: {
         gisuId: number
-        /** @description 지원 상태 필터 (선택). 미지정 시 DRAFT 제외 전체. 허용 값: DRAFT / SUBMITTED / APPROVED / REJECTED. */
+        /**
+         * @description 지원 상태 필터입니다. 보내지 않으면 임시저장(DRAFT)을 제외한 지원서와 랜덤 매칭 카드를 조회합니다.
+         *     허용 값: DRAFT / SUBMITTED / APPROVED / REJECTED.
+         */
         status?: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED" | "CANCELLED"
       }
       header?: never
@@ -15171,7 +22630,46 @@ export interface operations {
       }
     }
   }
-  search: {
+  "APPLY-101-BATCH": {
+    parameters: {
+      query: {
+        projectIds: number[]
+        matchingRoundId?: number
+        part?:
+          | "PLAN"
+          | "DESIGN"
+          | "WEB"
+          | "ANDROID"
+          | "IOS"
+          | "NODEJS"
+          | "SPRINGBOOT"
+          | "ADMIN"
+        /**
+         * @description 지원 상태 필터입니다. DRAFT 는 지원자 목록에서 사용할 수 없습니다.
+         *     허용 값: SUBMITTED / APPROVED / REJECTED.
+         */
+        status?: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED" | "CANCELLED"
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": {
+            [key: string]: components["schemas"]["ProjectApplicantResponse"][]
+          }
+        }
+      }
+    }
+  }
+  "POST-103": {
     parameters: {
       query: {
         /**
@@ -15203,7 +22701,7 @@ export interface operations {
       }
     }
   }
-  getScrappedPosts: {
+  "POST-106": {
     parameters: {
       query?: {
         /** @description Zero-based page index (0..N) */
@@ -15230,7 +22728,7 @@ export interface operations {
       }
     }
   }
-  getMyPosts: {
+  "POST-104": {
     parameters: {
       query?: {
         /** @description Zero-based page index (0..N) */
@@ -15257,7 +22755,7 @@ export interface operations {
       }
     }
   }
-  getCommentedPosts: {
+  "POST-105": {
     parameters: {
       query?: {
         /** @description Zero-based page index (0..N) */
@@ -15284,13 +22782,13 @@ export interface operations {
       }
     }
   }
-  getNoticeReadStatus: {
+  "NOTICE-005": {
     parameters: {
       query: {
-        /** @description 페이징 커서 ID. 첫 페이지 요청 시 null. status=READ일 때는 마지막 NoticeRead의 ID, status=UNREAD일 때는 마지막 Challenger의 ID를 넘겨주세요 */
+        /** @description 페이징 커서 ID. 첫 페이지 요청 시 null. status=READ이면 마지막 NoticeRead ID, status=UNREAD이면 마지막 Challenger ID를 전달 */
         cursorId?: number
         /**
-         * @description 조직 필터 타입. ALL=전체, CHAPTER=지부별 필터, SCHOOL=학교별 필터. CHAPTER/SCHOOL 선택 시 organizationIds에 해당 ID 목록을 함께 전달해야 합니다
+         * @description 조직 필터 타입. ALL=전체, CHAPTER=지부, SCHOOL=학교. CHAPTER 또는 SCHOOL이면 organizationIds에 대상 ID 목록을 함께 전달
          * @example ALL
          */
         filterType: "CHAPTER" | "SCHOOL" | "ALL"
@@ -15331,7 +22829,7 @@ export interface operations {
       }
     }
   }
-  getNoticeReadStatics: {
+  "NOTICE-004": {
     parameters: {
       query?: never
       header?: never
@@ -15357,7 +22855,7 @@ export interface operations {
       }
     }
   }
-  searchNotices: {
+  "NOTICE-002": {
     parameters: {
       query: {
         /**
@@ -15435,7 +22933,7 @@ export interface operations {
       }
     }
   }
-  searchMembers: {
+  "MEMBER-103": {
     parameters: {
       query?: {
         /** @description Zero-based page index (0..N) */
@@ -15475,7 +22973,7 @@ export interface operations {
       }
     }
   }
-  getMemberProfile: {
+  "MEMBER-101": {
     parameters: {
       query?: never
       header?: never
@@ -15497,7 +22995,7 @@ export interface operations {
       }
     }
   }
-  getMyProfile: {
+  "MEMBER-102": {
     parameters: {
       query?: never
       header?: never
@@ -15517,7 +23015,7 @@ export interface operations {
       }
     }
   }
-  getMyOAuthInfos: {
+  "OAUTH-101": {
     parameters: {
       query?: never
       header?: never
@@ -15537,12 +23035,12 @@ export interface operations {
       }
     }
   }
-  getGisu: {
+  "MAINT-004": {
     parameters: {
       query?: never
       header?: never
       path: {
-        gisuId: number
+        windowId: number
       }
       cookie?: never
     }
@@ -15554,12 +23052,34 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
+          "*/*": components["schemas"]["MaintenanceWindowResponse"]
+        }
+      }
+    }
+  }
+  "GISU-100": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        gisuId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description 조회 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
           "*/*": components["schemas"]["GisuResponse"]
         }
       }
     }
   }
-  deleteGisu: {
+  "GISU-002": {
     parameters: {
       query?: never
       header?: never
@@ -15594,7 +23114,7 @@ export interface operations {
       }
     }
   }
-  getAllGisu: {
+  "GISU-102": {
     parameters: {
       query?: never
       header?: never
@@ -15614,7 +23134,7 @@ export interface operations {
       }
     }
   }
-  getActiveGisu: {
+  "GISU-103": {
     parameters: {
       query?: never
       header?: never
@@ -15634,7 +23154,142 @@ export interface operations {
       }
     }
   }
-  getChapterById: {
+  getErrorCodeCatalog: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ErrorCodeCatalogResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-105": {
+    parameters: {
+      query?: {
+        before?: string
+        limit?: number
+      }
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadMessagePageResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-103": {
+    parameters: {
+      query?: {
+        q?: string
+        role?: "OWNER" | "ADMIN" | "MEMBER"
+        part?:
+          | "PLAN"
+          | "DESIGN"
+          | "WEB"
+          | "ANDROID"
+          | "IOS"
+          | "NODEJS"
+          | "SPRINGBOOT"
+          | "ADMIN"
+        generation?: number
+        offset?: number
+        limit?: number
+      }
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadMemberPageResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-104": {
+    parameters: {
+      query?: {
+        q?: string
+        offset?: number
+        limit?: number
+      }
+      header?: never
+      path: {
+        threadId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadInvitablePageResponse"]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-REPORT-101": {
+    parameters: {
+      query?: {
+        status?: "PENDING" | "APPROVED" | "REJECTED"
+        reason?: "SPAM" | "ABUSE" | "INAPPROPRIATE" | "PRIVACY" | "ETC"
+        threadId?: string
+        reporterId?: string
+        offset?: number
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadMessageReportPageResponse"]
+        }
+      }
+    }
+  }
+  "CHAPTER-103": {
     parameters: {
       query?: never
       header?: never
@@ -15656,7 +23311,7 @@ export interface operations {
       }
     }
   }
-  deleteChapter: {
+  "CHAPTER-003": {
     parameters: {
       query?: never
       header?: never
@@ -15684,7 +23339,7 @@ export interface operations {
       }
     }
   }
-  getChaptersWithSchoolsByGisuId: {
+  "CHAPTER-102": {
     parameters: {
       query: {
         /**
@@ -15710,7 +23365,7 @@ export interface operations {
       }
     }
   }
-  getChallengerInfo: {
+  "CHALLENGER-101": {
     parameters: {
       query?: never
       header?: never
@@ -15732,7 +23387,7 @@ export interface operations {
       }
     }
   }
-  deleteChallenger: {
+  "CHALLENGER-005": {
     parameters: {
       query?: never
       header?: never
@@ -15752,7 +23407,7 @@ export interface operations {
       }
     }
   }
-  searchChallenger: {
+  "CHALLENGER-103": {
     parameters: {
       query?: {
         /** @description Zero-based page index (0..N) */
@@ -15795,7 +23450,7 @@ export interface operations {
       }
     }
   }
-  globalSearchChallenger: {
+  "CHALLENGER-104": {
     parameters: {
       query?: {
         /** @description 이전 페이지의 마지막 챌린저 ID. 첫 페이지 조회 시 null */
@@ -15824,7 +23479,7 @@ export interface operations {
       }
     }
   }
-  cursorSearchChallenger: {
+  "CHALLENGER-102": {
     parameters: {
       query?: {
         /** @description 이전 페이지의 마지막 챌린저 ID. 첫 페이지 조회 시 null */
@@ -15873,7 +23528,7 @@ export interface operations {
       }
     }
   }
-  getChallengerRecordById: {
+  "CHALLENGER-RECORD-102": {
     parameters: {
       query?: never
       header?: never
@@ -15895,7 +23550,7 @@ export interface operations {
       }
     }
   }
-  getChallengerRecordByCode: {
+  "CHALLENGER-RECORD-101": {
     parameters: {
       query?: never
       header?: never
@@ -15917,7 +23572,241 @@ export interface operations {
       }
     }
   }
-  getResourcePermission: {
+  "CERTIFICATE-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        certificateId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CertificateDownloadResponse"]
+        }
+      }
+    }
+  }
+  "CERTIFICATE-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        serialNumber: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CertificateVerificationResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-SERIES-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        type: string
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogSeriesResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-SERIES-003": {
+    parameters: {
+      query?: {
+        cursor?: number
+        size?: number
+        sort?: string
+      }
+      header?: never
+      path: {
+        type: string
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CursorResponseBlogContentSummaryResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-SERIES-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        seriesId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogSeriesResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-CONTENT-007": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogSeoPathsResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-HASHTAG-001": {
+    parameters: {
+      query?: {
+        type?: string
+        q?: string
+        cursor?: number
+        size?: number
+        sort?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CursorResponseBlogHashtagResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-HASHTAG-002": {
+    parameters: {
+      query?: {
+        type?: string
+        cursor?: number
+        size?: number
+        sort?: string
+      }
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CursorResponseBlogContentSummaryResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-CONTENT-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        type: string
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogContentResponse"]
+        }
+      }
+    }
+  }
+  "BLOG-CONTENT-003": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        contentId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["BlogContentResponse"]
+        }
+      }
+    }
+  }
+  "PERMISSION-001": {
     parameters: {
       query: {
         resourceType:
@@ -15936,6 +23825,9 @@ export interface operations {
           | "STUDY_GROUP"
           | "COMMUNITY_POST"
           | "COMMUNITY_COMMENT"
+          | "BLOG_CONTENT"
+          | "BLOG_SERIES"
+          | "BLOG_COMMENT"
           | "RECRUITMENT"
           | "MEMBER"
           | "ANALYTICS"
@@ -15947,7 +23839,6 @@ export interface operations {
           | "FCM"
           | "PROJECT"
           | "PROJECT_APPLICATION"
-          | "FIGMA"
         resourceId?: number
         permissionType?:
           | "READ"
@@ -15977,7 +23868,7 @@ export interface operations {
       }
     }
   }
-  getChallengerRole: {
+  "STAFF-101": {
     parameters: {
       query?: never
       header?: never
@@ -15999,7 +23890,7 @@ export interface operations {
       }
     }
   }
-  deleteChallengerRole: {
+  "STAFF-002": {
     parameters: {
       query?: never
       header?: never
@@ -16019,7 +23910,59 @@ export interface operations {
       }
     }
   }
-  checkEmailAvailability: {
+  "SSO-OAUTH-001": {
+    parameters: {
+      query: {
+        client_id: string
+        redirect_uri: string
+        response_type: string
+        state: string
+        code_challenge: string
+        code_challenge_method: string
+      }
+      header?: {
+        Origin?: string
+        Referer?: string
+      }
+      path?: never
+      cookie?: {
+        UMC_SSO_LOGIN?: string
+      }
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "SSO-LOGIN-002": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: {
+        UMC_SSO_LOGIN?: string
+      }
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["SsoBrowserLoginResponse"]
+        }
+      }
+    }
+  }
+  "CREDENTIAL-005": {
     parameters: {
       query: {
         email: string
@@ -16041,7 +23984,84 @@ export interface operations {
       }
     }
   }
-  getSchoolSummaries: {
+  "AUDIT-001": {
+    parameters: {
+      query?: {
+        domain?:
+          | "COMMON"
+          | "AUTHENTICATION"
+          | "AUTHORIZATION"
+          | "MEMBER"
+          | "CHALLENGER"
+          | "ORGANIZATION"
+          | "CURRICULUM"
+          | "SCHEDULE"
+          | "COMMUNITY"
+          | "NOTICE"
+          | "FCM"
+          | "FORM"
+          | "RECRUITMENT"
+          | "TERMS"
+          | "EMAIL"
+          | "STORAGE"
+          | "WEBHOOK"
+          | "AUDIT_LOG"
+          | "PROJECT"
+          | "LLM"
+          | "ANALYTICS"
+          | "CHAT"
+          | "MAINTENANCE"
+          | "FEEDBACK"
+          | "BLOG"
+          | "DOCUMENTATION"
+          | "CERTIFICATE"
+        action?:
+          | "CREATE"
+          | "UPDATE"
+          | "DELETE"
+          | "APPROVE"
+          | "REJECT"
+          | "CHECK"
+          | "SUBMIT"
+          | "REGISTER"
+          | "WITHDRAW"
+          | "LOGIN"
+          | "LINK"
+          | "UNLINK"
+          | "ACCESS_DENIED"
+          | "PUBLISH"
+          | "CANCEL"
+          | "REMIND"
+          | "REORDER"
+          | "FINALIZE"
+        actorMemberId?: number
+        from?: string
+        to?: string
+        /** @description Zero-based page index (0..N) */
+        page?: number
+        /** @description The size of the page to be returned */
+        size?: number
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["ApiResponsePageAuditLogInfo"]
+        }
+      }
+    }
+  }
+  "DASHBOARD-100": {
     parameters: {
       query?: {
         /** @description Zero-based page index (0..N) */
@@ -16072,138 +24092,7 @@ export interface operations {
       }
     }
   }
-  getOne: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        windowId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["MaintenanceWindowResponse"]
-        }
-      }
-    }
-  }
-  getFile: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        watchedFileId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["FigmaWatchedFileResponse"]
-        }
-      }
-    }
-  }
-  disable: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        watchedFileId: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  preview: {
-    parameters: {
-      query?: {
-        from?: string
-        to?: string
-        watchedFileId?: number
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["FigmaSummaryResult"]
-        }
-      }
-    }
-  }
-  start_1: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["FigmaOAuthAuthorizeResponse"]
-        }
-      }
-    }
-  }
-  callback: {
-    parameters: {
-      query: {
-        code: string
-        state: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["FigmaOAuthCallbackResponse"]
-        }
-      }
-    }
-  }
-  getSummary: {
+  "DASHBOARD-001": {
     parameters: {
       query?: {
         gisuId?: number
@@ -16227,7 +24116,7 @@ export interface operations {
       }
     }
   }
-  getRiskChallengers: {
+  "DASHBOARD-003": {
     parameters: {
       query?: {
         /** @description Zero-based page index (0..N) */
@@ -16258,7 +24147,7 @@ export interface operations {
       }
     }
   }
-  getOperationsOverview: {
+  "DASHBOARD-005": {
     parameters: {
       query?: {
         gisuId?: number
@@ -16282,7 +24171,125 @@ export interface operations {
       }
     }
   }
-  getContext: {
+  "DASHBOARD-009": {
+    parameters: {
+      query?: {
+        gisuId?: number
+        from?: string
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["AdminOperationsStudyGroupsResponse"]
+        }
+      }
+    }
+  }
+  "DASHBOARD-010": {
+    parameters: {
+      query?: {
+        gisuId?: number
+        from?: string
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["AdminOperationsSignupsResponse"]
+        }
+      }
+    }
+  }
+  "DASHBOARD-006": {
+    parameters: {
+      query?: {
+        gisuId?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["AdminOperationsSchoolsResponse"]
+        }
+      }
+    }
+  }
+  "DASHBOARD-007": {
+    parameters: {
+      query?: {
+        gisuId?: number
+        from?: string
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["AdminOperationsPointsResponse"]
+        }
+      }
+    }
+  }
+  "DASHBOARD-008": {
+    parameters: {
+      query?: {
+        gisuId?: number
+        from?: string
+        to?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["AdminOperationsAttendanceResponse"]
+        }
+      }
+    }
+  }
+  "DASHBOARD-004": {
     parameters: {
       query?: never
       header?: never
@@ -16302,7 +24309,7 @@ export interface operations {
       }
     }
   }
-  getActionQueue: {
+  "DASHBOARD-002": {
     parameters: {
       query?: {
         gisuId?: number
@@ -16325,72 +24332,7 @@ export interface operations {
       }
     }
   }
-  search_1: {
-    parameters: {
-      query?: {
-        domain?:
-          | "COMMON"
-          | "AUTHENTICATION"
-          | "AUTHORIZATION"
-          | "MEMBER"
-          | "CHALLENGER"
-          | "ORGANIZATION"
-          | "CURRICULUM"
-          | "SCHEDULE"
-          | "COMMUNITY"
-          | "NOTICE"
-          | "FCM"
-          | "SURVEY"
-          | "RECRUITMENT"
-          | "TERMS"
-          | "EMAIL"
-          | "STORAGE"
-          | "WEBHOOK"
-          | "AUDIT_LOG"
-          | "PROJECT"
-          | "FIGMA"
-          | "LLM"
-          | "ANALYTICS"
-          | "MAINTENANCE"
-          | "FEEDBACK"
-        action?:
-          | "CREATE"
-          | "UPDATE"
-          | "DELETE"
-          | "APPROVE"
-          | "REJECT"
-          | "CHECK"
-          | "SUBMIT"
-          | "REGISTER"
-          | "WITHDRAW"
-        actorMemberId?: number
-        from?: string
-        to?: string
-        /** @description Zero-based page index (0..N) */
-        page?: number
-        /** @description The size of the page to be returned */
-        size?: number
-        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[]
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["ApiResponsePageAuditLogInfo"]
-        }
-      }
-    }
-  }
-  forceDelete: {
+  "SCHEDULE-C007": {
     parameters: {
       query?: never
       header?: never
@@ -16408,14 +24350,14 @@ export interface operations {
         }
         content?: never
       }
-      /** @description AUTHORIZATION-0002 : 해당 리소스에 접근할 권한이 없습니다. */
+      /** @description AUTHORIZATION-0002 : 이 항목에 접근할 권한이 없어요. 필요한 권한이 있다면 운영진에게 문의해주세요. */
       403: {
         headers: {
           [name: string]: unknown
         }
         content?: never
       }
-      /** @description SCHEDULE-0009 : 일정을 찾을 수 없습니다. */
+      /** @description SCHEDULE-0009 : 일정을 찾을 수 없어요. 선택한 일정을 확인해주세요. */
       404: {
         headers: {
           [name: string]: unknown
@@ -16424,7 +24366,7 @@ export interface operations {
       }
     }
   }
-  deleteFile: {
+  "STORAGE-003": {
     parameters: {
       query?: never
       header?: never
@@ -16446,7 +24388,7 @@ export interface operations {
       }
     }
   }
-  removeMember: {
+  "PROJECT-005": {
     parameters: {
       query?: {
         reason?: string
@@ -16469,7 +24411,7 @@ export interface operations {
       }
     }
   }
-  deleteComment: {
+  "COMMENT-002": {
     parameters: {
       query?: never
       header?: never
@@ -16490,7 +24432,28 @@ export interface operations {
       }
     }
   }
-  unsubscribeAllMemberLegacyTopics: {
+  "FCM-004": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description Firebase Installation ID */
+        installationId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description 토큰 해제 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  "FCM-002": {
     parameters: {
       query?: never
       header?: never
@@ -16508,7 +24471,7 @@ export interface operations {
       }
     }
   }
-  deleteNoticeVote: {
+  "NOTICE-106": {
     parameters: {
       query?: never
       header?: never
@@ -16532,7 +24495,7 @@ export interface operations {
       }
     }
   }
-  deleteMember_2: {
+  "MEMBER-004": {
     parameters: {
       query?: never
       header?: never
@@ -16554,7 +24517,7 @@ export interface operations {
       }
     }
   }
-  deleteMemberOAuth: {
+  "OAUTH-002": {
     parameters: {
       query?: never
       header?: never
@@ -16576,6 +24539,29 @@ export interface operations {
         }
         content: {
           "*/*": components["schemas"]["MemberOAuthInfo"][]
+        }
+      }
+    }
+  }
+  "COMMUNITY-THREAD-009": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        threadId: string
+        memberId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["CommunityThreadMemberMutationResponse"]
         }
       }
     }
