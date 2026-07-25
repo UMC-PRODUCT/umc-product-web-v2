@@ -94,4 +94,53 @@ describe("CurriculumCardEditable", () => {
       screen.getAllByPlaceholderText("미션을 작성하세요").length,
     ).toBeGreaterThan(0)
   })
+
+  it("미션 입력에서 Enter를 누르면 다음 미션을 추가한다", () => {
+    const onAddMission = vi.fn()
+    renderCard({ onAddMission })
+
+    const missionInputs = screen.getAllByPlaceholderText("미션을 작성하세요")
+    fireEvent.keyDown(missionInputs[0] as HTMLElement, { key: "Enter" })
+
+    expect(onAddMission).toHaveBeenCalledWith(0, 0)
+  })
+
+  it("빈 미션에서 Backspace를 누르면 해당 미션을 제거한다", () => {
+    const onRemoveMission = vi.fn()
+    renderCard({
+      curriculum: buildCurriculum({
+        workbooks: [
+          {
+            id: "wb1",
+            number: 1,
+            title: "Hug 익히기",
+            missions: ["", "미션 B"],
+          },
+        ],
+      }),
+      onRemoveMission,
+    })
+
+    const missionInputs = screen.getAllByPlaceholderText("미션을 작성하세요")
+    fireEvent.keyDown(missionInputs[0] as HTMLElement, { key: "Backspace" })
+
+    expect(onRemoveMission).toHaveBeenCalledWith(0, 0)
+  })
+
+  it("미션이 하나뿐이면 Backspace로 제거하지 않는다", () => {
+    const onRemoveMission = vi.fn()
+    renderCard({
+      curriculum: buildCurriculum({
+        workbooks: [
+          { id: "wb1", number: 1, title: "Hug 익히기", missions: [""] },
+        ],
+      }),
+      onRemoveMission,
+    })
+
+    const missionInputs = screen.getAllByPlaceholderText("미션을 작성하세요")
+    fireEvent.keyDown(missionInputs[0] as HTMLElement, { key: "Backspace" })
+
+    expect(onRemoveMission).not.toHaveBeenCalled()
+  })
 })
