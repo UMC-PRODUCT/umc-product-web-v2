@@ -72,13 +72,19 @@ describe("CurriculumCardEditable", () => {
 
   it("워크북 제목과 미션을 입력으로 편집할 수 있다", () => {
     const onUpdateWorkbookTitle = vi.fn()
-    renderCard({ onUpdateWorkbookTitle })
+    const onUpdateMission = vi.fn()
+    renderCard({ onUpdateWorkbookTitle, onUpdateMission })
 
-    const workbookTitle =
-      screen.getByPlaceholderText("워크북 이름을 작성하세요")
-    fireEvent.change(workbookTitle, { target: { value: "Fill 익히기" } })
-
+    fireEvent.change(screen.getByPlaceholderText("워크북 이름을 작성하세요"), {
+      target: { value: "Fill 익히기" },
+    })
     expect(onUpdateWorkbookTitle).toHaveBeenCalledWith(0, "Fill 익히기")
+
+    const missionInputs = screen.getAllByPlaceholderText("미션을 작성하세요")
+    fireEvent.change(missionInputs[0] as HTMLElement, {
+      target: { value: "Frame 개념 알기" },
+    })
+    expect(onUpdateMission).toHaveBeenCalledWith(0, 0, "Frame 개념 알기")
   })
 
   it("펼치기 토글 없이 워크북을 항상 노출한다", () => {
