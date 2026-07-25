@@ -3,6 +3,7 @@ import { useState } from "react"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
   getMyEvaluation,
@@ -32,6 +33,7 @@ export function MyStageEvaluationPanel({
   stage,
   onComplete,
 }: MyStageEvaluationPanelProps) {
+  const addToast = useToastStore((state) => state.addToast)
   const myEvaluation = getMyEvaluation(evaluation)
   const savedResult = myEvaluation?.result ?? null
   const savedComment = myEvaluation?.comment ?? ""
@@ -58,6 +60,14 @@ export function MyStageEvaluationPanel({
     setSubmitting(true)
     try {
       await onComplete(result, comment)
+    } catch {
+      addToast({
+        message: "평가 저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
     } finally {
       setSubmitting(false)
     }
