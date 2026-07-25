@@ -95,6 +95,11 @@ export function CurriculumCardReadonly({
                 e.stopPropagation()
                 onEdit?.()
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.stopPropagation()
+                }
+              }}
               className="hover:decoration-teal-gray-500 decoration-teal-gray-500 cursor-pointer px-1 py-0.5 hover:underline"
             >
               <span className="text-subtitle-2-medium text-teal-gray-500">
