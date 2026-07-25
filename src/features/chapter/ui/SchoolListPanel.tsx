@@ -1,5 +1,9 @@
 import { useDroppable } from "@dnd-kit/core"
 
+import {
+  PANEL_ASSIGNED_CHIP_PREFIX,
+  WAITING_CHIP_PREFIX,
+} from "../model/chapterManagement"
 import { SchoolChip } from "./SchoolChip"
 
 import type { School } from "../model/chapterManagement"
@@ -47,7 +51,7 @@ export function SchoolListPanel({
               schoolList.map((school) => (
                 <SchoolChip
                   key={school.id}
-                  dragId={`waiting-${school.id}`}
+                  dragId={`${WAITING_CHIP_PREFIX}${school.id}`}
                   school={school}
                   variant="waiting"
                   draggable={true}
@@ -79,7 +83,7 @@ export function SchoolListPanel({
               assignedSchoolList.map((school) => (
                 <SchoolChip
                   key={school.id}
-                  dragId={`panel-assigned-${school.id}`}
+                  dragId={`${PANEL_ASSIGNED_CHIP_PREFIX}${school.id}`}
                   school={school}
                   variant="assigned"
                   draggable={true}

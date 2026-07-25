@@ -6,7 +6,7 @@ import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
 import { useCurriculumEditor } from "../hooks/useCurriculumEditor"
-import { CurriculumCard } from "./CurriculumCard"
+import { CurriculumCardEditable } from "./CurriculumCardEditable"
 
 interface CurriculumCreatePageProps {
   part?: string
@@ -75,10 +75,9 @@ export function CurriculumCreatePage({
           >
             <div className="flex w-full flex-col gap-2.5">
               {curriculums.map((item) => (
-                <CurriculumCard
+                <CurriculumCardEditable
                   key={item.id}
                   curriculum={item}
-                  isEditable
                   onUpdateCurriculumTitle={(title) =>
                     handleUpdateCurriculumTitle(item.id, title)
                   }

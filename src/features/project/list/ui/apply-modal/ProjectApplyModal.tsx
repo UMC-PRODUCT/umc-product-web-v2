@@ -603,6 +603,7 @@ export const ProjectApplyModal = forwardRef<
                   <RadioList
                     key={`${optionValue}-${index}`}
                     checked={value === optionValue}
+                    allowDeselect
                     onChange={(checked) => {
                       onChange(checked ? optionValue : "")
                     }}

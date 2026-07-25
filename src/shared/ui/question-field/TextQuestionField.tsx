@@ -13,6 +13,7 @@ interface TextQuestionFieldProps {
   showCounter?: boolean
   size?: "lg" | "md"
   error?: string
+  disabled?: boolean
   className?: string
   ariaLabel?: string
   ariaRequired?: boolean
@@ -28,6 +29,7 @@ export function TextQuestionField({
   showCounter = true,
   size = "lg",
   error,
+  disabled = false,
   className,
   ariaLabel,
   ariaRequired,
@@ -37,13 +39,15 @@ export function TextQuestionField({
   const [focused, setFocused] = useState(false)
   const internalTextareaRef = useRef<HTMLTextAreaElement>(null)
   const textareaRef = externalTextareaRef || internalTextareaRef
-  const state = error
-    ? "error"
-    : focused
-      ? "focus"
-      : value.length > 0
-        ? "filled"
-        : "default"
+  const state = disabled
+    ? "disabled"
+    : error
+      ? "error"
+      : focused
+        ? "focus"
+        : value.length > 0
+          ? "filled"
+          : "default"
 
   useLayoutEffect(() => {
     const el = textareaRef.current
@@ -57,6 +61,7 @@ export function TextQuestionField({
       <QuestionFieldBox
         state={state}
         size={size}
+        interactive={!disabled}
         className={cn("w-full min-w-0", className)}
       >
         <textarea
@@ -65,6 +70,7 @@ export function TextQuestionField({
           value={value}
           maxLength={maxLength}
           placeholder={placeholder}
+          disabled={disabled}
           aria-label={ariaLabel}
           aria-required={ariaRequired || undefined}
           onChange={(e) => onChange(e.target.value)}
@@ -75,9 +81,10 @@ export function TextQuestionField({
             size === "md" ? "text-body-2-medium" : "text-body-1-regular",
             "text-teal-gray-900 placeholder:text-teal-gray-400",
             "w-full resize-none overflow-hidden border-none bg-transparent outline-none",
+            "disabled:text-teal-gray-400 disabled:cursor-not-allowed",
           )}
         />
-        {showCounter && focused && (
+        {showCounter && focused && !disabled && (
           <CounterLabel
             current={value.length}
             total={maxLength}

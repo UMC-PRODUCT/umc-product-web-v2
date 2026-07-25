@@ -4,6 +4,19 @@ export interface Staff {
   name: string
 }
 
+export function isStaff(value: unknown): value is Staff {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    typeof value.id === "string" &&
+    "nickname" in value &&
+    typeof value.nickname === "string" &&
+    "name" in value &&
+    typeof value.name === "string"
+  )
+}
+
 export const SCHOOL_STAFF_LIST: Staff[] = [
   { id: "staff-1", nickname: "이삭", name: "강지훈" },
   { id: "staff-2", nickname: "헤일리", name: "한현서" },

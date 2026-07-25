@@ -7,7 +7,7 @@ import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
 import { INITIAL_CURRICULUM_DATA } from "../model/curriculumData"
-import { CurriculumCard } from "./CurriculumCard"
+import { CurriculumCardReadonly } from "./CurriculumCardReadonly"
 import { CurriculumSettingModal } from "./CurriculumSettingModal"
 import { PartTabs } from "./PartTabs"
 
@@ -126,7 +126,7 @@ export function CurriculumManagePage() {
         {currentItems.length > 0 ? (
           <div className="flex w-full flex-col gap-2.5">
             {currentItems.map((item) => (
-              <CurriculumCard
+              <CurriculumCardReadonly
                 key={item.id}
                 curriculum={item}
                 isExpanded={!!expandedIds[item.id]}

@@ -26,6 +26,7 @@ export interface ApplyRecruitmentInfo {
   title: string
   school: string
   notice: string
+  noticeUrl?: string | null
   logoUrl: string | null
 }
 

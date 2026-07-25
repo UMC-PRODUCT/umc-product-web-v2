@@ -2,7 +2,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
-import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
+import { MoreVerticalGlyph } from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { PartTagChip } from "@/shared/ui/chip/PartTagChip"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -203,9 +203,12 @@ export function RecruitingApplicationCard({
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
+                aria-label="지원서 메뉴"
+                aria-haspopup="menu"
+                aria-expanded={isDropdownOpen}
                 className="hover:bg-teal-gray-100 hover:shadow-inner-neutral-2 flex h-6.5 w-6.5 cursor-pointer items-center justify-center rounded-[8px]"
               >
-                <MoreVerticalIcon className="text-teal-gray-700 h-6 w-6" />
+                <MoreVerticalGlyph className="text-teal-gray-700 h-6 w-6" />
               </button>
 
               {isDropdownOpen && (

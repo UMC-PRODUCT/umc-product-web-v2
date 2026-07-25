@@ -115,6 +115,7 @@ export function ApplyAnswerField({
               <RadioList
                 key={option.optionId}
                 checked={value === option.optionId}
+                allowDeselect
                 onChange={(checked) => {
                   onChange(checked ? option.optionId : "")
                 }}

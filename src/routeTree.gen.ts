@@ -55,6 +55,7 @@ import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
 import { Route as TestFooterRouteImport } from './routes/test/footer'
 import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
 import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
+import { Route as TestCurriculumSkeletonRouteImport } from './routes/test/curriculum-skeleton'
 import { Route as TestCounterLabelRouteImport } from './routes/test/counter-label'
 import { Route as TestCounterRouteImport } from './routes/test/counter'
 import { Route as TestCodeInputRouteImport } from './routes/test/code-input'
@@ -336,6 +337,11 @@ const TestFloatingActionButtonRoute =
 const TestFieldTypeButtonRoute = TestFieldTypeButtonRouteImport.update({
   id: '/test/field-type-button',
   path: '/test/field-type-button',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestCurriculumSkeletonRoute = TestCurriculumSkeletonRouteImport.update({
+  id: '/test/curriculum-skeleton',
+  path: '/test/curriculum-skeleton',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestCounterLabelRoute = TestCounterLabelRouteImport.update({
@@ -621,6 +627,7 @@ export interface FileRoutesByFullPath {
   '/test/code-input': typeof TestCodeInputRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
+  '/test/curriculum-skeleton': typeof TestCurriculumSkeletonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/footer': typeof TestFooterRoute
@@ -711,6 +718,7 @@ export interface FileRoutesByTo {
   '/test/code-input': typeof TestCodeInputRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
+  '/test/curriculum-skeleton': typeof TestCurriculumSkeletonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/footer': typeof TestFooterRoute
@@ -806,6 +814,7 @@ export interface FileRoutesById {
   '/test/code-input': typeof TestCodeInputRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
+  '/test/curriculum-skeleton': typeof TestCurriculumSkeletonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/footer': typeof TestFooterRoute
@@ -903,6 +912,7 @@ export interface FileRouteTypes {
     | '/test/code-input'
     | '/test/counter'
     | '/test/counter-label'
+    | '/test/curriculum-skeleton'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/footer'
@@ -993,6 +1003,7 @@ export interface FileRouteTypes {
     | '/test/code-input'
     | '/test/counter'
     | '/test/counter-label'
+    | '/test/curriculum-skeleton'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/footer'
@@ -1087,6 +1098,7 @@ export interface FileRouteTypes {
     | '/test/code-input'
     | '/test/counter'
     | '/test/counter-label'
+    | '/test/curriculum-skeleton'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/footer'
@@ -1177,6 +1189,7 @@ export interface RootRouteChildren {
   TestCodeInputRoute: typeof TestCodeInputRoute
   TestCounterRoute: typeof TestCounterRoute
   TestCounterLabelRoute: typeof TestCounterLabelRoute
+  TestCurriculumSkeletonRoute: typeof TestCurriculumSkeletonRoute
   TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
   TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
   TestFooterRoute: typeof TestFooterRoute
@@ -1533,6 +1546,13 @@ declare module '@tanstack/react-router' {
       path: '/test/field-type-button'
       fullPath: '/test/field-type-button'
       preLoaderRoute: typeof TestFieldTypeButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/curriculum-skeleton': {
+      id: '/test/curriculum-skeleton'
+      path: '/test/curriculum-skeleton'
+      fullPath: '/test/curriculum-skeleton'
+      preLoaderRoute: typeof TestCurriculumSkeletonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/counter-label': {
@@ -2096,6 +2116,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestCodeInputRoute: TestCodeInputRoute,
   TestCounterRoute: TestCounterRoute,
   TestCounterLabelRoute: TestCounterLabelRoute,
+  TestCurriculumSkeletonRoute: TestCurriculumSkeletonRoute,
   TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
   TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
   TestFooterRoute: TestFooterRoute,

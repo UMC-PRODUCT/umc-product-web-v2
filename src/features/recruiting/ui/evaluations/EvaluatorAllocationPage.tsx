@@ -14,7 +14,11 @@ import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
-import { SCHOOL_STAFF_LIST, type Staff } from "../../model/evaluatorAllocation"
+import {
+  isStaff,
+  SCHOOL_STAFF_LIST,
+  type Staff,
+} from "../../model/evaluatorAllocation"
 import { DroppableRecruitmentBox } from "./DroppableRecruitmentBox"
 import { EvaluatorSharedNote } from "./EvaluatorSharedNote"
 import { SchoolStaffPanel } from "./SchoolStaffPanel"
@@ -52,10 +56,9 @@ export function EvaluatorAllocationPage() {
   }, [selectedChipId])
 
   function handleDragStart(event: DragStartEvent) {
-    const staff = event.active.data.current as Staff | undefined
-    if (staff) {
-      setActiveStaff(staff)
-    }
+    const staff = event.active.data.current
+    if (!isStaff(staff)) return
+    setActiveStaff(staff)
   }
 
   function handleDragCancel() {
@@ -66,15 +69,15 @@ export function EvaluatorAllocationPage() {
     const { active, over } = event
     setActiveStaff(null)
 
-    if (over && over.id === "regular-recruitment-box") {
-      const staff = active.data.current as Staff | undefined
-      if (staff) {
-        setAssignedEvaluators((prev) => {
-          if (prev.some((item) => item.id === staff.id)) return prev
-          return [...prev, staff]
-        })
-      }
-    }
+    if (!over || over.id !== "regular-recruitment-box") return
+
+    const staff = active.data.current
+    if (!isStaff(staff)) return
+
+    setAssignedEvaluators((prev) => {
+      if (prev.some((item) => item.id === staff.id)) return prev
+      return [...prev, staff]
+    })
   }
 
   return (

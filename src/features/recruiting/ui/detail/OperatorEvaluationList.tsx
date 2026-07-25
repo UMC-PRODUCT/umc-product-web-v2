@@ -27,6 +27,14 @@ function OperatorStatusChip({ done }: { done: boolean }) {
   )
 }
 
+function EmptyMessage({ children }: { children: string }) {
+  return (
+    <div className="flex min-h-24 items-center justify-center">
+      <p className="text-body-2-regular text-teal-gray-400">{children}</p>
+    </div>
+  )
+}
+
 function SortIcon() {
   return (
     <svg
@@ -54,6 +62,11 @@ export function OperatorEvaluationList({
   const { done, total } = countOperatorProgress(evaluation.operators)
   const myEvaluation = getMyEvaluation(evaluation)
   const revealed = myEvaluation?.progress === "done"
+  const othersDone = evaluation.operators.filter(
+    (operator) =>
+      operator.evaluatorId !== evaluation.myEvaluatorId &&
+      operator.progress === "done",
+  ).length
 
   return (
     <section className="border-teal-gray-100 flex flex-col gap-4 rounded-[16px] border bg-white p-6">
@@ -65,7 +78,11 @@ export function OperatorEvaluationList({
         {revealed && <SortIcon />}
       </div>
 
-      {revealed ? (
+      {!revealed ? (
+        <EmptyMessage>나의 평가를 등록 후에 확인할 수 있습니다.</EmptyMessage>
+      ) : othersDone === 0 ? (
+        <EmptyMessage>현재 완료된 평가가 없습니다.</EmptyMessage>
+      ) : (
         <ul className="flex flex-col">
           {evaluation.operators.map((operator) => {
             const operatorDone = operator.progress === "done"
@@ -96,12 +113,6 @@ export function OperatorEvaluationList({
             )
           })}
         </ul>
-      ) : (
-        <div className="flex min-h-24 items-center justify-center">
-          <p className="text-body-2-regular text-teal-gray-400">
-            나의 평가를 등록 후에 확인할 수 있습니다.
-          </p>
-        </div>
       )}
     </section>
   )
