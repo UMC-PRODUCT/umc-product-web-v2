@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useBlocker } from "@tanstack/react-router"
+import { ExternalLink } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 
@@ -219,9 +220,22 @@ export function RecruitingApplyForm({
         school={config.recruitment.school}
       />
       <div className="flex flex-col gap-9 rounded-b-[17px] border-x border-b border-teal-100 bg-white px-11.5 pt-9 pb-12">
-        <p className="text-body-1-regular text-teal-gray-700 whitespace-pre-wrap">
-          {config.recruitment.notice}
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <p className="text-body-1-regular text-teal-gray-700 min-w-0 flex-1 whitespace-pre-wrap">
+            {config.recruitment.notice}
+          </p>
+          {config.recruitment.noticeUrl && (
+            <a
+              href={config.recruitment.noticeUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="모집 공고 원문 열기"
+              className="text-teal-gray-400 hover:text-teal-gray-600 shrink-0 transition-colors"
+            >
+              <ExternalLink className="size-5" />
+            </a>
+          )}
+        </div>
         <div className="flex flex-col gap-8">
           {visibleSections.map((section) => (
             <FormSection

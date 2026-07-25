@@ -124,6 +124,7 @@ export const RECRUITING_APPLY_FORM_MOCK: ApplyFormConfig = {
     school: "한양대학교 ERICA",
     notice:
       "모집 공지 모집 공지 모집 공지 모집 공지 모집 공지\n모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지 모집 공지",
+    noticeUrl: null,
     logoUrl: null,
   },
   sections: [
