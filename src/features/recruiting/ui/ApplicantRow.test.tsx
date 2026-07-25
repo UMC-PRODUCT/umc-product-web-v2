@@ -48,6 +48,9 @@ describe("ApplicantRow", () => {
     render(<ApplicantRow row={createApplicantRow()} stage="document" />)
 
     expect(screen.queryByText("/")).not.toBeInTheDocument()
+    expect(
+      screen.queryAllByText(/^\d+\s*\/\s*\d+$/).map((el) => el.textContent),
+    ).toEqual(["04/22"])
   })
 
   it("면접 전형도 지원 일시를 그대로 쓴다", () => {
@@ -99,7 +102,7 @@ describe("ApplicantRow", () => {
 
     expect(screen.queryByText("04/22")).not.toBeInTheDocument()
     expect(screen.queryByText("-")).not.toBeInTheDocument()
-    expect(screen.queryByText("/")).not.toBeInTheDocument()
+    expect(screen.queryByText(/\d+\s*\/\s*\d+/)).not.toBeInTheDocument()
     expect(screen.getByText("완료")).toBeInTheDocument()
   })
 })
