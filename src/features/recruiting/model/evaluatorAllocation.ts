@@ -9,8 +9,11 @@ export function isStaff(value: unknown): value is Staff {
     typeof value === "object" &&
     value !== null &&
     "id" in value &&
+    typeof value.id === "string" &&
     "nickname" in value &&
-    "name" in value
+    typeof value.nickname === "string" &&
+    "name" in value &&
+    typeof value.name === "string"
   )
 }
 

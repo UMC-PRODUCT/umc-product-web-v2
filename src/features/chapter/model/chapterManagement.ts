@@ -75,7 +75,9 @@ export function isSchool(value: unknown): value is School {
     typeof value === "object" &&
     value !== null &&
     "id" in value &&
-    "name" in value
+    typeof value.id === "string" &&
+    "name" in value &&
+    typeof value.name === "string"
   )
 }
 
