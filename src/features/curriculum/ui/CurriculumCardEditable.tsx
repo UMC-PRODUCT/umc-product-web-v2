@@ -87,6 +87,7 @@ function SortableWorkbookItem({
             className="cursor-grab touch-none p-px active:cursor-grabbing"
             {...attributes}
             {...listeners}
+            aria-label={`WorkBook ${wb.number} 순서 변경`}
           >
             <HamburgerIcon className="text-teal-gray-700 size-6" />
           </button>
@@ -242,6 +243,7 @@ export function CurriculumCardEditable({
               className="text-teal-gray-700 shrink-0 cursor-grab touch-none active:cursor-grabbing"
               {...attributes}
               {...listeners}
+              aria-label="커리큘럼 순서 변경"
             >
               <HamburgerIcon className="text-teal-gray-700 size-7.5" />
             </button>
