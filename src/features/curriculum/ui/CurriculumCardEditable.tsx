@@ -68,7 +68,7 @@ function SortableWorkbookItem({
     opacity: isDragging ? 0.4 : 1,
   }
 
-  const missionsToRender = wb.missions ?? ["", ""]
+  const missionsToRender = wb.missions
 
   return (
     <div
