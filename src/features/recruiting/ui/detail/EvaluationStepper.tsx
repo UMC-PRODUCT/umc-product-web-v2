@@ -10,7 +10,7 @@ import {
 
 interface EvaluationStepperProps {
   applicationId: string
-  roundId: string
+  roundId: string | undefined
   stage: EvaluationStage
   reachedStages: EvaluationStage[]
   className?: string

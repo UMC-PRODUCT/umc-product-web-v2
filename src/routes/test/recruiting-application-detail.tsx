@@ -37,7 +37,7 @@ function RecruitingApplicationDetailTestPage() {
               key={applicationId}
               stage={stage}
               applicationId={applicationId}
-              roundId=""
+              roundId={undefined}
             />
           </div>
         </div>

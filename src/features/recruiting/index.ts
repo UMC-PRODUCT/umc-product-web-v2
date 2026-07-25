@@ -1,3 +1,4 @@
+export { validateEvaluationDetailSearch } from "./model/evaluationDetailSearch"
 export {
   EVALUATION_STAGE_LABEL,
   EVALUATION_STAGES,

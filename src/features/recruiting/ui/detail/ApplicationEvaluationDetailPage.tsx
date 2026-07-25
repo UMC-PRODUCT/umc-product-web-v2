@@ -28,7 +28,7 @@ const STAGE_LIST_PATH: Record<EvaluationStage, string> = {
 interface ApplicationEvaluationDetailPageProps {
   stage: EvaluationStage
   applicationId: string
-  roundId: string
+  roundId: string | undefined
 }
 
 export function ApplicationEvaluationDetailPage({

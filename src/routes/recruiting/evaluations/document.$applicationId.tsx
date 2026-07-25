@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { ApplicationEvaluationDetailPage } from "@/features/recruiting"
+import {
+  ApplicationEvaluationDetailPage,
+  validateEvaluationDetailSearch,
+} from "@/features/recruiting"
 
 export const Route = createFileRoute(
   "/recruiting/evaluations/document/$applicationId",
 )({
-  validateSearch: (search: Record<string, unknown>) => ({
-    roundId: typeof search.roundId === "string" ? search.roundId : "",
-  }),
+  validateSearch: validateEvaluationDetailSearch,
   component: DocumentEvaluationDetailRoute,
 })
 
