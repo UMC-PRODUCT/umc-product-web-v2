@@ -22,5 +22,6 @@ export function useRecruitingRounds() {
     groups: roundsQuery.data ?? [],
     generation: gisuQuery.data?.generation,
     isLoading: gisuQuery.isLoading || roundsQuery.isLoading,
+    isError: gisuQuery.isError || roundsQuery.isError,
   }
 }

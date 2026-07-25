@@ -84,7 +84,7 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
   )
 
   const { data: me } = useMe()
-  const { groups, generation, isLoading } = useRecruitingRounds()
+  const { groups, generation, isLoading, isError } = useRecruitingRounds()
 
   const role = resolveRecruitingListRole(me)
   const viewerChapter = resolveViewerChapter(me)
@@ -179,6 +179,8 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
         <EmptyNotice message="지부를 선택하면 해당 지부의 지원자를 확인할 수 있습니다." />
       ) : isLoading ? (
         <EmptyNotice message="모집 정보를 불러오는 중입니다." />
+      ) : isError ? (
+        <EmptyNotice message="모집 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
       ) : chapterGroups.length === 0 ? (
         <EmptyNotice message="현재 등록된 모집 공고가 없습니다." />
       ) : (
