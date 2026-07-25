@@ -712,8 +712,8 @@ export interface FileRoutesByFullPath {
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
   '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
-  '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
   '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
+  '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
   '/manage/curriculum/': typeof ManageCurriculumIndexRoute
   '/manage/school/': typeof ManageSchoolIndexRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
@@ -806,8 +806,8 @@ export interface FileRoutesByTo {
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
   '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
-  '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
   '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
+  '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
   '/manage/curriculum': typeof ManageCurriculumIndexRoute
   '/manage/school': typeof ManageSchoolIndexRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
@@ -907,8 +907,8 @@ export interface FileRoutesById {
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
   '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
-  '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
   '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
+  '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
   '/manage/curriculum/': typeof ManageCurriculumIndexRoute
   '/manage/school/': typeof ManageSchoolIndexRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
@@ -1009,8 +1009,8 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
     | '/recruiting/history/archive'
-    | '/recruiting/recruitments/quota'
     | '/recruiting/recruitments/new'
+    | '/recruiting/recruitments/quota'
     | '/manage/curriculum/'
     | '/manage/school/'
     | '/matching/projects/'
@@ -1103,8 +1103,8 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
     | '/recruiting/history/archive'
-    | '/recruiting/recruitments/quota'
     | '/recruiting/recruitments/new'
+    | '/recruiting/recruitments/quota'
     | '/manage/curriculum'
     | '/manage/school'
     | '/matching/projects'
@@ -1203,8 +1203,8 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
     | '/recruiting/history/archive'
-    | '/recruiting/recruitments/quota'
     | '/recruiting/recruitments/new'
+    | '/recruiting/recruitments/quota'
     | '/manage/curriculum/'
     | '/manage/school/'
     | '/matching/projects/'
@@ -2143,8 +2143,8 @@ interface RecruitingRouteRouteChildren {
   RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
   RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRouteWithChildren
   RecruitingHistoryArchiveRoute: typeof RecruitingHistoryArchiveRoute
-  RecruitingRecruitmentsQuotaRoute: typeof RecruitingRecruitmentsQuotaRoute
   RecruitingRecruitmentsNewRoute: typeof RecruitingRecruitmentsNewRoute
+  RecruitingRecruitmentsQuotaRoute: typeof RecruitingRecruitmentsQuotaRoute
   RecruitingEvaluationsIndexRoute: typeof RecruitingEvaluationsIndexRoute
   RecruitingRecruitmentsIndexRoute: typeof RecruitingRecruitmentsIndexRoute
 }
@@ -2158,8 +2158,8 @@ const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
   RecruitingEvaluationsInterviewRoute:
     RecruitingEvaluationsInterviewRouteWithChildren,
   RecruitingHistoryArchiveRoute: RecruitingHistoryArchiveRoute,
-  RecruitingRecruitmentsQuotaRoute: RecruitingRecruitmentsQuotaRoute,
   RecruitingRecruitmentsNewRoute: RecruitingRecruitmentsNewRoute,
+  RecruitingRecruitmentsQuotaRoute: RecruitingRecruitmentsQuotaRoute,
   RecruitingEvaluationsIndexRoute: RecruitingEvaluationsIndexRoute,
   RecruitingRecruitmentsIndexRoute: RecruitingRecruitmentsIndexRoute,
 }
