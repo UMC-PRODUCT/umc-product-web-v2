@@ -18,8 +18,7 @@ export function RecruitmentStepper({
   className,
 }: RecruitmentStepperProps) {
   return (
-    <section
-      role="tablist"
+    <nav
       aria-label="모집 등록 단계"
       className={cn(
         "bg-teal-gray-100 flex h-11.5 w-full min-w-0 items-center gap-2 rounded-[0.875rem] p-1",
@@ -32,8 +31,7 @@ export function RecruitmentStepper({
           <button
             key={idx}
             type="button"
-            role="tab"
-            aria-selected={isSelected}
+            aria-current={isSelected ? "step" : undefined}
             onClick={() => onStepChange(idx)}
             className={cn(
               "flex h-9.5 flex-1 items-center gap-2 rounded-xl py-1 pr-5 pl-3",
@@ -60,6 +58,6 @@ export function RecruitmentStepper({
           </button>
         )
       })}
-    </section>
+    </nav>
   )
 }
