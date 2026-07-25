@@ -55,4 +55,12 @@ describe("DroppableChapterBox", () => {
       screen.getByRole("button", { name: "지부명 입력" }),
     ).toBeInTheDocument()
   })
+
+  it("지부명이 있으면 수정 버튼이 다른 버튼 안에 중첩되지 않는다", () => {
+    renderBox({ id: "chapter-1", name: "Chromium", assignedSchools: [] })
+
+    const editButton = screen.getByRole("button", { name: "지부명 수정" })
+
+    expect(editButton.parentElement?.closest("button")).toBeNull()
+  })
 })
