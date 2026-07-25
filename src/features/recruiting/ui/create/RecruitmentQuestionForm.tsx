@@ -20,7 +20,6 @@ import { ToggleButton } from "@/shared/ui/input/ToggleButton"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { QuestionFieldBox } from "@/shared/ui/question-field/QuestionFieldBox"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
-import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { Toggle } from "@/shared/ui/Toggle"
 
 import { PARTS } from "../../model/parts"
@@ -215,16 +214,22 @@ function DefaultRadioQuestion({
   onRemoveOption,
   onRestoreOption,
   allowDisable,
+  enabled,
+  required,
+  onEnabledChange,
+  onRequiredChange,
 }: {
   question: RecruitmentDefaultQuestion
   removedOptions: string[]
   onRemoveOption: (option: string) => void
   onRestoreOption: (option: string) => void
   allowDisable: boolean
+  enabled: boolean
+  required: boolean
+  onEnabledChange: (enabled: boolean) => void
+  onRequiredChange: (required: boolean) => void
 }) {
   const [focused, setFocused] = useState(false)
-  const [enabled, setEnabled] = useState(true)
-  const [required, setRequired] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
   const options = question.options ?? []
   const isDisabled = allowDisable && !enabled
@@ -249,7 +254,7 @@ function DefaultRadioQuestion({
           role="checkbox"
           componentName="Checkbox"
           checked={required}
-          onChange={setRequired}
+          onChange={onRequiredChange}
           aria-label="필수 항목 여부"
           className="inline-flex items-center justify-center"
         >
@@ -261,7 +266,7 @@ function DefaultRadioQuestion({
         <span className="text-body-1-medium text-teal-gray-600">질문 사용</span>
         <Toggle
           checked={enabled}
-          onChange={setEnabled}
+          onChange={onEnabledChange}
           size="sm"
           aria-label="질문 사용 여부"
         />
@@ -360,7 +365,6 @@ export function RecruitmentQuestionForm({
   onBlankPartsChange,
 }: RecruitmentQuestionFormProps) {
   const navigate = useNavigate()
-  const addToast = useToastStore((state) => state.addToast)
   const [enabledParts, setEnabledParts] = useState<Record<PartKey, boolean>>(
     () =>
       Object.fromEntries(PARTS.map((part) => [part.key, false])) as Record<
@@ -370,11 +374,25 @@ export function RecruitmentQuestionForm({
   )
   const [removedOptionsByQuestionIndex, setRemovedOptionsByQuestionIndex] =
     useState<Record<string, string[]>>({})
+  const [questionToggleState, setQuestionToggleState] = useState<
+    Record<string, { enabled: boolean; required: boolean }>
+  >(() =>
+    Object.fromEntries(
+      OPTIONAL_TOGGLE_QUESTION_INDEXES.map((index) => [
+        index,
+        { enabled: true, required: true },
+      ]),
+    ),
+  )
   const [isSaving, setIsSaving] = useState(false)
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
 
   const savedSnapshotRef = useRef(
-    JSON.stringify({ enabledParts, removedOptionsByQuestionIndex }),
+    JSON.stringify({
+      enabledParts,
+      removedOptionsByQuestionIndex,
+      questionToggleState,
+    }),
   )
 
   const removeOption = (questionIndex: string, option: string) => {
@@ -393,9 +411,30 @@ export function RecruitmentQuestionForm({
     }))
   }
 
+  const setQuestionEnabled = (questionIndex: string, enabled: boolean) => {
+    setQuestionToggleState((prev) => ({
+      ...prev,
+      [questionIndex]: {
+        enabled,
+        required: prev[questionIndex]?.required ?? true,
+      },
+    }))
+  }
+
+  const setQuestionRequired = (questionIndex: string, required: boolean) => {
+    setQuestionToggleState((prev) => ({
+      ...prev,
+      [questionIndex]: {
+        enabled: prev[questionIndex]?.enabled ?? true,
+        required,
+      },
+    }))
+  }
+
   const currentSnapshot = JSON.stringify({
     enabledParts,
     removedOptionsByQuestionIndex,
+    questionToggleState,
   })
   const hasUnsavedChanges = savedSnapshotRef.current !== currentSnapshot
   const canTempSave = hasUnsavedChanges && !isSaving
@@ -404,25 +443,15 @@ export function RecruitmentQuestionForm({
     onDirtyChange?.(hasUnsavedChanges)
   }, [hasUnsavedChanges, onDirtyChange])
 
+  // 섹션 사용이 켜진 파트는 문항 작성이 아직 정적 플레이스홀더뿐이라 항상 "미입력" 상태다.
+  // 다음 단계로 넘어갈 수 있는지(토스트 포함)는 부모(RecruitmentCreatePage)가 스테퍼 세그먼트
+  // 이동과 함께 한 곳에서 판단하므로, 여기서는 상태만 올려보내고 직접 막지 않는다.
+  // TODO: 파트별 문항 편집 상태가 생기면 validateRecruitmentQuestionForm으로 교체.
   const hasBlankEnabledPart = PARTS.some((part) => enabledParts[part.key])
 
   useEffect(() => {
     onBlankPartsChange?.(hasBlankEnabledPart)
   }, [hasBlankEnabledPart, onBlankPartsChange])
-
-  const handleNext = () => {
-    if (hasBlankEnabledPart) {
-      addToast({
-        message: "사용 중인 섹션의 항목을 모두 입력해 주세요.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      return
-    }
-    onNext()
-  }
 
   const handleTempSave = () => {
     setIsSaving(true)
@@ -460,6 +489,16 @@ export function RecruitmentQuestionForm({
                   allowDisable={QUESTION_DISABLE_TOGGLE_INDEXES.includes(
                     question.index,
                   )}
+                  enabled={questionToggleState[question.index]?.enabled ?? true}
+                  required={
+                    questionToggleState[question.index]?.required ?? true
+                  }
+                  onEnabledChange={(enabled) =>
+                    setQuestionEnabled(question.index, enabled)
+                  }
+                  onRequiredChange={(required) =>
+                    setQuestionRequired(question.index, required)
+                  }
                 />
               )
             }
@@ -547,12 +586,7 @@ export function RecruitmentQuestionForm({
           >
             임시 저장
           </Button>
-          <Button
-            type="button"
-            variant="fill"
-            color="primary"
-            onClick={handleNext}
-          >
+          <Button type="button" variant="fill" color="primary" onClick={onNext}>
             다음
           </Button>
         </div>
