@@ -70,7 +70,12 @@ function scopeGroups(
     if (filters.schoolTab === "all") return inChapter
     return inChapter.filter((group) => group.schoolName === filters.schoolTab)
   }
-  if (filters.chapterTab === "all") return []
+  if (filters.chapterTab === "all") {
+    if (filters.chapters.length === 0) return []
+    return groups.filter((group) =>
+      filters.chapters.includes(group.chapterName),
+    )
+  }
   return groups.filter((group) => group.chapterName === filters.chapterTab)
 }
 
@@ -125,7 +130,10 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
 
   const baseTime = formatBaseTime(new Date())
   const gisuLabel = formatGisuLabel(generation)
-  const needsChapterPick = role === "central" && filters.chapterTab === "all"
+  const needsChapterPick =
+    role === "central" &&
+    filters.chapterTab === "all" &&
+    filters.chapters.length === 0
 
   return (
     <div className="flex w-full max-w-286.5 flex-col">
