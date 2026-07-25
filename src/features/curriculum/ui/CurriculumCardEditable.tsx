@@ -113,7 +113,9 @@ function SortableWorkbookItem({
             onDeleteWorkbook?.(wbIndex)
           }}
           className={`cursor-pointer px-1 transition-opacity ${
-            isDragging ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            isDragging
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
           }`}
         >
           <span className="text-subtitle-2-medium text-teal-gray-500 decoration-teal-gray-500 hover:underline">
