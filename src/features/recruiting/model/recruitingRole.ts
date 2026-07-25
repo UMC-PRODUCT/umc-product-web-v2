@@ -2,7 +2,6 @@ import {
   getViewerBranch,
   isCentralStaff,
   isChapterPresident,
-  isSchoolStaff,
   isSuperAdmin,
 } from "@/entities/member/model/identity"
 
@@ -15,7 +14,6 @@ export function resolveRecruitingListRole(
 ): RecruitingListRole {
   if (isSuperAdmin(me) || isCentralStaff(me)) return "central"
   if (isChapterPresident(me)) return "chapterAdmin"
-  if (isSchoolStaff(me)) return "schoolStaff"
   return "schoolStaff"
 }
 
