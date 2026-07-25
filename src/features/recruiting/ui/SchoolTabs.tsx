@@ -5,6 +5,7 @@ interface SchoolTabsProps {
   schools: readonly string[]
   value: string
   onValueChange: (value: string) => void
+  allLabel?: string
   className?: string
 }
 
@@ -12,10 +13,11 @@ export function SchoolTabs({
   schools,
   value,
   onValueChange,
+  allLabel = "학교 전체",
   className,
 }: SchoolTabsProps) {
   const items = [
-    { value: "all", label: "학교 전체" },
+    { value: "all", label: allLabel },
     ...schools.map((school) => ({ value: school, label: school })),
   ]
 
