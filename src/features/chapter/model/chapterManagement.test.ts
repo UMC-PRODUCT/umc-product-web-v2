@@ -9,9 +9,11 @@ import {
   detachSchool,
   isDuplicateChapterName,
   isSchool,
+  PANEL_ASSIGNED_CHIP_PREFIX,
   resolveDropTargetId,
   type School,
   UNASSIGNED_PANEL_ID,
+  WAITING_CHIP_PREFIX,
   withSchoolsAppended,
 } from "./chapterManagement"
 
@@ -120,6 +122,19 @@ describe("resolveDropTargetId", () => {
     expect(resolveDropTargetId(buildChapters(), [yonsei], yonsei.id)).toBe(
       UNASSIGNED_PANEL_ID,
     )
+  })
+
+  it("대기 칩과 패널 배정 칩 프리픽스도 패널로 귀속시킨다", () => {
+    expect(
+      resolveDropTargetId(buildChapters(), [], `${WAITING_CHIP_PREFIX}s99`),
+    ).toBe(UNASSIGNED_PANEL_ID)
+    expect(
+      resolveDropTargetId(
+        buildChapters(),
+        [],
+        `${PANEL_ASSIGNED_CHIP_PREFIX}s99`,
+      ),
+    ).toBe(UNASSIGNED_PANEL_ID)
   })
 
   it("알 수 없는 대상은 null을 반환한다", () => {
