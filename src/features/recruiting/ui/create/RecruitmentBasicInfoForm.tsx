@@ -67,10 +67,10 @@ interface PeriodFieldValue {
 
 const INITIAL_PERIOD_FORM: Record<PeriodFieldKey, PeriodFieldValue> = {
   documentStartAt: { date: "", time: "00:00" },
-  documentEndAt: { date: "", time: "11:59" },
+  documentEndAt: { date: "", time: "23:59" },
   documentResultPublishedAt: { date: "", time: "00:00" },
   interviewStartAt: { date: "", time: "00:00" },
-  interviewEndAt: { date: "", time: "11:59" },
+  interviewEndAt: { date: "", time: "23:59" },
   finalResultPublishedAt: { date: "", time: "12:00" },
 }
 
@@ -400,8 +400,44 @@ export function RecruitmentBasicInfoForm({
     !!periodForm.finalResultPublishedAt.date
 
   const handleNext = () => {
-    const start = parsePeriodDate(periodForm.documentStartAt)
-    const end = parsePeriodDate(periodForm.finalResultPublishedAt)
+    const documentStart = parsePeriodDate(periodForm.documentStartAt)
+    const documentEnd = parsePeriodDate(periodForm.documentEndAt)
+    if (recruitmentType && documentStart && documentEnd) {
+      const { min, max } = DOC_PERIOD_DAYS[recruitmentType]
+      const days = dayCountInclusive(documentStart, documentEnd)
+      if (days < min || days > max) {
+        addToast({
+          message:
+            recruitmentType === "ADDITIONAL"
+              ? `추가 모집 서류 접수 기간은 최소 ${min}일, 최대 ${max}일까지 설정할 수 있습니다.`
+              : `정규 모집 서류 접수 기간은 최소 ${min}일, 최대 ${max}일까지 설정할 수 있습니다.`,
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
+    }
+
+    const interviewEnd = parsePeriodDate(periodForm.interviewEndAt)
+    const finalResult = parsePeriodDate(periodForm.finalResultPublishedAt)
+    if (interviewEnd && finalResult) {
+      const gap = dayGap(interviewEnd, finalResult)
+      if (gap < 0 || gap > MAX_INTERVIEW_RESULT_DELAY_DAYS) {
+        addToast({
+          message: `면접 결과 발표는 면접 종료 후부터 최대 ${MAX_INTERVIEW_RESULT_DELAY_DAYS}일까지 설정할 수 있습니다.`,
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
+    }
+
+    const start = documentStart
+    const end = finalResult
     if (start && end) {
       const totalDays = dayCountInclusive(start, end)
       if (totalDays > MAX_TOTAL_PERIOD_DAYS) {
