@@ -34,6 +34,7 @@ export function RecruitmentQuotaPage() {
     setChapterTab(nextValue)
     setIsDirty(false)
     setAllocationStatus("TO 설정 전")
+    setAutoAllocateTrigger(0)
   }
 
   const handleConfirmAutoAllocate = () => {
