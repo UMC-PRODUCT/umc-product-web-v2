@@ -102,7 +102,7 @@ export function RecruitmentCreatePage({
       {step === 2 && (
         <RecruitmentQuestionForm
           onPrev={() => moveToStep(1)}
-          onNext={() => moveToStep(3)}
+          onNext={() => handleStepChange(3)}
           onDirtyChange={setIsStep2Dirty}
           onBlankPartsChange={setStep2HasBlankPart}
         />
