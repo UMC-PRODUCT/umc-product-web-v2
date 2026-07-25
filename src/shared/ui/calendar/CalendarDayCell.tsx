@@ -7,6 +7,7 @@ interface CalendarDayCellProps {
   day: number
   state?: DayCellState
   highlightPosition?: HighlightPosition | null
+  hasMarker?: boolean
   onClick?: () => void
 }
 
@@ -14,6 +15,7 @@ export function CalendarDayCell({
   day,
   state = "default",
   highlightPosition = null,
+  hasMarker = false,
   onClick,
 }: CalendarDayCellProps) {
   const isDisabled = state === "disabled"
@@ -49,7 +51,7 @@ export function CalendarDayCell({
       {/* 원형 배경 */}
       <div
         className={cn(
-          "relative z-10 flex h-9 w-9 items-center justify-center rounded-full transition-colors",
+          "relative z-10 flex h-9 w-9 flex-col items-center justify-center gap-0.5 rounded-full transition-colors",
           !hasCircleBg && !isDisabled && "hover:bg-teal-gray-100",
           isSelected && "bg-teal-300 text-white",
           isActive && "bg-teal-500 text-white hover:bg-teal-700",
@@ -62,6 +64,15 @@ export function CalendarDayCell({
         )}
       >
         <span className="text-subtitle-2-medium leading-none">{day}</span>
+        {hasMarker && (
+          <span
+            aria-hidden="true"
+            className={cn(
+              "h-1 w-1 rounded-full",
+              hasCircleBg ? "bg-white" : "bg-teal-500",
+            )}
+          />
+        )}
       </div>
     </button>
   )
