@@ -8,7 +8,7 @@ import { Popover } from "radix-ui"
 import { useEffect, useRef, useState } from "react"
 
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
-import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
+import { MoreVerticalGlyph } from "@/shared/assets/icon/more/MoreVerticalIcon"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -298,7 +298,7 @@ export function CurriculumCardEditable({
                 className="hover:shadow-inner-neutral-1 hover:bg-teal-gray-100 flex cursor-pointer items-center justify-center rounded-[10px] bg-white p-2 transition-colors"
                 aria-label="커리큘럼 더보기"
               >
-                <MoreVerticalIcon className="text-teal-gray-600 size-6" />
+                <MoreVerticalGlyph className="text-teal-gray-600 size-6" />
               </button>
             </Popover.Trigger>
 
