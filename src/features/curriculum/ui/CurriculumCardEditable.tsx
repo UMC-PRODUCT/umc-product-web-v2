@@ -150,9 +150,7 @@ function SortableWorkbookItem({
                 ) {
                   e.preventDefault()
                   e.stopPropagation()
-                  if (idx > 0) {
-                    setFocusIndex(idx - 1)
-                  }
+                  setFocusIndex(idx > 0 ? idx - 1 : 0)
                   onRemoveMission?.(wbIndex, idx)
                 }
               }}
