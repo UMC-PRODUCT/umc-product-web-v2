@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { isChapter } from "@/entities/organization/model/chapters"
 import { RecruitmentCreatePage } from "@/features/recruiting"
 import { isRecruitingListRole } from "@/features/recruiting/model/recruitingListRole"
+import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 import type { RecruitingListRole } from "@/features/recruiting/model/recruitingListRole"
@@ -16,11 +17,21 @@ interface RecruitmentCreateSearch {
 export const Route = createFileRoute("/recruiting/recruitments/new")({
   validateSearch: (
     search: Record<string, unknown>,
-  ): RecruitmentCreateSearch => ({
-    role: isRecruitingListRole(search.role) ? search.role : undefined,
-    chapter: isChapter(search.chapter) ? search.chapter : undefined,
-    school: typeof search.school === "string" ? search.school : undefined,
-  }),
+  ): RecruitmentCreateSearch => {
+    const chapter = isChapter(search.chapter) ? search.chapter : undefined
+    const school =
+      chapter &&
+      typeof search.school === "string" &&
+      (SCHOOLS_BY_BRANCH[chapter] as readonly string[]).includes(search.school)
+        ? search.school
+        : undefined
+
+    return {
+      role: isRecruitingListRole(search.role) ? search.role : undefined,
+      chapter,
+      school,
+    }
+  },
   component: RouteComponent,
 })
 
