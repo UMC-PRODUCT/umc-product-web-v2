@@ -41,6 +41,7 @@ export function RecruitmentQuotaPage() {
     setAutoModalOpen(false)
     setAutoAllocateTrigger((prev) => prev + 1)
     setAllocationStatus("자동 배정 중")
+    setIsDirty(true)
 
     addToast({
       message: "이제부터 모집 인원이 자동으로 배정됩니다.",
