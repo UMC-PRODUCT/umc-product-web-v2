@@ -20,9 +20,12 @@ export function RecruitmentSectionHeader({
       <span className="text-teal-gray-900 flex items-center">
         {title}
         {required && (
-          <span className="text-error-500" aria-hidden="true">
-            *
-          </span>
+          <>
+            <span className="text-error-500" aria-hidden="true">
+              *
+            </span>
+            <span className="sr-only">(필수)</span>
+          </>
         )}
       </span>
     </Tag>
