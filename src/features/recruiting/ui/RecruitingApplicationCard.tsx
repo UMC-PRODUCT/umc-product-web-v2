@@ -203,6 +203,9 @@ export function RecruitingApplicationCard({
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
+                aria-label="지원서 메뉴"
+                aria-haspopup="menu"
+                aria-expanded={isDropdownOpen}
                 className="hover:bg-teal-gray-100 hover:shadow-inner-neutral-2 flex h-6.5 w-6.5 cursor-pointer items-center justify-center rounded-[8px]"
               >
                 <MoreVerticalGlyph className="text-teal-gray-700 h-6 w-6" />
