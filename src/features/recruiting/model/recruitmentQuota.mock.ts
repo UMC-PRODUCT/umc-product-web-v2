@@ -8,8 +8,6 @@ export const RECRUITMENT_QUOTA_MOCK: ChapterQuotaData[] = [
     schoolCount: 10,
     updatedDate: "26-07-04",
     updatedTime: "02:48",
-    status: "자동 배정 중",
-    headerTO: { pm: 0, design: 0, webPe: 0, mobilePe: 0 },
     schools: [],
     totals: { pm: 0, design: 0, webPe: 0, mobilePe: 0, total: 0 },
   },
@@ -18,8 +16,6 @@ export const RECRUITMENT_QUOTA_MOCK: ChapterQuotaData[] = [
     schoolCount: 10,
     updatedDate: "26-07-04",
     updatedTime: "02:48",
-    status: "자동 배정 중",
-    headerTO: { pm: 63, design: 80, webPe: 115, mobilePe: 110 },
     schools: [
       {
         schoolName: "가가대",
@@ -46,13 +42,6 @@ export const RECRUITMENT_QUOTA_MOCK: ChapterQuotaData[] = [
         total: 130,
       },
     ],
-    remaining: {
-      pm: 1,
-      design: "-",
-      webPe: 5,
-      mobilePe: "-",
-      total: 6,
-    },
     totals: {
       pm: 63,
       design: 80,
@@ -75,8 +64,6 @@ export function getChapterQuotaData(
     schoolCount: 10,
     updatedDate: "26-07-04",
     updatedTime: "02:48",
-    status: "자동 배정 중",
-    headerTO: { pm: 0, design: 0, webPe: 0, mobilePe: 0 },
     schools: [],
     totals: { pm: 0, design: 0, webPe: 0, mobilePe: 0, total: 0 },
   }

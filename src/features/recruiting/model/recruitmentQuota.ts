@@ -19,15 +19,6 @@ export interface ChapterQuotaData {
   schoolCount: number
   updatedDate: string
   updatedTime: string
-  status: string
-  headerTO: PartCounts
   schools: SchoolQuotaRow[]
-  remaining?: {
-    pm?: number | string
-    design?: number | string
-    webPe?: number | string
-    mobilePe?: number | string
-    total: number
-  }
   totals: PartCounts & { total: number }
 }
