@@ -4,7 +4,7 @@ import type { ApiResponse } from "@/shared/lib/apiResponse"
 import type { components, operations } from "@/types/api"
 
 export type ResourceType = NonNullable<
-  operations["getResourcePermission"]["parameters"]["query"]["resourceType"]
+  operations["PERMISSION-001"]["parameters"]["query"]["resourceType"]
 >
 export type PermissionType = NonNullable<
   components["schemas"]["PermissionInfo"]["permissionType"]
