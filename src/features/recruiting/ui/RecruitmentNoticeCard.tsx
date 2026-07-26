@@ -64,13 +64,13 @@ export function RecruitmentNoticeCard({
 
         <div className="ml-auto shrink-0">
           {isClosed ? (
-            <div className="bg-teal-gray-150 rounded-md px-2 py-0.5">
+            <div className="bg-teal-gray-150 shadow-drop-neutral-3 rounded-[0.375rem] px-2 py-0.5">
               <span className="text-label-2-medium text-teal-gray-600">
                 모집 마감
               </span>
             </div>
           ) : (
-            <div className="rounded-md bg-teal-100 px-2 py-0.5">
+            <div className="shadow-drop-neutral-3 rounded-[0.375rem] bg-teal-100 px-2 py-0.5">
               <span className="text-label-2-medium text-teal-600">
                 모집 마감{dDay !== undefined ? ` D-${dDay}` : ""}
               </span>
