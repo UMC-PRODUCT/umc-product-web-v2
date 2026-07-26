@@ -29,6 +29,8 @@ export function RecruitmentApplyConfirmModal({
         open={open}
         onOpenChange={onOpenChange}
         icon={false}
+        widthClassName="w-fit"
+        titleClassName="whitespace-nowrap"
         title={`${recruitmentTitle}에 지원할까요?`}
         content={
           <>
