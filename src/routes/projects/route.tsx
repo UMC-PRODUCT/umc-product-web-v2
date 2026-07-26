@@ -41,7 +41,7 @@ function ProjectsLayout() {
       <div className="flex w-full flex-1">
         <SideBar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="min-h-200 pt-10 pl-8">
+          <div className="min-h-200 px-8 pt-10">
             <div className="flex flex-col gap-6.5 pl-3">
               <div className="flex h-5.5 items-center gap-1">
                 <p className="text-body-2-medium text-teal-gray-400">
