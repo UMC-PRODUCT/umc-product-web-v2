@@ -68,7 +68,7 @@ export function useStageEvaluations(
   }, [roster, evaluationsQuery.data])
 
   const profilesQuery = useQuery({
-    queryKey: [...recruitingKeys.all, "evaluator-profiles", memberIds] as const,
+    queryKey: recruitingKeys.evaluatorProfiles(memberIds),
     queryFn: async () => {
       // 탈퇴·권한 문제로 한 명이 실패해도 나머지 이름은 살린다.
       const settled = await Promise.allSettled(

@@ -49,4 +49,7 @@ export const recruitingKeys = {
 
   evaluators: (roundId: string) =>
     [...recruitingKeys.all, "evaluators", roundId] as const,
+
+  evaluatorProfiles: (memberIds: string[]) =>
+    [...recruitingKeys.all, "evaluator-profiles", memberIds] as const,
 }
