@@ -43,6 +43,16 @@ export function RecruitmentCreatePage({
   }
 
   const handleStepChange = (target: number) => {
+    if (target > step + 1) {
+      addToast({
+        message: "이전 단계부터 순서대로 진행해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
     if (step === 2 && target > 2 && step2HasBlankPart) {
       addToast({
         message: "사용 중인 섹션의 항목을 모두 입력해 주세요.",
