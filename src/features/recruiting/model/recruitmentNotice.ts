@@ -14,6 +14,8 @@ export interface RecruitmentNoticeItem {
   dDay?: number
   logoUrl?: string
   announcement: string
+  // 로그인한 사용자의 이 공고에 대한 기존 지원 상태. 없으면 아직 지원 전.
+  appliedStatus?: "submitted" | "submittedEditable" | "draft"
 }
 
 // "2026-01-10 00:00 ~ 01-17 23:59" 형태. 종료일이 시작일과 같은 해면 연도를 생략

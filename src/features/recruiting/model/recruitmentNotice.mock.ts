@@ -29,6 +29,7 @@ export const RECRUITMENT_NOTICE_ITEMS_MOCK: RecruitmentNoticeItem[] = [
     isClosed: false,
     dDay: 10,
     announcement: ANNOUNCEMENT,
+    appliedStatus: "submitted",
   },
   {
     id: 3,
@@ -40,6 +41,7 @@ export const RECRUITMENT_NOTICE_ITEMS_MOCK: RecruitmentNoticeItem[] = [
     isClosed: false,
     dDay: 10,
     announcement: ANNOUNCEMENT,
+    appliedStatus: "draft",
   },
   {
     id: 4,
@@ -51,6 +53,7 @@ export const RECRUITMENT_NOTICE_ITEMS_MOCK: RecruitmentNoticeItem[] = [
     isClosed: false,
     dDay: 10,
     announcement: ANNOUNCEMENT,
+    appliedStatus: "submittedEditable",
   },
   {
     id: 5,
