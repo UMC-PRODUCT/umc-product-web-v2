@@ -46,7 +46,6 @@ export interface RecruitingRoundGroup {
   chapterName: string
   schoolId: string
   schoolName: string
-  memo: string | null
   rounds: RecruitingRound[]
 }
 
@@ -75,14 +74,8 @@ export interface RecruitingApplicationPage {
   hasPrevious: boolean
 }
 
-export interface RecruitingRoundsQuery {
-  gisuId: string
-  chapterId?: string
-  schoolId?: string
-}
-
 // 공개 목록은 지원 기간이 열린 차수(OPEN)와 마감된 차수(PAST)를 따로 조회한다.
-// 파라미터를 생략하면 서버가 OPEN 으로 간주해 평가 대상 차수가 빠진다.
+// 파라미터를 생략하면 서버가 OPEN 으로 간주해 마감된 차수가 빠진다.
 export type RecruitingRoundPhase = "OPEN" | "PAST"
 
 export interface PublicRoundsQuery {
@@ -90,9 +83,6 @@ export interface PublicRoundsQuery {
   roundIds?: string[]
   phase?: RecruitingRoundPhase
 }
-
-// 공개 응답에는 운영진 전용 필드(memo)가 없다.
-export type RecruitingPublicRoundGroup = Omit<RecruitingRoundGroup, "memo">
 
 export interface RoundApplicationsQuery {
   statuses?: RecruitingApplicationStatus[]

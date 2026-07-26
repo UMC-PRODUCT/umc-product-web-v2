@@ -11,51 +11,58 @@ import type {
   RecruitingApplicationSummary,
   RecruitingEvaluation,
   RecruitingFormStructure,
-  RecruitingPublicRoundGroup,
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
   RecruitingRoundPhase,
-  RecruitingRoundsQuery,
   RoundApplicationsQuery,
 } from "./types"
 
 const APPLICATIONS_PAGE_SIZE = 100
 
-export async function getRecruitingRounds(
-  params: RecruitingRoundsQuery,
-): Promise<RecruitingRoundGroup[]> {
-  const { data } = await api.get<ApiResponse<RecruitingRoundGroup[]>>(
-    "/v1/recruiting/admin/rounds",
-    { params },
-  )
-  return data.result
-}
-
-// 관리자용 차수 목록(ADMIN-011)은 학교 회장단 이상만 조회할 수 있다. 평가자로만
-// 등록된 운영진도 차수 정보가 필요하므로 공개 목록을 쓴다.
+// 관리자용 차수 목록은 학교 회장단 이상만 조회할 수 있어 평가자 권한만 가진
+// 운영진이 403 을 받는다. 공개 목록이 같은 차수 응답을 주므로 이쪽을 쓴다.
 export async function getPublicRounds(
   params: PublicRoundsQuery,
-): Promise<RecruitingPublicRoundGroup[]> {
-  const { data } = await api.get<ApiResponse<RecruitingPublicRoundGroup[]>>(
+): Promise<RecruitingRoundGroup[]> {
+  const { data } = await api.get<ApiResponse<RecruitingRoundGroup[]>>(
     "/v1/recruiting/public/rounds",
     { params, paramsSerializer: { indexes: null } },
   )
   return data.result
 }
 
-// phase 는 서버에서 OPEN 이 기본값이라 마감된 차수가 빠진다. 평가는 서류 마감 후에
-// 하므로 두 구간을 모두 조회해 합친다.
-export async function findPublicRound(
+export function mergeRoundGroups(
+  groups: RecruitingRoundGroup[],
+): RecruitingRoundGroup[] {
+  const bySeason = new Map<string, RecruitingRoundGroup>()
+
+  groups.forEach((group) => {
+    const key = String(group.seasonId)
+    const merged = bySeason.get(key)
+    if (!merged) {
+      bySeason.set(key, { ...group, rounds: [...group.rounds] })
+      return
+    }
+    const seen = new Set(merged.rounds.map((round) => String(round.roundId)))
+    merged.rounds.push(
+      ...group.rounds.filter((round) => !seen.has(String(round.roundId))),
+    )
+  })
+
+  return [...bySeason.values()]
+}
+
+// phase 는 서버에서 OPEN 이 기본값이라 마감된 차수가 빠진다. 값이 두 개뿐이라
+// 한쪽으로는 전 구간을 덮을 수 없어 둘 다 조회해 합친다.
+export async function getAllPublicRounds(
   gisuId: string,
-  roundId: string,
-): Promise<RecruitingPublicRoundGroup[]> {
+  roundIds?: string[],
+): Promise<RecruitingRoundGroup[]> {
   const phases: RecruitingRoundPhase[] = ["PAST", "OPEN"]
   const perPhase = await Promise.all(
-    phases.map((phase) =>
-      getPublicRounds({ gisuId, roundIds: [roundId], phase }),
-    ),
+    phases.map((phase) => getPublicRounds({ gisuId, roundIds, phase })),
   )
-  return perPhase.flat()
+  return mergeRoundGroups(perPhase.flat())
 }
 
 export async function getRoundApplications(

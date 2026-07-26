@@ -5,7 +5,7 @@ import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 
 import { recruitingKeys } from "../api/queryKeys"
 import {
-  findPublicRound,
+  getAllPublicRounds,
   getApplicationDetail,
   getFormStructure,
 } from "../api/recruitingApi"
@@ -14,15 +14,15 @@ import {
   toApplicationSections,
 } from "../model/applicationDetailMapper"
 
-import type { RecruitingPublicRoundGroup, RecruitingRound } from "../api/types"
+import type { RecruitingRound, RecruitingRoundGroup } from "../api/types"
 
 interface RoundLocation {
-  group: RecruitingPublicRoundGroup
+  group: RecruitingRoundGroup
   round: RecruitingRound
 }
 
 function locateRound(
-  groups: RecruitingPublicRoundGroup[],
+  groups: RecruitingRoundGroup[],
   roundId: string | undefined,
 ): RoundLocation | null {
   if (!roundId) return null
@@ -47,8 +47,8 @@ export function useApplicationDetail(
   // 회장단 이상만 볼 수 있어, 평가자로만 등록된 운영진도 쓸 수 있는 공개 목록에서
   // 해당 차수 하나만 가져온다.
   const roundQuery = useQuery({
-    queryKey: recruitingKeys.publicRound(gisuId ?? "", roundId ?? ""),
-    queryFn: () => findPublicRound(gisuId!, roundId!),
+    queryKey: recruitingKeys.round(gisuId ?? "", roundId ?? ""),
+    queryFn: () => getAllPublicRounds(gisuId!, [roundId!]),
     enabled: gisuId != null && roundId != null,
     staleTime: 5 * 60 * 1000,
   })

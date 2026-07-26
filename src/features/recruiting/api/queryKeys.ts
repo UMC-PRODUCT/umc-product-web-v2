@@ -1,16 +1,15 @@
 import type { EvaluationStage } from "../model/evaluationStage"
-import type { ApiEvaluationStage, RecruitingRoundsQuery } from "./types"
+import type { ApiEvaluationStage } from "./types"
 
 export const recruitingKeys = {
   all: ["recruiting"] as const,
 
   rounds: () => [...recruitingKeys.all, "rounds"] as const,
 
-  roundList: (params: RecruitingRoundsQuery) =>
-    [...recruitingKeys.rounds(), params] as const,
+  roundList: (gisuId: string) => [...recruitingKeys.rounds(), gisuId] as const,
 
-  publicRound: (gisuId: string, roundId: string) =>
-    [...recruitingKeys.rounds(), "public", gisuId, roundId] as const,
+  round: (gisuId: string, roundId: string) =>
+    [...recruitingKeys.rounds(), gisuId, roundId] as const,
 
   applications: () => [...recruitingKeys.all, "applications"] as const,
 
