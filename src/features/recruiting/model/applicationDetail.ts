@@ -1,4 +1,3 @@
-import type { Chapter } from "@/entities/organization/model/chapters"
 import type { PartTag } from "@/shared/model/domain"
 
 import type { EvaluationProgress, EvaluationResult } from "./applicantListTypes"
@@ -82,7 +81,7 @@ export interface InterviewContent {
 export interface ApplicationDetail {
   applicationId: string
   applicantName: string
-  chapter: Chapter
+  chapter: string
   school: string
   recruitmentLabel: string
   parts: PartTag[]

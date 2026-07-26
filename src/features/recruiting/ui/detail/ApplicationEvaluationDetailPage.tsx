@@ -28,11 +28,13 @@ const STAGE_LIST_PATH: Record<EvaluationStage, string> = {
 interface ApplicationEvaluationDetailPageProps {
   stage: EvaluationStage
   applicationId: string
+  roundId: string | undefined
 }
 
 export function ApplicationEvaluationDetailPage({
   stage,
   applicationId,
+  roundId,
 }: ApplicationEvaluationDetailPageProps) {
   const [detail, setDetail] = useState(() =>
     getApplicationDetailMock(applicationId),
@@ -105,6 +107,7 @@ export function ApplicationEvaluationDetailPage({
         <div className="flex w-115 shrink-0 flex-col gap-5">
           <EvaluationStepper
             applicationId={applicationId}
+            roundId={roundId}
             stage={stage}
             reachedStages={detail.reachedStages}
           />
@@ -113,11 +116,13 @@ export function ApplicationEvaluationDetailPage({
           )}
           {evaluation && (
             <>
-              <MyStageEvaluationPanel
-                evaluation={evaluation}
-                stage={stage}
-                onComplete={handleComplete}
-              />
+              {stage !== "final" && (
+                <MyStageEvaluationPanel
+                  evaluation={evaluation}
+                  stage={stage}
+                  onComplete={handleComplete}
+                />
+              )}
               <OperatorEvaluationList evaluation={evaluation} />
             </>
           )}

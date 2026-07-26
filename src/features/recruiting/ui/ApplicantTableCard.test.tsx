@@ -13,8 +13,8 @@ function createApplicant(
 ): ApplicantRow {
   return {
     applicationId: "101",
+    roundId: "9001",
     appliedAt: "2026-04-22T03:33:00",
-    interviewAt: null,
     applicantName: "테스터",
     chapter: "Chromium",
     school: "테스트대",
@@ -23,8 +23,6 @@ function createApplicant(
     evaluations: {
       document: {
         progress,
-        doneCount: progress === "done" ? 7 : progress === "before" ? 0 : 3,
-        totalCount: 7,
         result: progress === "done" ? "pass" : null,
         myProgress: progress,
       },

@@ -10,6 +10,7 @@ import {
 
 interface EvaluationStepperProps {
   applicationId: string
+  roundId: string | undefined
   stage: EvaluationStage
   reachedStages: EvaluationStage[]
   className?: string
@@ -19,6 +20,7 @@ const NAVIGABLE_STAGES: EvaluationStage[] = ["document", "interview"]
 
 export function EvaluationStepper({
   applicationId,
+  roundId,
   stage,
   reachedStages,
   className,
@@ -38,15 +40,18 @@ export function EvaluationStepper({
       value={stage}
       onValueChange={(next) => {
         const params = { applicationId }
+        const search = { roundId }
         if (next === "document") {
           navigate({
             to: "/recruiting/evaluations/document/$applicationId",
             params,
+            search,
           })
         } else if (next === "interview") {
           navigate({
             to: "/recruiting/evaluations/interview/$applicationId",
             params,
+            search,
           })
         }
       }}
