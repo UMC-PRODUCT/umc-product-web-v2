@@ -443,11 +443,11 @@ export function RecruitmentQuestionForm({
     onDirtyChange?.(hasUnsavedChanges)
   }, [hasUnsavedChanges, onDirtyChange])
 
-  // 섹션 사용이 켜진 파트는 문항 작성이 아직 정적 플레이스홀더뿐이라 항상 "미입력" 상태다.
-  // 다음 단계로 넘어갈 수 있는지(토스트 포함)는 부모(RecruitmentCreatePage)가 스테퍼 세그먼트
-  // 이동과 함께 한 곳에서 판단하므로, 여기서는 상태만 올려보내고 직접 막지 않는다.
+  // 파트 본문(PartSectionBody)이 아직 입력 불가한 정적 플레이스홀더라 검증할 실제 데이터가 없다.
+  // "파트 사용" 토글만으로 미입력 여부를 판단하면 파트를 켜는 순간 영구히 다음 단계가
+  // 막히므로, 파트별 문항 편집이 구현되기 전까지는 이 게이트를 임시로 비활성화한다.
   // TODO: 파트별 문항 편집 상태가 생기면 validateRecruitmentQuestionForm으로 교체.
-  const hasBlankEnabledPart = PARTS.some((part) => enabledParts[part.key])
+  const hasBlankEnabledPart = false
 
   useEffect(() => {
     onBlankPartsChange?.(hasBlankEnabledPart)
