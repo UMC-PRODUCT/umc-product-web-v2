@@ -101,7 +101,10 @@ export function RecruitmentNoticePage() {
               onRequestClose={() => setOpenFilterKey(null)}
               options={schoolFilterOptions}
               selectedValues={schoolFilters}
-              onSelectedValuesChange={setSchoolFilters}
+              onSelectedValuesChange={(values) => {
+                setSchoolFilters(values)
+                setSearch("")
+              }}
             />
             <FilterDropdown
               label="모집 파트"
