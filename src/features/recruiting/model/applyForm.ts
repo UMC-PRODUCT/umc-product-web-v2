@@ -137,6 +137,10 @@ function questionSchema(
       return required
         ? z.array(z.string()).min(1, "한 개 이상 선택해 주세요.")
         : z.array(z.string())
+    // 일정 문항을 입력할 UI 가 아직 없다. 필수로 두면 채울 방법 없이 제출이
+    // 막히므로 값이 들어올 때만 문자열 배열로 받는다.
+    case "schedule":
+      return z.array(z.string()).optional()
     case "file":
       if (required) {
         return z.unknown().superRefine((value, ctx) => {

@@ -9,6 +9,7 @@ export type ApplicationQuestionType =
   | "radio"
   | "checkbox"
   | "dropdown"
+  | "schedule"
   | "file"
   | "portfolio"
 
@@ -20,7 +21,7 @@ export interface ApplicationQuestionOption {
 export interface ApplicationQuestionFile {
   fileId: string
   name: string
-  url: string
+  url: string | null
 }
 
 export interface ApplicationQuestion {
