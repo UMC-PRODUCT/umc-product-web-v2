@@ -10,6 +10,7 @@ export interface RecruitmentNoticeCardProps {
   parts: PartTag[]
   isClosed: boolean
   dDay?: number
+  logoUrl?: string
   onClick?: () => void
   className?: string
 }
@@ -20,6 +21,7 @@ export function RecruitmentNoticeCard({
   parts,
   isClosed,
   dDay,
+  logoUrl,
   onClick,
   className,
 }: RecruitmentNoticeCardProps) {
@@ -34,7 +36,15 @@ export function RecruitmentNoticeCard({
     >
       <div className="flex w-full items-start gap-4">
         <div className="flex items-start gap-4">
-          <div className="bg-teal-gray-200 h-12.5 w-12.5 shrink-0 rounded-lg" />
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt=""
+              className="h-12.5 w-12.5 shrink-0 rounded-lg object-cover"
+            />
+          ) : (
+            <div className="bg-teal-gray-200 h-12.5 w-12.5 shrink-0 rounded-lg" />
+          )}
 
           <div className="flex flex-col items-start gap-3">
             <div className="flex flex-col items-start gap-1">

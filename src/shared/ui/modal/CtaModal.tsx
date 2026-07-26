@@ -16,7 +16,10 @@ interface CtaModalProps {
   confirmText: string
   confirmLoading?: boolean
   variant?: CtaModalVariant
+  icon?: boolean
   overlayTone?: "light" | "deep"
+  widthClassName?: string
+  titleClassName?: string
   descriptionClassName?: string
   cancelOnDismiss?: boolean
   onOpenChange: (open: boolean) => void
@@ -32,7 +35,10 @@ export function CtaModal({
   confirmText,
   confirmLoading = false,
   variant = "warning",
+  icon = true,
   overlayTone = "light",
+  widthClassName = "w-115",
+  titleClassName,
   descriptionClassName,
   cancelOnDismiss = true,
   onOpenChange,
@@ -58,12 +64,21 @@ export function CtaModal({
     >
       <Modal.Portal>
         <Modal.Overlay tone={overlayTone} />
-        <Modal.Content className="shadow-drop-neutral-1 flex w-115 max-w-[calc(100vw-32px)] flex-col gap-8 rounded-[10px] border border-neutral-200 bg-white px-6 py-6 focus:outline-none">
+        <Modal.Content
+          className={cn(
+            "shadow-drop-neutral-1 flex max-w-[calc(100vw-2rem)] flex-col gap-8 rounded-[0.625rem] border border-neutral-200 bg-white px-6 py-6 focus:outline-none",
+            widthClassName,
+          )}
+        >
           <div className="flex flex-col items-start gap-4">
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              <Icon className={cn("h-6 w-6", toneClassName)} />
+              {icon && <Icon className={cn("h-6 w-6", toneClassName)} />}
               <Modal.Title
-                className={cn("text-subtitle-1-semibold", toneClassName)}
+                className={cn(
+                  "text-subtitle-1-semibold",
+                  toneClassName,
+                  titleClassName,
+                )}
               >
                 {title}
               </Modal.Title>
@@ -85,7 +100,7 @@ export function CtaModal({
                 variant="weak"
                 color="neutral"
                 size="s"
-                className="rounded-[10px]"
+                className="rounded-[0.625rem]"
                 onClick={onCancel}
               >
                 {cancelText}
