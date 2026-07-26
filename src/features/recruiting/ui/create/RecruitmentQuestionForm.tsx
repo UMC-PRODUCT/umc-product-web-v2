@@ -403,12 +403,17 @@ export function RecruitmentQuestionForm({
   }
 
   const restoreOption = (questionIndex: string, option: string) => {
-    setRemovedOptionsByQuestionIndex((prev) => ({
-      ...prev,
-      [questionIndex]: (prev[questionIndex] ?? []).filter(
+    setRemovedOptionsByQuestionIndex((prev) => {
+      const nextOptions = (prev[questionIndex] ?? []).filter(
         (removed) => removed !== option,
-      ),
-    }))
+      )
+      if (nextOptions.length === 0) {
+        const nextState = { ...prev }
+        delete nextState[questionIndex]
+        return nextState
+      }
+      return { ...prev, [questionIndex]: nextOptions }
+    })
   }
 
   const setQuestionEnabled = (questionIndex: string, enabled: boolean) => {
