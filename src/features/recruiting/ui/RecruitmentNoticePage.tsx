@@ -2,10 +2,9 @@ import { useMemo, useState } from "react"
 
 import FilterIcon from "@/shared/assets/icon/filter/FilterIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
-import { cn } from "@/shared/lib/utils"
 import { PART_TAG_LABEL } from "@/shared/model/domain"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
-import { segmentTriggerVariants } from "@/shared/ui/segment/segment.config"
+import { Segment } from "@/shared/ui/segment/Segment"
 
 import { formatNoticePeriod } from "../model/recruitmentNotice"
 import { RECRUITMENT_NOTICE_ITEMS_MOCK } from "../model/recruitmentNotice.mock"
@@ -37,9 +36,10 @@ const PART_FILTER_OPTIONS = NOTICE_FILTER_PARTS.map((part) => ({
 export function RecruitmentNoticePage() {
   const [search, setSearch] = useState("")
   const [tab, setTab] = useState<NoticeTab>("recruiting")
-  const [schoolFilterOpen, setSchoolFilterOpen] = useState(false)
+  const [openFilterKey, setOpenFilterKey] = useState<"school" | "part" | null>(
+    null,
+  )
   const [schoolFilters, setSchoolFilters] = useState<string[]>([])
-  const [partFilterOpen, setPartFilterOpen] = useState(false)
   const [partFilters, setPartFilters] = useState<string[]>([])
   const [selectedItem, setSelectedItem] =
     useState<RecruitmentNoticeItem | null>(null)
@@ -84,17 +84,21 @@ export function RecruitmentNoticePage() {
           className="w-80"
         />
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <FilterIcon className="text-teal-gray-500 size-4" />
-            <span className="text-body-1-medium text-teal-gray-600">필터</span>
-          </div>
+          <span className="text-body-1-medium text-teal-gray-600 flex items-center gap-1">
+            <FilterIcon className="text-teal-gray-600 size-4" />
+            필터
+          </span>
           <div className="flex items-center gap-2">
             <FilterDropdown
               label="학교"
               multiSelect
-              open={schoolFilterOpen}
-              onClick={() => setSchoolFilterOpen((prev) => !prev)}
-              onRequestClose={() => setSchoolFilterOpen(false)}
+              open={openFilterKey === "school"}
+              onClick={() =>
+                setOpenFilterKey((prev) =>
+                  prev === "school" ? null : "school",
+                )
+              }
+              onRequestClose={() => setOpenFilterKey(null)}
               options={schoolFilterOptions}
               selectedValues={schoolFilters}
               onSelectedValuesChange={setSchoolFilters}
@@ -102,9 +106,11 @@ export function RecruitmentNoticePage() {
             <FilterDropdown
               label="모집 파트"
               multiSelect
-              open={partFilterOpen}
-              onClick={() => setPartFilterOpen((prev) => !prev)}
-              onRequestClose={() => setPartFilterOpen(false)}
+              open={openFilterKey === "part"}
+              onClick={() =>
+                setOpenFilterKey((prev) => (prev === "part" ? null : "part"))
+              }
+              onRequestClose={() => setOpenFilterKey(null)}
               options={PART_FILTER_OPTIONS}
               selectedValues={partFilters}
               onSelectedValuesChange={setPartFilters}
@@ -113,23 +119,11 @@ export function RecruitmentNoticePage() {
         </div>
       </div>
 
-      <div role="tablist" className="flex w-full items-center">
-        {NOTICE_TABS.map((item) => {
-          const selected = item.id === tab
-          return (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              onClick={() => setTab(item.id)}
-              className={cn(segmentTriggerVariants({ selected }))}
-            >
-              {item.label}
-            </button>
-          )
-        })}
-      </div>
+      <Segment
+        items={NOTICE_TABS.map(({ id, label }) => ({ id, label }))}
+        value={tab}
+        onValueChange={(id) => setTab(id as NoticeTab)}
+      />
 
       {items.length === 0 ? (
         <p className="text-body-2-medium text-teal-gray-400 flex w-full items-center justify-center py-30">
@@ -173,8 +167,7 @@ export function RecruitmentNoticePage() {
         <RecruitmentApplyConfirmModal
           open={applyConfirmOpen}
           onOpenChange={setApplyConfirmOpen}
-          // TODO: 로그인/지원 이력 조회 API 연동 시 실제 상태로 교체
-          status="confirm"
+          status={selectedItem.appliedStatus ?? "confirm"}
           recruitmentTitle={selectedItem.title}
           // TODO: 지원 폼 라우트 연결 (routes/projects/ 지원 방법 미구현 상태)
           onConfirm={() => setApplyConfirmOpen(false)}
