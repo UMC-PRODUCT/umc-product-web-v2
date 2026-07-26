@@ -89,7 +89,8 @@ export function RecruitmentCreatePage({
         />
       </div>
 
-      {step === 1 && (
+      {/* 단계 전환 시 입력값이 사라지지 않도록 언마운트하지 않고 보이기/숨기기만 전환한다. */}
+      <div className={step === 1 ? undefined : "hidden"}>
         <RecruitmentBasicInfoForm
           key={`${role ?? "central"}:${initialChapter ?? ""}:${initialSchool ?? ""}`}
           onNext={() => moveToStep(2)}
@@ -98,21 +99,21 @@ export function RecruitmentCreatePage({
           initialChapter={initialChapter}
           initialSchool={initialSchool}
         />
-      )}
-      {step === 2 && (
+      </div>
+      <div className={step === 2 ? undefined : "hidden"}>
         <RecruitmentQuestionForm
           onPrev={() => moveToStep(1)}
           onNext={() => handleStepChange(3)}
           onDirtyChange={setIsStep2Dirty}
           onBlankPartsChange={setStep2HasBlankPart}
         />
-      )}
-      {step === 3 && (
+      </div>
+      <div className={step === 3 ? undefined : "hidden"}>
         <RecruitmentAnnouncementForm
           onPrev={() => moveToStep(2)}
           onDirtyChange={setIsStep3Dirty}
         />
-      )}
+      </div>
 
       {/* 페이지 이탈 모달 */}
       <CtaModal
