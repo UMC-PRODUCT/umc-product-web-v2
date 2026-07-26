@@ -2,7 +2,8 @@ import dayjs from "dayjs"
 
 import type { RecruitmentNoticeItem } from "./recruitmentNotice"
 
-const today = dayjs()
+// 예시
+const today = dayjs("2026-07-27")
 
 const ANNOUNCEMENT =
   "모집 공지\n본문의 최소, 최대 높이 있음. 카드 자체의 최대 높이 있음. 본문 내용이 길어질 경우, 본문 프레임의 우측에 스크롤바 허용."
