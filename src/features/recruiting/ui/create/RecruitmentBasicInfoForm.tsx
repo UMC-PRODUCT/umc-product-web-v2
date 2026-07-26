@@ -116,6 +116,36 @@ function formatMonthDay(dateStr: string): string {
 // 이미 완료된 일정(수정 불가) / 진행 중인 일정 / 예정된 일정
 type ScheduleItemStatus = "completed" | "active" | "upcoming"
 
+// 서류 접수 기간 검증. 필드 변경 시(handleDocumentEndAtChange)와 다음 단계 진입 시(handleNext) 공용으로 쓴다.
+function validateDocumentPeriod(
+  recruitmentType: RecruitmentRoundType | undefined,
+  start: Date | null,
+  end: Date | null,
+): string | null {
+  if (!recruitmentType || !start || !end) return null
+  const { min, max } = DOC_PERIOD_DAYS[recruitmentType]
+  const days = dayCountInclusive(start, end)
+  if (days < min || days > max) {
+    return recruitmentType === "ADDITIONAL"
+      ? `추가 모집 서류 접수 기간은 최소 ${min}일, 최대 ${max}일까지 설정할 수 있습니다.`
+      : `정규 모집 서류 접수 기간은 최소 ${min}일, 최대 ${max}일까지 설정할 수 있습니다.`
+  }
+  return null
+}
+
+// 면접 결과 발표 지연 검증. 위와 동일하게 필드 변경 시·다음 단계 진입 시 공용으로 쓴다.
+function validateInterviewResultDelay(
+  interviewEnd: Date | null,
+  finalResult: Date | null,
+): string | null {
+  if (!interviewEnd || !finalResult) return null
+  const gap = dayGap(interviewEnd, finalResult)
+  if (gap < 0 || gap > MAX_INTERVIEW_RESULT_DELAY_DAYS) {
+    return `면접 결과 발표는 면접 종료 후부터 최대 ${MAX_INTERVIEW_RESULT_DELAY_DAYS}일까지 설정할 수 있습니다.`
+  }
+  return null
+}
+
 // 모집 생성 화면을 보는 사람의 권한.
 // - central: 지부·학교를 자유롭게 선택 (지부 선택 시 첫번째 지부가 기본 선택됨)
 // - chapterAdmin: 지부는 텍스트로 고정, 학교는 진입 지점에 따라 선택 가능하거나 고정
@@ -339,28 +369,24 @@ export function RecruitmentBasicInfoForm({
     }, 600)
   }
 
+  const showPeriodErrorToast = (message: string) => {
+    addToast({
+      message,
+      color: "red",
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
+  }
+
   const handleDocumentEndAtChange = (date: string) => {
     updatePeriodField("documentEndAt", { date })
-    if (!recruitmentType || !periodForm.documentStartAt.date || !date) return
+    if (!periodForm.documentStartAt.date || !date) return
 
     const start = parsePeriodDate(periodForm.documentStartAt)
     const end = parsePeriodDate({ date, time: periodForm.documentEndAt.time })
-    if (!start || !end) return
-
-    const { min, max } = DOC_PERIOD_DAYS[recruitmentType]
-    const days = dayCountInclusive(start, end)
-    if (days < min || days > max) {
-      addToast({
-        message:
-          recruitmentType === "ADDITIONAL"
-            ? `추가 모집 서류 접수 기간은 최소 ${min}일, 최대 ${max}일까지 설정할 수 있습니다.`
-            : `정규 모집 서류 접수 기간은 최소 ${min}일, 최대 ${max}일까지 설정할 수 있습니다.`,
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    }
+    const message = validateDocumentPeriod(recruitmentType, start, end)
+    if (message) showPeriodErrorToast(message)
   }
 
   const handleFinalResultPublishedAtChange = (date: string) => {
@@ -372,18 +398,8 @@ export function RecruitmentBasicInfoForm({
       date,
       time: periodForm.finalResultPublishedAt.time,
     })
-    if (!interviewEnd || !result) return
-
-    const gap = dayGap(interviewEnd, result)
-    if (gap < 0 || gap > MAX_INTERVIEW_RESULT_DELAY_DAYS) {
-      addToast({
-        message: `면접 결과 발표는 면접 종료 후부터 최대 ${MAX_INTERVIEW_RESULT_DELAY_DAYS}일까지 설정할 수 있습니다.`,
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    }
+    const message = validateInterviewResultDelay(interviewEnd, result)
+    if (message) showPeriodErrorToast(message)
   }
 
   // 필수 항목 적용
@@ -400,54 +416,46 @@ export function RecruitmentBasicInfoForm({
     !!periodForm.finalResultPublishedAt.date
 
   const handleNext = () => {
+    const { footer: resolvedFooter, wasAdjusted } = resolveAvailableFooter(
+      previewTitle,
+      footer,
+      EXISTING_RECRUITMENT_TITLES_MOCK,
+    )
+    if (wasAdjusted) {
+      setFooter(resolvedFooter)
+      showPeriodErrorToast("같은 공고 제목이 있어 숫자가 자동 +1 되었습니다.")
+      return
+    }
+
     const documentStart = parsePeriodDate(periodForm.documentStartAt)
     const documentEnd = parsePeriodDate(periodForm.documentEndAt)
-    if (recruitmentType && documentStart && documentEnd) {
-      const { min, max } = DOC_PERIOD_DAYS[recruitmentType]
-      const days = dayCountInclusive(documentStart, documentEnd)
-      if (days < min || days > max) {
-        addToast({
-          message:
-            recruitmentType === "ADDITIONAL"
-              ? `추가 모집 서류 접수 기간은 최소 ${min}일, 최대 ${max}일까지 설정할 수 있습니다.`
-              : `정규 모집 서류 접수 기간은 최소 ${min}일, 최대 ${max}일까지 설정할 수 있습니다.`,
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-        return
-      }
+    const documentPeriodError = validateDocumentPeriod(
+      recruitmentType,
+      documentStart,
+      documentEnd,
+    )
+    if (documentPeriodError) {
+      showPeriodErrorToast(documentPeriodError)
+      return
     }
 
     const interviewEnd = parsePeriodDate(periodForm.interviewEndAt)
     const finalResult = parsePeriodDate(periodForm.finalResultPublishedAt)
-    if (interviewEnd && finalResult) {
-      const gap = dayGap(interviewEnd, finalResult)
-      if (gap < 0 || gap > MAX_INTERVIEW_RESULT_DELAY_DAYS) {
-        addToast({
-          message: `면접 결과 발표는 면접 종료 후부터 최대 ${MAX_INTERVIEW_RESULT_DELAY_DAYS}일까지 설정할 수 있습니다.`,
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-        return
-      }
+    const interviewDelayError = validateInterviewResultDelay(
+      interviewEnd,
+      finalResult,
+    )
+    if (interviewDelayError) {
+      showPeriodErrorToast(interviewDelayError)
+      return
     }
 
-    const start = documentStart
-    const end = finalResult
-    if (start && end) {
-      const totalDays = dayCountInclusive(start, end)
+    if (documentStart && finalResult) {
+      const totalDays = dayCountInclusive(documentStart, finalResult)
       if (totalDays > MAX_TOTAL_PERIOD_DAYS) {
-        addToast({
-          message: `전체 모집 기간이 ${MAX_TOTAL_PERIOD_DAYS}일을 넘을 수 없습니다.`,
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
+        showPeriodErrorToast(
+          `전체 모집 기간이 ${MAX_TOTAL_PERIOD_DAYS}일을 넘을 수 없습니다.`,
+        )
         return
       }
     }
