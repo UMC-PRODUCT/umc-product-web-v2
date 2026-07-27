@@ -40,6 +40,9 @@ import { Route as TestRecruitmentStepperRouteImport } from './routes/test/recrui
 import { Route as TestRecruitmentSectionHeaderRouteImport } from './routes/test/recruitment-section-header'
 import { Route as TestRecruitmentPreviewCardRouteImport } from './routes/test/recruitment-preview-card'
 import { Route as TestRecruitmentPostRowRouteImport } from './routes/test/recruitment-post-row'
+import { Route as TestRecruitmentNoticePreviewModalRouteImport } from './routes/test/recruitment-notice-preview-modal'
+import { Route as TestRecruitmentNoticeCardRouteImport } from './routes/test/recruitment-notice-card'
+import { Route as TestRecruitmentApplyConfirmModalRouteImport } from './routes/test/recruitment-apply-confirm-modal'
 import { Route as TestRecruitingRecruitmentsRouteImport } from './routes/test/recruiting-recruitments'
 import { Route as TestRecruitingHeaderRouteImport } from './routes/test/recruiting-header'
 import { Route as TestRecruitingApplyRouteImport } from './routes/test/recruiting-apply'
@@ -264,6 +267,24 @@ const TestRecruitmentPostRowRoute = TestRecruitmentPostRowRouteImport.update({
   path: '/test/recruitment-post-row',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestRecruitmentNoticePreviewModalRoute =
+  TestRecruitmentNoticePreviewModalRouteImport.update({
+    id: '/test/recruitment-notice-preview-modal',
+    path: '/test/recruitment-notice-preview-modal',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const TestRecruitmentNoticeCardRoute =
+  TestRecruitmentNoticeCardRouteImport.update({
+    id: '/test/recruitment-notice-card',
+    path: '/test/recruitment-notice-card',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const TestRecruitmentApplyConfirmModalRoute =
+  TestRecruitmentApplyConfirmModalRouteImport.update({
+    id: '/test/recruitment-apply-confirm-modal',
+    path: '/test/recruitment-apply-confirm-modal',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const TestRecruitingRecruitmentsRoute =
   TestRecruitingRecruitmentsRouteImport.update({
     id: '/test/recruiting-recruitments',
@@ -664,6 +685,9 @@ export interface FileRoutesByFullPath {
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
   '/test/recruiting-header': typeof TestRecruitingHeaderRoute
   '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
+  '/test/recruitment-apply-confirm-modal': typeof TestRecruitmentApplyConfirmModalRoute
+  '/test/recruitment-notice-card': typeof TestRecruitmentNoticeCardRoute
+  '/test/recruitment-notice-preview-modal': typeof TestRecruitmentNoticePreviewModalRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
   '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
   '/test/recruitment-section-header': typeof TestRecruitmentSectionHeaderRoute
@@ -758,6 +782,9 @@ export interface FileRoutesByTo {
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
   '/test/recruiting-header': typeof TestRecruitingHeaderRoute
   '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
+  '/test/recruitment-apply-confirm-modal': typeof TestRecruitmentApplyConfirmModalRoute
+  '/test/recruitment-notice-card': typeof TestRecruitmentNoticeCardRoute
+  '/test/recruitment-notice-preview-modal': typeof TestRecruitmentNoticePreviewModalRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
   '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
   '/test/recruitment-section-header': typeof TestRecruitmentSectionHeaderRoute
@@ -857,6 +884,9 @@ export interface FileRoutesById {
   '/test/recruiting-apply': typeof TestRecruitingApplyRoute
   '/test/recruiting-header': typeof TestRecruitingHeaderRoute
   '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
+  '/test/recruitment-apply-confirm-modal': typeof TestRecruitmentApplyConfirmModalRoute
+  '/test/recruitment-notice-card': typeof TestRecruitmentNoticeCardRoute
+  '/test/recruitment-notice-preview-modal': typeof TestRecruitmentNoticePreviewModalRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
   '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
   '/test/recruitment-section-header': typeof TestRecruitmentSectionHeaderRoute
@@ -958,6 +988,9 @@ export interface FileRouteTypes {
     | '/test/recruiting-apply'
     | '/test/recruiting-header'
     | '/test/recruiting-recruitments'
+    | '/test/recruitment-apply-confirm-modal'
+    | '/test/recruitment-notice-card'
+    | '/test/recruitment-notice-preview-modal'
     | '/test/recruitment-post-row'
     | '/test/recruitment-preview-card'
     | '/test/recruitment-section-header'
@@ -1052,6 +1085,9 @@ export interface FileRouteTypes {
     | '/test/recruiting-apply'
     | '/test/recruiting-header'
     | '/test/recruiting-recruitments'
+    | '/test/recruitment-apply-confirm-modal'
+    | '/test/recruitment-notice-card'
+    | '/test/recruitment-notice-preview-modal'
     | '/test/recruitment-post-row'
     | '/test/recruitment-preview-card'
     | '/test/recruitment-section-header'
@@ -1150,6 +1186,9 @@ export interface FileRouteTypes {
     | '/test/recruiting-apply'
     | '/test/recruiting-header'
     | '/test/recruiting-recruitments'
+    | '/test/recruitment-apply-confirm-modal'
+    | '/test/recruitment-notice-card'
+    | '/test/recruitment-notice-preview-modal'
     | '/test/recruitment-post-row'
     | '/test/recruitment-preview-card'
     | '/test/recruitment-section-header'
@@ -1244,6 +1283,9 @@ export interface RootRouteChildren {
   TestRecruitingApplyRoute: typeof TestRecruitingApplyRoute
   TestRecruitingHeaderRoute: typeof TestRecruitingHeaderRoute
   TestRecruitingRecruitmentsRoute: typeof TestRecruitingRecruitmentsRoute
+  TestRecruitmentApplyConfirmModalRoute: typeof TestRecruitmentApplyConfirmModalRoute
+  TestRecruitmentNoticeCardRoute: typeof TestRecruitmentNoticeCardRoute
+  TestRecruitmentNoticePreviewModalRoute: typeof TestRecruitmentNoticePreviewModalRoute
   TestRecruitmentPostRowRoute: typeof TestRecruitmentPostRowRoute
   TestRecruitmentPreviewCardRoute: typeof TestRecruitmentPreviewCardRoute
   TestRecruitmentSectionHeaderRoute: typeof TestRecruitmentSectionHeaderRoute
@@ -1480,6 +1522,27 @@ declare module '@tanstack/react-router' {
       path: '/test/recruitment-post-row'
       fullPath: '/test/recruitment-post-row'
       preLoaderRoute: typeof TestRecruitmentPostRowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/recruitment-notice-preview-modal': {
+      id: '/test/recruitment-notice-preview-modal'
+      path: '/test/recruitment-notice-preview-modal'
+      fullPath: '/test/recruitment-notice-preview-modal'
+      preLoaderRoute: typeof TestRecruitmentNoticePreviewModalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/recruitment-notice-card': {
+      id: '/test/recruitment-notice-card'
+      path: '/test/recruitment-notice-card'
+      fullPath: '/test/recruitment-notice-card'
+      preLoaderRoute: typeof TestRecruitmentNoticeCardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/recruitment-apply-confirm-modal': {
+      id: '/test/recruitment-apply-confirm-modal'
+      path: '/test/recruitment-apply-confirm-modal'
+      fullPath: '/test/recruitment-apply-confirm-modal'
+      preLoaderRoute: typeof TestRecruitmentApplyConfirmModalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/recruiting-recruitments': {
@@ -2197,6 +2260,10 @@ const rootRouteChildren: RootRouteChildren = {
   TestRecruitingApplyRoute: TestRecruitingApplyRoute,
   TestRecruitingHeaderRoute: TestRecruitingHeaderRoute,
   TestRecruitingRecruitmentsRoute: TestRecruitingRecruitmentsRoute,
+  TestRecruitmentApplyConfirmModalRoute: TestRecruitmentApplyConfirmModalRoute,
+  TestRecruitmentNoticeCardRoute: TestRecruitmentNoticeCardRoute,
+  TestRecruitmentNoticePreviewModalRoute:
+    TestRecruitmentNoticePreviewModalRoute,
   TestRecruitmentPostRowRoute: TestRecruitmentPostRowRoute,
   TestRecruitmentPreviewCardRoute: TestRecruitmentPreviewCardRoute,
   TestRecruitmentSectionHeaderRoute: TestRecruitmentSectionHeaderRoute,
