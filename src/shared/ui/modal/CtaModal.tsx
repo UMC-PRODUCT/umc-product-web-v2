@@ -111,7 +111,7 @@ export function CtaModal({
               variant="fill"
               color="primary"
               size="s"
-              className="rounded-[10px]"
+              className="rounded-[0.625rem]"
               isLoading={confirmLoading}
               onClick={confirmLoading ? undefined : onConfirm}
             >

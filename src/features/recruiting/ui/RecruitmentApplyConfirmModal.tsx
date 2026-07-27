@@ -23,6 +23,8 @@ export function RecruitmentApplyConfirmModal({
   confirmLoading,
   onConfirm,
 }: RecruitmentApplyConfirmModalProps) {
+  const handleCancel = () => onOpenChange(false)
+
   if (status === "confirm") {
     return (
       <CtaModal
@@ -40,6 +42,7 @@ export function RecruitmentApplyConfirmModal({
           </>
         }
         cancelText="돌아가기"
+        onCancel={handleCancel}
         confirmText="지원하기"
         confirmLoading={confirmLoading}
         onConfirm={onConfirm}
@@ -56,6 +59,7 @@ export function RecruitmentApplyConfirmModal({
         content="모집 마감 전까지 내 지원서에서 수정할 수 있습니다."
         descriptionClassName="text-teal-600 font-semibold underline"
         cancelText="돌아가기"
+        onCancel={handleCancel}
         confirmText="내 지원서 수정하기"
         confirmLoading={confirmLoading}
         onConfirm={onConfirm}
@@ -81,6 +85,7 @@ export function RecruitmentApplyConfirmModal({
       }
       descriptionClassName="underline"
       cancelText="돌아가기"
+      onCancel={handleCancel}
       confirmText="내 지원서 보기"
       confirmLoading={confirmLoading}
       onConfirm={onConfirm}
