@@ -8,6 +8,7 @@ interface RecruitmentNoticePreviewModalProps {
   onOpenChange: (open: boolean) => void
   title: string
   content: ReactNode
+  isClosed?: boolean
   applyLoading?: boolean
   onApply: () => void
   onBack?: () => void
@@ -18,6 +19,7 @@ export function RecruitmentNoticePreviewModal({
   onOpenChange,
   title,
   content,
+  isClosed = false,
   applyLoading = false,
   onApply,
   onBack,
@@ -54,17 +56,19 @@ export function RecruitmentNoticePreviewModal({
             >
               돌아가기
             </Button>
-            <Button
-              type="button"
-              variant="fill"
-              color="primary"
-              size="m"
-              className="grow"
-              isLoading={applyLoading}
-              onClick={applyLoading ? undefined : onApply}
-            >
-              지원하기
-            </Button>
+            {!isClosed && (
+              <Button
+                type="button"
+                variant="fill"
+                color="primary"
+                size="m"
+                className="grow"
+                isLoading={applyLoading}
+                onClick={applyLoading ? undefined : onApply}
+              >
+                지원하기
+              </Button>
+            )}
           </div>
         </Modal.Content>
       </Modal.Portal>

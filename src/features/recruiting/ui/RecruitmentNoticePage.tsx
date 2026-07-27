@@ -160,6 +160,7 @@ export function RecruitmentNoticePage() {
         onOpenChange={setPreviewOpen}
         title={selectedItem?.title ?? ""}
         content={selectedItem?.announcement}
+        isClosed={selectedItem?.isClosed ?? false}
         onApply={() => {
           setPreviewOpen(false)
           setApplyConfirmOpen(true)
