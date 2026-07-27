@@ -10,6 +10,11 @@ import { EVALUATION_STAGE_LABEL } from "../../model/evaluationStage"
 
 interface OperatorEvaluationListProps {
   evaluation: StageEvaluationDetail
+  /**
+   * 모집 관리 권한 보유 여부. 있으면 평가자 명단을 받아 총원을 셀 수 있고,
+   * 서버도 다른 평가를 제한 없이 내려준다. 없으면 총원을 알 수 없다.
+   */
+  viewerIsAdmin?: boolean
 }
 
 function OperatorStatusChip({ done }: { done: boolean }) {
@@ -58,22 +63,28 @@ function SortIcon() {
 
 export function OperatorEvaluationList({
   evaluation,
+  viewerIsAdmin = false,
 }: OperatorEvaluationListProps) {
   const { done, total } = countOperatorProgress(evaluation.operators)
   const myEvaluation = getMyEvaluation(evaluation)
-  const revealed = myEvaluation?.progress === "done"
   const othersDone = evaluation.operators.filter(
     (operator) =>
       operator.evaluatorId !== evaluation.myEvaluatorId &&
       operator.progress === "done",
   ).length
+  // 서버가 열람 가능한 평가만 내려준다. 운영진에게는 제한 없이 주고, 평가자에게는
+  // 본인이 제출한 뒤에만 준다. 받은 것이 있으면 그대로 보여준다.
+  const revealed =
+    viewerIsAdmin || myEvaluation?.progress === "done" || othersDone > 0
 
   return (
     <section className="border-teal-gray-100 flex flex-col gap-4 rounded-[16px] border bg-white p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-heading-6-semibold text-teal-gray-800">
           운영진 평가 <span className="text-teal-500">{done}</span>
-          <span className="text-teal-gray-400">/{total}</span>
+          {viewerIsAdmin && (
+            <span className="text-teal-gray-400">/{total}</span>
+          )}
         </h3>
         {revealed && <SortIcon />}
       </div>

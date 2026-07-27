@@ -46,7 +46,6 @@ export interface RecruitingRoundGroup {
   chapterName: string
   schoolId: string
   schoolName: string
-  memo: string | null
   rounds: RecruitingRound[]
 }
 
@@ -75,10 +74,14 @@ export interface RecruitingApplicationPage {
   hasPrevious: boolean
 }
 
-export interface RecruitingRoundsQuery {
+// 공개 목록은 지원 기간이 열린 차수(OPEN)와 마감된 차수(PAST)를 따로 조회한다.
+// 파라미터를 생략하면 서버가 OPEN 으로 간주해 마감된 차수가 빠진다.
+export type RecruitingRoundPhase = "OPEN" | "PAST"
+
+export interface PublicRoundsQuery {
   gisuId: string
-  chapterId?: string
-  schoolId?: string
+  roundIds?: string[]
+  phase?: RecruitingRoundPhase
 }
 
 export interface RoundApplicationsQuery {
@@ -86,4 +89,95 @@ export interface RoundApplicationsQuery {
   tracks?: RecruitingTrack[]
   page?: number
   size?: number
+}
+
+export type RecruitingQuestionType =
+  | "SHORT_TEXT"
+  | "LONG_TEXT"
+  | "RADIO"
+  | "CHECKBOX"
+  | "DROPDOWN"
+  | "SCHEDULE"
+  | "FILE"
+  | "PORTFOLIO"
+
+export interface RecruitingFormOption {
+  optionId: string
+  content: string
+  orderNo: number
+  other: boolean
+  nextSectionId: string | null
+}
+
+export interface RecruitingFormQuestion {
+  questionId: string
+  title: string
+  description: string | null
+  type: RecruitingQuestionType
+  required: boolean
+  orderNo: number
+  options: RecruitingFormOption[]
+}
+
+export interface RecruitingFormSection {
+  sectionId: string
+  title: string
+  description: string | null
+  orderNo: number
+  questions: RecruitingFormQuestion[]
+}
+
+export interface RecruitingFormStructure {
+  formId: string
+  title: string
+  description: string | null
+  sections: RecruitingFormSection[]
+}
+
+export interface RecruitingSelectedOption {
+  questionOptionId: string | null
+  answeredAsContent: string | null
+}
+
+// 서버가 선택지 답변을 id 배열에서 객체 배열로 옮기는 중이다. dev 는 아직
+// selectedOptionIds 를 주고 원본은 selectedOptions 로 바뀌어 있어 둘 다 받는다.
+export interface RecruitingApplicationAnswer {
+  questionId: string
+  type?: RecruitingQuestionType
+  textValue: string | null
+  selectedOptionIds?: string[]
+  selectedOptions?: RecruitingSelectedOption[]
+  fileIds: string[]
+  times: string[]
+}
+
+export interface RecruitingApplicationDetail {
+  application: RecruitingApplicationSummary
+  formResponseId: string
+  answers: RecruitingApplicationAnswer[]
+}
+
+export interface FormStructureQuery {
+  firstChoice: RecruitingTrack
+  secondChoice?: RecruitingTrack
+}
+
+export type ApiEvaluationStage = "DOCUMENT" | "INTERVIEW"
+
+export type RecruitingEvaluationDecision = "APPROVED" | "REJECTED"
+
+export interface RecruitingEvaluation {
+  id: string
+  applicationId: string
+  evaluatorMemberId: string
+  stage: ApiEvaluationStage
+  decision: RecruitingEvaluationDecision
+  comment: string | null
+  submittedAt: string | null
+}
+
+export interface RecruitingRoundEvaluator {
+  id: string
+  roundId: string
+  memberId: string
 }
