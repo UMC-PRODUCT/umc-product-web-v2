@@ -36,6 +36,8 @@ import { Route as TestToastRouteImport } from './routes/test/toast'
 import { Route as TestTextFieldRouteImport } from './routes/test/text-field'
 import { Route as TestTextButtonRouteImport } from './routes/test/text-button'
 import { Route as TestSocialButtonRouteImport } from './routes/test/social-button'
+import { Route as TestRecruitmentStepperRouteImport } from './routes/test/recruitment-stepper'
+import { Route as TestRecruitmentSectionHeaderRouteImport } from './routes/test/recruitment-section-header'
 import { Route as TestRecruitmentPreviewCardRouteImport } from './routes/test/recruitment-preview-card'
 import { Route as TestRecruitmentPostRowRouteImport } from './routes/test/recruitment-post-row'
 import { Route as TestRecruitingRecruitmentsRouteImport } from './routes/test/recruiting-recruitments'
@@ -78,6 +80,7 @@ import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/pro
 import { Route as ManageSchoolIndexRouteImport } from './routes/manage/school/index'
 import { Route as ManageCurriculumIndexRouteImport } from './routes/manage/curriculum/index'
 import { Route as RecruitingRecruitmentsQuotaRouteImport } from './routes/recruiting/recruitments/quota'
+import { Route as RecruitingRecruitmentsNewRouteImport } from './routes/recruiting/recruitments/new'
 import { Route as RecruitingHistoryArchiveRouteImport } from './routes/recruiting/history/archive'
 import { Route as RecruitingEvaluationsInterviewRouteImport } from './routes/recruiting/evaluations/interview'
 import { Route as RecruitingEvaluationsFinalRouteImport } from './routes/recruiting/evaluations/final'
@@ -239,6 +242,17 @@ const TestSocialButtonRoute = TestSocialButtonRouteImport.update({
   path: '/test/social-button',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestRecruitmentStepperRoute = TestRecruitmentStepperRouteImport.update({
+  id: '/test/recruitment-stepper',
+  path: '/test/recruitment-stepper',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestRecruitmentSectionHeaderRoute =
+  TestRecruitmentSectionHeaderRouteImport.update({
+    id: '/test/recruitment-section-header',
+    path: '/test/recruitment-section-header',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const TestRecruitmentPreviewCardRoute =
   TestRecruitmentPreviewCardRouteImport.update({
     id: '/test/recruitment-preview-card',
@@ -458,6 +472,12 @@ const RecruitingRecruitmentsQuotaRoute =
     path: '/recruitments/quota',
     getParentRoute: () => RecruitingRouteRoute,
   } as any)
+const RecruitingRecruitmentsNewRoute =
+  RecruitingRecruitmentsNewRouteImport.update({
+    id: '/recruitments/new',
+    path: '/recruitments/new',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
 const RecruitingHistoryArchiveRoute =
   RecruitingHistoryArchiveRouteImport.update({
     id: '/history/archive',
@@ -646,6 +666,8 @@ export interface FileRoutesByFullPath {
   '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
   '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
+  '/test/recruitment-section-header': typeof TestRecruitmentSectionHeaderRoute
+  '/test/recruitment-stepper': typeof TestRecruitmentStepperRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
   '/test/text-field': typeof TestTextFieldRoute
@@ -682,6 +704,7 @@ export interface FileRoutesByFullPath {
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
   '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
+  '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
   '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
   '/manage/curriculum/': typeof ManageCurriculumIndexRoute
   '/manage/school/': typeof ManageSchoolIndexRoute
@@ -737,6 +760,8 @@ export interface FileRoutesByTo {
   '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
   '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
+  '/test/recruitment-section-header': typeof TestRecruitmentSectionHeaderRoute
+  '/test/recruitment-stepper': typeof TestRecruitmentStepperRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
   '/test/text-field': typeof TestTextFieldRoute
@@ -772,6 +797,7 @@ export interface FileRoutesByTo {
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
   '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
+  '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
   '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
   '/manage/curriculum': typeof ManageCurriculumIndexRoute
   '/manage/school': typeof ManageSchoolIndexRoute
@@ -833,6 +859,8 @@ export interface FileRoutesById {
   '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
   '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
   '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
+  '/test/recruitment-section-header': typeof TestRecruitmentSectionHeaderRoute
+  '/test/recruitment-stepper': typeof TestRecruitmentStepperRoute
   '/test/social-button': typeof TestSocialButtonRoute
   '/test/text-button': typeof TestTextButtonRoute
   '/test/text-field': typeof TestTextFieldRoute
@@ -869,6 +897,7 @@ export interface FileRoutesById {
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
   '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
+  '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
   '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
   '/manage/curriculum/': typeof ManageCurriculumIndexRoute
   '/manage/school/': typeof ManageSchoolIndexRoute
@@ -931,6 +960,8 @@ export interface FileRouteTypes {
     | '/test/recruiting-recruitments'
     | '/test/recruitment-post-row'
     | '/test/recruitment-preview-card'
+    | '/test/recruitment-section-header'
+    | '/test/recruitment-stepper'
     | '/test/social-button'
     | '/test/text-button'
     | '/test/text-field'
@@ -967,6 +998,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
     | '/recruiting/history/archive'
+    | '/recruiting/recruitments/new'
     | '/recruiting/recruitments/quota'
     | '/manage/curriculum/'
     | '/manage/school/'
@@ -1022,6 +1054,8 @@ export interface FileRouteTypes {
     | '/test/recruiting-recruitments'
     | '/test/recruitment-post-row'
     | '/test/recruitment-preview-card'
+    | '/test/recruitment-section-header'
+    | '/test/recruitment-stepper'
     | '/test/social-button'
     | '/test/text-button'
     | '/test/text-field'
@@ -1057,6 +1091,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
     | '/recruiting/history/archive'
+    | '/recruiting/recruitments/new'
     | '/recruiting/recruitments/quota'
     | '/manage/curriculum'
     | '/manage/school'
@@ -1117,6 +1152,8 @@ export interface FileRouteTypes {
     | '/test/recruiting-recruitments'
     | '/test/recruitment-post-row'
     | '/test/recruitment-preview-card'
+    | '/test/recruitment-section-header'
+    | '/test/recruitment-stepper'
     | '/test/social-button'
     | '/test/text-button'
     | '/test/text-field'
@@ -1153,6 +1190,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
     | '/recruiting/history/archive'
+    | '/recruiting/recruitments/new'
     | '/recruiting/recruitments/quota'
     | '/manage/curriculum/'
     | '/manage/school/'
@@ -1208,6 +1246,8 @@ export interface RootRouteChildren {
   TestRecruitingRecruitmentsRoute: typeof TestRecruitingRecruitmentsRoute
   TestRecruitmentPostRowRoute: typeof TestRecruitmentPostRowRoute
   TestRecruitmentPreviewCardRoute: typeof TestRecruitmentPreviewCardRoute
+  TestRecruitmentSectionHeaderRoute: typeof TestRecruitmentSectionHeaderRoute
+  TestRecruitmentStepperRoute: typeof TestRecruitmentStepperRoute
   TestSocialButtonRoute: typeof TestSocialButtonRoute
   TestTextButtonRoute: typeof TestTextButtonRoute
   TestTextFieldRoute: typeof TestTextFieldRoute
@@ -1412,6 +1452,20 @@ declare module '@tanstack/react-router' {
       path: '/test/social-button'
       fullPath: '/test/social-button'
       preLoaderRoute: typeof TestSocialButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/recruitment-stepper': {
+      id: '/test/recruitment-stepper'
+      path: '/test/recruitment-stepper'
+      fullPath: '/test/recruitment-stepper'
+      preLoaderRoute: typeof TestRecruitmentStepperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/recruitment-section-header': {
+      id: '/test/recruitment-section-header'
+      path: '/test/recruitment-section-header'
+      fullPath: '/test/recruitment-section-header'
+      preLoaderRoute: typeof TestRecruitmentSectionHeaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test/recruitment-preview-card': {
@@ -1706,6 +1760,13 @@ declare module '@tanstack/react-router' {
       path: '/recruitments/quota'
       fullPath: '/recruiting/recruitments/quota'
       preLoaderRoute: typeof RecruitingRecruitmentsQuotaRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/recruitments/new': {
+      id: '/recruiting/recruitments/new'
+      path: '/recruitments/new'
+      fullPath: '/recruiting/recruitments/new'
+      preLoaderRoute: typeof RecruitingRecruitmentsNewRouteImport
       parentRoute: typeof RecruitingRouteRoute
     }
     '/recruiting/history/archive': {
@@ -2061,6 +2122,7 @@ interface RecruitingRouteRouteChildren {
   RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
   RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRouteWithChildren
   RecruitingHistoryArchiveRoute: typeof RecruitingHistoryArchiveRoute
+  RecruitingRecruitmentsNewRoute: typeof RecruitingRecruitmentsNewRoute
   RecruitingRecruitmentsQuotaRoute: typeof RecruitingRecruitmentsQuotaRoute
   RecruitingEvaluationsIndexRoute: typeof RecruitingEvaluationsIndexRoute
   RecruitingRecruitmentsIndexRoute: typeof RecruitingRecruitmentsIndexRoute
@@ -2075,6 +2137,7 @@ const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
   RecruitingEvaluationsInterviewRoute:
     RecruitingEvaluationsInterviewRouteWithChildren,
   RecruitingHistoryArchiveRoute: RecruitingHistoryArchiveRoute,
+  RecruitingRecruitmentsNewRoute: RecruitingRecruitmentsNewRoute,
   RecruitingRecruitmentsQuotaRoute: RecruitingRecruitmentsQuotaRoute,
   RecruitingEvaluationsIndexRoute: RecruitingEvaluationsIndexRoute,
   RecruitingRecruitmentsIndexRoute: RecruitingRecruitmentsIndexRoute,
@@ -2136,6 +2199,8 @@ const rootRouteChildren: RootRouteChildren = {
   TestRecruitingRecruitmentsRoute: TestRecruitingRecruitmentsRoute,
   TestRecruitmentPostRowRoute: TestRecruitmentPostRowRoute,
   TestRecruitmentPreviewCardRoute: TestRecruitmentPreviewCardRoute,
+  TestRecruitmentSectionHeaderRoute: TestRecruitmentSectionHeaderRoute,
+  TestRecruitmentStepperRoute: TestRecruitmentStepperRoute,
   TestSocialButtonRoute: TestSocialButtonRoute,
   TestTextButtonRoute: TestTextButtonRoute,
   TestTextFieldRoute: TestTextFieldRoute,

@@ -17,8 +17,8 @@ import {
 } from "@/widgets/navigation/header/RecruitingStatusButton"
 
 interface RecruitingHeaderProps {
-  // 모집 상태(진행 전/중/마감 + D-day). 서버에서 내려줄 예정.
-  // 없으면 상태 버튼을 렌더하지 않는다(연동 전 고정값 노출 방지).
+  // 모집 상태(진행 전/중/마감 + D-day). 서버에서 내려줄 예정
+  // 없으면 상태 버튼을 렌더하지 않는다(연동 전 고정값 노출 방지)
   recruitingStatus?: RecruitingStatus
   activePathname?: string
 }

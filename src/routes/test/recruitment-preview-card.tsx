@@ -43,6 +43,15 @@ function RecruitmentPreviewCardTestPage() {
             endLabel="00-00 23:59"
           />
         </Section>
+
+        <Section title="생성 미리보기 — footer 없을 때 안내 문구(emptyFooterPlaceholder)">
+          <RecruitmentPreviewCard
+            title="전체 학교 UMC 9기 1차 정기 모집"
+            emptyFooterPlaceholder="꼬릿말을 필요 시 작성하세요 (선택)"
+            startLabel="2000-00-00 00:00"
+            endLabel="00-00 23:59"
+          />
+        </Section>
       </div>
     </main>
   )

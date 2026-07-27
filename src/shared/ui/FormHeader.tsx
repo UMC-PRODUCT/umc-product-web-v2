@@ -6,6 +6,11 @@ type FormHeaderCommonProps = {
   className?: string
 }
 
+type FormHeaderBasicProps = {
+  variant: "basic"
+  className?: string
+}
+
 type FormHeaderPartProps = {
   variant: "part"
   partName: string
@@ -16,16 +21,21 @@ type FormHeaderPartProps = {
   className?: string
 }
 
-type FormHeaderProps = FormHeaderCommonProps | FormHeaderPartProps
+type FormHeaderProps =
+  | FormHeaderCommonProps
+  | FormHeaderBasicProps
+  | FormHeaderPartProps
 
 export function FormHeader(props: FormHeaderProps) {
-  if (props.variant === "common") {
+  if (props.variant === "common" || props.variant === "basic") {
     return (
       <div
         className={cn("flex w-full items-end self-stretch", props.className)}
       >
         <div className="rounded-t-[12px] bg-teal-500 px-10.5 pt-2 pb-0.5">
-          <span className="text-heading-7-semibold text-white">공통 문항</span>
+          <span className="text-heading-7-semibold text-white">
+            {props.variant === "common" ? "공통 문항" : "기본 문항"}
+          </span>
         </div>
         <div className="h-1.5 flex-1 rounded-tr-[12px] bg-teal-500" />
       </div>

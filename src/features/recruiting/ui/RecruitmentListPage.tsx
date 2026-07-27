@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 
 import { CHAPTERS, isChapter } from "@/entities/organization/model/chapters"
@@ -15,6 +16,7 @@ import {
 import { ChapterTabs } from "./ChapterTabs"
 import { RecruitmentCreateButton } from "./RecruitmentCreateButton"
 import { RecruitmentDraftArchiveCard } from "./RecruitmentDraftArchiveCard"
+import { RecruitmentOwnScopeSection } from "./RecruitmentOwnScopeSection"
 import { RecruitmentPostListCard } from "./RecruitmentPostListCard"
 import { RecruitmentSchoolSearchDropdown } from "./RecruitmentSchoolSearchDropdown"
 import { SchoolTabs } from "./SchoolTabs"
@@ -31,6 +33,7 @@ export function RecruitmentListPage({
   role = "central",
   useMockData = false,
 }: RecruitmentListPageProps) {
+  const navigate = useNavigate()
   const [chapterTab, setChapterTab] = useState("all")
   const [schoolTab, setSchoolTab] = useState("all")
   const [schoolSearchOpen, setSchoolSearchOpen] = useState(false)
@@ -84,7 +87,7 @@ export function RecruitmentListPage({
 
   // 공유 보관함이 보이는 뷰로 전환 (해당 학교가 속한 지부 탭 + 학교 드릴다운)
   const handleNavigateToArchive = (school: string) => {
-    if (role === "schoolStaff") {
+    if (role === "chapterAdmin" || role === "schoolStaff") {
       setSchoolTab(school)
       return
     }
@@ -126,35 +129,33 @@ export function RecruitmentListPage({
         description="지부별, 학교별 모집 공고를 확인하고 관리합니다."
         className="pl-3"
       />
-      {(role === "central" || role === "chapterAdmin") && (
+      {role === "central" && (
         <ChapterTabs
           value={chapterTab}
           onValueChange={(value) => {
             setChapterTab(value)
             setSelectedSchool(null)
           }}
-          allLabel={role === "chapterAdmin" ? "지부 전체" : "전체"}
           className="mt-8"
         />
       )}
-      {role === "schoolStaff" && (
+      {(role === "chapterAdmin" || role === "schoolStaff") && (
         <SchoolTabs
           schools={SCHOOLS_BY_BRANCH[RECRUITING_MY_CHAPTER_MOCK]}
           value={schoolTab}
           onValueChange={setSchoolTab}
+          allLabel={role === "chapterAdmin" ? "지부 전체" : "학교 전체"}
           className="mt-8"
         />
       )}
 
-      {(role === "central" || role === "chapterAdmin") && (
+      {role === "central" && (
         <div className="mt-8 flex flex-col gap-11">
           {chapterGroups.map(({ chapter, posts: chapterPosts }) => {
             const scopedPosts = selectedSchool
               ? chapterPosts.filter((post) => post.school === selectedSchool)
               : chapterPosts
-            const canSeeArchive =
-              chapterTab !== "all" &&
-              (role === "central" || chapter === RECRUITING_MY_CHAPTER_MOCK)
+            const canSeeArchive = chapterTab !== "all"
 
             return (
               <section key={chapter} className="flex flex-col">
@@ -182,8 +183,16 @@ export function RecruitmentListPage({
                   </div>
                   {canSeeArchive && (
                     <RecruitmentCreateButton
-                      // TODO: 모집 공고 생성 페이지 라우트 연결
-                      onClick={() => console.info("TODO: 모집 공고 생성")}
+                      onClick={() =>
+                        navigate({
+                          to: "/recruiting/recruitments/new",
+                          search: {
+                            role,
+                            chapter,
+                            school: selectedSchool ?? undefined,
+                          },
+                        })
+                      }
                       className="translate-y-1"
                     />
                   )}
@@ -226,45 +235,49 @@ export function RecruitmentListPage({
         </div>
       )}
 
+      {role === "chapterAdmin" && (
+        <RecruitmentOwnScopeSection
+          role={role}
+          chapter={RECRUITING_MY_CHAPTER_MOCK}
+          posts={myScopedPosts}
+          schoolTab={schoolTab}
+          editScope={editScope}
+          onPrivatize={handlePrivatize}
+          onPublish={handlePublish}
+          onDuplicate={handleDuplicate}
+          onDelete={handleDelete}
+          onUndoDelete={handleUndoDelete}
+          onNavigateToArchive={handleNavigateToArchive}
+          archiveVisible
+          onCreate={() =>
+            navigate({
+              to: "/recruiting/recruitments/new",
+              search: {
+                role,
+                chapter: RECRUITING_MY_CHAPTER_MOCK,
+                school: schoolTab,
+              },
+            })
+          }
+        />
+      )}
+
       {role === "schoolStaff" && (
-        <section className="mt-8 flex flex-col">
-          <h2 className="text-heading-5-semibold pl-3 text-teal-700">
-            {schoolTab === "all" ? RECRUITING_MY_CHAPTER_MOCK : schoolTab}
-          </h2>
-          <RecruitmentPostListCard
-            chapter={RECRUITING_MY_CHAPTER_MOCK}
-            posts={myScopedPosts}
-            role={role}
-            editScope={editScope}
-            onPrivatize={handlePrivatize}
-            onDuplicate={handleDuplicate}
-            onDelete={handleDelete}
-            onUndoDelete={handleUndoDelete}
-            onNavigateToArchive={handleNavigateToArchive}
-            archiveVisibleOnPage={schoolTab === RECRUITING_MY_SCHOOL_MOCK}
-            schoolFilterActive={schoolTab !== "all"}
-            className="mt-5"
-          />
-          {schoolTab === RECRUITING_MY_SCHOOL_MOCK && (
-            <div className="mt-11 flex flex-col gap-5">
-              <h2 className="text-heading-5-semibold pl-3 text-teal-700">
-                {schoolTab}
-              </h2>
-              <RecruitmentDraftArchiveCard
-                chapter={RECRUITING_MY_CHAPTER_MOCK}
-                posts={myScopedPosts}
-                role={role}
-                editScope={editScope}
-                onPublish={handlePublish}
-                onDuplicate={handleDuplicate}
-                onDelete={handleDelete}
-                onUndoDelete={handleUndoDelete}
-                selectedSchool={schoolTab}
-                title="공유 보관함"
-              />
-            </div>
-          )}
-        </section>
+        <RecruitmentOwnScopeSection
+          role={role}
+          chapter={RECRUITING_MY_CHAPTER_MOCK}
+          posts={myScopedPosts}
+          schoolTab={schoolTab}
+          editScope={editScope}
+          onPrivatize={handlePrivatize}
+          onPublish={handlePublish}
+          onDuplicate={handleDuplicate}
+          onDelete={handleDelete}
+          onUndoDelete={handleUndoDelete}
+          onNavigateToArchive={handleNavigateToArchive}
+          archiveVisible={schoolTab === RECRUITING_MY_SCHOOL_MOCK}
+          archiveTitle="공유 보관함"
+        />
       )}
     </div>
   )

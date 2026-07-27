@@ -14,6 +14,8 @@ interface CalendarProps {
   selectedDate?: Date | null
   highlightRange?: { start: Date; end: Date } | null
   highlightRanges?: { start: Date; end: Date }[]
+  // 서류/면접 결과 발표처럼 연두 점 표시
+  markedDates?: Date[]
   onDateClick?: (date: Date) => void
   onMonthChange?: (year: number, month: number) => void
   className?: string
@@ -42,6 +44,7 @@ export function Calendar({
   selectedDate = null,
   highlightRange = null,
   highlightRanges,
+  markedDates,
   onDateClick,
   onMonthChange,
   className,
@@ -218,6 +221,11 @@ export function Calendar({
               state={state}
               highlightPosition={
                 cell.isCurrentMonth ? getHighlightPosition(cell.date) : null
+              }
+              hasMarker={
+                cell.isCurrentMonth &&
+                (markedDates?.some((date) => isSameDay(date, cell.date)) ??
+                  false)
               }
               onClick={
                 cell.isCurrentMonth ? () => onDateClick?.(cell.date) : undefined
