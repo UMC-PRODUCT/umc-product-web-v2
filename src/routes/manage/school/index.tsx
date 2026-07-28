@@ -6,6 +6,7 @@ import {
   useSchoolList,
 } from "@/entities/organization/hooks/useSchool"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
+import { CHAPTERS } from "@/entities/organization/model/chapters"
 import { ChapterTabs } from "@/features/recruiting/ui/ChapterTabs"
 import { SchoolCard } from "@/features/settings/ui/SchoolCard"
 import { SchoolPagination } from "@/features/settings/ui/SchoolPagination"
@@ -39,67 +40,45 @@ function SchoolManagePage() {
     ? `${activeGisuData.gisu}기`
     : "11기"
 
+  const chapterIdParam = useMemo(() => {
+    if (selectedChapter === "all") return undefined
+    const num = Number(selectedChapter)
+    if (!Number.isNaN(num)) return num
+    const index = (CHAPTERS as readonly string[]).indexOf(selectedChapter)
+    if (index !== -1) return index + 1
+    return undefined
+  }, [selectedChapter])
+
   const { data: summaryData, isLoading: isSummaryLoading } =
-    useAdminSchoolsSummary({ gisuId: activeGisuId, size: 1000 })
-  const { data: schoolListData, isLoading: isListLoading } = useSchoolList()
+    useAdminSchoolsSummary({
+      gisuId: activeGisuId,
+      chapterId: chapterIdParam,
+      search: searchQuery.trim() || undefined,
+      page: currentPage - 1,
+      size: PAGE_SIZE,
+    })
+  const { isLoading: isListLoading } = useSchoolList()
   const { getChapterIdBySchool } = useSchoolChapterMap()
 
   const isLoading = isSummaryLoading || isListLoading
 
-  const processedSchools = useMemo(() => {
-    const rawList = schoolListData?.schools ?? []
-
-    const summaryMap = new Map<
-      string,
-      { branch?: string; count?: number; chapterId?: number }
-    >()
-    if (summaryData?.content) {
-      for (const item of summaryData.content) {
-        const info = {
-          branch: item.chapterName ?? undefined,
+  const paginatedSchools = useMemo(() => {
+    if (!summaryData?.content) return []
+    return summaryData.content
+      .map((item) => {
+        const fallbackChapterId = item.schoolName
+          ? getChapterIdBySchool(item.schoolName)
+          : undefined
+        const chapterId = item.chapterId ?? fallbackChapterId
+        return {
+          id: item.schoolId != null ? String(item.schoolId) : "",
+          name: item.schoolName ?? "",
+          chapterId,
+          branch:
+            item.chapterName ??
+            (chapterId ? `지부 ${chapterId}` : "지부 미지정"),
           count: item.activeChallengerCount ?? 0,
-          chapterId: item.chapterId ?? undefined,
         }
-        if (item.schoolId != null) {
-          summaryMap.set(String(item.schoolId), info)
-        }
-        if (item.schoolName) {
-          summaryMap.set(item.schoolName, info)
-        }
-      }
-    }
-
-    return rawList.map((school) => {
-      const summaryInfo =
-        summaryMap.get(school.schoolId) ?? summaryMap.get(school.schoolName)
-      const chapterId = getChapterIdBySchool(school.schoolName)
-
-      return {
-        id: school.schoolId,
-        name: school.schoolName,
-        chapterId: summaryInfo?.chapterId ?? chapterId,
-        branch:
-          summaryInfo?.branch ??
-          (chapterId ? `지부 ${chapterId}` : "지부 미지정"),
-        count: summaryInfo?.count ?? 0,
-      }
-    })
-  }, [summaryData, schoolListData, getChapterIdBySchool])
-
-  const filteredSchools = useMemo(() => {
-    return processedSchools
-      .filter((school) => {
-        if (selectedChapter !== "all") {
-          const target = selectedChapter.toLowerCase()
-          const branch = school.branch.toLowerCase()
-          if (branch !== target && !branch.includes(target)) {
-            return false
-          }
-        }
-        if (!searchQuery.trim()) return true
-        return school.name
-          .toLowerCase()
-          .includes(searchQuery.trim().toLowerCase())
       })
       .sort((a, b) => {
         if (sortOption === "name") {
@@ -107,13 +86,9 @@ function SchoolManagePage() {
         }
         return 0
       })
-  }, [processedSchools, selectedChapter, searchQuery, sortOption])
+  }, [summaryData, getChapterIdBySchool, sortOption])
 
-  const totalPages = Math.max(1, Math.ceil(filteredSchools.length / PAGE_SIZE))
-  const paginatedSchools = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE
-    return filteredSchools.slice(start, start + PAGE_SIZE)
-  }, [filteredSchools, currentPage])
+  const totalPages = Math.max(1, summaryData?.totalPages ?? 1)
 
   return (
     <div className="flex w-full max-w-244 flex-col gap-8">
