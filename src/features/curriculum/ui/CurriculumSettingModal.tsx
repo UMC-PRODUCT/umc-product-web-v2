@@ -176,7 +176,12 @@ export function CurriculumSettingModal({
                 커리큘럼 설정
               </Modal.Title>
 
-              <Button size="s" color="primary" variant="fill">
+              <Button
+                size="s"
+                color="primary"
+                variant="fill"
+                onClick={() => onOpenChange(false)}
+              >
                 완료
               </Button>
             </div>
