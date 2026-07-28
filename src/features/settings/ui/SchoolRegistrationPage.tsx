@@ -11,6 +11,7 @@ import {
   showRequiredFieldsMissingToast,
   showSchoolAlreadyExistsToast,
   showSchoolDeletedToast,
+  showSchoolDeleteFailedToast,
   showSchoolEditCompletedToast,
   showSchoolRegisterCompletedToast,
 } from "@/features/settings/model/schoolToasts"
@@ -202,7 +203,6 @@ export function SchoolRegistrationPage({
 
     const backupSchoolData: CreateSchoolRequest = {
       schoolName: officialName.trim(),
-      shortName: shortName.trim(),
       remark: memo.trim() || undefined,
       links,
     }
@@ -220,6 +220,7 @@ export function SchoolRegistrationPage({
       })
       navigate({ to: "/manage/school" })
     } catch (error) {
+      showSchoolDeleteFailedToast(addToast)
       if (process.env.NODE_ENV === "development") {
         console.error("Failed to delete school:", error)
       }
