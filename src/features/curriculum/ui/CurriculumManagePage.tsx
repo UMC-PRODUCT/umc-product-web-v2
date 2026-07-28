@@ -1,7 +1,12 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
-import { deleteCurriculum, getCurriculumOverview } from "@/entities/curriculum"
+import {
+  createCurriculum,
+  createWeeklyCurriculum,
+  deleteCurriculum,
+  getCurriculumOverview,
+} from "@/entities/curriculum"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import SettingIcon from "@/shared/assets/icon/setting/SettingIcon"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
@@ -100,7 +105,10 @@ export function CurriculumManagePage() {
     })
   }
 
-  const handleRestoreItem = (itemToRestore: CurriculumItem, index: number) => {
+  const handleRestoreItem = async (
+    itemToRestore: CurriculumItem,
+    index: number,
+  ) => {
     setCurriculumData((prev) => {
       const list = [...(prev[selectedPart] || [])]
       list.splice(index, 0, itemToRestore)
@@ -113,6 +121,46 @@ export function CurriculumManagePage() {
         [selectedPart]: renumbered,
       }
     })
+
+    try {
+      const apiPart = mapPartToApiEnum(selectedPart)
+      const newCurriculumId = await createCurriculum({
+        gisuId,
+        part: apiPart,
+        title: itemToRestore.title || "복원된 커리큘럼",
+      })
+
+      if (newCurriculumId) {
+        setCurriculumData((prev) => {
+          const list = prev[selectedPart] || []
+          const updated = list.map((c) =>
+            c.id === itemToRestore.id
+              ? { ...c, id: String(newCurriculumId) }
+              : c,
+          )
+          return {
+            ...prev,
+            [selectedPart]: updated,
+          }
+        })
+
+        if (itemToRestore.workbooks && itemToRestore.workbooks.length > 0) {
+          for (const wb of itemToRestore.workbooks) {
+            const now = new Date()
+            const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+            await createWeeklyCurriculum({
+              curriculumId: newCurriculumId,
+              weekNo: wb.number,
+              title: wb.title,
+              startsAt: now.toISOString(),
+              endsAt: nextWeek.toISOString(),
+            })
+          }
+        }
+      }
+    } catch {
+      // Ignore restore API error fallback to local state
+    }
   }
 
   return (
