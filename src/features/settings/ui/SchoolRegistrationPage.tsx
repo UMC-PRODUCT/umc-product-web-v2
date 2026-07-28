@@ -202,6 +202,7 @@ export function SchoolRegistrationPage({
 
     const backupSchoolData: CreateSchoolRequest = {
       schoolName: officialName.trim(),
+      shortName: shortName.trim(),
       remark: memo.trim() || undefined,
       links,
     }
