@@ -1,18 +1,30 @@
+import { useNavigate } from "@tanstack/react-router"
 import { type ChangeEvent, useEffect, useRef, useState } from "react"
 
 import {
+  useCreateSchool,
+  useDeleteSchool,
+  useSchoolDetail,
+  useUpdateSchool,
+} from "@/entities/organization/hooks/useSchool"
+import {
   showRequiredFieldsMissingToast,
-  showSchoolAlreadyExistsToast,
   showSchoolDeletedToast,
   showSchoolEditCompletedToast,
   showSchoolRegisterCompletedToast,
 } from "@/features/settings/model/schoolToasts"
+import { uploadFileFlow } from "@/shared/api/storage"
 import CloudUploadIcon from "@/shared/assets/icon/upload/CloudUploadIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
+
+import type {
+  CreateSchoolRequest,
+  SchoolLinkRequest,
+} from "@/entities/organization/model/schoolTypes"
 
 interface SchoolRegistrationPageProps {
   mode?: "register" | "edit"
@@ -25,6 +37,14 @@ export function SchoolRegistrationPage({
 }: SchoolRegistrationPageProps) {
   const isEditMode = mode === "edit"
   const addToast = useToastStore((s) => s.addToast)
+  const navigate = useNavigate()
+
+  const { data: schoolDetail } = useSchoolDetail(
+    isEditMode ? schoolId : undefined,
+  )
+  const createSchoolMutation = useCreateSchool()
+  const updateSchoolMutation = useUpdateSchool()
+  const deleteSchoolMutation = useDeleteSchool()
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [openResetModal, setOpenResetModal] = useState(false)
@@ -41,6 +61,31 @@ export function SchoolRegistrationPage({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const logoPreviewRef = useRef<string | null>(null)
   logoPreviewRef.current = logoPreview
+
+  useEffect(() => {
+    if (schoolDetail) {
+      if (schoolDetail.schoolName) {
+        setOfficialName(schoolDetail.schoolName)
+      }
+      if (schoolDetail.remark) {
+        setMemo(schoolDetail.remark)
+      }
+      if (schoolDetail.logoImageUrl) {
+        setLogoPreview(schoolDetail.logoImageUrl)
+      }
+      if (schoolDetail.links) {
+        const instaLink =
+          schoolDetail.links.find((l) => l.type === "INSTAGRAM")?.url ?? ""
+        const youtubeLink =
+          schoolDetail.links.find((l) => l.type === "YOUTUBE")?.url ?? ""
+        const kakaoLink =
+          schoolDetail.links.find((l) => l.type === "KAKAO")?.url ?? ""
+        setInstagram(instaLink)
+        setYoutube(youtubeLink)
+        setKakao(kakaoLink)
+      }
+    }
+  }, [schoolDetail])
 
   useEffect(() => {
     return () => {
@@ -81,46 +126,103 @@ export function SchoolRegistrationPage({
     handleRemoveLogo()
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!officialName.trim() || !shortName.trim()) {
       showRequiredFieldsMissingToast(addToast)
       return
     }
 
-    if (officialName.trim() === "가가대학교") {
-      showSchoolAlreadyExistsToast(addToast)
-      return
-    }
-
-    if (isEditMode) {
-      showSchoolEditCompletedToast(addToast)
-    } else {
-      showSchoolRegisterCompletedToast(addToast)
-    }
-
-    if (process.env.NODE_ENV === "development") {
-      console.log({
-        schoolId,
-        officialName,
-        shortName,
-        logoFile,
-        instagram,
-        youtube,
-        kakao,
-        memo,
+    const links: SchoolLinkRequest[] = []
+    if (instagram.trim())
+      links.push({
+        title: "Instagram",
+        type: "INSTAGRAM",
+        url: instagram.trim(),
       })
+    if (youtube.trim())
+      links.push({ title: "Youtube", type: "YOUTUBE", url: youtube.trim() })
+    if (kakao.trim())
+      links.push({ title: "Kakao", type: "KAKAO", url: kakao.trim() })
+
+    try {
+      let logoImageId: string | undefined
+      if (logoFile) {
+        const uploadResult = await uploadFileFlow(logoFile, "SCHOOL_LOGO")
+        logoImageId = uploadResult.fileId
+      }
+
+      if (isEditMode && schoolId) {
+        await updateSchoolMutation.mutateAsync({
+          schoolId,
+          body: {
+            schoolName: officialName.trim(),
+            remark: memo.trim() || undefined,
+            logoImageId,
+            links,
+          },
+        })
+        showSchoolEditCompletedToast(addToast)
+      } else {
+        await createSchoolMutation.mutateAsync({
+          schoolName: officialName.trim(),
+          remark: memo.trim() || undefined,
+          logoImageId,
+          links,
+        })
+        showSchoolRegisterCompletedToast(addToast)
+      }
+      navigate({ to: "/manage/school" })
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to save school:", error)
+      }
     }
   }
 
-  const handleDeleteConfirm = () => {
-    showSchoolDeletedToast(addToast, () => {
-      if (process.env.NODE_ENV === "development") {
-        console.log("School deletion undone", schoolId)
-      }
-    })
+  const handleDeleteConfirm = async () => {
+    if (!schoolId) return
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("Deleting school", schoolId)
+    const links: SchoolLinkRequest[] = []
+    if (instagram.trim())
+      links.push({
+        title: "Instagram",
+        type: "INSTAGRAM",
+        url: instagram.trim(),
+      })
+    if (youtube.trim())
+      links.push({ title: "Youtube", type: "YOUTUBE", url: youtube.trim() })
+    if (kakao.trim())
+      links.push({ title: "Kakao", type: "KAKAO", url: kakao.trim() })
+
+    const backupSchoolData: CreateSchoolRequest = {
+      schoolName: officialName.trim(),
+      remark: memo.trim() || undefined,
+      links,
+    }
+
+    try {
+      await deleteSchoolMutation.mutateAsync(schoolId)
+      showSchoolDeletedToast(addToast, async () => {
+        try {
+          await createSchoolMutation.mutateAsync(backupSchoolData)
+          addToast({
+            message: "삭제된 학교 정보가 복구되었습니다.",
+            color: "primary",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+        } catch (undoError) {
+          if (process.env.NODE_ENV === "development") {
+            console.error("Failed to restore school:", undoError)
+          }
+        }
+      })
+      navigate({ to: "/manage/school" })
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to delete school:", error)
+      }
     }
   }
 

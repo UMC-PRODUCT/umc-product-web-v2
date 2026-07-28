@@ -87,3 +87,23 @@ export interface SchoolDetailResponse {
   /** 학교 링크 목록 */
   links?: SchoolLinkResponse[]
 }
+
+/** 학교 현황 및 지부/인원 수 요약 정보 (DASHBOARD-100) */
+export interface AdminSchoolSummaryResponse {
+  schoolId?: number
+  schoolName?: string
+  chapterId?: number
+  chapterName?: string
+  activeChallengerCount?: number
+}
+
+/** 학교 현황 페이징 응답 DTO (DASHBOARD-100) */
+export interface PageResponseAdminSchoolSummaryResponse {
+  content?: AdminSchoolSummaryResponse[]
+  page?: number
+  size?: number
+  totalElements?: number
+  totalPages?: number
+  hasNext?: boolean
+  hasPrevious?: boolean
+}
