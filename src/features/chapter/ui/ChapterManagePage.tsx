@@ -250,7 +250,8 @@ export function ChapterManagePage() {
   }
 
   async function handleSave() {
-    if (chapters.length === 0) return
+    const newChapters = chapters.filter((ch) => ch.id.startsWith("chapter-"))
+    if (newChapters.length === 0) return
 
     if (isGisuLoading || activeGisuId == null) {
       addToast({
@@ -263,7 +264,7 @@ export function ChapterManagePage() {
       return
     }
 
-    const bulkPayload = chapters.map((ch) => ({
+    const bulkPayload = newChapters.map((ch) => ({
       gisuId: activeGisuId,
       name: ch.name,
       schoolIds: ch.assignedSchools
