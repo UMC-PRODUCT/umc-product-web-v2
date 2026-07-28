@@ -44,7 +44,7 @@ function SchoolManagePage() {
   const { data: schoolListData, isLoading: isListLoading } = useSchoolList()
   const { getChapterIdBySchool } = useSchoolChapterMap()
 
-  const isLoading = isSummaryLoading && isListLoading
+  const isLoading = isSummaryLoading || isListLoading
 
   const processedSchools = useMemo(() => {
     const rawList = schoolListData?.schools ?? []
