@@ -142,7 +142,31 @@ export function ChapterManagePage() {
       try {
         await deleteChapterMutation.mutateAsync(chapterId)
       } catch {
-        // API 삭제 시도 중 실패 시 로깅 또는 무시
+        setChapters((prev) => {
+          if (prev.some((ch) => ch.id === chapterToDelete.id)) return prev
+          const next = [...prev]
+          const insertIndex = Math.min(targetIndex, next.length)
+          next.splice(insertIndex, 0, chapterToDelete)
+          return next
+        })
+
+        if (chapterToDelete.assignedSchools.length > 0) {
+          const restoredSchoolIds = new Set(
+            chapterToDelete.assignedSchools.map((s) => s.id),
+          )
+          setUnassignedSchools((prev) =>
+            prev.filter((s) => !restoredSchoolIds.has(s.id)),
+          )
+        }
+
+        addToast({
+          message: "지부 삭제에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
       }
     }
 
