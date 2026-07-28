@@ -9,6 +9,7 @@ import {
 } from "@/entities/organization/hooks/useSchool"
 import {
   showRequiredFieldsMissingToast,
+  showSchoolAlreadyExistsToast,
   showSchoolDeletedToast,
   showSchoolEditCompletedToast,
   showSchoolRegisterCompletedToast,
@@ -173,6 +174,7 @@ export function SchoolRegistrationPage({
       }
       navigate({ to: "/manage/school" })
     } catch (error) {
+      showSchoolAlreadyExistsToast(addToast)
       if (process.env.NODE_ENV === "development") {
         console.error("Failed to save school:", error)
       }
@@ -205,13 +207,6 @@ export function SchoolRegistrationPage({
       showSchoolDeletedToast(addToast, async () => {
         try {
           await createSchoolMutation.mutateAsync(backupSchoolData)
-          addToast({
-            message: "삭제된 학교 정보가 복구되었습니다.",
-            color: "primary",
-            variant: "deep",
-            type: "default",
-            duration: 3000,
-          })
         } catch (undoError) {
           if (process.env.NODE_ENV === "development") {
             console.error("Failed to restore school:", undoError)

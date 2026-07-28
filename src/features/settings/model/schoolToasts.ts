@@ -48,7 +48,7 @@ export function showSchoolDeletedToast(
 ) {
   addToast({
     message: "학교 정보가 삭제됐습니다.",
-    color: "primary",
+    color: "red",
     variant: "deep",
     type: "default",
     duration: 6000,
