@@ -128,7 +128,11 @@ export function SchoolRegistrationPage({
   }
 
   const handleSave = async () => {
-    if (!officialName.trim() || !shortName.trim()) {
+    if (
+      !officialName.trim() ||
+      !shortName.trim() ||
+      (!logoFile && !logoPreview)
+    ) {
       showRequiredFieldsMissingToast(addToast)
       return
     }
