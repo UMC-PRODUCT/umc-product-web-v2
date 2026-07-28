@@ -21,6 +21,7 @@ interface SortableWorkbookItemProps {
   wb: Workbook
   wbIndex: number
   onUpdateWorkbookTitle?: (wbIndex: number, title: string) => void
+  onBlurWorkbookTitle?: (wbIndex: number, title: string) => void
   onUpdateMission?: (
     wbIndex: number,
     missionIndex: number,
@@ -35,6 +36,7 @@ function SortableWorkbookItem({
   wb,
   wbIndex,
   onUpdateWorkbookTitle,
+  onBlurWorkbookTitle,
   onUpdateMission,
   onDeleteWorkbook,
   onAddMission,
@@ -100,6 +102,7 @@ function SortableWorkbookItem({
               value={wb.title}
               onPointerDown={(e) => e.stopPropagation()}
               onChange={(e) => onUpdateWorkbookTitle?.(wbIndex, e.target.value)}
+              onBlur={() => onBlurWorkbookTitle?.(wbIndex, wb.title)}
               placeholder="워크북 이름을 작성하세요"
               className="text-heading-7-semibold text-teal-gray-900 placeholder:text-teal-gray-400 min-w-48 bg-transparent outline-none"
             />
@@ -170,7 +173,9 @@ function SortableWorkbookItem({
 interface CurriculumCardEditableProps {
   curriculum: CurriculumItem
   onUpdateCurriculumTitle?: (title: string) => void
+  onBlurCurriculumTitle?: (title: string) => void
   onUpdateWorkbookTitle?: (wbIndex: number, title: string) => void
+  onBlurWorkbookTitle?: (wbIndex: number, title: string) => void
   onUpdateMission?: (
     wbIndex: number,
     missionIndex: number,
@@ -188,7 +193,9 @@ interface CurriculumCardEditableProps {
 export function CurriculumCardEditable({
   curriculum,
   onUpdateCurriculumTitle,
+  onBlurCurriculumTitle,
   onUpdateWorkbookTitle,
+  onBlurWorkbookTitle,
   onUpdateMission,
   onAddWorkbook,
   onDeleteWorkbook,
@@ -264,6 +271,7 @@ export function CurriculumCardEditable({
                 value={curriculum.title}
                 onPointerDown={(e) => e.stopPropagation()}
                 onChange={(e) => onUpdateCurriculumTitle?.(e.target.value)}
+                onBlur={() => onBlurCurriculumTitle?.(curriculum.title)}
                 placeholder="커리큘럼 이름을 작성하세요"
                 className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 w-full min-w-60 bg-transparent outline-none"
               />
@@ -367,6 +375,7 @@ export function CurriculumCardEditable({
               wb={wb}
               wbIndex={wbIndex}
               onUpdateWorkbookTitle={onUpdateWorkbookTitle}
+              onBlurWorkbookTitle={onBlurWorkbookTitle}
               onUpdateMission={onUpdateMission}
               onDeleteWorkbook={onDeleteWorkbook}
               onAddMission={onAddMission}

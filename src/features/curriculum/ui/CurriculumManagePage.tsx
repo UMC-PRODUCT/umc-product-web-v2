@@ -1,12 +1,18 @@
 import { useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
+import { deleteCurriculum, getCurriculumOverview } from "@/entities/curriculum"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import SettingIcon from "@/shared/assets/icon/setting/SettingIcon"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
 import { INITIAL_CURRICULUM_DATA } from "../model/curriculumData"
+import {
+  mapOverviewToCurriculumItem,
+  mapPartToApiEnum,
+} from "../model/curriculumMapper"
 import { CurriculumCardReadonly } from "./CurriculumCardReadonly"
 import { CurriculumSettingModal } from "./CurriculumSettingModal"
 import { PartTabs } from "./PartTabs"
@@ -18,11 +24,37 @@ export function CurriculumManagePage() {
   const [selectedPart, setSelectedPart] = useState<string>("PM")
   const [curriculumData, setCurriculumData] = useState(INITIAL_CURRICULUM_DATA)
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
+  const { data: activeGisuId } = useActiveGisuId()
+  const gisuId = activeGisuId ?? 10
 
   // Default expand card 01 (design-1)
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({
     "design-1": true,
   })
+
+  useEffect(() => {
+    let isSubscribed = true
+    async function loadCurriculum() {
+      if (!gisuId) return
+      try {
+        const apiPart = mapPartToApiEnum(selectedPart)
+        const overview = await getCurriculumOverview({ gisuId, part: apiPart })
+        if (isSubscribed && overview && overview.curriculumId) {
+          const item = mapOverviewToCurriculumItem(overview, 0)
+          setCurriculumData((prev) => ({
+            ...prev,
+            [selectedPart]: [item],
+          }))
+        }
+      } catch {
+        // Fallback to initial local mock data if api has no entry
+      }
+    }
+    loadCurriculum()
+    return () => {
+      isSubscribed = false
+    }
+  }, [gisuId, selectedPart])
 
   const currentItems = curriculumData[selectedPart] || []
 
@@ -33,13 +65,22 @@ export function CurriculumManagePage() {
     }))
   }
 
-  const handleDeleteItem = (id: string) => {
+  const handleDeleteItem = async (id: string) => {
     setCurriculumData((prev) => ({
       ...prev,
       [selectedPart]: (prev[selectedPart] || []).filter(
         (item) => item.id !== id,
       ),
     }))
+
+    const numericId = Number(id)
+    if (!Number.isNaN(numericId) && numericId > 0) {
+      try {
+        await deleteCurriculum(numericId)
+      } catch {
+        // Handled silently or toast
+      }
+    }
   }
 
   const handleReorderItems = (fromIndex: number, toIndex: number) => {

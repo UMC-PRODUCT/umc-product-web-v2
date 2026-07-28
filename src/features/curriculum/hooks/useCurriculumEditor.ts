@@ -8,11 +8,24 @@ import {
   useSensors,
 } from "@dnd-kit/core"
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
+import {
+  createCurriculum,
+  createWeeklyCurriculum,
+  deleteCurriculum,
+  deleteWeeklyCurriculum,
+  getCurriculumOverview,
+  updateCurriculum,
+  updateWeeklyCurriculum,
+} from "@/entities/curriculum"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
-import { INITIAL_CURRICULUM_DATA } from "../model/curriculumData"
+import {
+  mapOverviewToCurriculumItem,
+  mapPartToApiEnum,
+} from "../model/curriculumMapper"
 
 import type { CurriculumItem, Workbook } from "../model/curriculumData"
 
@@ -149,7 +162,35 @@ export function useCurriculumEditor({
 }: UseCurriculumEditorOptions) {
   const [curriculums, setCurriculums] =
     useState<CurriculumItem[]>(initialCurriculums)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const addToast = useToastStore((state) => state.addToast)
+  const { data: activeGisuId } = useActiveGisuId()
+  const gisuId = activeGisuId ?? 10
+
+  // 서버에서 기수 및 파트별 커리큘럼 데이터 동기화
+  useEffect(() => {
+    let isSubscribed = true
+    async function fetchOverview() {
+      if (!gisuId) return
+      setIsLoading(true)
+      try {
+        const apiPart = mapPartToApiEnum(part)
+        const overview = await getCurriculumOverview({ gisuId, part: apiPart })
+        if (isSubscribed && overview && overview.curriculumId) {
+          const fetchedItem = mapOverviewToCurriculumItem(overview, 0)
+          setCurriculums([fetchedItem])
+        }
+      } catch {
+        // 서버에 데이터가 없을 시 기존 초기값 유지
+      } finally {
+        if (isSubscribed) setIsLoading(false)
+      }
+    }
+    fetchOverview()
+    return () => {
+      isSubscribed = false
+    }
+  }, [gisuId, part])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -158,18 +199,21 @@ export function useCurriculumEditor({
     }),
   )
 
-  const handleCreateCurriculum = () => {
-    const baseCount = INITIAL_CURRICULUM_DATA[part]?.length || 0
+  const handleCreateCurriculum = async () => {
+    const baseCount = 0
+
+    const newCurriculumTempId = `curriculum-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+    const newWorkbookTempId = `wb-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 
     const newWorkbook: Workbook = {
-      id: `wb-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      id: newWorkbookTempId,
       number: 1,
       title: "",
       missions: ["", ""],
     }
 
     const newCurriculum: CurriculumItem = {
-      id: `curriculum-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      id: newCurriculumTempId,
       number: "00",
       title: "",
       workbookCount: 1,
@@ -180,11 +224,57 @@ export function useCurriculumEditor({
     setCurriculums((prev) =>
       recalculateCurriculumNumbers([...prev, newCurriculum], baseCount),
     )
+
+    // API 연동: 서버에 커리큘럼 생성 요청
+    try {
+      const apiPart = mapPartToApiEnum(part)
+      const createdId = await createCurriculum({
+        gisuId,
+        part: apiPart,
+        title: "새 커리큘럼",
+      })
+
+      if (createdId) {
+        setCurriculums((prev) =>
+          prev.map((c) =>
+            c.id === newCurriculumTempId ? { ...c, id: String(createdId) } : c,
+          ),
+        )
+        try {
+          const now = new Date()
+          const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+          const createdWbId = await createWeeklyCurriculum({
+            curriculumId: createdId,
+            weekNo: 1,
+            title: "",
+            startsAt: now.toISOString(),
+            endsAt: nextWeek.toISOString(),
+          })
+          if (createdWbId) {
+            setCurriculums((prev) =>
+              prev.map((c) => {
+                if (c.id !== String(createdId)) return c
+                const updatedWorkbooks = c.workbooks.map((wb) =>
+                  wb.id === newWorkbookTempId
+                    ? { ...wb, id: String(createdWbId) }
+                    : wb,
+                )
+                return { ...c, workbooks: updatedWorkbooks }
+              }),
+            )
+          }
+        } catch {
+          // Ignore secondary creation error
+        }
+      }
+    } catch {
+      // Ignore initial creation error fallback to local state
+    }
   }
 
   const handleUpdateCurriculumTitle = (id: string, title: string) => {
     const trimmed = title.trim()
-    const baseCount = INITIAL_CURRICULUM_DATA[part]?.length || 0
+    const baseCount = 0
 
     if (trimmed !== "") {
       const isDuplicate = curriculums.some(
@@ -210,6 +300,25 @@ export function useCurriculumEditor({
       const updated = prev.map((c) => (c.id === id ? { ...c, title } : c))
       return recalculateCurriculumNumbers(updated, baseCount)
     })
+  }
+
+  const handleBlurCurriculumTitle = async (id: string, title: string) => {
+    const trimmed = title.trim()
+    if (!trimmed) return
+    const numericId = Number(id)
+    if (!Number.isNaN(numericId) && numericId > 0) {
+      try {
+        await updateCurriculum(numericId, { title: trimmed })
+      } catch {
+        addToast({
+          message: "커리큘럼 제목 변경 저장에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+    }
   }
 
   const handleUpdateWorkbookTitle = (
@@ -256,6 +365,36 @@ export function useCurriculumEditor({
         return { ...c, workbooks: newWorkbooks }
       }),
     )
+  }
+
+  const handleBlurWorkbookTitle = async (
+    curriculumId: string,
+    wbIndex: number,
+    title: string,
+  ) => {
+    const trimmed = title.trim()
+    const curriculum = curriculums.find((c) => c.id === curriculumId)
+    if (!curriculum) return
+    const wb = curriculum.workbooks[wbIndex]
+    if (!wb) return
+
+    const numericWbId = Number(wb.id)
+    if (!Number.isNaN(numericWbId) && numericWbId > 0) {
+      try {
+        await updateWeeklyCurriculum(numericWbId, {
+          title: trimmed,
+          weekNo: wb.number,
+        })
+      } catch {
+        addToast({
+          message: "주차별 워크북 제목 저장에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+    }
   }
 
   const handleUpdateMission = (
@@ -344,16 +483,23 @@ export function useCurriculumEditor({
     )
   }
 
-  const handleAddWorkbook = (curriculumId: string) => {
+  const handleAddWorkbook = async (curriculumId: string) => {
+    const targetCurriculum = curriculums.find((c) => c.id === curriculumId)
+    const nextWeekNo = targetCurriculum
+      ? targetCurriculum.workbooks.length + 1
+      : 1
+    const newWbTempId = `wb-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+
+    const newWb: Workbook = {
+      id: newWbTempId,
+      number: nextWeekNo,
+      title: "",
+      missions: ["", ""],
+    }
+
     setCurriculums((prev) =>
       prev.map((c) => {
         if (c.id !== curriculumId) return c
-        const newWb: Workbook = {
-          id: `wb-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-          number: c.workbooks.length + 1,
-          title: "",
-          missions: ["", ""],
-        }
         const newWorkbooks = [...c.workbooks, newWb]
         const missionCount = newWorkbooks.reduce(
           (sum, wb) => sum + (wb.missions ? wb.missions.length : 0),
@@ -367,9 +513,52 @@ export function useCurriculumEditor({
         }
       }),
     )
+
+    const numericCurriculumId = Number(curriculumId)
+    if (!Number.isNaN(numericCurriculumId) && numericCurriculumId > 0) {
+      try {
+        const now = new Date()
+        const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+        const createdWeeklyId = await createWeeklyCurriculum({
+          curriculumId: numericCurriculumId,
+          weekNo: nextWeekNo,
+          title: "",
+          startsAt: now.toISOString(),
+          endsAt: nextWeek.toISOString(),
+        })
+
+        if (createdWeeklyId) {
+          setCurriculums((prev) =>
+            prev.map((c) => {
+              if (c.id !== curriculumId) return c
+              const updatedWbs = c.workbooks.map((wb) =>
+                wb.id === newWbTempId
+                  ? { ...wb, id: String(createdWeeklyId) }
+                  : wb,
+              )
+              return { ...c, workbooks: updatedWbs }
+            }),
+          )
+        }
+      } catch {
+        addToast({
+          message: "워크북 추가 저장에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+    }
   }
 
-  const handleDeleteWorkbook = (curriculumId: string, wbIndex: number) => {
+  const handleDeleteWorkbook = async (
+    curriculumId: string,
+    wbIndex: number,
+  ) => {
+    const targetCurriculum = curriculums.find((c) => c.id === curriculumId)
+    const targetWb = targetCurriculum?.workbooks[wbIndex]
+
     setCurriculums((prev) =>
       prev.map((c) => {
         if (c.id !== curriculumId) return c
@@ -388,10 +577,27 @@ export function useCurriculumEditor({
         }
       }),
     )
+
+    if (targetWb) {
+      const numericWbId = Number(targetWb.id)
+      if (!Number.isNaN(numericWbId) && numericWbId > 0) {
+        try {
+          await deleteWeeklyCurriculum(numericWbId)
+        } catch {
+          addToast({
+            message: "워크북 삭제에 실패했습니다.",
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+        }
+      }
+    }
   }
 
   const handleMoveCurriculumToBottom = (id: string) => {
-    const baseCount = INITIAL_CURRICULUM_DATA[part]?.length || 0
+    const baseCount = 0
     setCurriculums((prev) => {
       const targetIdx = prev.findIndex((c) => c.id === id)
       if (targetIdx === -1) return prev
@@ -403,11 +609,12 @@ export function useCurriculumEditor({
     })
   }
 
-  const handleRestoreCurriculum = (
+  // 되돌리기(Undo) 클릭 시 로컬 State 복구 및 API 백엔드 재등록 연동
+  const handleRestoreCurriculum = async (
     restoredItem: CurriculumItem,
     targetIndex: number,
   ) => {
-    const baseCount = INITIAL_CURRICULUM_DATA[part]?.length || 0
+    const baseCount = 0
     setCurriculums((prev) => {
       const next = [...prev]
       if (targetIndex >= 0 && targetIndex <= next.length) {
@@ -417,10 +624,44 @@ export function useCurriculumEditor({
       }
       return recalculateCurriculumNumbers(next, baseCount)
     })
+
+    // 백엔드 재등록 API 연동
+    try {
+      const apiPart = mapPartToApiEnum(part)
+      const newCurriculumId = await createCurriculum({
+        gisuId,
+        part: apiPart,
+        title: restoredItem.title || "복원된 커리큘럼",
+      })
+
+      if (newCurriculumId) {
+        setCurriculums((prev) =>
+          prev.map((c) =>
+            c.id === restoredItem.id
+              ? { ...c, id: String(newCurriculumId) }
+              : c,
+          ),
+        )
+
+        for (const wb of restoredItem.workbooks) {
+          const now = new Date()
+          const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+          await createWeeklyCurriculum({
+            curriculumId: newCurriculumId,
+            weekNo: wb.number,
+            title: wb.title,
+            startsAt: now.toISOString(),
+            endsAt: nextWeek.toISOString(),
+          })
+        }
+      }
+    } catch {
+      // Ignore background restore sync fallback
+    }
   }
 
-  const handleDeleteCurriculum = (id: string) => {
-    const baseCount = INITIAL_CURRICULUM_DATA[part]?.length || 0
+  const handleDeleteCurriculum = async (id: string) => {
+    const baseCount = 0
     const targetIndex = curriculums.findIndex((c) => c.id === id)
     const targetCurriculum = curriculums[targetIndex]
 
@@ -430,6 +671,22 @@ export function useCurriculumEditor({
       const filtered = prev.filter((c) => c.id !== id)
       return recalculateCurriculumNumbers(filtered, baseCount)
     })
+
+    const numericCurriculumId = Number(id)
+    if (!Number.isNaN(numericCurriculumId) && numericCurriculumId > 0) {
+      try {
+        await deleteCurriculum(numericCurriculumId)
+      } catch {
+        addToast({
+          message: "커리큘럼 삭제에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
+    }
 
     addToast({
       message: "선택한 커리큘럼이 삭제되었습니다.",
@@ -468,23 +725,43 @@ export function useCurriculumEditor({
       const newIndex = curriculums.findIndex((c) => c.id === over.id)
 
       if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
-        const baseCount = INITIAL_CURRICULUM_DATA[part]?.length || 0
+        const baseCount = 0
         setCurriculums((prev) => {
           const reordered = arrayMove(prev, oldIndex, newIndex)
           return recalculateCurriculumNumbers(reordered, baseCount)
         })
       }
+    } else if (activeData?.type === "workbook") {
+      // 주차 순서(weekNo) 이동 변경 시 백엔드 weekNo 업데이트
+      curriculums.forEach((c) => {
+        c.workbooks.forEach(async (wb, idx) => {
+          const numericWbId = Number(wb.id)
+          if (!Number.isNaN(numericWbId) && numericWbId > 0) {
+            try {
+              await updateWeeklyCurriculum(numericWbId, {
+                weekNo: idx + 1,
+                title: wb.title,
+              })
+            } catch {
+              // Ignore background order sync error
+            }
+          }
+        })
+      })
     }
   }
 
   return {
     curriculums,
     setCurriculums,
+    isLoading,
     closestCenter,
     sensors,
     handleCreateCurriculum,
     handleUpdateCurriculumTitle,
+    handleBlurCurriculumTitle,
     handleUpdateWorkbookTitle,
+    handleBlurWorkbookTitle,
     handleUpdateMission,
     handleAddMission,
     handleRemoveMission,
@@ -492,6 +769,7 @@ export function useCurriculumEditor({
     handleDeleteWorkbook,
     handleMoveCurriculumToBottom,
     handleDeleteCurriculum,
+    handleRestoreCurriculum,
     handleDragOver,
     handleDragEnd,
   }
