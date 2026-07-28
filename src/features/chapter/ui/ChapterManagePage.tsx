@@ -51,7 +51,7 @@ export function ChapterManagePage() {
   const deleteChapterMutation = useDeleteChapter()
   const createChapterMutation = useCreateChapter()
   const createChaptersBulkMutation = useCreateChaptersBulk()
-  const { data: activeGisuId } = useActiveGisuId()
+  const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
 
   const assignedSchools = chapters.flatMap((ch) => ch.assignedSchools)
 
@@ -197,8 +197,20 @@ export function ChapterManagePage() {
           }
 
           if (isExistingChapter) {
+            if (isGisuLoading || activeGisuId == null) {
+              addToast({
+                message:
+                  "기수 정보를 불러오는 중이거나 선택된 기수가 없습니다.",
+                color: "red",
+                variant: "deep",
+                type: "default",
+                duration: 3000,
+              })
+              return
+            }
+
             await createChapterMutation.mutateAsync({
-              gisuId: activeGisuId ?? 1,
+              gisuId: activeGisuId,
               name: chapterToDelete.name,
               schoolIds: chapterToDelete.assignedSchools
                 .map((s) => Number(s.id))
@@ -240,8 +252,19 @@ export function ChapterManagePage() {
   async function handleSave() {
     if (chapters.length === 0) return
 
+    if (isGisuLoading || activeGisuId == null) {
+      addToast({
+        message: "기수 정보를 불러오는 중이거나 선택된 기수가 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
     const bulkPayload = chapters.map((ch) => ({
-      gisuId: activeGisuId ?? 1,
+      gisuId: activeGisuId,
       name: ch.name,
       schoolIds: ch.assignedSchools
         .map((s) => Number(s.id))
