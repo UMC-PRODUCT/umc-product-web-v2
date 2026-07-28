@@ -6,8 +6,14 @@ import {
 } from "@dnd-kit/core"
 import { useState } from "react"
 
+import {
+  useCreateChapter,
+  useCreateChaptersBulk,
+  useDeleteChapter,
+} from "@/entities/organization/hooks/useChapter"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -41,6 +47,11 @@ export function ChapterManagePage() {
   const [activeSchoolVariant, setActiveSchoolVariant] = useState<
     "waiting" | "assigned"
   >("waiting")
+
+  const deleteChapterMutation = useDeleteChapter()
+  const createChapterMutation = useCreateChapter()
+  const createChaptersBulkMutation = useCreateChaptersBulk()
+  const { data: activeGisuId } = useActiveGisuId()
 
   const assignedSchools = chapters.flatMap((ch) => ch.assignedSchools)
 
@@ -114,7 +125,7 @@ export function ChapterManagePage() {
     setSelectedChipId(null)
   }
 
-  function handleDeleteChapter(chapterId: string) {
+  async function handleDeleteChapter(chapterId: string) {
     const chapterToDelete = chapters.find((ch) => ch.id === chapterId)
     if (!chapterToDelete) return
     const targetIndex = chapters.indexOf(chapterToDelete)
@@ -126,6 +137,15 @@ export function ChapterManagePage() {
     setChapters((prev) => prev.filter((ch) => ch.id !== chapterId))
     setSelectedChipId(null)
 
+    const isExistingChapter = !chapterId.startsWith("chapter-")
+    if (isExistingChapter) {
+      try {
+        await deleteChapterMutation.mutateAsync(chapterId)
+      } catch {
+        // API 삭제 시도 중 실패 시 로깅 또는 무시
+      }
+    }
+
     addToast({
       message: "지부가 삭제되었습니다.",
       color: "red",
@@ -134,7 +154,7 @@ export function ChapterManagePage() {
       duration: 5000,
       action: {
         label: "되돌리기",
-        onClick: () => {
+        onClick: async () => {
           setChapters((prev) => {
             if (prev.some((ch) => ch.id === chapterToDelete.id)) return prev
             const next = [...prev]
@@ -150,6 +170,16 @@ export function ChapterManagePage() {
             setUnassignedSchools((prev) =>
               prev.filter((s) => !restoredSchoolIds.has(s.id)),
             )
+          }
+
+          if (isExistingChapter) {
+            await createChapterMutation.mutateAsync({
+              gisuId: activeGisuId ?? 1,
+              name: chapterToDelete.name,
+              schoolIds: chapterToDelete.assignedSchools
+                .map((s) => Number(s.id))
+                .filter((id) => !Number.isNaN(id)),
+            })
           }
         },
       },
@@ -181,6 +211,37 @@ export function ChapterManagePage() {
       prev.map((ch) => (ch.id === id ? { ...ch, name: name.trim() } : ch)),
     )
     return true
+  }
+
+  async function handleSave() {
+    if (chapters.length === 0) return
+
+    const bulkPayload = chapters.map((ch) => ({
+      gisuId: activeGisuId ?? 1,
+      name: ch.name,
+      schoolIds: ch.assignedSchools
+        .map((s) => Number(s.id))
+        .filter((id) => !Number.isNaN(id)),
+    }))
+
+    try {
+      await createChaptersBulkMutation.mutateAsync(bulkPayload)
+      addToast({
+        message: "지부 정보가 저장되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } catch {
+      addToast({
+        message: "지부 정보 저장에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
   }
 
   return (
@@ -239,6 +300,7 @@ export function ChapterManagePage() {
               color="primary"
               variant="fill"
               className="w-fit rounded-[8px] px-3 py-1.5"
+              onClick={handleSave}
             >
               저장하기
             </Button>
