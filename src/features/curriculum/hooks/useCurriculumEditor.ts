@@ -268,7 +268,18 @@ export function useCurriculumEditor({
         }
       }
     } catch {
-      // Ignore initial creation error fallback to local state
+      setCurriculums((prev) => {
+        const filtered = prev.filter((c) => c.id !== newCurriculumTempId)
+        return recalculateCurriculumNumbers(filtered, baseCount)
+      })
+
+      addToast({
+        message: "커리큘럼 생성에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
     }
   }
 
