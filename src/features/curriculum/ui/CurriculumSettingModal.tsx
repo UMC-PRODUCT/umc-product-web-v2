@@ -16,6 +16,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { useState } from "react"
 
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
+import { Button } from "@/shared/ui/Button"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
@@ -170,9 +171,15 @@ export function CurriculumSettingModal({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-2 border-teal-gray-100 flex h-180 w-227 flex-col gap-8 overflow-y-auto rounded-[16px] border bg-white px-8 py-7.5 focus:outline-none">
-            <Modal.Title className="text-heading-4-semibold text-teal-gray-900">
-              커리큘럼 설정
-            </Modal.Title>
+            <div className="flex w-full items-center justify-between">
+              <Modal.Title className="text-heading-4-semibold text-teal-gray-900">
+                커리큘럼 설정
+              </Modal.Title>
+
+              <Button size="s" color="primary" variant="fill">
+                완료
+              </Button>
+            </div>
 
             {items.length > 0 ? (
               <DndContext
