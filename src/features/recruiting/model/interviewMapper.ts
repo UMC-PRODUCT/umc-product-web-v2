@@ -9,14 +9,17 @@ function toBlock(
   title: string,
   questions: RecruitingInterviewQuestion[],
 ): InterviewQuestionBlock | null {
-  if (questions.length === 0) return null
+  // 조회 API 가 활성 질문만 준다고 알려져 있지만, 응답에 active 가 실려 오므로
+  // 여기서도 거른다. 이 함수만 놓고 봐도 결과가 맞아야 한다.
+  const active = questions.filter((question) => question.active)
+  if (active.length === 0) return null
   return {
     group,
     title,
-    questions: questions
+    questions: active
       .slice()
       .sort((a, b) => a.orderNo - b.orderNo)
-      .map((question) => ({ text: question.content })),
+      .map((question) => ({ id: String(question.id), text: question.content })),
     // 답변을 저장·조회하는 경로가 아직 없다. 질문만 채운다.
     answers: [],
   }

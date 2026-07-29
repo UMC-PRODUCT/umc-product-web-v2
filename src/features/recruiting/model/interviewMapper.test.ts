@@ -55,6 +55,40 @@ describe("toInterviewContent", () => {
     expect(toInterviewContent([], [])).toBeNull()
   })
 
+  it("비활성 질문은 렌더 대상에서 뺀다", () => {
+    const content = toInterviewContent(
+      [
+        { ...question("1", "지워진 질문", 1), active: false },
+        question("2", "살아 있는 질문", 2),
+      ],
+      [],
+    )
+
+    expect(content?.blocks[0]?.questions.map((q) => q.text)).toEqual([
+      "살아 있는 질문",
+    ])
+  })
+
+  it("전부 비활성이면 블록을 만들지 않는다", () => {
+    const content = toInterviewContent(
+      [{ ...question("1", "지워진 질문", 1), active: false }],
+      [],
+    )
+
+    expect(content).toBeNull()
+  })
+
+  it("내용이 같은 질문도 서로 다른 식별자를 갖는다", () => {
+    const content = toInterviewContent(
+      [question("1", "같은 질문", 1), question("2", "같은 질문", 2)],
+      [],
+    )
+
+    const ids = content?.blocks[0]?.questions.map((q) => q.id)
+    expect(ids).toEqual(["1", "2"])
+    expect(new Set(ids).size).toBe(2)
+  })
+
   it("답변 저장 경로가 없어 답변은 비워 둔다", () => {
     const content = toInterviewContent([question("1", "공통", 1)], [])
     expect(content?.blocks[0]?.answers).toEqual([])
