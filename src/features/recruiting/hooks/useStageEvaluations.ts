@@ -7,22 +7,40 @@ import { useMe } from "@/entities/member/hooks/useMe"
 
 import { recruitingKeys } from "../api/queryKeys"
 import { getRoundEvaluators, getStageEvaluations } from "../api/recruitingApi"
+import { resolveEvaluationEligibility } from "../model/evaluationRules"
 import {
   toApiStage,
   toOperatorEvaluations,
   toStageEvaluationDetail,
 } from "../model/evaluatorMapper"
 
+import type { RecruitingApplicationStatus } from "../api/types"
+import type {
+  EvaluationBlockReason,
+  EvaluatorState,
+} from "../model/evaluationRules"
 import type { EvaluationStage } from "../model/evaluationStage"
+
+const LOCK_REASON: Record<EvaluationBlockReason, string | undefined> = {
+  stageHasNoEvaluation: undefined,
+  permissionUnknown:
+    "권한 정보를 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.",
+  notEvaluator: "평가자로 지정된 운영진만 평가를 등록할 수 있습니다.",
+  stageClosed: "판정이 끝난 전형이라 평가를 수정할 수 없습니다.",
+}
 
 export function useStageEvaluations(
   applicationId: string,
   roundId: string | undefined,
   stage: EvaluationStage,
+  status: RecruitingApplicationStatus | undefined,
 ) {
   const { data: me } = useMe()
   const apiStage = toApiStage(stage)
-  const enabled = roundId != null && apiStage != null
+  // 평가 목록은 단계별 API 라 최종 단계에는 없지만, 평가자 명단은 차수 단위라
+  // 최종 화면에서도 조회해야 한다. 하나로 묶으면 최종 화면에서 명단이 비어
+  // 관리 권한을 판정하지 못해 합불 처리가 잠긴다.
+  const evaluationsEnabled = roundId != null && apiStage != null
 
   // 평가자 명단은 모집 관리 권한이 있어야 조회할 수 있다. 평가자 whitelist 에만
   // 올라간 운영진은 403 을 받으므로, 실패해도 평가 목록은 그대로 보여준다.
@@ -31,7 +49,7 @@ export function useStageEvaluations(
   const evaluatorsQuery = useQuery({
     queryKey: recruitingKeys.evaluators(roundId ?? ""),
     queryFn: () => getRoundEvaluators(roundId!),
-    enabled,
+    enabled: roundId != null,
     retry: (failureCount, error) =>
       !(isAxiosError(error) && error.response?.status === 403) &&
       failureCount < 2,
@@ -42,6 +60,13 @@ export function useStageEvaluations(
     [evaluatorsQuery.data],
   )
   const rosterKnown = evaluatorsQuery.isSuccess
+  // 403 은 "관리 권한 없음"이라는 확정 답이고, 그 외 실패는 아무것도 알려주지
+  // 않는다. 둘을 한 값으로 접으면 장애를 권한 없음으로 오인한다.
+  const rosterDenied =
+    evaluatorsQuery.isError &&
+    isAxiosError(evaluatorsQuery.error) &&
+    evaluatorsQuery.error.response?.status === 403
+  const rosterUnavailable = evaluatorsQuery.isError && !rosterDenied
   // 명단 조회가 끝나기 전에는 관리 권한 유무를 알 수 없다. 그 사이에 비운영진
   // 화면을 보였다가 뒤바뀌지 않도록 결과가 확정된 뒤에 조립한다.
   const rosterSettled = evaluatorsQuery.isSuccess || evaluatorsQuery.isError
@@ -53,7 +78,7 @@ export function useStageEvaluations(
       apiStage ?? "DOCUMENT",
     ),
     queryFn: () => getStageEvaluations(roundId!, applicationId, apiStage!),
-    enabled,
+    enabled: evaluationsEnabled,
     staleTime: 60 * 1000,
   })
 
@@ -87,8 +112,32 @@ export function useStageEvaluations(
     staleTime: 10 * 60 * 1000,
   })
 
+  // 평가 등록은 평가자 명단에 있는 사람만 할 수 있다.
+  //  · 명단을 받았으면 직접 확인한다.
+  //  · 403 이면 관리 권한이 없다는 뜻이고, 그런데도 평가 목록을 받았다면
+  //    서버가 평가자로 인정한 것이다(운영진 경로가 막혔으므로).
+  //  · 그 밖의 실패는 아무것도 증명하지 못한다. 운영진도 이 경로로 떨어질 수
+  //    있어 평가자로 단정하면 제출 단계에서 거부된다.
+  const evaluatorState: EvaluatorState = useMemo(() => {
+    if (!me) return "unknown"
+    if (rosterKnown) {
+      const myId = String(me.id)
+      return roster.some((evaluator) => String(evaluator.memberId) === myId)
+        ? "yes"
+        : "no"
+    }
+    if (rosterDenied) return evaluationsQuery.isSuccess ? "yes" : "no"
+    return "unknown"
+  }, [me, rosterKnown, rosterDenied, roster, evaluationsQuery.isSuccess])
+
+  const eligibility = resolveEvaluationEligibility(
+    stage,
+    status,
+    evaluatorState,
+  )
+
   const evaluation = useMemo(() => {
-    if (!enabled || !me || !rosterSettled) return null
+    if (!evaluationsEnabled || !me || !rosterSettled) return null
     const evaluations = evaluationsQuery.data
     if (!evaluations) return null
 
@@ -101,23 +150,27 @@ export function useStageEvaluations(
       ),
       stage,
       String(me.id),
-      // 평가 등록 mutation 은 후속 작업이라 이번에는 읽기 전용으로 둔다.
-      true,
+      !eligibility.canSubmit,
+      LOCK_REASON[eligibility.reason ?? "stageHasNoEvaluation"],
     )
   }, [
-    enabled,
+    evaluationsEnabled,
     me,
     rosterSettled,
     roster,
     evaluationsQuery.data,
     profilesQuery.data,
     stage,
+    eligibility.canSubmit,
+    eligibility.reason,
   ])
 
   return {
     evaluation,
     // 명단을 못 받으면 아직 평가하지 않은 운영진을 알 수 없어 총원을 셀 수 없다.
     rosterKnown,
+    rosterUnavailable,
+    canSubmit: eligibility.canSubmit,
     isLoading: evaluationsQuery.isLoading,
     isError: evaluationsQuery.isError,
   }

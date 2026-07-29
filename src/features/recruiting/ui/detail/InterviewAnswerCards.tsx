@@ -72,7 +72,7 @@ function InterviewBlockCard({ block }: { block: InterviewQuestionBlock }) {
           <ol className="flex flex-col gap-3">
             {block.questions.map((question, index) => (
               <li
-                key={question.text}
+                key={question.id}
                 className="text-body-1-regular text-teal-gray-800 flex gap-2"
               >
                 <span className="text-teal-gray-500 shrink-0">
@@ -83,7 +83,12 @@ function InterviewBlockCard({ block }: { block: InterviewQuestionBlock }) {
             ))}
           </ol>
 
-          <div className="flex flex-col gap-4">
+          <div
+            className={cn(
+              "flex flex-col gap-4",
+              block.answers.length === 0 && "hidden",
+            )}
+          >
             <h4 className="text-heading-7-semibold text-teal-gray-800">
               지원자 답변
             </h4>

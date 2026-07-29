@@ -112,6 +112,9 @@ export function useApplicationDetail(
 
   return {
     detail,
+    // 평가 등록 가능 여부는 지원서 상태로 갈린다. 조립된 detail 에는 남지 않아
+    // 원본 요약을 그대로 넘긴다.
+    application: application ?? null,
     round: location?.round ?? null,
     isError:
       gisuQuery.isError ||
