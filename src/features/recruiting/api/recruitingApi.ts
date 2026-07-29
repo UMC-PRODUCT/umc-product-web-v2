@@ -4,6 +4,7 @@ import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 import type {
   ApiEvaluationStage,
+  FinalDecisionBody,
   FormStructureQuery,
   PublicRoundsQuery,
   RecruitingApplicationDetail,
@@ -11,10 +12,12 @@ import type {
   RecruitingApplicationSummary,
   RecruitingEvaluation,
   RecruitingFormStructure,
+  RecruitingInterviewQuestion,
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
   RecruitingRoundPhase,
   RoundApplicationsQuery,
+  SubmitEvaluationBody,
 } from "./types"
 
 const APPLICATIONS_PAGE_SIZE = 100
@@ -132,6 +135,46 @@ export async function getRoundEvaluators(
 ): Promise<RecruitingRoundEvaluator[]> {
   const { data } = await api.get<ApiResponse<RecruitingRoundEvaluator[]>>(
     `/v1/recruiting/admin/rounds/${roundId}/evaluators`,
+  )
+  return data.result
+}
+
+export async function submitEvaluation(
+  roundId: string,
+  applicationId: string,
+  stage: ApiEvaluationStage,
+  body: SubmitEvaluationBody,
+): Promise<void> {
+  await api.put(
+    `/v1/recruiting/rounds/${roundId}/applications/${applicationId}/evaluations/${stage}`,
+    body,
+  )
+}
+
+export async function decideFinal(
+  applicationId: string,
+  body: FinalDecisionBody,
+): Promise<void> {
+  await api.patch(
+    `/v1/recruiting/admin/applications/${applicationId}/final-decision`,
+    body,
+  )
+}
+
+export async function getRoundInterviewQuestions(
+  roundId: string,
+): Promise<RecruitingInterviewQuestion[]> {
+  const { data } = await api.get<ApiResponse<RecruitingInterviewQuestion[]>>(
+    `/v1/recruiting/admin/rounds/${roundId}/questions`,
+  )
+  return data.result
+}
+
+export async function getApplicationInterviewQuestions(
+  applicationId: string,
+): Promise<RecruitingInterviewQuestion[]> {
+  const { data } = await api.get<ApiResponse<RecruitingInterviewQuestion[]>>(
+    `/v1/recruiting/admin/applications/${applicationId}/questions`,
   )
   return data.result
 }

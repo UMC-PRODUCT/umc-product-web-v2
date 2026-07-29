@@ -176,8 +176,30 @@ export interface RecruitingEvaluation {
   submittedAt: string | null
 }
 
+export interface SubmitEvaluationBody {
+  decision: RecruitingEvaluationDecision
+  comment?: string
+}
+
 export interface RecruitingRoundEvaluator {
   id: string
   roundId: string
   memberId: string
 }
+
+export interface RecruitingInterviewQuestion {
+  id: string
+  roundId: string
+  applicationId: string | null
+  content: string
+  orderNo: number
+  active: boolean
+}
+
+export type RecruitingDecision = "PASS" | "FAIL"
+
+// 합격에는 확정 트랙이 필수이고 지원자의 1·2지망 중 하나여야 한다. 불합격에는
+// 담으면 거부되므로 두 형태를 타입으로 갈라 둔다.
+export type FinalDecisionBody =
+  | { decision: "PASS"; acceptedTrack: RecruitingTrack; reason?: string }
+  | { decision: "FAIL"; reason?: string }
