@@ -238,6 +238,7 @@ v1.0.0 이후 develop에 누적된 변경을 배포합니다. 데모데이 소�
 
 UMC 데모데이 매칭 시스템 첫 공식 릴리스.
 
+[1.1.11]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.10...v1.1.11
 [1.1.10]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.9...v1.1.10
 [1.1.9]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.8...v1.1.9
 [1.1.8]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.7...v1.1.8
