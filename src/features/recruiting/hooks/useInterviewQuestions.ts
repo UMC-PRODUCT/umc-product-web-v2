@@ -30,10 +30,17 @@ export function useInterviewQuestions(
     staleTime: 5 * 60 * 1000,
   })
 
+  // 한쪽만 실패하면 남은 블록만 그려져 질문이 원래 없는 것처럼 보인다.
+  // 둘 다 확보된 뒤에 조립하고, 그 전까지는 상태를 그대로 넘긴다.
+  const isLoading = roundQuestions.isLoading || applicationQuestions.isLoading
+  const isError = roundQuestions.isError || applicationQuestions.isError
+  const ready = roundQuestions.isSuccess && applicationQuestions.isSuccess
+
   return {
-    interview: toInterviewContent(
-      roundQuestions.data ?? [],
-      applicationQuestions.data ?? [],
-    ),
+    interview: ready
+      ? toInterviewContent(roundQuestions.data, applicationQuestions.data)
+      : null,
+    isLoading,
+    isError,
   }
 }

@@ -72,7 +72,7 @@ export function ApplicationEvaluationDetailPage({
     isError: isEvaluationError,
   } = useStageEvaluations(applicationId, roundId, stage, application?.status)
   const submitEvaluation = useSubmitEvaluation(applicationId, roundId, stage)
-  const { interview } = useInterviewQuestions(
+  const { interview, isError: isInterviewError } = useInterviewQuestions(
     applicationId,
     roundId,
     stage === "interview",
@@ -137,9 +137,16 @@ export function ApplicationEvaluationDetailPage({
               stage={stage}
               reachedStages={detail.reachedStages}
             />
-            {stage === "interview" && interview && (
-              <InterviewAnswerCards content={interview} />
-            )}
+            {stage === "interview" &&
+              (isInterviewError ? (
+                <div className="border-teal-gray-100 flex min-h-20 items-center justify-center rounded-[16px] border bg-white p-6">
+                  <p className="text-body-2-regular text-teal-gray-500">
+                    면접 질문을 불러오지 못했습니다.
+                  </p>
+                </div>
+              ) : (
+                interview && <InterviewAnswerCards content={interview} />
+              ))}
             {isEvaluationError ? (
               <div className="border-teal-gray-100 flex min-h-30 items-center justify-center rounded-[16px] border bg-white p-6">
                 <p className="text-body-2-regular text-teal-gray-500">
