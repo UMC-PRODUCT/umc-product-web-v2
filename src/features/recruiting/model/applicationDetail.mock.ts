@@ -242,10 +242,10 @@ function buildInterviewContent(row: ApplicantRow): InterviewContent {
         totalCountLabel,
         timestampLabel: "26-07-04 02:48 기준",
         questions: [
-          { text: "UMC는 어떻게 알게 되셨나요?" },
-          { text: "재학 중이신가요, 휴학 중이신가요?" },
-          { text: "무슨 노래 좋아하세요?" },
-          { text: "MBTI가 어떻게 되세요?" },
+          { id: "q-mock-1", text: "UMC는 어떻게 알게 되셨나요?" },
+          { id: "q-mock-2", text: "재학 중이신가요, 휴학 중이신가요?" },
+          { id: "q-mock-3", text: "무슨 노래 좋아하세요?" },
+          { id: "q-mock-4", text: "MBTI가 어떻게 되세요?" },
         ],
         answers: [
           {
@@ -264,13 +264,14 @@ function buildInterviewContent(row: ApplicantRow): InterviewContent {
         group: "individual",
         title: "개별 질문",
         questions: [
-          { text: "전공이 어떻게 되시나요?" },
-          { text: "오프라인 참여도 가능하신가요?" },
+          { id: "q-mock-5", text: "전공이 어떻게 되시나요?" },
+          { id: "q-mock-6", text: "오프라인 참여도 가능하신가요?" },
           {
+            id: "q-mock-9",
             text: "포트폴리오에서 OOO 프로젝트는 무엇인가요? 참여 비율은 어떻게 되나요?",
           },
-          { text: "개발자와 협업해 보신 경험이 있으신가요?" },
-          { text: "서비스 배포 경험이 있으신가요?" },
+          { id: "q-mock-7", text: "개발자와 협업해 보신 경험이 있으신가요?" },
+          { id: "q-mock-8", text: "서비스 배포 경험이 있으신가요?" },
         ],
         answers: [
           {

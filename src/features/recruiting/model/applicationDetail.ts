@@ -71,7 +71,7 @@ export interface InterviewQuestionBlock {
   title: string
   totalCountLabel?: string
   timestampLabel?: string
-  questions: { text: string }[]
+  questions: { id: string; text: string }[]
   answers: InterviewAnswerSession[]
 }
 

@@ -72,7 +72,7 @@ function InterviewBlockCard({ block }: { block: InterviewQuestionBlock }) {
           <ol className="flex flex-col gap-3">
             {block.questions.map((question, index) => (
               <li
-                key={question.text}
+                key={question.id}
                 className="text-body-1-regular text-teal-gray-800 flex gap-2"
               >
                 <span className="text-teal-gray-500 shrink-0">
