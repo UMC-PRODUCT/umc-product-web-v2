@@ -83,7 +83,12 @@ function InterviewBlockCard({ block }: { block: InterviewQuestionBlock }) {
             ))}
           </ol>
 
-          <div className="flex flex-col gap-4">
+          <div
+            className={cn(
+              "flex flex-col gap-4",
+              block.answers.length === 0 && "hidden",
+            )}
+          >
             <h4 className="text-heading-7-semibold text-teal-gray-800">
               지원자 답변
             </h4>

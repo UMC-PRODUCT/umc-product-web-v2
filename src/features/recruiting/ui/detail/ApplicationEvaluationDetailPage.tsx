@@ -4,15 +4,19 @@ import LeftChevronIcon from "@/shared/assets/icon/chevron/LeftChevronIcon"
 import { Breadcrumb } from "@/shared/ui/breadcrumb/Breadcrumb"
 
 import { useApplicationDetail } from "../../hooks/useApplicationDetail"
+import { useSubmitEvaluation } from "../../hooks/useEvaluationMutations"
+import { useInterviewQuestions } from "../../hooks/useInterviewQuestions"
 import { useStageEvaluations } from "../../hooks/useStageEvaluations"
+import { canDecideFinal } from "../../model/evaluationRules"
 import {
   EVALUATION_STAGE_LABEL,
   EVALUATION_STAGE_SHORT_LABEL,
   type EvaluationStage,
 } from "../../model/evaluationStage"
 import { ApplicationFormReadonly } from "./ApplicationFormReadonly"
-import { EvaluationResultToggle } from "./EvaluationResultToggle"
 import { EvaluationStepper } from "./EvaluationStepper"
+import { FinalDecisionSection } from "./FinalDecisionSection"
+import { InterviewAnswerCards } from "./InterviewAnswerCards"
 import { MyStageEvaluationPanel } from "./MyStageEvaluationPanel"
 import { OperatorEvaluationList } from "./OperatorEvaluationList"
 
@@ -57,12 +61,22 @@ export function ApplicationEvaluationDetailPage({
   applicationId,
   roundId,
 }: ApplicationEvaluationDetailPageProps) {
-  const { detail, isError } = useApplicationDetail(applicationId, roundId)
+  const { detail, application, isError } = useApplicationDetail(
+    applicationId,
+    roundId,
+  )
   const {
     evaluation,
     rosterKnown,
+    rosterUnavailable,
     isError: isEvaluationError,
-  } = useStageEvaluations(applicationId, roundId, stage)
+  } = useStageEvaluations(applicationId, roundId, stage, application?.status)
+  const submitEvaluation = useSubmitEvaluation(applicationId, roundId, stage)
+  const { interview } = useInterviewQuestions(
+    applicationId,
+    roundId,
+    stage === "interview",
+  )
 
   const listPath = STAGE_LIST_PATH[stage]
   const showFinalResult = stage !== "document"
@@ -123,6 +137,9 @@ export function ApplicationEvaluationDetailPage({
               stage={stage}
               reachedStages={detail.reachedStages}
             />
+            {stage === "interview" && interview && (
+              <InterviewAnswerCards content={interview} />
+            )}
             {isEvaluationError ? (
               <div className="border-teal-gray-100 flex min-h-30 items-center justify-center rounded-[16px] border bg-white p-6">
                 <p className="text-body-2-regular text-teal-gray-500">
@@ -136,7 +153,12 @@ export function ApplicationEvaluationDetailPage({
                     <MyStageEvaluationPanel
                       evaluation={evaluation}
                       stage={stage}
-                      onComplete={() => {}}
+                      onComplete={(result, comment) =>
+                        submitEvaluation.mutateAsync({
+                          decision: result === "pass" ? "APPROVED" : "REJECTED",
+                          comment: comment || undefined,
+                        })
+                      }
                     />
                   )}
                   <OperatorEvaluationList
@@ -146,20 +168,21 @@ export function ApplicationEvaluationDetailPage({
                 </>
               )
             )}
-            {showFinalResult && (
-              <div className="flex items-center justify-center gap-4 pt-2">
-                <span className="text-heading-7-semibold text-teal-gray-800">
-                  {finalResultLabel}
-                </span>
-                <EvaluationResultToggle
-                  value={detail.finalResult}
-                  onChange={() => {}}
-                  disabled
-                  variant="strong"
-                  failLabel="최종 불합격"
-                  passLabel="최종 합격"
+            {showFinalResult && application && (
+              <>
+                <FinalDecisionSection
+                  label={finalResultLabel}
+                  application={application}
+                  currentResult={detail.finalResult}
+                  canDecide={canDecideFinal(application.status, rosterKnown)}
                 />
-              </div>
+                {rosterUnavailable && (
+                  <p className="text-body-2-regular text-teal-gray-500 text-center">
+                    권한 정보를 불러오지 못해 합불 처리를 열지 못했습니다.
+                    새로고침 후 다시 시도해주세요.
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
