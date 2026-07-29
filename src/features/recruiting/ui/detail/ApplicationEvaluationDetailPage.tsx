@@ -72,13 +72,13 @@ export function ApplicationEvaluationDetailPage({
   const {
     permittedSeasonIds,
     isLoading: isPermissionLoading,
-    isError: isPermissionError,
+    isUnresolved: isPermissionUnresolved,
   } = useRecruitingPermissions(seasonId ? [seasonId] : [])
   const managePermission = resolveManagePermission({
     seasonId,
     permittedSeasonIds,
     isLoading: isPermissionLoading,
-    isError: isPermissionError,
+    isUnresolved: isPermissionUnresolved,
   })
   const {
     evaluation,
@@ -203,7 +203,7 @@ export function ApplicationEvaluationDetailPage({
                   currentResult={detail.finalResult}
                   canDecide={canDecideFinal(application.status, viewerIsAdmin)}
                 />
-                {isPermissionError && (
+                {isPermissionUnresolved && (
                   <p className="text-body-2-regular text-teal-gray-500 text-center">
                     권한 정보를 불러오지 못해 합불 처리를 열지 못했습니다.
                     새로고침 후 다시 시도해주세요.

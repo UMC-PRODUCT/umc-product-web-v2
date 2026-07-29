@@ -112,24 +112,27 @@ export function useStageEvaluations(
 
   // 평가 등록은 평가자 명단에 있는 사람만 할 수 있다.
   //  · 관리 권한이 있으면 명단을 직접 받아 확인한다.
-  //  · 권한이 없다고 확정됐다면, 그런데도 평가 목록을 받았다는 사실이
-  //    서버가 평가자로 인정했다는 뜻이다(운영진 경로가 막혔으므로).
-  //  · 권한 자체를 아직 모르면 단정하지 않는다.
+  //  · 권한이 없거나 판정하지 못했다면, 그런데도 평가 목록을 받았다는 사실이
+  //    서버가 평가자로 인정했다는 뜻이다(운영진 경로가 막혔으므로). 권한 조회
+  //    장애로 평가자를 막지 않는다. 평가자가 이 화면의 주 사용자다.
+  //  · 조회가 아직 끝나지 않았으면 단정하지 않는다.
   const evaluatorState: EvaluatorState = useMemo(() => {
-    if (!me || hasManagePermission === undefined) return "unknown"
-    if (hasManagePermission) {
+    if (!me) return "unknown"
+    if (hasManagePermission === true) {
       if (!rosterKnown) return "unknown"
       const myId = String(me.id)
       return roster.some((evaluator) => String(evaluator.memberId) === myId)
         ? "yes"
         : "no"
     }
+    if (!isPermissionResolved) return "unknown"
     if (evaluationsQuery.isSuccess) return "yes"
     if (evaluationsQuery.isError) return "no"
     return "unknown"
   }, [
     me,
     hasManagePermission,
+    isPermissionResolved,
     rosterKnown,
     roster,
     evaluationsQuery.isSuccess,

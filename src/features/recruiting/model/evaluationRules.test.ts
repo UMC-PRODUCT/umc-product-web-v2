@@ -17,7 +17,7 @@ describe("resolveManagePermission", () => {
         seasonId: "7",
         permittedSeasonIds: permitted,
         isLoading: false,
-        isError: false,
+        isUnresolved: false,
       }),
     ).toEqual({ isGranted: true, isResolved: true })
   })
@@ -28,7 +28,7 @@ describe("resolveManagePermission", () => {
         seasonId: "9",
         permittedSeasonIds: permitted,
         isLoading: false,
-        isError: false,
+        isUnresolved: false,
       }),
     ).toEqual({ isGranted: false, isResolved: true })
   })
@@ -39,7 +39,7 @@ describe("resolveManagePermission", () => {
         seasonId: "7",
         permittedSeasonIds: new Set(),
         isLoading: false,
-        isError: true,
+        isUnresolved: true,
       }),
     ).toEqual({ isGranted: undefined, isResolved: true })
   })
@@ -50,7 +50,7 @@ describe("resolveManagePermission", () => {
         seasonId: "7",
         permittedSeasonIds: new Set(),
         isLoading: true,
-        isError: false,
+        isUnresolved: false,
       }),
     ).toEqual({ isGranted: undefined, isResolved: false })
   })
@@ -61,7 +61,7 @@ describe("resolveManagePermission", () => {
         seasonId: null,
         permittedSeasonIds: permitted,
         isLoading: false,
-        isError: false,
+        isUnresolved: false,
       }),
     ).toEqual({ isGranted: undefined, isResolved: false })
   })

@@ -47,7 +47,14 @@ const SCHOOL_CARD_COLUMNS: ApplicantColumnOptions = {
   hideSchool: true,
 }
 
-function pageDescription(stage: EvaluationStage, scope: RecruitingScope) {
+function pageDescription(
+  stage: EvaluationStage,
+  scope: RecruitingScope,
+  isScopeReady: boolean,
+) {
+  // 조회가 끝나기 전 빈 스코프로 문구를 정하면 전 지부를 보는 사용자에게도
+  // '내 학교' 설명이 먼저 뜬 뒤 뒤바뀐다.
+  if (!isScopeReady) return EVALUATION_STAGE_DESCRIPTION[stage]
   const shortLabel = EVALUATION_STAGE_SHORT_LABEL[stage]
   if (scope.chapters.length === 1 && scope.schools.length > 1) {
     return `지부 ${shortLabel} 평가 현황을 확인하고, 내 학교 지원자를 평가합니다.`
@@ -80,7 +87,7 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
   const {
     permittedSeasonIds,
     isLoading: isPermissionLoading,
-    isError: isPermissionError,
+    isUnresolved: isPermissionUnresolved,
   } = useRecruitingPermissions(seasonIds)
 
   const scope = useMemo(
@@ -133,7 +140,11 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
           { id: stage, label: EVALUATION_STAGE_LABEL[stage] },
         ]}
         title={EVALUATION_STAGE_LABEL[stage]}
-        description={pageDescription(stage, scope)}
+        description={pageDescription(
+          stage,
+          scope,
+          !isLoading && !isPermissionLoading,
+        )}
         className="pl-3"
       />
       {showChapterTabs && (
@@ -176,10 +187,14 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
         <EmptyNotice message="모집 정보를 불러오는 중입니다." />
       ) : isError ? (
         <EmptyNotice message="모집 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
-      ) : isPermissionError ? (
-        <EmptyNotice message="권한 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
       ) : scope.groups.length === 0 ? (
-        <EmptyNotice message="조회할 수 있는 모집이 없습니다." />
+        <EmptyNotice
+          message={
+            isPermissionUnresolved
+              ? "권한 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+              : "조회할 수 있는 모집이 없습니다."
+          }
+        />
       ) : chapterGroups.length === 0 ? (
         <EmptyNotice message="현재 등록된 모집 공고가 없습니다." />
       ) : (

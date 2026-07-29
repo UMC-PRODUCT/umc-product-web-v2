@@ -50,6 +50,8 @@ export function useRecruitingPermissions(seasonIds: string[]) {
   return {
     permittedSeasonIds,
     isLoading: query.isLoading,
-    isError: query.isError,
+    // 재조회가 실패해도 앞서 받은 결과는 남는다. 실패를 곧 판정 불가로 접으면
+    // 창에 다시 들어올 때마다 권한이 사라져 버튼이 잠긴다.
+    isUnresolved: query.isError && query.data === undefined,
   }
 }

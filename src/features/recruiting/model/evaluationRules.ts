@@ -34,17 +34,17 @@ export function resolveManagePermission({
   seasonId,
   permittedSeasonIds,
   isLoading,
-  isError,
+  isUnresolved,
 }: {
   seasonId: string | null
   permittedSeasonIds: ReadonlySet<string>
   isLoading: boolean
-  isError: boolean
+  isUnresolved: boolean
 }): ManagePermission {
   if (seasonId == null || isLoading) {
     return { isGranted: undefined, isResolved: false }
   }
-  if (isError) {
+  if (isUnresolved) {
     return { isGranted: undefined, isResolved: true }
   }
   return { isGranted: permittedSeasonIds.has(seasonId), isResolved: true }
