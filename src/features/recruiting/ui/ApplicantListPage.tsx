@@ -77,8 +77,11 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
     () => groups.map((group) => String(group.seasonId)),
     [groups],
   )
-  const { permittedSeasonIds, isLoading: isPermissionLoading } =
-    useRecruitingPermissions(seasonIds)
+  const {
+    permittedSeasonIds,
+    isLoading: isPermissionLoading,
+    isError: isPermissionError,
+  } = useRecruitingPermissions(seasonIds)
 
   const scope = useMemo(
     () => resolveRecruitingScope(groups, permittedSeasonIds, viewerSchool),
@@ -173,6 +176,8 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
         <EmptyNotice message="모집 정보를 불러오는 중입니다." />
       ) : isError ? (
         <EmptyNotice message="모집 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
+      ) : isPermissionError ? (
+        <EmptyNotice message="권한 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
       ) : scope.groups.length === 0 ? (
         <EmptyNotice message="조회할 수 있는 모집이 없습니다." />
       ) : chapterGroups.length === 0 ? (

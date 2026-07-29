@@ -22,6 +22,34 @@ export interface EvaluationEligibility {
 // 접으면 권한 있는 사람에게 잘못된 안내가 나가므로 따로 둔다.
 export type EvaluatorState = "yes" | "no" | "unknown"
 
+export interface ManagePermission {
+  isGranted: boolean | undefined
+  isResolved: boolean
+}
+
+// 권한 조회 실패는 '권한 없음'이 아니다. 둘을 한 값으로 접으면 관리 권한자의
+// 합불 버튼이 사유 없이 잠긴다. 실패는 '판정 불가'로 두고, 아직 조회 중인
+// 구간과도 구분해 기다릴지 말지를 호출부가 가릴 수 있게 한다.
+export function resolveManagePermission({
+  seasonId,
+  permittedSeasonIds,
+  isLoading,
+  isError,
+}: {
+  seasonId: string | null
+  permittedSeasonIds: ReadonlySet<string>
+  isLoading: boolean
+  isError: boolean
+}): ManagePermission {
+  if (seasonId == null || isLoading) {
+    return { isGranted: undefined, isResolved: false }
+  }
+  if (isError) {
+    return { isGranted: undefined, isResolved: true }
+  }
+  return { isGranted: permittedSeasonIds.has(seasonId), isResolved: true }
+}
+
 // 서버는 전형이 열려 있는 동안에만 평가 등록을 받는다. 서류는 판정 전(SUBMITTED),
 // 면접은 면접 대상으로 확정된 뒤(INTERVIEW_ASSIGNED)만 열린다.
 const OPEN_STATUS: Partial<

@@ -8,7 +8,10 @@ import { useSubmitEvaluation } from "../../hooks/useEvaluationMutations"
 import { useInterviewQuestions } from "../../hooks/useInterviewQuestions"
 import { useRecruitingPermissions } from "../../hooks/useRecruitingPermissions"
 import { useStageEvaluations } from "../../hooks/useStageEvaluations"
-import { canDecideFinal } from "../../model/evaluationRules"
+import {
+  canDecideFinal,
+  resolveManagePermission,
+} from "../../model/evaluationRules"
 import {
   EVALUATION_STAGE_LABEL,
   EVALUATION_STAGE_SHORT_LABEL,
@@ -66,16 +69,19 @@ export function ApplicationEvaluationDetailPage({
     applicationId,
     roundId,
   )
-  const { permittedSeasonIds, isLoading: isPermissionLoading } =
-    useRecruitingPermissions(seasonId ? [seasonId] : [])
-  // 권한 조회가 끝나기 전에는 확정하지 않는다. 모른 채로 잠그면 사유가 잘못 나간다.
-  const hasManagePermission =
-    seasonId == null || isPermissionLoading
-      ? undefined
-      : permittedSeasonIds.has(seasonId)
+  const {
+    permittedSeasonIds,
+    isLoading: isPermissionLoading,
+    isError: isPermissionError,
+  } = useRecruitingPermissions(seasonId ? [seasonId] : [])
+  const managePermission = resolveManagePermission({
+    seasonId,
+    permittedSeasonIds,
+    isLoading: isPermissionLoading,
+    isError: isPermissionError,
+  })
   const {
     evaluation,
-    rosterUnavailable,
     hasManagePermission: viewerIsAdmin,
     isError: isEvaluationError,
   } = useStageEvaluations(
@@ -83,7 +89,7 @@ export function ApplicationEvaluationDetailPage({
     roundId,
     stage,
     application?.status,
-    hasManagePermission,
+    managePermission,
   )
   const submitEvaluation = useSubmitEvaluation(applicationId, roundId, stage)
   const { interview, isError: isInterviewError } = useInterviewQuestions(
@@ -197,7 +203,7 @@ export function ApplicationEvaluationDetailPage({
                   currentResult={detail.finalResult}
                   canDecide={canDecideFinal(application.status, viewerIsAdmin)}
                 />
-                {rosterUnavailable && (
+                {isPermissionError && (
                   <p className="text-body-2-regular text-teal-gray-500 text-center">
                     권한 정보를 불러오지 못해 합불 처리를 열지 못했습니다.
                     새로고침 후 다시 시도해주세요.

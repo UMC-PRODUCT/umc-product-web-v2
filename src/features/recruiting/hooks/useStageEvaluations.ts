@@ -18,6 +18,7 @@ import type { RecruitingApplicationStatus } from "../api/types"
 import type {
   EvaluationBlockReason,
   EvaluatorState,
+  ManagePermission,
 } from "../model/evaluationRules"
 import type { EvaluationStage } from "../model/evaluationStage"
 
@@ -34,9 +35,10 @@ export function useStageEvaluations(
   roundId: string | undefined,
   stage: EvaluationStage,
   status: RecruitingApplicationStatus | undefined,
-  /** 모집 관리 권한. 아직 확정되지 않았으면 undefined. */
-  hasManagePermission: boolean | undefined,
+  managePermission: ManagePermission,
 ) {
+  const { isGranted: hasManagePermission, isResolved: isPermissionResolved } =
+    managePermission
   const { data: me } = useMe()
   const apiStage = toApiStage(stage)
   // 평가 목록은 단계별 API 라 최종 단계에는 없지만, 평가자 명단은 차수 단위라
@@ -60,11 +62,10 @@ export function useStageEvaluations(
     [evaluatorsQuery.data],
   )
   const rosterKnown = evaluatorsQuery.isSuccess
-  // 관리 권한자인데 명단을 못 받은 경우. 미평가자를 알 수 없어 총원을 못 센다.
-  const rosterUnavailable = evaluatorsQuery.isError
-  // 권한이 없다고 확정됐으면 명단을 기다릴 필요가 없다.
+  // 명단은 관리 권한자만 조회한다. 권한 판정이 끝났고 권한자가 아니라면 기다릴
+  // 것이 없다. 판정 자체가 아직 안 끝났으면 기다린다.
   const rosterSettled =
-    hasManagePermission === false ||
+    (isPermissionResolved && hasManagePermission !== true) ||
     evaluatorsQuery.isSuccess ||
     evaluatorsQuery.isError
 
@@ -172,9 +173,6 @@ export function useStageEvaluations(
 
   return {
     evaluation,
-    // 명단을 못 받으면 아직 평가하지 않은 운영진을 알 수 없어 총원을 셀 수 없다.
-    rosterKnown,
-    rosterUnavailable,
     hasManagePermission: hasManagePermission === true,
     canSubmit: eligibility.canSubmit,
     isLoading: evaluationsQuery.isLoading,
