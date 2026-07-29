@@ -6,7 +6,6 @@ import {
   useSchoolList,
 } from "@/entities/organization/hooks/useSchool"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
-import { CHAPTERS } from "@/entities/organization/model/chapters"
 import { ChapterTabs } from "@/features/recruiting/ui/ChapterTabs"
 import { SchoolCard } from "@/features/settings/ui/SchoolCard"
 import { SchoolPagination } from "@/features/settings/ui/SchoolPagination"
@@ -40,14 +39,14 @@ function SchoolManagePage() {
     ? `${activeGisuData.gisu}기`
     : "11기"
 
+  const { getChapterIdBySchool, getChapterIdByName } = useSchoolChapterMap()
+
   const chapterIdParam = useMemo(() => {
     if (selectedChapter === "all") return undefined
     const num = Number(selectedChapter)
     if (!Number.isNaN(num)) return num
-    const index = (CHAPTERS as readonly string[]).indexOf(selectedChapter)
-    if (index !== -1) return index + 1
-    return undefined
-  }, [selectedChapter])
+    return getChapterIdByName(selectedChapter)
+  }, [selectedChapter, getChapterIdByName])
 
   const { data: summaryData, isLoading: isSummaryLoading } =
     useAdminSchoolsSummary({
@@ -58,7 +57,6 @@ function SchoolManagePage() {
       size: PAGE_SIZE,
     })
   const { isLoading: isListLoading } = useSchoolList()
-  const { getChapterIdBySchool } = useSchoolChapterMap()
 
   const isLoading = isSummaryLoading || isListLoading
 

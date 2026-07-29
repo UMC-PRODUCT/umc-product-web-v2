@@ -28,8 +28,18 @@ export function useSchoolChapterMap() {
     return map
   }, [chaptersData])
 
+  const chapterNameToId = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const chapter of chaptersData?.chapters ?? []) {
+      map.set(chapter.chapterName, Number(chapter.chapterId))
+    }
+    return map
+  }, [chaptersData])
+
   return {
     getChapterIdBySchool: (schoolName: string) =>
       schoolToChapterId.get(schoolName),
+    getChapterIdByName: (chapterName: string) =>
+      chapterNameToId.get(chapterName),
   }
 }
