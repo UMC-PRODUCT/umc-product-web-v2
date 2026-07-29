@@ -85,6 +85,7 @@ export async function getAdminSchoolsSummary(params?: {
   search?: string
   page?: number
   size?: number
+  sort?: string | string[]
 }): Promise<PageResponseAdminSchoolSummaryResponse> {
   const { data } = await api.get<
     ApiResponse<PageResponseAdminSchoolSummaryResponse>

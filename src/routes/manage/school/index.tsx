@@ -52,35 +52,28 @@ function SchoolManagePage() {
       search: searchQuery.trim() || undefined,
       page: currentPage - 1,
       size: PAGE_SIZE,
+      sort: sortOption,
     })
 
   const isLoading = isSummaryLoading
 
   const paginatedSchools = useMemo(() => {
     if (!summaryData?.content) return []
-    return summaryData.content
-      .map((item) => {
-        const fallbackChapterId = item.schoolName
-          ? getChapterIdBySchool(item.schoolName)
-          : undefined
-        const chapterId = item.chapterId ?? fallbackChapterId
-        return {
-          id: item.schoolId != null ? String(item.schoolId) : "",
-          name: item.schoolName ?? "",
-          chapterId,
-          branch:
-            item.chapterName ??
-            (chapterId ? `지부 ${chapterId}` : "지부 미지정"),
-          count: item.activeChallengerCount ?? 0,
-        }
-      })
-      .sort((a, b) => {
-        if (sortOption === "name") {
-          return a.name.localeCompare(b.name, "ko")
-        }
-        return 0
-      })
-  }, [summaryData, getChapterIdBySchool, sortOption])
+    return summaryData.content.map((item) => {
+      const fallbackChapterId = item.schoolName
+        ? getChapterIdBySchool(item.schoolName)
+        : undefined
+      const chapterId = item.chapterId ?? fallbackChapterId
+      return {
+        id: item.schoolId != null ? String(item.schoolId) : "",
+        name: item.schoolName ?? "",
+        chapterId,
+        branch:
+          item.chapterName ?? (chapterId ? `지부 ${chapterId}` : "지부 미지정"),
+        count: item.activeChallengerCount ?? 0,
+      }
+    })
+  }, [summaryData, getChapterIdBySchool])
 
   const totalPages = Math.max(1, summaryData?.totalPages ?? 1)
 

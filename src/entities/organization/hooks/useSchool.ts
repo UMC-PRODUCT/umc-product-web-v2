@@ -42,6 +42,7 @@ export function useAdminSchoolsSummary(params?: {
   search?: string
   page?: number
   size?: number
+  sort?: string | string[]
 }) {
   return useQuery({
     queryKey: ["schools", "admin-summary", params],
