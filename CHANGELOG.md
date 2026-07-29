@@ -4,6 +4,17 @@
 
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며, 버전 관리는 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
+## [1.1.11] - 2026-07-29
+
+토큰 갱신이 실패했을 때 화면이 멈추던 문제를 해결한 hotfix 배포입니다.
+
+### Fixed (수정)
+
+- **토큰 갱신 실패 교착** — 401이 동시에 여러 건 발생하면 로그인 이동이 중복 실행돼 화면이 멈추던 문제를 수정. 인증 종료 경로를 일원화해 한 번만 이동하도록 변경 (#608)
+- **인증 경로 오탐** — 요청 URL을 부분 문자열로 판별해 쿼리스트링이나 경로 일부에 걸리던 문제를 pathname 기준 비교로 수정
+- **갱신 요청의 만료 토큰** — 토큰 갱신 요청에 만료된 Authorization 헤더가 실려 갱신까지 401이 되던 문제를 수정
+- **재시도 무한 반복** — 대기 큐에서 재시도하는 요청에 재시도 표시가 없어 갱신이 반복되던 문제를 수정
+
 ## [1.1.10] - 2026-07-03
 
 지원 현황 Top4 라벨이 활성 차수를 반영하도록 정정한 hotfix 배포입니다.
@@ -227,6 +238,7 @@ v1.0.0 이후 develop에 누적된 변경을 배포합니다. 데모데이 소�
 
 UMC 데모데이 매칭 시스템 첫 공식 릴리스.
 
+[1.1.11]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.10...v1.1.11
 [1.1.10]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.9...v1.1.10
 [1.1.9]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.8...v1.1.9
 [1.1.8]: https://github.com/UMC-PRODUCT/umc-product-web-v2/compare/v1.1.7...v1.1.8
