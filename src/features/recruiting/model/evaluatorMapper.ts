@@ -66,11 +66,13 @@ export function toStageEvaluationDetail(
   stage: EvaluationStage,
   myMemberId: string,
   locked: boolean,
+  lockReason?: string,
 ): StageEvaluationDetail {
   return {
     stage,
     myEvaluatorId: myMemberId,
     locked,
+    lockReason,
     operators,
   }
 }
