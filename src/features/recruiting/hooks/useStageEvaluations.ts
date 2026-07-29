@@ -37,7 +37,10 @@ export function useStageEvaluations(
 ) {
   const { data: me } = useMe()
   const apiStage = toApiStage(stage)
-  const enabled = roundId != null && apiStage != null
+  // 평가 목록은 단계별 API 라 최종 단계에는 없지만, 평가자 명단은 차수 단위라
+  // 최종 화면에서도 조회해야 한다. 하나로 묶으면 최종 화면에서 명단이 비어
+  // 관리 권한을 판정하지 못해 합불 처리가 잠긴다.
+  const evaluationsEnabled = roundId != null && apiStage != null
 
   // 평가자 명단은 모집 관리 권한이 있어야 조회할 수 있다. 평가자 whitelist 에만
   // 올라간 운영진은 403 을 받으므로, 실패해도 평가 목록은 그대로 보여준다.
@@ -46,7 +49,7 @@ export function useStageEvaluations(
   const evaluatorsQuery = useQuery({
     queryKey: recruitingKeys.evaluators(roundId ?? ""),
     queryFn: () => getRoundEvaluators(roundId!),
-    enabled,
+    enabled: roundId != null,
     retry: (failureCount, error) =>
       !(isAxiosError(error) && error.response?.status === 403) &&
       failureCount < 2,
@@ -75,7 +78,7 @@ export function useStageEvaluations(
       apiStage ?? "DOCUMENT",
     ),
     queryFn: () => getStageEvaluations(roundId!, applicationId, apiStage!),
-    enabled,
+    enabled: evaluationsEnabled,
     staleTime: 60 * 1000,
   })
 
@@ -134,7 +137,7 @@ export function useStageEvaluations(
   )
 
   const evaluation = useMemo(() => {
-    if (!enabled || !me || !rosterSettled) return null
+    if (!evaluationsEnabled || !me || !rosterSettled) return null
     const evaluations = evaluationsQuery.data
     if (!evaluations) return null
 
@@ -151,7 +154,7 @@ export function useStageEvaluations(
       LOCK_REASON[eligibility.reason ?? "stageHasNoEvaluation"],
     )
   }, [
-    enabled,
+    evaluationsEnabled,
     me,
     rosterSettled,
     roster,
