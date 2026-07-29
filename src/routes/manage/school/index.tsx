@@ -1,10 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
-import {
-  useAdminSchoolsSummary,
-  useSchoolList,
-} from "@/entities/organization/hooks/useSchool"
+import { useAdminSchoolsSummary } from "@/entities/organization/hooks/useSchool"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { ChapterTabs } from "@/features/recruiting/ui/ChapterTabs"
 import { SchoolCard } from "@/features/settings/ui/SchoolCard"
@@ -56,9 +53,8 @@ function SchoolManagePage() {
       page: currentPage - 1,
       size: PAGE_SIZE,
     })
-  const { isLoading: isListLoading } = useSchoolList()
 
-  const isLoading = isSummaryLoading || isListLoading
+  const isLoading = isSummaryLoading
 
   const paginatedSchools = useMemo(() => {
     if (!summaryData?.content) return []
