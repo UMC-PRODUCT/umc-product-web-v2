@@ -4,6 +4,7 @@ import { useMe } from "@/entities/member/hooks/useMe"
 import { isChapter } from "@/entities/organization/model/chapters"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
+import { useRecruitingPermissions } from "../hooks/useRecruitingPermissions"
 import { useRecruitingRounds } from "../hooks/useRecruitingRounds"
 import {
   type ApplicantListFilters,
@@ -18,17 +19,21 @@ import {
 } from "../model/evaluationStage"
 import {
   formatGisuLabel,
-  resolveRecruitingListRole,
   resolveViewerChapter,
   resolveViewerSchool,
 } from "../model/recruitingRole"
+import {
+  applyScopeFilters,
+  resolveRecruitingScope,
+  resolveScopeTabs,
+} from "../model/recruitingScope"
 import { ApplicantFilterBar } from "./ApplicantFilterBar"
 import { ChapterTabs } from "./ChapterTabs"
 import { SchoolApplicantSection } from "./SchoolApplicantSection"
 import { SchoolTabs } from "./SchoolTabs"
 
 import type { RecruitingRoundGroup } from "../api/types"
-import type { RecruitingListRole } from "../model/recruitingListRole"
+import type { RecruitingScope } from "../model/recruitingScope"
 import type { ApplicantColumnOptions } from "./applicantTableColumns"
 
 const RESULT_FILTER_LABEL: Record<EvaluationStage, string> = {
@@ -42,41 +47,15 @@ const SCHOOL_CARD_COLUMNS: ApplicantColumnOptions = {
   hideSchool: true,
 }
 
-function pageDescription(stage: EvaluationStage, role: RecruitingListRole) {
+function pageDescription(stage: EvaluationStage, scope: RecruitingScope) {
   const shortLabel = EVALUATION_STAGE_SHORT_LABEL[stage]
-  if (role === "chapterAdmin") {
+  if (scope.chapters.length === 1 && scope.schools.length > 1) {
     return `지부 ${shortLabel} 평가 현황을 확인하고, 내 학교 지원자를 평가합니다.`
   }
-  if (role === "schoolStaff") {
+  if (scope.schools.length <= 1) {
     return `내 학교 지원자의 ${shortLabel} 평가 현황을 확인하고 평가합니다.`
   }
   return EVALUATION_STAGE_DESCRIPTION[stage]
-}
-
-function scopeGroups(
-  groups: RecruitingRoundGroup[],
-  role: RecruitingListRole,
-  filters: ApplicantListFilters,
-  viewerChapter: string | undefined,
-  viewerSchool: string | undefined,
-) {
-  if (role === "schoolStaff") {
-    return groups.filter((group) => group.schoolName === viewerSchool)
-  }
-  if (role === "chapterAdmin") {
-    const inChapter = groups.filter(
-      (group) => group.chapterName === viewerChapter,
-    )
-    if (filters.schoolTab === "all") return inChapter
-    return inChapter.filter((group) => group.schoolName === filters.schoolTab)
-  }
-  if (filters.chapterTab === "all") {
-    if (filters.chapters.length === 0) return []
-    return groups.filter((group) =>
-      filters.chapters.includes(group.chapterName),
-    )
-  }
-  return groups.filter((group) => group.chapterName === filters.chapterTab)
 }
 
 interface ApplicantListPageProps {
@@ -91,13 +70,31 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
   const { data: me } = useMe()
   const { groups, generation, isLoading, isError } = useRecruitingRounds()
 
-  const role = resolveRecruitingListRole(me)
   const viewerChapter = resolveViewerChapter(me)
   const viewerSchool = resolveViewerSchool(me)
 
+  const seasonIds = useMemo(
+    () => groups.map((group) => String(group.seasonId)),
+    [groups],
+  )
+  const { permittedSeasonIds, isLoading: isPermissionLoading } =
+    useRecruitingPermissions(seasonIds)
+
+  const scope = useMemo(
+    () => resolveRecruitingScope(groups, permittedSeasonIds, viewerSchool),
+    [groups, permittedSeasonIds, viewerSchool],
+  )
+  const { showChapterTabs, showSchoolTabs } = resolveScopeTabs(scope)
+
   const scopedGroups = useMemo(
-    () => scopeGroups(groups, role, filters, viewerChapter, viewerSchool),
-    [groups, role, filters, viewerChapter, viewerSchool],
+    () =>
+      applyScopeFilters(
+        scope,
+        filters.chapterTab,
+        filters.schoolTab,
+        filters.chapters,
+      ),
+    [scope, filters.chapterTab, filters.schoolTab, filters.chapters],
   )
 
   const chapterGroups = useMemo(() => {
@@ -113,17 +110,6 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
     }))
   }, [scopedGroups])
 
-  const chapterSchools = useMemo(
-    () => [
-      ...new Set(
-        groups
-          .filter((group) => group.chapterName === viewerChapter)
-          .map((group) => group.schoolName),
-      ),
-    ],
-    [groups, viewerChapter],
-  )
-
   const handleFiltersChange = (partial: Partial<ApplicantListFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }))
   }
@@ -131,7 +117,7 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
   const baseTime = formatBaseTime(new Date())
   const gisuLabel = formatGisuLabel(generation)
   const needsChapterPick =
-    role === "central" &&
+    showChapterTabs &&
     filters.chapterTab === "all" &&
     filters.chapters.length === 0
 
@@ -144,10 +130,10 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
           { id: stage, label: EVALUATION_STAGE_LABEL[stage] },
         ]}
         title={EVALUATION_STAGE_LABEL[stage]}
-        description={pageDescription(stage, role)}
+        description={pageDescription(stage, scope)}
         className="pl-3"
       />
-      {role === "central" && (
+      {showChapterTabs && (
         <ChapterTabs
           value={filters.chapterTab}
           onValueChange={(chapterTab) =>
@@ -156,9 +142,9 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
           className="mt-8"
         />
       )}
-      {role === "chapterAdmin" && (
+      {showSchoolTabs && (
         <SchoolTabs
-          schools={chapterSchools}
+          schools={scope.schools}
           value={filters.schoolTab}
           onValueChange={(schoolTab) =>
             handleFiltersChange({ schoolTab, schools: [] })
@@ -171,11 +157,9 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
         onFiltersChange={handleFiltersChange}
         resultFilterLabel={RESULT_FILTER_LABEL[stage]}
         chapterScope={
-          role === "chapterAdmin" && isChapter(viewerChapter)
-            ? viewerChapter
-            : undefined
+          showSchoolTabs && isChapter(viewerChapter) ? viewerChapter : undefined
         }
-        hideSchoolControls={role === "schoolStaff"}
+        hideSchoolControls={!showChapterTabs && !showSchoolTabs}
         className="mt-6"
       />
       {gisuLabel && (
@@ -185,10 +169,12 @@ export function ApplicantListPage({ stage }: ApplicantListPageProps) {
       )}
       {needsChapterPick ? (
         <EmptyNotice message="지부를 선택하면 해당 지부의 지원자를 확인할 수 있습니다." />
-      ) : isLoading ? (
+      ) : isLoading || isPermissionLoading ? (
         <EmptyNotice message="모집 정보를 불러오는 중입니다." />
       ) : isError ? (
         <EmptyNotice message="모집 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
+      ) : scope.groups.length === 0 ? (
+        <EmptyNotice message="조회할 수 있는 모집이 없습니다." />
       ) : chapterGroups.length === 0 ? (
         <EmptyNotice message="현재 등록된 모집 공고가 없습니다." />
       ) : (

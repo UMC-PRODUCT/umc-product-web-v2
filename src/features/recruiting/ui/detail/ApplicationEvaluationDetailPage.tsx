@@ -6,6 +6,7 @@ import { Breadcrumb } from "@/shared/ui/breadcrumb/Breadcrumb"
 import { useApplicationDetail } from "../../hooks/useApplicationDetail"
 import { useSubmitEvaluation } from "../../hooks/useEvaluationMutations"
 import { useInterviewQuestions } from "../../hooks/useInterviewQuestions"
+import { useRecruitingPermissions } from "../../hooks/useRecruitingPermissions"
 import { useStageEvaluations } from "../../hooks/useStageEvaluations"
 import { canDecideFinal } from "../../model/evaluationRules"
 import {
@@ -61,16 +62,29 @@ export function ApplicationEvaluationDetailPage({
   applicationId,
   roundId,
 }: ApplicationEvaluationDetailPageProps) {
-  const { detail, application, isError } = useApplicationDetail(
+  const { detail, application, seasonId, isError } = useApplicationDetail(
     applicationId,
     roundId,
   )
+  const { permittedSeasonIds, isLoading: isPermissionLoading } =
+    useRecruitingPermissions(seasonId ? [seasonId] : [])
+  // 권한 조회가 끝나기 전에는 확정하지 않는다. 모른 채로 잠그면 사유가 잘못 나간다.
+  const hasManagePermission =
+    seasonId == null || isPermissionLoading
+      ? undefined
+      : permittedSeasonIds.has(seasonId)
   const {
     evaluation,
-    rosterKnown,
     rosterUnavailable,
+    hasManagePermission: viewerIsAdmin,
     isError: isEvaluationError,
-  } = useStageEvaluations(applicationId, roundId, stage, application?.status)
+  } = useStageEvaluations(
+    applicationId,
+    roundId,
+    stage,
+    application?.status,
+    hasManagePermission,
+  )
   const submitEvaluation = useSubmitEvaluation(applicationId, roundId, stage)
   const { interview, isError: isInterviewError } = useInterviewQuestions(
     applicationId,
@@ -170,7 +184,7 @@ export function ApplicationEvaluationDetailPage({
                   )}
                   <OperatorEvaluationList
                     evaluation={evaluation}
-                    viewerIsAdmin={rosterKnown}
+                    viewerIsAdmin={viewerIsAdmin}
                   />
                 </>
               )
@@ -181,7 +195,7 @@ export function ApplicationEvaluationDetailPage({
                   label={finalResultLabel}
                   application={application}
                   currentResult={detail.finalResult}
-                  canDecide={canDecideFinal(application.status, rosterKnown)}
+                  canDecide={canDecideFinal(application.status, viewerIsAdmin)}
                 />
                 {rosterUnavailable && (
                   <p className="text-body-2-regular text-teal-gray-500 text-center">

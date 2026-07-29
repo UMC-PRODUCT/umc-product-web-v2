@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { isAxiosError } from "axios"
 
 import { recruitingKeys } from "../api/queryKeys"
 import { getAllRoundApplications } from "../api/recruitingApi"
@@ -32,6 +33,10 @@ export function useSchoolApplicants(
       return perRound.flat()
     },
     enabled: roundIds.length > 0,
+    // 403 은 권한이 없다는 확정 답이라 다시 물어봐도 달라지지 않는다.
+    retry: (failureCount, error) =>
+      !(isAxiosError(error) && error.response?.status === 403) &&
+      failureCount < 2,
     staleTime: 60 * 1000,
   })
 }
