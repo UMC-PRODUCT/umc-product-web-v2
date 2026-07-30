@@ -15,7 +15,9 @@ import type {
 } from "./applicantListTypes"
 import type { EvaluationStage } from "./evaluationStage"
 
-const TRACK_PART_TAG: Record<RecruitingTrack, PartTag | null> = {
+// 트랙 -> 파트 매핑 단일 소스. 평가 이력 매퍼도 이걸 쓴다.
+// INFRA_PLUS 는 모집 단위에 없는 파트라 null 이다.
+export const TRACK_PART_TAG: Record<RecruitingTrack, PartTag | null> = {
   PLAN: "pm",
   DESIGN: "design",
   WEB_PRODUCT_ENGINEER: "web-pe",

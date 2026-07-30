@@ -6,12 +6,17 @@ import type {
   AdminRoundsQuery,
   ApiEvaluationStage,
   CreateRecruitingRoundRequest,
+  DecisionHistoriesQuery,
   FinalDecisionBody,
   FormStructureQuery,
   PublicRoundsQuery,
+  RawCount,
+  RawDecisionHistoryPage,
+  RawId,
   RecruitingApplicationDetail,
   RecruitingApplicationPage,
   RecruitingApplicationSummary,
+  RecruitingDecisionHistoryPage,
   RecruitingEvaluation,
   RecruitingFormStructure,
   RecruitingInterviewQuestion,
@@ -115,6 +120,88 @@ export async function getAllRoundApplications(
     if (!result.hasNext) return collected
     page += 1
   }
+}
+
+const DECISION_HISTORY_PAGE_SIZE = 100
+
+function toCount(value: RawCount | undefined): number {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function toOptionalId(value: RawId | null | undefined): string | null {
+  return value == null ? null : String(value)
+}
+
+// 서버가 ID 와 건수를 문자열로 주므로 경계에서 정리한다. 중앙 직위 담당자는
+// 지부·학교가 null 이라 그대로 null 로 남긴다.
+export function normalizeDecisionHistoryPage(
+  raw: RawDecisionHistoryPage,
+): RecruitingDecisionHistoryPage {
+  const histories = raw.histories ?? {}
+  return {
+    asOf: raw.asOf ?? null,
+    progressStatus: raw.progressStatus,
+    content: (histories.content ?? []).map((item) => ({
+      ...item,
+      decisionHistoryId: String(item.decisionHistoryId),
+      applicationId: String(item.applicationId),
+      applicant: {
+        ...item.applicant,
+        chapterId: String(item.applicant.chapterId),
+        schoolId: String(item.applicant.schoolId),
+      },
+      decider: {
+        ...item.decider,
+        memberId: String(item.decider.memberId),
+        chapterId: toOptionalId(item.decider.chapterId),
+        schoolId: toOptionalId(item.decider.schoolId),
+      },
+    })),
+    page: toCount(histories.page),
+    size: toCount(histories.size),
+    totalElements: toCount(histories.totalElements),
+    totalPages: toCount(histories.totalPages),
+    hasNext: histories.hasNext ?? false,
+    hasPrevious: histories.hasPrevious ?? false,
+  }
+}
+
+// 평가 이력 조회 (RECRUITING-ADMIN-091). 중앙 3역할만 조회할 수 있고 학교·지부
+// 운영진은 감사 대상이라 403 을 받는다.
+export async function getDecisionHistories(
+  params: DecisionHistoriesQuery,
+): Promise<RecruitingDecisionHistoryPage> {
+  const { data } = await api.get<ApiResponse<RawDecisionHistoryPage>>(
+    "/v1/recruiting/admin/decision-histories",
+    { params, paramsSerializer: { indexes: null } },
+  )
+  return normalizeDecisionHistoryPage(data.result)
+}
+
+// 화면이 지부·학교 다중 선택과 학교별 그룹핑을 클라이언트에서 처리하고 있어 전량을
+// 받아야 한다. 서버 필터(chapterId/schoolId)는 단일 ID 라 이름 기반인 현재 필터와
+// 바로 맞물리지 않는다. asOf 와 progressStatus 는 첫 페이지 값을 쓴다.
+export async function getAllDecisionHistories(
+  params: Omit<DecisionHistoriesQuery, "page" | "size">,
+): Promise<RecruitingDecisionHistoryPage> {
+  const first = await getDecisionHistories({
+    ...params,
+    page: 0,
+    size: DECISION_HISTORY_PAGE_SIZE,
+  })
+  if (!first.hasNext) return first
+
+  const content = [...first.content]
+  for (let page = 1; page < first.totalPages; page += 1) {
+    const next = await getDecisionHistories({
+      ...params,
+      page,
+      size: DECISION_HISTORY_PAGE_SIZE,
+    })
+    content.push(...next.content)
+  }
+  return { ...first, content }
 }
 
 export async function getApplicationDetail(

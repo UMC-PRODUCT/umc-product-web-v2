@@ -1,4 +1,3 @@
-import type { Chapter } from "@/entities/organization/model/chapters"
 import type { PartTag } from "@/shared/model/domain"
 
 import type { EvaluationResult } from "./applicantListTypes"
@@ -14,7 +13,9 @@ export interface EvaluationHistoryEntry {
   id: string
   processedAt: string // ISO 문자열. 처리 일시
   applicant: {
-    chapter: Chapter
+    // 서버가 주는 지부명을 그대로 쓴다. 프론트 CHAPTERS 상수(6개)는 역대 지부
+    // 전체를 담지 않아 union 으로 좁히면 데이터가 사라진다.
+    chapter: string
     school: string
     name: string
     part: PartTag // 테이블엔 안 보이지만 "지원 파트" 필터에 필요
@@ -22,9 +23,10 @@ export interface EvaluationHistoryEntry {
   }
   evaluator: {
     id: string // 담당자별 그룹핑 기준 키
-    chapter: Chapter
+    // 중앙 직위 담당자는 지부·학교가 없어 빈 문자열로 온다.
+    chapter: string
     school: string
-    position: string // 직위(회장/부회장 등). TODO: 서버 연동 시 RoleType -> 라벨 매핑으로 대체
+    position: string // 직위 라벨. 판정 시점 roleType 스냅샷을 매핑한 값
     nickname: string
     name: string
   }

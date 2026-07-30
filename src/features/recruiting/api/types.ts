@@ -1,3 +1,11 @@
+import type { RoleType } from "@/shared/model/domain"
+
+// 서버는 스펙에 int64 로 적힌 ID 와 건수를 문자열로 준다(dev 실호출 확인).
+// ID 는 문자열로 고정하고 건수는 숫자로 바꿔 경계에서 정리한다.
+export type RawId = string | number
+
+export type RawCount = string | number
+
 export type RecruitingTrack =
   | "PLAN"
   | "DESIGN"
@@ -304,3 +312,117 @@ export type RecruitingDecision = "PASS" | "FAIL"
 export type FinalDecisionBody =
   | { decision: "PASS"; acceptedTrack: RecruitingTrack; reason?: string }
   | { decision: "FAIL"; reason?: string }
+
+// 평가 이력 (RECRUITING-ADMIN-091). 교내 회장단이 내린 판정을 중앙이 감사하는
+// read-only 목록이라 SUPER_ADMIN 과 기수 내 중앙운영사무국만 조회할 수 있다.
+// 학교·지부 운영진은 감사 대상이라 403 을 받는다.
+//
+// 판정이 확정되는 시점(DOCUMENT_FAILED, FINAL_PASSED, FINAL_FAILED)에만 1행이
+// 남는다. 서류 합격은 면접으로 넘어가는 중간 상태라 기록되지 않는다.
+export type RecruitingDecisionResult = "PASSED" | "FAILED"
+
+export type RecruitingHistoryProgressStatus =
+  | "BEFORE_EVALUATION"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+
+export type RecruitingHistorySort = "LATEST" | "OLDEST"
+
+export interface RecruitingDecisionApplicant {
+  chapterId: string
+  chapterName: string
+  schoolId: string
+  schoolName: string
+  name: string
+  firstChoice: RecruitingTrack
+  secondChoice: RecruitingTrack | null
+  acceptedTrack: RecruitingTrack | null
+}
+
+// 직위(roleType)는 판정 시점 스냅샷이라 이후 직위가 바뀌어도 보존된다.
+// 중앙 직위와 SUPER_ADMIN 은 지부·학교가 null 이다.
+export interface RecruitingDecisionDecider {
+  memberId: string
+  chapterId: string | null
+  chapterName: string | null
+  schoolId: string | null
+  schoolName: string | null
+  roleType: RoleType
+  name: string
+  nickname: string
+}
+
+export interface RecruitingDecisionHistory {
+  decisionHistoryId: string
+  applicationId: string
+  decidedAt: string
+  decisionStatus: RecruitingApplicationStatus
+  result: RecruitingDecisionResult
+  applicant: RecruitingDecisionApplicant
+  decider: RecruitingDecisionDecider
+}
+
+export interface RecruitingDecisionHistoryPage {
+  /** 집계 기준 시각 */
+  asOf: string | null
+  /** 판정 대상 전원 완료 기준. 0건 BEFORE_EVALUATION / 일부 IN_PROGRESS / 전원 COMPLETED */
+  progressStatus: RecruitingHistoryProgressStatus
+  content: RecruitingDecisionHistory[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+  hasNext: boolean
+  hasPrevious: boolean
+}
+
+export interface DecisionHistoriesQuery {
+  gisuId: string
+  chapterId?: string
+  schoolId?: string
+  tracks?: RecruitingTrack[]
+  results?: RecruitingDecisionResult[]
+  searchName?: string
+  sort?: RecruitingHistorySort
+  groupByDecider?: boolean
+  page?: number
+  size?: number
+}
+
+export type RawDecisionApplicant = Omit<
+  RecruitingDecisionApplicant,
+  "chapterId" | "schoolId"
+> & { chapterId: RawId; schoolId: RawId }
+
+export type RawDecisionDecider = Omit<
+  RecruitingDecisionDecider,
+  "memberId" | "chapterId" | "schoolId"
+> & {
+  memberId: RawId
+  chapterId?: RawId | null
+  schoolId?: RawId | null
+}
+
+export type RawDecisionHistory = Omit<
+  RecruitingDecisionHistory,
+  "decisionHistoryId" | "applicationId" | "applicant" | "decider"
+> & {
+  decisionHistoryId: RawId
+  applicationId: RawId
+  applicant: RawDecisionApplicant
+  decider: RawDecisionDecider
+}
+
+export interface RawDecisionHistoryPage {
+  asOf?: string | null
+  progressStatus: RecruitingHistoryProgressStatus
+  histories?: {
+    content?: RawDecisionHistory[]
+    page?: RawCount
+    size?: RawCount
+    totalElements?: RawCount
+    totalPages?: RawCount
+    hasNext?: boolean
+    hasPrevious?: boolean
+  }
+}

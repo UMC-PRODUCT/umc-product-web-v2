@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
 import { isChapter } from "@/entities/organization/model/chapters"
-import { RECRUITING_TARGET_GISU_LABEL_MOCK } from "@/features/recruiting/model/applicantList.mock"
+import { useEvaluationHistory } from "@/features/recruiting/hooks/useEvaluationHistory"
+import { formatBaseTime } from "@/features/recruiting/model/applicantListTypes"
 import {
   applyEvaluationHistoryFilters,
   DEFAULT_EVALUATION_HISTORY_FILTERS,
@@ -11,10 +12,7 @@ import {
   orderEvaluationHistoryRows,
   toEvaluationHistoryCsv,
 } from "@/features/recruiting/model/evaluationHistory"
-import {
-  EVALUATION_HISTORY_BASE_TIME_MOCK,
-  EVALUATION_HISTORY_MOCK,
-} from "@/features/recruiting/model/evaluationHistory.mock"
+import { formatGisuLabel } from "@/features/recruiting/model/recruitingRole"
 import { ChapterTabs } from "@/features/recruiting/ui/ChapterTabs"
 import { EvaluationHistoryCard } from "@/features/recruiting/ui/history/EvaluationHistoryCard"
 import { EvaluationHistoryFilterBar } from "@/features/recruiting/ui/history/EvaluationHistoryFilterBar"
@@ -25,6 +23,8 @@ export const Route = createFileRoute("/recruiting/history/archive")({
 })
 
 function RouteComponent() {
+  const { rows, progress, asOf, generation, isLoading, isError } =
+    useEvaluationHistory()
   const [filters, setFilters] = useState<EvaluationHistoryFilters>(
     DEFAULT_EVALUATION_HISTORY_FILTERS,
   )
@@ -41,8 +41,8 @@ function RouteComponent() {
     : undefined
 
   const visibleRows = useMemo(
-    () => applyEvaluationHistoryFilters(EVALUATION_HISTORY_MOCK, filters),
-    [filters],
+    () => applyEvaluationHistoryFilters(rows, filters),
+    [rows, filters],
   )
 
   const orderedRows = useMemo(
@@ -55,7 +55,9 @@ function RouteComponent() {
     [visibleRows, sort, byEvaluator, filters.bySchool],
   )
 
-  const sectionTitle = chapterScope ?? RECRUITING_TARGET_GISU_LABEL_MOCK
+  const sectionTitle = chapterScope ?? formatGisuLabel(generation)
+  // 서버가 집계 기준 시각(asOf)을 준다. 없을 때만 조회 시각으로 대체한다.
+  const baseTime = formatBaseTime(asOf ? new Date(asOf) : new Date())
 
   const handleDownload = () => {
     const csv = toEvaluationHistoryCsv(orderedRows)
@@ -106,17 +108,30 @@ function RouteComponent() {
         {sectionTitle}
       </h2>
 
-      <EvaluationHistoryCard
-        rows={orderedRows}
-        baseTime={EVALUATION_HISTORY_BASE_TIME_MOCK}
-        // TODO: 실제로는 서버가 내려주는 진행 상태를 써야 함. 지금은 row 유무로만 임시 판단
-        progress={visibleRows.length === 0 ? "before" : "done"}
-        sort={sort}
-        onSortChange={setSort}
-        byEvaluator={byEvaluator}
-        onByEvaluatorChange={setByEvaluator}
-        className="mt-4"
-      />
+      {isLoading ? (
+        <EmptyNotice message="평가 이력을 불러오는 중입니다." />
+      ) : isError ? (
+        <EmptyNotice message="평가 이력을 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
+      ) : (
+        <EvaluationHistoryCard
+          rows={orderedRows}
+          baseTime={baseTime}
+          progress={progress}
+          sort={sort}
+          onSortChange={setSort}
+          byEvaluator={byEvaluator}
+          onByEvaluatorChange={setByEvaluator}
+          className="mt-4"
+        />
+      )}
+    </div>
+  )
+}
+
+function EmptyNotice({ message }: { message: string }) {
+  return (
+    <div className="border-teal-gray-100 text-body-2-regular text-teal-gray-500 mt-4 flex min-h-50 items-center justify-center rounded-[12px] border bg-white">
+      {message}
     </div>
   )
 }
