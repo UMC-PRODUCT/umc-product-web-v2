@@ -8,6 +8,11 @@ export const recruitingKeys = {
 
   roundList: (gisuId: string) => [...recruitingKeys.rounds(), gisuId] as const,
 
+  // roundList 는 OPEN + PAST 를 합친 목록이라 캐시를 공유할 수 없다. phase 를
+  // 키에 넣어 분리한다.
+  openRoundList: (gisuId: string) =>
+    [...recruitingKeys.rounds(), gisuId, "OPEN"] as const,
+
   round: (gisuId: string, roundId: string) =>
     [...recruitingKeys.rounds(), gisuId, roundId] as const,
 

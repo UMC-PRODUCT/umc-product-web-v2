@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { getServerErrorMessage } from "@/features/recruiting/api/errors"
 import { useApplicationStatusSummary } from "@/features/recruiting/hooks/useApplicationStatusSummary"
+import { useRecruitingProgress } from "@/features/recruiting/hooks/useRecruitingProgress"
 import {
   formatAppliedAtParts,
   formatBaseTime,
@@ -100,6 +101,7 @@ function EmptyNotice({ message }: { message: string }) {
 function RouteComponent() {
   const { data, isLoading, isError, error, dataUpdatedAt } =
     useApplicationStatusSummary()
+  const { isRecruiting } = useRecruitingProgress()
 
   const chapterGroups = data ? groupByChapter(data) : []
   // 서버가 집계 기준 시각을 주지 않아 조회 시각을 쓴다. 집계 시각과 조회 시각의
@@ -191,13 +193,13 @@ function RouteComponent() {
             chapterName: group.chapterName,
             count: group.totalCount,
           }))}
-          footerStatus="모집 중"
+          footerStatus={isRecruiting ? "모집 중" : undefined}
         />
       </div>
       <div className="mt-4">
         <SchoolPartChartCard
           title="학교별 지원 현황"
-          footerStatus="모집 중"
+          footerStatus={isRecruiting ? "모집 중" : undefined}
           schools={MOCK_SCHOOL_PART_ROWS}
         />
       </div>
