@@ -1,15 +1,23 @@
+import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
-import { type Chapter, CHAPTERS } from "@/entities/organization/model/chapters"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { getChaptersWithSchools } from "@/entities/organization/api/organization"
+import {
+  type Chapter,
+  CHAPTERS,
+  isChapter,
+} from "@/entities/organization/model/chapters"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
-import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
 import { Calendar } from "@/shared/ui/calendar/Calendar"
 import { DateTextBox } from "@/shared/ui/date-text-box/DateTextBox"
 import { TimeTextBox } from "@/shared/ui/date-text-box/TimeTextBox"
 import { Dropdown } from "@/shared/ui/Dropdown"
+import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { CheckboxIndicator } from "@/shared/ui/input/checkbox/CheckboxIndicator"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { OptionButton } from "@/shared/ui/option-button/OptionButton"
@@ -17,27 +25,35 @@ import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
+import { checkRecruitingRoundTitleAvailability } from "../../api/recruitingApi"
+import { useAdminRecruitingRounds } from "../../hooks/useAdminRecruitingRounds"
 import {
+  resolveRecruitingListRole,
+  resolveViewerChapter,
+  resolveViewerSchool,
+} from "../../model/recruitingRole"
+import {
+  buildRecruitmentPreviewTitle,
+  composeRecruitmentTitle,
   dayCountInclusive,
   dayGap,
   DOC_PERIOD_DAYS,
+  INITIAL_PERIOD_FORM,
   MAX_INTERVIEW_RESULT_DELAY_DAYS,
+  MAX_TITLE_LENGTH,
   MAX_TOTAL_PERIOD_DAYS,
   resolveAvailableFooter,
 } from "../../model/recruitmentCreate"
-import { RECRUITMENT_LIST_MOCK } from "../../model/recruitmentList.mock"
+import { findSeasonIdBySchool } from "../../model/recruitmentList"
+import { useRecruitmentCreateStore } from "../../model/useRecruitmentCreateStore"
 import { RecruitmentPreviewCard } from "../RecruitmentPreviewCard"
 import { RecruitmentSectionHeader } from "../RecruitmentSectionHeader"
 
+import type {
+  PeriodFieldKey,
+  PeriodFieldValue,
+} from "../../model/recruitmentCreate"
 import type { RecruitmentRoundType } from "../../model/recruitmentList"
-
-// TODO: 실제로는 백엔드에 제목 중복 여부를 조회해야 함
-const EXISTING_RECRUITMENT_TITLES_MOCK = RECRUITMENT_LIST_MOCK.map(
-  (post) => post.title,
-)
-
-// TODO: 로그인한 사용자의 실제 기수로 교체
-const RECRUITING_GISU_MOCK = 11
 
 const RECRUITMENT_TYPES: { value: RecruitmentRoundType; label: string }[] = [
   { value: "REGULAR", label: "정규 모집" },
@@ -52,28 +68,6 @@ const RECRUITMENT_ROUNDS = [
   { value: "5", label: "5차" },
 ] as const
 
-type PeriodFieldKey =
-  | "documentStartAt"
-  | "documentEndAt"
-  | "documentResultPublishedAt"
-  | "interviewStartAt"
-  | "interviewEndAt"
-  | "finalResultPublishedAt"
-
-interface PeriodFieldValue {
-  date: string
-  time: string
-}
-
-const INITIAL_PERIOD_FORM: Record<PeriodFieldKey, PeriodFieldValue> = {
-  documentStartAt: { date: "", time: "00:00" },
-  documentEndAt: { date: "", time: "23:59" },
-  documentResultPublishedAt: { date: "", time: "00:00" },
-  interviewStartAt: { date: "", time: "00:00" },
-  interviewEndAt: { date: "", time: "23:59" },
-  finalResultPublishedAt: { date: "", time: "12:00" },
-}
-
 function parsePeriodDate(value: PeriodFieldValue): Date | null {
   const parts = value.date.split("-")
   if (parts.length !== 3) return null
@@ -82,7 +76,7 @@ function parsePeriodDate(value: PeriodFieldValue): Date | null {
   return new Date(y, m - 1, d)
 }
 
-// 일정 상태 판별용: 날짜뿐 아니라 시각까지 포함해 지금 시각과 비교한다.
+// 일정 상태 판별용: 날짜뿐 아니라 시각까지 포함해 지금 시각과 비교
 function parsePeriodDateTime(value: PeriodFieldValue): Date | null {
   const date = parsePeriodDate(value)
   if (!date) return null
@@ -107,6 +101,13 @@ function getScheduleStatus(
   return "upcoming"
 }
 
+const FULL_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
+// 아직 다 입력되지 않은 날짜는 요약 리스트에 반영하지 않는다.
+function isCompleteDate(dateStr: string): boolean {
+  return FULL_DATE_PATTERN.test(dateStr)
+}
+
 // 일정 요약 리스트 표시용: "2026-08-01" -> "08월 01일" (저장 형식은 그대로 둠)
 function formatMonthDay(dateStr: string): string {
   const [, month, day] = dateStr.split("-")
@@ -123,6 +124,9 @@ function validateDocumentPeriod(
   end: Date | null,
 ): string | null {
   if (!recruitmentType || !start || !end) return null
+  if (end < start) {
+    return "종료 날짜는 시작 날짜 이후로 설정해 주세요."
+  }
   const { min, max } = DOC_PERIOD_DAYS[recruitmentType]
   const days = dayCountInclusive(start, end)
   if (days < min || days > max) {
@@ -152,11 +156,6 @@ function validateInterviewResultDelay(
 // - schoolStaff: 지부·학교 둘 다 텍스트로 고정, 선택 불가
 type RecruitmentViewerRole = "central" | "chapterAdmin" | "schoolStaff"
 
-// TODO: 실제로는 목록 페이지(지부/학교별 진입 경로)에서 라우팅으로 role·지부·학교를 내려받아야 함.
-// 아직 그 라우팅이 없어서 지금은 central 기본값 + 이 목업으로만 미리보기 가능.
-const VIEWER_CHAPTER_MOCK: Chapter = CHAPTERS[0]
-const VIEWER_SCHOOL_MOCK = SCHOOLS_BY_BRANCH[VIEWER_CHAPTER_MOCK]?.[0]
-
 interface RecruitmentBasicInfoFormProps {
   onNext: () => void
   onDirtyChange?: (dirty: boolean) => void
@@ -172,31 +171,107 @@ interface RecruitmentBasicInfoFormProps {
 export function RecruitmentBasicInfoForm({
   onNext,
   onDirtyChange,
-  role = "central",
+  role: roleProp,
   initialChapter,
   initialSchool,
 }: RecruitmentBasicInfoFormProps) {
   const addToast = useToastStore((state) => state.addToast)
   const navigate = useNavigate()
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
-  const [chapter, setChapter] = useState<Chapter | undefined>(
-    initialChapter ?? (role === "central" ? CHAPTERS[0] : VIEWER_CHAPTER_MOCK),
+  const chapter = useRecruitmentCreateStore((s) => s.basicInfo.chapter)
+  const school = useRecruitmentCreateStore((s) => s.basicInfo.school)
+  const recruitmentType = useRecruitmentCreateStore(
+    (s) => s.basicInfo.recruitmentType,
   )
-  const [school, setSchool] = useState<string | undefined>(
-    initialSchool ?? (role === "schoolStaff" ? VIEWER_SCHOOL_MOCK : undefined),
+  const roundNo = useRecruitmentCreateStore((s) => s.basicInfo.roundNo)
+  const interviewRequired = useRecruitmentCreateStore(
+    (s) => s.basicInfo.interviewRequired,
   )
-  // 공통 디폴트: 정규 모집·1차가 항상 기본 선택되어 있어야 한다.
-  const [recruitmentType, setRecruitmentType] = useState<
-    RecruitmentRoundType | undefined
-  >("REGULAR")
-  const [roundNo, setRoundNo] = useState<string | undefined>("1")
+  const footer = useRecruitmentCreateStore((s) => s.basicInfo.footer)
+  const periodForm = useRecruitmentCreateStore((s) => s.basicInfo.periodForm)
+  const patchBasicInfo = useRecruitmentCreateStore((s) => s.patchBasicInfo)
+  const seasonId = useRecruitmentCreateStore((s) => s.seasonId)
+  const setSeasonId = useRecruitmentCreateStore((s) => s.setSeasonId)
+  const {
+    groups: seasonGroups,
+    isLoading: isSeasonGroupsLoading,
+    isForbidden: isAdminRoundsForbidden,
+  } = useAdminRecruitingRounds()
+  const { data: me } = useMe()
+  // role은 목록 화면(또는 사이드바 직접 진입)에서 넘어온 값이 있으면 그걸 우선
+  // 쓰고(진입 지점에 따른 고정 문맥), 없으면 실제 로그인 사용자의 권한으로 판단한다.
+  // me.roles(RoleType)가 정상적으로 채워져 있으면 그걸 신뢰하지만, 계정에 따라
+  // roles가 빈 배열로 내려오는 데이터 결손이 실제로 확인됐다(#657 평가 화면에서도
+  // 같은 이유로 RoleType 대신 실제 권한 걸린 엔드포인트의 성공/403 응답으로 판단하는
+  // 패턴을 씀). roles가 비어있을 때만 그 패턴을 빌려, admin 전용 조회(GET /admin/rounds)가
+  // 403이면 schoolStaff로, 성공(또는 아직 로딩 중)이면 central로 대체 판단한다 —
+  // chapterAdmin까지는 이 신호만으로 구분할 수 없어 더 넓은 central 쪽으로 폴백한다.
+  const hasRoleTypeData = !!me?.roles?.length
+  const role =
+    roleProp ??
+    (hasRoleTypeData
+      ? resolveRecruitingListRole(me)
+      : isAdminRoundsForbidden
+        ? "schoolStaff"
+        : "central")
+  const viewerChapterName = resolveViewerChapter(me)
+  const viewerChapter = isChapter(viewerChapterName)
+    ? viewerChapterName
+    : CHAPTERS[0]
+  const viewerSchool = resolveViewerSchool(me)
+
+  // 지부·학교 선택지는 실제 기수 기준 조직 데이터(GISU-201: 다른 화면들도 쓰는 getChaptersWithSchools)에서 가져온다.
+  const gisuQuery = useActiveGisu()
+  const gisuId = gisuQuery.data?.gisuId
+    ? Number(gisuQuery.data.gisuId)
+    : undefined
+  const chaptersQuery = useQuery({
+    queryKey: ["chapters", "with-schools", gisuId],
+    queryFn: () => getChaptersWithSchools(String(gisuId!)),
+    enabled: gisuId != null,
+    staleTime: 5 * 60 * 1000,
+  })
+  const chapterEntries = chaptersQuery.data?.chapters ?? []
+  const chapterOptions = chapterEntries
+    .map((entry) => entry.chapterName)
+    .filter(isChapter)
+  const schoolOptions =
+    chapterEntries
+      .find((entry) => entry.chapterName === chapter)
+      ?.schools.map((school) => school.schoolName) ?? []
+
+  // seasonId는 URL param(목록 화면에서 넘어온 값)에 의존하지 않고, 학교가
+  // 정해질 때마다 여기서 직접 조회해 스토어에 반영한다. 사이드바에서 이
+  // 화면으로 바로 들어와 seasonId가 아예 없이 시작해도 동작하게 하기 위함.
+  useEffect(() => {
+    setSeasonId(findSeasonIdBySchool(seasonGroups, school) ?? null)
+  }, [school, seasonGroups, setSeasonId])
+
+  // 시즌은 기수 시작 시 학교당 1회 백오피스에서 미리 만들어두는 자원이라 프론트에
+  // 만드는 화면이 없다. 학교를 골랐는데도 시즌이 안 잡히면 그건 아직 해당 학교의
+  // 시즌이 세팅되지 않은 것이므로, 2단계까지 다 채운 뒤 생성 시점에야 막히지 않도록
+  // 여기서 바로 안내하고 다음 단계 진행 자체를 막는다.
+  const isSeasonMissing = !!school && !isSeasonGroupsLoading && !seasonId
+
+  // 진입 지점(role·initialChapter·initialSchool)이 바뀌면 상위(RecruitmentCreatePage)가
+  // key를 바꿔 이 컴포넌트를 통째로 리마운트시킨다. 그때마다 지부·학교 초기값을 새로 채운다.
+  // role/viewerChapter/viewerSchool은 useMe 조회가 끝나야 채워지므로 의존성에 넣어
+  // 로그인 정보가 늦게 도착해도 다시 채운다.
+  useEffect(() => {
+    patchBasicInfo({
+      chapter:
+        initialChapter ?? (role === "central" ? CHAPTERS[0] : viewerChapter),
+      school:
+        initialSchool ?? (role === "schoolStaff" ? viewerSchool : undefined),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role, viewerChapter, viewerSchool])
+
   // 지부는 central만 자유 선택. 학교는 central이거나(지부 선택 후),
   // chapterAdmin이 지부 페이지(학교 미고정)에서 들어왔을 때만 선택 가능.
   const isChapterEditable = role === "central"
   const isSchoolEditable =
     role === "central" || (role === "chapterAdmin" && !initialSchool)
-  const [footer, setFooter] = useState("")
-  const [periodForm, setPeriodForm] = useState(INITIAL_PERIOD_FORM)
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const today = new Date()
     return { year: today.getFullYear(), month: today.getMonth() + 1 }
@@ -209,36 +284,37 @@ export function RecruitmentBasicInfoForm({
       school,
       recruitmentType,
       roundNo,
+      interviewRequired,
       footer,
       periodForm,
     }),
   )
 
-  // 정규 모집은 항상 1차 고정이라 제목엔 차수 표기 안 함
-  // (다른 화면에서도 정규 모집은 차수 없이 '정규'로만 노출)
-  const previewTitle = `${school ?? "전체 학교"} UMC ${RECRUITING_GISU_MOCK}기 ${
-    recruitmentType === "ADDITIONAL" && roundNo ? `${roundNo}차 ` : ""
-  }${
-    recruitmentType === "ADDITIONAL"
-      ? "추가 모집"
-      : recruitmentType === "REGULAR"
-        ? "정규 모집"
-        : "모집"
-  }`
+  const previewTitle = buildRecruitmentPreviewTitle({
+    school,
+    recruitmentType,
+    roundNo,
+  })
+  const isTitleTooLong =
+    composeRecruitmentTitle(previewTitle, footer).length > MAX_TITLE_LENGTH
 
   const handleRecruitmentTypeChange = (
     value: RecruitmentRoundType | undefined,
   ) => {
-    setRecruitmentType(value)
     // 정규 모집은 항상 1차로 고정, 추가 모집은 사용자가 다시 고르게 초기화
-    setRoundNo(value === "REGULAR" ? "1" : undefined)
+    patchBasicInfo({
+      recruitmentType: value,
+      roundNo: value === "REGULAR" ? "1" : undefined,
+    })
   }
 
   const updatePeriodField = (
     key: PeriodFieldKey,
     patch: Partial<PeriodFieldValue>,
   ) => {
-    setPeriodForm((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }))
+    patchBasicInfo({
+      periodForm: { ...periodForm, [key]: { ...periodForm[key], ...patch } },
+    })
   }
 
   const documentStartAtDate = parsePeriodDate(periodForm.documentStartAt)
@@ -274,7 +350,8 @@ export function RecruitmentBasicInfoForm({
         now,
       ),
       text:
-        periodForm.documentStartAt.date && periodForm.documentEndAt.date
+        isCompleteDate(periodForm.documentStartAt.date) &&
+        isCompleteDate(periodForm.documentEndAt.date)
           ? `${formatMonthDay(periodForm.documentStartAt.date)} ${periodForm.documentStartAt.time} ~ ${formatMonthDay(periodForm.documentEndAt.date)} ${periodForm.documentEndAt.time}`
           : null,
     },
@@ -286,7 +363,7 @@ export function RecruitmentBasicInfoForm({
         null,
         now,
       ),
-      text: periodForm.documentResultPublishedAt.date
+      text: isCompleteDate(periodForm.documentResultPublishedAt.date)
         ? `${formatMonthDay(periodForm.documentResultPublishedAt.date)} ${periodForm.documentResultPublishedAt.time}`
         : null,
     },
@@ -299,7 +376,8 @@ export function RecruitmentBasicInfoForm({
         now,
       ),
       text:
-        periodForm.interviewStartAt.date && periodForm.interviewEndAt.date
+        isCompleteDate(periodForm.interviewStartAt.date) &&
+        isCompleteDate(periodForm.interviewEndAt.date)
           ? `${formatMonthDay(periodForm.interviewStartAt.date)} ${periodForm.interviewStartAt.time} ~ ${formatMonthDay(periodForm.interviewEndAt.date)} ${periodForm.interviewEndAt.time}`
           : null,
     },
@@ -311,7 +389,7 @@ export function RecruitmentBasicInfoForm({
         null,
         now,
       ),
-      text: periodForm.finalResultPublishedAt.date
+      text: isCompleteDate(periodForm.finalResultPublishedAt.date)
         ? `${formatMonthDay(periodForm.finalResultPublishedAt.date)} ${periodForm.finalResultPublishedAt.time}`
         : null,
     },
@@ -331,33 +409,36 @@ export function RecruitmentBasicInfoForm({
     school,
     recruitmentType,
     roundNo,
+    interviewRequired,
     footer,
     periodForm,
   })
   const hasUnsavedChanges = savedSnapshotRef.current !== currentSnapshot
-  const canTempSave = hasUnsavedChanges && !isSaving
+  const canTempSave = hasUnsavedChanges && !isSaving && !isTitleTooLong
 
   useEffect(() => {
     onDirtyChange?.(hasUnsavedChanges)
   }, [hasUnsavedChanges, onDirtyChange])
 
-  const handleTempSave = () => {
-    const { footer: resolvedFooter, wasAdjusted } = resolveAvailableFooter(
-      previewTitle,
-      footer,
-      EXISTING_RECRUITMENT_TITLES_MOCK,
-    )
+  // seasonId가 아직 없으면(시즌 없는 학교) 중복 체크를 할 대상 자체가 없으니
+  // 통과시킨다 — 실제 생성 시점엔 시즌 가드가 별도로 막는다. 조회 실패도
+  // 마찬가지로 진행을 막지 않는다: 최종 중복은 생성 시 DB unique index/409가 방어한다.
+  const checkTitleAvailable = async (title: string): Promise<boolean> => {
+    if (!seasonId) return true
+    try {
+      return await checkRecruitingRoundTitleAvailability(seasonId, title)
+    } catch {
+      return true
+    }
+  }
+
+  const handleTempSave = async () => {
+    const { footer: resolvedFooter, wasAdjusted } =
+      await resolveAvailableFooter(previewTitle, footer, checkTitleAvailable)
 
     if (wasAdjusted) {
-      setFooter(resolvedFooter)
-      addToast({
-        message: "같은 공고 제목이 있어 숫자가 자동 +1 되었습니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-      return
+      patchBasicInfo({ footer: resolvedFooter })
+      showTitleAdjustedToast()
     }
 
     setIsSaving(true)
@@ -373,6 +454,18 @@ export function RecruitmentBasicInfoForm({
     addToast({
       message,
       color: "red",
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
+  }
+
+  // 제목 중복 시 꼬릿말 숫자를 자동으로 보정한 것을 알리는 안내
+  // 등록 자체를 막는 에러가 아니므로 저장/다음 진행은 계속
+  const showTitleAdjustedToast = () => {
+    addToast({
+      message: "같은 공고 제목이 있어 꼬릿말에 숫자가 표기 되었습니다.",
+      color: "primary",
       variant: "deep",
       type: "default",
       duration: 3000,
@@ -406,25 +499,24 @@ export function RecruitmentBasicInfoForm({
   const canProceedToNext =
     !!chapter &&
     !!school &&
+    !isSeasonMissing &&
+    !isTitleTooLong &&
     !!recruitmentType &&
     (recruitmentType !== "ADDITIONAL" || !!roundNo) &&
     !!periodForm.documentStartAt.date &&
     !!periodForm.documentEndAt.date &&
     !!periodForm.documentResultPublishedAt.date &&
-    !!periodForm.interviewStartAt.date &&
-    !!periodForm.interviewEndAt.date &&
+    (!interviewRequired ||
+      (!!periodForm.interviewStartAt.date &&
+        !!periodForm.interviewEndAt.date)) &&
     !!periodForm.finalResultPublishedAt.date
 
-  const handleNext = () => {
-    const { footer: resolvedFooter, wasAdjusted } = resolveAvailableFooter(
-      previewTitle,
-      footer,
-      EXISTING_RECRUITMENT_TITLES_MOCK,
-    )
+  const handleNext = async () => {
+    const { footer: resolvedFooter, wasAdjusted } =
+      await resolveAvailableFooter(previewTitle, footer, checkTitleAvailable)
     if (wasAdjusted) {
-      setFooter(resolvedFooter)
-      showPeriodErrorToast("같은 공고 제목이 있어 숫자가 자동 +1 되었습니다.")
-      return
+      patchBasicInfo({ footer: resolvedFooter })
+      showTitleAdjustedToast()
     }
 
     const documentStart = parsePeriodDate(periodForm.documentStartAt)
@@ -441,10 +533,9 @@ export function RecruitmentBasicInfoForm({
 
     const interviewEnd = parsePeriodDate(periodForm.interviewEndAt)
     const finalResult = parsePeriodDate(periodForm.finalResultPublishedAt)
-    const interviewDelayError = validateInterviewResultDelay(
-      interviewEnd,
-      finalResult,
-    )
+    const interviewDelayError = interviewRequired
+      ? validateInterviewResultDelay(interviewEnd, finalResult)
+      : null
     if (interviewDelayError) {
       showPeriodErrorToast(interviewDelayError)
       return
@@ -485,11 +576,13 @@ export function RecruitmentBasicInfoForm({
                     variant="segmented"
                     value={chapter}
                     onValueChange={(value) => {
-                      setChapter(value as Chapter | undefined)
-                      setSchool(undefined)
+                      patchBasicInfo({
+                        chapter: value as Chapter | undefined,
+                        school: undefined,
+                      })
                     }}
                   >
-                    {CHAPTERS.map((value) => (
+                    {chapterOptions.map((value) => (
                       <OptionButton key={value} value={value}>
                         {value}
                       </OptionButton>
@@ -507,32 +600,41 @@ export function RecruitmentBasicInfoForm({
                 </div>
               )}
 
-              <div className="flex items-center gap-6">
-                <span
-                  className={cn(
-                    "w-16 shrink-0",
-                    isSchoolEditable
-                      ? "text-body-1-regular text-teal-gray-700"
-                      : "text-body-1-medium text-teal-gray-600",
-                  )}
-                >
-                  모집 학교
-                </span>
-                {isSchoolEditable ? (
-                  <Dropdown
-                    value={school}
-                    onChange={setSchool}
-                    options={(chapter ? SCHOOLS_BY_BRANCH[chapter] : []).map(
-                      (value) => ({ value, label: value }),
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-6">
+                  <span
+                    className={cn(
+                      "w-16 shrink-0",
+                      isSchoolEditable
+                        ? "text-body-1-regular text-teal-gray-700"
+                        : "text-body-1-medium text-teal-gray-600",
                     )}
-                    placeholder="학교 선택"
-                    disabled={!chapter}
-                    className="w-52.5"
-                  />
-                ) : (
-                  <span className="text-body-1-medium text-teal-500">
-                    {school}
+                  >
+                    모집 학교
                   </span>
+                  {isSchoolEditable ? (
+                    <Dropdown
+                      value={school}
+                      onChange={(value) => patchBasicInfo({ school: value })}
+                      options={schoolOptions.map((value) => ({
+                        value,
+                        label: value,
+                      }))}
+                      placeholder="학교 선택"
+                      disabled={!chapter}
+                      className="w-52.5"
+                    />
+                  ) : (
+                    <span className="text-body-1-medium text-teal-500">
+                      {school}
+                    </span>
+                  )}
+                </div>
+                {/* 임시 메시지(시즌 미생성시)*/}
+                {isSeasonMissing && (
+                  <p className="text-body-2-medium pl-22 text-red-500">
+                    모집 시즌 생성 전입니다.
+                  </p>
                 )}
               </div>
 
@@ -564,7 +666,9 @@ export function RecruitmentBasicInfoForm({
                   <OptionButtonGroup
                     variant="segmented"
                     value={roundNo}
-                    onValueChange={setRoundNo}
+                    onValueChange={(value) =>
+                      patchBasicInfo({ roundNo: value })
+                    }
                   >
                     {RECRUITMENT_ROUNDS.map(({ value, label }) => (
                       <OptionButton
@@ -579,6 +683,31 @@ export function RecruitmentBasicInfoForm({
                     ))}
                   </OptionButtonGroup>
                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-body-1-medium text-teal-gray-600">
+                    면접 진행
+                  </span>
+                  <Checkbox
+                    checked={interviewRequired}
+                    onChange={(checked) => {
+                      patchBasicInfo({
+                        interviewRequired: checked,
+                        periodForm: checked
+                          ? periodForm
+                          : {
+                              ...periodForm,
+                              interviewStartAt:
+                                INITIAL_PERIOD_FORM.interviewStartAt,
+                              interviewEndAt:
+                                INITIAL_PERIOD_FORM.interviewEndAt,
+                            },
+                      })
+                    }}
+                    variant="primary"
+                    size="lg"
+                    aria-label="면접 진행 여부"
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col gap-2 pr-22.5">
@@ -590,7 +719,9 @@ export function RecruitmentBasicInfoForm({
                     title={previewTitle}
                     footer={footer}
                     emptyFooterPlaceholder="꼬릿말을 필요 시 작성하세요 (선택)"
-                    onFooterChange={setFooter}
+                    onFooterChange={(value) =>
+                      patchBasicInfo({ footer: value })
+                    }
                     startLabel={
                       periodForm.documentStartAt.date
                         ? `${periodForm.documentStartAt.date} ${periodForm.documentStartAt.time}`
@@ -607,6 +738,12 @@ export function RecruitmentBasicInfoForm({
                 <p className="text-body-2-medium text-teal-gray-400 pl-22">
                   * 꼬릿말 예시: 사본 1, 테스트 1, 디자인 파트
                 </p>
+                {isTitleTooLong && (
+                  <p className="text-body-2-medium pl-22 text-red-500">
+                    공고 제목은 {MAX_TITLE_LENGTH}자를 넘을 수 없습니다.
+                    꼬릿말을 줄여주세요.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -769,7 +906,14 @@ export function RecruitmentBasicInfoForm({
 
                   <div className="flex flex-col gap-7">
                     <div className="flex flex-col gap-2">
-                      <span className="text-subtitle-3-semibold text-teal-600">
+                      <span
+                        className={cn(
+                          "text-subtitle-3-semibold",
+                          interviewRequired
+                            ? "text-teal-600"
+                            : "text-teal-gray-300",
+                        )}
+                      >
                         면접 진행 기간
                       </span>
                       <div className="flex items-center gap-2">
@@ -780,12 +924,14 @@ export function RecruitmentBasicInfoForm({
                             onChange={(date) =>
                               updatePeriodField("interviewStartAt", { date })
                             }
+                            disabled={!interviewRequired}
                           />
                           <TimeTextBox
                             value={periodForm.interviewStartAt.time}
                             onChange={(time) =>
                               updatePeriodField("interviewStartAt", { time })
                             }
+                            disabled={!interviewRequired}
                           />
                         </div>
                         <span className="text-teal-gray-400">~</span>
@@ -796,12 +942,14 @@ export function RecruitmentBasicInfoForm({
                             onChange={(date) =>
                               updatePeriodField("interviewEndAt", { date })
                             }
+                            disabled={!interviewRequired}
                           />
                           <TimeTextBox
                             value={periodForm.interviewEndAt.time}
                             onChange={(time) =>
                               updatePeriodField("interviewEndAt", { time })
                             }
+                            disabled={!interviewRequired}
                           />
                         </div>
                       </div>
