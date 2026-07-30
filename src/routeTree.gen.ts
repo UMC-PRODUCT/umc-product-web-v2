@@ -104,6 +104,7 @@ import { Route as AdminChallengerRecordsRouteImport } from './routes/admin/chall
 import { Route as AdminChallengerPointsRouteImport } from './routes/admin/challenger/points'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
 import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matching/projects/announce/index'
+import { Route as RecruitingRecruitmentsEditRoundIdRouteImport } from './routes/recruiting/recruitments/edit.$roundId'
 import { Route as RecruitingEvaluationsInterviewApplicationIdRouteImport } from './routes/recruiting/evaluations/interview.$applicationId'
 import { Route as RecruitingEvaluationsDocumentApplicationIdRouteImport } from './routes/recruiting/evaluations/document.$applicationId'
 import { Route as MatchingProjectsEditProjectIdRouteImport } from './routes/matching/projects/edit.$projectId'
@@ -610,6 +611,12 @@ const MatchingProjectsAnnounceIndexRoute =
     path: '/',
     getParentRoute: () => MatchingProjectsAnnounceRouteRoute,
   } as any)
+const RecruitingRecruitmentsEditRoundIdRoute =
+  RecruitingRecruitmentsEditRoundIdRouteImport.update({
+    id: '/recruitments/edit/$roundId',
+    path: '/recruitments/edit/$roundId',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
 const RecruitingEvaluationsInterviewApplicationIdRoute =
   RecruitingEvaluationsInterviewApplicationIdRouteImport.update({
     id: '/$applicationId',
@@ -740,6 +747,7 @@ export interface FileRoutesByFullPath {
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
   '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
+  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -836,6 +844,7 @@ export interface FileRoutesByTo {
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
   '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
+  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -939,6 +948,7 @@ export interface FileRoutesById {
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
   '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
+  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -1043,6 +1053,7 @@ export interface FileRouteTypes {
     | '/matching/projects/edit/$projectId'
     | '/recruiting/evaluations/document/$applicationId'
     | '/recruiting/evaluations/interview/$applicationId'
+    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesByTo: FileRoutesByTo
@@ -1139,6 +1150,7 @@ export interface FileRouteTypes {
     | '/matching/projects/edit/$projectId'
     | '/recruiting/evaluations/document/$applicationId'
     | '/recruiting/evaluations/interview/$applicationId'
+    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce'
     | '/matching/projects/announce/notice-publish/$noticeId'
   id:
@@ -1241,6 +1253,7 @@ export interface FileRouteTypes {
     | '/matching/projects/edit/$projectId'
     | '/recruiting/evaluations/document/$applicationId'
     | '/recruiting/evaluations/interview/$applicationId'
+    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesById: FileRoutesById
@@ -1972,6 +1985,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsAnnounceIndexRouteImport
       parentRoute: typeof MatchingProjectsAnnounceRouteRoute
     }
+    '/recruiting/recruitments/edit/$roundId': {
+      id: '/recruiting/recruitments/edit/$roundId'
+      path: '/recruitments/edit/$roundId'
+      fullPath: '/recruiting/recruitments/edit/$roundId'
+      preLoaderRoute: typeof RecruitingRecruitmentsEditRoundIdRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
     '/recruiting/evaluations/interview/$applicationId': {
       id: '/recruiting/evaluations/interview/$applicationId'
       path: '/$applicationId'
@@ -2189,6 +2209,7 @@ interface RecruitingRouteRouteChildren {
   RecruitingRecruitmentsQuotaRoute: typeof RecruitingRecruitmentsQuotaRoute
   RecruitingEvaluationsIndexRoute: typeof RecruitingEvaluationsIndexRoute
   RecruitingRecruitmentsIndexRoute: typeof RecruitingRecruitmentsIndexRoute
+  RecruitingRecruitmentsEditRoundIdRoute: typeof RecruitingRecruitmentsEditRoundIdRoute
 }
 
 const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
@@ -2204,6 +2225,8 @@ const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
   RecruitingRecruitmentsQuotaRoute: RecruitingRecruitmentsQuotaRoute,
   RecruitingEvaluationsIndexRoute: RecruitingEvaluationsIndexRoute,
   RecruitingRecruitmentsIndexRoute: RecruitingRecruitmentsIndexRoute,
+  RecruitingRecruitmentsEditRoundIdRoute:
+    RecruitingRecruitmentsEditRoundIdRoute,
 }
 
 const RecruitingRouteRouteWithChildren = RecruitingRouteRoute._addFileChildren(
