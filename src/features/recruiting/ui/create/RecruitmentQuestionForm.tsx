@@ -80,9 +80,11 @@ const QUESTION_DISABLE_TOGGLE_INDEXES = ["04"]
 function RemovableRadioOption({
   option,
   onRemove,
+  disabled,
 }: {
   option: string
   onRemove: () => void
+  disabled?: boolean
 }) {
   return (
     <div className="group/option hover:bg-teal-gray-50 flex w-full items-center justify-between gap-3 rounded-lg p-2">
@@ -90,14 +92,16 @@ function RemovableRadioOption({
         <RadioIndicator checked={false} variant="list" />
         <span className="text-body-1-regular text-teal-gray-700">{option}</span>
       </div>
-      <button
-        type="button"
-        aria-label={`${option} 옵션 사용 해제`}
-        onClick={onRemove}
-        className="text-teal-gray-400 flex size-5 shrink-0 items-center justify-center opacity-0 transition-opacity group-hover/option:opacity-100 focus-visible:opacity-100"
-      >
-        <CloseThinIcon className="size-3.5" />
-      </button>
+      {!disabled && (
+        <button
+          type="button"
+          aria-label={`${option} 옵션 사용 해제`}
+          onClick={onRemove}
+          className="text-teal-gray-400 flex size-5 shrink-0 items-center justify-center opacity-0 transition-opacity group-hover/option:opacity-100 focus-visible:opacity-100"
+        >
+          <CloseThinIcon className="size-3.5" />
+        </button>
+      )}
     </div>
   )
 }
@@ -145,6 +149,7 @@ function ToggleableRadioOptionsBox({
           key={option}
           option={option}
           onRemove={() => onRemoveOption(option)}
+          disabled={activeOptions.length <= 1}
         />
       ))}
       {removedOptions.map((option) => (
@@ -235,6 +240,7 @@ function PartSectionBody({
             <div
               key={question.id}
               onClick={focused ? undefined : () => onFocus(question.id)}
+              onFocusCapture={focused ? undefined : () => onFocus(question.id)}
               className={cn("w-full", !focused && "cursor-pointer")}
             >
               <QuestionForm
@@ -664,8 +670,11 @@ export function RecruitmentQuestionForm({
     })
   }
 
-  // Round 생성(013)은 이 시점(Step2 "다음")에 처음 일어난다.
   const handleNext = async () => {
+    if (hasBlankEnabledPart) {
+      showErrorToast("사용 중인 섹션의 항목을 모두 적어주세요.")
+      return
+    }
     const recruitableTracks = getRecruitableTracks(enabledParts)
     if (recruitableTracks.length === 0) {
       showErrorToast("모집할 트랙을 최소 1개 선택해 주세요.")
