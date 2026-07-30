@@ -44,7 +44,7 @@ export function RecruitmentRoundEditPage({
         <EditNotice message="불러오는 중입니다..." />
       ) : isForbidden ? (
         <EditNotice message="이 화면을 조회할 권한이 없습니다." />
-      ) : isError || !group || !round ? (
+      ) : isError || !group || !round || round.status == null ? (
         <EditNotice message="모집 정보를 찾을 수 없습니다." />
       ) : round.status === "DRAFT" ? (
         <EditNotice message="아직 공개되지 않은 모집은 모집 목록의 공유 보관함에서 수정해 주세요." />
