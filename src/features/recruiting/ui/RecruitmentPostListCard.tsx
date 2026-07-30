@@ -1,13 +1,12 @@
+import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
-import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
 import {
   canEditRecruitmentPost,
   groupPostsBySchool,
-  RECRUITMENT_SORT_OPTIONS,
 } from "../model/recruitmentList"
 import { RecruitmentPostMoreMenu } from "./RecruitmentPostMoreMenu"
 import { RecruitmentPostRow } from "./RecruitmentPostRow"
@@ -15,18 +14,12 @@ import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
-import type { RecruitingListRole } from "../model/recruitingListRole"
-import type {
-  RecruitmentEditScope,
-  RecruitmentPost,
-  RecruitmentSort,
-} from "../model/recruitmentList"
+import type { RecruitmentPost } from "../model/recruitmentList"
 
 interface RecruitmentPostListCardProps {
   chapter: Chapter
   posts: RecruitmentPost[]
-  role: RecruitingListRole
-  editScope: RecruitmentEditScope
+  permittedSeasonIds: ReadonlySet<string>
   onPrivatize: (postId: string) => void
   onDuplicate: (postId: string) => void
   onDelete: (postId: string) => void
@@ -39,8 +32,7 @@ interface RecruitmentPostListCardProps {
 
 function PostRow({
   post,
-  role,
-  editScope,
+  permittedSeasonIds,
   onPrivatize,
   onDuplicate,
   onDelete,
@@ -49,8 +41,7 @@ function PostRow({
   archiveVisibleOnPage,
 }: {
   post: RecruitmentPost
-  role: RecruitingListRole
-  editScope: RecruitmentEditScope
+  permittedSeasonIds: ReadonlySet<string>
   onPrivatize: (postId: string) => void
   onDuplicate: (postId: string) => void
   onDelete: (postId: string) => void
@@ -58,7 +49,8 @@ function PostRow({
   onNavigateToArchive: (school: string) => void
   archiveVisibleOnPage: boolean
 }) {
-  const editable = canEditRecruitmentPost(role, post, editScope)
+  const editable = canEditRecruitmentPost(post, permittedSeasonIds)
+  const navigate = useNavigate()
 
   return (
     <RecruitmentPostRow
@@ -74,8 +66,13 @@ function PostRow({
           status={post.status}
           onPublish={() => {}}
           onPrivatize={() => onPrivatize(post.postId)}
-          // TODO: 모집 공고 수정 페이지 라우트 연결
-          onEdit={() => console.info("TODO: 모집 공고 수정", post.postId)}
+          onEdit={() =>
+            navigate({
+              to: "/recruiting/recruitments/edit/$roundId",
+              params: { roundId: post.postId },
+              search: { seasonId: post.seasonId },
+            })
+          }
           onDuplicate={() => onDuplicate(post.postId)}
           onDelete={() => onDelete(post.postId)}
           onUndoDelete={onUndoDelete}
@@ -90,8 +87,7 @@ function PostRow({
 export function RecruitmentPostListCard({
   chapter,
   posts,
-  role,
-  editScope,
+  permittedSeasonIds,
   onPrivatize,
   onDuplicate,
   onDelete,
@@ -104,9 +100,6 @@ export function RecruitmentPostListCard({
   const [recruitingOnly, setRecruitingOnly] = useState(false)
   const [bySchool, setBySchool] = useState(false)
   const showBySchool = !schoolFilterActive && bySchool
-  // TODO: API 연동 시 sort=NEWEST|REGISTERED|RECRUITMENT 쿼리 파라미터로 서버 정렬 연결 (RECRUITING-PUBLIC-001/ADMIN-011)
-  const [sort, setSort] = useState<RecruitmentSort>("NEWEST")
-  const [sortOpen, setSortOpen] = useState(false)
 
   // DRAFT(비공개) 글은 학교별 공유 보관함에서만 노출
   const publishedPosts = posts.filter((post) => post.status !== "DRAFT")
@@ -152,21 +145,6 @@ export function RecruitmentPostListCard({
                 </span>
               </label>
             )}
-            <FilterDropdown
-              label="최신 순"
-              multiSelect={false}
-              className="border-teal-gray-300 text-teal-gray-900 hover:bg-teal-gray-50 h-10 bg-white"
-              open={sortOpen}
-              onClick={() => setSortOpen((prev) => !prev)}
-              onRequestClose={() => setSortOpen(false)}
-              options={RECRUITMENT_SORT_OPTIONS}
-              selectedValue={sort}
-              selectedLabel={
-                RECRUITMENT_SORT_OPTIONS.find((option) => option.value === sort)
-                  ?.label
-              }
-              onSelect={(value) => setSort(value as RecruitmentSort)}
-            />
           </div>
         )}
       </div>
@@ -200,8 +178,7 @@ export function RecruitmentPostListCard({
                       <PostRow
                         key={post.postId}
                         post={post}
-                        role={role}
-                        editScope={editScope}
+                        permittedSeasonIds={permittedSeasonIds}
                         onPrivatize={onPrivatize}
                         onDuplicate={onDuplicate}
                         onDelete={onDelete}
@@ -222,8 +199,7 @@ export function RecruitmentPostListCard({
             <PostRow
               key={post.postId}
               post={post}
-              role={role}
-              editScope={editScope}
+              permittedSeasonIds={permittedSeasonIds}
               onPrivatize={onPrivatize}
               onDuplicate={onDuplicate}
               onDelete={onDelete}
