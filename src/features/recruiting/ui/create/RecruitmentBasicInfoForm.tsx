@@ -9,6 +9,7 @@ import {
   CHAPTERS,
   isChapter,
 } from "@/entities/organization/model/chapters"
+import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { cn } from "@/shared/lib/utils"
@@ -16,7 +17,6 @@ import { Button } from "@/shared/ui/Button"
 import { Calendar } from "@/shared/ui/calendar/Calendar"
 import { DateTextBox } from "@/shared/ui/date-text-box/DateTextBox"
 import { TimeTextBox } from "@/shared/ui/date-text-box/TimeTextBox"
-import { Dropdown } from "@/shared/ui/Dropdown"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { CheckboxIndicator } from "@/shared/ui/input/checkbox/CheckboxIndicator"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -47,6 +47,7 @@ import {
 import { findSeasonIdBySchool } from "../../model/recruitmentList"
 import { useRecruitmentCreateStore } from "../../model/useRecruitmentCreateStore"
 import { RecruitmentPreviewCard } from "../RecruitmentPreviewCard"
+import { RecruitmentSchoolSearchDropdown } from "../RecruitmentSchoolSearchDropdown"
 import { RecruitmentSectionHeader } from "../RecruitmentSectionHeader"
 
 import type {
@@ -184,6 +185,7 @@ export function RecruitmentBasicInfoForm({
   const addToast = useToastStore((state) => state.addToast)
   const navigate = useNavigate()
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
+  const [schoolSearchOpen, setSchoolSearchOpen] = useState(false)
   const chapter = useRecruitmentCreateStore((s) => s.basicInfo.chapter)
   const school = useRecruitmentCreateStore((s) => s.basicInfo.school)
   const recruitmentType = useRecruitmentCreateStore(
@@ -649,17 +651,42 @@ export function RecruitmentBasicInfoForm({
                     모집 학교
                   </span>
                   {isSchoolEditable ? (
-                    <Dropdown
-                      value={school}
-                      onChange={(value) => patchBasicInfo({ school: value })}
-                      options={schoolOptions.map((value) => ({
-                        value,
-                        label: value,
-                      }))}
-                      placeholder="학교 선택"
-                      disabled={!chapter}
-                      className="w-52.5"
-                    />
+                    <div className="relative w-52.5">
+                      <button
+                        type="button"
+                        aria-haspopup="listbox"
+                        aria-expanded={schoolSearchOpen}
+                        disabled={!chapter}
+                        onClick={() => setSchoolSearchOpen((prev) => !prev)}
+                        className={cn(
+                          "shadow-inner-neutral-2 text-label-1-medium inline-flex h-11 w-full items-center justify-between gap-1 rounded-[12px] border pr-2.5 pl-4 transition-colors",
+                          !chapter
+                            ? "bg-teal-gray-50 border-teal-gray-200 text-teal-gray-300 pointer-events-none cursor-not-allowed"
+                            : schoolSearchOpen
+                              ? "border-teal-400 bg-teal-50 text-teal-600"
+                              : school
+                                ? "border-teal-gray-300 text-teal-gray-900 hover:bg-teal-gray-50 bg-white"
+                                : "border-teal-gray-300 text-teal-gray-400 hover:bg-teal-gray-50 bg-white",
+                        )}
+                      >
+                        <span className="truncate">
+                          {school ?? "학교 선택"}
+                        </span>
+                        <DownChevronIcon
+                          className={cn(
+                            "text-teal-gray-400 size-4 shrink-0 transition-transform",
+                            schoolSearchOpen && "rotate-180",
+                          )}
+                        />
+                      </button>
+                      <RecruitmentSchoolSearchDropdown
+                        open={schoolSearchOpen}
+                        schools={schoolOptions}
+                        onOpenChange={setSchoolSearchOpen}
+                        onSelect={(value) => patchBasicInfo({ school: value })}
+                        className="w-full"
+                      />
+                    </div>
                   ) : (
                     <span className="text-body-1-medium text-teal-500">
                       {school}
