@@ -45,3 +45,5 @@ export { RecruitmentSchoolSectionLabel } from "./ui/RecruitmentSchoolSectionLabe
 export { RecruitmentSectionHeader } from "./ui/RecruitmentSectionHeader"
 export { RecruitmentStatusChip } from "./ui/RecruitmentStatusChip"
 export { RecruitmentStepper } from "./ui/RecruitmentStepper"
+export { InterviewScheduleBoardPage } from "./ui/schedule/InterviewScheduleBoardPage"
+export { InterviewSchedulePage } from "./ui/schedule/InterviewSchedulePage"
