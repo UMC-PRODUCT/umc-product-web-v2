@@ -469,7 +469,7 @@ function MatchingRoundsPage() {
           ),
         )
         addToast({
-          message: "매칭 날짜를 한 번 더 확인해 주세요.",
+          message: "매칭 날짜를 다시 확인해 주세요.",
           color: "red",
           variant: "deep",
           type: "default",

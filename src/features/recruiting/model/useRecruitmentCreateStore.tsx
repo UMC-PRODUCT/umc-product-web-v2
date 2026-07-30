@@ -13,8 +13,7 @@ import type { PeriodFieldKey, PeriodFieldValue } from "./recruitmentCreate"
 import type { RecruitmentRoundType } from "./recruitmentList"
 
 // 모집 생성 3단계(기본 정보·모집 문항·공고)가 공유하는 값들.
-// 각 단계는 여전히 독립 컴포넌트지만, roundId·트랙 선택처럼 다른 단계의
-// 값을 참조해야 하는 필드는 여기서 소유한다.
+// 각 단계는 여전히 독립 컴포넌트지만, roundId·트랙 선택처럼 다른 단계의 값을 참조해야 하는 필드는 여기서 소유한다.
 export interface RecruitmentBasicInfo {
   chapter: Chapter | undefined
   school: string | undefined
@@ -31,7 +30,8 @@ const DEFAULT_BASIC_INFO: RecruitmentBasicInfo = {
   // 공통 디폴트: 정규 모집·1차가 항상 기본 선택되어 있어야 한다.
   recruitmentType: "REGULAR",
   roundNo: "1",
-  interviewRequired: true,
+  // availability form 빌더 미구현이라 체크박스 자체를 disabled로 막아둠
+  interviewRequired: false,
   footer: "",
   periodForm: INITIAL_PERIOD_FORM,
 }
@@ -44,8 +44,10 @@ export interface RecruitmentCreateState {
   seasonId: string | null
   roundId: string | null
   basicInfo: RecruitmentBasicInfo
-  // Step2 "파트 사용" 토글. 백엔드 recruitableTracks는 이 값에서 파생된다.
+  // Step2 "파트 사용" 토글
   enabledParts: Record<PartKey, boolean>
+  // Step2 기본 문항 04번(2지망) enabled 토글과 동기화되는 Round 레벨 플래그.
+  secondChoiceEnabled: boolean
   announcement: string
   contactText: string
 
@@ -53,6 +55,7 @@ export interface RecruitmentCreateState {
   setRoundId: (id: string) => void
   patchBasicInfo: (patch: Partial<RecruitmentBasicInfo>) => void
   setEnabledParts: (parts: Record<PartKey, boolean>) => void
+  setSecondChoiceEnabled: (enabled: boolean) => void
   setAnnouncement: (text: string) => void
   setContactText: (text: string) => void
   reset: () => void
@@ -64,6 +67,7 @@ export function createRecruitmentCreateStore() {
     roundId: null,
     basicInfo: { ...DEFAULT_BASIC_INFO },
     enabledParts: { ...DEFAULT_ENABLED_PARTS },
+    secondChoiceEnabled: true,
     announcement: "",
     contactText: "",
 
@@ -72,6 +76,7 @@ export function createRecruitmentCreateStore() {
     patchBasicInfo: (patch) =>
       set((s) => ({ basicInfo: { ...s.basicInfo, ...patch } })),
     setEnabledParts: (parts) => set({ enabledParts: parts }),
+    setSecondChoiceEnabled: (enabled) => set({ secondChoiceEnabled: enabled }),
     setAnnouncement: (text) => set({ announcement: text }),
     setContactText: (text) => set({ contactText: text }),
     reset: () =>
@@ -80,6 +85,7 @@ export function createRecruitmentCreateStore() {
         roundId: null,
         basicInfo: { ...DEFAULT_BASIC_INFO },
         enabledParts: { ...DEFAULT_ENABLED_PARTS },
+        secondChoiceEnabled: true,
         announcement: "",
         contactText: "",
       }),

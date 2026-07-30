@@ -703,6 +703,9 @@ export function RecruitmentBasicInfoForm({
                             },
                       })
                     }}
+                    disabled // TODO(면접 가능 시간대 Form 빌더 미구현): availabilityFormId를 세팅하는 화면이
+                    // 아직 없어서 interviewRequired=true로 OPEN 전환하면 RECRUITING_ROUND_INVALID_SCHEDULE로
+                    // 무조건 실패함. availability form 빌더 붙으면 이 disabled 제거.
                     variant="primary"
                     size="lg"
                     aria-label="면접 진행 여부"

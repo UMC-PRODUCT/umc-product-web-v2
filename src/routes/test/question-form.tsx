@@ -255,7 +255,7 @@ function QuestionFormTestPage() {
             <QuestionItemTitle
               index="Q1"
               title="질문을 작성하세요"
-              caption="설명 (선택 사항)"
+              caption="설명을 입력하세요"
             />
           </div>
         </Section>
