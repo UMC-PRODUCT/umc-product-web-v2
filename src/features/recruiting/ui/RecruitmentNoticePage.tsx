@@ -46,7 +46,7 @@ export function RecruitmentNoticePage() {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [applyConfirmOpen, setApplyConfirmOpen] = useState(false)
 
-  const { groups, isLoading } = useRecruitingRounds()
+  const { groups, isLoading, isError } = useRecruitingRounds()
   const allItems = useMemo(() => toRecruitmentNoticeItems(groups), [groups])
   const allSchoolsQuery = useAllSchools()
   const allSchools = useMemo(
@@ -136,7 +136,11 @@ export function RecruitmentNoticePage() {
 
       {items.length === 0 ? (
         <p className="text-body-2-medium text-teal-gray-400 flex w-full items-center justify-center py-30">
-          {isLoading ? "불러오는 중입니다..." : "등록된 모집 공고가 없습니다."}
+          {isLoading
+            ? "불러오는 중입니다..."
+            : isError
+              ? "모집 공고를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+              : "등록된 모집 공고가 없습니다."}
         </p>
       ) : (
         <div className="flex w-full flex-col items-start gap-0.5">
