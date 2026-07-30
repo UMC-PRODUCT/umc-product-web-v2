@@ -187,8 +187,7 @@ export const RECRUITMENT_DEFAULT_QUESTIONS: RecruitmentDefaultQuestion[] = [
   },
 ]
 
-// Form Upsert 요청 전용 타입만 여기서 참조(entity 레이어 의존 방지를 위해 api 타입은 호출부에서 조립).
-// 공통 문항의 radio/text만 다루므로 폭넓은 RecruitingQuestionType
+// 공통 문항은 radio/text만 다루므로 RecruitingQuestionType 전체가 아니라 이 두 값으로만 좁혀 반환한다.
 function toRecruitingQuestionType(
   type: RecruitmentDefaultQuestion["type"],
 ): "RADIO" | "SHORT_TEXT" {
@@ -196,7 +195,7 @@ function toRecruitingQuestionType(
 }
 
 // 공통 문항(01~05) 섹션을 Form Upsert 요청 payload로 직렬화한다.
-// 파트별(TRACK) 섹션은 아직 실제 편집 상태가 없는 정적 placeholder라 여기서 다루지 않는다.
+// 파트별(TRACK) 섹션 직렬화는 buildTrackSectionUpsertRequest가 별도로 담당한다.
 export function buildCommonSectionUpsertRequest(
   removedOptionsByQuestionIndex: Record<string, string[]>,
   questionToggleState: Record<string, { enabled: boolean; required: boolean }>,
