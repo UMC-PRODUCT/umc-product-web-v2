@@ -447,6 +447,9 @@ export function RecruitmentBasicInfoForm({
   }
 
   const handleTempSave = async () => {
+    if (isSaving) return
+    setIsSaving(true)
+
     const { footer: resolvedFooter, wasAdjusted } =
       await resolveAvailableFooter(previewTitle, footer, checkTitleAvailable)
 
@@ -455,7 +458,6 @@ export function RecruitmentBasicInfoForm({
       showTitleAdjustedToast()
     }
 
-    setIsSaving(true)
     // TODO: 실제 임시 저장 API 호출로 교체 (지금은 로딩 상태만 흉내)
     setTimeout(() => {
       savedSnapshotRef.current = currentSnapshot
@@ -526,6 +528,9 @@ export function RecruitmentBasicInfoForm({
     !!periodForm.finalResultPublishedAt.date
 
   const handleNext = async () => {
+    if (isAdvancing) return
+    setIsAdvancing(true)
+
     const { footer: resolvedFooter, wasAdjusted } =
       await resolveAvailableFooter(previewTitle, footer, checkTitleAvailable)
     if (wasAdjusted) {
@@ -542,6 +547,7 @@ export function RecruitmentBasicInfoForm({
     )
     if (documentPeriodError) {
       showPeriodErrorToast(documentPeriodError)
+      setIsAdvancing(false)
       return
     }
 
@@ -552,6 +558,7 @@ export function RecruitmentBasicInfoForm({
       : null
     if (interviewDelayError) {
       showPeriodErrorToast(interviewDelayError)
+      setIsAdvancing(false)
       return
     }
 
@@ -561,11 +568,11 @@ export function RecruitmentBasicInfoForm({
         showPeriodErrorToast(
           `전체 모집 기간이 ${MAX_TOTAL_PERIOD_DAYS}일을 넘을 수 없습니다.`,
         )
+        setIsAdvancing(false)
         return
       }
     }
 
-    setIsAdvancing(true)
     // TODO: 실제로는 1단계 데이터 저장 API 호출 후 다음 단계로 이동
     setTimeout(() => {
       setIsAdvancing(false)
