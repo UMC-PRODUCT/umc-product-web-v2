@@ -48,13 +48,17 @@ export function RecruitmentAnnouncementForm({
   const setAnnouncement = useRecruitmentCreateStore((s) => s.setAnnouncement)
   const contactText = useRecruitmentCreateStore((s) => s.contactText)
   const basicInfo = useRecruitmentCreateStore((s) => s.basicInfo)
+  const gisuGeneration = useRecruitmentCreateStore((s) => s.gisuGeneration)
   const enabledParts = useRecruitmentCreateStore((s) => s.enabledParts)
   const secondChoiceEnabled = useRecruitmentCreateStore(
     (s) => s.secondChoiceEnabled,
   )
   const seasonId = useRecruitmentCreateStore((s) => s.seasonId)
   const roundId = useRecruitmentCreateStore((s) => s.roundId)
-  const previewTitle = buildRecruitmentPreviewTitle(basicInfo)
+  const previewTitle = buildRecruitmentPreviewTitle({
+    ...basicInfo,
+    gisuGeneration,
+  })
   const documentStartAtLabel = formatDocumentStartAtLabel(basicInfo.periodForm)
   const [openModal, setOpenModal] = useState<AnnouncementModalKind | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
@@ -173,7 +177,7 @@ export function RecruitmentAnnouncementForm({
             // false로 보낸다 — Round 생성(createRecruitingRound)과 대칭.
             await updateRecruitingRound(seasonId, roundId, {
               title: composeRecruitmentTitle(
-                buildRecruitmentPreviewTitle(basicInfo),
+                buildRecruitmentPreviewTitle({ ...basicInfo, gisuGeneration }),
                 basicInfo.footer,
               ),
               recruitableTracks: getRecruitableTracks(enabledParts),

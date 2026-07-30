@@ -486,6 +486,7 @@ export function RecruitmentQuestionForm({
     (s) => s.setSecondChoiceEnabled,
   )
   const basicInfo = useRecruitmentCreateStore((s) => s.basicInfo)
+  const gisuGeneration = useRecruitmentCreateStore((s) => s.gisuGeneration)
   const seasonId = useRecruitmentCreateStore((s) => s.seasonId)
   const roundId = useRecruitmentCreateStore((s) => s.roundId)
   const setRoundId = useRecruitmentCreateStore((s) => s.setRoundId)
@@ -699,7 +700,7 @@ export function RecruitmentQuestionForm({
         roundId ??
         (await createRecruitingRound(seasonId, {
           title: composeRecruitmentTitle(
-            buildRecruitmentPreviewTitle(basicInfo),
+            buildRecruitmentPreviewTitle({ ...basicInfo, gisuGeneration }),
             basicInfo.footer,
           ),
           type: basicInfo.recruitmentType,

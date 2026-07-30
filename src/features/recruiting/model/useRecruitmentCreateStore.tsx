@@ -43,6 +43,8 @@ const DEFAULT_ENABLED_PARTS: Record<PartKey, boolean> = Object.fromEntries(
 export interface RecruitmentCreateState {
   seasonId: string | null
   roundId: string | null
+  // 모집 제목("UMC N기 ...")에 쓰는 로그인 사용자의 활성 기수 번호.
+  gisuGeneration: number | null
   basicInfo: RecruitmentBasicInfo
   // Step2 "파트 사용" 토글
   enabledParts: Record<PartKey, boolean>
@@ -53,6 +55,7 @@ export interface RecruitmentCreateState {
 
   setSeasonId: (id: string | null) => void
   setRoundId: (id: string) => void
+  setGisuGeneration: (generation: number | null) => void
   patchBasicInfo: (patch: Partial<RecruitmentBasicInfo>) => void
   setEnabledParts: (parts: Record<PartKey, boolean>) => void
   setSecondChoiceEnabled: (enabled: boolean) => void
@@ -65,6 +68,7 @@ export function createRecruitmentCreateStore() {
   return createStore<RecruitmentCreateState>((set) => ({
     seasonId: null,
     roundId: null,
+    gisuGeneration: null,
     basicInfo: { ...DEFAULT_BASIC_INFO },
     enabledParts: { ...DEFAULT_ENABLED_PARTS },
     secondChoiceEnabled: true,
@@ -73,6 +77,7 @@ export function createRecruitmentCreateStore() {
 
     setSeasonId: (id) => set({ seasonId: id }),
     setRoundId: (id) => set({ roundId: id }),
+    setGisuGeneration: (generation) => set({ gisuGeneration: generation }),
     patchBasicInfo: (patch) =>
       set((s) => ({ basicInfo: { ...s.basicInfo, ...patch } })),
     setEnabledParts: (parts) => set({ enabledParts: parts }),
@@ -83,6 +88,7 @@ export function createRecruitmentCreateStore() {
       set({
         seasonId: null,
         roundId: null,
+        gisuGeneration: null,
         basicInfo: { ...DEFAULT_BASIC_INFO },
         enabledParts: { ...DEFAULT_ENABLED_PARTS },
         secondChoiceEnabled: true,

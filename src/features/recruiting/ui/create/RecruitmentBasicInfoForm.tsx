@@ -192,6 +192,10 @@ export function RecruitmentBasicInfoForm({
   const patchBasicInfo = useRecruitmentCreateStore((s) => s.patchBasicInfo)
   const seasonId = useRecruitmentCreateStore((s) => s.seasonId)
   const setSeasonId = useRecruitmentCreateStore((s) => s.setSeasonId)
+  const gisuGeneration = useRecruitmentCreateStore((s) => s.gisuGeneration)
+  const setGisuGeneration = useRecruitmentCreateStore(
+    (s) => s.setGisuGeneration,
+  )
   const {
     groups: seasonGroups,
     isLoading: isSeasonGroupsLoading,
@@ -247,6 +251,12 @@ export function RecruitmentBasicInfoForm({
     setSeasonId(findSeasonIdBySchool(seasonGroups, school) ?? null)
   }, [school, seasonGroups, setSeasonId])
 
+  // 모집 제목("UMC N기 ...")에 쓰는 기수 번호도 다른 단계(2·3단계)에서 재조회
+  // 없이 쓸 수 있도록 여기서 한 번만 스토어에 반영해둔다.
+  useEffect(() => {
+    setGisuGeneration(gisuQuery.data?.generation ?? null)
+  }, [gisuQuery.data?.generation, setGisuGeneration])
+
   // 시즌은 기수 시작 시 학교당 1회 백오피스에서 미리 만들어두는 자원이라 프론트에
   // 만드는 화면이 없다. 학교를 골랐는데도 시즌이 안 잡히면 그건 아직 해당 학교의
   // 시즌이 세팅되지 않은 것이므로, 2단계까지 다 채운 뒤 생성 시점에야 막히지 않도록
@@ -294,6 +304,7 @@ export function RecruitmentBasicInfoForm({
     school,
     recruitmentType,
     roundNo,
+    gisuGeneration,
   })
   const isTitleTooLong =
     composeRecruitmentTitle(previewTitle, footer).length > MAX_TITLE_LENGTH
