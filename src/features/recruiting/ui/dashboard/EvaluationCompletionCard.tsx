@@ -1,17 +1,18 @@
-import { CHAPTERS } from "@/entities/organization/model/chapters"
 import GoalIcon from "@/shared/assets/icon/goal/GoalIcon"
 import { cn } from "@/shared/lib/utils"
 
-import type { Chapter } from "@/entities/organization/model/chapters"
-
+// 지부 목록은 서버 응답에서 오므로 개수와 이름을 카드가 가정하지 않는다.
+// 표시 순서는 받은 배열 순서를 그대로 따른다(정렬 책임은 호출부).
 interface ChapterEvaluation {
+  chapterId: string
+  chapterName: string
   count: number
   percentage: number
 }
 
 interface EvaluationCompletionCardProps {
   overallPercentage: number
-  chapters: Record<Chapter, ChapterEvaluation>
+  chapters: ChapterEvaluation[]
 }
 
 function percentageChipClassName(percentage: number): string {
@@ -38,15 +39,14 @@ export function EvaluationCompletionCard({
       </div>
 
       <div className="scrollbar-thin -mr-5.25 flex flex-1 flex-col gap-2.5 overflow-x-clip overflow-y-auto pr-5.25">
-        {CHAPTERS.map((chapter) => {
-          const { count, percentage } = chapters[chapter]
+        {chapters.map(({ chapterId, chapterName, count, percentage }) => {
           return (
             <div
-              key={chapter}
+              key={chapterId}
               className="flex items-center justify-between gap-2"
             >
               <p className="text-body-2-medium text-teal-gray-600 whitespace-nowrap">
-                {chapter}
+                {chapterName}
               </p>
               <div className="flex items-center gap-2">
                 <p className="text-label-3-medium text-teal-gray-400 whitespace-nowrap">

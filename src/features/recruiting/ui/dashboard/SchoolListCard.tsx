@@ -1,20 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
-import { CHAPTERS } from "@/entities/organization/model/chapters"
 import SchoolIcon from "@/shared/assets/icon/school/SchoolIcon"
 import { cn } from "@/shared/lib/utils"
 
-import type { Chapter } from "@/entities/organization/model/chapters"
+// 지부 목록은 서버 응답에서 오므로 개수와 이름을 카드가 가정하지 않는다.
+// 표시 순서는 받은 배열 순서를 그대로 따른다(정렬 책임은 호출부).
+interface ChapterSchools {
+  chapterId: string
+  chapterName: string
+  schools: string[]
+}
 
 interface SchoolListCardProps {
   totalCount: number
-  schoolsByChapter: Record<Chapter, string[]>
+  chapters: ChapterSchools[]
 }
 
-export function SchoolListCard({
-  totalCount,
-  schoolsByChapter,
-}: SchoolListCardProps) {
+export function SchoolListCard({ totalCount, chapters }: SchoolListCardProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   // 스크롤 여지가 있고 아직 맨 아래가 아닐 때만 페이드 노출(마지막 요소를 안 가리게).
   const [showFade, setShowFade] = useState(false)
@@ -29,7 +31,7 @@ export function SchoolListCard({
 
   useEffect(() => {
     updateFade()
-  }, [updateFade, schoolsByChapter])
+  }, [updateFade, chapters])
 
   return (
     <div className="border-teal-gray-100 shadow-drop-neutral-3 flex h-70 w-82 flex-col gap-5 rounded-xl border bg-white px-6 pt-7 pb-3">
@@ -46,13 +48,13 @@ export function SchoolListCard({
           onScroll={updateFade}
           className="scrollbar-hide flex h-47.5 flex-col gap-4 overflow-x-clip overflow-y-auto"
         >
-          {CHAPTERS.map((chapter) => (
-            <div key={chapter} className="flex gap-4">
+          {chapters.map(({ chapterId, chapterName, schools }) => (
+            <div key={chapterId} className="flex gap-4">
               <p className="text-subtitle-4-semibold w-20 shrink-0 text-teal-600">
-                {chapter}
+                {chapterName}
               </p>
               <div className="grid flex-1 grid-cols-2 gap-x-4 gap-y-1.5">
-                {schoolsByChapter[chapter].map((school) => (
+                {schools.map((school) => (
                   <p
                     key={school}
                     className="text-body-2-medium text-teal-gray-600"

@@ -1,13 +1,14 @@
-import { CHAPTERS } from "@/entities/organization/model/chapters"
 import { PARTS } from "@/features/recruiting/model/parts"
 import { GraphTooltip } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
 
-import type { Chapter } from "@/entities/organization/model/chapters"
 import type { PartKey, PartMeta } from "@/features/recruiting/model/parts"
 import type { PartBreakdown } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
 
 interface SchoolDatum {
-  chapter: Chapter
+  // 지부는 서버 값을 그대로 받는다. 같은 이름의 지부가 있을 수 있어 그룹핑과
+  // key 는 chapterId 로 잡고 chapterName 은 표시에만 쓴다.
+  chapterId: string
+  chapterName: string
   name: string
   // 앞(컬러) 막대 값. 지원현황=지원자수, 평가현황=평가 완료 수.
   counts: Record<PartKey, number>
@@ -17,6 +18,7 @@ interface SchoolDatum {
 
 interface SchoolPartChartCardProps {
   title: string
+  // 받은 순서대로 렌더한다. 지부별로 묶여 보이려면 호출부에서 정렬해 넘긴다.
   schools: SchoolDatum[]
   // 호버 툴팁 하단의 모집 상태(예: "모집 중", "추가 모집 중"). 없으면 미표기.
   footerStatus?: string
@@ -55,16 +57,6 @@ function barHeightPx(count: number, globalMax: number): number {
   )
 }
 
-// 지부 가나다(CHAPTERS 순서) > 지부 내 학교 가나다 순으로 정렬.
-function sortSchools(schools: SchoolDatum[]): SchoolDatum[] {
-  return [...schools].sort((a, b) => {
-    const chapterDiff =
-      CHAPTERS.indexOf(a.chapter) - CHAPTERS.indexOf(b.chapter)
-    if (chapterDiff !== 0) return chapterDiff
-    return a.name.localeCompare(b.name, "ko")
-  })
-}
-
 function chunk<T>(items: T[], size: number): T[][] {
   const rows: T[][] = []
   for (let i = 0; i < items.length; i += size) {
@@ -91,17 +83,16 @@ export function SchoolPartChartCard({
   schools,
   footerStatus,
 }: SchoolPartChartCardProps) {
-  const sorted = sortSchools(schools)
   // 평가 모드: 학교 중 하나라도 지원자 수(applicants)를 가지면 회색 배경 막대 + 범례 추가.
-  const hasApplicants = sorted.some((school) => school.applicants)
+  const hasApplicants = schools.some((school) => school.applicants)
   // 높이 기준(Max): 평가 모드면 지원자 수 최댓값, 지원 모드면 지원자 수(counts) 최댓값.
   const globalMax = Math.max(
-    ...sorted.flatMap((school) =>
+    ...schools.flatMap((school) =>
       PARTS.map((part) => (school.applicants ?? school.counts)[part.key]),
     ),
     1,
   )
-  const rows = chunk(sorted, SCHOOLS_PER_ROW)
+  const rows = chunk(schools, SCHOOLS_PER_ROW)
 
   return (
     <div className="border-teal-gray-100 shadow-drop-neutral-3 w-263 rounded-xl border bg-white px-8 py-7">
@@ -146,7 +137,7 @@ export function SchoolPartChartCard({
               <div className="relative flex gap-1.5">
                 {row.map((school) => (
                   <div
-                    key={`${school.chapter}-${school.name}`}
+                    key={`${school.chapterId}-${school.name}`}
                     className="group relative flex w-15 shrink-0 flex-col items-center gap-1.25"
                   >
                     <div className="flex h-25 gap-1.25">
