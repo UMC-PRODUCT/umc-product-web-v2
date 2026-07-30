@@ -1,243 +1,162 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { getServerErrorMessage } from "@/features/recruiting/api/errors"
+import { useEvaluationStatistics } from "@/features/recruiting/hooks/useEvaluationStatistics"
+import { useRecruitingProgress } from "@/features/recruiting/hooks/useRecruitingProgress"
+import { formatBaseTime } from "@/features/recruiting/model/applicantListTypes"
+import {
+  toApplicantCountsByPart,
+  toChapterCompletions,
+  toChapterEvaluationBars,
+  toCompletionPercentage,
+  toEvaluatedCountsByPart,
+  toSchoolEvaluationBars,
+} from "@/features/recruiting/model/evaluationStats"
 import { ChapterRankingCard } from "@/features/recruiting/ui/dashboard/ChapterRankingCard"
 import { EvaluationCompletionCard } from "@/features/recruiting/ui/dashboard/EvaluationCompletionCard"
 import { PartDistributionCard } from "@/features/recruiting/ui/dashboard/PartDistributionCard"
 import { SchoolPartChartCard } from "@/features/recruiting/ui/dashboard/SchoolPartChartCard"
 import { StatCard } from "@/features/recruiting/ui/dashboard/StatCard"
+import { shortenSchoolName } from "@/shared/lib/formatSchoolName"
 import { GraphTimestampLabel } from "@/shared/ui/GraphTimestampLabel"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
+
+import type { PartKey } from "@/features/recruiting/model/parts"
 
 export const Route = createFileRoute("/recruiting/dashboard/evaluations")({
   component: RouteComponent,
 })
 
-// TODO: 평가 완료 집계 API 가 없어 전부 목업이다. 서버 스펙 확정 후 삭제.
-// chapterId 는 dev/prod 의 실제 지부 id.
-const MOCK_CHAPTERS = [
-  { chapterId: "29", chapterName: "Chromium" },
-  { chapterId: "30", chapterName: "Ferrum" },
-  { chapterId: "27", chapterName: "Neon" },
-  { chapterId: "31", chapterName: "Platinum" },
-  { chapterId: "32", chapterName: "Selenium" },
-  { chapterId: "28", chapterName: "Xenon" },
-]
-
-const MOCK_COMPLETION = [
-  { count: 80, percentage: 100 },
-  { count: 64, percentage: 80 },
-  { count: 112, percentage: 100 },
-  { count: 40, percentage: 100 },
-  { count: 0, percentage: 0 },
-  { count: 92, percentage: 80 },
-]
-
-// count = 평가 완료 수, compareCount = 지원자 수(배경 막대)
-const MOCK_CHAPTER_RANKING = [
-  { count: 80, compareCount: 80 },
-  { count: 51, compareCount: 64 },
-  { count: 112, compareCount: 112 },
-  { count: 40, compareCount: 40 },
-  { count: 0, compareCount: 0 },
-  { count: 74, compareCount: 92 },
-]
-
-const MOCK_CHAPTER_BREAKDOWNS = [
-  {
-    pm: { evaluated: 20, applied: 20 },
-    design: { evaluated: 25, applied: 25 },
-    webPe: { evaluated: 20, applied: 20 },
-    mobilePe: { evaluated: 15, applied: 15 },
-  },
-  {
-    pm: { evaluated: 18, applied: 22 },
-    design: { evaluated: 14, applied: 18 },
-    webPe: { evaluated: 11, applied: 14 },
-    mobilePe: { evaluated: 8, applied: 10 },
-  },
-  {
-    pm: { evaluated: 40, applied: 40 },
-    design: { evaluated: 32, applied: 32 },
-    webPe: { evaluated: 22, applied: 22 },
-    mobilePe: { evaluated: 18, applied: 18 },
-  },
-  {
-    pm: { evaluated: 14, applied: 14 },
-    design: { evaluated: 12, applied: 12 },
-    webPe: { evaluated: 9, applied: 9 },
-    mobilePe: { evaluated: 5, applied: 5 },
-  },
-  {
-    pm: { evaluated: 0, applied: 0 },
-    design: { evaluated: 0, applied: 0 },
-    webPe: { evaluated: 0, applied: 0 },
-    mobilePe: { evaluated: 0, applied: 0 },
-  },
-  {
-    pm: { evaluated: 28, applied: 34 },
-    design: { evaluated: 20, applied: 26 },
-    webPe: { evaluated: 14, applied: 18 },
-    mobilePe: { evaluated: 12, applied: 14 },
-  },
-]
-
-const MOCK_SCHOOL_ROWS: {
-  chapterName: string
-  name: string
-  counts: { pm: number; design: number; webPe: number; mobilePe: number }
-  applicants: { pm: number; design: number; webPe: number; mobilePe: number }
-}[] = [
-  {
-    chapterName: "Chromium",
-    name: "광운대",
-    counts: { pm: 12, design: 8, webPe: 5, mobilePe: 2 },
-    applicants: { pm: 38, design: 28, webPe: 18, mobilePe: 8 },
-  },
-  {
-    chapterName: "Chromium",
-    name: "서울여대",
-    counts: { pm: 3, design: 2, webPe: 1, mobilePe: 0 },
-    applicants: { pm: 10, design: 6, webPe: 4, mobilePe: 2 },
-  },
-  {
-    chapterName: "Ferrum",
-    name: "동국대",
-    counts: { pm: 8, design: 6, webPe: 4, mobilePe: 2 },
-    applicants: { pm: 20, design: 16, webPe: 12, mobilePe: 7 },
-  },
-  {
-    chapterName: "Ferrum",
-    name: "이화여대",
-    counts: { pm: 2, design: 5, webPe: 1, mobilePe: 2 },
-    applicants: { pm: 6, design: 12, webPe: 3, mobilePe: 5 },
-  },
-  {
-    chapterName: "Ferrum",
-    name: "홍익대 서울",
-    counts: { pm: 4, design: 3, webPe: 1, mobilePe: 0 },
-    applicants: { pm: 9, design: 6, webPe: 2, mobilePe: 1 },
-  },
-  {
-    chapterName: "Neon",
-    name: "가천대",
-    counts: { pm: 10, design: 8, webPe: 6, mobilePe: 4 },
-    applicants: { pm: 28, design: 22, webPe: 18, mobilePe: 12 },
-  },
-  {
-    chapterName: "Neon",
-    name: "숙명여대",
-    counts: { pm: 5, design: 4, webPe: 2, mobilePe: 1 },
-    applicants: { pm: 12, design: 10, webPe: 6, mobilePe: 4 },
-  },
-  {
-    chapterName: "Neon",
-    name: "한국항공대",
-    counts: { pm: 0, design: 0, webPe: 0, mobilePe: 0 },
-    applicants: { pm: 0, design: 0, webPe: 0, mobilePe: 0 },
-  },
-  {
-    chapterName: "Platinum",
-    name: "동아대",
-    counts: { pm: 4, design: 3, webPe: 2, mobilePe: 1 },
-    applicants: { pm: 9, design: 7, webPe: 5, mobilePe: 3 },
-  },
-  {
-    chapterName: "Xenon",
-    name: "중앙대",
-    counts: { pm: 6, design: 5, webPe: 3, mobilePe: 2 },
-    applicants: { pm: 14, design: 12, webPe: 8, mobilePe: 5 },
-  },
-  {
-    chapterName: "Xenon",
-    name: "한성대",
-    counts: { pm: 1, design: 0, webPe: 0, mobilePe: 0 },
-    applicants: { pm: 2, design: 1, webPe: 1, mobilePe: 0 },
-  },
-]
-
-const MOCK_CHAPTER_ID_BY_NAME = new Map(
-  MOCK_CHAPTERS.map(({ chapterId, chapterName }) => [chapterName, chapterId]),
-)
+function EmptyNotice({ message }: { message: string }) {
+  return (
+    <div className="border-teal-gray-100 text-body-2-regular text-teal-gray-500 mt-8 flex min-h-50 items-center justify-center rounded-[12px] border bg-white">
+      {message}
+    </div>
+  )
+}
 
 function RouteComponent() {
-  const completionChapters = MOCK_CHAPTERS.map((chapter, index) => ({
-    ...chapter,
-    count: MOCK_COMPLETION[index]?.count ?? 0,
-    percentage: MOCK_COMPLETION[index]?.percentage ?? 0,
-  }))
+  const { data, isLoading, isError, error } = useEvaluationStatistics()
+  const { isAdditionalRecruiting } = useRecruitingProgress()
 
-  const rankingChapters = MOCK_CHAPTERS.map((chapter, index) => ({
-    ...chapter,
-    count: MOCK_CHAPTER_RANKING[index]?.count ?? 0,
-    compareCount: MOCK_CHAPTER_RANKING[index]?.compareCount ?? 0,
-    breakdown: MOCK_CHAPTER_BREAKDOWNS[index],
-  }))
+  const header = (
+    <PageLabel
+      breadcrumb={[
+        { id: "recruiting", label: "리크루팅" },
+        { id: "dashboard", label: "대시보드" },
+        { id: "evaluations", label: "평가 현황" },
+      ]}
+      title="평가 현황"
+      description="지부별, 학교별, 파트별 평가 현황을 실시간으로 확인합니다."
+    />
+  )
 
-  const chartSchools = MOCK_SCHOOL_ROWS.map((row) => ({
-    chapterId: MOCK_CHAPTER_ID_BY_NAME.get(row.chapterName) ?? row.chapterName,
-    chapterName: row.chapterName,
-    name: row.name,
-    counts: row.counts,
-    applicants: row.applicants,
+  if (isLoading) {
+    return (
+      <div>
+        {header}
+        <EmptyNotice message="평가 현황을 불러오는 중입니다." />
+      </div>
+    )
+  }
+
+  if (isError || !data) {
+    // 권한 부족처럼 원인이 확정된 실패는 서버 문구를 그대로 보여준다.
+    const message =
+      getServerErrorMessage(error) ??
+      "평가 현황을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+    return (
+      <div>
+        {header}
+        <EmptyNotice message={message} />
+      </div>
+    )
+  }
+
+  // 지원 현황과 달리 서버가 asOf(집계 기준 시각)를 준다. 없을 때만 조회 시각으로
+  // 대체한다. 평가 완료 카드는 비율 footer 라 날짜를 쓰지 않고, 그래프 기준 시각
+  // 라벨만 "26-07-04 02:48" 형식으로 표기한다.
+  const asOf = data.asOf ? new Date(data.asOf) : new Date()
+  const [graphAsOfDate, graphAsOfTime] = formatBaseTime(asOf).split(" ")
+
+  const overallPercentage = toCompletionPercentage(
+    data.evaluatedCount,
+    data.applicantCount,
+  )
+  // 파트 도넛은 평가 완료 수(분자)와 지원자 수(분모)를 함께 받는다.
+  const evaluated = toEvaluatedCountsByPart(data.byTrack)
+  const applicants = toApplicantCountsByPart(data.byTrack)
+  const partValues: Record<
+    PartKey,
+    { type: "evaluation"; count: number; total: number }
+  > = {
+    pm: { type: "evaluation", count: evaluated.pm, total: applicants.pm },
+    design: {
+      type: "evaluation",
+      count: evaluated.design,
+      total: applicants.design,
+    },
+    webPe: {
+      type: "evaluation",
+      count: evaluated.webPe,
+      total: applicants.webPe,
+    },
+    mobilePe: {
+      type: "evaluation",
+      count: evaluated.mobilePe,
+      total: applicants.mobilePe,
+    },
+  }
+
+  const chartSchools = toSchoolEvaluationBars(data).map((school) => ({
+    ...school,
+    name: shortenSchoolName(school.name),
   }))
 
   return (
     <div>
-      <PageLabel
-        breadcrumb={[
-          { id: "recruiting", label: "리크루팅" },
-          { id: "dashboard", label: "대시보드" },
-          { id: "evaluations", label: "평가 현황" },
-        ]}
-        title="평가 현황"
-        description="지부별, 학교별, 파트별 평가 현황을 실시간으로 확인합니다."
-      />
+      {header}
       <div className="mt-8 flex gap-4">
         <StatCard
           title={"평가 완료"}
-          count={1000}
+          count={data.evaluatedCount}
           footer={{
             type: "ratio",
-            totalCount: 1500,
+            totalCount: data.applicantCount,
           }}
         />
         <EvaluationCompletionCard
-          overallPercentage={82}
-          chapters={completionChapters}
+          overallPercentage={overallPercentage}
+          chapters={toChapterCompletions(data)}
         />
         {/* 마지막 카드 위 8px에 기준 시각 라벨(우측 정렬). absolute라 카드 정렬엔 영향 없음. */}
         <div className="relative flex">
           <GraphTimestampLabel
-            date="26-07-04"
-            time="02:48"
+            date={graphAsOfDate ?? ""}
+            time={graphAsOfTime ?? ""}
             className="absolute right-0 bottom-full mb-2"
           />
           <PartDistributionCard
             title="파트별 평가 완료 현황"
-            values={{
-              pm: { type: "evaluation", count: 10, total: 15 },
-              design: { type: "evaluation", count: 20, total: 25 },
-              webPe: { type: "evaluation", count: 0, total: 0 },
-              mobilePe: { type: "evaluation", count: 35, total: 70 },
-            }}
+            values={partValues}
           />
         </div>
       </div>
       <div className="mt-4">
         <ChapterRankingCard
           title="지부별 평가 현황"
-          chapters={rankingChapters}
+          chapters={toChapterEvaluationBars(data)}
           compareLabels={{
             primaryLabel: "평가 완료",
             compareLabel: "지원자 수",
           }}
-          footerStatus="추가 모집 중"
+          footerStatus={isAdditionalRecruiting ? "추가 모집 중" : undefined}
         />
       </div>
       <div className="mt-4">
         <SchoolPartChartCard
           title="학교별 평가 현황"
-          footerStatus="추가 모집 중"
+          footerStatus={isAdditionalRecruiting ? "추가 모집 중" : undefined}
           schools={chartSchools}
         />
       </div>
