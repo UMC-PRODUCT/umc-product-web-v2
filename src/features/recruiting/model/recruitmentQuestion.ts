@@ -1,6 +1,9 @@
 import { type PartKey, PARTS } from "./parts"
 
-import type { RecruitingTrack } from "../api/types"
+import type {
+  RecruitingTrack,
+  UpsertRecruitingSectionRequest,
+} from "../api/types"
 
 export type RecruitmentFieldType =
   | "text"
@@ -258,19 +261,7 @@ export function buildTrackSectionUpsertRequest(
   partLabel: string,
   track: RecruitingTrack,
   questions: RecruitmentQuestion[],
-): {
-  clientKey: string
-  title: string
-  type: "TRACK"
-  track: RecruitingTrack
-  questions: {
-    type: "SHORT_TEXT" | "RADIO" | "CHECKBOX" | "FILE" | "PORTFOLIO"
-    title: string
-    description?: string
-    required: boolean
-    options?: { content: string; other: boolean }[]
-  }[]
-} {
+): UpsertRecruitingSectionRequest {
   return {
     clientKey: `track-${track}`,
     title: partLabel,
