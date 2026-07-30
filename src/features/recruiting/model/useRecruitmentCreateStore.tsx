@@ -75,11 +75,22 @@ export function createRecruitmentCreateStore() {
     announcement: "",
     contactText: "",
 
-    setSeasonId: (id) => set({ seasonId: id }),
+    setSeasonId: (id) =>
+      set((s) => (s.seasonId === id ? {} : { seasonId: id, roundId: null })),
     setRoundId: (id) => set({ roundId: id }),
     setGisuGeneration: (generation) => set({ gisuGeneration: generation }),
     patchBasicInfo: (patch) =>
-      set((s) => ({ basicInfo: { ...s.basicInfo, ...patch } })),
+      set((s) => {
+        // 값이 바뀌면 기존 roundId를 재사용하지 못하게 초기화한다.
+        const invalidatesRound =
+          ("recruitmentType" in patch &&
+            patch.recruitmentType !== s.basicInfo.recruitmentType) ||
+          ("roundNo" in patch && patch.roundNo !== s.basicInfo.roundNo)
+        return {
+          basicInfo: { ...s.basicInfo, ...patch },
+          ...(invalidatesRound ? { roundId: null } : {}),
+        }
+      }),
     setEnabledParts: (parts) => set({ enabledParts: parts }),
     setSecondChoiceEnabled: (enabled) => set({ secondChoiceEnabled: enabled }),
     setAnnouncement: (text) => set({ announcement: text }),
