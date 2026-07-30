@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
 import { isChapter } from "@/entities/organization/model/chapters"
+import { downloadDecisionHistoriesCsv } from "@/features/recruiting/api/recruitingApi"
 import { useEvaluationHistory } from "@/features/recruiting/hooks/useEvaluationHistory"
 import { formatBaseTime } from "@/features/recruiting/model/applicantListTypes"
 import {
@@ -10,27 +11,30 @@ import {
   type EvaluationHistoryFilters,
   type EvaluationHistorySort,
   orderEvaluationHistoryRows,
-  toEvaluationHistoryCsv,
+  toDecisionHistoriesQuery,
 } from "@/features/recruiting/model/evaluationHistory"
 import { formatGisuLabel } from "@/features/recruiting/model/recruitingRole"
 import { ChapterTabs } from "@/features/recruiting/ui/ChapterTabs"
 import { EvaluationHistoryCard } from "@/features/recruiting/ui/history/EvaluationHistoryCard"
 import { EvaluationHistoryFilterBar } from "@/features/recruiting/ui/history/EvaluationHistoryFilterBar"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 export const Route = createFileRoute("/recruiting/history/archive")({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { rows, progress, asOf, generation, isLoading, isError } =
+  const { rows, progress, asOf, gisuId, generation, isLoading, isError } =
     useEvaluationHistory()
+  const addToast = useToastStore((state) => state.addToast)
   const [filters, setFilters] = useState<EvaluationHistoryFilters>(
     DEFAULT_EVALUATION_HISTORY_FILTERS,
   )
   // 카드의 정렬/담당자별 상태를 여기서 갖고 있어야 CSV 다운로드가 화면과 같은 순서를 쓸 수 있다.
   const [sort, setSort] = useState<EvaluationHistorySort>("latest")
   const [byEvaluator, setByEvaluator] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   const handleFiltersChange = (partial: Partial<EvaluationHistoryFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }))
@@ -59,18 +63,33 @@ function RouteComponent() {
   // 서버가 집계 기준 시각(asOf)을 준다. 없을 때만 조회 시각으로 대체한다.
   const baseTime = formatBaseTime(asOf ? new Date(asOf) : new Date())
 
-  const handleDownload = () => {
-    const csv = toEvaluationHistoryCsv(orderedRows)
-    // 맨 앞 BOM: 엑셀에서 한글 CSV 깨짐 방지
-    const blob = new Blob(["\uFEFF" + csv], {
-      type: "text/csv;charset=utf-8;",
-    })
-    const url = URL.createObjectURL(blob)
-    const anchor = document.createElement("a")
-    anchor.href = url
-    anchor.download = `평가이력_${sectionTitle}.csv`
-    anchor.click()
-    URL.revokeObjectURL(url)
+  // 서버가 만든 CSV 를 그대로 내려받는다. 실명·원문 이메일을 제외하는 개인정보 처리를
+  // 서버가 담당하므로 클라이언트에서 CSV 를 만들지 않는다.
+  const handleDownload = async () => {
+    if (gisuId == null) return
+    setIsDownloading(true)
+    try {
+      const blob = await downloadDecisionHistoriesCsv({
+        gisuId,
+        ...toDecisionHistoriesQuery(filters, sort, byEvaluator),
+      })
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement("a")
+      anchor.href = url
+      anchor.download = `평가이력_${sectionTitle}.csv`
+      anchor.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      addToast({
+        message: "평가 이력을 다운로드하지 못했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
   return (
@@ -100,7 +119,8 @@ function RouteComponent() {
         onFiltersChange={handleFiltersChange}
         chapterScope={chapterScope}
         onDownload={handleDownload}
-        downloadDisabled={visibleRows.length === 0}
+        downloadDisabled={rows.length === 0}
+        downloadLoading={isDownloading}
         className="mt-6"
       />
 

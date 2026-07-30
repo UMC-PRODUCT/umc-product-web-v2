@@ -1,6 +1,20 @@
 import type { PartTag } from "@/shared/model/domain"
 
+import type { RecruitingDecisionResult, RecruitingTrack } from "../api/types"
 import type { EvaluationResult } from "./applicantListTypes"
+
+// 화면 필터 값 -> 서버 파라미터. TRACK_PART_TAG(트랙 -> 파트)의 역방향이다.
+const PART_TAG_TRACK: Partial<Record<string, RecruitingTrack>> = {
+  pm: "PLAN",
+  design: "DESIGN",
+  "web-pe": "WEB_PRODUCT_ENGINEER",
+  "mobile-pe": "MOBILE_PRODUCT_ENGINEER",
+}
+
+const RESULT_TO_SERVER: Partial<Record<string, RecruitingDecisionResult>> = {
+  pass: "PASSED",
+  fail: "FAILED",
+}
 
 export const EVALUATION_RESULT_LABEL: Record<EvaluationResult, string> = {
   pass: "합격",
@@ -250,46 +264,29 @@ export function formatHistoryProcessedAt(processedAt: string) {
   }
 }
 
-const EVALUATION_HISTORY_CSV_HEADER = [
-  "처리일시",
-  "지원자 지부",
-  "지원자 학교",
-  "지원자 이름",
-  "지원자 결과",
-  "담당자 지부",
-  "담당자 학교",
-  "담당자 직위",
-  "담당자 닉네임",
-  "담당자 이름",
-]
+// 서버 판정 이력 조회 파라미터로 옮긴다. CSV 다운로드가 화면과 같은 범위를 쓰도록
+// 목록 조회와 같은 조건을 넘긴다.
+//
+// 지부·학교는 옮기지 못한다. 서버가 단일 숫자 ID 를 받는데 필터 바는 이름 기반
+// 다중 선택이라서다. 그래서 화면에서 지부·학교를 좁혀도 CSV 에는 전 범위가 담긴다.
+export function toDecisionHistoriesQuery(
+  filters: EvaluationHistoryFilters,
+  sort: EvaluationHistorySort,
+  byEvaluator: boolean,
+) {
+  const search = filters.search.trim()
+  const tracks = filters.parts
+    .map((part) => PART_TAG_TRACK[part])
+    .filter((track): track is RecruitingTrack => track != null)
+  const results = filters.results
+    .map((result) => RESULT_TO_SERVER[result])
+    .filter((result): result is RecruitingDecisionResult => result != null)
 
-function escapeCsvCell(value: string) {
-  if (/[",\n]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`
+  return {
+    tracks: tracks.length > 0 ? tracks : undefined,
+    results: results.length > 0 ? results : undefined,
+    searchName: search === "" ? undefined : search,
+    sort: sort === "latest" ? ("LATEST" as const) : ("OLDEST" as const),
+    groupByDecider: byEvaluator,
   }
-  return value
-}
-
-// CSV 문자열만 만드는 순수 함수. 실제로 파일로 내려받는 건 호출하는 쪽(archive.tsx)의 책임.
-export function toEvaluationHistoryCsv(rows: EvaluationHistoryEntry[]): string {
-  const lines = [EVALUATION_HISTORY_CSV_HEADER.join(",")]
-
-  for (const row of rows) {
-    const { date, time } = formatHistoryProcessedAt(row.processedAt)
-    const cells = [
-      `${date} ${time}`,
-      row.applicant.chapter,
-      row.applicant.school,
-      row.applicant.name,
-      EVALUATION_RESULT_LABEL[row.applicant.result],
-      row.evaluator.chapter,
-      row.evaluator.school,
-      row.evaluator.position,
-      row.evaluator.nickname,
-      row.evaluator.name,
-    ]
-    lines.push(cells.map(escapeCsvCell).join(","))
-  }
-
-  return lines.join("\n")
 }

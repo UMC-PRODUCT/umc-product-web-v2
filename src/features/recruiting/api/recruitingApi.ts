@@ -204,6 +204,19 @@ export async function getAllDecisionHistories(
   return { ...first, content }
 }
 
+// 평가 이력 CSV 다운로드 (RECRUITING-ADMIN-092). 목록 조회와 같은 조건을 받으며
+// 원문 이메일과 실명을 제외하고 ID·마스킹 이메일로 준다. 서버가 text/csv 를 그대로
+// 주므로 Blob 으로 받는다(스펙에는 format: byte 로 적혀 있으나 base64 가 아니다).
+export async function downloadDecisionHistoriesCsv(
+  params: Omit<DecisionHistoriesQuery, "page" | "size">,
+): Promise<Blob> {
+  const { data } = await api.get<Blob>(
+    "/v1/recruiting/admin/decision-histories.csv",
+    { params, paramsSerializer: { indexes: null }, responseType: "blob" },
+  )
+  return data
+}
+
 export async function getApplicationDetail(
   roundId: string,
   applicationId: string,

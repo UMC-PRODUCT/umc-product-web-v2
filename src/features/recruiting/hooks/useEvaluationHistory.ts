@@ -41,6 +41,7 @@ export function useEvaluationHistory() {
     // 것을 대체한다.
     progress: data ? toHistoryProgress(data.progressStatus) : "before",
     asOf: data?.asOf ?? null,
+    gisuId,
     generation: gisuQuery.data?.generation,
     isLoading: gisuQuery.isLoading || historyQuery.isLoading,
     isError: gisuQuery.isError || historyQuery.isError,
