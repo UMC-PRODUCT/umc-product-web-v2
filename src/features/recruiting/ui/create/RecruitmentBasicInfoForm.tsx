@@ -332,19 +332,22 @@ export function RecruitmentBasicInfoForm({
   const documentEndAtDate = parsePeriodDate(periodForm.documentEndAt)
   const interviewStartAtDate = parsePeriodDate(periodForm.interviewStartAt)
   const interviewEndAtDate = parsePeriodDate(periodForm.interviewEndAt)
-
-  const highlightRanges = [
-    documentStartAtDate && documentEndAtDate
-      ? { start: documentStartAtDate, end: documentEndAtDate }
-      : null,
-    interviewStartAtDate && interviewEndAtDate
-      ? { start: interviewStartAtDate, end: interviewEndAtDate }
-      : null,
-  ].filter((range): range is { start: Date; end: Date } => range !== null)
+  const documentResultPublishedAtDate = parsePeriodDate(
+    periodForm.documentResultPublishedAt,
+  )
+  const finalResultPublishedAtDate = parsePeriodDate(
+    periodForm.finalResultPublishedAt,
+  )
+  const highlightRanges =
+    documentStartAtDate && finalResultPublishedAtDate
+      ? [{ start: documentStartAtDate, end: finalResultPublishedAtDate }]
+      : []
 
   const markedDates = [
-    parsePeriodDate(periodForm.documentResultPublishedAt),
-    parsePeriodDate(periodForm.finalResultPublishedAt),
+    documentEndAtDate,
+    documentResultPublishedAtDate,
+    interviewStartAtDate,
+    interviewEndAtDate,
   ].filter((date): date is Date => date !== null)
 
   // 캘린더 밑 일정 요약 리스트: 날짜가 입력된 항목만 보여준다.
@@ -714,9 +717,9 @@ export function RecruitmentBasicInfoForm({
                             },
                       })
                     }}
-                    disabled // TODO(면접 가능 시간대 Form 빌더 미구현): availabilityFormId를 세팅하는 화면이
+                    // TODO(면접 가능 시간대 Form 빌더 미구현): availabilityFormId를 세팅하는 화면이
                     // 아직 없어서 interviewRequired=true로 OPEN 전환하면 RECRUITING_ROUND_INVALID_SCHEDULE로
-                    // 무조건 실패함. availability form 빌더 붙으면 이 disabled 제거.
+                    // 무조건 실패함. 확인 목적으로 disabled 임시 해제 — 확인 끝나면 다시 추가할 것.
                     variant="primary"
                     size="lg"
                     aria-label="면접 진행 여부"
