@@ -1,21 +1,37 @@
 import { useNavigate } from "@tanstack/react-router"
+import { isAxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
 
 import { Button } from "@/shared/ui/Button"
 import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
+import {
+  updateRecruitingRound,
+  updateRecruitingRoundStatus,
+} from "../../api/recruitingApi"
+import { getRecruitableTracks } from "../../model/parts"
+import {
+  buildRecruitmentPreviewTitle,
+  composeRecruitmentTitle,
+  periodFieldToInstant,
+} from "../../model/recruitmentCreate"
+import { useRecruitmentCreateStore } from "../../model/useRecruitmentCreateStore"
 import { RecruitmentSectionHeader } from "../RecruitmentSectionHeader"
 
 const ANNOUNCEMENT_MAX_LENGTH = 10000
 
-// TODO: 1단계(기본 정보)에서 선택한 학교·기수·모집 유형을 상위에서 내려받아 채우기.
-// 지금은 단계 간 상태 공유가 아직 없어 예시 값으로 대신한다.
-const PREVIEW_TITLE_MOCK = "한양대학교 ERICA UMC 11기 정규 모집"
-// TODO: 1단계에서 입력한 서류 접수 시작일시로 교체.
-const DOCUMENT_START_AT_MOCK = "10월 20일 07:25"
-
 type AnnouncementModalKind = "publishConfirm" | "complete"
+
+function formatDocumentStartAtLabel(
+  periodForm: { documentStartAt: { date: string; time: string } } | undefined,
+): string {
+  const { date, time } = periodForm?.documentStartAt ?? { date: "", time: "" }
+  const [, month, day] = date.split("-")
+  if (!month || !day) return "0월 0일 00:00"
+  return `${Number(month)}월 ${Number(day)}일 ${time}`
+}
 
 interface RecruitmentAnnouncementFormProps {
   onPrev: () => void
@@ -27,7 +43,19 @@ export function RecruitmentAnnouncementForm({
   onDirtyChange,
 }: RecruitmentAnnouncementFormProps) {
   const navigate = useNavigate()
-  const [announcement, setAnnouncement] = useState("")
+  const addToast = useToastStore((state) => state.addToast)
+  const announcement = useRecruitmentCreateStore((s) => s.announcement)
+  const setAnnouncement = useRecruitmentCreateStore((s) => s.setAnnouncement)
+  const contactText = useRecruitmentCreateStore((s) => s.contactText)
+  const basicInfo = useRecruitmentCreateStore((s) => s.basicInfo)
+  const enabledParts = useRecruitmentCreateStore((s) => s.enabledParts)
+  const secondChoiceEnabled = useRecruitmentCreateStore(
+    (s) => s.secondChoiceEnabled,
+  )
+  const seasonId = useRecruitmentCreateStore((s) => s.seasonId)
+  const roundId = useRecruitmentCreateStore((s) => s.roundId)
+  const previewTitle = buildRecruitmentPreviewTitle(basicInfo)
+  const documentStartAtLabel = formatDocumentStartAtLabel(basicInfo.periodForm)
   const [openModal, setOpenModal] = useState<AnnouncementModalKind | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isPublished, setIsPublished] = useState(false)
@@ -35,9 +63,14 @@ export function RecruitmentAnnouncementForm({
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
   const savedSnapshotRef = useRef(announcement)
 
-  // TODO: 1단계에서 제목(학교·기수·모집 유형)까지 완성됐는지도 함께 검사해야 함.
-  // 지금은 이 화면이 아는 값이 공지글 본문뿐이라 본문 작성 여부만으로 판단
-  const isSubmittable = announcement.trim() !== ""
+  // 1단계(기본 정보)까지 완성됐는지는 chapter/school 여부로 판단한다.
+  // roundId는 2단계(모집 문항)에서 Round 생성이 끝나야 채워지므로, 게시 전 필수 전제조건이다.
+  const isSubmittable =
+    announcement.trim() !== "" &&
+    !!basicInfo.chapter &&
+    !!basicInfo.school &&
+    !!seasonId &&
+    !!roundId
   const hasUnsavedChanges = savedSnapshotRef.current !== announcement
   const canTempSave = hasUnsavedChanges && !isSaving
 
@@ -61,7 +94,7 @@ export function RecruitmentAnnouncementForm({
 
       <div className="flex flex-col items-start gap-4 self-stretch">
         <div className="text-heading-7-semibold flex items-start gap-2.5 self-stretch overflow-hidden px-4 py-1 text-teal-600">
-          {PREVIEW_TITLE_MOCK}
+          {previewTitle}
         </div>
         <div className="bg-teal-gray-50 flex flex-col items-end gap-4 self-stretch rounded-xl px-8 pt-6 pb-7.5">
           <textarea
@@ -81,7 +114,13 @@ export function RecruitmentAnnouncementForm({
       </div>
 
       <div className="flex items-center justify-between">
-        <Button type="button" variant="weak" color="neutral" onClick={onPrev}>
+        <Button
+          type="button"
+          variant="weak"
+          color="neutral"
+          disabled={isPublished}
+          onClick={onPrev}
+        >
           이전
         </Button>
         <div className="flex items-center gap-3">
@@ -117,23 +156,65 @@ export function RecruitmentAnnouncementForm({
         title="모집 공고를 게시하겠습니까?"
         content={
           <>
-            <span className="text-teal-600">{DOCUMENT_START_AT_MOCK}</span>
+            <span className="text-teal-600">{documentStartAtLabel}</span>
             부터 모든 지원자에게 공개됩니다.
           </>
         }
         cancelText="돌아가기"
         confirmText="게시하기"
         onCancel={() => setOpenModal(null)}
-        onConfirm={() => {
+        onConfirm={async () => {
+          if (!seasonId || !roundId) return
           setOpenModal(null)
           setIsPublishing(true)
-          // TODO: 실제 등록 API 연동
-          setTimeout(() => {
-            setIsPublishing(false)
+          try {
+            // interviewRequired는 2단계 진입 시점에 이미 false로 고정된 상태로만
+            // Round가 만들어졌으므로(면접 있는 모집은 그 전에 막힘) 여기서도 동일하게
+            // false로 보낸다 — Round 생성(createRecruitingRound)과 대칭.
+            await updateRecruitingRound(seasonId, roundId, {
+              title: composeRecruitmentTitle(
+                buildRecruitmentPreviewTitle(basicInfo),
+                basicInfo.footer,
+              ),
+              recruitableTracks: getRecruitableTracks(enabledParts),
+              secondChoiceEnabled,
+              documentStartAt: periodFieldToInstant(
+                basicInfo.periodForm.documentStartAt,
+              ),
+              documentEndAt: periodFieldToInstant(
+                basicInfo.periodForm.documentEndAt,
+              ),
+              documentResultPublishedAt: periodFieldToInstant(
+                basicInfo.periodForm.documentResultPublishedAt,
+              ),
+              finalResultPublishedAt: periodFieldToInstant(
+                basicInfo.periodForm.finalResultPublishedAt,
+              ),
+              interviewRequired: false,
+              announcement,
+              contactText,
+            })
+            await updateRecruitingRoundStatus(seasonId, roundId, {
+              status: "OPEN",
+            })
             setIsPublished(true)
             savedSnapshotRef.current = announcement
             setOpenModal("complete")
-          }, 600)
+          } catch (error) {
+            const message = isAxiosError(error)
+              ? (error.response?.data as { message?: string } | undefined)
+                  ?.message
+              : undefined
+            addToast({
+              message: message ?? "모집 공고 게시에 실패했습니다.",
+              color: "red",
+              variant: "deep",
+              type: "default",
+              duration: 3000,
+            })
+          } finally {
+            setIsPublishing(false)
+          }
         }}
       />
 
