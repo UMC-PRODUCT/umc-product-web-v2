@@ -19,9 +19,10 @@ export function getRecruitingRoundCreateErrorMessage(error: unknown): string {
     const data = error.response?.data as
       | { code?: string; message?: string }
       | undefined
-    if (data?.code && ROUND_CREATE_ERROR_MESSAGES[data.code]) {
-      return ROUND_CREATE_ERROR_MESSAGES[data.code]
-    }
+    const mapped = data?.code
+      ? ROUND_CREATE_ERROR_MESSAGES[data.code]
+      : undefined
+    if (mapped) return mapped
     if (data?.message) return data.message
   }
   return "모집 차수 생성에 실패했습니다."
