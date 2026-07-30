@@ -15,7 +15,9 @@ import type {
 } from "./applicantListTypes"
 import type { EvaluationStage } from "./evaluationStage"
 
-const TRACK_PART_TAG: Record<RecruitingTrack, PartTag | null> = {
+// 트랙 -> 파트 매핑 단일 소스. 대시보드 집계(evaluationStats)도 이걸 쓴다.
+// INFRA_PLUS 는 리크루팅 파트 표기가 없어 null 이다.
+export const TRACK_PART_TAG: Record<RecruitingTrack, PartTag | null> = {
   PLAN: "pm",
   DESIGN: "design",
   WEB_PRODUCT_ENGINEER: "web-pe",
