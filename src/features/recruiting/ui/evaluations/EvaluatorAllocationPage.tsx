@@ -3,20 +3,21 @@ import {
   type DragEndEvent,
   DragOverlay,
   type DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
 } from "@dnd-kit/core"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
 import {
   isStaff,
+  RECRUITMENT_BOX_ID,
+  resolveDropTargetId,
   SCHOOL_STAFF_LIST,
+  SCHOOL_STAFF_PANEL_ID,
   type Staff,
 } from "../../model/evaluatorAllocation"
 import { DroppableRecruitmentBox } from "./DroppableRecruitmentBox"
@@ -25,35 +26,20 @@ import { SchoolStaffPanel } from "./SchoolStaffPanel"
 
 export function EvaluatorAllocationPage() {
   const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
-  const [selectedChipId, setSelectedChipId] = useState<string | null>(null)
-  const [activeStaff, setActiveStaff] = useState<Staff | null>(null)
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    }),
-  )
-
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (
-        document.activeElement?.tagName === "INPUT" ||
-        document.activeElement?.tagName === "TEXTAREA"
-      ) {
-        return
-      }
-
-      if (selectedChipId && (e.key === "Delete" || e.key === "Backspace")) {
-        setAssignedEvaluators((prev) =>
-          prev.filter((staff) => staff.id !== selectedChipId),
-        )
-        setSelectedChipId(null)
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [selectedChipId])
+  const {
+    sensors,
+    selectedChipId,
+    setSelectedChipId,
+    activeItem: activeStaff,
+    setActiveItem: setActiveStaff,
+  } = useChipAssignment<Staff>({
+    onRemoveSelected: (chipId) => {
+      setAssignedEvaluators((prev) =>
+        prev.filter((staff) => staff.id !== chipId),
+      )
+    },
+  })
 
   function handleDragStart(event: DragStartEvent) {
     const staff = event.active.data.current
@@ -69,15 +55,27 @@ export function EvaluatorAllocationPage() {
     const { active, over } = event
     setActiveStaff(null)
 
-    if (!over || over.id !== "regular-recruitment-box") return
+    if (!over) return
 
     const staff = active.data.current
     if (!isStaff(staff)) return
 
-    setAssignedEvaluators((prev) => {
-      if (prev.some((item) => item.id === staff.id)) return prev
-      return [...prev, staff]
-    })
+    const targetId = resolveDropTargetId(String(over.id), assignedEvaluators)
+    if (!targetId) return
+
+    if (targetId === SCHOOL_STAFF_PANEL_ID) {
+      setAssignedEvaluators((prev) =>
+        prev.filter((item) => item.id !== staff.id),
+      )
+      return
+    }
+
+    if (targetId === RECRUITMENT_BOX_ID) {
+      setAssignedEvaluators((prev) => {
+        if (prev.some((item) => item.id === staff.id)) return prev
+        return [...prev, staff]
+      })
+    }
   }
 
   return (
@@ -137,7 +135,7 @@ export function EvaluatorAllocationPage() {
             {/* 공고 */}
             <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
               <DroppableRecruitmentBox
-                id="regular-recruitment-box"
+                id={RECRUITMENT_BOX_ID}
                 assignedEvaluators={assignedEvaluators}
                 selectedChipId={selectedChipId}
                 onSelectChip={setSelectedChipId}
