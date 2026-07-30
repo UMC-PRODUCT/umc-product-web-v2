@@ -108,6 +108,12 @@ function isCompleteDate(dateStr: string): boolean {
   return FULL_DATE_PATTERN.test(dateStr)
 }
 
+const FULL_TIME_PATTERN = /^\d{2}:\d{2}$/
+
+function isPeriodFieldComplete(value: PeriodFieldValue): boolean {
+  return isCompleteDate(value.date) && FULL_TIME_PATTERN.test(value.time)
+}
+
 // 일정 요약 리스트 표시용: "2026-08-01" -> "08월 01일" (저장 형식은 그대로 둠)
 function formatMonthDay(dateStr: string): string {
   const [, month, day] = dateStr.split("-")
@@ -519,13 +525,13 @@ export function RecruitmentBasicInfoForm({
     !isTitleTooLong &&
     !!recruitmentType &&
     (recruitmentType !== "ADDITIONAL" || !!roundNo) &&
-    !!periodForm.documentStartAt.date &&
-    !!periodForm.documentEndAt.date &&
-    !!periodForm.documentResultPublishedAt.date &&
+    isPeriodFieldComplete(periodForm.documentStartAt) &&
+    isPeriodFieldComplete(periodForm.documentEndAt) &&
+    isPeriodFieldComplete(periodForm.documentResultPublishedAt) &&
     (!interviewRequired ||
-      (!!periodForm.interviewStartAt.date &&
-        !!periodForm.interviewEndAt.date)) &&
-    !!periodForm.finalResultPublishedAt.date
+      (isPeriodFieldComplete(periodForm.interviewStartAt) &&
+        isPeriodFieldComplete(periodForm.interviewEndAt))) &&
+    isPeriodFieldComplete(periodForm.finalResultPublishedAt)
 
   const handleNext = async () => {
     if (isAdvancing) return
