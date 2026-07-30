@@ -3,10 +3,19 @@ import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
+import type { RecruitingRoundGroup, RecruitingRoundStatus } from "../api/types"
 import type { RecruitingListRole } from "./recruitingListRole"
 
-// RecruitingRoundStatus (백엔드 RoundResponse.status)와 동일한 값
-export type RecruitmentPostStatus = "DRAFT" | "OPEN" | "CLOSED"
+// 모집 생성(013)에 필요한 seasonId는 화면에서 새로 만드는 게 아니라, 이미
+// 존재하는 시즌 목록(공개 차수 목록 응답에 포함됨)에서 학교명으로 찾아 쓴다.
+export function findSeasonIdBySchool(
+  groups: RecruitingRoundGroup[],
+  school: string | null | undefined,
+): string | undefined {
+  return groups.find((group) => group.schoolName === school)?.seasonId
+}
+
+export type RecruitmentPostStatus = RecruitingRoundStatus
 
 // TODO: 백엔드 명세 확인
 export interface RecruitmentPost {

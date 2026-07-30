@@ -1,40 +1,82 @@
+import type { RecruitmentRoundType } from "./recruitmentList"
+
+export type PeriodFieldKey =
+  | "documentStartAt"
+  | "documentEndAt"
+  | "documentResultPublishedAt"
+  | "interviewStartAt"
+  | "interviewEndAt"
+  | "finalResultPublishedAt"
+
+export interface PeriodFieldValue {
+  date: string
+  time: string
+}
+
+export const INITIAL_PERIOD_FORM: Record<PeriodFieldKey, PeriodFieldValue> = {
+  documentStartAt: { date: "", time: "00:00" },
+  documentEndAt: { date: "", time: "23:59" },
+  documentResultPublishedAt: { date: "", time: "00:00" },
+  interviewStartAt: { date: "", time: "00:00" },
+  interviewEndAt: { date: "", time: "23:59" },
+  finalResultPublishedAt: { date: "", time: "12:00" },
+}
+
+// 정규 모집은 항상 1차 고정이라 제목엔 차수 표기 안 함
+// (다른 화면에서도 정규 모집은 차수 없이 '정규'로만 노출)
+export function buildRecruitmentPreviewTitle({
+  school,
+  recruitmentType,
+  roundNo,
+  gisuGeneration,
+}: {
+  school: string | undefined
+  recruitmentType: RecruitmentRoundType | undefined
+  roundNo: string | undefined
+  gisuGeneration: number | null | undefined
+}): string {
+  return `${school ?? "전체 학교"} UMC ${gisuGeneration ?? "-"}기 ${
+    recruitmentType === "ADDITIONAL" && roundNo ? `${roundNo}차 ` : ""
+  }${
+    recruitmentType === "ADDITIONAL"
+      ? "추가 모집"
+      : recruitmentType === "REGULAR"
+        ? "정규 모집"
+        : "모집"
+  }`
+}
+
+// periodForm의 {date: "YYYY-MM-DD", time: "HH:mm"}을 백엔드가 요구하는
+// Instant(ISO 8601, UTC) 문자열로 변환한다.
+export function periodFieldToInstant(value: PeriodFieldValue): string {
+  return new Date(`${value.date}T${value.time}:00`).toISOString()
+}
+
 export function composeRecruitmentTitle(baseTitle: string, footer: string) {
   return footer ? `${baseTitle} ${footer}` : baseTitle
 }
 
-// 임시 저장 시 제목이 중복되면 꼬릿말에 숫자를 2부터 붙여 사용 가능한 조합을 찾는다.
-// (예: 복제 직후 원본과 제목이 같은 경우)
-export function resolveAvailableFooter(
+export const MAX_TITLE_LENGTH = 10000
+// 임시 저장/다음 진행 시 제목이 이미 사용 중이면 꼬릿말에 숫자를 2부터 붙여 사용 가능한 조합을 찾는다.
+// 실제 중복 여부는 백엔드(title-availability API)에 묻는다.
+export async function resolveAvailableFooter(
   baseTitle: string,
   footer: string,
-  existingTitles: string[],
-): { footer: string; wasAdjusted: boolean } {
-  if (!existingTitles.includes(composeRecruitmentTitle(baseTitle, footer))) {
+  checkAvailable: (title: string) => Promise<boolean>,
+): Promise<{ footer: string; wasAdjusted: boolean }> {
+  if (await checkAvailable(composeRecruitmentTitle(baseTitle, footer))) {
     return { footer, wasAdjusted: false }
   }
 
   let n = 2
   let candidate = footer ? `${footer} ${n}` : `${n}`
   while (
-    existingTitles.includes(composeRecruitmentTitle(baseTitle, candidate))
+    !(await checkAvailable(composeRecruitmentTitle(baseTitle, candidate)))
   ) {
     n++
     candidate = footer ? `${footer} ${n}` : `${n}`
   }
   return { footer: candidate, wasAdjusted: true }
-}
-
-// 사용자가 직접 입력한 제목이 이미 존재하는지(수정 저장/등록 시 차단용) 확인한다.
-export function isRecruitmentTitleTaken(
-  baseTitle: string,
-  footer: string,
-  existingTitles: string[],
-  excludeTitle?: string,
-) {
-  const fullTitle = composeRecruitmentTitle(baseTitle, footer)
-  return existingTitles.some(
-    (title) => title === fullTitle && title !== excludeTitle,
-  )
 }
 
 // 전체 진행 기간(서류 모집 시작 ~ 면접 결과 발표) 최대 일수

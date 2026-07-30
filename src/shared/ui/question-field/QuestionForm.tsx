@@ -69,7 +69,7 @@ export function QuestionForm({
   return (
     <article
       className={cn(
-        "relative flex w-full flex-col items-center gap-2.5 px-6 pb-6",
+        "relative flex w-full flex-col items-center gap-2.5 px-6 py-6",
         focused ? "" : "mt-4 pt-4",
         className,
       )}
@@ -140,7 +140,7 @@ export function QuestionForm({
                   onCaptionChange?.(e.target.value)
                   autoResize(e.target)
                 }}
-                placeholder="설명 (선택 사항)"
+                placeholder="설명을 입력하세요"
                 className="text-body-2-regular text-teal-gray-600 placeholder:text-teal-gray-300 w-full resize-none overflow-hidden bg-transparent outline-none"
               />
             </div>

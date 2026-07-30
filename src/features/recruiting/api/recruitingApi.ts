@@ -3,7 +3,9 @@ import { api } from "@/shared/lib/axios"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
 import type {
+  AdminRoundsQuery,
   ApiEvaluationStage,
+  CreateRecruitingRoundRequest,
   FinalDecisionBody,
   FormStructureQuery,
   PublicRoundsQuery,
@@ -18,6 +20,9 @@ import type {
   RecruitingRoundPhase,
   RoundApplicationsQuery,
   SubmitEvaluationBody,
+  UpdateRecruitingRoundRequest,
+  UpdateRecruitingRoundStatusRequest,
+  UpsertRecruitingApplicationFormRequest,
 } from "./types"
 
 const APPLICATIONS_PAGE_SIZE = 100
@@ -66,6 +71,20 @@ export async function getAllPublicRounds(
     phases.map((phase) => getPublicRounds({ gisuId, roundIds, phase })),
   )
   return mergeRoundGroups(perPhase.flat())
+}
+
+// 시즌은 기수·학교당 1회만 생성되고 전용 생성/목록 화면이 없다. 모집 생성 화면이
+// seasonId를 알아내려면 이 관리자용 목록에서 뽑아 써야 한다 — 공개 목록
+// (getPublicRounds)은 OPEN/CLOSED 차수만 내려줘서 차수를 하나도 안 만든 시즌은
+// 빠지기 때문에 대체할 수 없다.
+export async function getAdminRounds(
+  params: AdminRoundsQuery,
+): Promise<RecruitingRoundGroup[]> {
+  const { data } = await api.get<ApiResponse<RecruitingRoundGroup[]>>(
+    "/v1/recruiting/admin/rounds",
+    { params, paramsSerializer: { indexes: null } },
+  )
+  return data.result
 }
 
 export async function getRoundApplications(
@@ -128,6 +147,69 @@ export async function getStageEvaluations(
     `/v1/recruiting/rounds/${roundId}/applications/${applicationId}/evaluations/${stage}`,
   )
   return data.result
+}
+
+export async function checkRecruitingRoundTitleAvailability(
+  seasonId: string,
+  title: string,
+  excludedRoundId?: string,
+): Promise<boolean> {
+  const { data } = await api.get<ApiResponse<{ available?: boolean }>>(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds/title-availability`,
+    { params: { title, excludedRoundId } },
+  )
+  return data.result.available ?? false
+}
+
+export async function createRecruitingRound(
+  seasonId: string,
+  payload: CreateRecruitingRoundRequest,
+): Promise<string> {
+  const { data } = await api.post<ApiResponse<{ id: number }>>(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds`,
+    payload,
+  )
+  return String(data.result.id)
+}
+
+// 모집 기간, 트랙, 2지망 정책, 면접 설정을 변경한다.
+// title/recruitableTracks/기간은 required라 매번 현재 값 전체를 다시 실어 보내야 한다(부분 patch 아님).
+export async function updateRecruitingRound(
+  seasonId: string,
+  roundId: string,
+  payload: UpdateRecruitingRoundRequest,
+): Promise<void> {
+  await api.put(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}`,
+    payload,
+  )
+}
+
+// Round가 DRAFT일 때만 지원 Form 구조를 통째로 Upsert할 수 있다. Round 생성
+// (createRecruitingRound) 직후, roundId를 받은 뒤에만 호출 가능하다.
+export async function upsertRecruitingApplicationForm(
+  seasonId: string,
+  roundId: string,
+  payload: UpsertRecruitingApplicationFormRequest,
+): Promise<string> {
+  const { data } = await api.put<ApiResponse<{ id: number }>>(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/form`,
+    payload,
+  )
+  return String(data.result.id)
+}
+
+// Round와 지원 Form 상태를 함께 변경한다. 지원서·Form 응답이 없는 OPEN Round만
+// DRAFT로 되돌릴 수 있고, CLOSED는 다시 열거나 DRAFT로 되돌릴 수 없다(백엔드 검증).
+export async function updateRecruitingRoundStatus(
+  seasonId: string,
+  roundId: string,
+  payload: UpdateRecruitingRoundStatusRequest,
+): Promise<void> {
+  await api.patch(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/status`,
+    payload,
+  )
 }
 
 export async function getRoundEvaluators(

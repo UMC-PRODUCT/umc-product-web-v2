@@ -1,5 +1,10 @@
 import { type PartKey, PARTS } from "./parts"
 
+import type {
+  RecruitingTrack,
+  UpsertRecruitingSectionRequest,
+} from "../api/types"
+
 export type RecruitmentFieldType =
   | "text"
   | "radio"
@@ -184,3 +189,96 @@ export const RECRUITMENT_DEFAULT_QUESTIONS: RecruitmentDefaultQuestion[] = [
     type: "text",
   },
 ]
+
+// 공통 문항은 radio/text만 다루므로 RecruitingQuestionType 전체가 아니라 이 두 값으로만 좁혀 반환한다.
+function toRecruitingQuestionType(
+  type: RecruitmentDefaultQuestion["type"],
+): "RADIO" | "SHORT_TEXT" {
+  return type === "radio" ? "RADIO" : "SHORT_TEXT"
+}
+
+// 공통 문항(01~05) 섹션을 Form Upsert 요청 payload로 직렬화한다.
+// 파트별(TRACK) 섹션 직렬화는 buildTrackSectionUpsertRequest가 별도로 담당한다.
+export function buildCommonSectionUpsertRequest(
+  removedOptionsByQuestionIndex: Record<string, string[]>,
+  questionToggleState: Record<string, { enabled: boolean; required: boolean }>,
+): {
+  clientKey: string
+  title: string
+  type: "COMMON"
+  questions: {
+    type: "RADIO" | "SHORT_TEXT"
+    title: string
+    description?: string
+    required: boolean
+    options?: { content: string; other: boolean }[]
+  }[]
+} {
+  const questions = RECRUITMENT_DEFAULT_QUESTIONS.filter(
+    (question) => questionToggleState[question.index]?.enabled ?? true,
+  ).map((question) => {
+    const removed = removedOptionsByQuestionIndex[question.index] ?? []
+    const activeOptions = question.options?.filter(
+      (option) => !removed.includes(option),
+    )
+    return {
+      type: toRecruitingQuestionType(question.type),
+      title: question.title,
+      description: question.caption,
+      required: questionToggleState[question.index]?.required ?? true,
+      options: activeOptions?.map((content) => ({ content, other: false })),
+    }
+  })
+
+  return {
+    clientKey: "common",
+    title: "기본 문항",
+    type: "COMMON",
+    questions,
+  }
+}
+
+function toRecruitingQuestionTypeFromField(
+  fieldType: RecruitmentFieldType,
+): "SHORT_TEXT" | "RADIO" | "CHECKBOX" | "FILE" | "PORTFOLIO" {
+  switch (fieldType) {
+    case "text":
+      return "SHORT_TEXT"
+    case "radio":
+      return "RADIO"
+    case "checkbox":
+      return "CHECKBOX"
+    case "file":
+      return "FILE"
+    case "portfolio":
+      return "PORTFOLIO"
+  }
+}
+
+// 파트(TRACK) 섹션을 Form Upsert 요청 payload로 직렬화한다.
+// "파트 사용" 토글이 켜진 파트마다 하나씩 만들어 sections 배열에 얹는다.
+export function buildTrackSectionUpsertRequest(
+  partLabel: string,
+  track: RecruitingTrack,
+  questions: RecruitmentQuestion[],
+): UpsertRecruitingSectionRequest {
+  return {
+    clientKey: `track-${track}`,
+    title: partLabel,
+    type: "TRACK",
+    track,
+    questions: questions.map((question) => ({
+      type: toRecruitingQuestionTypeFromField(question.fieldType),
+      title: question.title,
+      description: question.caption || undefined,
+      required: question.required,
+      options:
+        question.fieldType === "radio" || question.fieldType === "checkbox"
+          ? question.options.map((option) => ({
+              content: option.content,
+              other: false,
+            }))
+          : undefined,
+    })),
+  }
+}
