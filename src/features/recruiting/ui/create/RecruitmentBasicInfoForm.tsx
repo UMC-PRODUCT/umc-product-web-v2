@@ -504,8 +504,11 @@ export function RecruitmentBasicInfoForm({
     updatePeriodField("documentEndAt", { date })
     if (!periodForm.documentStartAt.date || !date) return
 
-    const start = parsePeriodDate(periodForm.documentStartAt)
-    const end = parsePeriodDate({ date, time: periodForm.documentEndAt.time })
+    const start = parsePeriodDateTime(periodForm.documentStartAt)
+    const end = parsePeriodDateTime({
+      date,
+      time: periodForm.documentEndAt.time,
+    })
     const message = validateDocumentPeriod(recruitmentType, start, end)
     if (message) showPeriodErrorToast(message)
   }
@@ -550,8 +553,8 @@ export function RecruitmentBasicInfoForm({
       showTitleAdjustedToast()
     }
 
-    const documentStart = parsePeriodDate(periodForm.documentStartAt)
-    const documentEnd = parsePeriodDate(periodForm.documentEndAt)
+    const documentStart = parsePeriodDateTime(periodForm.documentStartAt)
+    const documentEnd = parsePeriodDateTime(periodForm.documentEndAt)
     const documentPeriodError = validateDocumentPeriod(
       recruitmentType,
       documentStart,
