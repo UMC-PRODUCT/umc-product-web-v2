@@ -4,7 +4,7 @@ import {
   DragOverlay,
   type DragStartEvent,
 } from "@dnd-kit/core"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
@@ -12,6 +12,11 @@ import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
+import {
+  useRoundEvaluators,
+  useSaveEvaluatorAllocation,
+} from "../../hooks/useEvaluatorAllocation"
+import { useRecruitingRounds } from "../../hooks/useRecruitingRounds"
 import {
   isStaff,
   RECRUITMENT_BOX_ID,
@@ -24,8 +29,31 @@ import { DroppableRecruitmentBox } from "./DroppableRecruitmentBox"
 import { EvaluatorSharedNote } from "./EvaluatorSharedNote"
 import { SchoolStaffPanel } from "./SchoolStaffPanel"
 
-export function EvaluatorAllocationPage() {
+interface EvaluatorAllocationPageProps {
+  roundId?: string
+}
+
+export function EvaluatorAllocationPage({
+  roundId,
+}: EvaluatorAllocationPageProps = {}) {
+  const { groups } = useRecruitingRounds()
+  const activeRoundId = roundId ?? groups[0]?.rounds[0]?.roundId ?? "1"
+
+  const { data: serverEvaluators } = useRoundEvaluators(activeRoundId)
+  const saveMutation = useSaveEvaluatorAllocation()
+
   const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
+
+  useEffect(() => {
+    if (!serverEvaluators) return
+    const serverMemberIds = new Set(
+      serverEvaluators.map((item) => String(item.memberId)),
+    )
+    const initialStaff = SCHOOL_STAFF_LIST.filter((staff) =>
+      serverMemberIds.has(String(staff.id)),
+    )
+    setAssignedEvaluators(initialStaff)
+  }, [serverEvaluators])
 
   const {
     sensors,
@@ -40,6 +68,13 @@ export function EvaluatorAllocationPage() {
       )
     },
   })
+
+  function handleSave() {
+    saveMutation.mutate({
+      roundId: activeRoundId,
+      assignedEvaluators,
+    })
+  }
 
   function handleDragStart(event: DragStartEvent) {
     const staff = event.active.data.current
@@ -120,6 +155,8 @@ export function EvaluatorAllocationPage() {
               size="xs"
               color="primary"
               variant="fill"
+              disabled={saveMutation.isPending}
+              onClick={handleSave}
               className="w-fit rounded-[8px] px-3 py-1.5"
             >
               저장하기
