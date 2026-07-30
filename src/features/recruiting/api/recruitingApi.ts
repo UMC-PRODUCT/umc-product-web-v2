@@ -8,12 +8,15 @@ import type {
   FormStructureQuery,
   PublicRoundsQuery,
   RawCount,
+  RawEvaluationStatistics,
   RawStatusCounts,
   RawStatusSummary,
+  RawTrackCount,
   RecruitingApplicationDetail,
   RecruitingApplicationPage,
   RecruitingApplicationSummary,
   RecruitingEvaluation,
+  RecruitingEvaluationStatistics,
   RecruitingFormStructure,
   RecruitingInterviewQuestion,
   RecruitingRoundEvaluator,
@@ -139,6 +142,54 @@ export function normalizeStatusSummary(
       })),
     })),
   }
+}
+
+function toTrackCounts(raw: RawTrackCount[] | undefined) {
+  return (raw ?? []).map((item) => ({
+    ...item,
+    applicantCount: toCount(item.applicantCount),
+    evaluatedCount: toCount(item.evaluatedCount),
+  }))
+}
+
+// 정렬은 서버가 이미 해준다(지부 가나다 > 학교 가나다). 여기서는 문자열 건수를
+// 숫자로 바꾸고 빠질 수 있는 배열만 채운다.
+export function normalizeEvaluationStatistics(
+  raw: RawEvaluationStatistics,
+): RecruitingEvaluationStatistics {
+  return {
+    asOf: raw.asOf ?? null,
+    applicantCount: toCount(raw.applicantCount),
+    evaluatedCount: toCount(raw.evaluatedCount),
+    byTrack: toTrackCounts(raw.byTrack),
+    chapters: (raw.chapters ?? []).map((chapter) => ({
+      ...chapter,
+      chapterId: String(chapter.chapterId),
+      applicantCount: toCount(chapter.applicantCount),
+      evaluatedCount: toCount(chapter.evaluatedCount),
+      byTrack: toTrackCounts(chapter.byTrack),
+      schools: (chapter.schools ?? []).map((school) => ({
+        ...school,
+        schoolId: String(school.schoolId),
+        applicantCount: toCount(school.applicantCount),
+        evaluatedCount: toCount(school.evaluatedCount),
+        byTrack: toTrackCounts(school.byTrack),
+      })),
+    })),
+  }
+}
+
+// 평가 현황 대시보드용 집계 (RECRUITING-ADMIN-083). 화면의 4개 위젯이 모두 이
+// 응답 하나에서 나온다. 위젯별로 나눠 호출하면 시점 차이로 카드 합계와 차트
+// 합계가 어긋나기 때문에 서버가 단일 스냅샷으로 설계했다.
+export async function getEvaluationStatistics(
+  gisuId: string,
+): Promise<RecruitingEvaluationStatistics> {
+  const { data } = await api.get<ApiResponse<RawEvaluationStatistics>>(
+    "/v1/recruiting/admin/statistics/evaluations",
+    { params: { gisuId } },
+  )
+  return normalizeEvaluationStatistics(data.result)
 }
 
 // 지원 현황 대시보드용 집계. admin 경로라 getPublicRounds 와 달리 학교 회장단

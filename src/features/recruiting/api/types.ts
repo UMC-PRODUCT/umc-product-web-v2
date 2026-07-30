@@ -172,6 +172,91 @@ export type RawStatusSummary = Omit<
   schools?: RawSchoolStatusSummary[]
 }
 
+// 평가 현황 집계 (RECRUITING-ADMIN-083). 지원 현황(081)과 달리 파트(track)별
+// 집계와 asOf 를 준다. 대신 필터가 gisuId 하나뿐이다.
+//
+// 서버 집계 기준(스펙 명시):
+// - applicantCount: DRAFT, CANCELLED 제외
+// - evaluatedCount: DOCUMENT_FAILED, FINAL_PASSED, FINAL_FAILED (판정 확정)
+// - byTrack: 1지망(firstChoice) 기준. 2지망을 포함하면 파트 합계가 총원을 넘는다.
+// - INFRA_PLUS 를 뺀 4개 트랙을 0건이어도 항상 반환
+// - 정렬(지부 가나다 > 학교 가나다)과 0건 학교 포함을 서버가 처리
+// - 비율은 서버가 주지 않는다. 클라이언트에서 계산한다.
+//
+// 081 의 totalCount 와 여기의 applicantCount 는 제외 규칙이 달라 값이 어긋날 수
+// 있다. 두 API 를 한 화면에서 섞지 않는다.
+export interface RecruitingTrackCount {
+  track: RecruitingTrack
+  applicantCount: number
+  evaluatedCount: number
+}
+
+export interface RecruitingSchoolEvaluationStatistics {
+  schoolId: string
+  schoolName: string
+  applicantCount: number
+  evaluatedCount: number
+  byTrack: RecruitingTrackCount[]
+}
+
+export interface RecruitingChapterEvaluationStatistics {
+  chapterId: string
+  chapterName: string
+  applicantCount: number
+  evaluatedCount: number
+  byTrack: RecruitingTrackCount[]
+  schools: RecruitingSchoolEvaluationStatistics[]
+}
+
+export interface RecruitingEvaluationStatistics {
+  /** 집계 기준 시각(ISO). 클라이언트 조회 시각과 다르다. */
+  asOf: string | null
+  applicantCount: number
+  evaluatedCount: number
+  byTrack: RecruitingTrackCount[]
+  chapters: RecruitingChapterEvaluationStatistics[]
+}
+
+export type RawTrackCount = Omit<
+  RecruitingTrackCount,
+  "applicantCount" | "evaluatedCount"
+> & {
+  applicantCount: RawCount
+  evaluatedCount: RawCount
+}
+
+export type RawSchoolEvaluationStatistics = Omit<
+  RecruitingSchoolEvaluationStatistics,
+  "schoolId" | "applicantCount" | "evaluatedCount" | "byTrack"
+> & {
+  schoolId: RawId
+  applicantCount: RawCount
+  evaluatedCount: RawCount
+  byTrack?: RawTrackCount[]
+}
+
+export type RawChapterEvaluationStatistics = Omit<
+  RecruitingChapterEvaluationStatistics,
+  "chapterId" | "applicantCount" | "evaluatedCount" | "byTrack" | "schools"
+> & {
+  chapterId: RawId
+  applicantCount: RawCount
+  evaluatedCount: RawCount
+  byTrack?: RawTrackCount[]
+  schools?: RawSchoolEvaluationStatistics[]
+}
+
+export type RawEvaluationStatistics = Omit<
+  RecruitingEvaluationStatistics,
+  "asOf" | "applicantCount" | "evaluatedCount" | "byTrack" | "chapters"
+> & {
+  asOf?: string | null
+  applicantCount: RawCount
+  evaluatedCount: RawCount
+  byTrack?: RawTrackCount[]
+  chapters?: RawChapterEvaluationStatistics[]
+}
+
 export type RecruitingQuestionType =
   | "SHORT_TEXT"
   | "LONG_TEXT"

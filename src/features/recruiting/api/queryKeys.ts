@@ -33,6 +33,9 @@ export const recruitingKeys = {
       schoolIds ? [...schoolIds].sort() : null,
     ] as const,
 
+  evaluationStatistics: (gisuId: string) =>
+    [...recruitingKeys.all, "evaluation-statistics", gisuId] as const,
+
   forms: () => [...recruitingKeys.all, "forms"] as const,
 
   formStructure: (

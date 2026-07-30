@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { mergeRoundGroups, normalizeStatusSummary } from "./recruitingApi"
+import {
+  mergeRoundGroups,
+  normalizeEvaluationStatistics,
+  normalizeStatusSummary,
+} from "./recruitingApi"
 
 import type {
+  RawEvaluationStatistics,
   RawStatusSummary,
   RecruitingRound,
   RecruitingRoundGroup,
@@ -162,5 +167,78 @@ describe("normalizeStatusSummary", () => {
     const result = normalizeStatusSummary({ totalCount: "" })
 
     expect(result.totalCount).toBe(0)
+  })
+})
+
+describe("normalizeEvaluationStatistics", () => {
+  // 2026-07-30 dev 실응답 형태. 건수가 전부 문자열로 온다.
+  const rawStatistics: RawEvaluationStatistics = {
+    asOf: "2026-07-30T10:22:48.103915815Z",
+    applicantCount: "24",
+    evaluatedCount: "12",
+    byTrack: [
+      { track: "PLAN", applicantCount: "10", evaluatedCount: "4" },
+      { track: "DESIGN", applicantCount: "8", evaluatedCount: "8" },
+    ],
+    chapters: [
+      {
+        chapterId: "29",
+        chapterName: "Chromium",
+        applicantCount: "20",
+        evaluatedCount: "10",
+        byTrack: [{ track: "PLAN", applicantCount: "10", evaluatedCount: "4" }],
+        schools: [
+          {
+            schoolId: "6",
+            schoolName: "광운대학교",
+            applicantCount: "12",
+            evaluatedCount: "6",
+            byTrack: [
+              { track: "PLAN", applicantCount: "6", evaluatedCount: "3" },
+            ],
+          },
+        ],
+      },
+    ],
+  }
+
+  it("3단 전체의 문자열 건수를 숫자로 바꾼다", () => {
+    const result = normalizeEvaluationStatistics(rawStatistics)
+
+    expect(result.applicantCount).toBe(24)
+    expect(result.byTrack[0]?.evaluatedCount).toBe(4)
+    expect(result.chapters[0]?.applicantCount).toBe(20)
+    expect(result.chapters[0]?.byTrack[0]?.applicantCount).toBe(10)
+    expect(result.chapters[0]?.schools[0]?.evaluatedCount).toBe(6)
+    expect(result.chapters[0]?.schools[0]?.byTrack[0]?.evaluatedCount).toBe(3)
+  })
+
+  it("ID 는 문자열로 고정한다", () => {
+    const result = normalizeEvaluationStatistics({
+      ...rawStatistics,
+      chapters: [
+        {
+          ...rawStatistics.chapters![0]!,
+          chapterId: 29,
+          schools: [
+            { ...rawStatistics.chapters![0]!.schools![0]!, schoolId: 6 },
+          ],
+        },
+      ],
+    })
+
+    expect(result.chapters[0]?.chapterId).toBe("29")
+    expect(result.chapters[0]?.schools[0]?.schoolId).toBe("6")
+  })
+
+  it("asOf 가 없으면 null 로 둔다", () => {
+    const result = normalizeEvaluationStatistics({
+      applicantCount: "0",
+      evaluatedCount: "0",
+    })
+
+    expect(result.asOf).toBeNull()
+    expect(result.byTrack).toEqual([])
+    expect(result.chapters).toEqual([])
   })
 })
