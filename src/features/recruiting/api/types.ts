@@ -187,6 +187,10 @@ export interface RecruitingRoundEvaluator {
   memberId: string
 }
 
+export interface RecruitingIdResponse {
+  id?: number
+}
+
 export interface RecruitingInterviewQuestion {
   id: string
   roundId: string
