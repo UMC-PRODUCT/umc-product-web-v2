@@ -116,6 +116,8 @@ export function useApplicationDetail(
     // 원본 요약을 그대로 넘긴다.
     application: application ?? null,
     round: location?.round ?? null,
+    // 모집 관리 권한은 시즌 단위로 판정한다.
+    seasonId: location ? String(location.group.seasonId) : null,
     isError:
       gisuQuery.isError ||
       roundQuery.isError ||

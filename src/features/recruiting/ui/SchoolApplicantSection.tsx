@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios"
 import { useEffect } from "react"
 
 import { cn } from "@/shared/lib/utils"
@@ -30,10 +31,15 @@ export function SchoolApplicantSection({
   className,
 }: SchoolApplicantSectionProps) {
   const addToast = useToastStore((state) => state.addToast)
-  const { data, isLoading, isError } = useSchoolApplicants(group, stage)
+  const { data, isLoading, isError, error } = useSchoolApplicants(group, stage)
+
+  // 조회 권한이 없는 학교는 장애가 아니라 정상 상황이다. 카드도 토스트도 내지
+  // 않는다. 그러지 않으면 권한 밖 학교 수만큼 오류가 쏟아진다.
+  const isForbidden =
+    isError && isAxiosError(error) && error.response?.status === 403
 
   useEffect(() => {
-    if (!isError) return
+    if (!isError || isForbidden) return
     addToast({
       message: `${group.schoolName} 지원자를 불러오지 못했습니다.`,
       color: "red",
@@ -41,7 +47,11 @@ export function SchoolApplicantSection({
       type: "default",
       duration: 3000,
     })
-  }, [isError, group.schoolName, addToast])
+  }, [isError, isForbidden, group.schoolName, addToast])
+
+  if (isForbidden) {
+    return null
+  }
 
   if (isLoading) {
     return <ApplicantSectionSkeleton className={className} />

@@ -4,8 +4,68 @@ import {
   buildFinalDecisionBody,
   canDecideFinal,
   resolveEvaluationEligibility,
+  resolveManagePermission,
   toAcceptableTracks,
 } from "./evaluationRules"
+
+describe("resolveManagePermission", () => {
+  const permitted = new Set(["7"])
+
+  it("권한 목록에 있으면 허용한다", () => {
+    expect(
+      resolveManagePermission({
+        seasonId: "7",
+        permittedSeasonIds: permitted,
+        isLoading: false,
+        isUnresolved: false,
+      }),
+    ).toEqual({ isGranted: true, isResolved: true })
+  })
+
+  it("권한 목록에 없으면 없음으로 확정한다", () => {
+    expect(
+      resolveManagePermission({
+        seasonId: "9",
+        permittedSeasonIds: permitted,
+        isLoading: false,
+        isUnresolved: false,
+      }),
+    ).toEqual({ isGranted: false, isResolved: true })
+  })
+
+  it("조회가 실패하면 권한 없음이 아니라 판정 불가로 둔다", () => {
+    expect(
+      resolveManagePermission({
+        seasonId: "7",
+        permittedSeasonIds: new Set(),
+        isLoading: false,
+        isUnresolved: true,
+      }),
+    ).toEqual({ isGranted: undefined, isResolved: true })
+  })
+
+  it("조회 중에는 확정하지 않고 기다린다", () => {
+    expect(
+      resolveManagePermission({
+        seasonId: "7",
+        permittedSeasonIds: new Set(),
+        isLoading: true,
+        isUnresolved: false,
+      }),
+    ).toEqual({ isGranted: undefined, isResolved: false })
+  })
+
+  it("시즌을 모르면 판정하지 않는다", () => {
+    expect(
+      resolveManagePermission({
+        seasonId: null,
+        permittedSeasonIds: permitted,
+        isLoading: false,
+        isUnresolved: false,
+      }),
+    ).toEqual({ isGranted: undefined, isResolved: false })
+  })
+})
 
 describe("resolveEvaluationEligibility", () => {
   it("평가자가 판정 전 서류를 평가할 수 있다", () => {
