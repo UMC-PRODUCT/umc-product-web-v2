@@ -26,6 +26,9 @@ export interface UpdateRecruitingRoundStatusRequest {
   status: RecruitingRoundStatus
 }
 
+// getPublicRounds(/public/rounds)와 getAdminRounds(/admin/rounds)가 같은 타입을
+// 공유하지만 실제 응답 스키마는 서로 달라 status/applicationOpen이 상호 배타적이다:
+// admin 응답에만 status(DRAFT/OPEN/CLOSED)가 있고, public 응답에만 applicationOpen이 있다.
 export interface RecruitingRound {
   roundId: string
   title: string
@@ -43,7 +46,12 @@ export interface RecruitingRound {
   announcement: string | null
   applicationFormId: string | null
   formId: string | null
-  applicationOpen: boolean
+  // admin 전용
+  status?: RecruitingRoundStatus
+  availabilityFormId?: string | null
+  contactText?: string | null
+  // public 전용
+  applicationOpen?: boolean
 }
 
 // interviewRequired=true 자체는 프론트에서 막아둔다 — 지원자가 면접 가능
@@ -91,6 +99,15 @@ export type UpdateRecruitingRoundRequest = {
   announcement?: string
   contactText?: string
 } & CreateRecruitingRoundInterviewFields
+
+// Round 설정, 지원 Form 전체 구조, 활성 공통 질문을 targetSeasonId의 새 DRAFT
+// Round로 복제한다(RECRUITING-ADMIN-016).
+export interface CloneRecruitingRoundRequest {
+  targetSeasonId: string
+  title: string
+  type: RecruitingRoundType
+  roundNo?: number
+}
 
 export interface RecruitingRoundGroup {
   seasonId: string

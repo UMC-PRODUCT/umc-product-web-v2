@@ -5,6 +5,7 @@ import type { ApiResponse } from "@/shared/lib/apiResponse"
 import type {
   AdminRoundsQuery,
   ApiEvaluationStage,
+  CloneRecruitingRoundRequest,
   CreateRecruitingRoundRequest,
   FinalDecisionBody,
   FormStructureQuery,
@@ -210,6 +211,28 @@ export async function updateRecruitingRoundStatus(
     `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/status`,
     payload,
   )
+}
+
+// Round 설정, 지원 Form 전체 구조, 활성 공통 질문을 targetSeasonId의 새 DRAFT
+// Round로 복제한다.
+export async function cloneRecruitingRound(
+  seasonId: string,
+  roundId: string,
+  payload: CloneRecruitingRoundRequest,
+): Promise<string> {
+  const { data } = await api.post<ApiResponse<{ id: number }>>(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/clone`,
+    payload,
+  )
+  return String(data.result.id)
+}
+
+// 지원서와 Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 복구 불가.
+export async function deleteRecruitingRound(
+  seasonId: string,
+  roundId: string,
+): Promise<void> {
+  await api.delete(`/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}`)
 }
 
 export async function getRoundEvaluators(
