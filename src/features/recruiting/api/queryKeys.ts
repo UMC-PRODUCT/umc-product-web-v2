@@ -24,6 +24,15 @@ export const recruitingKeys = {
       applicationId,
     ] as const,
 
+  // schoolIds 는 순서만 다른 같은 조회가 캐시를 나눠 쓰지 않도록 정렬해서 넣는다.
+  statusSummary: (gisuId: string, schoolIds?: string[]) =>
+    [
+      ...recruitingKeys.all,
+      "status-summary",
+      gisuId,
+      schoolIds ? [...schoolIds].sort() : null,
+    ] as const,
+
   forms: () => [...recruitingKeys.all, "forms"] as const,
 
   formStructure: (

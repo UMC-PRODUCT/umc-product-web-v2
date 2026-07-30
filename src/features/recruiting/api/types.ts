@@ -91,6 +91,87 @@ export interface RoundApplicationsQuery {
   size?: number
 }
 
+export interface StatusSummaryQuery {
+  gisuId: string
+  schoolIds?: string[]
+  roundIds?: string[]
+  schoolName?: string
+}
+
+// 서버는 건수가 0 인 상태를 응답에서 아예 뺀다(2026-07-30 dev 확인: 지원서가
+// 없는 기수는 countByStatus 가 {}). 그래서 Partial 로 두고 읽는 쪽에서 ?? 0 을 붙인다.
+// 총 지원자 수는 이 값들의 합이 아니라 totalCount 를 써야 한다.
+export type RecruitingStatusCounts = Partial<
+  Record<RecruitingApplicationStatus, number>
+>
+
+export interface RecruitingRoundStatusSummary {
+  roundId: string
+  roundTitle: string
+  roundType: RecruitingRoundType
+  roundNo: number
+  totalCount: number
+  countByStatus: RecruitingStatusCounts
+}
+
+export interface RecruitingSchoolStatusSummary {
+  schoolId: string
+  schoolName: string
+  // 지부명은 프론트 CHAPTERS 상수(6개)와 일치하지 않는다. dev 에는 지부가 32개
+  // 있고 이름이 중복되는 건(Pegasus id 7/23)도 있어서 그룹핑 키로는 chapterId 를
+  // 쓰고 chapterName 은 표시에만 쓴다.
+  chapterId: string
+  chapterName: string
+  totalCount: number
+  countByStatus: RecruitingStatusCounts
+  rounds: RecruitingRoundStatusSummary[]
+}
+
+export interface RecruitingStatusSummary {
+  totalCount: number
+  countByStatus: RecruitingStatusCounts
+  schools: RecruitingSchoolStatusSummary[]
+}
+
+// 스펙은 ID 와 건수를 모두 int64 로 적어두었지만 서버는 전부 문자열로 준다
+// (2026-07-30 dev 확인: totalCount "0", schoolId "1", chapterId "27").
+// ID 는 문자열로, 건수는 숫자로 고정해야 한다. 건수를 문자열로 두면 합산이
+// 문자열 연결("0" + "10" = "010")이 되어 조용히 틀린 값이 나온다.
+type RawId = string | number
+
+export type RawCount = string | number
+
+export type RawStatusCounts = Record<string, RawCount>
+
+export type RawRoundStatusSummary = Omit<
+  RecruitingRoundStatusSummary,
+  "roundId" | "totalCount" | "countByStatus"
+> & {
+  roundId: RawId
+  totalCount: RawCount
+  countByStatus?: RawStatusCounts
+}
+
+export type RawSchoolStatusSummary = Omit<
+  RecruitingSchoolStatusSummary,
+  "schoolId" | "chapterId" | "totalCount" | "countByStatus" | "rounds"
+> & {
+  schoolId: RawId
+  chapterId: RawId
+  totalCount: RawCount
+  countByStatus?: RawStatusCounts
+  rounds?: RawRoundStatusSummary[]
+}
+
+export type RawStatusSummary = Omit<
+  RecruitingStatusSummary,
+  "totalCount" | "countByStatus" | "schools"
+> & {
+  totalCount: RawCount
+  countByStatus?: RawStatusCounts
+  schools?: RawSchoolStatusSummary[]
+}
+
 export type RecruitingQuestionType =
   | "SHORT_TEXT"
   | "LONG_TEXT"

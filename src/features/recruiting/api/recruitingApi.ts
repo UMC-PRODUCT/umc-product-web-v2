@@ -7,6 +7,9 @@ import type {
   FinalDecisionBody,
   FormStructureQuery,
   PublicRoundsQuery,
+  RawCount,
+  RawStatusCounts,
+  RawStatusSummary,
   RecruitingApplicationDetail,
   RecruitingApplicationPage,
   RecruitingApplicationSummary,
@@ -16,7 +19,10 @@ import type {
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
   RecruitingRoundPhase,
+  RecruitingStatusCounts,
+  RecruitingStatusSummary,
   RoundApplicationsQuery,
+  StatusSummaryQuery,
   SubmitEvaluationBody,
 } from "./types"
 
@@ -96,6 +102,56 @@ export async function getAllRoundApplications(
     if (!result.hasNext) return collected
     page += 1
   }
+}
+
+// 서버가 문자열로 주는 건수를 숫자로, ID 를 문자열로 고정하고 빠질 수 있는
+// 배열/객체를 채운다. 순수 함수라 테스트에서 응답 형태를 그대로 넣어볼 수 있다.
+function toCount(value: RawCount | undefined): number {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function toStatusCounts(raw: RawStatusCounts | undefined) {
+  const counts: Record<string, number> = {}
+  for (const [status, value] of Object.entries(raw ?? {})) {
+    counts[status] = toCount(value)
+  }
+  return counts as RecruitingStatusCounts
+}
+
+export function normalizeStatusSummary(
+  raw: RawStatusSummary,
+): RecruitingStatusSummary {
+  return {
+    totalCount: toCount(raw.totalCount),
+    countByStatus: toStatusCounts(raw.countByStatus),
+    schools: (raw.schools ?? []).map((school) => ({
+      ...school,
+      schoolId: String(school.schoolId),
+      chapterId: String(school.chapterId),
+      totalCount: toCount(school.totalCount),
+      countByStatus: toStatusCounts(school.countByStatus),
+      rounds: (school.rounds ?? []).map((round) => ({
+        ...round,
+        roundId: String(round.roundId),
+        totalCount: toCount(round.totalCount),
+        countByStatus: toStatusCounts(round.countByStatus),
+      })),
+    })),
+  }
+}
+
+// 지원 현황 대시보드용 집계. admin 경로라 getPublicRounds 와 달리 학교 회장단
+// 이상만 조회할 수 있을 가능성이 있어 403 처리가 필요할 수 있다.
+// 파트(track)별 집계는 응답에 없다.
+export async function getStatusSummary(
+  params: StatusSummaryQuery,
+): Promise<RecruitingStatusSummary> {
+  const { data } = await api.get<ApiResponse<RawStatusSummary>>(
+    "/v1/recruiting/admin/summary",
+    { params, paramsSerializer: { indexes: null } },
+  )
+  return normalizeStatusSummary(data.result)
 }
 
 export async function getApplicationDetail(
