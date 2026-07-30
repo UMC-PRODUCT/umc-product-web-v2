@@ -61,7 +61,7 @@ export function useSaveEvaluatorAllocation() {
       })
       addToast({
         message: "평가 담당자 배정이 저장되었습니다.",
-        color: "teal",
+        color: "primary",
         variant: "deep",
         type: "default",
         duration: 3000,
