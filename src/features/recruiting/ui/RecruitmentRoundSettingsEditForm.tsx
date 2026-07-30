@@ -43,6 +43,32 @@ function isPeriodFieldComplete(value: PeriodFieldValue): boolean {
   )
 }
 
+function periodFieldToDate(value: PeriodFieldValue): Date | null {
+  return isPeriodFieldComplete(value)
+    ? new Date(`${value.date}T${value.time}:00`)
+    : null
+}
+
+// 모집 기간 필드 간 순서 검증. 형식이 다 채워졌어도 순서가 뒤바뀌면 저장을 막는다.
+function validatePeriodOrder(
+  documentStartAt: PeriodFieldValue,
+  documentEndAt: PeriodFieldValue,
+  documentResultPublishedAt: PeriodFieldValue,
+  finalResultPublishedAt: PeriodFieldValue,
+): string | null {
+  const start = periodFieldToDate(documentStartAt)
+  const end = periodFieldToDate(documentEndAt)
+  const docResult = periodFieldToDate(documentResultPublishedAt)
+  const finalResult = periodFieldToDate(finalResultPublishedAt)
+  if (!start || !end || !docResult || !finalResult) return null
+  if (end < start) return "서류 접수 종료는 시작 이후로 설정해 주세요."
+  if (docResult < end)
+    return "서류 결과 발표는 서류 접수 종료 이후로 설정해 주세요."
+  if (finalResult < docResult)
+    return "최종 결과 발표는 서류 결과 발표 이후로 설정해 주세요."
+  return null
+}
+
 // 면접 관련 값은 이 폼에서 편집하지 않는다(availability form 빌더 미구현이라
 // 앱 전역에서 interviewRequired=false로 강제 중). 기존 값을 그대로 되돌려 보낸다.
 // interviewRequired가 true인데 나머지 값이 비어있는 비정상 상태면, 그걸 조용히
@@ -144,6 +170,13 @@ export function RecruitmentRoundSettingsEditForm({
   })
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
 
+  const periodOrderError = validatePeriodOrder(
+    documentStartAt,
+    documentEndAt,
+    documentResultPublishedAt,
+    finalResultPublishedAt,
+  )
+
   const canSubmit =
     title.trim() !== "" &&
     title.length <= TITLE_MAX_LENGTH &&
@@ -152,7 +185,8 @@ export function RecruitmentRoundSettingsEditForm({
     isPeriodFieldComplete(documentStartAt) &&
     isPeriodFieldComplete(documentEndAt) &&
     isPeriodFieldComplete(documentResultPublishedAt) &&
-    isPeriodFieldComplete(finalResultPublishedAt)
+    isPeriodFieldComplete(finalResultPublishedAt) &&
+    periodOrderError === null
 
   const toggleTrack = (track: RecruitingTrack, checked: boolean) => {
     setEnabledTracks((prev) => {
@@ -171,7 +205,7 @@ export function RecruitmentRoundSettingsEditForm({
         seasonId,
         roundId,
         payload: {
-          title,
+          title: title.trim(),
           recruitableTracks: [...enabledTracks],
           secondChoiceEnabled,
           documentStartAt: periodFieldToInstant(documentStartAt),
@@ -334,6 +368,11 @@ export function RecruitmentRoundSettingsEditForm({
               />
             </div>
           </div>
+          {periodOrderError && (
+            <p className="text-body-2-medium text-red-500">
+              {periodOrderError}
+            </p>
+          )}
         </div>
       </div>
 
