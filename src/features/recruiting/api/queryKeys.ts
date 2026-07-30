@@ -8,6 +8,9 @@ export const recruitingKeys = {
 
   roundList: (gisuId: string) => [...recruitingKeys.rounds(), gisuId] as const,
 
+  adminRoundList: (gisuId: string) =>
+    [...recruitingKeys.rounds(), "admin", gisuId] as const,
+
   round: (gisuId: string, roundId: string) =>
     [...recruitingKeys.rounds(), gisuId, roundId] as const,
 
