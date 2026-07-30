@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
 import { CHAPTERS, isChapter } from "@/entities/organization/model/chapters"
@@ -77,14 +77,13 @@ export function RecruitmentListPage({
   } = useAdminRecruitingRounds(sort)
   const fetchedPosts = useMemo(() => mapRoundGroupsToPosts(groups), [groups])
 
-  // useMockData(테스트 라우트 전용)일 때만 조회 결과를 로컬 상태로 미러링해
-  // 낙관적으로 반영한다. 실제 모드에서는 mutation 성공 후 재조회로 갱신된다.
-  const [posts, setPosts] = useState<RecruitmentPost[]>(
-    useMockData ? RECRUITMENT_LIST_MOCK : [],
+  // mock 모드(테스트 라우트 전용)만 낙관적 업데이트를 위한 로컬 state가 필요하다.
+  // 실제 모드는 mutation 성공 후 재조회된 fetchedPosts를 그대로 파생값으로 쓴다.
+  const [mockPosts, setMockPosts] = useState<RecruitmentPost[]>(
+    RECRUITMENT_LIST_MOCK,
   )
-  useEffect(() => {
-    if (!useMockData) setPosts(fetchedPosts)
-  }, [useMockData, fetchedPosts])
+  const posts = useMockData ? mockPosts : fetchedPosts
+  const setPosts = setMockPosts
   const lastDeletedPostRef = useRef<RecruitmentPost | null>(null)
 
   // 편집 권한은 role이 아니라 시즌 단위 실제 EDIT 권한으로 판정한다(canEditRecruitmentPost 참고).
@@ -245,7 +244,7 @@ export function RecruitmentListPage({
           onSelect={(value) => setSort(value as RecruitmentSort)}
         />
       </div>
-      {!useMockData && (isRoundsLoading || isForbidden || isRoundsError) && (
+      {!useMockData && (isRoundsLoading || isForbidden || isRoundsError) ? (
         <div className="border-teal-gray-100 text-body-2-regular text-teal-gray-500 mt-8 flex min-h-50 w-full items-center justify-center rounded-[12px] border bg-white">
           {isRoundsLoading
             ? "불러오는 중입니다..."
@@ -253,152 +252,157 @@ export function RecruitmentListPage({
               ? "이 화면을 조회할 권한이 없습니다."
               : "모집 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."}
         </div>
-      )}
-      {role === "central" && (
-        <ChapterTabs
-          value={chapterTab}
-          onValueChange={(value) => {
-            setChapterTab(value)
-            setSelectedSchool(null)
-          }}
-          className="mt-8"
-        />
-      )}
-      {(role === "chapterAdmin" || role === "schoolStaff") && myChapter && (
-        <SchoolTabs
-          schools={SCHOOLS_BY_BRANCH[myChapter]}
-          value={schoolTab}
-          onValueChange={setSchoolTab}
-          allLabel={role === "chapterAdmin" ? "지부 전체" : "학교 전체"}
-          className="mt-8"
-        />
-      )}
+      ) : (
+        <>
+          {role === "central" && (
+            <ChapterTabs
+              value={chapterTab}
+              onValueChange={(value) => {
+                setChapterTab(value)
+                setSelectedSchool(null)
+              }}
+              className="mt-8"
+            />
+          )}
+          {(role === "chapterAdmin" || role === "schoolStaff") && myChapter && (
+            <SchoolTabs
+              schools={SCHOOLS_BY_BRANCH[myChapter]}
+              value={schoolTab}
+              onValueChange={setSchoolTab}
+              allLabel={role === "chapterAdmin" ? "지부 전체" : "학교 전체"}
+              className="mt-8"
+            />
+          )}
 
-      {role === "central" && (
-        <div className="mt-8 flex flex-col gap-11">
-          {chapterGroups.map(({ chapter, posts: chapterPosts }) => {
-            const scopedPosts = selectedSchool
-              ? chapterPosts.filter((post) => post.school === selectedSchool)
-              : chapterPosts
-            const canSeeArchive = chapterTab !== "all"
+          {role === "central" && (
+            <div className="mt-8 flex flex-col gap-11">
+              {chapterGroups.map(({ chapter, posts: chapterPosts }) => {
+                const scopedPosts = selectedSchool
+                  ? chapterPosts.filter(
+                      (post) => post.school === selectedSchool,
+                    )
+                  : chapterPosts
+                const canSeeArchive = chapterTab !== "all"
 
-            return (
-              <section key={chapter} className="flex flex-col">
-                <div className="flex items-end justify-between px-3">
-                  <div className="relative flex items-center gap-2.5">
-                    <h2 className="text-heading-5-semibold text-teal-700">
-                      {selectedSchool ?? chapter}
-                    </h2>
-                    {chapterTab !== "all" && (
-                      <IconButton
-                        variant="weak"
-                        aria-label="학교 검색"
-                        onClick={() => setSchoolSearchOpen((prev) => !prev)}
-                        className="bg-teal-gray-100 text-teal-gray-700 hover:bg-teal-gray-150 h-7.5 min-h-7.5 w-7.5 min-w-0 rounded-[0.625rem] p-0"
-                      >
-                        <DownChevronIcon className="h-4 w-4" />
-                      </IconButton>
-                    )}
-                    <RecruitmentSchoolSearchDropdown
-                      open={schoolSearchOpen}
-                      chapter={chapter}
-                      onOpenChange={setSchoolSearchOpen}
-                      onSelect={(school) => setSelectedSchool(school)}
-                    />
-                  </div>
-                  {canSeeArchive && (
-                    <RecruitmentCreateButton
-                      onClick={() =>
-                        navigate({
-                          to: "/recruiting/recruitments/new",
-                          search: {
-                            role,
-                            chapter,
-                            school: selectedSchool ?? undefined,
-                          },
-                        })
-                      }
-                      className="translate-y-1"
-                    />
-                  )}
-                </div>
-                <RecruitmentPostListCard
-                  chapter={chapter}
-                  posts={scopedPosts}
-                  permittedSeasonIds={permittedSeasonIds}
-                  onPrivatize={handlePrivatize}
-                  onDuplicate={handleDuplicate}
-                  onDelete={handleDelete}
-                  onUndoDelete={handleUndoDelete}
-                  onNavigateToArchive={handleNavigateToArchive}
-                  archiveVisibleOnPage={canSeeArchive}
-                  schoolFilterActive={selectedSchool !== null}
-                  className="mt-5"
-                />
-                {canSeeArchive && (
-                  <div className="mt-11 flex flex-col gap-5">
-                    <h2 className="text-heading-5-semibold pl-3 text-teal-700">
-                      {chapter}
-                    </h2>
-                    <RecruitmentDraftArchiveCard
+                return (
+                  <section key={chapter} className="flex flex-col">
+                    <div className="flex items-end justify-between px-3">
+                      <div className="relative flex items-center gap-2.5">
+                        <h2 className="text-heading-5-semibold text-teal-700">
+                          {selectedSchool ?? chapter}
+                        </h2>
+                        {chapterTab !== "all" && (
+                          <IconButton
+                            variant="weak"
+                            aria-label="학교 검색"
+                            onClick={() => setSchoolSearchOpen((prev) => !prev)}
+                            className="bg-teal-gray-100 text-teal-gray-700 hover:bg-teal-gray-150 h-7.5 min-h-7.5 w-7.5 min-w-0 rounded-[0.625rem] p-0"
+                          >
+                            <DownChevronIcon className="h-4 w-4" />
+                          </IconButton>
+                        )}
+                        <RecruitmentSchoolSearchDropdown
+                          open={schoolSearchOpen}
+                          chapter={chapter}
+                          onOpenChange={setSchoolSearchOpen}
+                          onSelect={(school) => setSelectedSchool(school)}
+                        />
+                      </div>
+                      {canSeeArchive && (
+                        <RecruitmentCreateButton
+                          onClick={() =>
+                            navigate({
+                              to: "/recruiting/recruitments/new",
+                              search: {
+                                role,
+                                chapter,
+                                school: selectedSchool ?? undefined,
+                              },
+                            })
+                          }
+                          className="translate-y-1"
+                        />
+                      )}
+                    </div>
+                    <RecruitmentPostListCard
                       chapter={chapter}
                       posts={scopedPosts}
                       permittedSeasonIds={permittedSeasonIds}
-                      onPublish={handlePublish}
+                      onPrivatize={handlePrivatize}
                       onDuplicate={handleDuplicate}
                       onDelete={handleDelete}
                       onUndoDelete={handleUndoDelete}
-                      selectedSchool={selectedSchool}
+                      onNavigateToArchive={handleNavigateToArchive}
+                      archiveVisibleOnPage={canSeeArchive}
+                      schoolFilterActive={selectedSchool !== null}
+                      className="mt-5"
                     />
-                  </div>
-                )}
-              </section>
-            )
-          })}
-        </div>
-      )}
+                    {canSeeArchive && (
+                      <div className="mt-11 flex flex-col gap-5">
+                        <h2 className="text-heading-5-semibold pl-3 text-teal-700">
+                          {chapter}
+                        </h2>
+                        <RecruitmentDraftArchiveCard
+                          chapter={chapter}
+                          posts={scopedPosts}
+                          permittedSeasonIds={permittedSeasonIds}
+                          onPublish={handlePublish}
+                          onDuplicate={handleDuplicate}
+                          onDelete={handleDelete}
+                          onUndoDelete={handleUndoDelete}
+                          selectedSchool={selectedSchool}
+                        />
+                      </div>
+                    )}
+                  </section>
+                )
+              })}
+            </div>
+          )}
 
-      {role === "chapterAdmin" && myChapter && (
-        <RecruitmentOwnScopeSection
-          chapter={myChapter}
-          posts={myScopedPosts}
-          schoolTab={schoolTab}
-          permittedSeasonIds={permittedSeasonIds}
-          onPrivatize={handlePrivatize}
-          onPublish={handlePublish}
-          onDuplicate={handleDuplicate}
-          onDelete={handleDelete}
-          onUndoDelete={handleUndoDelete}
-          onNavigateToArchive={handleNavigateToArchive}
-          archiveVisible
-          onCreate={() =>
-            navigate({
-              to: "/recruiting/recruitments/new",
-              search: {
-                role,
-                chapter: myChapter,
-                school: schoolTab,
-              },
-            })
-          }
-        />
-      )}
+          {role === "chapterAdmin" && myChapter && (
+            <RecruitmentOwnScopeSection
+              chapter={myChapter}
+              posts={myScopedPosts}
+              schoolTab={schoolTab}
+              permittedSeasonIds={permittedSeasonIds}
+              onPrivatize={handlePrivatize}
+              onPublish={handlePublish}
+              onDuplicate={handleDuplicate}
+              onDelete={handleDelete}
+              onUndoDelete={handleUndoDelete}
+              onNavigateToArchive={handleNavigateToArchive}
+              archiveVisible
+              onCreate={() =>
+                navigate({
+                  to: "/recruiting/recruitments/new",
+                  search: {
+                    role,
+                    chapter: myChapter,
+                    school: schoolTab,
+                  },
+                })
+              }
+            />
+          )}
 
-      {role === "schoolStaff" && myChapter && (
-        <RecruitmentOwnScopeSection
-          chapter={myChapter}
-          posts={myScopedPosts}
-          schoolTab={schoolTab}
-          permittedSeasonIds={permittedSeasonIds}
-          onPrivatize={handlePrivatize}
-          onPublish={handlePublish}
-          onDuplicate={handleDuplicate}
-          onDelete={handleDelete}
-          onUndoDelete={handleUndoDelete}
-          onNavigateToArchive={handleNavigateToArchive}
-          archiveVisible={schoolTab === viewerSchool}
-          archiveTitle="공유 보관함"
-        />
+          {role === "schoolStaff" && myChapter && (
+            <RecruitmentOwnScopeSection
+              chapter={myChapter}
+              posts={myScopedPosts}
+              schoolTab={schoolTab}
+              permittedSeasonIds={permittedSeasonIds}
+              onPrivatize={handlePrivatize}
+              onPublish={handlePublish}
+              onDuplicate={handleDuplicate}
+              onDelete={handleDelete}
+              onUndoDelete={handleUndoDelete}
+              onNavigateToArchive={handleNavigateToArchive}
+              archiveVisible={schoolTab === viewerSchool}
+              archiveTitle="공유 보관함"
+            />
+          )}
+        </>
       )}
     </div>
   )
