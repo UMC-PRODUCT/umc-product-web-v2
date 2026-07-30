@@ -1,13 +1,16 @@
 import { useMemo, useState } from "react"
 
+import { useAllSchools } from "@/entities/organization/hooks/useAllSchools"
 import FilterIcon from "@/shared/assets/icon/filter/FilterIcon"
-import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 import { PART_TAG_LABEL } from "@/shared/model/domain"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Segment } from "@/shared/ui/segment/Segment"
 
-import { formatNoticePeriod } from "../model/recruitmentNotice"
-import { RECRUITMENT_NOTICE_ITEMS_MOCK } from "../model/recruitmentNotice.mock"
+import { useRecruitingRounds } from "../hooks/useRecruitingRounds"
+import {
+  formatNoticePeriod,
+  toRecruitmentNoticeItems,
+} from "../model/recruitmentNotice"
 import { RecruitmentApplyConfirmModal } from "./RecruitmentApplyConfirmModal"
 import { RecruitmentNoticeCard } from "./RecruitmentNoticeCard"
 import { RecruitmentNoticePreviewModal } from "./RecruitmentNoticePreviewModal"
@@ -23,9 +26,6 @@ const NOTICE_TABS: { id: NoticeTab; label: string }[] = [
   { id: "recruiting", label: "진행 중인 모집" },
   { id: "past", label: "이미 지난 모집" },
 ]
-
-// 검색 자동완성은 지부 상관없이 전체 학교를 대상으로 한다.
-const ALL_SCHOOLS = Object.values(SCHOOLS_BY_BRANCH).flat()
 
 const NOTICE_FILTER_PARTS: PartTag[] = ["pm", "design", "web-pe", "mobile-pe"]
 const PART_FILTER_OPTIONS = NOTICE_FILTER_PARTS.map((part) => ({
@@ -46,8 +46,14 @@ export function RecruitmentNoticePage() {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [applyConfirmOpen, setApplyConfirmOpen] = useState(false)
 
-  // TODO: API 연동 시 RECRUITMENT_NOTICE_ITEMS_MOCK 대신 실제 응답으로 교체
-  const allItems = RECRUITMENT_NOTICE_ITEMS_MOCK
+  const { groups, isLoading } = useRecruitingRounds()
+  const allItems = useMemo(() => toRecruitmentNoticeItems(groups), [groups])
+  const allSchoolsQuery = useAllSchools()
+  const allSchools = useMemo(
+    () =>
+      allSchoolsQuery.data?.schools.map((school) => school.schoolName) ?? [],
+    [allSchoolsQuery.data],
+  )
 
   const schoolFilterOptions = useMemo(
     () =>
@@ -80,7 +86,7 @@ export function RecruitmentNoticePage() {
             setSearch(value)
             setSchoolFilters([])
           }}
-          schools={ALL_SCHOOLS}
+          schools={allSchools}
           className="w-80"
         />
         <div className="flex items-center gap-4">
@@ -130,7 +136,7 @@ export function RecruitmentNoticePage() {
 
       {items.length === 0 ? (
         <p className="text-body-2-medium text-teal-gray-400 flex w-full items-center justify-center py-30">
-          등록된 모집 공고가 없습니다.
+          {isLoading ? "불러오는 중입니다..." : "등록된 모집 공고가 없습니다."}
         </p>
       ) : (
         <div className="flex w-full flex-col items-start gap-0.5">

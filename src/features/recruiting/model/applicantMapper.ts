@@ -56,6 +56,13 @@ export function toPartTags(
   return [...new Set(tags)]
 }
 
+export function toPartTagsFromTracks(tracks: RecruitingTrack[]): PartTag[] {
+  const tags = tracks
+    .map((track) => TRACK_PART_TAG[track])
+    .filter((tag): tag is PartTag => tag != null)
+  return [...new Set(tags)]
+}
+
 function isDecided(status: RecruitingApplicationStatus) {
   return status !== "SUBMITTED"
 }
