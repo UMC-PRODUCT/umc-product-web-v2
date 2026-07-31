@@ -3,38 +3,37 @@ import type {
   ApplicationQuestion,
   ApplicationSection,
 } from "./applicationDetail"
+import type {
+  ApplyAnswerValue,
+  ApplyPortfolioAnswer,
+  ApplyUploadedFile,
+} from "./applyForm"
 
-export interface ApplyUploadedFileValue {
-  fileId: string
-  name: string
-}
+// 폼이 들고 있는 값을 그대로 받는다. 별도로 선언하면 폼 쪽 타입이 바뀔 때
+// 호출부의 캐스팅이 그 차이를 조용히 덮는다.
+export type ApplyPayloadValue = ApplyAnswerValue
 
-export type ApplyPortfolioAnswerValue =
-  | { kind: "link"; url: string }
-  | { kind: "file"; fileId: string; name: string }
-
-export type ApplyPayloadValue =
-  | string
-  | string[]
-  | ApplyUploadedFileValue
-  | ApplyPortfolioAnswerValue
-  | null
+// 업로드가 끝난 값만 페이로드에 담는다. fileId 가 없으면 아직 올라가는 중이거나
+// 실패한 것이다.
+type UploadedFile = ApplyUploadedFile & { fileId: string }
 
 export function isUploadedFileValue(
   value: ApplyPayloadValue,
-): value is ApplyUploadedFileValue {
+): value is UploadedFile {
   return (
     value !== null &&
     typeof value === "object" &&
     !Array.isArray(value) &&
     "fileId" in value &&
+    typeof value.fileId === "string" &&
+    value.fileId.length > 0 &&
     !("kind" in value)
   )
 }
 
 export function isPortfolioAnswerValue(
   value: ApplyPayloadValue,
-): value is ApplyPortfolioAnswerValue {
+): value is ApplyPortfolioAnswer {
   return (
     value !== null &&
     typeof value === "object" &&
@@ -97,6 +96,8 @@ function toAnswer(
         const url = value.url.trim()
         return url === "" ? [] : [{ ...base, textValue: url }]
       }
+      // 업로드가 끝나지 않은 포트폴리오 파일은 보낼 fileId 가 없다.
+      if (!value.fileId) return []
       return [{ ...base, fileIds: [value.fileId] }]
     }
     // 일정 답변을 담을 필드가 저장 요청에 없다. 서버가 times 를 받게 되면

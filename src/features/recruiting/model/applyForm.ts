@@ -226,7 +226,17 @@ function questionSchema(
           })
         })
       }
-      return uploadedFileValueSchema.nullable().optional()
+      // 선택 문항은 업로드가 끝나지 않아도 오류를 내지 않는다. 제출 자체는
+      // hasPendingUpload 가 막으므로, 여기서 막으면 아직 올라가는 중인 파일에
+      // 영문 스키마 오류만 뜬다.
+      return z.unknown().superRefine((value, ctx) => {
+        if (value == null || isUploadingValue(value)) return
+        if (uploadedFileValueSchema.safeParse(value).success) return
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "파일을 다시 첨부해 주세요.",
+        })
+      })
     case "portfolio":
       if (required) {
         return z.unknown().superRefine((value, ctx) => {
@@ -256,7 +266,16 @@ function questionSchema(
           }
         })
       }
-      return portfolioValueSchema.nullable().optional()
+      return z.unknown().superRefine((value, ctx) => {
+        if (value == null || isUploadingValue(value)) return
+        const parsed = portfolioValueSchema.safeParse(value)
+        if (parsed.success) return
+        const [firstIssue] = parsed.error.issues
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: firstIssue?.message ?? "포트폴리오를 확인해 주세요.",
+        })
+      })
   }
 }
 

@@ -146,6 +146,13 @@ function TrackPicker({
               type="button"
               role="radio"
               aria-checked={isSelected}
+              // role="radio" 만으로는 "다시 눌러 해제" 를 알릴 수 없다.
+              // 선택 값인 2지망에서만 해제가 되므로 그 상태를 이름에 담는다.
+              aria-label={
+                allowClear && isSelected
+                  ? `${trackLabel(track)} 선택됨, 다시 누르면 선택 해제`
+                  : trackLabel(track)
+              }
               disabled={disabled}
               onClick={() => {
                 if (isSelected && allowClear) {

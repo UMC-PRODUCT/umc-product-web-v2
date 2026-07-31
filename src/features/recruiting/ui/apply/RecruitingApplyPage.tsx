@@ -88,7 +88,7 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
     [roundId, memberId],
   )
 
-  const { round, config, isLoading, isStructureFetching, isError } =
+  const { round, config, isLoading, isStructureFetching, isError, isNotFound } =
     useApplyForm(roundId, applicant.firstChoice, applicant.secondChoice)
 
   const context = {
@@ -105,9 +105,17 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
       config?.sections ?? [],
     )
 
+  // 이어서 쓸지 새로 쓸지 정하기 전에 저장하면, 서버에 남아 있는 초안이 지금
+  // 화면의 빈 답변으로 덮어써진다. 저장된 답변을 되불러올 경로가 없어 복구도
+  // 안 되므로, 결정 전에는 보내지 않는다.
+  const awaitingResumeChoice = savedDraft != null && !resumeDecided
+
   // 이름·이메일은 문항이 아니라 지원서 필드라 폼 검증에 걸리지 않는다.
   // 보내기 직전에 확인한다 — 없다고 폼을 감추면 작성 중인 답변이 사라진다.
   const missingApplicantInfo = () => {
+    if (awaitingResumeChoice) {
+      return "이어서 작성할지 새로 시작할지 먼저 선택해 주세요."
+    }
     if (!applicant.applicantName.trim()) return "이름을 입력해 주세요."
     if (!applicant.applicantEmail.trim()) return "이메일을 입력해 주세요."
     if (!applicant.firstChoice) return "1지망 파트를 선택해 주세요."
@@ -192,11 +200,11 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
       </Notice>
     )
   }
-  if (isLoading && !round) {
-    return <Notice>모집 정보를 불러오는 중입니다.</Notice>
+  if (isNotFound) {
+    return <Notice>모집을 찾지 못했습니다. 링크를 다시 확인해주세요.</Notice>
   }
-  if (!round) {
-    return <Notice>모집을 찾지 못했습니다.</Notice>
+  if (isLoading || !round) {
+    return <Notice>모집 정보를 불러오는 중입니다.</Notice>
   }
   if (!round.applicationOpen) {
     return <Notice>지원 기간이 아닙니다.</Notice>
@@ -206,8 +214,10 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
     <div className="flex w-full flex-col gap-6">
       {savedDraft && !resumeDecided && (
         <div className="flex items-center justify-between gap-4 rounded-[12px] border border-teal-300 bg-teal-50 px-6 py-5">
-          <p className="text-body-2-regular text-teal-gray-700">
-            이 브라우저에 임시저장한 지원서가 있습니다. 이어서 작성할까요?
+          <p className="text-body-2-regular text-teal-gray-700 whitespace-pre-line">
+            {
+              "이 브라우저에 임시저장한 지원서가 있습니다.\n이어서 작성하면 같은 지원서에 저장되지만, 이전에 쓴 답변은 다시 불러오지 못합니다."
+            }
           </p>
           <div className="flex shrink-0 gap-2">
             <Button

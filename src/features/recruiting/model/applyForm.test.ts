@@ -134,6 +134,36 @@ describe("buildRecruitingAnswersSchema", () => {
       schema.safeParse({ "1": { name: "a.pdf", fileId: "f-1" } }).success,
     ).toBe(true)
   })
+
+  it("선택 파일 문항은 업로드 중이어도 오류를 내지 않는다", () => {
+    const schema = schemaFor([
+      question({ questionId: "1", type: "file", required: false }),
+    ])
+    expect(
+      schema.safeParse({ "1": { name: "a.pdf", uploading: true } }).success,
+    ).toBe(true)
+    expect(schema.safeParse({ "1": null }).success).toBe(true)
+  })
+
+  it("선택 포트폴리오도 업로드 중이면 통과시킨다", () => {
+    const schema = schemaFor([
+      question({ questionId: "1", type: "portfolio", required: false }),
+    ])
+    expect(
+      schema.safeParse({
+        "1": { kind: "file", name: "p.pdf", uploading: true },
+      }).success,
+    ).toBe(true)
+  })
+
+  it("선택 포트폴리오의 잘못된 링크는 막는다", () => {
+    const schema = schemaFor([
+      question({ questionId: "1", type: "portfolio", required: false }),
+    ])
+    expect(
+      schema.safeParse({ "1": { kind: "link", url: "not-a-url" } }).success,
+    ).toBe(false)
+  })
 })
 
 const UPLOAD_SECTIONS = [

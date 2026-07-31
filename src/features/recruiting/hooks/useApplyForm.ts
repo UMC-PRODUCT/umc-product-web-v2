@@ -101,10 +101,9 @@ export function useApplyForm(
     config,
     isLoading: roundQuery.isLoading || structureQuery.isLoading,
     isStructureFetching: structureQuery.isFetching,
-    isError:
-      gisuQuery.isError ||
-      roundQuery.isError ||
-      structureQuery.isError ||
-      (roundQuery.isSuccess && location == null),
+    isError: gisuQuery.isError || roundQuery.isError || structureQuery.isError,
+    // 조회는 됐는데 그 차수가 없는 경우. 잘못된 링크로 들어온 것이라
+    // "잠시 후 다시 시도"로 안내하면 아무리 기다려도 달라지지 않는다.
+    isNotFound: roundQuery.isSuccess && location == null,
   }
 }
