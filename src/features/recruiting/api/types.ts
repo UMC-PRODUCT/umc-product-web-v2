@@ -581,8 +581,10 @@ export interface RecruitingDecisionHistoryPage {
 
 export interface DecisionHistoriesQuery {
   gisuId: string
-  chapterId?: string
-  schoolId?: string
+  // 반복 쿼리 파라미터로 보낸다(chapterIds=1&chapterIds=2). 각 목록 내부는 OR,
+  // 지부와 학교를 함께 주면 AND 로 범위를 좁힌다. "[]" 접미사 키는 쓰지 않는다.
+  chapterIds?: string[]
+  schoolIds?: string[]
   tracks?: RecruitingTrack[]
   results?: RecruitingDecisionResult[]
   searchName?: string

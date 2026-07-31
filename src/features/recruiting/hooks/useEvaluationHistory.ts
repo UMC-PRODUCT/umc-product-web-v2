@@ -3,6 +3,7 @@ import { useMemo } from "react"
 
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 
+import { isServerRejection } from "../api/errors"
 import { recruitingKeys } from "../api/queryKeys"
 import { getAllDecisionHistories } from "../api/recruitingApi"
 import {
@@ -26,6 +27,10 @@ export function useEvaluationHistory() {
     queryFn: () => getAllDecisionHistories({ gisuId: gisuId! }),
     enabled: gisuId != null,
     staleTime: 60 * 1000,
+    // 권한 부족 등 서버가 확정 응답한 실패는 재시도하지 않는다(전역 기본값 retry: 1).
+    // 이 화면은 학교·지부 운영진이 403 을 받는 게 정상 설계라 실제로 자주 탄다.
+    retry: (failureCount, error) =>
+      !isServerRejection(error) && failureCount < 1,
   })
 
   const { data } = historyQuery
@@ -36,6 +41,9 @@ export function useEvaluationHistory() {
 
   return {
     ...historyQuery,
+    // 활성 기수를 못 받으면 쿼리가 비활성이라 isLoading/isError 가 모두 false 다.
+    // 조회 실패와 구분해 안내를 다르게 한다.
+    hasActiveGisu: gisuId != null,
     rows,
     // 서버가 판정 대상 전원 완료 기준으로 계산해 준다. 화면에서 행 개수로 추측하던
     // 것을 대체한다.

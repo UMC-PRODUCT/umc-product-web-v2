@@ -271,19 +271,22 @@ export function formatHistoryProcessedAt(processedAt: string) {
 // 서버 판정 이력 조회 파라미터로 옮긴다. CSV 다운로드가 화면과 같은 범위를 쓰도록
 // 목록 조회와 같은 조건을 넘긴다.
 //
-// 지부·학교는 서버가 단일 숫자 ID 만 받는데 필터 바는 다중 선택이다(기획 확정).
-// 그래서 하나만 고른 경우에만 전달하고, 둘 이상이면 전달하지 않아 CSV 에 전 범위가
-// 담긴다. 서버가 chapterIds/schoolIds 배열을 받아주면 그때 전부 전달할 수 있다.
-// 이름 -> ID 는 행에 실려 온 값을 쓴다(조회를 더 하지 않는다).
-function toSingleId(
+// 지부·학교·파트는 다중 선택, 평가 결과는 단일 선택이다(기획 확정). 서버가 모두
+// 배열 파라미터로 받으므로 화면 필터를 그대로 전달한다.
+// 필터 바는 지부·학교를 이름으로 다루는데 서버는 ID 를 받는다. 행에 실려 온 ID 를
+// 쓰므로 이름 -> ID 변환에 조회를 더 하지 않는다. 조회 결과에 없는 이름은 매칭할 ID 가
+// 없어 자연히 빠진다.
+function toIds(
   rows: EvaluationHistoryEntry[],
   selectedNames: string[],
   pick: (row: EvaluationHistoryEntry) => { id: string; name: string },
-): string | undefined {
-  if (selectedNames.length !== 1) return undefined
-  const target = selectedNames[0]
-  const matched = rows.find((row) => pick(row).name === target)
-  return matched ? pick(matched).id : undefined
+): string[] | undefined {
+  if (selectedNames.length === 0) return undefined
+  const idByName = new Map(rows.map((row) => [pick(row).name, pick(row).id]))
+  const ids = selectedNames
+    .map((name) => idByName.get(name))
+    .filter((id): id is string => id != null)
+  return ids.length > 0 ? ids : undefined
 }
 
 export function toDecisionHistoriesQuery(
@@ -305,11 +308,11 @@ export function toDecisionHistoriesQuery(
       : [filters.chapterTab]
 
   return {
-    chapterId: toSingleId(rows, chapterNames, (row) => ({
+    chapterIds: toIds(rows, chapterNames, (row) => ({
       id: row.applicant.chapterId,
       name: row.applicant.chapter,
     })),
-    schoolId: toSingleId(rows, filters.schools, (row) => ({
+    schoolIds: toIds(rows, filters.schools, (row) => ({
       id: row.applicant.schoolId,
       name: row.applicant.school,
     })),

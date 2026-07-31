@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
+import { getServerErrorMessage } from "@/features/recruiting/api/errors"
 import { downloadDecisionHistoriesCsv } from "@/features/recruiting/api/recruitingApi"
 import { useEvaluationHistory } from "@/features/recruiting/hooks/useEvaluationHistory"
 import { formatBaseTime } from "@/features/recruiting/model/applicantListTypes"
@@ -25,8 +26,17 @@ export const Route = createFileRoute("/recruiting/history/archive")({
 })
 
 function RouteComponent() {
-  const { rows, progress, asOf, gisuId, generation, isLoading, isError } =
-    useEvaluationHistory()
+  const {
+    rows,
+    progress,
+    asOf,
+    gisuId,
+    generation,
+    isLoading,
+    isError,
+    error,
+    hasActiveGisu,
+  } = useEvaluationHistory()
   const addToast = useToastStore((state) => state.addToast)
   const [filters, setFilters] = useState<EvaluationHistoryFilters>(
     DEFAULT_EVALUATION_HISTORY_FILTERS,
@@ -134,8 +144,17 @@ function RouteComponent() {
 
       {isLoading ? (
         <EmptyNotice message="평가 이력을 불러오는 중입니다." />
+      ) : !hasActiveGisu ? (
+        <EmptyNotice message="진행 중인 기수가 없어 평가 이력을 표시할 수 없습니다." />
       ) : isError ? (
-        <EmptyNotice message="평가 이력을 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
+        // 이 화면은 중앙 운영진만 조회할 수 있고 학교·지부 운영진은 403 을 받는다.
+        // 기다려도 안 풀리는 실패라 서버가 주는 사유를 그대로 보여준다.
+        <EmptyNotice
+          message={
+            getServerErrorMessage(error) ??
+            "평가 이력을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+          }
+        />
       ) : (
         <EvaluationHistoryCard
           rows={orderedRows}

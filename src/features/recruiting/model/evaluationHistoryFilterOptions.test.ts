@@ -162,19 +162,7 @@ describe("toDecisionHistoriesQuery", () => {
     ).toBeUndefined()
   })
 
-  // 서버가 단일 ID 만 받아서 하나만 고른 경우에만 전달할 수 있다.
-  it("지부를 하나만 고르면 chapterId 를 보낸다", () => {
-    const query = toDecisionHistoriesQuery(
-      filters({ chapters: ["Neon"] }),
-      "latest",
-      false,
-      rows,
-    )
-
-    expect(query.chapterId).toBe("Neon")
-  })
-
-  it("지부를 둘 이상 고르면 chapterId 를 보내지 않는다", () => {
+  it("지부 다중 선택을 chapterIds 배열로 옮긴다", () => {
     const query = toDecisionHistoriesQuery(
       filters({ chapters: ["Neon", "Chromium"] }),
       "latest",
@@ -182,7 +170,18 @@ describe("toDecisionHistoriesQuery", () => {
       rows,
     )
 
-    expect(query.chapterId).toBeUndefined()
+    expect(query.chapterIds).toEqual(["Neon", "Chromium"])
+  })
+
+  it("학교 다중 선택을 schoolIds 배열로 옮긴다", () => {
+    const query = toDecisionHistoriesQuery(
+      filters({ schools: ["광운대학교", "동국대학교"] }),
+      "latest",
+      false,
+      rows,
+    )
+
+    expect(query.schoolIds).toEqual(["광운대학교", "동국대학교"])
   })
 
   it("지부 탭으로 좁혀졌으면 그 지부를 쓴다", () => {
@@ -193,18 +192,26 @@ describe("toDecisionHistoriesQuery", () => {
       rows,
     )
 
-    expect(query.chapterId).toBe("Ferrum")
+    expect(query.chapterIds).toEqual(["Ferrum"])
   })
 
-  it("학교를 하나만 고르면 schoolId 를 보낸다", () => {
+  it("아무것도 안 고르면 보내지 않는다", () => {
+    const query = toDecisionHistoriesQuery(filters(), "latest", false, rows)
+
+    expect(query.chapterIds).toBeUndefined()
+    expect(query.schoolIds).toBeUndefined()
+  })
+
+  // 조회 결과에 없는 이름은 매칭할 ID 가 없어 빠진다.
+  it("조회 결과에 없는 이름은 제외한다", () => {
     const query = toDecisionHistoriesQuery(
-      filters({ schools: ["광운대학교"] }),
+      filters({ chapters: ["Neon", "존재하지않는지부"] }),
       "latest",
       false,
       rows,
     )
 
-    expect(query.schoolId).toBe("광운대학교")
+    expect(query.chapterIds).toEqual(["Neon"])
   })
 
   it("정렬과 담당자별 그룹을 옮긴다", () => {
