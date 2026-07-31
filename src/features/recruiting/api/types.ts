@@ -506,6 +506,43 @@ export interface RecruitingInterviewQuestion {
   active: boolean
 }
 
+// 지원서 저장 요청의 답변 한 건. SCHEDULE 문항의 times 를 받는 필드가 없어
+// 일정 답변은 이 경로로 보낼 수 없다(RECRUITING-SCHEDULE-001 이 미구현).
+export interface RecruitingAnswerRequest {
+  questionId: number
+  textValue?: string
+  selectedOptionIds?: number[]
+  fileIds?: string[]
+}
+
+// 이름·이메일·지망은 Form 문항이 아니라 지원서 자체의 필드다.
+export interface CreateApplicationDraftBody {
+  applicationFormId: number
+  applicantName: string
+  applicantEmail: string
+  firstChoice: RecruitingTrack
+  secondChoice?: RecruitingTrack
+}
+
+export interface UpdateApplicationDraftBody {
+  applicantName: string
+  applicantEmail: string
+  firstChoice: RecruitingTrack
+  secondChoice?: RecruitingTrack
+  answers: RecruitingAnswerRequest[]
+}
+
+export interface RecruitingApplicationCreated {
+  applicationId: string
+  applicationKey: string
+  status: RecruitingApplicationStatus
+}
+
+export interface RecruitingApplicationMutationResult {
+  applicationId: string
+  status: RecruitingApplicationStatus
+}
+
 export type RecruitingDecision = "PASS" | "FAIL"
 
 // 합격에는 확정 트랙이 필수이고 지원자의 1·2지망 중 하나여야 한다. 불합격에는
