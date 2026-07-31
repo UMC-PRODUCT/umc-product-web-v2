@@ -67,7 +67,12 @@ export function useSaveEvaluatorAllocation() {
         duration: 3000,
       })
     },
-    onError: () => {
+    onError: (_, variables) => {
+      if (variables?.roundId) {
+        void queryClient.invalidateQueries({
+          queryKey: recruitingKeys.evaluators(variables.roundId),
+        })
+      }
       addToast({
         message:
           "평가 담당자 배정 저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
