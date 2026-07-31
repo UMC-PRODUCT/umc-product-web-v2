@@ -5,6 +5,7 @@ import type { ApiResponse } from "@/shared/lib/apiResponse"
 import type {
   AdminRoundsQuery,
   ApiEvaluationStage,
+  CloneRecruitingRoundRequest,
   CreateRecruitingRoundRequest,
   DecisionHistoriesQuery,
   FinalDecisionBody,
@@ -12,18 +13,27 @@ import type {
   PublicRoundsQuery,
   RawCount,
   RawDecisionHistoryPage,
+  RawEvaluationStatistics,
   RawId,
+  RawPartSummary,
+  RawStatusCounts,
+  RawStatusSummary,
+  RawTrackCount,
   RecruitingApplicationDetail,
   RecruitingApplicationPage,
   RecruitingApplicationSummary,
   RecruitingDecisionHistoryPage,
   RecruitingEvaluation,
+  RecruitingEvaluationStatistics,
   RecruitingFormStructure,
   RecruitingInterviewQuestion,
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
   RecruitingRoundPhase,
+  RecruitingStatusCounts,
+  RecruitingStatusSummary,
   RoundApplicationsQuery,
+  StatusSummaryQuery,
   SubmitEvaluationBody,
   UpdateRecruitingRoundRequest,
   UpdateRecruitingRoundStatusRequest,
@@ -124,6 +134,8 @@ export async function getAllRoundApplications(
 
 const DECISION_HISTORY_PAGE_SIZE = 100
 
+// 서버가 문자열로 주는 건수를 숫자로, ID 를 문자열로 고정하고 빠질 수 있는
+// 배열/객체를 채운다. 순수 함수라 테스트에서 응답 형태를 그대로 넣어볼 수 있다.
 function toCount(value: RawCount | undefined): number {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : 0
@@ -215,6 +227,108 @@ export async function downloadDecisionHistoriesCsv(
     { params, paramsSerializer: { indexes: null }, responseType: "blob" },
   )
   return data
+}
+
+function toStatusCounts(raw: RawStatusCounts | undefined) {
+  const counts: Record<string, number> = {}
+  for (const [status, value] of Object.entries(raw ?? {})) {
+    counts[status] = toCount(value)
+  }
+  return counts as RecruitingStatusCounts
+}
+
+function toPartSummaries(raw: RawPartSummary[] | undefined) {
+  return (raw ?? []).map((part) => ({
+    ...part,
+    totalCount: toCount(part.totalCount),
+    countByStatus: toStatusCounts(part.countByStatus),
+  }))
+}
+
+export function normalizeStatusSummary(
+  raw: RawStatusSummary,
+): RecruitingStatusSummary {
+  return {
+    totalCount: toCount(raw.totalCount),
+    countByStatus: toStatusCounts(raw.countByStatus),
+    parts: toPartSummaries(raw.parts),
+    schools: (raw.schools ?? []).map((school) => ({
+      ...school,
+      schoolId: String(school.schoolId),
+      chapterId: String(school.chapterId),
+      totalCount: toCount(school.totalCount),
+      countByStatus: toStatusCounts(school.countByStatus),
+      parts: toPartSummaries(school.parts),
+      rounds: (school.rounds ?? []).map((round) => ({
+        ...round,
+        roundId: String(round.roundId),
+        totalCount: toCount(round.totalCount),
+        countByStatus: toStatusCounts(round.countByStatus),
+        parts: toPartSummaries(round.parts),
+      })),
+    })),
+  }
+}
+
+function toTrackCounts(raw: RawTrackCount[] | undefined) {
+  return (raw ?? []).map((item) => ({
+    ...item,
+    applicantCount: toCount(item.applicantCount),
+    evaluatedCount: toCount(item.evaluatedCount),
+  }))
+}
+
+// 정렬은 서버가 이미 해준다(지부 가나다 > 학교 가나다). 여기서는 문자열 건수를
+// 숫자로 바꾸고 빠질 수 있는 배열만 채운다.
+export function normalizeEvaluationStatistics(
+  raw: RawEvaluationStatistics,
+): RecruitingEvaluationStatistics {
+  return {
+    asOf: raw.asOf ?? null,
+    applicantCount: toCount(raw.applicantCount),
+    evaluatedCount: toCount(raw.evaluatedCount),
+    byTrack: toTrackCounts(raw.byTrack),
+    chapters: (raw.chapters ?? []).map((chapter) => ({
+      ...chapter,
+      chapterId: String(chapter.chapterId),
+      applicantCount: toCount(chapter.applicantCount),
+      evaluatedCount: toCount(chapter.evaluatedCount),
+      byTrack: toTrackCounts(chapter.byTrack),
+      schools: (chapter.schools ?? []).map((school) => ({
+        ...school,
+        schoolId: String(school.schoolId),
+        applicantCount: toCount(school.applicantCount),
+        evaluatedCount: toCount(school.evaluatedCount),
+        byTrack: toTrackCounts(school.byTrack),
+      })),
+    })),
+  }
+}
+
+// 평가 현황 대시보드용 집계 (RECRUITING-ADMIN-083). 화면의 4개 위젯이 모두 이
+// 응답 하나에서 나온다. 위젯별로 나눠 호출하면 시점 차이로 카드 합계와 차트
+// 합계가 어긋나기 때문에 서버가 단일 스냅샷으로 설계했다.
+export async function getEvaluationStatistics(
+  gisuId: string,
+): Promise<RecruitingEvaluationStatistics> {
+  const { data } = await api.get<ApiResponse<RawEvaluationStatistics>>(
+    "/v1/recruiting/admin/statistics/evaluations",
+    { params: { gisuId } },
+  )
+  return normalizeEvaluationStatistics(data.result)
+}
+
+// 지원 현황 대시보드용 집계. admin 경로라 getPublicRounds 와 달리 학교 회장단
+// 이상만 조회할 수 있을 가능성이 있어 403 처리가 필요할 수 있다.
+// 파트(track)별 집계는 응답에 없다.
+export async function getStatusSummary(
+  params: StatusSummaryQuery,
+): Promise<RecruitingStatusSummary> {
+  const { data } = await api.get<ApiResponse<RawStatusSummary>>(
+    "/v1/recruiting/admin/summary",
+    { params, paramsSerializer: { indexes: null } },
+  )
+  return normalizeStatusSummary(data.result)
 }
 
 export async function getApplicationDetail(
@@ -310,6 +424,28 @@ export async function updateRecruitingRoundStatus(
     `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/status`,
     payload,
   )
+}
+
+// Round 설정, 지원 Form 전체 구조, 활성 공통 질문을 targetSeasonId의 새 DRAFT
+// Round로 복제한다.
+export async function cloneRecruitingRound(
+  seasonId: string,
+  roundId: string,
+  payload: CloneRecruitingRoundRequest,
+): Promise<string> {
+  const { data } = await api.post<ApiResponse<{ id: number }>>(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/clone`,
+    payload,
+  )
+  return String(data.result.id)
+}
+
+// 지원서와 Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 복구 불가.
+export async function deleteRecruitingRound(
+  seasonId: string,
+  roundId: string,
+): Promise<void> {
+  await api.delete(`/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}`)
 }
 
 export async function getRoundEvaluators(

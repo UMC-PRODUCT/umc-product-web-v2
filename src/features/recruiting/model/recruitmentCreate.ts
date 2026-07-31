@@ -79,6 +79,21 @@ export async function resolveAvailableFooter(
   return { footer: candidate, wasAdjusted: true }
 }
 
+// 복제(clone) 등 base/footer 구분 없이 제목 하나만 다루는 곳에서 쓴다.
+// 이미 사용 중이면 뒤에 숫자를 2부터 붙여 사용 가능한 제목을 찾는다.
+export async function resolveAvailableTitle(
+  baseTitle: string,
+  checkAvailable: (title: string) => Promise<boolean>,
+): Promise<string> {
+  if (await checkAvailable(baseTitle)) return baseTitle
+
+  let n = 2
+  while (!(await checkAvailable(`${baseTitle} ${n}`))) {
+    n++
+  }
+  return `${baseTitle} ${n}`
+}
+
 // 전체 진행 기간(서류 모집 시작 ~ 면접 결과 발표) 최대 일수
 export const MAX_TOTAL_PERIOD_DAYS = 25
 

@@ -4,18 +4,13 @@ import { RecruitmentPostListCard } from "./RecruitmentPostListCard"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
-import type { RecruitingListRole } from "../model/recruitingListRole"
-import type {
-  RecruitmentEditScope,
-  RecruitmentPost,
-} from "../model/recruitmentList"
+import type { RecruitmentPost } from "../model/recruitmentList"
 
 interface RecruitmentOwnScopeSectionProps {
-  role: RecruitingListRole
   chapter: Chapter
   posts: RecruitmentPost[]
   schoolTab: string
-  editScope: RecruitmentEditScope
+  permittedSeasonIds: ReadonlySet<string>
   onPrivatize: (postId: string) => void
   onPublish: (postId: string) => void
   onDuplicate: (postId: string) => void
@@ -29,11 +24,10 @@ interface RecruitmentOwnScopeSectionProps {
 
 // chapterAdmin(본인 지부 전체)과 schoolStaff(본인 학교)가 공유하는 "내 스코프" 목록 + 공유 보관함 섹션
 export function RecruitmentOwnScopeSection({
-  role,
   chapter,
   posts,
   schoolTab,
-  editScope,
+  permittedSeasonIds,
   onPrivatize,
   onPublish,
   onDuplicate,
@@ -60,8 +54,7 @@ export function RecruitmentOwnScopeSection({
       <RecruitmentPostListCard
         chapter={chapter}
         posts={posts}
-        role={role}
-        editScope={editScope}
+        permittedSeasonIds={permittedSeasonIds}
         onPrivatize={onPrivatize}
         onDuplicate={onDuplicate}
         onDelete={onDelete}
@@ -79,8 +72,7 @@ export function RecruitmentOwnScopeSection({
           <RecruitmentDraftArchiveCard
             chapter={chapter}
             posts={posts}
-            role={role}
-            editScope={editScope}
+            permittedSeasonIds={permittedSeasonIds}
             onPublish={onPublish}
             onDuplicate={onDuplicate}
             onDelete={onDelete}

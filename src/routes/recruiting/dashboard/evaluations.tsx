@@ -1,203 +1,175 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { getServerErrorMessage } from "@/features/recruiting/api/errors"
+import { useEvaluationStatistics } from "@/features/recruiting/hooks/useEvaluationStatistics"
+import { useRecruitingProgress } from "@/features/recruiting/hooks/useRecruitingProgress"
+import { formatBaseTime } from "@/features/recruiting/model/applicantListTypes"
+import {
+  toApplicantCountsByPart,
+  toChapterCompletions,
+  toChapterEvaluationBars,
+  toCompletionPercentage,
+  toEvaluatedCountsByPart,
+  toSchoolEvaluationBars,
+} from "@/features/recruiting/model/evaluationStats"
 import { ChapterRankingCard } from "@/features/recruiting/ui/dashboard/ChapterRankingCard"
 import { EvaluationCompletionCard } from "@/features/recruiting/ui/dashboard/EvaluationCompletionCard"
 import { PartDistributionCard } from "@/features/recruiting/ui/dashboard/PartDistributionCard"
 import { SchoolPartChartCard } from "@/features/recruiting/ui/dashboard/SchoolPartChartCard"
 import { StatCard } from "@/features/recruiting/ui/dashboard/StatCard"
+import { shortenSchoolName } from "@/shared/lib/formatSchoolName"
 import { GraphTimestampLabel } from "@/shared/ui/GraphTimestampLabel"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
+
+import type { PartKey } from "@/features/recruiting/model/parts"
 
 export const Route = createFileRoute("/recruiting/dashboard/evaluations")({
   component: RouteComponent,
 })
 
+function EmptyNotice({ message }: { message: string }) {
+  return (
+    <div className="border-teal-gray-100 text-body-2-regular text-teal-gray-500 mt-8 flex min-h-50 items-center justify-center rounded-[12px] border bg-white">
+      {message}
+    </div>
+  )
+}
+
 function RouteComponent() {
+  const { data, isLoading, isError, error, hasActiveGisu } =
+    useEvaluationStatistics()
+  const { isAdditionalRecruiting } = useRecruitingProgress()
+
+  const header = (
+    <PageLabel
+      breadcrumb={[
+        { id: "recruiting", label: "리크루팅" },
+        { id: "dashboard", label: "대시보드" },
+        { id: "evaluations", label: "평가 현황" },
+      ]}
+      title="평가 현황"
+      description="지부별, 학교별, 파트별 평가 현황을 실시간으로 확인합니다."
+    />
+  )
+
+  if (isLoading) {
+    return (
+      <div>
+        {header}
+        <EmptyNotice message="평가 현황을 불러오는 중입니다." />
+      </div>
+    )
+  }
+
+  // 활성 기수가 없으면 조회 자체를 하지 않는다. 실패가 아니라 표시할 대상이
+  // 없는 상태라 안내를 구분한다.
+  if (!hasActiveGisu) {
+    return (
+      <div>
+        {header}
+        <EmptyNotice message="진행 중인 기수가 없어 평가 현황을 표시할 수 없습니다." />
+      </div>
+    )
+  }
+
+  if (isError || !data) {
+    // 권한 부족처럼 원인이 확정된 실패는 서버 문구를 그대로 보여준다.
+    const message =
+      getServerErrorMessage(error) ??
+      "평가 현황을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+    return (
+      <div>
+        {header}
+        <EmptyNotice message={message} />
+      </div>
+    )
+  }
+
+  // 지원 현황과 달리 서버가 asOf(집계 기준 시각)를 준다. 없을 때만 조회 시각으로
+  // 대체한다. 평가 완료 카드는 비율 footer 라 날짜를 쓰지 않고, 그래프 기준 시각
+  // 라벨만 "26-07-04 02:48" 형식으로 표기한다.
+  const asOf = data.asOf ? new Date(data.asOf) : new Date()
+  const [graphAsOfDate, graphAsOfTime] = formatBaseTime(asOf).split(" ")
+
+  const overallPercentage = toCompletionPercentage(
+    data.evaluatedCount,
+    data.applicantCount,
+  )
+  // 파트 도넛은 평가 완료 수(분자)와 지원자 수(분모)를 함께 받는다.
+  const evaluated = toEvaluatedCountsByPart(data.byTrack)
+  const applicants = toApplicantCountsByPart(data.byTrack)
+  const partValues: Record<
+    PartKey,
+    { type: "evaluation"; count: number; total: number }
+  > = {
+    pm: { type: "evaluation", count: evaluated.pm, total: applicants.pm },
+    design: {
+      type: "evaluation",
+      count: evaluated.design,
+      total: applicants.design,
+    },
+    webPe: {
+      type: "evaluation",
+      count: evaluated.webPe,
+      total: applicants.webPe,
+    },
+    mobilePe: {
+      type: "evaluation",
+      count: evaluated.mobilePe,
+      total: applicants.mobilePe,
+    },
+  }
+
+  const chartSchools = toSchoolEvaluationBars(data).map((school) => ({
+    ...school,
+    name: shortenSchoolName(school.name),
+  }))
+
   return (
     <div>
-      <PageLabel
-        breadcrumb={[
-          { id: "recruiting", label: "리크루팅" },
-          { id: "dashboard", label: "대시보드" },
-          { id: "evaluations", label: "평가 현황" },
-        ]}
-        title="평가 현황"
-        description="지부별, 학교별, 파트별 평가 현황을 실시간으로 확인합니다."
-      />
+      {header}
       <div className="mt-8 flex gap-4">
         <StatCard
           title={"평가 완료"}
-          count={1000}
+          count={data.evaluatedCount}
           footer={{
             type: "ratio",
-            totalCount: 1500,
+            totalCount: data.applicantCount,
           }}
         />
         <EvaluationCompletionCard
-          overallPercentage={82}
-          chapters={{
-            Chromium: { count: 80, percentage: 100 },
-            Ferrum: { count: 64, percentage: 80 },
-            Neon: { count: 112, percentage: 100 },
-            Platinum: { count: 40, percentage: 100 },
-            Selenium: { count: 0, percentage: 0 },
-            Xenon: { count: 92, percentage: 80 },
-          }}
+          overallPercentage={overallPercentage}
+          chapters={toChapterCompletions(data)}
         />
         {/* 마지막 카드 위 8px에 기준 시각 라벨(우측 정렬). absolute라 카드 정렬엔 영향 없음. */}
         <div className="relative flex">
           <GraphTimestampLabel
-            date="26-07-04"
-            time="02:48"
+            date={graphAsOfDate ?? ""}
+            time={graphAsOfTime ?? ""}
             className="absolute right-0 bottom-full mb-2"
           />
           <PartDistributionCard
             title="파트별 평가 완료 현황"
-            values={{
-              pm: { type: "evaluation", count: 10, total: 15 },
-              design: { type: "evaluation", count: 20, total: 25 },
-              webPe: { type: "evaluation", count: 0, total: 0 },
-              mobilePe: { type: "evaluation", count: 35, total: 70 },
-            }}
+            values={partValues}
           />
         </div>
       </div>
       <div className="mt-4">
         <ChapterRankingCard
           title="지부별 평가 현황"
-          counts={{
-            Chromium: 80,
-            Ferrum: 51,
-            Neon: 112,
-            Platinum: 40,
-            Selenium: 0,
-            Xenon: 74,
-          }}
-          compare={{
-            counts: {
-              Chromium: 80,
-              Ferrum: 64,
-              Neon: 112,
-              Platinum: 40,
-              Selenium: 0,
-              Xenon: 92,
-            },
+          chapters={toChapterEvaluationBars(data)}
+          compareLabels={{
             primaryLabel: "평가 완료",
             compareLabel: "지원자 수",
           }}
-          footerStatus="추가 모집 중"
-          breakdowns={{
-            Chromium: {
-              pm: { evaluated: 20, applied: 20 },
-              design: { evaluated: 25, applied: 25 },
-              webPe: { evaluated: 20, applied: 20 },
-              mobilePe: { evaluated: 15, applied: 15 },
-            },
-            Ferrum: {
-              pm: { evaluated: 18, applied: 22 },
-              design: { evaluated: 14, applied: 18 },
-              webPe: { evaluated: 11, applied: 14 },
-              mobilePe: { evaluated: 8, applied: 10 },
-            },
-            Neon: {
-              pm: { evaluated: 40, applied: 40 },
-              design: { evaluated: 32, applied: 32 },
-              webPe: { evaluated: 22, applied: 22 },
-              mobilePe: { evaluated: 18, applied: 18 },
-            },
-            Platinum: {
-              pm: { evaluated: 14, applied: 14 },
-              design: { evaluated: 12, applied: 12 },
-              webPe: { evaluated: 9, applied: 9 },
-              mobilePe: { evaluated: 5, applied: 5 },
-            },
-            Selenium: {
-              pm: { evaluated: 0, applied: 0 },
-              design: { evaluated: 0, applied: 0 },
-              webPe: { evaluated: 0, applied: 0 },
-              mobilePe: { evaluated: 0, applied: 0 },
-            },
-            Xenon: {
-              pm: { evaluated: 28, applied: 34 },
-              design: { evaluated: 20, applied: 26 },
-              webPe: { evaluated: 14, applied: 18 },
-              mobilePe: { evaluated: 12, applied: 14 },
-            },
-          }}
+          footerStatus={isAdditionalRecruiting ? "추가 모집 중" : undefined}
         />
       </div>
       <div className="mt-4">
         <SchoolPartChartCard
           title="학교별 평가 현황"
-          footerStatus="추가 모집 중"
-          schools={[
-            {
-              chapter: "Chromium",
-              name: "광운대",
-              counts: { pm: 12, design: 8, webPe: 5, mobilePe: 2 },
-              applicants: { pm: 38, design: 28, webPe: 18, mobilePe: 8 },
-            },
-            {
-              chapter: "Chromium",
-              name: "서울여대",
-              counts: { pm: 3, design: 2, webPe: 1, mobilePe: 0 },
-              applicants: { pm: 10, design: 6, webPe: 4, mobilePe: 2 },
-            },
-            {
-              chapter: "Ferrum",
-              name: "동국대",
-              counts: { pm: 8, design: 6, webPe: 4, mobilePe: 2 },
-              applicants: { pm: 20, design: 16, webPe: 12, mobilePe: 7 },
-            },
-            {
-              chapter: "Ferrum",
-              name: "이화여대",
-              counts: { pm: 2, design: 5, webPe: 1, mobilePe: 2 },
-              applicants: { pm: 6, design: 12, webPe: 3, mobilePe: 5 },
-            },
-            {
-              chapter: "Ferrum",
-              name: "홍익대 서울",
-              counts: { pm: 4, design: 3, webPe: 1, mobilePe: 0 },
-              applicants: { pm: 9, design: 6, webPe: 2, mobilePe: 1 },
-            },
-            {
-              chapter: "Neon",
-              name: "가천대",
-              counts: { pm: 10, design: 8, webPe: 6, mobilePe: 4 },
-              applicants: { pm: 28, design: 22, webPe: 18, mobilePe: 12 },
-            },
-            {
-              chapter: "Neon",
-              name: "숙명여대",
-              counts: { pm: 5, design: 4, webPe: 2, mobilePe: 1 },
-              applicants: { pm: 12, design: 10, webPe: 6, mobilePe: 4 },
-            },
-            {
-              chapter: "Neon",
-              name: "한국항공대",
-              counts: { pm: 0, design: 0, webPe: 0, mobilePe: 0 },
-              applicants: { pm: 0, design: 0, webPe: 0, mobilePe: 0 },
-            },
-            {
-              chapter: "Platinum",
-              name: "동아대",
-              counts: { pm: 4, design: 3, webPe: 2, mobilePe: 1 },
-              applicants: { pm: 9, design: 7, webPe: 5, mobilePe: 3 },
-            },
-            {
-              chapter: "Xenon",
-              name: "중앙대",
-              counts: { pm: 6, design: 5, webPe: 3, mobilePe: 2 },
-              applicants: { pm: 14, design: 12, webPe: 8, mobilePe: 5 },
-            },
-            {
-              chapter: "Xenon",
-              name: "한성대",
-              counts: { pm: 1, design: 0, webPe: 0, mobilePe: 0 },
-              applicants: { pm: 2, design: 1, webPe: 1, mobilePe: 0 },
-            },
-          ]}
+          footerStatus={isAdditionalRecruiting ? "추가 모집 중" : undefined}
+          schools={chartSchools}
         />
       </div>
     </div>
