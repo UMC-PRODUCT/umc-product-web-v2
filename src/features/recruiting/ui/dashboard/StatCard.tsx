@@ -31,8 +31,9 @@ export function StatCard({ title, count, footer }: StatCardProps) {
         )}
         {footer.type === "ratio" && (
           <p className="text-subtitle-1-medium text-teal-gray-500">
-            <span className="text-body-1-medium text-teal-gray-400">/</span>총
-            지원자 {footer.totalCount} 명
+            {/* 연속 공백은 HTML 에서 하나로 접히므로 nbsp 로 한 칸 더 띈다. */}
+            <span className="text-body-1-medium text-teal-gray-400">/</span>
+            &nbsp; 총 지원자 {footer.totalCount} 명
           </p>
         )}
       </div>

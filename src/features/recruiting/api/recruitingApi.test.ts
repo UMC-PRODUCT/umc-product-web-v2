@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest"
 
-import { mergeRoundGroups } from "./recruitingApi"
+import {
+  mergeRoundGroups,
+  normalizeEvaluationStatistics,
+  normalizeStatusSummary,
+} from "./recruitingApi"
 
-import type { RecruitingRound, RecruitingRoundGroup } from "./types"
+import type {
+  RawEvaluationStatistics,
+  RawStatusSummary,
+  RecruitingRound,
+  RecruitingRoundGroup,
+} from "./types"
 
 function round(roundId: string): RecruitingRound {
   return {
@@ -76,5 +85,165 @@ describe("mergeRoundGroups", () => {
 
   it("빈 입력은 빈 결과가 된다", () => {
     expect(mergeRoundGroups([])).toEqual([])
+  })
+})
+
+describe("normalizeStatusSummary", () => {
+  // 2026-07-30 dev 실응답 형태. 스펙은 int64 지만 서버는 문자열로 준다.
+  const rawResponse: RawStatusSummary = {
+    totalCount: "12",
+    countByStatus: { SUBMITTED: "7", FINAL_PASSED: "5" },
+    schools: [
+      {
+        schoolId: "1",
+        schoolName: "가천대학교",
+        chapterId: "27",
+        chapterName: "Neon",
+        totalCount: "5",
+        countByStatus: { SUBMITTED: "5" },
+        rounds: [
+          {
+            roundId: "10",
+            roundTitle: "10기 본모집",
+            roundType: "REGULAR" as const,
+            roundNo: 1,
+            totalCount: "5",
+            countByStatus: { SUBMITTED: "5" },
+          },
+        ],
+      },
+      {
+        schoolId: "2",
+        schoolName: "가톨릭대학교",
+        chapterId: "28",
+        chapterName: "Xenon",
+        totalCount: "7",
+        countByStatus: {},
+        rounds: [],
+      },
+    ],
+  }
+
+  it("문자열 건수를 숫자로 바꾼다", () => {
+    const result = normalizeStatusSummary(rawResponse)
+
+    expect(result.totalCount).toBe(12)
+    expect(result.countByStatus.SUBMITTED).toBe(7)
+    expect(result.schools[0]?.totalCount).toBe(5)
+    expect(result.schools[0]?.rounds[0]?.totalCount).toBe(5)
+    expect(result.schools[0]?.rounds[0]?.countByStatus.SUBMITTED).toBe(5)
+  })
+
+  // 문자열로 두면 합산이 "5" + "7" = "57" 이 되어 조용히 틀린다.
+  it("학교 건수를 더하면 문자열 연결이 아니라 산술 합이 된다", () => {
+    const result = normalizeStatusSummary(rawResponse)
+    const sum = result.schools.reduce(
+      (acc, school) => acc + school.totalCount,
+      0,
+    )
+
+    expect(sum).toBe(12)
+  })
+
+  it("ID 는 문자열로 고정한다", () => {
+    const result = normalizeStatusSummary({
+      ...rawResponse,
+      schools: [
+        { ...rawResponse.schools![0]!, schoolId: 1, chapterId: 27, rounds: [] },
+      ],
+    })
+
+    expect(result.schools[0]?.schoolId).toBe("1")
+    expect(result.schools[0]?.chapterId).toBe("27")
+  })
+
+  it("빠진 배열과 객체를 빈 값으로 채운다", () => {
+    const result = normalizeStatusSummary({ totalCount: "0" })
+
+    expect(result).toEqual({
+      totalCount: 0,
+      countByStatus: {},
+      parts: [],
+      schools: [],
+    })
+  })
+
+  // Number("") 는 0 이라 가드가 없어도 통과한다. NaN 이 되는 값을 써야 검증된다.
+  it("숫자로 바꿀 수 없는 값은 0 으로 둔다", () => {
+    expect(normalizeStatusSummary({ totalCount: "abc" }).totalCount).toBe(0)
+    expect(normalizeStatusSummary({ totalCount: "" }).totalCount).toBe(0)
+  })
+})
+
+describe("normalizeEvaluationStatistics", () => {
+  // 2026-07-30 dev 실응답 형태. 건수가 전부 문자열로 온다.
+  const rawStatistics: RawEvaluationStatistics = {
+    asOf: "2026-07-30T10:22:48.103915815Z",
+    applicantCount: "24",
+    evaluatedCount: "12",
+    byTrack: [
+      { track: "PLAN", applicantCount: "10", evaluatedCount: "4" },
+      { track: "DESIGN", applicantCount: "8", evaluatedCount: "8" },
+    ],
+    chapters: [
+      {
+        chapterId: "29",
+        chapterName: "Chromium",
+        applicantCount: "20",
+        evaluatedCount: "10",
+        byTrack: [{ track: "PLAN", applicantCount: "10", evaluatedCount: "4" }],
+        schools: [
+          {
+            schoolId: "6",
+            schoolName: "광운대학교",
+            applicantCount: "12",
+            evaluatedCount: "6",
+            byTrack: [
+              { track: "PLAN", applicantCount: "6", evaluatedCount: "3" },
+            ],
+          },
+        ],
+      },
+    ],
+  }
+
+  it("3단 전체의 문자열 건수를 숫자로 바꾼다", () => {
+    const result = normalizeEvaluationStatistics(rawStatistics)
+
+    expect(result.applicantCount).toBe(24)
+    expect(result.byTrack[0]?.evaluatedCount).toBe(4)
+    expect(result.chapters[0]?.applicantCount).toBe(20)
+    expect(result.chapters[0]?.byTrack[0]?.applicantCount).toBe(10)
+    expect(result.chapters[0]?.schools[0]?.evaluatedCount).toBe(6)
+    expect(result.chapters[0]?.schools[0]?.byTrack[0]?.evaluatedCount).toBe(3)
+  })
+
+  it("ID 는 문자열로 고정한다", () => {
+    const result = normalizeEvaluationStatistics({
+      ...rawStatistics,
+      chapters: [
+        {
+          ...rawStatistics.chapters![0]!,
+          chapterId: 29,
+          schools: [
+            { ...rawStatistics.chapters![0]!.schools![0]!, schoolId: 6 },
+          ],
+        },
+      ],
+    })
+
+    expect(result.chapters[0]?.chapterId).toBe("29")
+    expect(result.chapters[0]?.schools[0]?.schoolId).toBe("6")
+  })
+
+  it("asOf 가 없으면 null 로 둔다", () => {
+    const result = normalizeEvaluationStatistics({
+      applicantCount: "0",
+      evaluatedCount: "0",
+    })
+
+    expect(result.asOf).toBeNull()
+    expect(result.byTrack).toEqual([])
+    expect(result.chapters).toEqual([])
   })
 })

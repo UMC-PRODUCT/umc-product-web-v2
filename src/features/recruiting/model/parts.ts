@@ -4,6 +4,14 @@ import type { RecruitingTrack } from "../api/types"
 // 카드마다 색이 어긋나거나 중복 정의되는 드리프트를 막는다.
 export type PartKey = "pm" | "design" | "webPe" | "mobilePe"
 
+// 파트별 상세: 지원 수(applied)는 항상, 평가 수(evaluated)는 평가현황에서만.
+// 툴팁 컴포넌트가 쓰지만 집계(model)도 이 형태로 만들기 때문에 model 에 둔다.
+// ui 에 두면 model -> ui 방향 의존이 생긴다.
+export type PartBreakdown = Record<
+  PartKey,
+  { applied: number; evaluated?: number }
+>
+
 export interface PartMeta {
   key: PartKey
   label: string

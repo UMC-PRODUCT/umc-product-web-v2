@@ -172,6 +172,198 @@ export interface RoundApplicationsQuery {
   size?: number
 }
 
+export interface StatusSummaryQuery {
+  gisuId: string
+  schoolIds?: string[]
+  roundIds?: string[]
+  schoolName?: string
+}
+
+// 서버는 건수가 0 인 상태를 응답에서 아예 뺀다(2026-07-30 dev 확인: 지원서가
+// 없는 기수는 countByStatus 가 {}). 그래서 Partial 로 두고 읽는 쪽에서 ?? 0 을 붙인다.
+// 총 지원자 수는 이 값들의 합이 아니라 totalCount 를 써야 한다.
+export type RecruitingStatusCounts = Partial<
+  Record<RecruitingApplicationStatus, number>
+>
+
+// 1지망 파트별 상태 교차집계. 서버는 INFRA_PLUS 를 뺀 4개 파트를 0건이어도 항상
+// 반환한다(모집 대상이 아니라서). 파트 귀속은 firstChoice 기준이다.
+//
+// totalCount 와 parts 모두 DRAFT, CANCELLED 를 제외한다(2026-07-31 서버팀 확인).
+// 스펙 설명에는 "전체 지원서 수"로만 적혀 있어 제외 여부가 드러나지 않는다.
+// 두 값의 분모가 같으므로 총 지원자 카드 값과 파트 합계는 일치한다.
+export interface RecruitingPartSummary {
+  part: RecruitingTrack
+  totalCount: number
+  countByStatus: RecruitingStatusCounts
+}
+
+export interface RecruitingRoundStatusSummary {
+  roundId: string
+  roundTitle: string
+  roundType: RecruitingRoundType
+  roundNo: number
+  totalCount: number
+  countByStatus: RecruitingStatusCounts
+  parts: RecruitingPartSummary[]
+}
+
+export interface RecruitingSchoolStatusSummary {
+  schoolId: string
+  schoolName: string
+  // 지부명은 프론트 CHAPTERS 상수(6개)와 일치하지 않는다. dev 에는 지부가 32개
+  // 있고 이름이 중복되는 건(Pegasus id 7/23)도 있어서 그룹핑 키로는 chapterId 를
+  // 쓰고 chapterName 은 표시에만 쓴다.
+  chapterId: string
+  chapterName: string
+  totalCount: number
+  countByStatus: RecruitingStatusCounts
+  parts: RecruitingPartSummary[]
+  rounds: RecruitingRoundStatusSummary[]
+}
+
+export interface RecruitingStatusSummary {
+  totalCount: number
+  countByStatus: RecruitingStatusCounts
+  parts: RecruitingPartSummary[]
+  schools: RecruitingSchoolStatusSummary[]
+}
+
+// 스펙은 ID 와 건수를 모두 int64 로 적어두었지만 서버는 전부 문자열로 준다
+// (2026-07-30 dev 확인: totalCount "0", schoolId "1", chapterId "27").
+// ID 는 문자열로, 건수는 숫자로 고정해야 한다. 건수를 문자열로 두면 합산이
+// 문자열 연결("0" + "10" = "010")이 되어 조용히 틀린 값이 나온다.
+type RawId = string | number
+
+export type RawCount = string | number
+
+export type RawStatusCounts = Record<string, RawCount>
+
+export type RawPartSummary = Omit<
+  RecruitingPartSummary,
+  "totalCount" | "countByStatus"
+> & {
+  totalCount: RawCount
+  countByStatus?: RawStatusCounts
+}
+
+export type RawRoundStatusSummary = Omit<
+  RecruitingRoundStatusSummary,
+  "roundId" | "totalCount" | "countByStatus" | "parts"
+> & {
+  roundId: RawId
+  totalCount: RawCount
+  countByStatus?: RawStatusCounts
+  parts?: RawPartSummary[]
+}
+
+export type RawSchoolStatusSummary = Omit<
+  RecruitingSchoolStatusSummary,
+  "schoolId" | "chapterId" | "totalCount" | "countByStatus" | "parts" | "rounds"
+> & {
+  schoolId: RawId
+  chapterId: RawId
+  totalCount: RawCount
+  countByStatus?: RawStatusCounts
+  parts?: RawPartSummary[]
+  rounds?: RawRoundStatusSummary[]
+}
+
+export type RawStatusSummary = Omit<
+  RecruitingStatusSummary,
+  "totalCount" | "countByStatus" | "parts" | "schools"
+> & {
+  totalCount: RawCount
+  countByStatus?: RawStatusCounts
+  parts?: RawPartSummary[]
+  schools?: RawSchoolStatusSummary[]
+}
+
+// 평가 현황 집계 (RECRUITING-ADMIN-083). 지원 현황(081)과 달리 파트(track)별
+// 집계와 asOf 를 준다. 대신 필터가 gisuId 하나뿐이다.
+//
+// 서버 집계 기준(스펙 명시):
+// - applicantCount: DRAFT, CANCELLED 제외
+// - evaluatedCount: DOCUMENT_FAILED, FINAL_PASSED, FINAL_FAILED (판정 확정)
+// - byTrack: 1지망(firstChoice) 기준. 2지망을 포함하면 파트 합계가 총원을 넘는다.
+// - INFRA_PLUS 를 뺀 4개 트랙을 0건이어도 항상 반환
+// - 정렬(지부 가나다 > 학교 가나다)과 0건 학교 포함을 서버가 처리
+// - 비율은 서버가 주지 않는다. 클라이언트에서 계산한다.
+//
+// 081 의 totalCount 와 여기의 applicantCount 는 제외 규칙이 달라 값이 어긋날 수
+// 있다. 두 API 를 한 화면에서 섞지 않는다.
+export interface RecruitingTrackCount {
+  track: RecruitingTrack
+  applicantCount: number
+  evaluatedCount: number
+}
+
+export interface RecruitingSchoolEvaluationStatistics {
+  schoolId: string
+  schoolName: string
+  applicantCount: number
+  evaluatedCount: number
+  byTrack: RecruitingTrackCount[]
+}
+
+export interface RecruitingChapterEvaluationStatistics {
+  chapterId: string
+  chapterName: string
+  applicantCount: number
+  evaluatedCount: number
+  byTrack: RecruitingTrackCount[]
+  schools: RecruitingSchoolEvaluationStatistics[]
+}
+
+export interface RecruitingEvaluationStatistics {
+  /** 집계 기준 시각(ISO). 클라이언트 조회 시각과 다르다. */
+  asOf: string | null
+  applicantCount: number
+  evaluatedCount: number
+  byTrack: RecruitingTrackCount[]
+  chapters: RecruitingChapterEvaluationStatistics[]
+}
+
+export type RawTrackCount = Omit<
+  RecruitingTrackCount,
+  "applicantCount" | "evaluatedCount"
+> & {
+  applicantCount: RawCount
+  evaluatedCount: RawCount
+}
+
+export type RawSchoolEvaluationStatistics = Omit<
+  RecruitingSchoolEvaluationStatistics,
+  "schoolId" | "applicantCount" | "evaluatedCount" | "byTrack"
+> & {
+  schoolId: RawId
+  applicantCount: RawCount
+  evaluatedCount: RawCount
+  byTrack?: RawTrackCount[]
+}
+
+export type RawChapterEvaluationStatistics = Omit<
+  RecruitingChapterEvaluationStatistics,
+  "chapterId" | "applicantCount" | "evaluatedCount" | "byTrack" | "schools"
+> & {
+  chapterId: RawId
+  applicantCount: RawCount
+  evaluatedCount: RawCount
+  byTrack?: RawTrackCount[]
+  schools?: RawSchoolEvaluationStatistics[]
+}
+
+export type RawEvaluationStatistics = Omit<
+  RecruitingEvaluationStatistics,
+  "asOf" | "applicantCount" | "evaluatedCount" | "byTrack" | "chapters"
+> & {
+  asOf?: string | null
+  applicantCount: RawCount
+  evaluatedCount: RawCount
+  byTrack?: RawTrackCount[]
+  chapters?: RawChapterEvaluationStatistics[]
+}
+
 export type RecruitingQuestionType =
   | "SHORT_TEXT"
   | "LONG_TEXT"
