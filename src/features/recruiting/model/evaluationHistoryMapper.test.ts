@@ -83,6 +83,18 @@ describe("toEvaluationHistoryEntry", () => {
     expect(entry.applicant.part).toBe("web-pe")
   })
 
+  // INFRA_PLUS 는 모집 대상 파트가 아니다. 임의 파트(plan)로 접으면 감사 화면에서
+  // 잘못 분류되므로 null 로 남겨 파트 필터에서 빠지게 한다.
+  it("매핑되는 파트가 없으면 null 로 둔다", () => {
+    const entry = toEvaluationHistoryEntry(
+      history({
+        applicant: { ...history().applicant, firstChoice: "INFRA_PLUS" },
+      }),
+    )
+
+    expect(entry.applicant.part).toBeNull()
+  })
+
   // 직위는 판정 시점 roleType 스냅샷이라 이후 직위가 바뀌어도 그대로 보존된다.
   it("roleType 을 직위 라벨로 옮긴다", () => {
     expect(toEvaluationHistoryEntry(history()).evaluator.position).toBe(

@@ -34,9 +34,10 @@ export function toEvaluationHistoryEntry(
       chapter: applicant.chapterName,
       school: applicant.schoolName,
       name: applicant.name,
-      // 파트 필터는 1지망 기준이다. INFRA_PLUS 는 모집 단위에 없어 null 이 되는데,
-      // 그 경우 필터에서 제외되도록 빈 문자열 대신 plan 으로 접지 않고 그대로 둔다.
-      part: TRACK_PART_TAG[applicant.firstChoice] ?? "plan",
+      // 파트 필터는 1지망 기준이다. INFRA_PLUS 는 모집 단위에 없는 파트라 null 이
+      // 되는데, 임의 파트로 접으면 감사 화면에서 잘못 분류된다. null 로 두어 파트
+      // 필터에서 빠지게 한다.
+      part: TRACK_PART_TAG[applicant.firstChoice],
       result: RESULT[history.result] ?? "fail",
     },
     evaluator: {

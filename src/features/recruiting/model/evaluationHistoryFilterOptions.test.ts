@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  applyEvaluationHistoryFilters,
   buildHistoryChapterOptions,
   buildHistorySchoolOptions,
   DEFAULT_EVALUATION_HISTORY_FILTERS,
@@ -219,5 +220,33 @@ describe("toDecisionHistoriesQuery", () => {
 
     expect(query.sort).toBe("OLDEST")
     expect(query.groupByDecider).toBe(true)
+  })
+})
+
+describe("applyEvaluationHistoryFilters - 파트가 null 인 행", () => {
+  function rowWithPart(part: EvaluationHistoryEntry["applicant"]["part"]) {
+    return {
+      ...row("Neon", "가천대학교"),
+      applicant: { ...row("Neon", "가천대학교").applicant, part },
+    }
+  }
+
+  it("파트 필터를 걸면 파트가 없는 행은 빠진다", () => {
+    const rows = [rowWithPart("pm"), rowWithPart(null)]
+    const result = applyEvaluationHistoryFilters(rows, {
+      ...DEFAULT_EVALUATION_HISTORY_FILTERS,
+      parts: ["pm"],
+    })
+
+    expect(result).toHaveLength(1)
+    expect(result[0]?.applicant.part).toBe("pm")
+  })
+
+  it("파트 필터가 없으면 파트가 없는 행도 남는다", () => {
+    const rows = [rowWithPart("pm"), rowWithPart(null)]
+
+    expect(
+      applyEvaluationHistoryFilters(rows, DEFAULT_EVALUATION_HISTORY_FILTERS),
+    ).toHaveLength(2)
   })
 })

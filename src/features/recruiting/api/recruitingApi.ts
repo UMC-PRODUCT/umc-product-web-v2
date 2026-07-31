@@ -204,14 +204,21 @@ export async function getAllDecisionHistories(
   })
   if (!first.hasNext) return first
 
+  // totalPages 로 반복을 끊으면 그 값이 빠졌을 때(toCount 가 0 을 돌려줌) 2페이지부터
+  // 통째로 누락된다. 감사용 이력이라 조용한 유실이 특히 위험해 각 응답의 hasNext 를
+  // 따라간다.
   const content = [...first.content]
-  for (let page = 1; page < first.totalPages; page += 1) {
+  let page = 1
+  let hasNext: boolean = first.hasNext
+  while (hasNext) {
     const next = await getDecisionHistories({
       ...params,
       page,
       size: DECISION_HISTORY_PAGE_SIZE,
     })
     content.push(...next.content)
+    hasNext = next.hasNext
+    page += 1
   }
   return { ...first, content }
 }

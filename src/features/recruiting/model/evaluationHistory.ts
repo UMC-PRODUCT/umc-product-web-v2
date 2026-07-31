@@ -38,7 +38,9 @@ export interface EvaluationHistoryEntry {
     chapter: string
     school: string
     name: string
-    part: PartTag // 테이블엔 안 보이지만 "지원 파트" 필터에 필요
+    // 매핑되는 파트가 없으면 null 이다(INFRA_PLUS). 감사 화면이라 임의 파트로
+    // 접지 않고 그대로 두어 파트 필터에서 빠지게 한다.
+    part: PartTag | null // 테이블엔 안 보이지만 "지원 파트" 필터에 필요
     result: EvaluationResult
   }
   evaluator: {
@@ -130,7 +132,8 @@ export function applyEvaluationHistoryFilters(
     }
     if (
       filters.parts.length > 0 &&
-      !filters.parts.includes(row.applicant.part)
+      (row.applicant.part == null ||
+        !filters.parts.includes(row.applicant.part))
     ) {
       return false
     }

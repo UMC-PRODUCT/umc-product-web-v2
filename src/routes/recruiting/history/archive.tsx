@@ -133,7 +133,10 @@ function RouteComponent() {
         rows={rows}
         chapterScope={chapterScope}
         onDownload={handleDownload}
-        downloadDisabled={rows.length === 0}
+        // 화면에 아무것도 없으면 내려받을 것도 없다. rows(전체) 기준으로 두면
+        // 지부 탭에 이력이 없을 때도 버튼이 열리는데, 그 지부의 ID 를 행에서 찾지
+        // 못해 필터가 빠지면서 전 범위 CSV 가 내려온다.
+        downloadDisabled={visibleRows.length === 0}
         downloadLoading={isDownloading}
         className="mt-6"
       />
