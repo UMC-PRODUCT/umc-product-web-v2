@@ -44,4 +44,21 @@ describe("shortenSchoolName", () => {
   it("빈 문자열은 그대로 반환한다", () => {
     expect(shortenSchoolName("")).toBe("")
   })
+
+  // 마지막 /학교$/ 규칙은 앞의 "대학교" 규칙이 먼저 잡아서 실제 학교명에서는
+  // 동작하지 않는다. 서버 학교 목록 36개를 전부 넣어봐도 걸리는 이름이 없었다
+  // (2026-07-31 확인). 규칙을 지울지 판단하기 전에 어떤 입력에서 동작하는지를
+  // 고정해 둔다.
+  it("대학교로 끝나지 않고 학교로 끝나면 학교를 뗀다", () => {
+    expect(shortenSchoolName("한국예술학교")).toBe("한국예술")
+  })
+
+  it("대학교로 끝나면 대학교 규칙이 먼저 잡아 학교 규칙은 타지 않는다", () => {
+    expect(shortenSchoolName("가천대학교")).toBe("가천대")
+    expect(shortenSchoolName("동양미래대학교")).toBe("동양미래대")
+  })
+
+  it("학교가 끝에 없으면 건드리지 않는다", () => {
+    expect(shortenSchoolName("학교법인 무슨재단")).toBe("학교법인 무슨재단")
+  })
 })

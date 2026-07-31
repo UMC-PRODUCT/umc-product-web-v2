@@ -24,6 +24,10 @@ export function useEvaluationStatistics() {
   })
 
   return {
+    // 활성 기수를 못 받으면 쿼리가 비활성이라 isLoading/isError 가 모두 false 이고
+    // data 도 undefined 다. 그대로 두면 화면이 조회 실패로 오인해 "잠시 후 다시
+    // 시도해주세요"를 띄운다. 기다려도 안 풀리는 상태라 별도로 알린다.
+    hasActiveGisu: gisuId != null,
     ...statisticsQuery,
     generation: gisuQuery.data?.generation,
     isLoading: gisuQuery.isLoading || statisticsQuery.isLoading,

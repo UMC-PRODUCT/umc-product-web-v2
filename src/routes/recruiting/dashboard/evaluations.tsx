@@ -36,7 +36,8 @@ function EmptyNotice({ message }: { message: string }) {
 }
 
 function RouteComponent() {
-  const { data, isLoading, isError, error } = useEvaluationStatistics()
+  const { data, isLoading, isError, error, hasActiveGisu } =
+    useEvaluationStatistics()
   const { isAdditionalRecruiting } = useRecruitingProgress()
 
   const header = (
@@ -56,6 +57,17 @@ function RouteComponent() {
       <div>
         {header}
         <EmptyNotice message="평가 현황을 불러오는 중입니다." />
+      </div>
+    )
+  }
+
+  // 활성 기수가 없으면 조회 자체를 하지 않는다. 실패가 아니라 표시할 대상이
+  // 없는 상태라 안내를 구분한다.
+  if (!hasActiveGisu) {
+    return (
+      <div>
+        {header}
+        <EmptyNotice message="진행 중인 기수가 없어 평가 현황을 표시할 수 없습니다." />
       </div>
     )
   }
