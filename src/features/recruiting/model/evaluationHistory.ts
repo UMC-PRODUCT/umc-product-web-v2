@@ -1,3 +1,5 @@
+import { shortenSchoolName } from "@/shared/lib/formatSchoolName"
+
 import type { PartTag } from "@/shared/model/domain"
 
 import type { RecruitingDecisionResult, RecruitingTrack } from "../api/types"
@@ -289,4 +291,45 @@ export function toDecisionHistoriesQuery(
     sort: sort === "latest" ? ("LATEST" as const) : ("OLDEST" as const),
     groupByDecider: byEvaluator,
   }
+}
+
+export interface HistoryFilterOption {
+  value: string
+  label: string
+}
+
+function uniqueSorted(values: string[]): string[] {
+  return [...new Set(values.filter((value) => value !== ""))].sort((a, b) =>
+    a.localeCompare(b, "ko"),
+  )
+}
+
+// 필터 선택지를 하드코딩 상수가 아니라 실제 응답에서 만든다. 상수로 만들면 두 가지가
+// 깨진다.
+// 1) 학교: 상수는 약칭("가천대")인데 서버는 정식 명칭("가천대학교")을 준다. 값이
+//    달라 어떤 학교를 골라도 필터 결과가 0건이 된다.
+// 2) 지부: 상수는 현재 기수 6개뿐이라 과거 기수 지부(GOAT, 오션 등) 이력은 표에는
+//    보이는데 필터로 좁힐 수 없다.
+export function buildHistoryChapterOptions(
+  rows: EvaluationHistoryEntry[],
+): HistoryFilterOption[] {
+  return uniqueSorted(rows.map((row) => row.applicant.chapter)).map(
+    (chapter) => ({ value: chapter, label: chapter }),
+  )
+}
+
+// 값은 매칭용이라 서버 정식 명칭을 그대로 두고, 화면에 보이는 label 만 약칭으로 줄인다.
+// chapterNames 가 비어 있으면 전체 학교를 대상으로 한다.
+export function buildHistorySchoolOptions(
+  rows: EvaluationHistoryEntry[],
+  chapterNames: string[],
+): HistoryFilterOption[] {
+  const scoped =
+    chapterNames.length > 0
+      ? rows.filter((row) => chapterNames.includes(row.applicant.chapter))
+      : rows
+
+  return uniqueSorted(scoped.map((row) => row.applicant.school)).map(
+    (school) => ({ value: school, label: shortenSchoolName(school) }),
+  )
 }

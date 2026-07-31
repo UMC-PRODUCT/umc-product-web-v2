@@ -52,3 +52,17 @@ export function formatSchoolName(
   if (KNOWN_ABBREVIATIONS.has(schoolName)) return schoolName
   return schoolName
 }
+
+// 위 FULL_TO_ABBR 과 달리 학교 목록을 하드코딩하지 않고 규칙으로 줄인다.
+// 서버가 주는 정식 명칭(예: "가천대학교", "홍익대학교 서울캠퍼스")을 대상으로 한다.
+// 2026-07-30 기준 리크루팅 대상 27개 학교는 모두 기존 맵과 같은 결과가 나오지만,
+// "국립부경대학교"만 맵이 "부경대", 이 함수는 "국립부경대"로 서로 다르다.
+// 그래서 formatSchoolName 을 이 함수로 대체하지 않고 따로 둔다.
+export function shortenSchoolName(name: string): string {
+  return name
+    .replace(/캠퍼스/, "")
+    .replace(/외국어대학교/, "외대")
+    .replace(/여자대학교/, "여대")
+    .replace(/대학교/, "대")
+    .replace(/학교$/, "")
+}

@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
-import { isChapter } from "@/entities/organization/model/chapters"
 import { downloadDecisionHistoriesCsv } from "@/features/recruiting/api/recruitingApi"
 import { useEvaluationHistory } from "@/features/recruiting/hooks/useEvaluationHistory"
 import { formatBaseTime } from "@/features/recruiting/model/applicantListTypes"
 import {
   applyEvaluationHistoryFilters,
   DEFAULT_EVALUATION_HISTORY_FILTERS,
+  EVALUATION_HISTORY_CHAPTER_TAB_ALL,
   type EvaluationHistoryFilters,
   type EvaluationHistorySort,
   orderEvaluationHistoryRows,
@@ -40,9 +40,12 @@ function RouteComponent() {
     setFilters((prev) => ({ ...prev, ...partial }))
   }
 
-  const chapterScope = isChapter(filters.chapterTab)
-    ? filters.chapterTab
-    : undefined
+  // 지부 탭이 "전체"가 아니면 그 지부로 좁혀진 상태다. 상수 목록과 대조하지 않고
+  // 탭 값을 그대로 쓴다 - 지부 목록이 서버 데이터로 바뀌어도 동작한다.
+  const chapterScope =
+    filters.chapterTab === EVALUATION_HISTORY_CHAPTER_TAB_ALL
+      ? undefined
+      : filters.chapterTab
 
   const visibleRows = useMemo(
     () => applyEvaluationHistoryFilters(rows, filters),
@@ -117,6 +120,7 @@ function RouteComponent() {
       <EvaluationHistoryFilterBar
         filters={filters}
         onFiltersChange={handleFiltersChange}
+        rows={rows}
         chapterScope={chapterScope}
         onDownload={handleDownload}
         downloadDisabled={rows.length === 0}

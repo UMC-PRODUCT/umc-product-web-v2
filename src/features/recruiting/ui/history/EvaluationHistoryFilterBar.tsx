@@ -1,12 +1,6 @@
 import { useState } from "react"
 
-import {
-  type Chapter,
-  CHAPTERS,
-  isChapter,
-} from "@/entities/organization/model/chapters"
 import FilterIcon from "@/shared/assets/icon/filter/FilterIcon"
-import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 import { cn } from "@/shared/lib/utils"
 import { PART_TAG_LABEL } from "@/shared/model/domain"
 import {
@@ -17,17 +11,17 @@ import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 import { SearchField } from "@/shared/ui/search-field/SearchField"
 
 import {
+  buildHistoryChapterOptions,
+  buildHistorySchoolOptions,
   EVALUATION_HISTORY_CHAPTER_TAB_ALL,
   EVALUATION_RESULT_LABEL,
 } from "../../model/evaluationHistory"
 import { DownloadButton } from "./DownloadButton"
 
-import type { EvaluationHistoryFilters } from "../../model/evaluationHistory"
-
-const CHAPTER_OPTIONS = [
-  { value: EVALUATION_HISTORY_CHAPTER_TAB_ALL, label: "지부 전체" },
-  ...CHAPTERS.map((chapter) => ({ value: chapter, label: chapter })),
-]
+import type {
+  EvaluationHistoryEntry,
+  EvaluationHistoryFilters,
+} from "../../model/evaluationHistory"
 
 const PART_OPTIONS = (["pm", "design", "web-pe", "mobile-pe"] as const).map(
   (part) => ({ value: part, label: PART_TAG_LABEL[part] }),
@@ -38,38 +32,13 @@ const RESULT_OPTIONS = (["pass", "fail"] as const).map((result) => ({
   label: EVALUATION_RESULT_LABEL[result],
 }))
 
-// 지부를 하나도 안 골랐으면 전체 지부의 학교를 다 유효한 것으로 취급한다.
-function schoolsForChapters(chapters: Chapter[]): string[] {
-  const scope = chapters.length > 0 ? chapters : CHAPTERS
-  return scope.flatMap((chapter) => SCHOOLS_BY_BRANCH[chapter])
-}
-
-function buildSchoolOptions(
-  filters: EvaluationHistoryFilters,
-  chapterScope?: Chapter,
-): FilterDropdownOption[] {
-  if (chapterScope) {
-    return SCHOOLS_BY_BRANCH[chapterScope].map((school) => ({
-      value: school,
-      label: school,
-    }))
-  }
-
-  const selectedChapters =
-    filters.chapterTab === EVALUATION_HISTORY_CHAPTER_TAB_ALL
-      ? filters.chapters.filter(isChapter)
-      : [filters.chapterTab].filter(isChapter)
-
-  return schoolsForChapters(selectedChapters).map((school) => ({
-    value: school,
-    label: school,
-  }))
-}
-
 interface EvaluationHistoryFilterBarProps {
   filters: EvaluationHistoryFilters
   onFiltersChange: (partial: Partial<EvaluationHistoryFilters>) => void
-  chapterScope?: Chapter
+  // 지부·학교 선택지를 실제 조회 결과에서 만든다. 상수로 만들면 서버가 주는
+  // 정식 명칭과 값이 어긋나 필터가 아무것도 못 걸러낸다.
+  rows: EvaluationHistoryEntry[]
+  chapterScope?: string
   onDownload?: () => void
   downloadDisabled?: boolean
   downloadLoading?: boolean
@@ -79,6 +48,7 @@ interface EvaluationHistoryFilterBarProps {
 export function EvaluationHistoryFilterBar({
   filters,
   onFiltersChange,
+  rows,
   chapterScope,
   onDownload,
   downloadDisabled = false,
@@ -86,7 +56,13 @@ export function EvaluationHistoryFilterBar({
   className,
 }: EvaluationHistoryFilterBarProps) {
   const [openKey, setOpenKey] = useState<string | null>(null)
-  const schoolOptions = buildSchoolOptions(filters, chapterScope)
+  const chapterOptions = [
+    { value: EVALUATION_HISTORY_CHAPTER_TAB_ALL, label: "지부 전체" },
+    ...buildHistoryChapterOptions(rows),
+  ]
+  // 지부 탭으로 좁혀졌으면 그 지부만, 아니면 드롭다운에서 고른 지부를 기준으로 한다.
+  const schoolScope = chapterScope ? [chapterScope] : filters.chapters
+  const schoolOptions = buildHistorySchoolOptions(rows, schoolScope)
 
   const multiDropdownProps = (
     key: keyof Pick<
@@ -107,10 +83,13 @@ export function EvaluationHistoryFilterBar({
     selectedValues: filters[key],
     onSelectedValuesChange: (nextValues: string[]) => {
       if (key === "chapters") {
+        // 지부를 바꾸면 그 지부에 없는 학교 선택은 버린다.
         // 지부를 바꾸면, 이미 골라둔 학교 중 새 지부 목록에 없는 학교만 해제한다.
         // (지부 선택 자체는 그대로 유지)
         const validSchools = new Set(
-          schoolsForChapters(nextValues.filter(isChapter)),
+          buildHistorySchoolOptions(rows, nextValues).map(
+            (option) => option.value,
+          ),
         )
         onFiltersChange({
           chapters: nextValues,
@@ -153,7 +132,7 @@ export function EvaluationHistoryFilterBar({
               {...multiDropdownProps(
                 "chapters",
                 "지부",
-                CHAPTER_OPTIONS,
+                chapterOptions,
                 EVALUATION_HISTORY_CHAPTER_TAB_ALL,
               )}
             />
