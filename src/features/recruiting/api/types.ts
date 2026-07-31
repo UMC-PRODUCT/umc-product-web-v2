@@ -107,6 +107,10 @@ export type RecruitingStatusCounts = Partial<
 
 // 1지망 파트별 상태 교차집계. 서버는 INFRA_PLUS 를 뺀 4개 파트를 0건이어도 항상
 // 반환한다(모집 대상이 아니라서). 파트 귀속은 firstChoice 기준이다.
+//
+// totalCount 와 parts 모두 DRAFT, CANCELLED 를 제외한다(2026-07-31 서버팀 확인).
+// 스펙 설명에는 "전체 지원서 수"로만 적혀 있어 제외 여부가 드러나지 않는다.
+// 두 값의 분모가 같으므로 총 지원자 카드 값과 파트 합계는 일치한다.
 export interface RecruitingPartSummary {
   part: RecruitingTrack
   totalCount: number
