@@ -49,8 +49,7 @@ describe("toRecruitmentNoticeItems", () => {
   it("차수를 공고 카드로 옮긴다", () => {
     const [item] = toRecruitmentNoticeItems([group([round()])], NOW)
     expect(item).toMatchObject({
-      id: 7,
-      roundId: "7",
+      id: "7",
       title: "한양대학교 ERICA UMC 11기 정규 모집",
       schoolName: "한양대학교 ERICA",
       parts: ["pm", "design"],
@@ -117,7 +116,7 @@ describe("toRecruitmentNoticeItems", () => {
       ],
       NOW,
     )
-    expect(items.map((item) => item.roundId)).toEqual(["3", "2", "1"])
+    expect(items.map((item) => item.id)).toEqual(["3", "2", "1"])
   })
 
   it("여러 학교의 차수를 한 목록으로 합친다", () => {

@@ -1,28 +1,9 @@
 import dayjs from "dayjs"
 
-import type { PartTag } from "@/shared/model/domain"
+import { toPartTagsFromTracks } from "./applicantMapper"
 
-import type {
-  RecruitingRound,
-  RecruitingRoundGroup,
-  RecruitingTrack,
-} from "../api/types"
+import type { RecruitingRound, RecruitingRoundGroup } from "../api/types"
 import type { RecruitmentNoticeItem } from "./recruitmentNotice"
-
-const TRACK_PART_TAG: Record<RecruitingTrack, PartTag | null> = {
-  PLAN: "pm",
-  DESIGN: "design",
-  WEB_PRODUCT_ENGINEER: "web-pe",
-  MOBILE_PRODUCT_ENGINEER: "mobile-pe",
-  INFRA_PLUS: null,
-}
-
-function toPartTags(tracks: RecruitingTrack[]): PartTag[] {
-  const tags = tracks
-    .map((track) => TRACK_PART_TAG[track])
-    .filter((tag): tag is PartTag => tag != null)
-  return [...new Set(tags)]
-}
 
 // 남은 일수는 날짜 경계로 센다. 마감 당일이면 0 이고, 지난 공고는 세지 않는다.
 function toDDay(documentEndAt: string, now: dayjs.Dayjs): number | undefined {
@@ -43,11 +24,12 @@ function toNoticeItem(
   const isClosed = !round.applicationOpen
 
   return {
-    id: Number(round.roundId),
-    roundId: String(round.roundId),
+    // 차수 id 를 그대로 쓴다. int64 라 number 로 바꾸면 정밀도를 잃을 수 있고,
+    // 지원 폼 라우트도 문자열 roundId 를 받는다.
+    id: String(round.roundId),
     title: round.title,
     schoolName: group.schoolName,
-    parts: toPartTags(round.recruitableTracks),
+    parts: toPartTagsFromTracks(round.recruitableTracks),
     documentStartAt: round.documentStartAt,
     documentEndAt: round.documentEndAt,
     isClosed,

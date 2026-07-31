@@ -189,7 +189,7 @@ export function RecruitmentNoticePage() {
             if (selectedItem.appliedStatus == null) {
               void navigate({
                 to: "/projects/apply/$roundId",
-                params: { roundId: selectedItem.roundId },
+                params: { roundId: selectedItem.id },
               })
               return
             }
