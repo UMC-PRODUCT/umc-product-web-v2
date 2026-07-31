@@ -43,9 +43,14 @@ export function EvaluatorAllocationPage({
   const saveMutation = useSaveEvaluatorAllocation()
 
   const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
+  const [isDirty, setIsDirty] = useState(false)
 
   useEffect(() => {
-    if (!serverEvaluators) return
+    setIsDirty(false)
+  }, [activeRoundId])
+
+  useEffect(() => {
+    if (!serverEvaluators || isDirty) return
     const serverMemberIds = new Set(
       serverEvaluators.map((item) => String(item.memberId)),
     )
@@ -53,7 +58,7 @@ export function EvaluatorAllocationPage({
       serverMemberIds.has(String(staff.id)),
     )
     setAssignedEvaluators(initialStaff)
-  }, [serverEvaluators])
+  }, [serverEvaluators, isDirty])
 
   const {
     sensors,
@@ -66,14 +71,22 @@ export function EvaluatorAllocationPage({
       setAssignedEvaluators((prev) =>
         prev.filter((staff) => staff.id !== chipId),
       )
+      setIsDirty(true)
     },
   })
 
   function handleSave() {
-    saveMutation.mutate({
-      roundId: activeRoundId,
-      assignedEvaluators,
-    })
+    saveMutation.mutate(
+      {
+        roundId: activeRoundId,
+        assignedEvaluators,
+      },
+      {
+        onSuccess: () => {
+          setIsDirty(false)
+        },
+      },
+    )
   }
 
   function handleDragStart(event: DragStartEvent) {
@@ -102,12 +115,14 @@ export function EvaluatorAllocationPage({
       setAssignedEvaluators((prev) =>
         prev.filter((item) => item.id !== staff.id),
       )
+      setIsDirty(true)
       return
     }
 
     if (targetId === RECRUITMENT_BOX_ID) {
       setAssignedEvaluators((prev) => {
         if (prev.some((item) => item.id === staff.id)) return prev
+        setIsDirty(true)
         return [...prev, staff]
       })
     }
@@ -141,6 +156,7 @@ export function EvaluatorAllocationPage({
               onClick={(e) => {
                 e.stopPropagation()
                 setAssignedEvaluators([])
+                setIsDirty(true)
                 setSelectedChipId(null)
               }}
               className="border-teal-gray-400/15 box-border flex h-8.5 items-center gap-1 rounded-[10px] border bg-white px-3 py-1 pl-2.5"
@@ -178,6 +194,7 @@ export function EvaluatorAllocationPage({
                 onSelectChip={setSelectedChipId}
                 onClear={() => {
                   setAssignedEvaluators([])
+                  setIsDirty(true)
                   setSelectedChipId(null)
                 }}
               />
