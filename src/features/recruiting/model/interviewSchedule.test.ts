@@ -4,16 +4,47 @@ import {
   assignApplicant,
   buildTimeSlots,
   calcAllocationRate,
+  canExtendEndTime,
   formatDateTabLabel,
   isSessionComplete,
   parseSlotKey,
   resolveScheduleDates,
   splitApplicantsByAssignment,
+  toMinutes,
   toSlotKey,
+  toTimeLabel,
   unassignApplicant,
 } from "./interviewSchedule"
 
 import type { InterviewSession, SlotAssignment } from "./interviewSchedule"
+
+describe("toTimeLabel", () => {
+  it("하루를 넘는 값은 마지막 시각으로 자른다", () => {
+    // 24:00 을 만들면 toMinutes 가 되읽지 못해 슬롯 계산이 통째로 무너진다.
+    expect(toTimeLabel(24 * 60)).toBe("23:59")
+    expect(toMinutes(toTimeLabel(24 * 60))).not.toBeNull()
+  })
+
+  it("음수는 자정으로 자른다", () => {
+    expect(toTimeLabel(-30)).toBe("00:00")
+  })
+})
+
+describe("canExtendEndTime", () => {
+  it("자정을 넘기지 않으면 늘릴 수 있다", () => {
+    expect(canExtendEndTime("15:00")).toBe(true)
+    expect(canExtendEndTime("23:00")).toBe(true)
+  })
+
+  it("한 칸 더 넣으면 자정을 넘기는 경우 막는다", () => {
+    expect(canExtendEndTime("23:30")).toBe(false)
+    expect(canExtendEndTime("23:59")).toBe(false)
+  })
+
+  it("읽을 수 없는 시각은 늘리지 않는다", () => {
+    expect(canExtendEndTime("")).toBe(false)
+  })
+})
 
 describe("buildTimeSlots", () => {
   it("30분 단위로 시간대를 쪼갠다", () => {

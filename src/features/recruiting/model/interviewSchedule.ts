@@ -52,10 +52,24 @@ export function toMinutes(time: string): number | null {
   return hours * 60 + minutes
 }
 
+// 하루의 마지막 시각. 이 값을 넘기면 toMinutes 가 되읽지 못해 슬롯 계산이
+// 통째로 무너진다.
+export const MAX_MINUTES_OF_DAY = 23 * 60 + 59
+
 export function toTimeLabel(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  const rest = minutes % 60
+  const clamped = Math.min(Math.max(minutes, 0), MAX_MINUTES_OF_DAY)
+  const hours = Math.floor(clamped / 60)
+  const rest = clamped % 60
   return `${String(hours).padStart(2, "0")}:${String(rest).padStart(2, "0")}`
+}
+
+// 슬롯을 하나 더 붙일 수 있는지. 마지막 슬롯이 자정을 넘기면 안 된다.
+export function canExtendEndTime(
+  endTime: string,
+  stepMinutes: number = SLOT_STEP_MINUTES,
+): boolean {
+  const end = toMinutes(endTime)
+  return end != null && end + stepMinutes <= MAX_MINUTES_OF_DAY
 }
 
 // 시안의 슬롯은 항상 30분 단위다. 끝시각에 걸쳐 30분을 채우지 못하는 구간은

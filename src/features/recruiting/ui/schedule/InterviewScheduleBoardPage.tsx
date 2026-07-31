@@ -3,6 +3,7 @@ import {
   type DragEndEvent,
   DragOverlay,
   type DragStartEvent,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -18,6 +19,7 @@ import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
   assignApplicant,
+  canExtendEndTime,
   formatDateTabLabel,
   isInterviewApplicant,
   parseSlotKey,
@@ -34,7 +36,7 @@ import {
   INTERVIEW_SESSIONS_MOCK,
 } from "../../model/interviewSchedule.mock"
 import { APPLICANT_POOL_ID, ApplicantPoolPanel } from "./ApplicantPoolPanel"
-import { DraggableApplicantChip } from "./DraggableApplicantChip"
+import { ApplicantChip } from "./DraggableApplicantChip"
 import { type ScheduleStep, ScheduleStepTabs } from "./ScheduleStepTabs"
 import { SessionEditorList } from "./SessionEditorList"
 import { SessionSlotBoard } from "./SessionSlotBoard"
@@ -75,8 +77,11 @@ export function InterviewScheduleBoardPage({
   const [draggingApplicant, setDraggingApplicant] =
     useState<InterviewApplicant | null>(null)
 
+  // 키보드만으로도 배정할 수 있어야 한다. PointerSensor 만 두면 마우스
+  // 없이는 이 화면을 쓸 수 없다.
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor),
   )
 
   const currentDate = activeDate || dates[0] || ""
@@ -90,17 +95,34 @@ export function InterviewScheduleBoardPage({
     () => new Map(INTERVIEW_APPLICANTS_MOCK.map((item) => [item.id, item])),
     [],
   )
+  // 배정 여부는 차수 전체로 판정한다. 지금 날짜의 배정만 보면, 다른 날짜에
+  // 이미 배정된 지원자가 대기 목록에 다시 나타나 두 슬롯을 차지하게 된다.
+  const allAssignments = useMemo(
+    () => Object.values(assignmentsByDate).flat(),
+    [assignmentsByDate],
+  )
   const { waiting, assigned } = useMemo(
-    () => splitApplicantsByAssignment(INTERVIEW_APPLICANTS_MOCK, assignments),
-    [assignments],
+    () =>
+      splitApplicantsByAssignment(INTERVIEW_APPLICANTS_MOCK, allAssignments),
+    [allAssignments],
   )
 
   const setSessions = (next: InterviewSession[]) => {
     setSessionsByDate((prev) => ({ ...prev, [currentDate]: next }))
   }
 
-  const setAssignments = (next: SlotAssignment[]) => {
-    setAssignmentsByDate((prev) => ({ ...prev, [currentDate]: next }))
+  // 한 지원자는 차수 전체에서 한 슬롯만 차지한다. 다른 날짜에 배정돼 있으면
+  // 그 배정을 먼저 걷어낸다.
+  const clearOtherDates = (
+    prev: Record<string, SlotAssignment[]>,
+    applicantId: string,
+  ) => {
+    const next: Record<string, SlotAssignment[]> = {}
+    Object.entries(prev).forEach(([date, list]) => {
+      next[date] =
+        date === currentDate ? list : unassignApplicant(list, applicantId)
+    })
+    return next
   }
 
   const handleAddSlotTime = (sessionId: string) => {
@@ -108,7 +130,8 @@ export function InterviewScheduleBoardPage({
       sessions.map((session) => {
         if (session.id !== sessionId) return session
         const end = toMinutes(session.endTime)
-        if (end == null) return session
+        // 자정을 넘기면 시각을 되읽지 못해 이 세션의 슬롯이 전부 사라진다.
+        if (end == null || !canExtendEndTime(session.endTime)) return session
         return { ...session, endTime: toTimeLabel(end + SLOT_STEP_MINUTES) }
       }),
     )
@@ -129,20 +152,34 @@ export function InterviewScheduleBoardPage({
     if (!isInterviewApplicant(applicant)) return
 
     if (over.id === APPLICANT_POOL_ID) {
-      setAssignments(unassignApplicant(assignments, applicant.id))
+      // 대기 목록으로 되돌리면 어느 날짜에 배정돼 있든 전부 푼다.
+      setAssignmentsByDate((prev) => {
+        const cleared = clearOtherDates(prev, applicant.id)
+        return {
+          ...cleared,
+          [currentDate]: unassignApplicant(
+            cleared[currentDate] ?? [],
+            applicant.id,
+          ),
+        }
+      })
       return
     }
 
     const slot = parseSlotKey(String(over.id))
     if (!slot) return
-    setAssignments(
-      assignApplicant(
-        assignments,
-        slot.sessionId,
-        slot.slotStart,
-        applicant.id,
-      ),
-    )
+    setAssignmentsByDate((prev) => {
+      const cleared = clearOtherDates(prev, applicant.id)
+      return {
+        ...cleared,
+        [currentDate]: assignApplicant(
+          cleared[currentDate] ?? [],
+          slot.sessionId,
+          slot.slotStart,
+          applicant.id,
+        ),
+      }
+    })
   }
 
   const handleSave = () => {
@@ -243,7 +280,7 @@ export function InterviewScheduleBoardPage({
           </div>
           <DragOverlay>
             {draggingApplicant && (
-              <DraggableApplicantChip applicant={draggingApplicant} compact />
+              <ApplicantChip applicant={draggingApplicant} compact />
             )}
           </DragOverlay>
         </DndContext>

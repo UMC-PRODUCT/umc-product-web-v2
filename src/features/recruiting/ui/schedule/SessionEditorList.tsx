@@ -99,7 +99,14 @@ export function SessionEditorList({
                         : "text-teal-gray-500 hover:bg-teal-gray-100 bg-white",
                     )}
                   >
-                    {selected ? `✓ ${item.label}` : item.label}
+                    {/* aria-checked 가 이미 상태를 알린다. 체크 표시를 라벨에
+                        넣으면 두 번 읽히고 선택할 때마다 버튼 폭이 흔들린다. */}
+                    {selected && (
+                      <span aria-hidden="true" className="mr-1">
+                        ✓
+                      </span>
+                    )}
+                    {item.label}
                   </button>
                 )
               })}
