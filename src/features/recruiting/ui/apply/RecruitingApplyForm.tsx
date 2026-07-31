@@ -15,9 +15,11 @@ import {
   type ApplyFormConfig,
   buildDefaultApplyValues,
   buildRecruitingAnswersSchema,
+  defaultApplyValue,
+  hasPendingUpload,
   resolveEnabledSectionIds,
+  toDirtySnapshot,
 } from "../../model/applyForm"
-import { RECRUITING_APPLY_CODE_MOCK } from "../../model/applyForm.mock"
 import { ApplyAnswerField } from "./ApplyAnswerField"
 
 import type { Resolver } from "react-hook-form"
@@ -29,6 +31,17 @@ type ApplyModalKind = "draftSaved" | "leave" | "submitConfirm" | "complete"
 interface RecruitingApplyFormProps {
   config: ApplyFormConfig
   initialValues?: Partial<Record<string, ApplyAnswerValue>>
+  // 지망·이름·이메일은 Form 문항이 아니라 지원서 필드다. 실제 연동 화면은
+  // 폼 밖에서 받아 내려 주고, 목업 화면은 이름 문항에서 뽑던 기존 방식을 쓴다.
+  applicantName?: string
+  applicationKey?: string
+  onSaveDraft?: (values: Record<string, ApplyAnswerValue>) => Promise<void>
+  onSubmit?: (values: Record<string, ApplyAnswerValue>) => Promise<void>
+  // 폼 밖 입력(이름·이메일·지망)을 확인 모달을 열기 전에 검사한다. 모달 안에서
+  // 막으면 토스트만 뜨고 모달은 열린 채 남는다.
+  canSubmit?: () => boolean
+  isSaving?: boolean
+  isSubmitting?: boolean
   onExit?: () => void
   onViewApplication?: () => void
   className?: string
@@ -88,6 +101,13 @@ function FormSection({
 export function RecruitingApplyForm({
   config,
   initialValues,
+  applicantName: applicantNameProp,
+  applicationKey,
+  onSaveDraft,
+  onSubmit,
+  canSubmit,
+  isSaving = false,
+  isSubmitting = false,
   onExit,
   onViewApplication,
   className,
@@ -102,7 +122,7 @@ export function RecruitingApplyForm({
     }),
     [config.sections, initialValues],
   )
-  const snapshotRef = useRef(JSON.stringify(defaultValues))
+  const snapshotRef = useRef(toDirtySnapshot(defaultValues))
 
   const schemaRef = useRef(
     buildRecruitingAnswersSchema(
@@ -119,6 +139,11 @@ export function RecruitingApplyForm({
       )(values, context, options),
   )
 
+  // 지망을 바꾸면 서버가 다른 문항 구조를 내려준다. 폼을 다시 세우거나 reset 하지
+  // 않는다 — reset 은 필드 레지스트리를 비워 이미 떠 있는 문항의 입력을 조용히
+  // 버린다. 새 문항은 Controller 가 defaultValue 로 스스로 등록하고, 구조 밖으로
+  // 밀려난 답변은 RHF 가 그대로 들고 있다(shouldUnregister 기본값 false).
+  // 지망을 되돌리면 되살아나고, 제출 페이로드에서만 걸러진다.
   const { control, getValues, handleSubmit } = useForm<
     Record<string, ApplyAnswerValue>
   >({
@@ -142,6 +167,8 @@ export function RecruitingApplyForm({
     enabledSectionIds.has(section.sectionId),
   )
 
+  const isUploading = hasPendingUpload(watchedValues, config.sections)
+
   const schema = useMemo(
     () => buildRecruitingAnswersSchema(config.sections, enabledSectionIds),
     [config.sections, enabledSectionIds],
@@ -151,7 +178,7 @@ export function RecruitingApplyForm({
     schemaRef.current = schema
   }, [schema])
 
-  const isDirtyNow = () => JSON.stringify(getValues()) !== snapshotRef.current
+  const isDirtyNow = () => toDirtySnapshot(getValues()) !== snapshotRef.current
 
   const {
     proceed: proceedLeave,
@@ -163,6 +190,7 @@ export function RecruitingApplyForm({
   })
 
   const applicantName = (() => {
+    if (applicantNameProp?.trim()) return applicantNameProp.trim()
     const raw = config.nameQuestionId
       ? getValues()[config.nameQuestionId]
       : null
@@ -196,19 +224,40 @@ export function RecruitingApplyForm({
     }
   }
 
-  const handleSaveDraft = () => {
-    snapshotRef.current = JSON.stringify(getValues())
+  // 저장이 실패하면 스냅샷을 갱신하지 않는다. 갱신해 버리면 서버에 없는 내용을
+  // 저장된 것으로 보고 이탈 경고까지 사라진다. 실패 안내는 호출부가 띄운다.
+  const handleSaveDraft = async () => {
+    if (onSaveDraft) {
+      try {
+        await onSaveDraft(getValues())
+      } catch {
+        return
+      }
+    }
+    snapshotRef.current = toDirtySnapshot(getValues())
     setOpenModal("draftSaved")
   }
 
+  const handleConfirmSubmit = async () => {
+    if (onSubmit) {
+      try {
+        await onSubmit(getValues())
+      } catch {
+        return
+      }
+    }
+    snapshotRef.current = toDirtySnapshot(getValues())
+    setOpenModal("complete")
+  }
+
   const handleExit = () => {
-    snapshotRef.current = JSON.stringify(getValues())
+    snapshotRef.current = toDirtySnapshot(getValues())
     setOpenModal(null)
     onExit?.()
   }
 
   const handleViewApplication = () => {
-    snapshotRef.current = JSON.stringify(getValues())
+    snapshotRef.current = toDirtySnapshot(getValues())
     setOpenModal(null)
     ;(onViewApplication ?? onExit)?.()
   }
@@ -257,6 +306,7 @@ export function RecruitingApplyForm({
                     <Controller
                       control={control}
                       name={question.questionId}
+                      defaultValue={defaultApplyValue(question)}
                       render={({ field, fieldState }) => (
                         <ApplyAnswerField
                           question={question}
@@ -279,15 +329,20 @@ export function RecruitingApplyForm({
             color="neutral"
             size="xl"
             className="w-50"
-            onClick={handleSaveDraft}
+            disabled={isSaving || isSubmitting || isUploading}
+            onClick={() => void handleSaveDraft()}
           >
-            임시저장 후 나가기
+            {isSaving ? "저장 중..." : "임시저장 후 나가기"}
           </Button>
           <Button
             type="button"
             size="xl"
             className="w-50"
-            onClick={submitWithValidation(() => setOpenModal("submitConfirm"))}
+            disabled={isSaving || isSubmitting || isUploading}
+            onClick={submitWithValidation(() => {
+              if (canSubmit && !canSubmit()) return
+              setOpenModal("submitConfirm")
+            })}
           >
             제출하기
           </Button>
@@ -301,7 +356,7 @@ export function RecruitingApplyForm({
         content={
           <span className="whitespace-pre-line">
             {applicantName}님의 지원 코드는{" "}
-            <span className="text-teal-600">{RECRUITING_APPLY_CODE_MOCK}</span>
+            <span className="text-teal-600">{applicationKey}</span>
             입니다.
             {"\n"}
             <span className="underline underline-offset-2">내 지원서</span>에서
@@ -352,14 +407,14 @@ export function RecruitingApplyForm({
         }
         cancelText="계속 작성하기"
         confirmText="제출하기"
+        // 연타하면 저장·제출이 겹쳐 돌아 한쪽은 완료 모달을, 다른 쪽은 실패
+        // 토스트를 띄운다.
+        confirmLoading={isSaving || isSubmitting}
         onOpenChange={(open) => {
           if (!open) setOpenModal(null)
         }}
         onCancel={() => setOpenModal(null)}
-        onConfirm={() => {
-          snapshotRef.current = JSON.stringify(getValues())
-          setOpenModal("complete")
-        }}
+        onConfirm={() => void handleConfirmSubmit()}
       />
 
       <CtaModal
@@ -369,7 +424,7 @@ export function RecruitingApplyForm({
         content={
           <span className="whitespace-pre-line">
             {applicantName}님의 지원 번호는{" "}
-            <span className="text-teal-600">{RECRUITING_APPLY_CODE_MOCK}</span>
+            <span className="text-teal-600">{applicationKey}</span>
             입니다.
             {"\n"}발급된 번호로{" "}
             <span className="underline underline-offset-2">내 지원서</span>{" "}

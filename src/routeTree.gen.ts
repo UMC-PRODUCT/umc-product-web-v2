@@ -90,6 +90,7 @@ import { Route as RecruitingEvaluationsFinalRouteImport } from './routes/recruit
 import { Route as RecruitingEvaluationsDocumentRouteImport } from './routes/recruiting/evaluations/document'
 import { Route as RecruitingDashboardEvaluationsRouteImport } from './routes/recruiting/dashboard/evaluations'
 import { Route as RecruitingDashboardApplicationsRouteImport } from './routes/recruiting/dashboard/applications'
+import { Route as ProjectsApplyRoundIdRouteImport } from './routes/projects/apply/$roundId'
 import { Route as ProjectsApplicationListRouteImport } from './routes/projects/application/list'
 import { Route as ProjectsApplicationApplicationIdRouteImport } from './routes/projects/application/$applicationId'
 import { Route as OauthKakaoCallbackRouteImport } from './routes/oauth/kakao/callback'
@@ -536,6 +537,11 @@ const RecruitingDashboardApplicationsRoute =
     path: '/dashboard/applications',
     getParentRoute: () => RecruitingRouteRoute,
   } as any)
+const ProjectsApplyRoundIdRoute = ProjectsApplyRoundIdRouteImport.update({
+  id: '/apply/$roundId',
+  path: '/apply/$roundId',
+  getParentRoute: () => ProjectsRouteRoute,
+} as any)
 const ProjectsApplicationListRoute = ProjectsApplicationListRouteImport.update({
   id: '/application/list',
   path: '/application/list',
@@ -729,6 +735,7 @@ export interface FileRoutesByFullPath {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/projects/apply/$roundId': typeof ProjectsApplyRoundIdRoute
   '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
   '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
@@ -826,6 +833,7 @@ export interface FileRoutesByTo {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/projects/apply/$roundId': typeof ProjectsApplyRoundIdRoute
   '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
   '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
@@ -930,6 +938,7 @@ export interface FileRoutesById {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/projects/apply/$roundId': typeof ProjectsApplyRoundIdRoute
   '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
   '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
@@ -1035,6 +1044,7 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/projects/application/$applicationId'
     | '/projects/application/list'
+    | '/projects/apply/$roundId'
     | '/recruiting/dashboard/applications'
     | '/recruiting/dashboard/evaluations'
     | '/recruiting/evaluations/document'
@@ -1132,6 +1142,7 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/projects/application/$applicationId'
     | '/projects/application/list'
+    | '/projects/apply/$roundId'
     | '/recruiting/dashboard/applications'
     | '/recruiting/dashboard/evaluations'
     | '/recruiting/evaluations/document'
@@ -1235,6 +1246,7 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/projects/application/$applicationId'
     | '/projects/application/list'
+    | '/projects/apply/$roundId'
     | '/recruiting/dashboard/applications'
     | '/recruiting/dashboard/evaluations'
     | '/recruiting/evaluations/document'
@@ -1887,6 +1899,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecruitingDashboardApplicationsRouteImport
       parentRoute: typeof RecruitingRouteRoute
     }
+    '/projects/apply/$roundId': {
+      id: '/projects/apply/$roundId'
+      path: '/apply/$roundId'
+      fullPath: '/projects/apply/$roundId'
+      preLoaderRoute: typeof ProjectsApplyRoundIdRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
     '/projects/application/list': {
       id: '/projects/application/list'
       path: '/application/list'
@@ -2153,6 +2172,7 @@ interface ProjectsRouteRouteChildren {
   ProjectsIndexRoute: typeof ProjectsIndexRoute
   ProjectsApplicationApplicationIdRoute: typeof ProjectsApplicationApplicationIdRoute
   ProjectsApplicationListRoute: typeof ProjectsApplicationListRoute
+  ProjectsApplyRoundIdRoute: typeof ProjectsApplyRoundIdRoute
   ProjectsApplicationIndexRoute: typeof ProjectsApplicationIndexRoute
 }
 
@@ -2161,6 +2181,7 @@ const ProjectsRouteRouteChildren: ProjectsRouteRouteChildren = {
   ProjectsIndexRoute: ProjectsIndexRoute,
   ProjectsApplicationApplicationIdRoute: ProjectsApplicationApplicationIdRoute,
   ProjectsApplicationListRoute: ProjectsApplicationListRoute,
+  ProjectsApplyRoundIdRoute: ProjectsApplyRoundIdRoute,
   ProjectsApplicationIndexRoute: ProjectsApplicationIndexRoute,
 }
 

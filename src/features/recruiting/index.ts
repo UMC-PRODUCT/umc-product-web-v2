@@ -15,6 +15,7 @@ export type {
 } from "./model/recruitmentQuota"
 export { ApplicantListPage } from "./ui/ApplicantListPage"
 export { RecruitingApplyForm } from "./ui/apply/RecruitingApplyForm"
+export { RecruitingApplyPage } from "./ui/apply/RecruitingApplyPage"
 export { ChapterQuotaTableCard } from "./ui/ChapterQuotaTableCard"
 export { ApplicationEvaluationDetailPage } from "./ui/detail/ApplicationEvaluationDetailPage"
 export { EvaluatorAllocationPage } from "./ui/evaluations/EvaluatorAllocationPage"
