@@ -6,6 +6,7 @@ import type {
   AdminRoundsQuery,
   ApiEvaluationStage,
   CloneRecruitingRoundRequest,
+  CreateApplicationDraftBody,
   CreateRecruitingRoundRequest,
   FinalDecisionBody,
   FormStructureQuery,
@@ -16,7 +17,9 @@ import type {
   RawStatusCounts,
   RawStatusSummary,
   RawTrackCount,
+  RecruitingApplicationCreated,
   RecruitingApplicationDetail,
+  RecruitingApplicationMutationResult,
   RecruitingApplicationPage,
   RecruitingApplicationSummary,
   RecruitingEvaluation,
@@ -31,6 +34,7 @@ import type {
   RoundApplicationsQuery,
   StatusSummaryQuery,
   SubmitEvaluationBody,
+  UpdateApplicationDraftBody,
   UpdateRecruitingRoundRequest,
   UpdateRecruitingRoundStatusRequest,
   UpsertRecruitingApplicationFormRequest,
@@ -256,6 +260,40 @@ export async function getFormStructure(
     { params },
   )
   return data.result
+}
+
+export async function createApplicationDraft(
+  body: CreateApplicationDraftBody,
+): Promise<RecruitingApplicationCreated> {
+  const { data } = await api.post<ApiResponse<RecruitingApplicationCreated>>(
+    "/v1/recruiting/applications",
+    body,
+  )
+  return data.result
+}
+
+export async function saveApplicationDraft(
+  applicationId: string,
+  body: UpdateApplicationDraftBody,
+): Promise<RecruitingApplicationMutationResult> {
+  const { data } = await api.put<
+    ApiResponse<RecruitingApplicationMutationResult>
+  >(`/v1/recruiting/applications/${applicationId}`, body)
+  return data.result
+}
+
+// submittedIp 를 생략하면 서버가 요청의 원격 주소를 쓴다.
+export async function submitApplication(
+  applicationId: string,
+): Promise<RecruitingApplicationMutationResult> {
+  const { data } = await api.post<
+    ApiResponse<RecruitingApplicationMutationResult>
+  >(`/v1/recruiting/applications/${applicationId}/submit`, {})
+  return data.result
+}
+
+export async function cancelApplication(applicationId: string): Promise<void> {
+  await api.patch(`/v1/recruiting/applications/${applicationId}/cancel`)
 }
 
 export async function getStageEvaluations(

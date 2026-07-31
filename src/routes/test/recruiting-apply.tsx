@@ -1,7 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 
 import { RecruitingApplyForm } from "@/features/recruiting"
-import { RECRUITING_APPLY_FORM_MOCK } from "@/features/recruiting/model/applyForm.mock"
+import {
+  RECRUITING_APPLY_CODE_MOCK,
+  RECRUITING_APPLY_FORM_MOCK,
+} from "@/features/recruiting/model/applyForm.mock"
 import PersonIcon from "@/shared/assets/icon/people/PersonIcon"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import Footer from "@/widgets/footer/Footer"
@@ -54,6 +57,7 @@ function RecruitingApplyTestPage() {
               />
               <RecruitingApplyForm
                 config={RECRUITING_APPLY_FORM_MOCK}
+                applicationKey={RECRUITING_APPLY_CODE_MOCK}
                 onExit={() => navigate({ to: "/test" })}
                 className="mt-8"
               />

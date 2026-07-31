@@ -10,7 +10,10 @@ import type { Chapter } from "@/entities/organization/model/chapters"
 
 interface RecruitmentSchoolSearchDropdownProps {
   open: boolean
-  chapter: Chapter
+  chapter?: Chapter
+  // 실제 기수 조직 데이터(getChaptersWithSchools) 등 호출부가 이미 들고 있는 학교
+  // 목록을 그대로 쓰고 싶을 때 전달한다. 없으면 하드코딩된 SCHOOLS_BY_BRANCH로 대체한다.
+  schools?: readonly string[]
   onOpenChange: (open: boolean) => void
   onSelect: (school: string) => void
   className?: string
@@ -19,6 +22,7 @@ interface RecruitmentSchoolSearchDropdownProps {
 export function RecruitmentSchoolSearchDropdown({
   open,
   chapter,
+  schools,
   onOpenChange,
   onSelect,
   className,
@@ -39,8 +43,15 @@ export function RecruitmentSchoolSearchDropdown({
 
   if (!open) return null
 
-  // TODO: 지부 개편 시 getChaptersWithSchools API 기반으로 전환 검토 (SCHOOLS_BY_BRANCH 하드코딩 제거)
-  const filteredSchools = SCHOOLS_BY_BRANCH[chapter].filter((school) =>
+  // 호출부가 조회 중이라 빈 배열을 넘기는 경우가 있다. 그때까지 "검색 결과가
+  // 없습니다" 를 보여주지 않도록 지부 목록으로 받쳐 준다.
+  const schoolList =
+    schools && schools.length > 0
+      ? schools
+      : chapter
+        ? SCHOOLS_BY_BRANCH[chapter]
+        : []
+  const filteredSchools = schoolList.filter((school) =>
     school.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 

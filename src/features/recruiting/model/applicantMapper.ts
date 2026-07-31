@@ -68,6 +68,13 @@ export function toPartKey(track: RecruitingTrack): PartKey | null {
   return tag ? (PART_TAG_TO_KEY[tag] ?? null) : null
 }
 
+export function toPartTagsFromTracks(tracks: RecruitingTrack[]): PartTag[] {
+  const tags = tracks
+    .map((track) => TRACK_PART_TAG[track])
+    .filter((tag): tag is PartTag => tag != null)
+  return [...new Set(tags)]
+}
+
 export function toPartTags(
   firstChoice: RecruitingTrack,
   secondChoice: RecruitingTrack | null,

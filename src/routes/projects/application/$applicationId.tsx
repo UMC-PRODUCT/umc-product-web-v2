@@ -3,7 +3,10 @@ import { useMemo } from "react"
 
 import { RecruitingApplyForm } from "@/features/recruiting"
 import { getApplicationDetailMock } from "@/features/recruiting/model/applicationDetail.mock"
-import { RECRUITING_APPLY_FORM_MOCK } from "@/features/recruiting/model/applyForm.mock"
+import {
+  RECRUITING_APPLY_CODE_MOCK,
+  RECRUITING_APPLY_FORM_MOCK,
+} from "@/features/recruiting/model/applyForm.mock"
 import { ReadonlyAnswerField } from "@/features/recruiting/ui/detail/ReadonlyAnswerField"
 import { Button } from "@/shared/ui/Button"
 
@@ -256,6 +259,7 @@ function ApplicationDetailPage() {
       ) : (
         <RecruitingApplyForm
           config={RECRUITING_APPLY_FORM_MOCK}
+          applicationKey={RECRUITING_APPLY_CODE_MOCK}
           initialValues={initialValues}
           onExit={() => navigate({ to: "/projects/application/list" })}
           onViewApplication={() =>
