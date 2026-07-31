@@ -139,6 +139,9 @@ export function EvaluatorAllocationPage({
     if (!targetId) return
 
     if (targetId === SCHOOL_STAFF_PANEL_ID) {
+      const isAssigned = assignedEvaluators.some((item) => item.id === staff.id)
+      if (!isAssigned) return
+
       setAssignedEvaluators((prev) =>
         prev.filter((item) => item.id !== staff.id),
       )
@@ -148,12 +151,14 @@ export function EvaluatorAllocationPage({
     }
 
     if (targetId === RECRUITMENT_BOX_ID) {
-      setAssignedEvaluators((prev) => {
-        if (prev.some((item) => item.id === staff.id)) return prev
-        setIsDirty(true)
-        editRevisionRef.current += 1
-        return [...prev, staff]
-      })
+      const isAlreadyAssigned = assignedEvaluators.some(
+        (item) => item.id === staff.id,
+      )
+      if (isAlreadyAssigned) return
+
+      setAssignedEvaluators((prev) => [...prev, staff])
+      setIsDirty(true)
+      editRevisionRef.current += 1
     }
   }
 
