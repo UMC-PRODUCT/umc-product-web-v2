@@ -105,6 +105,14 @@ export type RecruitingStatusCounts = Partial<
   Record<RecruitingApplicationStatus, number>
 >
 
+// 1지망 파트별 상태 교차집계. 서버는 INFRA_PLUS 를 뺀 4개 파트를 0건이어도 항상
+// 반환한다(모집 대상이 아니라서). 파트 귀속은 firstChoice 기준이다.
+export interface RecruitingPartSummary {
+  part: RecruitingTrack
+  totalCount: number
+  countByStatus: RecruitingStatusCounts
+}
+
 export interface RecruitingRoundStatusSummary {
   roundId: string
   roundTitle: string
@@ -112,6 +120,7 @@ export interface RecruitingRoundStatusSummary {
   roundNo: number
   totalCount: number
   countByStatus: RecruitingStatusCounts
+  parts: RecruitingPartSummary[]
 }
 
 export interface RecruitingSchoolStatusSummary {
@@ -124,12 +133,14 @@ export interface RecruitingSchoolStatusSummary {
   chapterName: string
   totalCount: number
   countByStatus: RecruitingStatusCounts
+  parts: RecruitingPartSummary[]
   rounds: RecruitingRoundStatusSummary[]
 }
 
 export interface RecruitingStatusSummary {
   totalCount: number
   countByStatus: RecruitingStatusCounts
+  parts: RecruitingPartSummary[]
   schools: RecruitingSchoolStatusSummary[]
 }
 
@@ -143,32 +154,43 @@ export type RawCount = string | number
 
 export type RawStatusCounts = Record<string, RawCount>
 
-export type RawRoundStatusSummary = Omit<
-  RecruitingRoundStatusSummary,
-  "roundId" | "totalCount" | "countByStatus"
+export type RawPartSummary = Omit<
+  RecruitingPartSummary,
+  "totalCount" | "countByStatus"
 > & {
-  roundId: RawId
   totalCount: RawCount
   countByStatus?: RawStatusCounts
 }
 
+export type RawRoundStatusSummary = Omit<
+  RecruitingRoundStatusSummary,
+  "roundId" | "totalCount" | "countByStatus" | "parts"
+> & {
+  roundId: RawId
+  totalCount: RawCount
+  countByStatus?: RawStatusCounts
+  parts?: RawPartSummary[]
+}
+
 export type RawSchoolStatusSummary = Omit<
   RecruitingSchoolStatusSummary,
-  "schoolId" | "chapterId" | "totalCount" | "countByStatus" | "rounds"
+  "schoolId" | "chapterId" | "totalCount" | "countByStatus" | "parts" | "rounds"
 > & {
   schoolId: RawId
   chapterId: RawId
   totalCount: RawCount
   countByStatus?: RawStatusCounts
+  parts?: RawPartSummary[]
   rounds?: RawRoundStatusSummary[]
 }
 
 export type RawStatusSummary = Omit<
   RecruitingStatusSummary,
-  "totalCount" | "countByStatus" | "schools"
+  "totalCount" | "countByStatus" | "parts" | "schools"
 > & {
   totalCount: RawCount
   countByStatus?: RawStatusCounts
+  parts?: RawPartSummary[]
   schools?: RawSchoolStatusSummary[]
 }
 

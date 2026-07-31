@@ -17,6 +17,7 @@ function school(
     chapterName: "Neon",
     totalCount: 10,
     countByStatus: {},
+    parts: [],
     rounds: [],
     ...override,
   }
@@ -28,6 +29,7 @@ function summary(
   return {
     totalCount: schools.reduce((sum, item) => sum + item.totalCount, 0),
     countByStatus: {},
+    parts: [],
     schools,
   }
 }

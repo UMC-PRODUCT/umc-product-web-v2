@@ -9,6 +9,7 @@ import type {
   PublicRoundsQuery,
   RawCount,
   RawEvaluationStatistics,
+  RawPartSummary,
   RawStatusCounts,
   RawStatusSummary,
   RawTrackCount,
@@ -122,23 +123,34 @@ function toStatusCounts(raw: RawStatusCounts | undefined) {
   return counts as RecruitingStatusCounts
 }
 
+function toPartSummaries(raw: RawPartSummary[] | undefined) {
+  return (raw ?? []).map((part) => ({
+    ...part,
+    totalCount: toCount(part.totalCount),
+    countByStatus: toStatusCounts(part.countByStatus),
+  }))
+}
+
 export function normalizeStatusSummary(
   raw: RawStatusSummary,
 ): RecruitingStatusSummary {
   return {
     totalCount: toCount(raw.totalCount),
     countByStatus: toStatusCounts(raw.countByStatus),
+    parts: toPartSummaries(raw.parts),
     schools: (raw.schools ?? []).map((school) => ({
       ...school,
       schoolId: String(school.schoolId),
       chapterId: String(school.chapterId),
       totalCount: toCount(school.totalCount),
       countByStatus: toStatusCounts(school.countByStatus),
+      parts: toPartSummaries(school.parts),
       rounds: (school.rounds ?? []).map((round) => ({
         ...round,
         roundId: String(round.roundId),
         totalCount: toCount(round.totalCount),
         countByStatus: toStatusCounts(round.countByStatus),
+        parts: toPartSummaries(round.parts),
       })),
     })),
   }

@@ -10,6 +10,7 @@ import {
 import {
   countSchools,
   groupByChapter,
+  toPartCounts,
 } from "@/features/recruiting/model/applicationStats"
 import { ChapterRankingCard } from "@/features/recruiting/ui/dashboard/ChapterRankingCard"
 import { PartDistributionCard } from "@/features/recruiting/ui/dashboard/PartDistributionCard"
@@ -20,75 +21,22 @@ import { shortenSchoolName } from "@/shared/lib/formatSchoolName"
 import { GraphTimestampLabel } from "@/shared/ui/GraphTimestampLabel"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
+import type { PartKey } from "@/features/recruiting/model/parts"
+import type { PartBreakdown } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
+
 export const Route = createFileRoute("/recruiting/dashboard/applications")({
   component: RouteComponent,
 })
 
-// TODO: 서버 summary 에 track(파트)별 집계가 없어 파트 관련 카드는 목업을 유지한다.
-// countByTrack 이 추가되면 MOCK_PART_VALUES 와 MOCK_SCHOOL_PART_ROWS 를 삭제한다.
-const MOCK_PART_VALUES = {
-  pm: { type: "application", count: 5 },
-  design: { type: "application", count: 25 },
-  webPe: { type: "application", count: 0 },
-  mobilePe: { type: "application", count: 70 },
-} as const
-
-const MOCK_SCHOOL_PART_ROWS = [
-  {
-    chapterId: "29",
-    chapterName: "Chromium",
-    name: "광운대",
-    counts: { pm: 40, design: 30, webPe: 20, mobilePe: 10 },
-  },
-  {
-    chapterId: "29",
-    chapterName: "Chromium",
-    name: "서울여대",
-    counts: { pm: 12, design: 8, webPe: 5, mobilePe: 3 },
-  },
-  {
-    chapterId: "30",
-    chapterName: "Ferrum",
-    name: "동국대",
-    counts: { pm: 22, design: 18, webPe: 14, mobilePe: 9 },
-  },
-  {
-    chapterId: "30",
-    chapterName: "Ferrum",
-    name: "이화여대",
-    counts: { pm: 8, design: 15, webPe: 4, mobilePe: 6 },
-  },
-  {
-    chapterId: "27",
-    chapterName: "Neon",
-    name: "가천대",
-    counts: { pm: 30, design: 25, webPe: 20, mobilePe: 15 },
-  },
-  {
-    chapterId: "27",
-    chapterName: "Neon",
-    name: "인하대",
-    counts: { pm: 18, design: 10, webPe: 6, mobilePe: 4 },
-  },
-  {
-    chapterId: "31",
-    chapterName: "Platinum",
-    name: "동아대",
-    counts: { pm: 11, design: 9, webPe: 7, mobilePe: 4 },
-  },
-  {
-    chapterId: "32",
-    chapterName: "Selenium",
-    name: "숭실대",
-    counts: { pm: 20, design: 16, webPe: 12, mobilePe: 8 },
-  },
-  {
-    chapterId: "28",
-    chapterName: "Xenon",
-    name: "중앙대",
-    counts: { pm: 16, design: 14, webPe: 9, mobilePe: 6 },
-  },
-]
+// 지원 현황 툴팁은 지원자 수만 보여준다(평가 완료 수는 평가 현황 화면에서 쓴다).
+function toBreakdown(counts: Record<PartKey, number>): PartBreakdown {
+  return {
+    pm: { applied: counts.pm },
+    design: { applied: counts.design },
+    webPe: { applied: counts.webPe },
+    mobilePe: { applied: counts.mobilePe },
+  }
+}
 
 function EmptyNotice({ message }: { message: string }) {
   return (
@@ -110,6 +58,7 @@ function RouteComponent() {
   // 총 지원자 카드는 "07/02 02:48 기준", 그래프 기준 시각 라벨은 "26-07-04 02:48 기준"
   // 으로 날짜 형식이 서로 다르다.
   const statAsOf = formatAppliedAtParts(asOf.toISOString())
+
   const [graphAsOfDate, graphAsOfTime] = formatBaseTime(asOf).split(" ")
 
   const header = (
@@ -147,6 +96,26 @@ function RouteComponent() {
     )
   }
 
+  // 파트 도넛은 기수 전체 파트 집계를 쓴다.
+  const applicantsByPart = toPartCounts(data.parts)
+  const partValues: Record<PartKey, { type: "application"; count: number }> = {
+    pm: { type: "application", count: applicantsByPart.pm },
+    design: { type: "application", count: applicantsByPart.design },
+    webPe: { type: "application", count: applicantsByPart.webPe },
+    mobilePe: { type: "application", count: applicantsByPart.mobilePe },
+  }
+
+  // 지부를 넘어 학교를 한 줄로 편다. groupByChapter 가 지부명 > 학교명 순으로
+  // 정렬해 두므로 순서를 그대로 쓴다(카드는 받은 순서대로 렌더한다).
+  const chartSchools = chapterGroups.flatMap((group) =>
+    group.schools.map((school) => ({
+      chapterId: group.chapterId,
+      chapterName: group.chapterName,
+      // 서버는 정식 명칭을 주는데 x축에 학교가 15개씩 들어가 그대로면 넘친다.
+      name: shortenSchoolName(school.schoolName),
+      counts: school.partCounts,
+    })),
+  )
   return (
     <div>
       {header}
@@ -160,10 +129,7 @@ function RouteComponent() {
             time: statAsOf.time,
           }}
         />
-        <PartDistributionCard
-          title="파트별 지원 현황"
-          values={MOCK_PART_VALUES}
-        />
+        <PartDistributionCard title="파트별 지원 현황" values={partValues} />
         {/* 마지막 카드 위 8px에 기준 시각 라벨(우측 정렬). absolute라 카드 정렬엔 영향 없음. */}
         <div className="relative flex">
           <GraphTimestampLabel
@@ -185,13 +151,13 @@ function RouteComponent() {
         </div>
       </div>
       <div className="mt-4">
-        {/* TODO: breakdown(파트별 툴팁)은 서버 countByTrack 이 없어 생략한다. */}
         <ChapterRankingCard
           title="지부별 지원 현황"
           chapters={chapterGroups.map((group) => ({
             chapterId: group.chapterId,
             chapterName: group.chapterName,
             count: group.totalCount,
+            breakdown: toBreakdown(group.partCounts),
           }))}
           footerStatus={isRecruiting ? "모집 중" : undefined}
         />
@@ -200,7 +166,7 @@ function RouteComponent() {
         <SchoolPartChartCard
           title="학교별 지원 현황"
           footerStatus={isRecruiting ? "모집 중" : undefined}
-          schools={MOCK_SCHOOL_PART_ROWS}
+          schools={chartSchools}
         />
       </div>
     </div>

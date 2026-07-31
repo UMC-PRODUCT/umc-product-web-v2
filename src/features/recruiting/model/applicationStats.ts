@@ -1,15 +1,60 @@
-import type { RecruitingStatusSummary } from "../api/types"
+import { TRACK_PART_TAG } from "./applicantMapper"
+
+import type {
+  RecruitingPartSummary,
+  RecruitingStatusSummary,
+} from "../api/types"
+import type { PartKey } from "./parts"
 
 export interface SchoolApplicationCount {
   schoolId: string
   schoolName: string
   totalCount: number
+  partCounts: Record<PartKey, number>
+}
+
+// PartTag(pm/design/web-pe/mobile-pe)와 대시보드 PartKey(webPe/mobilePe)는 표기가
+// 달라 한 번 더 옮긴다. 트랙 매핑은 TRACK_PART_TAG 한 곳에 유지한다.
+const PART_TAG_TO_KEY: Record<string, PartKey> = {
+  pm: "pm",
+  design: "design",
+  "web-pe": "webPe",
+  "mobile-pe": "mobilePe",
+}
+
+export function emptyPartCounts(): Record<PartKey, number> {
+  return { pm: 0, design: 0, webPe: 0, mobilePe: 0 }
+}
+
+// 서버는 INFRA_PLUS 를 뺀 4개 파트를 항상 주지만, 매핑되지 않는 파트가 오면 버린다
+// (INFRA_PLUS 는 모집 대상이 아니라 TRACK_PART_TAG 에서 null 이다).
+export function toPartCounts(
+  parts: RecruitingPartSummary[],
+): Record<PartKey, number> {
+  const counts = emptyPartCounts()
+  for (const part of parts) {
+    const tag = TRACK_PART_TAG[part.part]
+    const key = tag ? PART_TAG_TO_KEY[tag] : undefined
+    if (key) counts[key] += part.totalCount
+  }
+  return counts
+}
+
+function addPartCounts(
+  target: Record<PartKey, number>,
+  source: Record<PartKey, number>,
+) {
+  for (const key of Object.keys(target) as PartKey[]) {
+    target[key] += source[key]
+  }
 }
 
 export interface ChapterApplicationGroup {
   chapterId: string
   chapterName: string
   totalCount: number
+  // 서버는 지부 단위 집계를 주지 않는다(학교 단위까지만). 학교 파트 집계를 더한다.
+  partCounts: Record<PartKey, number>
   schools: SchoolApplicationCount[]
 }
 
@@ -26,10 +71,12 @@ export function groupByChapter(
       schoolId: school.schoolId,
       schoolName: school.schoolName,
       totalCount: school.totalCount,
+      partCounts: toPartCounts(school.parts),
     }
     const group = byChapter.get(school.chapterId)
     if (group) {
       group.totalCount += school.totalCount
+      addPartCounts(group.partCounts, entry.partCounts)
       group.schools.push(entry)
       continue
     }
@@ -37,6 +84,7 @@ export function groupByChapter(
       chapterId: school.chapterId,
       chapterName: school.chapterName,
       totalCount: school.totalCount,
+      partCounts: { ...entry.partCounts },
       schools: [entry],
     })
   }

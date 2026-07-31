@@ -160,7 +160,12 @@ describe("normalizeStatusSummary", () => {
   it("빠진 배열과 객체를 빈 값으로 채운다", () => {
     const result = normalizeStatusSummary({ totalCount: "0" })
 
-    expect(result).toEqual({ totalCount: 0, countByStatus: {}, schools: [] })
+    expect(result).toEqual({
+      totalCount: 0,
+      countByStatus: {},
+      parts: [],
+      schools: [],
+    })
   })
 
   it("숫자로 바꿀 수 없는 값은 0 으로 둔다", () => {
