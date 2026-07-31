@@ -5,6 +5,9 @@ import type { PartTag } from "@/shared/model/domain"
 // TODO: 백엔드 스펙 필요
 export interface RecruitmentNoticeItem {
   id: number
+  // 지원 폼(/projects/apply/$roundId)이 차수와 지원 Form 을 찾는 열쇠다.
+  // 공개 모집 목록 응답의 round.roundId 를 그대로 담는다.
+  roundId: string
   title: string
   schoolName: string
   parts: PartTag[]
