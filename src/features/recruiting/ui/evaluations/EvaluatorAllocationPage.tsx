@@ -4,7 +4,7 @@ import {
   DragOverlay,
   type DragStartEvent,
 } from "@dnd-kit/core"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
@@ -33,6 +33,12 @@ interface EvaluatorAllocationPageProps {
   roundId?: string
 }
 
+function areEvaluatorsEqual(a: Staff[], b: Staff[]): boolean {
+  if (a.length !== b.length) return false
+  const setA = new Set(a.map((staff) => staff.id))
+  return b.every((staff) => setA.has(staff.id))
+}
+
 export function EvaluatorAllocationPage({
   roundId,
 }: EvaluatorAllocationPageProps = {}) {
@@ -44,9 +50,13 @@ export function EvaluatorAllocationPage({
 
   const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
   const [isDirty, setIsDirty] = useState(false)
+  const editRevisionRef = useRef(0)
+  const savedSnapshotRef = useRef<Staff[] | null>(null)
 
   useEffect(() => {
     setIsDirty(false)
+    savedSnapshotRef.current = null
+    editRevisionRef.current = 0
   }, [activeRoundId])
 
   useEffect(() => {
@@ -54,10 +64,19 @@ export function EvaluatorAllocationPage({
     const serverMemberIds = new Set(
       serverEvaluators.map((item) => String(item.memberId)),
     )
-    const initialStaff = SCHOOL_STAFF_LIST.filter((staff) =>
+    const serverStaff = SCHOOL_STAFF_LIST.filter((staff) =>
       serverMemberIds.has(String(staff.id)),
     )
-    setAssignedEvaluators(initialStaff)
+
+    if (
+      savedSnapshotRef.current &&
+      !areEvaluatorsEqual(serverStaff, savedSnapshotRef.current)
+    ) {
+      return
+    }
+
+    savedSnapshotRef.current = null
+    setAssignedEvaluators(serverStaff)
   }, [serverEvaluators, isDirty])
 
   const {
@@ -72,18 +91,26 @@ export function EvaluatorAllocationPage({
         prev.filter((staff) => staff.id !== chipId),
       )
       setIsDirty(true)
+      editRevisionRef.current += 1
     },
   })
 
   function handleSave() {
+    const requestRevision = editRevisionRef.current
+    const requestSnapshot = assignedEvaluators
+
     saveMutation.mutate(
       {
         roundId: activeRoundId,
-        assignedEvaluators,
+        assignedEvaluators: requestSnapshot,
       },
       {
         onSuccess: () => {
-          setIsDirty(false)
+          if (editRevisionRef.current === requestRevision) {
+            savedSnapshotRef.current = requestSnapshot
+            setIsDirty(false)
+            setAssignedEvaluators(requestSnapshot)
+          }
         },
       },
     )
@@ -116,6 +143,7 @@ export function EvaluatorAllocationPage({
         prev.filter((item) => item.id !== staff.id),
       )
       setIsDirty(true)
+      editRevisionRef.current += 1
       return
     }
 
@@ -123,6 +151,7 @@ export function EvaluatorAllocationPage({
       setAssignedEvaluators((prev) => {
         if (prev.some((item) => item.id === staff.id)) return prev
         setIsDirty(true)
+        editRevisionRef.current += 1
         return [...prev, staff]
       })
     }
