@@ -29,6 +29,8 @@ export function toEvaluationHistoryEntry(
     id: history.decisionHistoryId,
     processedAt: history.decidedAt,
     applicant: {
+      chapterId: applicant.chapterId,
+      schoolId: applicant.schoolId,
       chapter: applicant.chapterName,
       school: applicant.schoolName,
       name: applicant.name,

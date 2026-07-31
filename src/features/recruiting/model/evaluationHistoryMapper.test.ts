@@ -47,6 +47,8 @@ describe("toEvaluationHistoryEntry", () => {
     expect(entry.id).toBe("7")
     expect(entry.processedAt).toBe("2026-07-30T10:22:48Z")
     expect(entry.applicant).toEqual({
+      chapterId: "29",
+      schoolId: "6",
       chapter: "Chromium",
       school: "광운대학교",
       name: "김지원",

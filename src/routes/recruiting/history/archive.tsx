@@ -74,7 +74,7 @@ function RouteComponent() {
     try {
       const blob = await downloadDecisionHistoriesCsv({
         gisuId,
-        ...toDecisionHistoriesQuery(filters, sort, byEvaluator),
+        ...toDecisionHistoriesQuery(filters, sort, byEvaluator, rows),
       })
       const url = URL.createObjectURL(blob)
       const anchor = document.createElement("a")

@@ -29,6 +29,10 @@ export interface EvaluationHistoryEntry {
   id: string
   processedAt: string // ISO 문자열. 처리 일시
   applicant: {
+    // 서버 필터는 이름이 아니라 숫자 ID 를 받는다. CSV 다운로드에 필터를 그대로
+    // 넘기려면 행에 ID 를 들고 있어야 한다.
+    chapterId: string
+    schoolId: string
     // 서버가 주는 지부명을 그대로 쓴다. 프론트 CHAPTERS 상수(6개)는 역대 지부
     // 전체를 담지 않아 union 으로 좁히면 데이터가 사라진다.
     chapter: string
@@ -79,7 +83,8 @@ export interface EvaluationHistoryFilters {
   chapters: string[]
   schools: string[]
   parts: string[]
-  results: string[]
+  // 평가 결과는 단일 선택이다(기획 확정). 미선택은 빈 문자열.
+  result: string
 }
 
 export const DEFAULT_EVALUATION_HISTORY_FILTERS: EvaluationHistoryFilters = {
@@ -89,7 +94,7 @@ export const DEFAULT_EVALUATION_HISTORY_FILTERS: EvaluationHistoryFilters = {
   chapters: [],
   schools: [],
   parts: [],
-  results: [],
+  result: "",
 }
 
 // applicantListTypes.ts의 applyApplicantFilters 구조를 따른다.
@@ -129,10 +134,7 @@ export function applyEvaluationHistoryFilters(
     ) {
       return false
     }
-    if (
-      filters.results.length > 0 &&
-      !filters.results.includes(row.applicant.result)
-    ) {
+    if (filters.result !== "" && filters.result !== row.applicant.result) {
       return false
     }
 
@@ -269,24 +271,50 @@ export function formatHistoryProcessedAt(processedAt: string) {
 // 서버 판정 이력 조회 파라미터로 옮긴다. CSV 다운로드가 화면과 같은 범위를 쓰도록
 // 목록 조회와 같은 조건을 넘긴다.
 //
-// 지부·학교는 옮기지 못한다. 서버가 단일 숫자 ID 를 받는데 필터 바는 이름 기반
-// 다중 선택이라서다. 그래서 화면에서 지부·학교를 좁혀도 CSV 에는 전 범위가 담긴다.
+// 지부·학교는 서버가 단일 숫자 ID 만 받는데 필터 바는 다중 선택이다(기획 확정).
+// 그래서 하나만 고른 경우에만 전달하고, 둘 이상이면 전달하지 않아 CSV 에 전 범위가
+// 담긴다. 서버가 chapterIds/schoolIds 배열을 받아주면 그때 전부 전달할 수 있다.
+// 이름 -> ID 는 행에 실려 온 값을 쓴다(조회를 더 하지 않는다).
+function toSingleId(
+  rows: EvaluationHistoryEntry[],
+  selectedNames: string[],
+  pick: (row: EvaluationHistoryEntry) => { id: string; name: string },
+): string | undefined {
+  if (selectedNames.length !== 1) return undefined
+  const target = selectedNames[0]
+  const matched = rows.find((row) => pick(row).name === target)
+  return matched ? pick(matched).id : undefined
+}
+
 export function toDecisionHistoriesQuery(
   filters: EvaluationHistoryFilters,
   sort: EvaluationHistorySort,
   byEvaluator: boolean,
+  rows: EvaluationHistoryEntry[],
 ) {
   const search = filters.search.trim()
   const tracks = filters.parts
     .map((part) => PART_TAG_TRACK[part])
     .filter((track): track is RecruitingTrack => track != null)
-  const results = filters.results
-    .map((result) => RESULT_TO_SERVER[result])
-    .filter((result): result is RecruitingDecisionResult => result != null)
+  const result = RESULT_TO_SERVER[filters.result]
+
+  // 지부 탭으로 좁혀졌으면 그 지부가 곧 선택이다.
+  const chapterNames =
+    filters.chapterTab === EVALUATION_HISTORY_CHAPTER_TAB_ALL
+      ? filters.chapters
+      : [filters.chapterTab]
 
   return {
+    chapterId: toSingleId(rows, chapterNames, (row) => ({
+      id: row.applicant.chapterId,
+      name: row.applicant.chapter,
+    })),
+    schoolId: toSingleId(rows, filters.schools, (row) => ({
+      id: row.applicant.schoolId,
+      name: row.applicant.school,
+    })),
     tracks: tracks.length > 0 ? tracks : undefined,
-    results: results.length > 0 ? results : undefined,
+    results: result ? [result] : undefined,
     searchName: search === "" ? undefined : search,
     sort: sort === "latest" ? ("LATEST" as const) : ("OLDEST" as const),
     groupByDecider: byEvaluator,

@@ -65,10 +65,7 @@ export function EvaluationHistoryFilterBar({
   const schoolOptions = buildHistorySchoolOptions(rows, schoolScope)
 
   const multiDropdownProps = (
-    key: keyof Pick<
-      EvaluationHistoryFilters,
-      "chapters" | "schools" | "parts" | "results"
-    >,
+    key: keyof Pick<EvaluationHistoryFilters, "chapters" | "schools" | "parts">,
     label: string,
     options: FilterDropdownOption[],
     allValue?: string,
@@ -144,7 +141,18 @@ export function EvaluationHistoryFilterBar({
             {...multiDropdownProps("parts", "지원 파트", PART_OPTIONS)}
           />
           <FilterDropdown
-            {...multiDropdownProps("results", "평가 결과", RESULT_OPTIONS)}
+            label="평가 결과"
+            options={RESULT_OPTIONS}
+            open={openKey === "result"}
+            onClick={() =>
+              setOpenKey((prev) => (prev === "result" ? null : "result"))
+            }
+            onRequestClose={() => setOpenKey(null)}
+            selectedValue={filters.result}
+            // 같은 값을 다시 고르면 해제한다. 단일 선택이라 전체로 돌아갈 방법이 필요하다.
+            onSelect={(value) =>
+              onFiltersChange({ result: value === filters.result ? "" : value })
+            }
           />
         </div>
         <DownloadButton

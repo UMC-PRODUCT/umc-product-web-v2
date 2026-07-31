@@ -3,9 +3,14 @@ import { describe, expect, it } from "vitest"
 import {
   buildHistoryChapterOptions,
   buildHistorySchoolOptions,
+  DEFAULT_EVALUATION_HISTORY_FILTERS,
+  toDecisionHistoriesQuery,
 } from "./evaluationHistory"
 
-import type { EvaluationHistoryEntry } from "./evaluationHistory"
+import type {
+  EvaluationHistoryEntry,
+  EvaluationHistoryFilters,
+} from "./evaluationHistory"
 
 function row(
   chapter: string,
@@ -15,7 +20,15 @@ function row(
   return {
     id: `${chapter}-${school}-${name}`,
     processedAt: "2026-07-30T10:00:00Z",
-    applicant: { chapter, school, name, part: "pm", result: "pass" },
+    applicant: {
+      chapterId: chapter,
+      schoolId: school,
+      chapter,
+      school,
+      name,
+      part: "pm",
+      result: "pass",
+    },
     evaluator: {
       id: "1",
       chapter,
@@ -109,5 +122,95 @@ describe("buildHistorySchoolOptions", () => {
       "숙명여대",
       "한국항공대",
     ])
+  })
+})
+
+describe("toDecisionHistoriesQuery", () => {
+  const rows = [
+    row("Neon", "가천대학교"),
+    row("Chromium", "광운대학교"),
+    row("Ferrum", "동국대학교"),
+  ]
+
+  function filters(override: Partial<EvaluationHistoryFilters> = {}) {
+    return { ...DEFAULT_EVALUATION_HISTORY_FILTERS, ...override }
+  }
+
+  it("파트 다중 선택을 트랙 배열로 옮긴다", () => {
+    const query = toDecisionHistoriesQuery(
+      filters({ parts: ["pm", "web-pe"] }),
+      "latest",
+      false,
+      rows,
+    )
+
+    expect(query.tracks).toEqual(["PLAN", "WEB_PRODUCT_ENGINEER"])
+  })
+
+  // 평가 결과는 단일 선택이지만 서버 파라미터는 배열이다.
+  it("평가 결과는 단일 값을 배열로 감싸 보낸다", () => {
+    expect(
+      toDecisionHistoriesQuery(
+        filters({ result: "pass" }),
+        "latest",
+        false,
+        rows,
+      ).results,
+    ).toEqual(["PASSED"])
+    expect(
+      toDecisionHistoriesQuery(filters(), "latest", false, rows).results,
+    ).toBeUndefined()
+  })
+
+  // 서버가 단일 ID 만 받아서 하나만 고른 경우에만 전달할 수 있다.
+  it("지부를 하나만 고르면 chapterId 를 보낸다", () => {
+    const query = toDecisionHistoriesQuery(
+      filters({ chapters: ["Neon"] }),
+      "latest",
+      false,
+      rows,
+    )
+
+    expect(query.chapterId).toBe("Neon")
+  })
+
+  it("지부를 둘 이상 고르면 chapterId 를 보내지 않는다", () => {
+    const query = toDecisionHistoriesQuery(
+      filters({ chapters: ["Neon", "Chromium"] }),
+      "latest",
+      false,
+      rows,
+    )
+
+    expect(query.chapterId).toBeUndefined()
+  })
+
+  it("지부 탭으로 좁혀졌으면 그 지부를 쓴다", () => {
+    const query = toDecisionHistoriesQuery(
+      filters({ chapterTab: "Ferrum" }),
+      "latest",
+      false,
+      rows,
+    )
+
+    expect(query.chapterId).toBe("Ferrum")
+  })
+
+  it("학교를 하나만 고르면 schoolId 를 보낸다", () => {
+    const query = toDecisionHistoriesQuery(
+      filters({ schools: ["광운대학교"] }),
+      "latest",
+      false,
+      rows,
+    )
+
+    expect(query.schoolId).toBe("광운대학교")
+  })
+
+  it("정렬과 담당자별 그룹을 옮긴다", () => {
+    const query = toDecisionHistoriesQuery(filters(), "oldest", true, rows)
+
+    expect(query.sort).toBe("OLDEST")
+    expect(query.groupByDecider).toBe(true)
   })
 })
