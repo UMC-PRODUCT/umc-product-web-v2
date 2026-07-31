@@ -1,7 +1,7 @@
 import { GraphTooltip } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
 import { cn } from "@/shared/lib/utils"
 
-import type { PartBreakdown } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
+import type { PartBreakdown } from "@/features/recruiting/model/parts"
 
 // 지부 목록은 서버 응답에서 오므로 개수와 이름을 카드가 가정하지 않는다.
 // 지부별 값(count/compareCount/breakdown)을 Record 세 개로 나눠 받으면 키를
@@ -31,6 +31,10 @@ interface ChapterRankingCardProps {
   footerStatus?: string
 }
 
+// 카드 폭에서 나온 값이다. 막대(82px) + 간격(10px) 기준으로 10개가 한계고
+// 11개부터 카드 밖으로 넘친다(막대가 shrink-0 이라 줄어들지 않는다).
+// 이름 그대로 랭킹 카드라 count 내림차순 상위 10개만 보여준다. 지부가 그보다
+// 많으면 나머지는 표시되지 않으므로, 전수 확인이 필요한 화면에는 쓰지 않는다.
 const MAX_CHAPTERS = 10
 const GRID_HEIGHT_PX = 200
 const FILLED_MIN_HEIGHT_PX = 28

@@ -14,6 +14,7 @@ import type {
   StageEvaluation,
 } from "./applicantListTypes"
 import type { EvaluationStage } from "./evaluationStage"
+import type { PartKey } from "./parts"
 
 // 트랙 -> 파트 매핑 단일 소스. 대시보드 집계(evaluationStats)도 이걸 쓴다.
 // INFRA_PLUS 는 리크루팅 파트 표기가 없어 null 이다.
@@ -45,6 +46,26 @@ const STAGE_STATUSES: Record<EvaluationStage, RecruitingApplicationStatus[]> = {
 
 export function getStageStatuses(stage: EvaluationStage) {
   return STAGE_STATUSES[stage]
+}
+
+// PartTag(pm/design/web-pe/mobile-pe)와 대시보드 PartKey(webPe/mobilePe)는 표기가
+// 다르다. 트랙 -> 파트 -> 화면 키 매핑을 이 파일 하나에 모아, 지원 현황과 평가 현황의
+// 파트 집계가 서로 갈라지지 않게 한다.
+const PART_TAG_TO_KEY: Record<string, PartKey> = {
+  pm: "pm",
+  design: "design",
+  "web-pe": "webPe",
+  "mobile-pe": "mobilePe",
+}
+
+export function emptyPartCounts(): Record<PartKey, number> {
+  return { pm: 0, design: 0, webPe: 0, mobilePe: 0 }
+}
+
+// 매핑되지 않는 트랙은 null 이다(INFRA_PLUS 는 모집 대상이 아니라 파트 표기가 없다).
+export function toPartKey(track: RecruitingTrack): PartKey | null {
+  const tag = TRACK_PART_TAG[track]
+  return tag ? (PART_TAG_TO_KEY[tag] ?? null) : null
 }
 
 export function toPartTags(

@@ -143,6 +143,7 @@ describe("toSchoolEvaluationBars", () => {
     expect(schools).toHaveLength(1)
     expect(schools[0]?.name).toBe("광운대학교")
     expect(schools[0]?.chapterId).toBe("29")
+    expect(schools[0]?.schoolId).toBe("6")
     expect(schools[0]?.counts.pm).toBe(4)
     expect(schools[0]?.applicants.pm).toBe(10)
   })

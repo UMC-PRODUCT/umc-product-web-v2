@@ -3,14 +3,7 @@ import { cn } from "@/shared/lib/utils"
 
 import type { CSSProperties } from "react"
 
-import type { PartKey } from "@/features/recruiting/model/parts"
-
-// 파트별 상세: 지원 수(applied)는 항상, 평가 수(evaluated)는 평가현황에서만.
-// evaluated가 하나라도 있으면 평가 모드로 렌더한다.
-export type PartBreakdown = Record<
-  PartKey,
-  { applied: number; evaluated?: number }
->
+import type { PartBreakdown } from "@/features/recruiting/model/parts"
 
 interface PartBreakdownTooltipContentProps {
   name: string

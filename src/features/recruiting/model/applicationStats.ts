@@ -1,4 +1,4 @@
-import { TRACK_PART_TAG } from "./applicantMapper"
+import { emptyPartCounts, toPartKey } from "./applicantMapper"
 
 import type {
   RecruitingPartSummary,
@@ -13,19 +13,6 @@ export interface SchoolApplicationCount {
   partCounts: Record<PartKey, number>
 }
 
-// PartTag(pm/design/web-pe/mobile-pe)와 대시보드 PartKey(webPe/mobilePe)는 표기가
-// 달라 한 번 더 옮긴다. 트랙 매핑은 TRACK_PART_TAG 한 곳에 유지한다.
-const PART_TAG_TO_KEY: Record<string, PartKey> = {
-  pm: "pm",
-  design: "design",
-  "web-pe": "webPe",
-  "mobile-pe": "mobilePe",
-}
-
-export function emptyPartCounts(): Record<PartKey, number> {
-  return { pm: 0, design: 0, webPe: 0, mobilePe: 0 }
-}
-
 // 서버는 INFRA_PLUS 를 뺀 4개 파트를 항상 주지만, 매핑되지 않는 파트가 오면 버린다
 // (INFRA_PLUS 는 모집 대상이 아니라 TRACK_PART_TAG 에서 null 이다).
 export function toPartCounts(
@@ -33,8 +20,7 @@ export function toPartCounts(
 ): Record<PartKey, number> {
   const counts = emptyPartCounts()
   for (const part of parts) {
-    const tag = TRACK_PART_TAG[part.part]
-    const key = tag ? PART_TAG_TO_KEY[tag] : undefined
+    const key = toPartKey(part.part)
     if (key) counts[key] += part.totalCount
   }
   return counts

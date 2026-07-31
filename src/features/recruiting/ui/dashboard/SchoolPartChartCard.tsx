@@ -1,14 +1,19 @@
 import { PARTS } from "@/features/recruiting/model/parts"
 import { GraphTooltip } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
 
-import type { PartKey, PartMeta } from "@/features/recruiting/model/parts"
-import type { PartBreakdown } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
+import type {
+  PartBreakdown,
+  PartKey,
+  PartMeta,
+} from "@/features/recruiting/model/parts"
 
 interface SchoolDatum {
   // 지부는 서버 값을 그대로 받는다. 같은 이름의 지부가 있을 수 있어 그룹핑과
   // key 는 chapterId 로 잡고 chapterName 은 표시에만 쓴다.
   chapterId: string
   chapterName: string
+  // name 은 축약된 표시용이라 서로 겹칠 수 있다. key 는 schoolId 로 잡는다.
+  schoolId: string
   name: string
   // 앞(컬러) 막대 값. 지원현황=지원자수, 평가현황=평가 완료 수.
   counts: Record<PartKey, number>
@@ -137,7 +142,7 @@ export function SchoolPartChartCard({
               <div className="relative flex gap-1.5">
                 {row.map((school) => (
                   <div
-                    key={`${school.chapterId}-${school.name}`}
+                    key={school.schoolId}
                     className="group relative flex w-15 shrink-0 flex-col items-center gap-1.25"
                   >
                     <div className="flex h-25 gap-1.25">

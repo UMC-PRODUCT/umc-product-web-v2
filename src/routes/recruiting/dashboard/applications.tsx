@@ -21,8 +21,7 @@ import { shortenSchoolName } from "@/shared/lib/formatSchoolName"
 import { GraphTimestampLabel } from "@/shared/ui/GraphTimestampLabel"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
-import type { PartKey } from "@/features/recruiting/model/parts"
-import type { PartBreakdown } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
+import type { PartBreakdown, PartKey } from "@/features/recruiting/model/parts"
 
 export const Route = createFileRoute("/recruiting/dashboard/applications")({
   component: RouteComponent,
@@ -111,6 +110,7 @@ function RouteComponent() {
     group.schools.map((school) => ({
       chapterId: group.chapterId,
       chapterName: group.chapterName,
+      schoolId: school.schoolId,
       // 서버는 정식 명칭을 주는데 x축에 학교가 15개씩 들어가 그대로면 넘친다.
       name: shortenSchoolName(school.schoolName),
       counts: school.partCounts,

@@ -1,30 +1,10 @@
-import { TRACK_PART_TAG } from "./applicantMapper"
+import { emptyPartCounts, toPartKey } from "./applicantMapper"
 
 import type {
   RecruitingEvaluationStatistics,
   RecruitingTrackCount,
 } from "../api/types"
-import type { PartBreakdown } from "../ui/dashboard/PartBreakdownTooltip"
-import type { PartKey } from "./parts"
-
-// PartTag(pm/design/web-pe/mobile-pe)와 대시보드 PartKey(webPe/mobilePe)는
-// 표기가 달라 한 번 더 옮긴다. TRACK_PART_TAG 를 재사용해 트랙 매핑을 한 곳에
-// 유지한다.
-const PART_TAG_TO_KEY: Record<string, PartKey> = {
-  pm: "pm",
-  design: "design",
-  "web-pe": "webPe",
-  "mobile-pe": "mobilePe",
-}
-
-function emptyPartCounts(): Record<PartKey, number> {
-  return { pm: 0, design: 0, webPe: 0, mobilePe: 0 }
-}
-
-function toPartKey(track: RecruitingTrackCount["track"]): PartKey | null {
-  const tag = TRACK_PART_TAG[track]
-  return tag ? (PART_TAG_TO_KEY[tag] ?? null) : null
-}
+import type { PartBreakdown, PartKey } from "./parts"
 
 // 서버는 INFRA_PLUS 를 빼고 4개 트랙을 항상 주지만, 늘어나도 화면이 깨지지 않게
 // 매핑되지 않는 트랙은 버린다(INFRA_PLUS 는 TRACK_PART_TAG 에서 null 이다).
@@ -114,6 +94,7 @@ export function toChapterEvaluationBars(
 export interface SchoolEvaluationBar {
   chapterId: string
   chapterName: string
+  schoolId: string
   name: string
   counts: Record<PartKey, number>
   applicants: Record<PartKey, number>
@@ -128,6 +109,7 @@ export function toSchoolEvaluationBars(
     chapter.schools.map((school) => ({
       chapterId: chapter.chapterId,
       chapterName: chapter.chapterName,
+      schoolId: school.schoolId,
       name: school.schoolName,
       counts: toEvaluatedCountsByPart(school.byTrack),
       applicants: toApplicantCountsByPart(school.byTrack),

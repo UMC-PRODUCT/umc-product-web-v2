@@ -168,10 +168,10 @@ describe("normalizeStatusSummary", () => {
     })
   })
 
+  // Number("") 는 0 이라 가드가 없어도 통과한다. NaN 이 되는 값을 써야 검증된다.
   it("숫자로 바꿀 수 없는 값은 0 으로 둔다", () => {
-    const result = normalizeStatusSummary({ totalCount: "" })
-
-    expect(result.totalCount).toBe(0)
+    expect(normalizeStatusSummary({ totalCount: "abc" }).totalCount).toBe(0)
+    expect(normalizeStatusSummary({ totalCount: "" }).totalCount).toBe(0)
   })
 })
 
