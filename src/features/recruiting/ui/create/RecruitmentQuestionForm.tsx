@@ -1,9 +1,9 @@
 import { useNavigate } from "@tanstack/react-router"
+import { isAxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
 
 import CloseThinIcon from "@/shared/assets/icon/close/CloseThinIcon"
 import DragAndDrop from "@/shared/assets/icon/drag-and-drop/DragAndDrop"
-import TrashCan from "@/shared/assets/icon/garbage/TrashCan"
 import ToggleCheckboxIcon from "@/shared/assets/icon/toggle/ToggleCheckboxIcon"
 import ToggleFileUploadIcon from "@/shared/assets/icon/toggle/ToggleFileUploadIcon"
 import ToggleRadioIcon from "@/shared/assets/icon/toggle/ToggleRadioIcon"
@@ -18,18 +18,52 @@ import { CheckboxIndicator } from "@/shared/ui/input/checkbox/CheckboxIndicator"
 import { RadioIndicator } from "@/shared/ui/input/radio/RadioIndicator"
 import { ToggleButton } from "@/shared/ui/input/ToggleButton"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
+import { OptionFieldList } from "@/shared/ui/question-field/OptionFieldList"
+import { PortfolioField } from "@/shared/ui/question-field/PortfolioField"
 import { QuestionFieldBox } from "@/shared/ui/question-field/QuestionFieldBox"
+import { QuestionForm } from "@/shared/ui/question-field/QuestionForm"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
+import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { Toggle } from "@/shared/ui/Toggle"
 
-import { PARTS } from "../../model/parts"
-import { RECRUITMENT_DEFAULT_QUESTIONS } from "../../model/recruitmentQuestion"
+import {
+  createRecruitingRound,
+  upsertRecruitingApplicationForm,
+} from "../../api/recruitingApi"
+import {
+  getRecruitableTracks,
+  PART_KEY_TO_TRACK,
+  PARTS,
+} from "../../model/parts"
+import {
+  buildRecruitmentPreviewTitle,
+  composeRecruitmentTitle,
+  periodFieldToInstant,
+} from "../../model/recruitmentCreate"
+import {
+  buildCommonSectionUpsertRequest,
+  buildTrackSectionUpsertRequest,
+  getRecruitmentFieldTypePatch,
+  makeRecruitmentQuestion,
+  RECRUITMENT_DEFAULT_QUESTIONS,
+  validateRecruitmentQuestionForm,
+} from "../../model/recruitmentQuestion"
+import { getRecruitingRoundCreateErrorMessage } from "../../model/recruitmentRoundErrors"
+import { useRecruitmentCreateStore } from "../../model/useRecruitmentCreateStore"
 import { RecruitmentSectionHeader } from "../RecruitmentSectionHeader"
 
 import type { FieldTypeOption } from "@/shared/ui/button/FieldTypeButtonGroup"
 
 import type { PartKey } from "../../model/parts"
-import type { RecruitmentDefaultQuestion } from "../../model/recruitmentQuestion"
+import type {
+  RecruitmentDefaultQuestion,
+  RecruitmentFieldType,
+  RecruitmentPartSection,
+  RecruitmentQuestion,
+  RecruitmentQuestionOption,
+} from "../../model/recruitmentQuestion"
 
 // 파트 섹션(PM/Design/Web/Mobile) 본문의 문항 유형 선택줄에 쓰는 옵션.
 const PART_FIELD_TYPE_OPTIONS: FieldTypeOption[] = [
@@ -46,9 +80,11 @@ const QUESTION_DISABLE_TOGGLE_INDEXES = ["04"]
 function RemovableRadioOption({
   option,
   onRemove,
+  disabled,
 }: {
   option: string
   onRemove: () => void
+  disabled?: boolean
 }) {
   return (
     <div className="group/option hover:bg-teal-gray-50 flex w-full items-center justify-between gap-3 rounded-lg p-2">
@@ -56,14 +92,16 @@ function RemovableRadioOption({
         <RadioIndicator checked={false} variant="list" />
         <span className="text-body-1-regular text-teal-gray-700">{option}</span>
       </div>
-      <button
-        type="button"
-        aria-label={`${option} 옵션 사용 해제`}
-        onClick={onRemove}
-        className="text-teal-gray-400 flex size-5 shrink-0 items-center justify-center opacity-0 transition-opacity group-hover/option:opacity-100 focus-visible:opacity-100"
-      >
-        <CloseThinIcon className="size-3.5" />
-      </button>
+      {!disabled && (
+        <button
+          type="button"
+          aria-label={`${option} 옵션 사용 해제`}
+          onClick={onRemove}
+          className="text-teal-gray-400 flex size-5 shrink-0 items-center justify-center opacity-0 transition-opacity group-hover/option:opacity-100 focus-visible:opacity-100"
+        >
+          <CloseThinIcon className="size-3.5" />
+        </button>
+      )}
     </div>
   )
 }
@@ -111,6 +149,7 @@ function ToggleableRadioOptionsBox({
           key={option}
           option={option}
           onRemove={() => onRemoveOption(option)}
+          disabled={activeOptions.length <= 1}
         />
       ))}
       {removedOptions.map((option) => (
@@ -124,53 +163,134 @@ function ToggleableRadioOptionsBox({
   )
 }
 
-// 파트 섹션("섹션 사용" 토글 ON) 본문. 문항 추가/유형 전환은 아직 TODO라
-// 공통 문항 섹션과 동일하게 정적 플레이스홀더만 보여준다.
-function PartSectionBody() {
-  return (
-    <div className="bg-teal-gray-100 relative flex w-full flex-col items-end gap-4 rounded-br-xl rounded-bl-xl border-r border-b border-l border-teal-200 px-5 pt-4 pb-5">
-      <span
-        aria-hidden="true"
-        className="absolute top-0 bottom-0 left-0 w-2 rounded-bl-xl bg-teal-500"
-      />
-      <div className="flex w-full justify-center">
-        <DragAndDrop className="h-2.5 w-4" aria-hidden="true" />
-      </div>
-      <div className="flex w-full flex-col items-start gap-2.5">
-        <QuestionItemTitle index="01" title="" caption="설명을 입력하세요." />
-        <div className="w-full pl-3">
-          <QuestionFieldBox>
-            <span className="text-body-1-regular text-teal-gray-400">
-              답변을 작성하세요.
-            </span>
-          </QuestionFieldBox>
+function PartQuestionFieldRenderer({
+  question,
+  onOptionsChange,
+}: {
+  question: RecruitmentQuestion
+  onOptionsChange: (options: RecruitmentQuestionOption[]) => void
+}) {
+  switch (question.fieldType) {
+    case "text":
+      return (
+        <div className="pointer-events-none w-full">
+          <TextQuestionField value="" onChange={() => {}} />
         </div>
-      </div>
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <CheckboxIndicator checked={false} variant="list" />
-          <span className="text-body-1-medium text-teal-gray-600">
-            필수 항목
-          </span>
-        </div>
-        <button
-          type="button"
-          aria-label="문항 삭제"
-          className="text-teal-gray-500 flex size-6.5 shrink-0 items-center justify-center"
-        >
-          <TrashCan className="size-6" />
-        </button>
-      </div>
-      <div className="flex w-full flex-col items-center gap-4">
-        <FieldTypeButtonGroup
-          options={PART_FIELD_TYPE_OPTIONS}
-          selected="text"
-          onChange={() => {}}
-          className="max-w-full flex-wrap justify-center"
+      )
+    case "radio":
+      return (
+        <OptionFieldList
+          type="radio"
+          options={question.options}
+          onOptionsChange={onOptionsChange}
         />
-        <FloatingActionButton aria-label="질문 추가" />
+      )
+    case "checkbox":
+      return (
+        <OptionFieldList
+          type="checkbox"
+          options={question.options}
+          onOptionsChange={onOptionsChange}
+        />
+      )
+    case "file":
+      return (
+        <div className="pointer-events-none w-full">
+          <FileUploadField
+            fileName={null}
+            placeholder="파일을 업로드해주세요."
+            onUpload={() => {}}
+            onDelete={() => {}}
+          />
+        </div>
+      )
+    case "portfolio":
+      return (
+        <div className="pointer-events-none w-full">
+          <PortfolioField />
+        </div>
+      )
+  }
+}
+
+// 파트 섹션("섹션 사용" 토글 ON) 본문
+function PartSectionBody({
+  questions,
+  focusedQuestionId,
+  onFocus,
+  onUpdate,
+  onAdd,
+  onDelete,
+}: {
+  questions: RecruitmentQuestion[]
+  focusedQuestionId: string | null
+  onFocus: (id: string) => void
+  onUpdate: (id: string, patch: Partial<RecruitmentQuestion>) => void
+  onAdd: () => void
+  onDelete: (id: string) => void
+}) {
+  const focusedQuestion = questions.find((q) => q.id === focusedQuestionId)
+
+  return (
+    <>
+      <div className="bg-teal-gray-100 flex w-full flex-col items-center gap-4 rounded-br-xl rounded-bl-xl border-r border-b border-l border-teal-200 pb-5">
+        {questions.map((question, index) => {
+          const focused = question.id === focusedQuestionId
+          return (
+            <div
+              key={question.id}
+              onClick={focused ? undefined : () => onFocus(question.id)}
+              onFocusCapture={focused ? undefined : () => onFocus(question.id)}
+              className={cn("w-full", !focused && "cursor-pointer")}
+            >
+              <QuestionForm
+                index={String(index + 1).padStart(2, "0")}
+                title={question.title}
+                onTitleChange={(title) => onUpdate(question.id, { title })}
+                caption={question.caption}
+                onCaptionChange={(caption) =>
+                  onUpdate(question.id, { caption })
+                }
+                focused={focused}
+                isFirst={index === 0}
+                readonlyTitle={question.fieldType === "portfolio"}
+                required={question.required}
+                onRequiredChange={(required) =>
+                  onUpdate(question.id, { required })
+                }
+                onDelete={() => onDelete(question.id)}
+              >
+                <PartQuestionFieldRenderer
+                  question={question}
+                  onOptionsChange={(options) =>
+                    onUpdate(question.id, { options })
+                  }
+                />
+              </QuestionForm>
+            </div>
+          )
+        })}
       </div>
-    </div>
+      <div className="flex w-full flex-col items-center gap-4 pt-4">
+        {focusedQuestion && (
+          <FieldTypeButtonGroup
+            options={PART_FIELD_TYPE_OPTIONS}
+            selected={focusedQuestion.fieldType}
+            onChange={(key) =>
+              onUpdate(
+                focusedQuestion.id,
+                getRecruitmentFieldTypePatch(
+                  key as RecruitmentFieldType,
+                  focusedQuestion,
+                ),
+              )
+            }
+            className="max-w-full flex-wrap justify-center"
+          />
+        )}
+        <FloatingActionButton aria-label="질문 추가" onClick={onAdd} />
+      </div>
+    </>
   )
 }
 
@@ -365,15 +485,41 @@ export function RecruitmentQuestionForm({
   onBlankPartsChange,
 }: RecruitmentQuestionFormProps) {
   const navigate = useNavigate()
-  const [enabledParts, setEnabledParts] = useState<Record<PartKey, boolean>>(
-    () =>
-      Object.fromEntries(PARTS.map((part) => [part.key, false])) as Record<
-        PartKey,
-        boolean
-      >,
+  const addToast = useToastStore((state) => state.addToast)
+  const enabledParts = useRecruitmentCreateStore((s) => s.enabledParts)
+  const setEnabledParts = useRecruitmentCreateStore((s) => s.setEnabledParts)
+  const setSecondChoiceEnabled = useRecruitmentCreateStore(
+    (s) => s.setSecondChoiceEnabled,
   )
+  const basicInfo = useRecruitmentCreateStore((s) => s.basicInfo)
+  const gisuGeneration = useRecruitmentCreateStore((s) => s.gisuGeneration)
+  const seasonId = useRecruitmentCreateStore((s) => s.seasonId)
+  const roundId = useRecruitmentCreateStore((s) => s.roundId)
+  const setRoundId = useRecruitmentCreateStore((s) => s.setRoundId)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [removedOptionsByQuestionIndex, setRemovedOptionsByQuestionIndex] =
     useState<Record<string, string[]>>({})
+  // 파트별 섹션의 문항 목록 편집 상태. 파트당 여러 문항을 가질 수 있다.
+  const [partQuestionDrafts, setPartQuestionDrafts] = useState<
+    Record<PartKey, RecruitmentQuestion[]>
+  >(
+    () =>
+      Object.fromEntries(
+        PARTS.map((part) => [part.key, [makeRecruitmentQuestion()]]),
+      ) as Record<PartKey, RecruitmentQuestion[]>,
+  )
+  // 파트별로 현재 편집 중(카드가 펼쳐진 상태)인 문항 id.
+  const [focusedQuestionIdByPart, setFocusedQuestionIdByPart] = useState<
+    Record<PartKey, string | null>
+  >(
+    () =>
+      Object.fromEntries(
+        PARTS.map((part) => [
+          part.key,
+          (partQuestionDrafts[part.key] ?? [])[0]?.id ?? null,
+        ]),
+      ) as Record<PartKey, string | null>,
+  )
   const [questionToggleState, setQuestionToggleState] = useState<
     Record<string, { enabled: boolean; required: boolean }>
   >(() =>
@@ -392,8 +538,47 @@ export function RecruitmentQuestionForm({
       enabledParts,
       removedOptionsByQuestionIndex,
       questionToggleState,
+      partQuestionDrafts,
     }),
   )
+
+  const updatePartQuestionDraft = (
+    part: PartKey,
+    questionId: string,
+    patch: Partial<RecruitmentQuestion>,
+  ) => {
+    setPartQuestionDrafts((prev) => ({
+      ...prev,
+      [part]: prev[part].map((question) =>
+        question.id === questionId ? { ...question, ...patch } : question,
+      ),
+    }))
+  }
+
+  const addPartQuestion = (part: PartKey) => {
+    const newQuestion = makeRecruitmentQuestion()
+    setPartQuestionDrafts((prev) => ({
+      ...prev,
+      [part]: [...prev[part], newQuestion],
+    }))
+    setFocusedQuestionIdByPart((prev) => ({ ...prev, [part]: newQuestion.id }))
+  }
+
+  const deletePartQuestion = (part: PartKey, questionId: string) => {
+    const nextQuestions = partQuestionDrafts[part].filter(
+      (q) => q.id !== questionId,
+    )
+    setPartQuestionDrafts((prev) => ({ ...prev, [part]: nextQuestions }))
+    setFocusedQuestionIdByPart((prev) =>
+      prev[part] === questionId
+        ? { ...prev, [part]: nextQuestions[0]?.id ?? null }
+        : prev,
+    )
+  }
+
+  const focusPartQuestion = (part: PartKey, questionId: string) => {
+    setFocusedQuestionIdByPart((prev) => ({ ...prev, [part]: questionId }))
+  }
 
   const removeOption = (questionIndex: string, option: string) => {
     setRemovedOptionsByQuestionIndex((prev) => ({
@@ -424,6 +609,7 @@ export function RecruitmentQuestionForm({
         required: prev[questionIndex]?.required ?? true,
       },
     }))
+    if (questionIndex === "04") setSecondChoiceEnabled(enabled)
   }
 
   const setQuestionRequired = (questionIndex: string, required: boolean) => {
@@ -440,6 +626,7 @@ export function RecruitmentQuestionForm({
     enabledParts,
     removedOptionsByQuestionIndex,
     questionToggleState,
+    partQuestionDrafts,
   })
   const hasUnsavedChanges = savedSnapshotRef.current !== currentSnapshot
   const canTempSave = hasUnsavedChanges && !isSaving
@@ -448,11 +635,16 @@ export function RecruitmentQuestionForm({
     onDirtyChange?.(hasUnsavedChanges)
   }, [hasUnsavedChanges, onDirtyChange])
 
-  // 파트 본문(PartSectionBody)이 아직 입력 불가한 정적 플레이스홀더라 검증할 실제 데이터가 없다.
-  // "파트 사용" 토글만으로 미입력 여부를 판단하면 파트를 켜는 순간 영구히 다음 단계가
-  // 막히므로, 파트별 문항 편집이 구현되기 전까지는 이 게이트를 임시로 비활성화한다.
-  // TODO: 파트별 문항 편집 상태가 생기면 validateRecruitmentQuestionForm으로 교체.
-  const hasBlankEnabledPart = false
+  const partSectionsForValidation: RecruitmentPartSection[] = PARTS.map(
+    (part) => ({
+      id: part.key,
+      name: part.label,
+      isEnabled: enabledParts[part.key],
+      questions: partQuestionDrafts[part.key],
+    }),
+  )
+  const hasBlankEnabledPart =
+    validateRecruitmentQuestionForm([], partSectionsForValidation).length > 0
 
   useEffect(() => {
     onBlankPartsChange?.(hasBlankEnabledPart)
@@ -467,6 +659,118 @@ export function RecruitmentQuestionForm({
       setShowTempSaveModal(true)
     }, 600)
   }
+
+  const showErrorToast = (message: string) => {
+    addToast({
+      message,
+      color: "red",
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+    })
+  }
+
+  const handleNext = async () => {
+    if (hasBlankEnabledPart) {
+      showErrorToast("사용 중인 섹션의 항목을 모두 적어주세요.")
+      return
+    }
+    const recruitableTracks = getRecruitableTracks(enabledParts)
+    if (recruitableTracks.length === 0) {
+      showErrorToast("모집할 트랙을 최소 1개 선택해 주세요.")
+      return
+    }
+    if (basicInfo.interviewRequired) {
+      // availabilityFormId 자체는 서버가 형식만 보고(> 0) 통과시키는 느슨한 참조라
+      // 프론트에서 채워 넣는 것만으로는 막힐 이유가 없다. 진짜 이유는 그 뒤 단계:
+      // 지원자가 면접 가능 시간대를 제출하는 백엔드 기능(RecruitingInterviewScheduleController
+      // .submitAvailability, RECRUITING-0419)이 Form 엔진 연동 전까지 501로 스텁 처리돼 있어
+      // 아직 개발되지 않았다. 즉 프론트가 뭘 만들든 지원자 쪽 제출 경로가 없어 면접
+      // 스케줄링이 end-to-end로 동작하지 않으므로, 그 기능이 나오기 전까지는 여기서 막는다.
+      showErrorToast(
+        "면접이 있는 모집은 아직 지원되지 않습니다. 1단계에서 면접 진행을 꺼주세요.",
+      )
+      return
+    }
+    if (!seasonId) {
+      showErrorToast("시즌 정보가 없어 모집 차수를 생성할 수 없습니다.")
+      return
+    }
+    if (!basicInfo.chapter || !basicInfo.school || !basicInfo.recruitmentType) {
+      showErrorToast("1단계 기본 정보를 먼저 입력해 주세요.")
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // roundId가 이미 있으면(직전 시도에서 Round 생성은 성공하고 Form 저장만
+      // 실패한 경우) 재시도 시 Round를 또 만들지 않고 같은 roundId로 Form만 다시 저장한다.
+      const currentRoundId =
+        roundId ??
+        (await createRecruitingRound(seasonId, {
+          title: composeRecruitmentTitle(
+            buildRecruitmentPreviewTitle({ ...basicInfo, gisuGeneration }),
+            basicInfo.footer,
+          ),
+          type: basicInfo.recruitmentType,
+          roundNo:
+            basicInfo.recruitmentType === "ADDITIONAL" && basicInfo.roundNo
+              ? Number(basicInfo.roundNo)
+              : undefined,
+          recruitableTracks,
+          secondChoiceEnabled: questionToggleState["04"]?.enabled ?? true,
+          documentStartAt: periodFieldToInstant(
+            basicInfo.periodForm.documentStartAt,
+          ),
+          documentEndAt: periodFieldToInstant(
+            basicInfo.periodForm.documentEndAt,
+          ),
+          documentResultPublishedAt: periodFieldToInstant(
+            basicInfo.periodForm.documentResultPublishedAt,
+          ),
+          finalResultPublishedAt: periodFieldToInstant(
+            basicInfo.periodForm.finalResultPublishedAt,
+          ),
+          interviewRequired: false,
+        }))
+      if (!roundId) setRoundId(currentRoundId)
+
+      try {
+        const trackSections = PARTS.filter(
+          (part) => enabledParts[part.key],
+        ).map((part) =>
+          buildTrackSectionUpsertRequest(
+            part.label,
+            PART_KEY_TO_TRACK[part.key],
+            partQuestionDrafts[part.key],
+          ),
+        )
+        await upsertRecruitingApplicationForm(seasonId, currentRoundId, {
+          sections: [
+            buildCommonSectionUpsertRequest(
+              removedOptionsByQuestionIndex,
+              questionToggleState,
+            ),
+            ...trackSections,
+          ],
+        })
+      } catch (formError) {
+        const message = isAxiosError(formError)
+          ? (formError.response?.data as { message?: string } | undefined)
+              ?.message
+          : undefined
+        showErrorToast(message ?? "모집 문항 저장에 실패했습니다.")
+        return
+      }
+
+      onNext()
+    } catch (error) {
+      showErrorToast(getRecruitingRoundCreateErrorMessage(error))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="border-teal-gray-150 mt-6 flex flex-col gap-8 rounded-2xl border bg-white px-8 py-8.5">
       <RecruitmentSectionHeader index={3} title="모집 문항 작성" />
@@ -566,10 +870,21 @@ export function RecruitmentQuestionForm({
               partName={part.label}
               toggleChecked={enabledParts[part.key]}
               onToggleChange={(next) =>
-                setEnabledParts((prev) => ({ ...prev, [part.key]: next }))
+                setEnabledParts({ ...enabledParts, [part.key]: next })
               }
             />
-            {enabledParts[part.key] && <PartSectionBody />}
+            {enabledParts[part.key] && (
+              <PartSectionBody
+                questions={partQuestionDrafts[part.key]}
+                focusedQuestionId={focusedQuestionIdByPart[part.key]}
+                onFocus={(id) => focusPartQuestion(part.key, id)}
+                onUpdate={(id, patch) =>
+                  updatePartQuestionDraft(part.key, id, patch)
+                }
+                onAdd={() => addPartQuestion(part.key)}
+                onDelete={(id) => deletePartQuestion(part.key, id)}
+              />
+            )}
           </div>
         ))}
         <span className="text-label-2-medium text-teal-gray-400">
@@ -591,7 +906,13 @@ export function RecruitmentQuestionForm({
           >
             임시 저장
           </Button>
-          <Button type="button" variant="fill" color="primary" onClick={onNext}>
+          <Button
+            type="button"
+            variant="fill"
+            color="primary"
+            isLoading={isSubmitting}
+            onClick={handleNext}
+          >
             다음
           </Button>
         </div>

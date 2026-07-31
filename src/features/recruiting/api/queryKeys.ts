@@ -12,6 +12,8 @@ export const recruitingKeys = {
   // 키에 넣어 분리한다.
   openRoundList: (gisuId: string) =>
     [...recruitingKeys.rounds(), gisuId, "OPEN"] as const,
+  adminRoundList: (gisuId: string, sort?: string) =>
+    [...recruitingKeys.rounds(), "admin", gisuId, sort ?? "NEWEST"] as const,
 
   round: (gisuId: string, roundId: string) =>
     [...recruitingKeys.rounds(), gisuId, roundId] as const,

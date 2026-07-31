@@ -5,6 +5,7 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
+import { RecruitmentCreateStoreProvider } from "../model/useRecruitmentCreateStore"
 import { RecruitmentAnnouncementForm } from "./create/RecruitmentAnnouncementForm"
 import { RecruitmentBasicInfoForm } from "./create/RecruitmentBasicInfoForm"
 import { RecruitmentQuestionForm } from "./create/RecruitmentQuestionForm"
@@ -79,72 +80,74 @@ export function RecruitmentCreatePage({
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
 
   return (
-    <div className="flex w-full max-w-286.5 flex-col">
-      <PageLabel
-        breadcrumb={[
-          { id: "recruiting", label: "리크루팅" },
-          { id: "recruitment-management", label: "모집 관리" },
-          { id: "recruitment-create", label: "모집 생성" },
-        ]}
-        title="모집 생성"
-        description="모집 공고를 만들고 공개할 준비를 합니다."
-        className="pl-3"
-      />
+    <RecruitmentCreateStoreProvider>
+      <div className="flex w-full max-w-286.5 flex-col">
+        <PageLabel
+          breadcrumb={[
+            { id: "recruiting", label: "리크루팅" },
+            { id: "recruitment-management", label: "모집 관리" },
+            { id: "recruitment-create", label: "모집 생성" },
+          ]}
+          title="모집 생성"
+          description="모집 공고를 만들고 공개할 준비를 합니다."
+          className="pl-3"
+        />
 
-      <div ref={stepperRef}>
-        <RecruitmentStepper
-          step={step}
-          onStepChange={handleStepChange}
-          className="mt-8"
-        />
-      </div>
+        <div ref={stepperRef}>
+          <RecruitmentStepper
+            step={step}
+            onStepChange={handleStepChange}
+            className="mt-8"
+          />
+        </div>
 
-      {/* 단계 전환 시 입력값이 사라지지 않도록 언마운트하지 않고 보이기/숨기기만 전환한다. */}
-      <div className={step === 1 ? undefined : "hidden"}>
-        <RecruitmentBasicInfoForm
-          key={`${role ?? "central"}:${initialChapter ?? ""}:${initialSchool ?? ""}`}
-          onNext={() => moveToStep(2)}
-          onDirtyChange={setIsStep1Dirty}
-          role={role}
-          initialChapter={initialChapter}
-          initialSchool={initialSchool}
-        />
-      </div>
-      <div className={step === 2 ? undefined : "hidden"}>
-        <RecruitmentQuestionForm
-          onPrev={() => moveToStep(1)}
-          onNext={() => handleStepChange(3)}
-          onDirtyChange={setIsStep2Dirty}
-          onBlankPartsChange={setStep2HasBlankPart}
-        />
-      </div>
-      <div className={step === 3 ? undefined : "hidden"}>
-        <RecruitmentAnnouncementForm
-          onPrev={() => moveToStep(2)}
-          onDirtyChange={setIsStep3Dirty}
-        />
-      </div>
+        {/* 단계 전환 시 입력값이 사라지지 않도록 언마운트하지 않고 보이기/숨기기만 전환한다. */}
+        <div className={step === 1 ? undefined : "hidden"}>
+          <RecruitmentBasicInfoForm
+            key={`${role ?? "central"}:${initialChapter ?? ""}:${initialSchool ?? ""}`}
+            onNext={() => moveToStep(2)}
+            onDirtyChange={setIsStep1Dirty}
+            role={role}
+            initialChapter={initialChapter}
+            initialSchool={initialSchool}
+          />
+        </div>
+        <div className={step === 2 ? undefined : "hidden"}>
+          <RecruitmentQuestionForm
+            onPrev={() => moveToStep(1)}
+            onNext={() => handleStepChange(3)}
+            onDirtyChange={setIsStep2Dirty}
+            onBlankPartsChange={setStep2HasBlankPart}
+          />
+        </div>
+        <div className={step === 3 ? undefined : "hidden"}>
+          <RecruitmentAnnouncementForm
+            onPrev={() => moveToStep(2)}
+            onDirtyChange={setIsStep3Dirty}
+          />
+        </div>
 
-      {/* 페이지 이탈 모달 */}
-      <CtaModal
-        open={isLeaveModalOpen}
-        onOpenChange={(open) => {
-          if (!open) resetLeave?.()
-        }}
-        variant="warning"
-        title="페이지 이탈"
-        content={
-          <>
-            작성 중인 내용이 저장되지 않습니다.
-            <br />
-            나가시겠습니까?
-          </>
-        }
-        cancelText="돌아가기"
-        confirmText="나가기"
-        onCancel={() => resetLeave?.()}
-        onConfirm={() => proceedLeave?.()}
-      />
-    </div>
+        {/* 페이지 이탈 모달 */}
+        <CtaModal
+          open={isLeaveModalOpen}
+          onOpenChange={(open) => {
+            if (!open) resetLeave?.()
+          }}
+          variant="warning"
+          title="페이지 이탈"
+          content={
+            <>
+              작성 중인 내용이 저장되지 않습니다.
+              <br />
+              나가시겠습니까?
+            </>
+          }
+          cancelText="돌아가기"
+          confirmText="나가기"
+          onCancel={() => resetLeave?.()}
+          onConfirm={() => proceedLeave?.()}
+        />
+      </div>
+    </RecruitmentCreateStoreProvider>
   )
 }

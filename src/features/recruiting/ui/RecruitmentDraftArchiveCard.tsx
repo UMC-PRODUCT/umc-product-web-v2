@@ -1,13 +1,11 @@
 import { useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
-import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
 import {
   canEditRecruitmentPost,
   groupPostsBySchool,
-  RECRUITMENT_SORT_OPTIONS,
 } from "../model/recruitmentList"
 import { RecruitmentPostMoreMenu } from "./RecruitmentPostMoreMenu"
 import { RecruitmentPostRow } from "./RecruitmentPostRow"
@@ -15,18 +13,12 @@ import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
-import type { RecruitingListRole } from "../model/recruitingListRole"
-import type {
-  RecruitmentEditScope,
-  RecruitmentPost,
-  RecruitmentSort,
-} from "../model/recruitmentList"
+import type { RecruitmentPost } from "../model/recruitmentList"
 
 interface RecruitmentDraftArchiveCardProps {
   chapter: Chapter
   posts: RecruitmentPost[]
-  role: RecruitingListRole
-  editScope: RecruitmentEditScope
+  permittedSeasonIds: ReadonlySet<string>
   onPublish: (postId: string) => void
   onDuplicate: (postId: string) => void
   onDelete: (postId: string) => void
@@ -38,16 +30,14 @@ interface RecruitmentDraftArchiveCardProps {
 
 function DraftPostRow({
   post,
-  role,
-  editScope,
+  permittedSeasonIds,
   onPublish,
   onDuplicate,
   onDelete,
   onUndoDelete,
 }: {
   post: RecruitmentPost
-  role: RecruitingListRole
-  editScope: RecruitmentEditScope
+  permittedSeasonIds: ReadonlySet<string>
   onPublish: (postId: string) => void
   onDuplicate: (postId: string) => void
   onDelete: (postId: string) => void
@@ -61,7 +51,7 @@ function DraftPostRow({
       dateLabel={post.dateLabel}
       authorLabel={post.authorLabel}
       status={post.status}
-      editable={canEditRecruitmentPost(role, post, editScope)}
+      editable={canEditRecruitmentPost(post, permittedSeasonIds)}
       rightAction={
         <RecruitmentPostMoreMenu
           status={post.status}
@@ -82,8 +72,7 @@ function DraftPostRow({
 export function RecruitmentDraftArchiveCard({
   chapter,
   posts,
-  role,
-  editScope,
+  permittedSeasonIds,
   onPublish,
   onDuplicate,
   onDelete,
@@ -94,8 +83,6 @@ export function RecruitmentDraftArchiveCard({
 }: RecruitmentDraftArchiveCardProps) {
   // TODO: API 연동 시 "내가 쓴 글"을 작성자 기준으로 실제 필터링
   const [myPostsOnly, setMyPostsOnly] = useState(false)
-  const [sort, setSort] = useState<RecruitmentSort>("NEWEST")
-  const [sortOpen, setSortOpen] = useState(false)
 
   // 임시 보관함(공유 보관함)에는 비공개 처리된 DRAFT 상태 글만 노출
   const draftPosts = posts.filter((post) => post.status === "DRAFT")
@@ -124,21 +111,6 @@ export function RecruitmentDraftArchiveCard({
               내가 쓴 글
             </span>
           </label>
-          <FilterDropdown
-            label="최신 순"
-            multiSelect={false}
-            className="border-teal-gray-300 text-teal-gray-900 hover:bg-teal-gray-50 h-10 bg-white"
-            open={sortOpen}
-            onClick={() => setSortOpen((prev) => !prev)}
-            onRequestClose={() => setSortOpen(false)}
-            options={RECRUITMENT_SORT_OPTIONS}
-            selectedValue={sort}
-            selectedLabel={
-              RECRUITMENT_SORT_OPTIONS.find((option) => option.value === sort)
-                ?.label
-            }
-            onSelect={(value) => setSort(value as RecruitmentSort)}
-          />
         </div>
       </div>
       <div className="mt-5 flex flex-col gap-8 px-5">
@@ -155,8 +127,7 @@ export function RecruitmentDraftArchiveCard({
                 <DraftPostRow
                   key={post.postId}
                   post={post}
-                  role={role}
-                  editScope={editScope}
+                  permittedSeasonIds={permittedSeasonIds}
                   onPublish={onPublish}
                   onDuplicate={onDuplicate}
                   onDelete={onDelete}
@@ -180,8 +151,7 @@ export function RecruitmentDraftArchiveCard({
                     <DraftPostRow
                       key={post.postId}
                       post={post}
-                      role={role}
-                      editScope={editScope}
+                      permittedSeasonIds={permittedSeasonIds}
                       onPublish={onPublish}
                       onDuplicate={onDuplicate}
                       onDelete={onDelete}

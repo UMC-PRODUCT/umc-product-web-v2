@@ -1,3 +1,5 @@
+import type { RecruitingTrack } from "../api/types"
+
 // 리크루팅 파트(트랙) 메타 단일 소스. 키/라벨/색을 여기서만 정의해
 // 카드마다 색이 어긋나거나 중복 정의되는 드리프트를 막는다.
 export type PartKey = "pm" | "design" | "webPe" | "mobilePe"
@@ -51,3 +53,19 @@ export const PARTS: PartMeta[] = [
     chip500: "var(--color-chip-mobile-pe-500)",
   },
 ]
+
+// INFRA_PLUS는 제외 (기획)
+export const PART_KEY_TO_TRACK: Record<PartKey, RecruitingTrack> = {
+  pm: "PLAN",
+  design: "DESIGN",
+  webPe: "WEB_PRODUCT_ENGINEER",
+  mobilePe: "MOBILE_PRODUCT_ENGINEER",
+}
+
+export function getRecruitableTracks(
+  enabledParts: Record<PartKey, boolean>,
+): RecruitingTrack[] {
+  return PARTS.filter((part) => enabledParts[part.key]).map(
+    (part) => PART_KEY_TO_TRACK[part.key],
+  )
+}
