@@ -16,8 +16,9 @@ import type {
 import type { EvaluationStage } from "./evaluationStage"
 import type { PartKey } from "./parts"
 
-// 트랙 -> 파트 매핑 단일 소스. 대시보드 집계(evaluationStats)도 이걸 쓴다.
-// INFRA_PLUS 는 리크루팅 파트 표기가 없어 null 이다.
+// 트랙 -> 파트 매핑 단일 소스. 대시보드 집계(applicationStats, evaluationStats)와
+// 평가 이력 매퍼도 이걸 쓴다.
+// INFRA_PLUS 는 모집 단위에 없는 파트라 null 이다(리크루팅이 끝난 뒤 정해지는 스터디 개념).
 export const TRACK_PART_TAG: Record<RecruitingTrack, PartTag | null> = {
   PLAN: "pm",
   DESIGN: "design",

@@ -8,11 +8,14 @@ import type {
   CloneRecruitingRoundRequest,
   CreateApplicationDraftBody,
   CreateRecruitingRoundRequest,
+  DecisionHistoriesQuery,
   FinalDecisionBody,
   FormStructureQuery,
   PublicRoundsQuery,
   RawCount,
+  RawDecisionHistoryPage,
   RawEvaluationStatistics,
+  RawId,
   RawPartSummary,
   RawStatusCounts,
   RawStatusSummary,
@@ -22,6 +25,7 @@ import type {
   RecruitingApplicationMutationResult,
   RecruitingApplicationPage,
   RecruitingApplicationSummary,
+  RecruitingDecisionHistoryPage,
   RecruitingEvaluation,
   RecruitingEvaluationStatistics,
   RecruitingFormStructure,
@@ -132,11 +136,108 @@ export async function getAllRoundApplications(
   }
 }
 
+const DECISION_HISTORY_PAGE_SIZE = 100
+
 // 서버가 문자열로 주는 건수를 숫자로, ID 를 문자열로 고정하고 빠질 수 있는
 // 배열/객체를 채운다. 순수 함수라 테스트에서 응답 형태를 그대로 넣어볼 수 있다.
 function toCount(value: RawCount | undefined): number {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : 0
+}
+
+function toOptionalId(value: RawId | null | undefined): string | null {
+  return value == null ? null : String(value)
+}
+
+// 서버가 ID 와 건수를 문자열로 주므로 경계에서 정리한다. 중앙 직위 담당자는
+// 지부·학교가 null 이라 그대로 null 로 남긴다.
+export function normalizeDecisionHistoryPage(
+  raw: RawDecisionHistoryPage,
+): RecruitingDecisionHistoryPage {
+  const histories = raw.histories ?? {}
+  return {
+    asOf: raw.asOf ?? null,
+    progressStatus: raw.progressStatus,
+    content: (histories.content ?? []).map((item) => ({
+      ...item,
+      decisionHistoryId: String(item.decisionHistoryId),
+      applicationId: String(item.applicationId),
+      applicant: {
+        ...item.applicant,
+        chapterId: String(item.applicant.chapterId),
+        schoolId: String(item.applicant.schoolId),
+      },
+      decider: {
+        ...item.decider,
+        memberId: String(item.decider.memberId),
+        chapterId: toOptionalId(item.decider.chapterId),
+        schoolId: toOptionalId(item.decider.schoolId),
+      },
+    })),
+    page: toCount(histories.page),
+    size: toCount(histories.size),
+    totalElements: toCount(histories.totalElements),
+    totalPages: toCount(histories.totalPages),
+    hasNext: histories.hasNext ?? false,
+    hasPrevious: histories.hasPrevious ?? false,
+  }
+}
+
+// 평가 이력 조회 (RECRUITING-ADMIN-091). 중앙 3역할만 조회할 수 있고 학교·지부
+// 운영진은 감사 대상이라 403 을 받는다.
+export async function getDecisionHistories(
+  params: DecisionHistoriesQuery,
+): Promise<RecruitingDecisionHistoryPage> {
+  const { data } = await api.get<ApiResponse<RawDecisionHistoryPage>>(
+    "/v1/recruiting/admin/decision-histories",
+    { params, paramsSerializer: { indexes: null } },
+  )
+  return normalizeDecisionHistoryPage(data.result)
+}
+
+// 화면이 지부·학교 다중 선택과 학교별 그룹핑을 클라이언트에서 처리하고 있어 전량을
+// 받아야 한다. 서버 필터(chapterId/schoolId)는 단일 ID 라 이름 기반인 현재 필터와
+// 바로 맞물리지 않는다. asOf 와 progressStatus 는 첫 페이지 값을 쓴다.
+export async function getAllDecisionHistories(
+  params: Omit<DecisionHistoriesQuery, "page" | "size">,
+): Promise<RecruitingDecisionHistoryPage> {
+  const first = await getDecisionHistories({
+    ...params,
+    page: 0,
+    size: DECISION_HISTORY_PAGE_SIZE,
+  })
+  if (!first.hasNext) return first
+
+  // totalPages 로 반복을 끊으면 그 값이 빠졌을 때(toCount 가 0 을 돌려줌) 2페이지부터
+  // 통째로 누락된다. 감사용 이력이라 조용한 유실이 특히 위험해 각 응답의 hasNext 를
+  // 따라간다.
+  const content = [...first.content]
+  let page = 1
+  let hasNext: boolean = first.hasNext
+  while (hasNext) {
+    const next = await getDecisionHistories({
+      ...params,
+      page,
+      size: DECISION_HISTORY_PAGE_SIZE,
+    })
+    content.push(...next.content)
+    hasNext = next.hasNext
+    page += 1
+  }
+  return { ...first, content }
+}
+
+// 평가 이력 CSV 다운로드 (RECRUITING-ADMIN-092). 목록 조회와 같은 조건을 받으며
+// 원문 이메일과 실명을 제외하고 ID·마스킹 이메일로 준다. 서버가 text/csv 를 그대로
+// 주므로 Blob 으로 받는다(스펙에는 format: byte 로 적혀 있으나 base64 가 아니다).
+export async function downloadDecisionHistoriesCsv(
+  params: Omit<DecisionHistoriesQuery, "page" | "size">,
+): Promise<Blob> {
+  const { data } = await api.get<Blob>(
+    "/v1/recruiting/admin/decision-histories.csv",
+    { params, paramsSerializer: { indexes: null }, responseType: "blob" },
+  )
+  return data
 }
 
 function toStatusCounts(raw: RawStatusCounts | undefined) {
