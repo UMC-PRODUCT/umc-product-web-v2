@@ -33,19 +33,14 @@ interface EvaluatorAllocationPageProps {
   roundId?: string
 }
 
-function areEvaluatorsEqual(a: Staff[], b: Staff[]): boolean {
-  if (a.length !== b.length) return false
-  const setA = new Set(a.map((staff) => staff.id))
-  return b.every((staff) => setA.has(staff.id))
-}
-
 export function EvaluatorAllocationPage({
   roundId,
 }: EvaluatorAllocationPageProps = {}) {
   const { groups } = useRecruitingRounds()
   const activeRoundId = roundId ?? groups[0]?.rounds[0]?.roundId ?? "1"
 
-  const { data: serverEvaluators } = useRoundEvaluators(activeRoundId)
+  const { data: serverEvaluators, isFetching } =
+    useRoundEvaluators(activeRoundId)
   const saveMutation = useSaveEvaluatorAllocation()
 
   const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
@@ -61,6 +56,8 @@ export function EvaluatorAllocationPage({
 
   useEffect(() => {
     if (!serverEvaluators || isDirty) return
+    if (savedSnapshotRef.current && isFetching) return
+
     const serverMemberIds = new Set(
       serverEvaluators.map((item) => String(item.memberId)),
     )
@@ -68,16 +65,9 @@ export function EvaluatorAllocationPage({
       serverMemberIds.has(String(staff.id)),
     )
 
-    if (
-      savedSnapshotRef.current &&
-      !areEvaluatorsEqual(serverStaff, savedSnapshotRef.current)
-    ) {
-      return
-    }
-
     savedSnapshotRef.current = null
     setAssignedEvaluators(serverStaff)
-  }, [serverEvaluators, isDirty])
+  }, [serverEvaluators, isDirty, isFetching])
 
   const {
     sensors,
