@@ -55,12 +55,14 @@ export function EvaluatorAllocationPage({
   const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
   const [isDirty, setIsDirty] = useState(false)
   const editRevisionRef = useRef(0)
+  const sessionTokenRef = useRef(0)
   const savedSnapshotRef = useRef<Staff[] | null>(null)
 
   useEffect(() => {
     setIsDirty(false)
     savedSnapshotRef.current = null
     editRevisionRef.current = 0
+    sessionTokenRef.current += 1
   }, [activeRoundId])
 
   useEffect(() => {
@@ -97,6 +99,7 @@ export function EvaluatorAllocationPage({
   function handleSave() {
     const requestRevision = editRevisionRef.current
     const requestSnapshot = assignedEvaluators
+    const requestToken = sessionTokenRef.current
 
     saveMutation.mutate(
       {
@@ -105,7 +108,10 @@ export function EvaluatorAllocationPage({
       },
       {
         onSuccess: () => {
-          if (editRevisionRef.current === requestRevision) {
+          if (
+            sessionTokenRef.current === requestToken &&
+            editRevisionRef.current === requestRevision
+          ) {
             savedSnapshotRef.current = requestSnapshot
             setIsDirty(false)
             setAssignedEvaluators(requestSnapshot)
