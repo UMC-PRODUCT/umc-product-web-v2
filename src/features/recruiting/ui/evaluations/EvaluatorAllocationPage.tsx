@@ -37,12 +37,13 @@ export function EvaluatorAllocationPage({
   roundId,
 }: EvaluatorAllocationPageProps = {}) {
   const { groups } = useRecruitingRounds()
-  const activeRoundId = roundId ?? groups[0]?.rounds[0]?.roundId ?? "1"
+  const activeRoundId = roundId ?? groups[0]?.rounds[0]?.roundId ?? null
 
-  const activeGroup =
-    groups.find((group) =>
-      group.rounds.some((r) => String(r.roundId) === String(activeRoundId)),
-    ) ?? groups[0]
+  const activeGroup = activeRoundId
+    ? (groups.find((group) =>
+        group.rounds.some((r) => String(r.roundId) === String(activeRoundId)),
+      ) ?? groups[0])
+    : groups[0]
 
   const schoolId = activeGroup?.schoolId
   const schoolName = activeGroup?.schoolName ?? "교내"
@@ -97,6 +98,7 @@ export function EvaluatorAllocationPage({
   })
 
   function handleSave() {
+    if (!activeRoundId) return
     const requestRevision = editRevisionRef.current
     const requestSnapshot = assignedEvaluators
     const requestToken = sessionTokenRef.current
@@ -214,7 +216,7 @@ export function EvaluatorAllocationPage({
               size="xs"
               color="primary"
               variant="fill"
-              disabled={saveMutation.isPending}
+              disabled={saveMutation.isPending || !activeRoundId}
               onClick={handleSave}
               className="w-fit rounded-[8px] px-3 py-1.5"
             >
