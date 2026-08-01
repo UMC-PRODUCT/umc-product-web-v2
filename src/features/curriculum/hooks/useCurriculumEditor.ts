@@ -171,13 +171,14 @@ export function useCurriculumEditor({
   useEffect(() => {
     if (isGisuLoading || activeGisuId == null) return
 
+    const currentGisuId = activeGisuId
     let isSubscribed = true
     async function fetchOverview() {
       setIsLoading(true)
       try {
         const apiPart = mapPartToApiEnum(part)
         const overview = await getCurriculumOverview({
-          gisuId: activeGisuId,
+          gisuId: currentGisuId,
           part: apiPart,
         })
         if (isSubscribed && overview && overview.curriculumId) {

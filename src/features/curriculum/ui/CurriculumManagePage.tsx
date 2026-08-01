@@ -40,12 +40,13 @@ export function CurriculumManagePage() {
   useEffect(() => {
     if (isGisuLoading || activeGisuId == null) return
 
+    const currentGisuId = activeGisuId
     let isSubscribed = true
     async function loadCurriculum() {
       try {
         const apiPart = mapPartToApiEnum(selectedPart)
         const overview = await getCurriculumOverview({
-          gisuId: activeGisuId,
+          gisuId: currentGisuId,
           part: apiPart,
         })
         if (isSubscribed && overview && overview.curriculumId) {
