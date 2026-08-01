@@ -48,19 +48,31 @@ export function EvaluatorAllocationPage({
   const schoolId = activeGroup?.schoolId
   const schoolName = activeGroup?.schoolName ?? "교내"
 
-  const { data: staffList = [] } = useSchoolStaff(schoolId)
-  const { data: serverEvaluators, isFetching } =
-    useRoundEvaluators(activeRoundId)
+  const { data: staffList = [], isSuccess: isStaffSuccess } =
+    useSchoolStaff(schoolId)
+  const {
+    data: serverEvaluators,
+    isSuccess: isEvaluatorsSuccess,
+    isFetching,
+  } = useRoundEvaluators(activeRoundId)
   const saveMutation = useSaveEvaluatorAllocation()
 
   const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
+  const [initializedRoundId, setInitializedRoundId] = useState<string | null>(
+    null,
+  )
   const [isDirty, setIsDirty] = useState(false)
   const editRevisionRef = useRef(0)
   const sessionTokenRef = useRef(0)
   const savedSnapshotRef = useRef<Staff[] | null>(null)
 
+  const isInitialized = Boolean(
+    activeRoundId && initializedRoundId === activeRoundId,
+  )
+
   useEffect(() => {
     setIsDirty(false)
+    setInitializedRoundId(null)
     savedSnapshotRef.current = null
     editRevisionRef.current = 0
     sessionTokenRef.current += 1
@@ -79,7 +91,18 @@ export function EvaluatorAllocationPage({
 
     savedSnapshotRef.current = null
     setAssignedEvaluators(serverStaff)
-  }, [serverEvaluators, staffList, isDirty, isFetching])
+    if (activeRoundId && isStaffSuccess && isEvaluatorsSuccess) {
+      setInitializedRoundId(activeRoundId)
+    }
+  }, [
+    serverEvaluators,
+    staffList,
+    isDirty,
+    isFetching,
+    activeRoundId,
+    isStaffSuccess,
+    isEvaluatorsSuccess,
+  ])
 
   const {
     sensors,
@@ -89,6 +112,7 @@ export function EvaluatorAllocationPage({
     setActiveItem: setActiveStaff,
   } = useChipAssignment<Staff>({
     onRemoveSelected: (chipId) => {
+      if (!isInitialized) return
       setAssignedEvaluators((prev) =>
         prev.filter((staff) => staff.id !== chipId),
       )
@@ -98,7 +122,7 @@ export function EvaluatorAllocationPage({
   })
 
   function handleSave() {
-    if (!activeRoundId) return
+    if (!activeRoundId || !isInitialized) return
     const requestRevision = editRevisionRef.current
     const requestSnapshot = assignedEvaluators
     const requestToken = sessionTokenRef.current
@@ -124,6 +148,7 @@ export function EvaluatorAllocationPage({
   }
 
   function handleDragStart(event: DragStartEvent) {
+    if (!isInitialized) return
     const staff = event.active.data.current
     if (!isStaff(staff)) return
     setActiveStaff(staff)
@@ -134,6 +159,7 @@ export function EvaluatorAllocationPage({
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    if (!isInitialized) return
     const { active, over } = event
     setActiveStaff(null)
 
@@ -199,12 +225,14 @@ export function EvaluatorAllocationPage({
           <div className="absolute -top-10.5 right-0.5 flex gap-2">
             <button
               onClick={(e) => {
+                if (!isInitialized) return
                 e.stopPropagation()
                 setAssignedEvaluators([])
                 setIsDirty(true)
                 setSelectedChipId(null)
               }}
-              className="border-teal-gray-400/15 box-border flex h-8.5 items-center gap-1 rounded-[10px] border bg-white px-3 py-1 pl-2.5"
+              disabled={!isInitialized}
+              className="border-teal-gray-400/15 box-border flex h-8.5 items-center gap-1 rounded-[10px] border bg-white px-3 py-1 pl-2.5 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ResetIcon className="h-4 w-4" />
               <span className="text-label-1-medium text-teal-gray-700">
@@ -216,7 +244,7 @@ export function EvaluatorAllocationPage({
               size="xs"
               color="primary"
               variant="fill"
-              disabled={saveMutation.isPending || !activeRoundId}
+              disabled={saveMutation.isPending || !isInitialized}
               onClick={handleSave}
               className="w-fit rounded-[8px] px-3 py-1.5"
             >
@@ -235,6 +263,7 @@ export function EvaluatorAllocationPage({
                 selectedChipId={selectedChipId}
                 onSelectChip={setSelectedChipId}
                 onClear={() => {
+                  if (!isInitialized) return
                   setAssignedEvaluators([])
                   setIsDirty(true)
                   setSelectedChipId(null)
