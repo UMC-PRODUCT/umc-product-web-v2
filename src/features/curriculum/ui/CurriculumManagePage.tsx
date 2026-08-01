@@ -29,7 +29,7 @@ export function CurriculumManagePage() {
   const [selectedPart, setSelectedPart] = useState<string>("PM")
   const [curriculumData, setCurriculumData] = useState(INITIAL_CURRICULUM_DATA)
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
-  const { data: activeGisuId } = useActiveGisuId()
+  const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
   const gisuId = activeGisuId ?? 10
 
   // Default expand card 01 (design-1)
@@ -38,12 +38,16 @@ export function CurriculumManagePage() {
   })
 
   useEffect(() => {
+    if (isGisuLoading || activeGisuId == null) return
+
     let isSubscribed = true
     async function loadCurriculum() {
-      if (!gisuId) return
       try {
         const apiPart = mapPartToApiEnum(selectedPart)
-        const overview = await getCurriculumOverview({ gisuId, part: apiPart })
+        const overview = await getCurriculumOverview({
+          gisuId: activeGisuId,
+          part: apiPart,
+        })
         if (isSubscribed && overview && overview.curriculumId) {
           const item = mapOverviewToCurriculumItem(overview, 0)
           setCurriculumData((prev) => ({
@@ -59,7 +63,7 @@ export function CurriculumManagePage() {
     return () => {
       isSubscribed = false
     }
-  }, [gisuId, selectedPart])
+  }, [activeGisuId, isGisuLoading, selectedPart])
 
   const currentItems = curriculumData[selectedPart] || []
 

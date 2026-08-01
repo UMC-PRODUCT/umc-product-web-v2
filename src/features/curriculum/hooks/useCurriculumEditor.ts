@@ -164,18 +164,22 @@ export function useCurriculumEditor({
     useState<CurriculumItem[]>(initialCurriculums)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const addToast = useToastStore((state) => state.addToast)
-  const { data: activeGisuId } = useActiveGisuId()
+  const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
   const gisuId = activeGisuId ?? 10
 
   // 서버에서 기수 및 파트별 커리큘럼 데이터 동기화
   useEffect(() => {
+    if (isGisuLoading || activeGisuId == null) return
+
     let isSubscribed = true
     async function fetchOverview() {
-      if (!gisuId) return
       setIsLoading(true)
       try {
         const apiPart = mapPartToApiEnum(part)
-        const overview = await getCurriculumOverview({ gisuId, part: apiPart })
+        const overview = await getCurriculumOverview({
+          gisuId: activeGisuId,
+          part: apiPart,
+        })
         if (isSubscribed && overview && overview.curriculumId) {
           const fetchedItem = mapOverviewToCurriculumItem(overview, 0)
           setCurriculums([fetchedItem])
@@ -190,7 +194,7 @@ export function useCurriculumEditor({
     return () => {
       isSubscribed = false
     }
-  }, [gisuId, part])
+  }, [activeGisuId, isGisuLoading, part])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
