@@ -273,7 +273,25 @@ export function ChapterManagePage() {
     }))
 
     try {
-      await createChaptersBulkMutation.mutateAsync(bulkPayload)
+      const createdIds =
+        await createChaptersBulkMutation.mutateAsync(bulkPayload)
+      if (
+        Array.isArray(createdIds) &&
+        createdIds.length === newChapters.length
+      ) {
+        const idMap = new Map<string, string>()
+        newChapters.forEach((ch, idx) => {
+          if (createdIds[idx] != null) {
+            idMap.set(ch.id, String(createdIds[idx]))
+          }
+        })
+        setChapters((prev) =>
+          prev.map((ch) => {
+            const serverId = idMap.get(ch.id)
+            return serverId ? { ...ch, id: serverId } : ch
+          }),
+        )
+      }
       addToast({
         message: "지부 정보가 저장되었습니다.",
         color: "primary",
