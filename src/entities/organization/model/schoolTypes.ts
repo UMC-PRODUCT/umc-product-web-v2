@@ -29,6 +29,8 @@ export interface SchoolLinkResponse {
 export interface CreateSchoolRequest {
   /** 학교명 (예: 서울대학교) */
   schoolName: string
+  /** 약칭 (예: 서울대) */
+  shortName?: string
   /** 비고 (예: 관악캠퍼스) */
   remark?: string
   /** 로고 이미지 파일 ID (presigned URL 업로드 후 전달) */
@@ -41,6 +43,8 @@ export interface CreateSchoolRequest {
 export interface UpdateSchoolRequest {
   /** 학교명 (수정할 경우만 입력) */
   schoolName?: string
+  /** 약칭 (수정할 경우만 입력) */
+  shortName?: string
   /** 지부 ID (수정할 경우만 입력) */
   chapterId?: number
   /** 비고 (수정할 경우만 입력) */
@@ -63,6 +67,8 @@ export interface SchoolItem {
   schoolId: string
   /** 학교명 */
   schoolName: string
+  /** 약칭 */
+  shortName?: string
 }
 
 /** 학교 전체 목록 응답 DTO (SCHOOL-101) */
@@ -78,6 +84,8 @@ export interface SchoolDetailResponse {
   chapterName?: string
   /** 학교명 */
   schoolName?: string
+  /** 약칭 */
+  shortName?: string
   /** 학교 ID */
   schoolId?: number
   /** 비고 */

@@ -69,6 +69,9 @@ export function SchoolRegistrationPage({
       if (schoolDetail.schoolName) {
         setOfficialName(schoolDetail.schoolName)
       }
+      if (schoolDetail.shortName) {
+        setShortName(schoolDetail.shortName)
+      }
       if (schoolDetail.remark) {
         setMemo(schoolDetail.remark)
       }
@@ -162,6 +165,7 @@ export function SchoolRegistrationPage({
           schoolId,
           body: {
             schoolName: officialName.trim(),
+            shortName: shortName.trim(),
             remark: memo.trim() || undefined,
             logoImageId,
             links,
@@ -171,6 +175,7 @@ export function SchoolRegistrationPage({
       } else {
         await createSchoolMutation.mutateAsync({
           schoolName: officialName.trim(),
+          shortName: shortName.trim(),
           remark: memo.trim() || undefined,
           logoImageId,
           links,
@@ -203,6 +208,7 @@ export function SchoolRegistrationPage({
 
     const backupSchoolData: CreateSchoolRequest = {
       schoolName: officialName.trim(),
+      shortName: shortName.trim(),
       remark: memo.trim() || undefined,
       links,
     }
