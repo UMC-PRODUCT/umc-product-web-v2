@@ -31,6 +31,7 @@ export const ASSIGNED_STAFF_CHIP_PREFIX = "assigned-staff-"
 export function resolveDropTargetId(
   overId: string,
   assignedEvaluators: Staff[],
+  staffList: Staff[] = SCHOOL_STAFF_LIST,
 ): string | null {
   if (overId === RECRUITMENT_BOX_ID) return RECRUITMENT_BOX_ID
   if (overId.startsWith(ASSIGNED_STAFF_CHIP_PREFIX)) return RECRUITMENT_BOX_ID
@@ -40,7 +41,7 @@ export function resolveDropTargetId(
 
   if (
     overId === SCHOOL_STAFF_PANEL_ID ||
-    SCHOOL_STAFF_LIST.some((staff) => staff.id === overId)
+    staffList.some((staff) => staff.id === overId)
   ) {
     return SCHOOL_STAFF_PANEL_ID
   }

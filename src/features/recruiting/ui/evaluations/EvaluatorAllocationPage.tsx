@@ -15,13 +15,13 @@ import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import {
   useRoundEvaluators,
   useSaveEvaluatorAllocation,
+  useSchoolStaff,
 } from "../../hooks/useEvaluatorAllocation"
 import { useRecruitingRounds } from "../../hooks/useRecruitingRounds"
 import {
   isStaff,
   RECRUITMENT_BOX_ID,
   resolveDropTargetId,
-  SCHOOL_STAFF_LIST,
   SCHOOL_STAFF_PANEL_ID,
   type Staff,
 } from "../../model/evaluatorAllocation"
@@ -39,6 +39,15 @@ export function EvaluatorAllocationPage({
   const { groups } = useRecruitingRounds()
   const activeRoundId = roundId ?? groups[0]?.rounds[0]?.roundId ?? "1"
 
+  const activeGroup =
+    groups.find((group) =>
+      group.rounds.some((r) => String(r.roundId) === String(activeRoundId)),
+    ) ?? groups[0]
+
+  const schoolId = activeGroup?.schoolId
+  const schoolName = activeGroup?.schoolName ?? "교내"
+
+  const { data: staffList = [] } = useSchoolStaff(schoolId)
   const { data: serverEvaluators, isFetching } =
     useRoundEvaluators(activeRoundId)
   const saveMutation = useSaveEvaluatorAllocation()
@@ -61,13 +70,13 @@ export function EvaluatorAllocationPage({
     const serverMemberIds = new Set(
       serverEvaluators.map((item) => String(item.memberId)),
     )
-    const serverStaff = SCHOOL_STAFF_LIST.filter((staff) =>
+    const serverStaff = staffList.filter((staff) =>
       serverMemberIds.has(String(staff.id)),
     )
 
     savedSnapshotRef.current = null
     setAssignedEvaluators(serverStaff)
-  }, [serverEvaluators, isDirty, isFetching])
+  }, [serverEvaluators, staffList, isDirty, isFetching])
 
   const {
     sensors,
@@ -125,7 +134,11 @@ export function EvaluatorAllocationPage({
     const staff = active.data.current
     if (!isStaff(staff)) return
 
-    const targetId = resolveDropTargetId(String(over.id), assignedEvaluators)
+    const targetId = resolveDropTargetId(
+      String(over.id),
+      assignedEvaluators,
+      staffList,
+    )
     if (!targetId) return
 
     if (targetId === SCHOOL_STAFF_PANEL_ID) {
@@ -204,10 +217,7 @@ export function EvaluatorAllocationPage({
           </div>
 
           <div className="flex h-197.5 w-full gap-4">
-            <SchoolStaffPanel
-              schoolName="중앙대학교"
-              staffList={SCHOOL_STAFF_LIST}
-            />
+            <SchoolStaffPanel schoolName={schoolName} staffList={staffList} />
 
             {/* 공고 */}
             <div className="flex flex-1 flex-col gap-4 overflow-y-auto">

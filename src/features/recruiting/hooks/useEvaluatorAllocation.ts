@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+import { searchAllMembers } from "@/entities/member/api/member"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { recruitingKeys } from "../api/queryKeys"
@@ -14,6 +15,22 @@ import type { Staff } from "../model/evaluatorAllocation"
 interface SaveEvaluatorAllocationParams {
   roundId: string
   assignedEvaluators: Staff[]
+}
+
+export function useSchoolStaff(schoolId?: string) {
+  return useQuery({
+    queryKey: recruitingKeys.schoolStaff(schoolId ?? ""),
+    queryFn: async () => {
+      if (!schoolId) return []
+      const response = await searchAllMembers({ schoolId })
+      return response.page.content.map((member) => ({
+        id: String(member.memberId),
+        nickname: member.nickname || member.name,
+        name: member.name,
+      }))
+    },
+    enabled: Boolean(schoolId),
+  })
 }
 
 export function useRoundEvaluators(roundId: string | null) {
