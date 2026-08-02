@@ -33,9 +33,16 @@ export function RecruitmentQuotaPage() {
   const addToast = useToastStore((state) => state.addToast)
 
   const { groups } = useAdminRecruitingRounds()
+  const activeTabGroups = useMemo(
+    () =>
+      chapterTab === "all"
+        ? groups
+        : groups.filter((g) => g.chapterName === chapterTab),
+    [groups, chapterTab],
+  )
   const seasonIds = useMemo(
-    () => [...new Set(groups.map((g) => g.seasonId))],
-    [groups],
+    () => [...new Set(activeTabGroups.map((g) => g.seasonId))],
+    [activeTabGroups],
   )
   const { seasonConfigsMap, updateQuotas, isSaving } =
     useRecruitingSeasonQuotas(seasonIds)
