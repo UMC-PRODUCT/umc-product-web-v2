@@ -56,17 +56,24 @@ function ApplicationListPage() {
           ? "fail"
           : null
 
+    const rawData = data as {
+      submittedAt?: string
+      updatedAt?: string
+      period?: string
+    }
+
     return {
       id: data.applicationId,
       name: data.applicantName
         ? `${data.applicantName}님의 지원서`
         : "익명 지원서",
-      submittedAt: data.submitted ? "제출 완료" : null,
-      updatedAt: !data.submitted ? "임시 저장됨" : null,
+      isSubmitted: data.submitted,
+      submittedAt: data.submitted ? (rawData.submittedAt ?? null) : null,
+      updatedAt: !data.submitted ? (rawData.updatedAt ?? null) : null,
       result,
       roles,
       isClosed: !data.editable,
-      period: "",
+      period: rawData.period ?? null,
     }
   }, [data])
 
