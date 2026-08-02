@@ -187,7 +187,7 @@ function ApplicationDetailPage() {
   }
 
   const isIdMismatch =
-    data?.applicationId != null && String(data.applicationId) !== applicationId
+    data?.applicationId == null || String(data.applicationId) !== applicationId
 
   if (!appInfo || !data || isIdMismatch) {
     return (
