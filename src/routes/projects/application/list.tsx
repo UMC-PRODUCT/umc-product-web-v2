@@ -40,7 +40,7 @@ function ApplicationListPage() {
   const cancelMutation = useCancelAnonymousApplication()
 
   const application = useMemo<RecruitingApplication | null>(() => {
-    if (!data || data.cancelled) return null
+    if (!data || data.cancelled || data.applicationId == null) return null
     const roles = [
       mapTrackToPartTag(data.firstChoice),
       mapTrackToPartTag(data.secondChoice),
@@ -54,7 +54,7 @@ function ApplicationListPage() {
           : null
 
     return {
-      id: data.applicationId ?? 1,
+      id: data.applicationId,
       name: data.applicantName
         ? `${data.applicantName}님의 지원서`
         : "익명 지원서",
