@@ -45,14 +45,21 @@ export function RecruitmentQuotaPage() {
     [groups, seasonConfigsMap],
   )
 
+  const chaptersDataWithEdits = useMemo(() => {
+    return allChaptersData.map((chapterData) => {
+      const editedSchools = editedSchoolsMap.get(chapterData.chapter)
+      if (!editedSchools) return chapterData
+      return {
+        ...chapterData,
+        schools: editedSchools,
+      }
+    })
+  }, [allChaptersData, editedSchoolsMap])
+
   const isAll = chapterTab === "all"
 
   const handleTabChange = (nextValue: string) => {
     setChapterTab(nextValue)
-    setIsDirty(false)
-    setAllocationStatus("TO 설정 전")
-    setAutoAllocateTrigger(0)
-    setEditedSchoolsMap(new Map())
   }
 
   const handleConfirmAutoAllocate = () => {
@@ -144,7 +151,7 @@ export function RecruitmentQuotaPage() {
 
   const selectedChapterData = isAll
     ? null
-    : (allChaptersData.find((item) => item.chapter === chapterTab) ?? {
+    : (chaptersDataWithEdits.find((item) => item.chapter === chapterTab) ?? {
         chapter: chapterTab,
         schoolCount: 0,
         updatedDate: "",
@@ -154,7 +161,7 @@ export function RecruitmentQuotaPage() {
       })
 
   const currentPartCounts = isAll
-    ? allChaptersData.reduce(
+    ? chaptersDataWithEdits.reduce(
         (acc, item) => ({
           pm: acc.pm + item.totals.pm,
           design: acc.design + item.totals.design,
@@ -166,7 +173,7 @@ export function RecruitmentQuotaPage() {
     : selectedChapterData!.totals
 
   const totalApplicants = isAll
-    ? allChaptersData.reduce((acc, item) => acc + item.totals.total, 0)
+    ? chaptersDataWithEdits.reduce((acc, item) => acc + item.totals.total, 0)
     : selectedChapterData!.totals.total
 
   const hasApplicants = totalApplicants > 0
@@ -269,7 +276,7 @@ export function RecruitmentQuotaPage() {
             ) : (
               <div className="flex w-full flex-col gap-10">
                 {isAll ? (
-                  allChaptersData.map((chapterData) => (
+                  chaptersDataWithEdits.map((chapterData) => (
                     <ChapterQuotaTableCard
                       key={chapterData.chapter}
                       data={chapterData}
