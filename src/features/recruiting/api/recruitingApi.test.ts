@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest"
 import {
   mergeRoundGroups,
   normalizeEvaluationStatistics,
+  normalizeRecruitingSeasonConfigurationResponse,
   normalizeStatusSummary,
 } from "./recruitingApi"
 
 import type {
   RawEvaluationStatistics,
+  RawRecruitingSeasonConfigurationResponse,
   RawStatusSummary,
   RecruitingRound,
   RecruitingRoundGroup,
@@ -245,5 +247,43 @@ describe("normalizeEvaluationStatistics", () => {
     expect(result.asOf).toBeNull()
     expect(result.byTrack).toEqual([])
     expect(result.chapters).toEqual([])
+  })
+})
+
+describe("normalizeRecruitingSeasonConfigurationResponse", () => {
+  const rawSeason: RawRecruitingSeasonConfigurationResponse = {
+    id: 10,
+    gisuId: 15,
+    schoolId: 3,
+    memo: "시즌 메모",
+    quotas: [
+      { track: "PLAN", targetCount: "5" },
+      { track: "DESIGN", targetCount: "3" },
+    ],
+    rounds: [],
+  }
+
+  it("ID를 문자열로, targetCount를 숫자로 정규화한다", () => {
+    const result = normalizeRecruitingSeasonConfigurationResponse(rawSeason)
+
+    expect(result.id).toBe("10")
+    expect(result.gisuId).toBe("15")
+    expect(result.schoolId).toBe("3")
+    expect(result.memo).toBe("시즌 메모")
+    expect(result.quotas).toEqual([
+      { track: "PLAN", targetCount: 5 },
+      { track: "DESIGN", targetCount: 3 },
+    ])
+  })
+
+  it("빠진 필드를 기본값으로 채운다", () => {
+    const result = normalizeRecruitingSeasonConfigurationResponse({})
+
+    expect(result.id).toBe("")
+    expect(result.gisuId).toBe("")
+    expect(result.schoolId).toBe("")
+    expect(result.memo).toBeNull()
+    expect(result.quotas).toEqual([])
+    expect(result.rounds).toEqual([])
   })
 })
