@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { Button } from "@/shared/ui/Button"
@@ -6,17 +6,17 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
-import {
-  getAllChaptersQuotaData,
-  getChapterQuotaData,
-  RECRUITMENT_QUOTA_MOCK,
-} from "../model/recruitmentQuota.mock"
+import { useAdminRecruitingRounds } from "../hooks/useAdminRecruitingRounds"
+import { useRecruitingSeasonQuotas } from "../hooks/useRecruitingSeasonQuotas"
+import { mapGroupsToChapterQuotaData } from "../model/recruitmentQuotaMapper"
 import {
   type AllocationStatus,
   ChapterQuotaTableCard,
 } from "./ChapterQuotaTableCard"
 import { ChapterTabs } from "./ChapterTabs"
 import { QuotaApplicantStatusCard } from "./QuotaApplicantStatusCard"
+
+import type { SchoolQuotaRow } from "../model/recruitmentQuota"
 
 export function RecruitmentQuotaPage() {
   const [chapterTab, setChapterTab] = useState("all")
@@ -26,7 +26,24 @@ export function RecruitmentQuotaPage() {
   const [autoModalOpen, setAutoModalOpen] = useState(false)
   const [autoAllocateTrigger, setAutoAllocateTrigger] = useState(0)
 
+  const [editedSchoolsMap, setEditedSchoolsMap] = useState<
+    Map<string, SchoolQuotaRow[]>
+  >(new Map())
+
   const addToast = useToastStore((state) => state.addToast)
+
+  const { groups } = useAdminRecruitingRounds()
+  const seasonIds = useMemo(
+    () => [...new Set(groups.map((g) => g.seasonId))],
+    [groups],
+  )
+  const { seasonConfigsMap, updateQuotas, isSaving } =
+    useRecruitingSeasonQuotas(seasonIds)
+
+  const allChaptersData = useMemo(
+    () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
+    [groups, seasonConfigsMap],
+  )
 
   const isAll = chapterTab === "all"
 
@@ -35,6 +52,7 @@ export function RecruitmentQuotaPage() {
     setIsDirty(false)
     setAllocationStatus("TO 설정 전")
     setAutoAllocateTrigger(0)
+    setEditedSchoolsMap(new Map())
   }
 
   const handleConfirmAutoAllocate = () => {
@@ -81,11 +99,58 @@ export function RecruitmentQuotaPage() {
     [addToast],
   )
 
-  const allChaptersData = getAllChaptersQuotaData(RECRUITMENT_QUOTA_MOCK)
+  const handleSchoolsDataChange = useCallback(
+    (chapter: string, schools: SchoolQuotaRow[]) => {
+      setEditedSchoolsMap((prev) => {
+        const next = new Map(prev)
+        next.set(chapter, schools)
+        return next
+      })
+    },
+    [],
+  )
+
+  const handleSave = async () => {
+    const allEditedRows = Array.from(editedSchoolsMap.values()).flat()
+    const payloadList = allEditedRows
+      .filter((row): row is SchoolQuotaRow & { seasonId: string } =>
+        Boolean(row.seasonId),
+      )
+      .map((row) => ({
+        seasonId: row.seasonId,
+        payload: {
+          quotas: [
+            { track: "PLAN" as const, targetCount: row.pm },
+            { track: "DESIGN" as const, targetCount: row.design },
+            { track: "WEB_PRODUCT_ENGINEER" as const, targetCount: row.webPe },
+            {
+              track: "MOBILE_PRODUCT_ENGINEER" as const,
+              targetCount: row.mobilePe,
+            },
+          ],
+        },
+      }))
+
+    if (payloadList.length === 0) return
+
+    try {
+      await updateQuotas(payloadList)
+      setIsDirty(false)
+    } catch {
+      // 에러 토스트는 useRecruitingSeasonQuotas 훅에서 처리됨
+    }
+  }
 
   const selectedChapterData = isAll
     ? null
-    : getChapterQuotaData(RECRUITMENT_QUOTA_MOCK, chapterTab)
+    : (allChaptersData.find((item) => item.chapter === chapterTab) ?? {
+        chapter: chapterTab,
+        schoolCount: 0,
+        updatedDate: "",
+        updatedTime: "",
+        schools: [],
+        totals: { pm: 0, design: 0, webPe: 0, mobilePe: 0, total: 0 },
+      })
 
   const currentPartCounts = isAll
     ? allChaptersData.reduce(
@@ -168,11 +233,15 @@ export function RecruitmentQuotaPage() {
                         size="xs"
                         color="primary"
                         variant="fill"
-                        disabled={!isDirty}
+                        disabled={!isDirty || isSaving}
                         className="w-auto px-3"
-                        onClick={() => {}}
+                        onClick={handleSave}
                       >
-                        {isDirty ? "저장" : "저장 완료"}
+                        {isSaving
+                          ? "저장 중..."
+                          : isDirty
+                            ? "저장"
+                            : "저장 완료"}
                       </Button>
                     )}
                   </div>
@@ -201,13 +270,16 @@ export function RecruitmentQuotaPage() {
                 {isAll ? (
                   allChaptersData.map((chapterData) => (
                     <ChapterQuotaTableCard
+                      key={chapterData.chapter}
+                      data={chapterData}
                       status={allocationStatus}
                       onDirtyChange={() => setIsDirty(true)}
                       onManualEdit={handleManualEdit}
                       onErrorExceeded={handleErrorExceeded}
+                      onSchoolsDataChange={(schools) =>
+                        handleSchoolsDataChange(chapterData.chapter, schools)
+                      }
                       autoAllocateTrigger={autoAllocateTrigger}
-                      key={chapterData.chapter}
-                      data={chapterData}
                     />
                   ))
                 ) : (
@@ -217,6 +289,12 @@ export function RecruitmentQuotaPage() {
                     onDirtyChange={() => setIsDirty(true)}
                     onManualEdit={handleManualEdit}
                     onErrorExceeded={handleErrorExceeded}
+                    onSchoolsDataChange={(schools) =>
+                      handleSchoolsDataChange(
+                        selectedChapterData!.chapter,
+                        schools,
+                      )
+                    }
                     autoAllocateTrigger={autoAllocateTrigger}
                   />
                 )}

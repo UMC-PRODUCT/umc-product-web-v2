@@ -17,6 +17,7 @@ interface ChapterQuotaTableCardProps {
   onDirtyChange?: (dirty: boolean) => void
   onManualEdit?: () => void
   onErrorExceeded?: (partName: string, maxAllowed: number) => void
+  onSchoolsDataChange?: (schools: SchoolQuotaRow[]) => void
   autoAllocateTrigger?: number
   className?: string
 }
@@ -27,6 +28,7 @@ export function ChapterQuotaTableCard({
   onDirtyChange,
   onManualEdit,
   onErrorExceeded,
+  onSchoolsDataChange,
   autoAllocateTrigger,
   className,
 }: ChapterQuotaTableCardProps) {
@@ -76,7 +78,8 @@ export function ChapterQuotaTableCard({
 
     setSchoolsData(updatedSchools)
     setLastValidSchoolsData(updatedSchools)
-  }, [autoAllocateTrigger, data.schools, data.totals])
+    onSchoolsDataChange?.(updatedSchools)
+  }, [autoAllocateTrigger, data.schools, data.totals, onSchoolsDataChange])
 
   const hasApplicants = schoolsData.length > 0
 
@@ -115,6 +118,7 @@ export function ChapterQuotaTableCard({
 
     onDirtyChange?.(true)
     onManualEdit?.()
+    onSchoolsDataChange?.(nextSchoolsData)
   }
 
   const currentPMTotal = schoolsData.reduce((acc, s) => acc + s.pm, 0)
