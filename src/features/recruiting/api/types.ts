@@ -593,6 +593,7 @@ export interface RecruitingPublicApplicationResponse {
   finalResult?: "PENDING" | "APPROVED" | "REJECTED"
   acceptedTrack?: RecruitingTrack
   answers?: AnswerResponse[]
+  formStructure?: RecruitingFormStructure
 }
 
 export type RecruitingDecision = "PASS" | "FAIL"

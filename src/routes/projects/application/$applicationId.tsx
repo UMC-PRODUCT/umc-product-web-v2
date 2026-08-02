@@ -1,11 +1,19 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useMemo } from "react"
 
-import { useAnonymousApplicationQuery } from "@/features/recruiting"
+import {
+  toApplicationSections,
+  useAnonymousApplicationQuery,
+} from "@/features/recruiting"
 import { ReadonlyAnswerField } from "@/features/recruiting/ui/detail/ReadonlyAnswerField"
 import { Button } from "@/shared/ui/Button"
 
-import type { RecruitingPublicApplicationAnswer } from "@/features/recruiting"
+import type {
+  RecruitingApplicationAnswer,
+  RecruitingFormStructure,
+  RecruitingPublicApplicationAnswer,
+  RecruitingTrack,
+} from "@/features/recruiting"
 import type { ApplicationSection } from "@/features/recruiting/model/applicationDetail"
 
 export const Route = createFileRoute("/projects/application/$applicationId")({
@@ -73,7 +81,25 @@ function ReadonlyFormSection({
 
 function toApplicationSectionsFromPublicAnswers(
   answers?: RecruitingPublicApplicationAnswer[],
+  formStructure?: RecruitingFormStructure,
+  choices?: { firstChoice?: RecruitingTrack; secondChoice?: RecruitingTrack },
 ): ApplicationSection[] {
+  if (formStructure && choices?.firstChoice) {
+    const adaptedAnswers: RecruitingApplicationAnswer[] = (answers ?? []).map(
+      (ans) => ({
+        questionId: String(ans.questionId ?? ""),
+        textValue: ans.textValue ?? null,
+        selectedOptionIds: (ans.selectedOptionIds ?? []).map(String),
+        fileIds: ans.fileIds ?? [],
+        times: ans.times ?? [],
+      }),
+    )
+    return toApplicationSections(formStructure, adaptedAnswers, {
+      firstChoice: choices.firstChoice,
+      secondChoice: choices.secondChoice ?? null,
+    })
+  }
+
   if (!answers || answers.length === 0) return []
 
   const questions = answers.map((ans, idx) => ({
@@ -141,7 +167,11 @@ function ApplicationDetailPage() {
   const applicationDetail = useMemo(() => {
     if (!data) return null
     return {
-      sections: toApplicationSectionsFromPublicAnswers(data.answers),
+      sections: toApplicationSectionsFromPublicAnswers(
+        data.answers,
+        data.formStructure,
+        { firstChoice: data.firstChoice, secondChoice: data.secondChoice },
+      ),
     }
   }, [data])
 
