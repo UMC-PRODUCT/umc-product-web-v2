@@ -6,6 +6,7 @@ import { useMe } from "@/entities/member/hooks/useMe"
 import { Button } from "@/shared/ui/Button"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
+import { getOrCreateAnonymousSessionId } from "../../hooks/useAnonymousApplication"
 import { useApplyForm } from "../../hooks/useApplyForm"
 import {
   useSaveApplicationDraft,
@@ -132,6 +133,12 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
       answers: toPayload(values),
     })
     setApplicationKey(draft.applicationKey)
+    if (typeof window !== "undefined" && draft.applicationKey) {
+      sessionStorage.setItem("isApplicationVerified", "true")
+      sessionStorage.setItem("anonymousEmail", applicant.applicantEmail.trim())
+      sessionStorage.setItem("anonymousApplicationKey", draft.applicationKey)
+      getOrCreateAnonymousSessionId()
+    }
     return draft
   }
 
