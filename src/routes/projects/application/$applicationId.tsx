@@ -210,14 +210,11 @@ function ApplicationDetailPage() {
   return (
     <div className="w-full max-w-265">
       <div className="flex w-full flex-col">
-        <FolderTabHeader
-          title={appInfo.name}
-          school={data.applicantEmail ?? "지원자 정보"}
-        />
+        <FolderTabHeader title={appInfo.name} school="지원자 정보" />
         <div className="shadow-drop-neutral-2 flex flex-col gap-9 rounded-b-[17px] border-x border-b border-teal-100 bg-white px-11.5 pt-9 pb-12">
           <div className="flex flex-col gap-1.5 border-b border-teal-50 pb-5">
             <h2 className="text-heading-6-semibold text-teal-gray-900">
-              {appInfo.name} 지원서 조회
+              지원서 조회
             </h2>
             <p className="text-body-2-regular text-teal-gray-600">
               {appInfo.submittedAt ? (
