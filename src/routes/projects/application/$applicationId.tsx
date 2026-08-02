@@ -138,6 +138,7 @@ function toApplicationSectionsFromPublicAnswers(
 
 function ApplicationDetailPage() {
   const navigate = useNavigate()
+  const { applicationId } = Route.useParams()
 
   const email =
     typeof window !== "undefined"
@@ -185,7 +186,10 @@ function ApplicationDetailPage() {
     )
   }
 
-  if (!appInfo || !data) {
+  const isIdMismatch =
+    data?.applicationId != null && String(data.applicationId) !== applicationId
+
+  if (!appInfo || !data || isIdMismatch) {
     return (
       <div className="flex flex-col items-center gap-4 py-20">
         <p className="text-body-1-medium text-teal-gray-600">
