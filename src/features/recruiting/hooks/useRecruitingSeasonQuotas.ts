@@ -74,10 +74,13 @@ export function useRecruitingSeasonQuotas(seasonIds: string[]) {
       const failedVariables: UpdateSeasonQuotaVariables[] = []
 
       results.forEach((result, index) => {
-        if (result.status === "fulfilled") {
-          successfulVariables.push(variablesList[index])
-        } else {
-          failedVariables.push(variablesList[index])
+        const item = variablesList[index]
+        if (item) {
+          if (result.status === "fulfilled") {
+            successfulVariables.push(item)
+          } else {
+            failedVariables.push(item)
+          }
         }
       })
 
