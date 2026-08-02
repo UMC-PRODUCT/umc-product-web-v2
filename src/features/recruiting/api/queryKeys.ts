@@ -88,25 +88,6 @@ export const recruitingKeys = {
   decisionHistories: (gisuId: string) =>
     [...recruitingKeys.all, "decision-histories", gisuId] as const,
 
-  anonymousApplication: (email: string, applicationKey: string) =>
-    [
-      ...recruitingKeys.all,
-      "anonymous",
-      hashValue(email),
-      hashValue(applicationKey),
-    ] as const,
-}
-
-function hashValue(value: string): string {
-  let h1 = 0x811c9dc5 ^ 0x12345678
-  let h2 = 0xcbf29ce4 ^ 0x87654321
-  for (let i = 0; i < value.length; i++) {
-    const ch = value.charCodeAt(i)
-    h1 = Math.imul(h1 ^ ch, 0x01000193)
-    h2 = Math.imul(h2 ^ ch, 0x050c5d17)
-  }
-  return (
-    (h1 >>> 0).toString(16).padStart(8, "0") +
-    (h2 >>> 0).toString(16).padStart(8, "0")
-  )
+  anonymousApplication: (sessionId: string) =>
+    [...recruitingKeys.all, "anonymous", sessionId] as const,
 }

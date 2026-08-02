@@ -1,9 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { Info } from "lucide-react"
 import { useState } from "react"
 
-import { useLookupAnonymousApplication } from "@/features/recruiting"
+import {
+  getOrCreateAnonymousSessionId,
+  useLookupAnonymousApplication,
+} from "@/features/recruiting"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { cn } from "@/shared/lib/utils"
 import { emailSchema } from "@/shared/lib/validationSchemas"
@@ -12,14 +15,24 @@ import { CodeInput } from "@/shared/ui/input/CodeInput"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 export const Route = createFileRoute("/projects/application/")({
-  component: MyApplicationCodePage,
+  beforeLoad: () => {
+    if (typeof window !== "undefined") {
+      const isVerified = sessionStorage.getItem("isApplicationVerified")
+      if (isVerified === "true") {
+        throw redirect({ to: "/projects/application/list" })
+      }
+    }
+  },
+  component: ApplicationVerifyPage,
 })
 
-function MyApplicationCodePage() {
+function ApplicationVerifyPage() {
   const navigate = useNavigate()
+  const verifyMutation = useLookupAnonymousApplication()
+
   const [email, setEmail] = useState("")
   const [code, setCode] = useState("")
-  const [emailError, setEmailError] = useState("")
+  const [emailError, setEmailError] = useState<string | null>(null)
   const [codeError, setCodeError] = useState(false)
   const [errorShakeKey, setErrorShakeKey] = useState(0)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
@@ -27,10 +40,11 @@ function MyApplicationCodePage() {
   const CODE_LENGTH = 6
   const isComplete = email.trim() !== "" && code.length === CODE_LENGTH
 
-  const verifyMutation = useLookupAnonymousApplication()
-
   const handleSubmit = async () => {
     if (!isComplete || emailError || codeError) return
+
+    setEmailError(null)
+    setCodeError(false)
 
     const isEmailValid = emailSchema.safeParse(email).success
     if (!isEmailValid) {
@@ -45,6 +59,7 @@ function MyApplicationCodePage() {
         sessionStorage.setItem("isApplicationVerified", "true")
         sessionStorage.setItem("anonymousEmail", email)
         sessionStorage.setItem("anonymousApplicationKey", code)
+        getOrCreateAnonymousSessionId()
       }
 
       navigate({ to: "/projects/application/list" })

@@ -12,6 +12,8 @@ export type {
   UpdateAnonymousApplicationRequest,
 } from "./api/types"
 export {
+  getAnonymousSessionId,
+  getOrCreateAnonymousSessionId,
   useAnonymousApplicationQuery,
   useCancelAnonymousApplication,
   useLookupAnonymousApplication,

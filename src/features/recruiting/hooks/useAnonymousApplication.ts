@@ -14,15 +14,38 @@ import type {
   UpdateAnonymousApplicationRequest,
 } from "../api/types"
 
+export function getAnonymousSessionId(): string | null {
+  if (typeof window === "undefined") return null
+  return sessionStorage.getItem("anonymousSessionId")
+}
+
+export function getOrCreateAnonymousSessionId(): string {
+  if (typeof window === "undefined") return ""
+  let sessionId = sessionStorage.getItem("anonymousSessionId")
+  if (!sessionId) {
+    sessionId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `session-${Math.random().toString(36).slice(2)}-${Date.now()}`
+    sessionStorage.setItem("anonymousSessionId", sessionId)
+  }
+  return sessionId
+}
+
 export function useAnonymousApplicationQuery(
   email: string | null,
   applicationKey: string | null,
+  sessionId?: string | null,
 ) {
+  const effectiveSessionId =
+    sessionId ??
+    (typeof window !== "undefined"
+      ? sessionStorage.getItem("anonymousSessionId")
+      : null) ??
+    ""
+
   return useQuery({
-    queryKey: recruitingKeys.anonymousApplication(
-      email ?? "",
-      applicationKey ?? "",
-    ),
+    queryKey: recruitingKeys.anonymousApplication(effectiveSessionId),
     queryFn: () => {
       if (!email || !applicationKey) {
         throw new Error("이메일과 지원 코드가 필요합니다.")
@@ -45,12 +68,10 @@ export function useLookupAnonymousApplication() {
   return useMutation({
     mutationFn: (body: RecruitingApplicationCredentialRequest) =>
       lookupAnonymousApplication(body),
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
+      const sessionId = getOrCreateAnonymousSessionId()
       queryClient.setQueryData(
-        recruitingKeys.anonymousApplication(
-          variables.email,
-          variables.applicationKey,
-        ),
+        recruitingKeys.anonymousApplication(sessionId),
         data,
       )
     },
@@ -63,17 +84,18 @@ export function useCancelAnonymousApplication() {
   return useMutation({
     mutationFn: (body: RecruitingApplicationCredentialRequest) =>
       cancelAnonymousApplication(body),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: recruitingKeys.anonymousApplication(
-          variables.email,
-          variables.applicationKey,
-        ),
-      })
+    onSuccess: () => {
+      const sessionId = getAnonymousSessionId()
+      if (sessionId) {
+        queryClient.invalidateQueries({
+          queryKey: recruitingKeys.anonymousApplication(sessionId),
+        })
+      }
       if (typeof window !== "undefined") {
         sessionStorage.removeItem("isApplicationVerified")
         sessionStorage.removeItem("anonymousEmail")
         sessionStorage.removeItem("anonymousApplicationKey")
+        sessionStorage.removeItem("anonymousSessionId")
       }
     },
   })
@@ -85,13 +107,13 @@ export function useUpdateAnonymousApplication() {
   return useMutation({
     mutationFn: (body: UpdateAnonymousApplicationRequest) =>
       updateAnonymousApplication(body),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: recruitingKeys.anonymousApplication(
-          variables.credentialEmail,
-          variables.applicationKey,
-        ),
-      })
+    onSuccess: () => {
+      const sessionId = getAnonymousSessionId()
+      if (sessionId) {
+        queryClient.invalidateQueries({
+          queryKey: recruitingKeys.anonymousApplication(sessionId),
+        })
+      }
     },
   })
 }
@@ -102,13 +124,13 @@ export function useSubmitAnonymousApplication() {
   return useMutation({
     mutationFn: (body: SubmitAnonymousApplicationRequest) =>
       submitAnonymousApplication(body),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: recruitingKeys.anonymousApplication(
-          variables.email,
-          variables.applicationKey,
-        ),
-      })
+    onSuccess: () => {
+      const sessionId = getAnonymousSessionId()
+      if (sessionId) {
+        queryClient.invalidateQueries({
+          queryKey: recruitingKeys.anonymousApplication(sessionId),
+        })
+      }
     },
   })
 }
