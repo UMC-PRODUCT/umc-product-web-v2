@@ -164,11 +164,13 @@ export function ChapterQuotaTableCard({
       <div className="flex w-full justify-between">
         <div />
         <div className="flex items-center gap-3 px-1">
-          <p className="text-body-1-regular text-teal-gray-400">
-            <span>{data.updatedDate}</span>
-            <span className="pl-1">{data.updatedTime}</span>
-            <span className="pl-0.5">기준</span>
-          </p>
+          {data.updatedDate && data.updatedTime && (
+            <p className="text-body-1-regular text-teal-gray-400">
+              <span>{data.updatedDate}</span>
+              <span className="pl-1">{data.updatedTime}</span>
+              <span className="pl-0.5">기준</span>
+            </p>
+          )}
 
           <div className="flex items-center gap-1.5">
             <div className="size-3 rounded-full bg-teal-500" />

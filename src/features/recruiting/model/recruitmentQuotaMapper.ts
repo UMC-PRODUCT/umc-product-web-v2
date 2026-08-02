@@ -11,7 +11,7 @@ import type { ChapterQuotaData, SchoolQuotaRow } from "./recruitmentQuota"
 export function mapGroupsToChapterQuotaData(
   groups: RecruitingRoundGroup[],
   seasonConfigsMap: Map<string, RecruitingSeasonConfigurationResponse>,
-  now: Date = new Date(),
+  now?: Date,
 ): ChapterQuotaData[] {
   const byChapter = new Map<string, RecruitingRoundGroup[]>()
 
@@ -23,8 +23,8 @@ export function mapGroupsToChapterQuotaData(
     byChapter.get(chapterName)!.push(group)
   })
 
-  const updatedDate = dayjs(now).format("YY-MM-DD")
-  const updatedTime = dayjs(now).format("HH:mm")
+  const updatedDate = now ? dayjs(now).format("YY-MM-DD") : undefined
+  const updatedTime = now ? dayjs(now).format("HH:mm") : undefined
 
   const chapters = CHAPTERS.length > 0 ? CHAPTERS : Array.from(byChapter.keys())
 

@@ -18,8 +18,8 @@ export interface PartCounts {
 export interface ChapterQuotaData {
   chapter: string
   schoolCount: number
-  updatedDate: string
-  updatedTime: string
+  updatedDate?: string
+  updatedTime?: string
   schools: SchoolQuotaRow[]
   totals: PartCounts & { total: number }
 }

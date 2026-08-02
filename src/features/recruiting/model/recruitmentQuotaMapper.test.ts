@@ -107,4 +107,11 @@ describe("mapGroupsToChapterQuotaData", () => {
     expect(chromium?.schools[0]?.total).toBe(0)
     expect(chromium?.totals.total).toBe(0)
   })
+
+  it("now 인자가 없으면 updatedDate와 updatedTime을 undefined로 설정한다", () => {
+    const result = mapGroupsToChapterQuotaData(groups, seasonConfigsMap)
+    const chromium = result.find((item) => item.chapter === "Chromium")
+    expect(chromium?.updatedDate).toBeUndefined()
+    expect(chromium?.updatedTime).toBeUndefined()
+  })
 })
