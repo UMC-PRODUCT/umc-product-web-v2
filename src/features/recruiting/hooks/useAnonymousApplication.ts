@@ -27,7 +27,12 @@ export function useAnonymousApplicationQuery(
       if (!email || !applicationKey) {
         throw new Error("이메일과 지원 코드가 필요합니다.")
       }
-      return lookupAnonymousApplication({ email, applicationKey })
+      const verifiedEmail: string = email
+      const verifiedKey: string = applicationKey
+      return lookupAnonymousApplication({
+        email: verifiedEmail,
+        applicationKey: verifiedKey,
+      })
     },
     enabled: Boolean(email && applicationKey),
     staleTime: 60 * 1000,
