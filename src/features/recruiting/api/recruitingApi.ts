@@ -429,10 +429,12 @@ export function normalizeRecruitingSeasonConfigurationResponse(
     gisuId: String(raw.gisuId ?? ""),
     schoolId: String(raw.schoolId ?? ""),
     memo: raw.memo ?? null,
-    quotas: (raw.quotas ?? []).map((quota) => ({
-      track: quota.track ?? "PLAN",
-      targetCount: toCount(quota.targetCount),
-    })),
+    quotas: (raw.quotas ?? [])
+      .filter((quota) => Boolean(quota.track))
+      .map((quota) => ({
+        track: quota.track!,
+        targetCount: toCount(quota.targetCount),
+      })),
     rounds: raw.rounds ?? [],
   }
 }

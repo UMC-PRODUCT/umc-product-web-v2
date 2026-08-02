@@ -286,4 +286,12 @@ describe("normalizeRecruitingSeasonConfigurationResponse", () => {
     expect(result.quotas).toEqual([])
     expect(result.rounds).toEqual([])
   })
+
+  it("track이 없는 quota 항목은 걸러낸다", () => {
+    const result = normalizeRecruitingSeasonConfigurationResponse({
+      quotas: [{ track: "DESIGN", targetCount: "3" }, { targetCount: "5" }],
+    })
+
+    expect(result.quotas).toEqual([{ track: "DESIGN", targetCount: 3 }])
+  })
 })
