@@ -578,7 +578,6 @@ export interface AnswerResponse {
 }
 
 export type RecruitingPublicApplicationAnswer = AnswerResponse
-export type RecruitingAnswerResponse = AnswerResponse
 
 // 익명 지원서 조회 응답 DTO
 export interface RecruitingPublicApplicationResponse {
