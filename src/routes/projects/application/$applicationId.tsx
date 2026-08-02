@@ -84,7 +84,7 @@ function toApplicationSectionsFromPublicAnswers(
   formStructure?: RecruitingFormStructure,
   choices?: { firstChoice?: RecruitingTrack; secondChoice?: RecruitingTrack },
 ): ApplicationSection[] {
-  if (formStructure && choices?.firstChoice) {
+  if (formStructure) {
     const adaptedAnswers: RecruitingApplicationAnswer[] = (answers ?? []).map(
       (ans) => ({
         questionId: String(ans.questionId ?? ""),
@@ -95,8 +95,8 @@ function toApplicationSectionsFromPublicAnswers(
       }),
     )
     return toApplicationSections(formStructure, adaptedAnswers, {
-      firstChoice: choices.firstChoice,
-      secondChoice: choices.secondChoice ?? null,
+      firstChoice: (choices?.firstChoice ?? null) as unknown as RecruitingTrack,
+      secondChoice: choices?.secondChoice ?? null,
     })
   }
 
