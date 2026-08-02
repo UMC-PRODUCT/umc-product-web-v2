@@ -125,6 +125,7 @@ export function RecruitmentQuotaPage() {
       )
       .map((row) => ({
         seasonId: row.seasonId,
+        schoolName: row.schoolName,
         payload: {
           quotas: [
             { track: "PLAN" as const, targetCount: row.pm },
@@ -141,9 +142,34 @@ export function RecruitmentQuotaPage() {
     if (payloadList.length === 0) return
 
     try {
-      await updateQuotas(payloadList)
-      setIsDirty(false)
-      setEditedSchoolsMap(new Map())
+      const result = await updateQuotas(payloadList)
+
+      if (result.failedCount === 0) {
+        setIsDirty(false)
+        setEditedSchoolsMap(new Map())
+      } else {
+        const successfulSchoolNames = new Set(
+          result.successfulVariables
+            .map((v) => v.schoolName)
+            .filter((name): name is string => Boolean(name)),
+        )
+
+        setEditedSchoolsMap((prev) => {
+          const next = new Map<string, SchoolQuotaRow[]>()
+          prev.forEach((rows, chapter) => {
+            const remainingRows = rows.filter(
+              (r) => !successfulSchoolNames.has(r.schoolName),
+            )
+            if (remainingRows.length > 0) {
+              next.set(chapter, remainingRows)
+            }
+          })
+          if (next.size === 0) {
+            setIsDirty(false)
+          }
+          return next
+        })
+      }
     } catch {
       // 에러 토스트는 useRecruitingSeasonQuotas 훅에서 처리됨
     }
