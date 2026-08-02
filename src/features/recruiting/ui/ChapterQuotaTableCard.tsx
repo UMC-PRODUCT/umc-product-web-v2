@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
 
@@ -36,6 +36,11 @@ export function ChapterQuotaTableCard({
   const [lastValidSchoolsData, setLastValidSchoolsData] = useState<
     SchoolQuotaRow[]
   >(data.schools)
+
+  const onSchoolsDataChangeRef = useRef(onSchoolsDataChange)
+  useEffect(() => {
+    onSchoolsDataChangeRef.current = onSchoolsDataChange
+  }, [onSchoolsDataChange])
 
   useEffect(() => {
     setSchoolsData(data.schools)
@@ -78,8 +83,8 @@ export function ChapterQuotaTableCard({
 
     setSchoolsData(updatedSchools)
     setLastValidSchoolsData(updatedSchools)
-    onSchoolsDataChange?.(updatedSchools)
-  }, [autoAllocateTrigger, data.schools, data.totals, onSchoolsDataChange])
+    onSchoolsDataChangeRef.current?.(updatedSchools)
+  }, [autoAllocateTrigger, data.schools, data.totals])
 
   const hasApplicants = schoolsData.length > 0
 

@@ -1,3 +1,5 @@
+import dayjs from "dayjs"
+
 import { CHAPTERS } from "@/entities/organization/model/chapters"
 
 import type {
@@ -21,13 +23,8 @@ export function mapGroupsToChapterQuotaData(
     byChapter.get(chapterName)!.push(group)
   })
 
-  const year = String(now.getFullYear()).slice(-2)
-  const month = String(now.getMonth() + 1).padStart(2, "0")
-  const day = String(now.getDate()).padStart(2, "0")
-  const hours = String(now.getHours()).padStart(2, "0")
-  const minutes = String(now.getMinutes()).padStart(2, "0")
-  const updatedDate = `${year}-${month}-${day}`
-  const updatedTime = `${hours}:${minutes}`
+  const updatedDate = dayjs(now).format("YY-MM-DD")
+  const updatedTime = dayjs(now).format("HH:mm")
 
   const chapters = CHAPTERS.length > 0 ? CHAPTERS : Array.from(byChapter.keys())
 

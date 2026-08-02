@@ -37,28 +37,28 @@ export function useRecruitingSeasonQuotas(seasonIds: string[]) {
     [seasonIds],
   )
 
-  const seasonQueries = useQueries({
+  const { seasonConfigsMap, isLoading, isError } = useQueries({
     queries: uniqueSeasonIds.map((seasonId) => ({
       queryKey: recruitingKeys.seasonConfiguration(seasonId),
       queryFn: () => getRecruitingSeasonConfiguration(seasonId),
       enabled: Boolean(seasonId),
       staleTime: 5 * 60 * 1000,
     })),
-  })
-
-  const isLoading = seasonQueries.some((query) => query.isLoading)
-  const isError = seasonQueries.some((query) => query.isError)
-
-  const seasonConfigsMap = useMemo(() => {
-    const map = new Map<string, RecruitingSeasonConfigurationResponse>()
-    seasonQueries.forEach((query, index) => {
-      const seasonId = uniqueSeasonIds[index]
-      if (seasonId && query.data) {
-        map.set(seasonId, query.data)
+    combine: (results) => {
+      const map = new Map<string, RecruitingSeasonConfigurationResponse>()
+      results.forEach((query, index) => {
+        const seasonId = uniqueSeasonIds[index]
+        if (seasonId && query.data) {
+          map.set(seasonId, query.data)
+        }
+      })
+      return {
+        seasonConfigsMap: map,
+        isLoading: results.some((query) => query.isLoading),
+        isError: results.some((query) => query.isError),
       }
-    })
-    return map
-  }, [seasonQueries, uniqueSeasonIds])
+    },
+  })
 
   const updateQuotasMutation = useMutation({
     mutationFn: async (variablesList: UpdateSeasonQuotaVariables[]) => {

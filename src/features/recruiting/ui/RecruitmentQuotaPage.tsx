@@ -136,6 +136,7 @@ export function RecruitmentQuotaPage() {
     try {
       await updateQuotas(payloadList)
       setIsDirty(false)
+      setEditedSchoolsMap(new Map())
     } catch {
       // 에러 토스트는 useRecruitingSeasonQuotas 훅에서 처리됨
     }
