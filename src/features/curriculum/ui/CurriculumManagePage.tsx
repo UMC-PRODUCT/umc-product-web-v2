@@ -12,6 +12,7 @@ import SettingIcon from "@/shared/assets/icon/setting/SettingIcon"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { INITIAL_CURRICULUM_DATA } from "../model/curriculumData"
 import {
@@ -29,8 +30,8 @@ export function CurriculumManagePage() {
   const [selectedPart, setSelectedPart] = useState<string>("PM")
   const [curriculumData, setCurriculumData] = useState(INITIAL_CURRICULUM_DATA)
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
+  const addToast = useToastStore((state) => state.addToast)
   const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
-  const gisuId = activeGisuId ?? 10
 
   // Default expand card 01 (design-1)
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({
@@ -76,6 +77,13 @@ export function CurriculumManagePage() {
   }
 
   const handleDeleteItem = async (id: string) => {
+    const targetItem = (curriculumData[selectedPart] || []).find(
+      (item) => item.id === id,
+    )
+    const targetIndex = (curriculumData[selectedPart] || []).findIndex(
+      (item) => item.id === id,
+    )
+
     setCurriculumData((prev) => ({
       ...prev,
       [selectedPart]: (prev[selectedPart] || []).filter(
@@ -88,7 +96,21 @@ export function CurriculumManagePage() {
       try {
         await deleteCurriculum(numericId)
       } catch {
-        // Handled silently or toast
+        if (targetItem) {
+          setCurriculumData((prev) => {
+            const list = [...(prev[selectedPart] || [])]
+            const insertIndex = Math.min(targetIndex, list.length)
+            list.splice(insertIndex, 0, targetItem)
+            return { ...prev, [selectedPart]: list }
+          })
+          addToast({
+            message: "커리큘럼 삭제에 실패했습니다.",
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+        }
       }
     }
   }
@@ -114,6 +136,17 @@ export function CurriculumManagePage() {
     itemToRestore: CurriculumItem,
     index: number,
   ) => {
+    if (isGisuLoading || activeGisuId == null) {
+      addToast({
+        message: "기수 정보를 불러오는 중이거나 선택된 기수가 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
     setCurriculumData((prev) => {
       const list = [...(prev[selectedPart] || [])]
       list.splice(index, 0, itemToRestore)
@@ -130,7 +163,7 @@ export function CurriculumManagePage() {
     try {
       const apiPart = mapPartToApiEnum(selectedPart)
       const newCurriculumId = await createCurriculum({
-        gisuId,
+        gisuId: activeGisuId,
         part: apiPart,
         title: itemToRestore.title || "복원된 커리큘럼",
       })
@@ -153,13 +186,26 @@ export function CurriculumManagePage() {
           for (const wb of itemToRestore.workbooks) {
             const now = new Date()
             const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-            await createWeeklyCurriculum({
+            const createdWbId = await createWeeklyCurriculum({
               curriculumId: newCurriculumId,
               weekNo: wb.number,
               title: wb.title,
               startsAt: now.toISOString(),
               endsAt: nextWeek.toISOString(),
             })
+            if (createdWbId) {
+              setCurriculumData((prev) => {
+                const list = prev[selectedPart] || []
+                const updated = list.map((c) => {
+                  if (c.id !== String(newCurriculumId)) return c
+                  const updatedWbs = c.workbooks.map((w) =>
+                    w.id === wb.id ? { ...w, id: String(createdWbId) } : w,
+                  )
+                  return { ...c, workbooks: updatedWbs }
+                })
+                return { ...prev, [selectedPart]: updated }
+              })
+            }
           }
         }
       }

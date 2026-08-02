@@ -165,7 +165,6 @@ export function useCurriculumEditor({
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const addToast = useToastStore((state) => state.addToast)
   const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
-  const gisuId = activeGisuId ?? 10
 
   // 서버에서 기수 및 파트별 커리큘럼 데이터 동기화
   useEffect(() => {
@@ -205,6 +204,17 @@ export function useCurriculumEditor({
   )
 
   const handleCreateCurriculum = async () => {
+    if (isGisuLoading || activeGisuId == null) {
+      addToast({
+        message: "기수 정보를 불러오는 중이거나 선택된 기수가 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
     const baseCount = 0
 
     const newCurriculumTempId = `curriculum-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
@@ -234,7 +244,7 @@ export function useCurriculumEditor({
     try {
       const apiPart = mapPartToApiEnum(part)
       const createdId = await createCurriculum({
-        gisuId,
+        gisuId: activeGisuId,
         part: apiPart,
         title: "새 커리큘럼",
       })
@@ -630,6 +640,17 @@ export function useCurriculumEditor({
     restoredItem: CurriculumItem,
     targetIndex: number,
   ) => {
+    if (isGisuLoading || activeGisuId == null) {
+      addToast({
+        message: "기수 정보를 불러오는 중이거나 선택된 기수가 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
     const baseCount = 0
     setCurriculums((prev) => {
       const next = [...prev]
@@ -645,7 +666,7 @@ export function useCurriculumEditor({
     try {
       const apiPart = mapPartToApiEnum(part)
       const newCurriculumId = await createCurriculum({
-        gisuId,
+        gisuId: activeGisuId,
         part: apiPart,
         title: restoredItem.title || "복원된 커리큘럼",
       })
@@ -662,13 +683,24 @@ export function useCurriculumEditor({
         for (const wb of restoredItem.workbooks) {
           const now = new Date()
           const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-          await createWeeklyCurriculum({
+          const createdWbId = await createWeeklyCurriculum({
             curriculumId: newCurriculumId,
             weekNo: wb.number,
             title: wb.title,
             startsAt: now.toISOString(),
             endsAt: nextWeek.toISOString(),
           })
+          if (createdWbId) {
+            setCurriculums((prev) =>
+              prev.map((c) => {
+                if (c.id !== String(newCurriculumId)) return c
+                const updatedWbs = c.workbooks.map((w) =>
+                  w.id === wb.id ? { ...w, id: String(createdWbId) } : w,
+                )
+                return { ...c, workbooks: updatedWbs }
+              }),
+            )
+          }
         }
       }
     } catch {
@@ -749,8 +781,11 @@ export function useCurriculumEditor({
       }
     } else if (activeData?.type === "workbook") {
       // 주차 순서(weekNo) 이동 변경 시 백엔드 weekNo 업데이트
-      curriculums.forEach((c) => {
-        c.workbooks.forEach(async (wb, idx) => {
+      const affected = curriculums.find((c) =>
+        c.workbooks.some((wb) => wb.id === String(active.id)),
+      )
+      if (affected) {
+        affected.workbooks.forEach(async (wb, idx) => {
           const numericWbId = Number(wb.id)
           if (!Number.isNaN(numericWbId) && numericWbId > 0) {
             try {
@@ -763,7 +798,7 @@ export function useCurriculumEditor({
             }
           }
         })
-      })
+      }
     }
   }
 

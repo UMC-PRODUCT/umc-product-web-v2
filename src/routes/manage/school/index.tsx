@@ -53,6 +53,7 @@ function SchoolManagePage() {
       page: currentPage - 1,
       size: PAGE_SIZE,
       sort: sortOption,
+      enabled: activeGisuId != null,
     })
 
   const isLoading = isSummaryLoading

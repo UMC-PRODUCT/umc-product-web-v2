@@ -209,13 +209,40 @@ export function ChapterManagePage() {
               return
             }
 
-            await createChapterMutation.mutateAsync({
-              gisuId: activeGisuId,
-              name: chapterToDelete.name,
-              schoolIds: chapterToDelete.assignedSchools
-                .map((s) => Number(s.id))
-                .filter((id) => !Number.isNaN(id)),
-            })
+            try {
+              const createdId = await createChapterMutation.mutateAsync({
+                gisuId: activeGisuId,
+                name: chapterToDelete.name,
+                schoolIds: chapterToDelete.assignedSchools
+                  .map((s) => Number(s.id))
+                  .filter((id) => !Number.isNaN(id)),
+              })
+              if (createdId != null) {
+                setChapters((prev) =>
+                  prev.map((ch) =>
+                    ch.id === chapterToDelete.id
+                      ? { ...ch, id: String(createdId) }
+                      : ch,
+                  ),
+                )
+              }
+            } catch {
+              setChapters((prev) =>
+                prev.filter((ch) => ch.id !== chapterToDelete.id),
+              )
+              if (chapterToDelete.assignedSchools.length > 0) {
+                setUnassignedSchools((prev) =>
+                  withSchoolsAppended(prev, chapterToDelete.assignedSchools),
+                )
+              }
+              addToast({
+                message: "지부 복원에 실패했습니다.",
+                color: "red",
+                variant: "deep",
+                type: "default",
+                duration: 3000,
+              })
+            }
           }
         },
       },

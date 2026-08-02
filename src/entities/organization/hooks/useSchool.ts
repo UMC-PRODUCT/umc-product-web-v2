@@ -43,10 +43,12 @@ export function useAdminSchoolsSummary(params?: {
   page?: number
   size?: number
   sort?: string | string[]
+  enabled?: boolean
 }) {
   return useQuery({
     queryKey: ["schools", "admin-summary", params],
     queryFn: () => getAdminSchoolsSummary(params),
+    enabled: params?.enabled ?? params?.gisuId != null,
     staleTime: 5 * 60 * 1000,
   })
 }
