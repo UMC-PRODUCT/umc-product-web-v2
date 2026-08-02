@@ -182,16 +182,14 @@ export function RecruitmentQuotaPage() {
     }
   }
 
-  const selectedChapterData = isAll
-    ? null
-    : (chaptersDataWithEdits.find((item) => item.chapter === chapterTab) ?? {
-        chapter: chapterTab,
-        schoolCount: 0,
-        updatedDate: "",
-        updatedTime: "",
-        schools: [],
-        totals: { pm: 0, design: 0, webPe: 0, mobilePe: 0, total: 0 },
-      })
+  const selectedChapterData = chaptersDataWithEdits.find(
+    (item) => item.chapter === chapterTab,
+  ) ?? {
+    chapter: chapterTab,
+    schoolCount: 0,
+    schools: [],
+    totals: { pm: 0, design: 0, webPe: 0, mobilePe: 0, total: 0 },
+  }
 
   const currentPartCounts = isAll
     ? chaptersDataWithEdits.reduce(
@@ -203,11 +201,11 @@ export function RecruitmentQuotaPage() {
         }),
         { pm: 0, design: 0, webPe: 0, mobilePe: 0 },
       )
-    : selectedChapterData!.totals
+    : selectedChapterData.totals
 
   const totalApplicants = isAll
     ? chaptersDataWithEdits.reduce((acc, item) => acc + item.totals.total, 0)
-    : selectedChapterData!.totals.total
+    : selectedChapterData.totals.total
 
   const hasApplicants = totalApplicants > 0
 
@@ -325,14 +323,14 @@ export function RecruitmentQuotaPage() {
                   ))
                 ) : (
                   <ChapterQuotaTableCard
-                    data={selectedChapterData!}
+                    data={selectedChapterData}
                     status={allocationStatus}
                     onDirtyChange={() => setIsDirty(true)}
                     onManualEdit={handleManualEdit}
                     onErrorExceeded={handleErrorExceeded}
                     onSchoolsDataChange={(schools) =>
                       handleSchoolsDataChange(
-                        selectedChapterData!.chapter,
+                        selectedChapterData.chapter,
                         schools,
                       )
                     }
