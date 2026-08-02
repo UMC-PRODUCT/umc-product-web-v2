@@ -12,12 +12,12 @@ import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
+import { useAdminRecruitingRounds } from "../../hooks/useAdminRecruitingRounds"
 import {
   useRoundEvaluators,
   useSaveEvaluatorAllocation,
   useSchoolStaff,
 } from "../../hooks/useEvaluatorAllocation"
-import { useRecruitingRounds } from "../../hooks/useRecruitingRounds"
 import {
   isStaff,
   RECRUITMENT_BOX_ID,
@@ -36,7 +36,7 @@ interface EvaluatorAllocationPageProps {
 export function EvaluatorAllocationPage({
   roundId,
 }: EvaluatorAllocationPageProps = {}) {
-  const { groups } = useRecruitingRounds()
+  const { groups } = useAdminRecruitingRounds()
   const activeRoundId = roundId ?? groups[0]?.rounds[0]?.roundId ?? null
 
   const activeGroup = activeRoundId

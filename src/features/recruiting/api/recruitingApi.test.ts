@@ -4,6 +4,7 @@ import { api } from "@/shared/lib/axios"
 
 import {
   addRoundEvaluator,
+  getAdminRounds,
   getRoundEvaluators,
   mergeRoundGroups,
   removeRoundEvaluator,
@@ -131,6 +132,25 @@ describe("evaluator API functions", () => {
       "/v1/recruiting/admin/rounds/10/evaluators/100",
     )
     expect(result).toEqual(mockResponse)
+  })
+
+  it("getAdminRounds는 GET /v1/recruiting/admin/rounds 요청을 보내고 결과 목록을 반환한다", async () => {
+    const mockGroups = [group("100", [round("1")])]
+    vi.mocked(api.get).mockResolvedValueOnce({
+      data: {
+        isSuccess: true,
+        code: "COMMON200",
+        message: "OK",
+        result: mockGroups,
+      },
+    })
+
+    const result = await getAdminRounds("5")
+
+    expect(api.get).toHaveBeenCalledWith("/v1/recruiting/admin/rounds", {
+      params: { gisuId: "5" },
+    })
+    expect(result).toEqual(mockGroups)
   })
 
   it("removeRoundEvaluator는 DELETE 요청을 올바른 엔드포인트로 보낸다", async () => {

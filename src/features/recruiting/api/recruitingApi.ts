@@ -23,6 +23,16 @@ import type {
 
 const APPLICATIONS_PAGE_SIZE = 100
 
+export async function getAdminRounds(
+  gisuId: string,
+): Promise<RecruitingRoundGroup[]> {
+  const { data } = await api.get<ApiResponse<RecruitingRoundGroup[]>>(
+    "/v1/recruiting/admin/rounds",
+    { params: { gisuId } },
+  )
+  return data.result
+}
+
 // 관리자용 차수 목록은 학교 회장단 이상만 조회할 수 있어 평가자 권한만 가진
 // 운영진이 403 을 받는다. 공개 목록이 같은 차수 응답을 주므로 이쪽을 쓴다.
 export async function getPublicRounds(
