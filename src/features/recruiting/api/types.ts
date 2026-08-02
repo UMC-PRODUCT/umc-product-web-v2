@@ -568,14 +568,17 @@ export interface SubmitAnonymousApplicationRequest {
   applicationKey: string
 }
 
-// 익명 지원서 조회 응답 내 문항 답변 DTO
-export interface RecruitingPublicApplicationAnswer {
+// 익명 지원서 조회 응답 내 문항 답변 DTO (OpenAPI 스펙: AnswerResponse)
+export interface AnswerResponse {
   questionId?: number
   textValue?: string
   selectedOptionIds?: number[]
   fileIds?: string[]
   times?: string[]
 }
+
+export type RecruitingPublicApplicationAnswer = AnswerResponse
+export type RecruitingAnswerResponse = AnswerResponse
 
 // 익명 지원서 조회 응답 DTO
 export interface RecruitingPublicApplicationResponse {
@@ -590,7 +593,7 @@ export interface RecruitingPublicApplicationResponse {
   documentResult?: "PENDING" | "APPROVED" | "REJECTED"
   finalResult?: "PENDING" | "APPROVED" | "REJECTED"
   acceptedTrack?: RecruitingTrack
-  answers?: RecruitingPublicApplicationAnswer[]
+  answers?: AnswerResponse[]
 }
 
 export type RecruitingDecision = "PASS" | "FAIL"

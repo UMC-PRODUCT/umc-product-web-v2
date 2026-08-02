@@ -1,9 +1,14 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { useState } from "react"
+import { useMemo } from "react"
 
-import { RecruitingApplicationCard } from "@/features/recruiting"
+import {
+  RecruitingApplicationCard,
+  useAnonymousApplicationQuery,
+  useCancelAnonymousApplication,
+} from "@/features/recruiting"
 
 import type { RecruitingApplication } from "@/features/recruiting"
+import type { PartTag } from "@/shared/model/domain"
 
 export const Route = createFileRoute("/projects/application/list")({
   beforeLoad: () => {
@@ -17,64 +22,100 @@ export const Route = createFileRoute("/projects/application/list")({
   component: ApplicationListPage,
 })
 
-function ApplicationListPage() {
-  const [dummyApplications, setDummyApplications] = useState<
-    RecruitingApplication[]
-  >([
-    {
-      id: 1,
-      name: "한양대학교 ERICA UMC 11기 정규 모집",
-      submittedAt: "2026-07-11 23:35",
-      result: "fail",
-      roles: ["plan"],
-      isClosed: true,
-      period: "2026-06-15 00:00 ~ 2026-07-11 23:59",
-    },
-    {
-      id: 2,
-      name: "한양대학교 ERICA UMC 11기 2차 추가 모집",
-      submittedAt: null,
-      updatedAt: "2026-07-12 14:22",
-      result: null,
-      roles: ["design", "mobile-pe"],
-      isClosed: true,
-      period: "2026-07-12 00:00 ~ 2026-07-15 23:59",
-    },
-    {
-      id: 3,
-      name: "한양대학교 ERICA UMC 11기 3차 추가 모집",
-      submittedAt: null,
-      updatedAt: "2026-07-20 10:15",
-      result: null,
-      roles: ["web-pe", "plan"],
-      isClosed: false,
-      dDay: 10,
-      period: "2026-07-16 00:00 ~ 2026-07-31 23:59",
-    },
-    {
-      id: 4,
-      name: "한양대학교 ERICA UMC 11기 4차 추가 모집",
-      submittedAt: "2026-08-05 14:20",
-      result: "pass",
-      roles: ["springboot", "nodejs"],
-      isClosed: true,
-      period: "2026-08-01 00:00 ~ 2026-08-05 23:59",
-    },
-  ])
+function mapTrackToPartTag(track?: string | null): PartTag | null {
+  if (!track) return null
+  switch (track) {
+    case "PLAN":
+      return "plan"
+    case "DESIGN":
+      return "design"
+    case "WEB_PRODUCT_ENGINEER":
+      return "web-pe"
+    case "MOBILE_PRODUCT_ENGINEER":
+      return "mobile-pe"
+    case "INFRA_PLUS":
+      return "springboot"
+    default:
+      return null
+  }
+}
 
-  const handleDelete = (id: number) => {
-    setDummyApplications((prev) => prev.filter((app) => app.id !== id))
+function ApplicationListPage() {
+  const email =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("anonymousEmail")
+      : null
+  const applicationKey =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("anonymousApplicationKey")
+      : null
+
+  const { data, isLoading } = useAnonymousApplicationQuery(
+    email,
+    applicationKey,
+  )
+  const cancelMutation = useCancelAnonymousApplication()
+
+  const application = useMemo<RecruitingApplication | null>(() => {
+    if (!data || data.cancelled) return null
+    const roles = [
+      mapTrackToPartTag(data.firstChoice),
+      mapTrackToPartTag(data.secondChoice),
+    ].filter((role): role is PartTag => role !== null)
+
+    const result =
+      data.finalResult === "APPROVED"
+        ? "pass"
+        : data.finalResult === "REJECTED"
+          ? "fail"
+          : null
+
+    return {
+      id: data.applicationId ?? 1,
+      name: data.applicantName
+        ? `${data.applicantName}님의 지원서`
+        : "익명 지원서",
+      submittedAt: data.submitted ? "제출 완료" : null,
+      updatedAt: !data.submitted ? "임시 저장됨" : null,
+      result,
+      roles,
+      isClosed: !data.editable,
+      period: "",
+    }
+  }, [data])
+
+  const handleDelete = () => {
+    if (!email || !applicationKey) return
+    cancelMutation.mutate({ email, applicationKey })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex w-full items-center justify-center py-20">
+        <p className="text-body-1-medium text-teal-gray-500">
+          지원서를 불러오는 중입니다...
+        </p>
+      </div>
+    )
+  }
+
+  if (!application) {
+    return (
+      <div className="flex w-full items-center justify-center py-20">
+        <p className="text-body-1-medium text-teal-gray-500">
+          조회된 지원서가 없습니다.
+        </p>
+      </div>
+    )
   }
 
   return (
     <div className="flex w-full flex-col gap-8">
-      {dummyApplications.map((app) => (
-        <RecruitingApplicationCard
-          key={app.id}
-          application={app}
-          onDelete={handleDelete}
-        />
-      ))}
+      <RecruitingApplicationCard
+        key={application.id}
+        application={application}
+        onDelete={handleDelete}
+      />
     </div>
   )
 }

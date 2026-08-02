@@ -1,7 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { isAxiosError } from "axios"
 import { Info } from "lucide-react"
 import { useState } from "react"
 
+import { useLookupAnonymousApplication } from "@/features/recruiting"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { cn } from "@/shared/lib/utils"
 import { emailSchema } from "@/shared/lib/validationSchemas"
@@ -25,11 +27,9 @@ function MyApplicationCodePage() {
   const CODE_LENGTH = 6
   const isComplete = email.trim() !== "" && code.length === CODE_LENGTH
 
-  const verifyMutation = {
-    isPending: false,
-  }
+  const verifyMutation = useLookupAnonymousApplication()
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isComplete || emailError || codeError) return
 
     const isEmailValid = emailSchema.safeParse(email).success
@@ -38,49 +38,27 @@ function MyApplicationCodePage() {
       return
     }
 
-    // TODO: 지원서 제출 이력 조회 API 연동 필요
-    /*
     try {
-      const response = await verifyApplication({ email, code })
-      
-      // 지원서 제출 이력이 없는 이메일인 경우
-      if (response.status === "NO_HISTORY") {
-        setEmailError("지원 내역이 없는 이메일입니다.")
-        return
-      }
+      await verifyMutation.mutateAsync({ email, applicationKey: code })
 
-      // 지원 코드가 잘못된 경우
-      if (response.status === "INVALID_CODE") {
-        setCodeError(true)
-        setErrorShakeKey((key) => key + 1)
-        return
-      }
-      
-      // 성공 처리 및 이동
-    } catch (error) {
-      console.error(error)
-    }
-    */
-
-    // 에러 노출 예시
-    // 이메일이 'nohistory@example.com'인 경우 지원 내역 없음 에러 노출
-    if (email === "nohistory@example.com") {
-      setEmailError("지원 내역이 없는 이메일입니다.")
-      return
-    }
-
-    // 성공 조건: 코드가 '123456'인 경우 지원서 목록 페이지로 이동
-    if (code === "123456") {
       if (typeof window !== "undefined") {
         sessionStorage.setItem("isApplicationVerified", "true")
+        sessionStorage.setItem("anonymousEmail", email)
+        sessionStorage.setItem("anonymousApplicationKey", code)
       }
-      navigate({ to: "/projects/application/list" })
-      return
-    }
 
-    // 그 외에는 지원 코드 에러 발생으로 간주
-    setCodeError(true)
-    setErrorShakeKey((key) => key + 1)
+      navigate({ to: "/projects/application/list" })
+    } catch (error) {
+      if (isAxiosError(error)) {
+        const status = error.response?.status
+        if (status === 404) {
+          setEmailError("지원 내역이 없는 이메일입니다.")
+          return
+        }
+      }
+      setCodeError(true)
+      setErrorShakeKey((key) => key + 1)
+    }
   }
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
