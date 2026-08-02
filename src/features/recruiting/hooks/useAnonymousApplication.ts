@@ -23,20 +23,32 @@ export function useAnonymousApplicationQuery(
       email ?? "",
       applicationKey ?? "",
     ),
-    queryFn: () =>
-      lookupAnonymousApplication({
-        email: email!,
-        applicationKey: applicationKey!,
-      }),
+    queryFn: () => {
+      if (!email || !applicationKey) {
+        throw new Error("이메일과 지원 코드가 필요합니다.")
+      }
+      return lookupAnonymousApplication({ email, applicationKey })
+    },
     enabled: Boolean(email && applicationKey),
     staleTime: 60 * 1000,
   })
 }
 
 export function useLookupAnonymousApplication() {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: (body: RecruitingApplicationCredentialRequest) =>
       lookupAnonymousApplication(body),
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(
+        recruitingKeys.anonymousApplication(
+          variables.email,
+          variables.applicationKey,
+        ),
+        data,
+      )
+    },
   })
 }
 
@@ -53,6 +65,11 @@ export function useCancelAnonymousApplication() {
           variables.applicationKey,
         ),
       })
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("isApplicationVerified")
+        sessionStorage.removeItem("anonymousEmail")
+        sessionStorage.removeItem("anonymousApplicationKey")
+      }
     },
   })
 }

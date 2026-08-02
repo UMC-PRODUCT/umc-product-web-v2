@@ -2,6 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useMemo } from "react"
 
 import {
+  mapTrackToPartTag,
   RecruitingApplicationCard,
   useAnonymousApplicationQuery,
   useCancelAnonymousApplication,
@@ -21,24 +22,6 @@ export const Route = createFileRoute("/projects/application/list")({
   },
   component: ApplicationListPage,
 })
-
-function mapTrackToPartTag(track?: string | null): PartTag | null {
-  if (!track) return null
-  switch (track) {
-    case "PLAN":
-      return "plan"
-    case "DESIGN":
-      return "design"
-    case "WEB_PRODUCT_ENGINEER":
-      return "web-pe"
-    case "MOBILE_PRODUCT_ENGINEER":
-      return "mobile-pe"
-    case "INFRA_PLUS":
-      return "springboot"
-    default:
-      return null
-  }
-}
 
 function ApplicationListPage() {
   const email =

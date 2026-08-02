@@ -24,6 +24,7 @@ export {
   isRecruitingListRole,
   type RecruitingListRole,
 } from "./model/recruitingListRole"
+export { mapTrackToPartTag } from "./model/recruitingTrackMapper"
 export type {
   ChapterQuotaData,
   PartCounts,

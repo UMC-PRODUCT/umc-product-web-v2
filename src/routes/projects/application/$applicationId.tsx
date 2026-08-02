@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useMemo } from "react"
 
 import { useAnonymousApplicationQuery } from "@/features/recruiting"
@@ -9,6 +9,14 @@ import type { RecruitingPublicApplicationAnswer } from "@/features/recruiting"
 import type { ApplicationSection } from "@/features/recruiting/model/applicationDetail"
 
 export const Route = createFileRoute("/projects/application/$applicationId")({
+  beforeLoad: () => {
+    if (typeof window !== "undefined") {
+      const isVerified = sessionStorage.getItem("isApplicationVerified")
+      if (isVerified !== "true") {
+        throw redirect({ to: "/projects/application" })
+      }
+    }
+  },
   component: ApplicationDetailPage,
 })
 
