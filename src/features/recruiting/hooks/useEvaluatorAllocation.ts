@@ -17,12 +17,15 @@ interface SaveEvaluatorAllocationParams {
   assignedEvaluators: Staff[]
 }
 
-export function useSchoolStaff(schoolId?: string) {
+export function useSchoolStaff(schoolId?: string, gisuId?: string) {
   return useQuery({
-    queryKey: recruitingKeys.schoolStaff(schoolId ?? ""),
+    queryKey: recruitingKeys.schoolStaff(schoolId ?? "", gisuId ?? ""),
     queryFn: async () => {
       if (!schoolId) return []
-      const response = await searchAllMembers({ schoolId })
+      const response = await searchAllMembers({
+        schoolId,
+        ...(gisuId ? { gisuId } : {}),
+      })
       return response.page.content.map((member) => ({
         id: String(member.memberId),
         nickname: member.nickname || member.name,

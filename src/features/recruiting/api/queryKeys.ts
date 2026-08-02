@@ -56,8 +56,8 @@ export const recruitingKeys = {
   evaluatorProfiles: (memberIds: string[]) =>
     [...recruitingKeys.all, "evaluator-profiles", memberIds] as const,
 
-  schoolStaff: (schoolId: string) =>
-    [...recruitingKeys.all, "school-staff", schoolId] as const,
+  schoolStaff: (schoolId: string, gisuId?: string) =>
+    [...recruitingKeys.all, "school-staff", schoolId, gisuId ?? ""] as const,
 
   interviewQuestions: () =>
     [...recruitingKeys.all, "interview-questions"] as const,
