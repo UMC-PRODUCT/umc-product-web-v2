@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useMemo } from "react"
 
 import {
@@ -7,6 +7,7 @@ import {
   useAnonymousApplicationQuery,
   useCancelAnonymousApplication,
 } from "@/features/recruiting"
+import { Button } from "@/shared/ui/Button"
 
 import type { RecruitingApplication } from "@/features/recruiting"
 import type { PartTag } from "@/shared/model/domain"
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/projects/application/list")({
 })
 
 function ApplicationListPage() {
+  const navigate = useNavigate()
+
   const email =
     typeof window !== "undefined"
       ? sessionStorage.getItem("anonymousEmail")
@@ -72,6 +75,16 @@ function ApplicationListPage() {
     cancelMutation.mutate({ email, applicationKey })
   }
 
+  const handleResetVerification = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("isApplicationVerified")
+      sessionStorage.removeItem("anonymousEmail")
+      sessionStorage.removeItem("anonymousApplicationKey")
+      sessionStorage.removeItem("anonymousSessionId")
+    }
+    void navigate({ to: "/projects/application" })
+  }
+
   if (isLoading) {
     return (
       <div className="flex w-full items-center justify-center py-20">
@@ -84,10 +97,18 @@ function ApplicationListPage() {
 
   if (!application) {
     return (
-      <div className="flex w-full items-center justify-center py-20">
+      <div className="flex w-full flex-col items-center justify-center gap-4 py-20">
         <p className="text-body-1-medium text-teal-gray-500">
           조회된 지원서가 없습니다.
         </p>
+        <Button
+          variant="fill"
+          color="neutral"
+          size="m"
+          onClick={handleResetVerification}
+        >
+          다른 지원서 조회하기
+        </Button>
       </div>
     )
   }
