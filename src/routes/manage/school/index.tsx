@@ -45,6 +45,9 @@ function SchoolManagePage() {
     return getChapterIdByName(selectedChapter)
   }, [selectedChapter, getChapterIdByName])
 
+  const isChapterUnresolved =
+    selectedChapter !== "all" && chapterIdParam === undefined
+
   const { data: summaryData, isLoading: isSummaryLoading } =
     useAdminSchoolsSummary({
       gisuId: activeGisuId,
@@ -53,7 +56,7 @@ function SchoolManagePage() {
       page: currentPage - 1,
       size: PAGE_SIZE,
       sort: sortOption,
-      enabled: activeGisuId != null,
+      enabled: activeGisuId != null && !isChapterUnresolved,
     })
 
   const isLoading = isSummaryLoading
@@ -128,7 +131,11 @@ function SchoolManagePage() {
           </div>
         </div>
 
-        {isLoading ? (
+        {isChapterUnresolved ? (
+          <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
+            선택한 지부 정보를 찾을 수 없거나 불러오는 중입니다.
+          </div>
+        ) : isLoading ? (
           <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
             학교 정보를 불러오는 중입니다...
           </div>
