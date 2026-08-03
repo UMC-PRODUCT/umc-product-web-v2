@@ -60,7 +60,11 @@ export async function deleteSchools(body: DeleteSchoolsRequest): Promise<void> {
  * 학교 단건 삭제 헬퍼 함수
  */
 export async function deleteSchool(schoolId: number | string): Promise<void> {
-  return deleteSchools({ schoolIds: [Number(schoolId)] })
+  const numericId = Number(schoolId)
+  if (Number.isNaN(numericId)) {
+    throw new Error("유효하지 않은 학교 ID입니다.")
+  }
+  return deleteSchools({ schoolIds: [numericId] })
 }
 
 /**
