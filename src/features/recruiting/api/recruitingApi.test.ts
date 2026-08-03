@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest"
 
 import {
   mergeRoundGroups,
+  normalizeAdminRoundGroups,
   normalizeEvaluationStatistics,
   normalizeStatusSummary,
 } from "./recruitingApi"
 
 import type {
+  RawAdminRoundGroup,
   RawEvaluationStatistics,
   RawStatusSummary,
   RecruitingRound,
@@ -49,6 +51,58 @@ function group(
     rounds,
   }
 }
+
+describe("normalizeAdminRoundGroups", () => {
+  function adminGroup(
+    rounds: RawAdminRoundGroup["rounds"],
+  ): RawAdminRoundGroup {
+    return { ...group("100", []), rounds }
+  }
+
+  it("관리자 응답의 id 를 roundId 로 옮긴다", () => {
+    const [normalized] = normalizeAdminRoundGroups([
+      adminGroup([{ ...round("ignored"), roundId: undefined, id: 20 }]),
+    ])
+
+    // 이 변환이 빠지면 목록 카드의 postId 와 수정 화면의 차수 조회가 전부
+    // undefined 가 된다.
+    expect(normalized?.rounds[0]?.roundId).toBe("20")
+  })
+
+  it("관리자 전용 필드를 그대로 남긴다", () => {
+    const [normalized] = normalizeAdminRoundGroups([
+      adminGroup([
+        {
+          ...round("ignored"),
+          roundId: undefined,
+          id: 20,
+          status: "DRAFT",
+          contactText: "010-0000-0000",
+        },
+      ]),
+    ])
+
+    expect(normalized?.rounds[0]?.status).toBe("DRAFT")
+    expect(normalized?.rounds[0]?.contactText).toBe("010-0000-0000")
+  })
+
+  it("서버가 roundId 를 주기 시작해도 그 값을 쓴다", () => {
+    const [normalized] = normalizeAdminRoundGroups([
+      adminGroup([{ ...round("ignored"), roundId: 31, id: 20 }]),
+    ])
+
+    expect(normalized?.rounds[0]?.roundId).toBe("31")
+  })
+
+  it("차수가 없는 시즌도 빈 배열로 살린다", () => {
+    const [normalized] = normalizeAdminRoundGroups([adminGroup(undefined)])
+
+    // 차수를 하나도 안 만든 시즌은 모집 생성 화면이 seasonId 를 얻는 유일한
+    // 통로라 빠뜨리면 안 된다.
+    expect(normalized?.seasonId).toBe("100")
+    expect(normalized?.rounds).toEqual([])
+  })
+})
 
 describe("mergeRoundGroups", () => {
   it("같은 시즌의 차수를 한 그룹으로 합친다", () => {

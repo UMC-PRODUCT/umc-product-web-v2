@@ -12,6 +12,7 @@ import type {
   FinalDecisionBody,
   FormStructureQuery,
   PublicRoundsQuery,
+  RawAdminRoundGroup,
   RawCount,
   RawDecisionHistoryPage,
   RawEvaluationStatistics,
@@ -99,11 +100,25 @@ export async function getAllPublicRounds(
 export async function getAdminRounds(
   params: AdminRoundsQuery,
 ): Promise<RecruitingRoundGroup[]> {
-  const { data } = await api.get<ApiResponse<RecruitingRoundGroup[]>>(
+  const { data } = await api.get<ApiResponse<RawAdminRoundGroup[]>>(
     "/v1/recruiting/admin/rounds",
     { params, paramsSerializer: { indexes: null } },
   )
-  return data.result
+  return normalizeAdminRoundGroups(data.result)
+}
+
+// 관리자 응답은 차수 식별자를 id 로 내려주는데 화면은 공개 응답과 같은 roundId 를 읽는다.
+// 옮겨 놓지 않으면 목록 카드의 postId 와 수정 화면의 차수 조회가 모두 undefined 가 된다.
+export function normalizeAdminRoundGroups(
+  groups: RawAdminRoundGroup[],
+): RecruitingRoundGroup[] {
+  return (groups ?? []).map((group) => ({
+    ...group,
+    rounds: (group.rounds ?? []).map(({ id, ...round }) => ({
+      ...round,
+      roundId: String(round.roundId ?? id ?? ""),
+    })),
+  }))
 }
 
 export async function getRoundApplications(
