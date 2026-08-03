@@ -14,19 +14,18 @@ import type {
 } from "./evaluationHistory"
 
 // 서버는 지부·학교를 숫자 ID 로 받는데 필터 바는 이름으로 다룬다. 픽스처의 ID 에
-// 이름을 넣어 두면 이름을 그대로 보내도 테스트가 통과해 버려서, 이름과 겹치지 않는
-// 값을 쓴다.
-const CHAPTER_IDS: Record<string, string> = {
-  Neon: "27",
-  Chromium: "29",
-  Ferrum: "31",
-}
+// 이름을 넣어 두면 이름을 그대로 보내도 테스트가 통과해 버리므로, 이름마다 숫자 ID 를
+// 만들어 붙인다. 이름 목록을 따로 관리하면 빠뜨린 이름만 다른 모양의 ID 를 받아
+// 검증이 헐거워진다.
+const idsByName = new Map<string, string>()
 
-const SCHOOL_IDS: Record<string, string> = {
-  가천대학교: "101",
-  인하대학교: "102",
-  광운대학교: "103",
-  동국대학교: "104",
+function fixtureId(name: string): string {
+  const assigned = idsByName.get(name)
+  if (assigned) return assigned
+
+  const id = String(100 + idsByName.size)
+  idsByName.set(name, id)
+  return id
 }
 
 function row(
@@ -38,8 +37,8 @@ function row(
     id: `${chapter}-${school}-${name}`,
     processedAt: "2026-07-30T10:00:00Z",
     applicant: {
-      chapterId: CHAPTER_IDS[chapter] ?? `chapter-${chapter}`,
-      schoolId: SCHOOL_IDS[school] ?? `school-${school}`,
+      chapterId: fixtureId(chapter),
+      schoolId: fixtureId(school),
       chapter,
       school,
       name,
@@ -188,7 +187,7 @@ describe("toDecisionHistoriesQuery", () => {
       rows,
     )
 
-    expect(query.chapterIds).toEqual([CHAPTER_IDS.Neon, CHAPTER_IDS.Chromium])
+    expect(query.chapterIds).toEqual([fixtureId("Neon"), fixtureId("Chromium")])
     expect(query.chapterIds).not.toContain("Neon")
   })
 
@@ -201,8 +200,8 @@ describe("toDecisionHistoriesQuery", () => {
     )
 
     expect(query.schoolIds).toEqual([
-      SCHOOL_IDS["광운대학교"],
-      SCHOOL_IDS["동국대학교"],
+      fixtureId("광운대학교"),
+      fixtureId("동국대학교"),
     ])
     expect(query.schoolIds).not.toContain("광운대학교")
   })
@@ -215,7 +214,7 @@ describe("toDecisionHistoriesQuery", () => {
       rows,
     )
 
-    expect(query.chapterIds).toEqual([CHAPTER_IDS.Ferrum])
+    expect(query.chapterIds).toEqual([fixtureId("Ferrum")])
   })
 
   it("아무것도 안 고르면 보내지 않는다", () => {
@@ -234,7 +233,7 @@ describe("toDecisionHistoriesQuery", () => {
       rows,
     )
 
-    expect(query.chapterIds).toEqual([CHAPTER_IDS.Neon])
+    expect(query.chapterIds).toEqual([fixtureId("Neon")])
   })
 
   it("정렬과 담당자별 그룹을 옮긴다", () => {
