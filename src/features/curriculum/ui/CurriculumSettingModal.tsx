@@ -106,7 +106,7 @@ interface CurriculumSettingModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   items: CurriculumItem[]
-  onDeleteItem: (id: string) => void
+  onDeleteItem: (id: string) => Promise<boolean> | boolean
   onReorderItems: (fromIndex: number, toIndex: number) => void
   onRestoreItem?: (item: CurriculumItem, index: number) => void
 }
@@ -139,30 +139,32 @@ export function CurriculumSettingModal({
     onReorderItems(fromIndex, toIndex)
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!itemToDelete) return
     const targetItem = itemToDelete
     const targetIndex = items.findIndex((i) => i.id === targetItem.id)
 
-    onDeleteItem(targetItem.id)
     setItemToDelete(null)
 
-    addToast({
-      message: "선택한 커리큘럼이 삭제되었습니다.",
-      color: "red",
-      variant: "deep",
-      type: "default",
-      duration: 5000,
-      action: {
-        label: "되돌리기",
-        onClick: () => {
-          onRestoreItem?.(
-            targetItem,
-            targetIndex >= 0 ? targetIndex : items.length,
-          )
+    const success = await onDeleteItem(targetItem.id)
+    if (success) {
+      addToast({
+        message: "선택한 커리큘럼이 삭제되었습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 5000,
+        action: {
+          label: "되돌리기",
+          onClick: () => {
+            onRestoreItem?.(
+              targetItem,
+              targetIndex >= 0 ? targetIndex : items.length,
+            )
+          },
         },
-      },
-    })
+      })
+    }
   }
 
   return (

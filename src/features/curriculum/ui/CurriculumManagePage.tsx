@@ -76,7 +76,7 @@ export function CurriculumManagePage() {
     }))
   }
 
-  const handleDeleteItem = async (id: string) => {
+  const handleDeleteItem = async (id: string): Promise<boolean> => {
     const targetItem = (curriculumData[selectedPart] || []).find(
       (item) => item.id === id,
     )
@@ -122,8 +122,10 @@ export function CurriculumManagePage() {
             duration: 3000,
           })
         }
+        return false
       }
     }
+    return true
   }
 
   const handleReorderItems = (fromIndex: number, toIndex: number) => {
