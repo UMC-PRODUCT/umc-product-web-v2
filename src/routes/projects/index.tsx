@@ -1,9 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import {
+  MatchingProjectsListPage,
+  validateProjectListSearch,
+} from "@/features/project/list"
+
 export const Route = createFileRoute("/projects/")({
-  component: ApplyMethodPage,
+  validateSearch: validateProjectListSearch,
+  component: ProjectsListRoute,
 })
 
-function ApplyMethodPage() {
-  return <div>{/* 지원 방법 */}</div>
+function ProjectsListRoute() {
+  const { mock } = Route.useSearch()
+  return <MatchingProjectsListPage useMockData={mock === "projects"} />
 }
