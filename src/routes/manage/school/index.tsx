@@ -25,8 +25,14 @@ const PAGE_SIZE = 20
 function SchoolManagePage() {
   const [selectedChapter, setSelectedChapter] = useState<string>("all")
   const [sortOption, setSortOption] = useState<SchoolSortOption>("name")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchInputText, setSearchInputText] = useState("")
+  const [submittedSearchQuery, setSubmittedSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+
+  const handleSearchSubmit = () => {
+    setSubmittedSearchQuery(searchInputText)
+    setCurrentPage(1)
+  }
 
   const { data: activeGisuData } = useActiveGisu()
   const activeGisuId = activeGisuData?.gisuId
@@ -52,7 +58,7 @@ function SchoolManagePage() {
     useAdminSchoolsSummary({
       gisuId: activeGisuId,
       chapterId: chapterIdParam,
-      search: searchQuery.trim() || undefined,
+      search: submittedSearchQuery.trim() || undefined,
       page: currentPage - 1,
       size: PAGE_SIZE,
       sort: sortOption,
@@ -107,11 +113,12 @@ function SchoolManagePage() {
 
         <div className="flex w-full items-center justify-between">
           <SchoolSearchInput
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value)
-              setCurrentPage(1)
+            value={searchInputText}
+            onChange={(e) => setSearchInputText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearchSubmit()
             }}
+            onSearch={handleSearchSubmit}
           />
 
           <div className="flex items-center gap-4">
