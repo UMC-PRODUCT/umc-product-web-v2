@@ -160,6 +160,22 @@ export function CurriculumManagePage() {
       return
     }
 
+    const previousList = curriculumData[selectedPart] || []
+
+    const rollbackState = () => {
+      setCurriculumData((prev) => ({
+        ...prev,
+        [selectedPart]: previousList,
+      }))
+      addToast({
+        message: "커리큘럼 복원에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
+
     setCurriculumData((prev) => {
       const list = [...(prev[selectedPart] || [])]
       list.splice(index, 0, itemToRestore)
@@ -181,49 +197,54 @@ export function CurriculumManagePage() {
         title: itemToRestore.title || "복원된 커리큘럼",
       })
 
-      if (newCurriculumId) {
-        setCurriculumData((prev) => {
-          const list = prev[selectedPart] || []
-          const updated = list.map((c) =>
-            c.id === itemToRestore.id
-              ? { ...c, id: String(newCurriculumId) }
-              : c,
-          )
-          return {
-            ...prev,
-            [selectedPart]: updated,
-          }
-        })
+      if (!newCurriculumId) {
+        rollbackState()
+        return
+      }
 
-        if (itemToRestore.workbooks && itemToRestore.workbooks.length > 0) {
-          for (const wb of itemToRestore.workbooks) {
-            const now = new Date()
-            const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-            const createdWbId = await createWeeklyCurriculum({
-              curriculumId: newCurriculumId,
-              weekNo: wb.number,
-              title: wb.title,
-              startsAt: now.toISOString(),
-              endsAt: nextWeek.toISOString(),
-            })
-            if (createdWbId) {
-              setCurriculumData((prev) => {
-                const list = prev[selectedPart] || []
-                const updated = list.map((c) => {
-                  if (c.id !== String(newCurriculumId)) return c
-                  const updatedWbs = c.workbooks.map((w) =>
-                    w.id === wb.id ? { ...w, id: String(createdWbId) } : w,
-                  )
-                  return { ...c, workbooks: updatedWbs }
-                })
-                return { ...prev, [selectedPart]: updated }
-              })
-            }
+      setCurriculumData((prev) => {
+        const list = prev[selectedPart] || []
+        const updated = list.map((c) =>
+          c.id === itemToRestore.id ? { ...c, id: String(newCurriculumId) } : c,
+        )
+        return {
+          ...prev,
+          [selectedPart]: updated,
+        }
+      })
+
+      if (itemToRestore.workbooks && itemToRestore.workbooks.length > 0) {
+        for (const wb of itemToRestore.workbooks) {
+          const now = new Date()
+          const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+          const createdWbId = await createWeeklyCurriculum({
+            curriculumId: newCurriculumId,
+            weekNo: wb.number,
+            title: wb.title,
+            startsAt: now.toISOString(),
+            endsAt: nextWeek.toISOString(),
+          })
+
+          if (!createdWbId) {
+            rollbackState()
+            return
           }
+
+          setCurriculumData((prev) => {
+            const list = prev[selectedPart] || []
+            const updated = list.map((c) => {
+              if (c.id !== String(newCurriculumId)) return c
+              const updatedWbs = c.workbooks.map((w) =>
+                w.id === wb.id ? { ...w, id: String(createdWbId) } : w,
+              )
+              return { ...c, workbooks: updatedWbs }
+            })
+            return { ...prev, [selectedPart]: updated }
+          })
         }
       }
     } catch {
-      // Ignore restore API error fallback to local state
+      rollbackState()
     }
   }
 
