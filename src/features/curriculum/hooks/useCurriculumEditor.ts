@@ -8,7 +8,7 @@ import {
   useSensors,
 } from "@dnd-kit/core"
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import {
   createCurriculum,
@@ -166,6 +166,13 @@ export function useCurriculumEditor({
   const addToast = useToastStore((state) => state.addToast)
   const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
 
+  const pendingCurriculumPromisesRef = useRef<
+    Map<string, Promise<number | string | null>>
+  >(new Map())
+  const pendingWorkbookPromisesRef = useRef<
+    Map<string, Promise<number | string | null>>
+  >(new Map())
+
   // 서버에서 기수 및 파트별 커리큘럼 데이터 동기화
   useEffect(() => {
     if (isGisuLoading || activeGisuId == null) return
@@ -245,78 +252,99 @@ export function useCurriculumEditor({
     )
 
     // API 연동: 서버에 커리큘럼 생성 요청
-    try {
-      const apiPart = mapPartToApiEnum(part)
-      const createdId = await createCurriculum({
-        gisuId: activeGisuId,
-        part: apiPart,
-        title: "새 커리큘럼",
-      })
+    const curriculumPromise = (async () => {
+      try {
+        const apiPart = mapPartToApiEnum(part)
+        const createdId = await createCurriculum({
+          gisuId: activeGisuId,
+          part: apiPart,
+          title: "새 커리큘럼",
+        })
 
-      if (createdId) {
-        setCurriculums((prev) =>
-          prev.map((c) =>
-            c.id === newCurriculumTempId ? { ...c, id: String(createdId) } : c,
-          ),
-        )
-        try {
-          const now = new Date()
-          const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-          const createdWbId = await createWeeklyCurriculum({
-            curriculumId: createdId,
-            weekNo: 1,
-            title: "",
-            startsAt: now.toISOString(),
-            endsAt: nextWeek.toISOString(),
-          })
-          if (createdWbId) {
-            setCurriculums((prev) =>
-              prev.map((c) => {
-                if (c.id !== String(createdId)) return c
-                const updatedWorkbooks = c.workbooks.map((wb) =>
-                  wb.id === newWorkbookTempId
-                    ? { ...wb, id: String(createdWbId) }
-                    : wb,
-                )
-                return { ...c, workbooks: updatedWorkbooks }
-              }),
-            )
-          } else {
-            throw new Error("Failed to create weekly curriculum")
-          }
-        } catch {
+        if (createdId) {
+          setCurriculums((prev) =>
+            prev.map((c) =>
+              c.id === newCurriculumTempId
+                ? { ...c, id: String(createdId) }
+                : c,
+            ),
+          )
+          return createdId
+        }
+        return null
+      } catch {
+        setCurriculums((prev) => {
+          const filtered = prev.filter((c) => c.id !== newCurriculumTempId)
+          return recalculateCurriculumNumbers(filtered, baseCount)
+        })
+
+        addToast({
+          message: "커리큘럼 생성에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return null
+      }
+    })()
+
+    pendingCurriculumPromisesRef.current.set(
+      newCurriculumTempId,
+      curriculumPromise,
+    )
+
+    const workbookPromise = (async () => {
+      const createdId = await curriculumPromise
+      if (!createdId) return null
+      try {
+        const now = new Date()
+        const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+        const createdWbId = await createWeeklyCurriculum({
+          curriculumId: createdId,
+          weekNo: 1,
+          title: "",
+          startsAt: now.toISOString(),
+          endsAt: nextWeek.toISOString(),
+        })
+        if (createdWbId) {
           setCurriculums((prev) =>
             prev.map((c) => {
               if (c.id !== String(createdId)) return c
-              const updatedWorkbooks = c.workbooks.filter(
-                (wb) => wb.id !== newWorkbookTempId,
+              const updatedWorkbooks = c.workbooks.map((wb) =>
+                wb.id === newWorkbookTempId
+                  ? { ...wb, id: String(createdWbId) }
+                  : wb,
               )
-              return recalculateCurriculum(c, updatedWorkbooks)
+              return { ...c, workbooks: updatedWorkbooks }
             }),
           )
-          addToast({
-            message: "첫 주차 워크북 생성에 실패했습니다.",
-            color: "red",
-            variant: "deep",
-            type: "default",
-            duration: 3000,
-          })
+          return createdWbId
+        } else {
+          throw new Error("Failed to create weekly curriculum")
         }
+      } catch {
+        setCurriculums((prev) =>
+          prev.map((c) => {
+            if (c.id !== String(createdId)) return c
+            const updatedWorkbooks = c.workbooks.filter(
+              (wb) => wb.id !== newWorkbookTempId,
+            )
+            return recalculateCurriculum(c, updatedWorkbooks)
+          }),
+        )
+        addToast({
+          message: "첫 주차 워크북 생성에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return null
       }
-    } catch {
-      setCurriculums((prev) => {
-        const filtered = prev.filter((c) => c.id !== newCurriculumTempId)
-        return recalculateCurriculumNumbers(filtered, baseCount)
-      })
+    })()
 
-      addToast({
-        message: "커리큘럼 생성에 실패했습니다.",
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    }
+    pendingWorkbookPromisesRef.current.set(newWorkbookTempId, workbookPromise)
   }
 
   const handleUpdateCurriculumTitle = (id: string, title: string) => {
@@ -352,7 +380,18 @@ export function useCurriculumEditor({
   const handleBlurCurriculumTitle = async (id: string, title: string) => {
     const trimmed = title.trim()
     if (!trimmed) return
-    const numericId = Number(id)
+
+    let numericId = Number(id)
+    if (Number.isNaN(numericId)) {
+      const pendingPromise = pendingCurriculumPromisesRef.current.get(id)
+      if (pendingPromise) {
+        const createdId = await pendingPromise
+        if (createdId) {
+          numericId = Number(createdId)
+        }
+      }
+    }
+
     if (!Number.isNaN(numericId) && numericId > 0) {
       try {
         await updateCurriculum(numericId, { title: trimmed })
@@ -420,12 +459,24 @@ export function useCurriculumEditor({
     title: string,
   ) => {
     const trimmed = title.trim()
-    const curriculum = curriculums.find((c) => c.id === curriculumId)
+    const curriculum = curriculums.find(
+      (c) => c.id === curriculumId || Number(c.id) === Number(curriculumId),
+    )
     if (!curriculum) return
     const wb = curriculum.workbooks[wbIndex]
     if (!wb) return
 
-    const numericWbId = Number(wb.id)
+    let numericWbId = Number(wb.id)
+    if (Number.isNaN(numericWbId)) {
+      const pendingWbPromise = pendingWorkbookPromisesRef.current.get(wb.id)
+      if (pendingWbPromise) {
+        const createdWbId = await pendingWbPromise
+        if (createdWbId) {
+          numericWbId = Number(createdWbId)
+        }
+      }
+    }
+
     if (!Number.isNaN(numericWbId) && numericWbId > 0) {
       try {
         await updateWeeklyCurriculum(numericWbId, {
@@ -561,42 +612,61 @@ export function useCurriculumEditor({
       }),
     )
 
-    const numericCurriculumId = Number(curriculumId)
-    if (!Number.isNaN(numericCurriculumId) && numericCurriculumId > 0) {
-      try {
-        const now = new Date()
-        const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-        const createdWeeklyId = await createWeeklyCurriculum({
-          curriculumId: numericCurriculumId,
-          weekNo: nextWeekNo,
-          title: "",
-          startsAt: now.toISOString(),
-          endsAt: nextWeek.toISOString(),
-        })
-
-        if (createdWeeklyId) {
-          setCurriculums((prev) =>
-            prev.map((c) => {
-              if (c.id !== curriculumId) return c
-              const updatedWbs = c.workbooks.map((wb) =>
-                wb.id === newWbTempId
-                  ? { ...wb, id: String(createdWeeklyId) }
-                  : wb,
-              )
-              return { ...c, workbooks: updatedWbs }
-            }),
-          )
+    const workbookPromise = (async () => {
+      let numericCurriculumId = Number(curriculumId)
+      if (Number.isNaN(numericCurriculumId)) {
+        const pendingCurriculum =
+          pendingCurriculumPromisesRef.current.get(curriculumId)
+        if (pendingCurriculum) {
+          const res = await pendingCurriculum
+          if (res) numericCurriculumId = Number(res)
         }
-      } catch {
-        addToast({
-          message: "워크북 추가 저장에 실패했습니다.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
       }
-    }
+
+      if (!Number.isNaN(numericCurriculumId) && numericCurriculumId > 0) {
+        try {
+          const now = new Date()
+          const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+          const createdWeeklyId = await createWeeklyCurriculum({
+            curriculumId: numericCurriculumId,
+            weekNo: nextWeekNo,
+            title: "",
+            startsAt: now.toISOString(),
+            endsAt: nextWeek.toISOString(),
+          })
+
+          if (createdWeeklyId) {
+            setCurriculums((prev) =>
+              prev.map((c) => {
+                if (
+                  c.id !== String(numericCurriculumId) &&
+                  c.id !== curriculumId
+                )
+                  return c
+                const updatedWbs = c.workbooks.map((wb) =>
+                  wb.id === newWbTempId
+                    ? { ...wb, id: String(createdWeeklyId) }
+                    : wb,
+                )
+                return { ...c, workbooks: updatedWbs }
+              }),
+            )
+            return createdWeeklyId
+          }
+        } catch {
+          addToast({
+            message: "워크북 추가 저장에 실패했습니다.",
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+        }
+      }
+      return null
+    })()
+
+    pendingWorkbookPromisesRef.current.set(newWbTempId, workbookPromise)
   }
 
   const handleDeleteWorkbook = async (
