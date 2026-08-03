@@ -6,6 +6,7 @@ import type {
   AdminRoundsQuery,
   ApiEvaluationStage,
   CloneRecruitingRoundRequest,
+  ConfirmInterviewSchedulesRequest,
   CreateApplicationDraftBody,
   CreateRecruitingRoundRequest,
   DecisionHistoriesQuery,
@@ -13,10 +14,13 @@ import type {
   FormStructureQuery,
   PublicRoundsQuery,
   RawAdminRoundGroup,
+  RawBoardApplicant,
   RawCount,
   RawDecisionHistoryPage,
   RawEvaluationStatistics,
   RawId,
+  RawInterviewScheduleBoard,
+  RawInterviewSession,
   RawPartSummary,
   RawStatusCounts,
   RawStatusSummary,
@@ -26,11 +30,15 @@ import type {
   RecruitingApplicationMutationResult,
   RecruitingApplicationPage,
   RecruitingApplicationSummary,
+  RecruitingBoardApplicant,
   RecruitingDecisionHistoryPage,
   RecruitingEvaluation,
   RecruitingEvaluationStatistics,
   RecruitingFormStructure,
   RecruitingInterviewQuestion,
+  RecruitingInterviewScheduleBoard,
+  RecruitingInterviewSession,
+  RecruitingInterviewSessionRequest,
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
   RecruitingRoundPhase,
@@ -564,4 +572,118 @@ export async function getApplicationInterviewQuestions(
     `/v1/recruiting/admin/applications/${applicationId}/questions`,
   )
   return data.result
+}
+
+// 면접 세션 목록 조회 (RECRUITING-ADMIN-053). 시작 시각 순으로 온다.
+export async function getInterviewSessions(
+  roundId: string,
+): Promise<RecruitingInterviewSession[]> {
+  const { data } = await api.get<ApiResponse<RawInterviewSession[]>>(
+    `/v1/recruiting/admin/rounds/${roundId}/interview-sessions`,
+  )
+  return normalizeInterviewSessions(data.result)
+}
+
+export function normalizeInterviewSessions(
+  sessions: RawInterviewSession[],
+): RecruitingInterviewSession[] {
+  return (sessions ?? []).map((session) => ({
+    ...session,
+    id: String(session.id),
+    roundId: String(session.roundId),
+    slotDurationMinutes: toCount(session.slotDurationMinutes),
+  }))
+}
+
+// 면접 세션 생성 (RECRUITING-ADMIN-054). 생성된 세션 ID 를 돌려준다.
+export async function createInterviewSession(
+  roundId: string,
+  payload: RecruitingInterviewSessionRequest,
+): Promise<string> {
+  const { data } = await api.post<ApiResponse<{ id: RawId }>>(
+    `/v1/recruiting/admin/rounds/${roundId}/interview-sessions`,
+    payload,
+  )
+  return String(data.result.id)
+}
+
+// 면접 세션 수정 (RECRUITING-ADMIN-055)
+export async function updateInterviewSession(
+  roundId: string,
+  sessionId: string,
+  payload: RecruitingInterviewSessionRequest,
+): Promise<void> {
+  await api.put(
+    `/v1/recruiting/admin/rounds/${roundId}/interview-sessions/${sessionId}`,
+    payload,
+  )
+}
+
+// 면접 세션 삭제 (RECRUITING-ADMIN-056)
+export async function deleteInterviewSession(
+  roundId: string,
+  sessionId: string,
+): Promise<void> {
+  await api.delete(
+    `/v1/recruiting/admin/rounds/${roundId}/interview-sessions/${sessionId}`,
+  )
+}
+
+// 면접 일정 보드 조회 (RECRUITING-ADMIN-057). date 는 KST 기준 YYYY-MM-DD 다.
+// 슬롯은 서버가 세션의 slotDurationMinutes 로 계산해 내려준다.
+export async function getInterviewScheduleBoard(
+  roundId: string,
+  date: string,
+): Promise<RecruitingInterviewScheduleBoard> {
+  const { data } = await api.get<ApiResponse<RawInterviewScheduleBoard>>(
+    `/v1/recruiting/admin/rounds/${roundId}/interview-schedule-board`,
+    { params: { date } },
+  )
+  return normalizeInterviewScheduleBoard(data.result)
+}
+
+function toBoardApplicant(raw: RawBoardApplicant): RecruitingBoardApplicant {
+  return {
+    applicationId: String(raw.applicationId),
+    applicantName: raw.applicantName ?? "",
+  }
+}
+
+export function normalizeInterviewScheduleBoard(
+  raw: RawInterviewScheduleBoard,
+): RecruitingInterviewScheduleBoard {
+  return {
+    roundId: String(raw.roundId),
+    date: raw.date,
+    sessions: (raw.sessions ?? []).map((session) => ({
+      ...session,
+      sessionId: String(session.sessionId),
+      slots: (session.slots ?? []).map((slot) => ({
+        startsAt: slot.startsAt,
+        endsAt: slot.endsAt,
+        availableApplicationIds: (slot.availableApplicationIds ?? []).map(
+          String,
+        ),
+        assignedApplicant: slot.assignedApplicant
+          ? toBoardApplicant(slot.assignedApplicant)
+          : null,
+      })),
+    })),
+    pendingApplicants: (raw.pendingApplicants ?? []).map(toBoardApplicant),
+    confirmedApplicants: (raw.confirmedApplicants ?? []).map(toBoardApplicant),
+  }
+}
+
+// 면접 일정 일괄 확정 (RECRUITING-ADMIN-058). 서버가 원자적으로 처리하며
+// 한 번에 100 건까지 받는다.
+export const INTERVIEW_ASSIGNMENT_LIMIT = 100
+
+export async function confirmInterviewSchedules(
+  roundId: string,
+  payload: ConfirmInterviewSchedulesRequest,
+): Promise<void> {
+  await api.post(
+    `/v1/recruiting/admin/rounds/${roundId}/interview-schedule/confirmations`,
+    payload,
+  )
 }

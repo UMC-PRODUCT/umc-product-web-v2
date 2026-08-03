@@ -686,3 +686,111 @@ export interface RawDecisionHistoryPage {
     hasPrevious?: boolean
   }
 }
+
+// 면접 스케줄링 (RECRUITING-ADMIN-053~058).
+// 서버는 시각을 ISO Instant 로, 화면은 날짜 탭과 "HH:mm" 으로 다룬다. 변환은
+// model/interviewScheduleMapper 에 모아 둔다.
+export type RecruitingInterviewMode = "ONLINE" | "OFFLINE"
+
+export interface RecruitingInterviewSession {
+  id: string
+  roundId: string
+  name: string
+  startsAt: string
+  endsAt: string
+  // 서버가 15 의 양의 배수만 받는다. 보드 슬롯 길이도 이 값으로 정해진다.
+  slotDurationMinutes: number
+  mode: RecruitingInterviewMode
+  location: string
+}
+
+export type RawInterviewSession = Omit<
+  RecruitingInterviewSession,
+  "id" | "roundId" | "slotDurationMinutes"
+> & {
+  id: RawId
+  roundId: RawId
+  slotDurationMinutes: RawCount
+}
+
+export interface RecruitingInterviewSessionRequest {
+  name: string
+  startsAt: string
+  endsAt: string
+  slotDurationMinutes: number
+  mode: RecruitingInterviewMode
+  location: string
+}
+
+export interface RecruitingBoardApplicant {
+  applicationId: string
+  applicantName: string
+}
+
+export type RawBoardApplicant = {
+  applicationId: RawId
+  applicantName?: string | null
+}
+
+export interface RecruitingBoardSlot {
+  startsAt: string
+  endsAt: string
+  // 이 슬롯에 면접 가능하다고 제출한 지원서들. 배정 가능 여부 표시에 쓴다.
+  availableApplicationIds: string[]
+  assignedApplicant: RecruitingBoardApplicant | null
+}
+
+export type RawBoardSlot = {
+  startsAt: string
+  endsAt: string
+  availableApplicationIds?: RawId[]
+  assignedApplicant?: RawBoardApplicant | null
+}
+
+export interface RecruitingBoardSession {
+  sessionId: string
+  name: string
+  startsAt: string
+  endsAt: string
+  mode: RecruitingInterviewMode
+  location: string
+  slots: RecruitingBoardSlot[]
+}
+
+export type RawBoardSession = Omit<
+  RecruitingBoardSession,
+  "sessionId" | "slots"
+> & {
+  sessionId: RawId
+  slots?: RawBoardSlot[]
+}
+
+// 대기자는 차수 전체, 확정자는 조회한 날짜의 세션만 담긴다. 범위가 달라서
+// 하루치 응답으로 차수 전체 배정률을 계산할 수 없다.
+export interface RecruitingInterviewScheduleBoard {
+  roundId: string
+  date: string
+  sessions: RecruitingBoardSession[]
+  pendingApplicants: RecruitingBoardApplicant[]
+  confirmedApplicants: RecruitingBoardApplicant[]
+}
+
+export type RawInterviewScheduleBoard = {
+  roundId: RawId
+  date: string
+  sessions?: RawBoardSession[]
+  pendingApplicants?: RawBoardApplicant[]
+  confirmedApplicants?: RawBoardApplicant[]
+}
+
+export interface RecruitingInterviewAssignmentRequest {
+  applicationId: number
+  sessionId: number
+  startsAt: string
+  // 확정 시점의 연락처. 서버가 빈 값을 거부한다.
+  contactSnapshot: string
+}
+
+export interface ConfirmInterviewSchedulesRequest {
+  assignments: RecruitingInterviewAssignmentRequest[]
+}
