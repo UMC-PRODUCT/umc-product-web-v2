@@ -105,6 +105,16 @@ export interface AdminSchoolSummaryResponse {
   activeChallengerCount?: number
 }
 
+/** 학교 현황 및 지부/인원 통계 요약 조회 쿼리 파라미터 DTO (DASHBOARD-100) */
+export interface AdminSchoolsSummaryParams {
+  gisuId?: number
+  chapterId?: number
+  search?: string
+  page?: number
+  size?: number
+  sort?: string | string[]
+}
+
 /** 학교 현황 페이징 응답 DTO (DASHBOARD-100) */
 export interface PageResponseAdminSchoolSummaryResponse {
   content?: AdminSchoolSummaryResponse[]

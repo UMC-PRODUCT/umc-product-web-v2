@@ -1,6 +1,7 @@
 import { api } from "@/shared/lib/axios"
 
 import type {
+  AdminSchoolsSummaryParams,
   CreateSchoolRequest,
   DeleteSchoolsRequest,
   PageResponseAdminSchoolSummaryResponse,
@@ -79,14 +80,9 @@ export async function getSchoolDetail(
  * 학교 현황 및 지부/인원 통계 요약 조회 (DASHBOARD-100)
  * 지부명, 학교명, 소속 인원 수 등을 함께 반환합니다.
  */
-export async function getAdminSchoolsSummary(params?: {
-  gisuId?: number
-  chapterId?: number
-  search?: string
-  page?: number
-  size?: number
-  sort?: string | string[]
-}): Promise<PageResponseAdminSchoolSummaryResponse> {
+export async function getAdminSchoolsSummary(
+  params?: AdminSchoolsSummaryParams,
+): Promise<PageResponseAdminSchoolSummaryResponse> {
   const { data } = await api.get<
     ApiResponse<PageResponseAdminSchoolSummaryResponse>
   >("/v1/analytics/admin/schools/summary", { params })

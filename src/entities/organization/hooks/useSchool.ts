@@ -11,6 +11,7 @@ import {
 } from "@/entities/organization/api/schoolApi"
 
 import type {
+  AdminSchoolsSummaryParams,
   CreateSchoolRequest,
   DeleteSchoolsRequest,
   UpdateSchoolRequest,
@@ -36,15 +37,9 @@ export function useSchoolList() {
 }
 
 /** 관리자용 학교 현황 요약 목록 조회 훅 (지부명/인원수 포함) */
-export function useAdminSchoolsSummary(params?: {
-  gisuId?: number
-  chapterId?: number
-  search?: string
-  page?: number
-  size?: number
-  sort?: string | string[]
-  enabled?: boolean
-}) {
+export function useAdminSchoolsSummary(
+  params?: AdminSchoolsSummaryParams & { enabled?: boolean },
+) {
   return useQuery({
     queryKey: ["schools", "admin-summary", params],
     queryFn: () => getAdminSchoolsSummary(params),
