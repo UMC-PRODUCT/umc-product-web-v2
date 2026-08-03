@@ -40,10 +40,12 @@ export function useSchoolList() {
 export function useAdminSchoolsSummary(
   params?: AdminSchoolsSummaryParams & { enabled?: boolean },
 ) {
+  const { enabled, ...queryParams } = params ?? {}
+
   return useQuery({
-    queryKey: ["schools", "admin-summary", params],
-    queryFn: () => getAdminSchoolsSummary(params),
-    enabled: params?.enabled ?? params?.gisuId != null,
+    queryKey: ["schools", "admin-summary", queryParams],
+    queryFn: () => getAdminSchoolsSummary(queryParams),
+    enabled: enabled ?? queryParams.gisuId != null,
     staleTime: 5 * 60 * 1000,
   })
 }
