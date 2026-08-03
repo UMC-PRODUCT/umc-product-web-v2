@@ -12,6 +12,7 @@ import type {
   FinalDecisionBody,
   FormStructureQuery,
   PublicRoundsQuery,
+  RawAdminRoundGroup,
   RawCount,
   RawDecisionHistoryPage,
   RawEvaluationStatistics,
@@ -99,11 +100,28 @@ export async function getAllPublicRounds(
 export async function getAdminRounds(
   params: AdminRoundsQuery,
 ): Promise<RecruitingRoundGroup[]> {
-  const { data } = await api.get<ApiResponse<RecruitingRoundGroup[]>>(
+  const { data } = await api.get<ApiResponse<RawAdminRoundGroup[]>>(
     "/v1/recruiting/admin/rounds",
     { params, paramsSerializer: { indexes: null } },
   )
-  return data.result
+  return normalizeAdminRoundGroups(data.result)
+}
+
+// 관리자 응답은 차수 식별자를 id 로 내려주는데 화면은 공개 응답과 같은 roundId 를 읽는다.
+// 옮겨 놓지 않으면 목록 카드의 postId 와 수정 화면의 차수 조회가 모두 undefined 가 된다.
+//
+// 식별자가 아예 없는 차수는 뺀다. 빈 값으로 두면 목록에는 보이면서 수정·삭제·복제가
+// 전부 빈 경로로 나가, 눌러 봐야 실패한다.
+export function normalizeAdminRoundGroups(
+  groups: RawAdminRoundGroup[],
+): RecruitingRoundGroup[] {
+  return (groups ?? []).map((group) => ({
+    ...group,
+    rounds: (group.rounds ?? []).flatMap(({ id, ...round }) => {
+      const roundId = String(round.roundId ?? id ?? "")
+      return roundId === "" ? [] : [{ ...round, roundId }]
+    }),
+  }))
 }
 
 export async function getRoundApplications(
@@ -196,8 +214,10 @@ export async function getDecisionHistories(
 }
 
 // 화면이 지부·학교 다중 선택과 학교별 그룹핑을 클라이언트에서 처리하고 있어 전량을
-// 받아야 한다. 서버 필터(chapterId/schoolId)는 단일 ID 라 이름 기반인 현재 필터와
-// 바로 맞물리지 않는다. asOf 와 progressStatus 는 첫 페이지 값을 쓴다.
+// 받아야 한다. asOf 와 progressStatus 는 첫 페이지 값을 쓴다.
+//
+// size 는 서버가 100 을 넘기면 거부하므로 그 경계에 맞춰 둔다. 스펙에는 상한이
+// 적혀 있지 않아 값을 올리면 조회가 통째로 400 이 된다.
 export async function getAllDecisionHistories(
   params: Omit<DecisionHistoriesQuery, "page" | "size">,
 ): Promise<RecruitingDecisionHistoryPage> {
@@ -331,7 +351,11 @@ export async function getEvaluationStatistics(
 
 // 지원 현황 대시보드용 집계. admin 경로라 getPublicRounds 와 달리 학교 회장단
 // 이상만 조회할 수 있을 가능성이 있어 403 처리가 필요할 수 있다.
-// 파트(track)별 집계는 응답에 없다.
+//
+// 건수는 작성 중(DRAFT)·지원 취소(CANCELLED)를 뺀 값이다. 지원자 목록의 행 수와는
+// 기준이 달라 두 숫자가 어긋나 보일 수 있다.
+// 파트(track)별 집계는 parts 로 함께 온다. 모집 대상이 아닌 트랙은 빠지고, 건수가
+// 0 인 트랙도 자리를 지킨다.
 export async function getStatusSummary(
   params: StatusSummaryQuery,
 ): Promise<RecruitingStatusSummary> {

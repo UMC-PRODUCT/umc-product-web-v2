@@ -27,3 +27,23 @@ export function getServerErrorMessage(error: unknown): string | undefined {
   const message = getErrorBody(error)?.message
   return message && message.trim() !== "" ? message : undefined
 }
+
+// 파일 다운로드는 responseType: "blob" 이라 실패 응답 본문도 Blob 으로 온다. Blob 도
+// typeof 는 "object" 라 getServerErrorMessage 의 검사는 통과하지만 message 가 없어
+// 항상 undefined 가 된다. 그래서 "조건을 좁혀 달라" 같은 안내가 통째로 묻힌다.
+export async function getServerErrorMessageFromBlob(
+  error: unknown,
+): Promise<string | undefined> {
+  if (!isAxiosError(error)) return undefined
+  const body = error.response?.data
+  if (!(body instanceof Blob)) return getServerErrorMessage(error)
+
+  try {
+    const parsed = JSON.parse(await body.text()) as ServerErrorBody
+    const message = parsed?.message
+    return message && message.trim() !== "" ? message : undefined
+  } catch {
+    // CSV 본문이 그대로 실린 경우처럼 JSON 이 아닐 수 있다. 호출부가 기본 문구를 쓴다.
+    return undefined
+  }
+}
