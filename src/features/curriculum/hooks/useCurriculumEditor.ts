@@ -701,6 +701,18 @@ export function useCurriculumEditor({
         try {
           await deleteWeeklyCurriculum(numericWbId)
         } catch {
+          setCurriculums((prev) =>
+            prev.map((c) => {
+              if (c.id !== curriculumId) return c
+              const restoredWorkbooks = [...c.workbooks]
+              if (wbIndex >= 0 && wbIndex <= restoredWorkbooks.length) {
+                restoredWorkbooks.splice(wbIndex, 0, targetWb)
+              } else {
+                restoredWorkbooks.push(targetWb)
+              }
+              return recalculateCurriculum(c, restoredWorkbooks)
+            }),
+          )
           addToast({
             message: "워크북 삭제에 실패했습니다.",
             color: "red",
@@ -861,6 +873,15 @@ export function useCurriculumEditor({
       try {
         await deleteCurriculum(numericCurriculumId)
       } catch {
+        setCurriculums((prev) => {
+          const next = [...prev]
+          if (targetIndex >= 0 && targetIndex <= next.length) {
+            next.splice(targetIndex, 0, targetCurriculum)
+          } else {
+            next.push(targetCurriculum)
+          }
+          return recalculateCurriculumNumbers(next, baseCount)
+        })
         addToast({
           message: "커리큘럼 삭제에 실패했습니다.",
           color: "red",

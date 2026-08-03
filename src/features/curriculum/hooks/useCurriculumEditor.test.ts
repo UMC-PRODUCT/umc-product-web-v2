@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
   createCurriculum,
   createWeeklyCurriculum,
+  deleteCurriculum,
+  deleteWeeklyCurriculum,
   updateCurriculum,
   updateWeeklyCurriculum,
 } from "@/entities/curriculum"
@@ -11,7 +13,7 @@ import {
 import { useCurriculumEditor } from "./useCurriculumEditor"
 
 vi.mock("@/entities/curriculum", () => ({
-  getCurriculumOverview: vi.fn().mockResolvedValue(null),
+  getCurriculumOverview: vi.fn().mockRejectedValue(new Error("No overview")),
   createCurriculum: vi.fn(),
   createWeeklyCurriculum: vi.fn(),
   updateCurriculum: vi.fn(),
@@ -116,19 +118,19 @@ describe("useCurriculumEditor - temporary ID handleBlur", () => {
   })
 })
 
-describe("useCurriculumEditor - handleRestoreCurriculum", () => {
+describe("useCurriculumEditor - deletion failure restoration", () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it("커리큘럼 복원 중 createCurriculum 실패 시 에러 처리하고 추가한 커리큘럼을 제거한다", async () => {
-    vi.mocked(createCurriculum).mockRejectedValue(new Error("Creation failed"))
+  it("deleteCurriculum 실패 시 targetCurriculum을 복구하고 번호를 재계산한다", async () => {
+    vi.mocked(deleteCurriculum).mockRejectedValue(new Error("Delete failed"))
 
     const initialCurriculums = [
       {
-        id: "1",
+        id: "100",
         number: "01",
-        title: "기존 커리큘럼",
+        title: "커리큘럼 1",
         workbookCount: 1,
         missionCount: 1,
         workbooks: [{ id: "10", number: 1, title: "Wb 1", missions: [""] }],
@@ -140,13 +142,45 @@ describe("useCurriculumEditor - handleRestoreCurriculum", () => {
     )
 
     await act(async () => {
-      await result.current.handleDeleteCurriculum("999") // dummy call
+      await result.current.handleDeleteCurriculum("100")
     })
 
-    // 직접 restore 호출 테스트
+    expect(result.current.curriculums).toHaveLength(1)
+    expect(result.current.curriculums[0]?.id).toBe("100")
+    expect(result.current.curriculums[0]?.number).toBe("01")
+  })
+
+  it("deleteWeeklyCurriculum 실패 시 targetWb를 복구하고 워크북 번호 및 개수를 재계산한다", async () => {
+    vi.mocked(deleteWeeklyCurriculum).mockRejectedValue(
+      new Error("Delete wb failed"),
+    )
+
+    const initialCurriculums = [
+      {
+        id: "100",
+        number: "01",
+        title: "커리큘럼 1",
+        workbookCount: 2,
+        missionCount: 2,
+        workbooks: [
+          { id: "10", number: 1, title: "Wb 1", missions: [""] },
+          { id: "20", number: 2, title: "Wb 2", missions: [""] },
+        ],
+      },
+    ]
+
+    const { result } = renderHook(() =>
+      useCurriculumEditor({ initialCurriculums, part: "PM" }),
+    )
+
     await act(async () => {
-      const curriculums = result.current.curriculums
-      expect(curriculums).toBeDefined()
+      await result.current.handleDeleteWorkbook("100", 0)
     })
+
+    const restoredWorkbooks = result.current.curriculums[0]?.workbooks
+    expect(restoredWorkbooks).toHaveLength(2)
+    expect(restoredWorkbooks?.[0]?.id).toBe("10")
+    expect(restoredWorkbooks?.[0]?.number).toBe(1)
+    expect(result.current.curriculums[0]?.workbookCount).toBe(2)
   })
 })
