@@ -8,6 +8,7 @@ import {
 } from "./recruitingApi"
 
 import type {
+  RawAdminRound,
   RawAdminRoundGroup,
   RawEvaluationStatistics,
   RawStatusSummary,
@@ -53,6 +54,28 @@ function group(
 }
 
 describe("normalizeAdminRoundGroups", () => {
+  // 공개 응답을 그대로 쓰지 않고 관리자 응답 모양으로 따로 만든다. 공개 전용
+  // 필드(applicationFormId·formId·applicationOpen)는 관리자 응답에 오지 않는다.
+  function adminRound(overrides: Partial<RawAdminRound> = {}): RawAdminRound {
+    return {
+      id: 20,
+      title: "차수",
+      type: "REGULAR",
+      roundNo: 1,
+      recruitableTracks: [],
+      secondChoiceEnabled: false,
+      documentStartAt: null,
+      documentEndAt: null,
+      documentResultPublishedAt: null,
+      interviewRequired: true,
+      interviewStartAt: null,
+      interviewEndAt: null,
+      finalResultPublishedAt: null,
+      announcement: null,
+      ...overrides,
+    }
+  }
+
   function adminGroup(
     rounds: RawAdminRoundGroup["rounds"],
   ): RawAdminRoundGroup {
@@ -61,7 +84,7 @@ describe("normalizeAdminRoundGroups", () => {
 
   it("관리자 응답의 id 를 roundId 로 옮긴다", () => {
     const [normalized] = normalizeAdminRoundGroups([
-      adminGroup([{ ...round("ignored"), roundId: undefined, id: 20 }]),
+      adminGroup([adminRound({ id: 20 })]),
     ])
 
     // 이 변환이 빠지면 목록 카드의 postId 와 수정 화면의 차수 조회가 전부
@@ -72,13 +95,7 @@ describe("normalizeAdminRoundGroups", () => {
   it("관리자 전용 필드를 그대로 남긴다", () => {
     const [normalized] = normalizeAdminRoundGroups([
       adminGroup([
-        {
-          ...round("ignored"),
-          roundId: undefined,
-          id: 20,
-          status: "DRAFT",
-          contactText: "010-0000-0000",
-        },
+        adminRound({ status: "DRAFT", contactText: "010-0000-0000" }),
       ]),
     ])
 
@@ -88,10 +105,27 @@ describe("normalizeAdminRoundGroups", () => {
 
   it("서버가 roundId 를 주기 시작해도 그 값을 쓴다", () => {
     const [normalized] = normalizeAdminRoundGroups([
-      adminGroup([{ ...round("ignored"), roundId: 31, id: 20 }]),
+      adminGroup([adminRound({ id: 20, roundId: 31 })]),
     ])
 
     expect(normalized?.rounds[0]?.roundId).toBe("31")
+  })
+
+  // 식별자가 없으면 수정·삭제·복제가 전부 빈 경로로 나간다. 목록에 남겨 두면
+  // 눌렀을 때 실패하므로 아예 빼는 편이 낫다.
+  it("식별자가 없는 차수는 목록에서 뺀다", () => {
+    // 타입에는 id 가 필수지만 응답이 그 계약을 어길 수 있다. 그 경우를 재현한다.
+    const contractViolating = [
+      { ...adminRound(), id: undefined },
+      { ...adminRound(), id: "", title: "빈 식별자" },
+      adminRound({ id: 21, title: "정상" }),
+    ] as RawAdminRound[]
+
+    const [normalized] = normalizeAdminRoundGroups([
+      adminGroup(contractViolating),
+    ])
+
+    expect(normalized?.rounds.map((item) => item.roundId)).toEqual(["21"])
   })
 
   it("차수가 없는 시즌도 빈 배열로 살린다", () => {

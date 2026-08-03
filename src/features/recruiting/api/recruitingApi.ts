@@ -109,15 +109,18 @@ export async function getAdminRounds(
 
 // 관리자 응답은 차수 식별자를 id 로 내려주는데 화면은 공개 응답과 같은 roundId 를 읽는다.
 // 옮겨 놓지 않으면 목록 카드의 postId 와 수정 화면의 차수 조회가 모두 undefined 가 된다.
+//
+// 식별자가 아예 없는 차수는 뺀다. 빈 값으로 두면 목록에는 보이면서 수정·삭제·복제가
+// 전부 빈 경로로 나가, 눌러 봐야 실패한다.
 export function normalizeAdminRoundGroups(
   groups: RawAdminRoundGroup[],
 ): RecruitingRoundGroup[] {
   return (groups ?? []).map((group) => ({
     ...group,
-    rounds: (group.rounds ?? []).map(({ id, ...round }) => ({
-      ...round,
-      roundId: String(round.roundId ?? id ?? ""),
-    })),
+    rounds: (group.rounds ?? []).flatMap(({ id, ...round }) => {
+      const roundId = String(round.roundId ?? id ?? "")
+      return roundId === "" ? [] : [{ ...round, roundId }]
+    }),
   }))
 }
 

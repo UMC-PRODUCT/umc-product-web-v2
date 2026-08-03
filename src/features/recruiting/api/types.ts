@@ -69,8 +69,12 @@ export interface RecruitingRound {
 }
 
 // admin 응답의 차수. 식별자가 id 로 오고, 공개 응답에만 있는 필드는 빠져 있다.
-export type RawAdminRound = Omit<RecruitingRound, "roundId"> & {
-  id?: RawId
+// 공개 전용 필드를 빼 두어야 관리자 응답에서 그 값을 읽는 코드가 타입 검사에서 걸린다.
+export type RawAdminRound = Omit<
+  RecruitingRound,
+  "roundId" | "applicationFormId" | "formId" | "applicationOpen"
+> & {
+  id: RawId
   roundId?: RawId
 }
 
