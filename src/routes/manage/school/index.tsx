@@ -63,20 +63,23 @@ function SchoolManagePage() {
 
   const paginatedSchools = useMemo(() => {
     if (!summaryData?.content) return []
-    return summaryData.content.map((item) => {
-      const fallbackChapterId = item.schoolName
-        ? getChapterIdBySchool(item.schoolName)
-        : undefined
-      const chapterId = item.chapterId ?? fallbackChapterId
-      return {
-        id: item.schoolId != null ? String(item.schoolId) : "",
-        name: item.schoolName ?? "",
-        chapterId,
-        branch:
-          item.chapterName ?? (chapterId ? `지부 ${chapterId}` : "지부 미지정"),
-        count: item.activeChallengerCount ?? 0,
-      }
-    })
+    return summaryData.content
+      .filter((item) => item.schoolId != null)
+      .map((item) => {
+        const fallbackChapterId = item.schoolName
+          ? getChapterIdBySchool(item.schoolName)
+          : undefined
+        const chapterId = item.chapterId ?? fallbackChapterId
+        return {
+          id: String(item.schoolId),
+          name: item.schoolName ?? "",
+          chapterId,
+          branch:
+            item.chapterName ??
+            (chapterId ? `지부 ${chapterId}` : "지부 미지정"),
+          count: item.activeChallengerCount ?? 0,
+        }
+      })
   }, [summaryData, getChapterIdBySchool])
 
   const totalPages = Math.max(1, summaryData?.totalPages ?? 1)
