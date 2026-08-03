@@ -180,12 +180,16 @@ export function useCurriculumEditor({
           gisuId: currentGisuId,
           part: apiPart,
         })
-        if (isSubscribed && overview && overview.curriculumId) {
-          const fetchedItem = mapOverviewToCurriculumItem(overview, 0)
-          setCurriculums([fetchedItem])
+        if (isSubscribed) {
+          if (overview && overview.curriculumId) {
+            const fetchedItem = mapOverviewToCurriculumItem(overview, 0)
+            setCurriculums([fetchedItem])
+          } else {
+            setCurriculums([])
+          }
         }
       } catch {
-        // 서버에 데이터가 없을 시 기존 초기값 유지
+        // 서버 요청 실패 시 기존 초기값 유지
       } finally {
         if (isSubscribed) setIsLoading(false)
       }
