@@ -56,13 +56,14 @@ export function mapWeeklyOverviewToWorkbook(
   week: WeeklyCurriculumOverviewResponse,
   index: number,
 ): Workbook {
+  const rawMissions = (week as { missions?: string[] }).missions
   return {
     id: week.weeklyCurriculumId
       ? String(week.weeklyCurriculumId)
       : `wb-${Date.now()}-${index}`,
     number: week.weekNo ?? index + 1,
     title: week.title ?? "",
-    missions: [],
+    missions: Array.isArray(rawMissions) ? rawMissions : [],
   }
 }
 
@@ -78,6 +79,10 @@ export function mapOverviewToCurriculumItem(
   )
 
   const numberStr = String(index + 1).padStart(2, "0")
+  const missionCount = workbooks.reduce(
+    (sum, wb) => sum + (wb.missions ? wb.missions.length : 0),
+    0,
+  )
 
   return {
     id: overview.curriculumId
@@ -86,7 +91,7 @@ export function mapOverviewToCurriculumItem(
     number: numberStr,
     title: overview.title ?? "",
     workbookCount: workbooks.length,
-    missionCount: 0,
+    missionCount,
     workbooks,
   }
 }
