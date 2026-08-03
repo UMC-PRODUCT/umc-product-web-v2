@@ -281,9 +281,26 @@ export function useCurriculumEditor({
                 return { ...c, workbooks: updatedWorkbooks }
               }),
             )
+          } else {
+            throw new Error("Failed to create weekly curriculum")
           }
         } catch {
-          // Ignore secondary creation error
+          setCurriculums((prev) =>
+            prev.map((c) => {
+              if (c.id !== String(createdId)) return c
+              const updatedWorkbooks = c.workbooks.filter(
+                (wb) => wb.id !== newWorkbookTempId,
+              )
+              return recalculateCurriculum(c, updatedWorkbooks)
+            }),
+          )
+          addToast({
+            message: "첫 주차 워크북 생성에 실패했습니다.",
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
         }
       }
     } catch {
