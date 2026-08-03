@@ -4,6 +4,7 @@ export type {
   MatchingProjectListFilterId,
   ProjectListSearch,
 } from "./model/matchingProjectList"
+export { validateProjectListSearch } from "./model/projectListSearch"
 export { MatchingProjectCard } from "./ui/MatchingProjectCard"
 export type { MatchingProjectCardVariant } from "./ui/MatchingProjectCard"
 export { MatchingProjectsListPage } from "./ui/MatchingProjectsListPage"
