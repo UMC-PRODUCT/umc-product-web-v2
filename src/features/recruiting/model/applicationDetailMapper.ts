@@ -95,7 +95,10 @@ function toQuestion(
   question: RecruitingFormQuestion,
   answer: RecruitingApplicationAnswer | undefined,
 ): ApplicationQuestion {
-  const type = QUESTION_TYPE[question.type]
+  // 답변에 실려 온 타입을 우선한다. 서버가 답변 시점의 문항 타입을 따로 보관해
+  // 주는데, 문항이 나중에 다른 타입으로 바뀌면 현재 타입으로 그리는 순간 답변이
+  // 화면에서 사라진다(예: 서술형 답변을 체크박스로 그리면 본문이 안 보인다).
+  const type = QUESTION_TYPE[answer?.type ?? question.type]
   const times = answer?.times ?? []
   const { options, selectedOptionIds } = resolveSelection(question, answer)
 
