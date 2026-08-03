@@ -3,7 +3,6 @@ import { api } from "@/shared/lib/axios"
 import type {
   CreateChapterBulkRequest,
   CreateChapterRequest,
-  DeleteChapterRequest,
 } from "@/entities/organization/model/chapterTypes"
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
@@ -33,21 +32,10 @@ export async function createChaptersBulk(
 }
 
 /**
- * 지부 일괄 생성 헬퍼 (동일 기능 별칭)
- */
-export const createBulkChapters = createChaptersBulk
-
-/**
  * 지부 삭제 (CHAPTER-003)
  * 지부를 삭제합니다. 소속 학교는 삭제되지 않습니다.
  */
-export async function deleteChapter(
-  chapterIdOrReq: number | string | DeleteChapterRequest,
-): Promise<void> {
-  const chapterId =
-    typeof chapterIdOrReq === "object"
-      ? chapterIdOrReq.chapterId
-      : chapterIdOrReq
+export async function deleteChapter(chapterId: number | string): Promise<void> {
   const { data } = await api.delete<ApiResponse<void>>(
     `/v1/chapters/${chapterId}`,
   )
