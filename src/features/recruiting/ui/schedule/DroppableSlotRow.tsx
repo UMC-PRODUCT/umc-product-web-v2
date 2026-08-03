@@ -5,14 +5,11 @@ import { cn } from "@/shared/lib/utils"
 import { toSlotKey } from "../../model/interviewSchedule"
 import { DraggableApplicantChip } from "./DraggableApplicantChip"
 
-import type {
-  InterviewApplicant,
-  InterviewTimeSlot,
-} from "../../model/interviewSchedule"
+import type { InterviewApplicant } from "../../model/interviewSchedule"
 
 interface DroppableSlotRowProps {
   sessionId: string
-  slot: InterviewTimeSlot
+  slot: { start: string; end: string }
   applicant: InterviewApplicant | undefined
 }
 

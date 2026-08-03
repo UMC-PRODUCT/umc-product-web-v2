@@ -2,15 +2,29 @@ import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
 
-import type {
-  InterviewMode,
-  InterviewSession,
-} from "../../model/interviewSchedule"
+import { SLOT_DURATION_UNIT_MINUTES } from "../../model/interviewScheduleMapper"
+
+import type { InterviewMode } from "../../model/interviewSchedule"
+
+// 화면 편집용 세션. 저장 전 행은 draft- 로 시작하는 임시 id 를 갖고, 저장하면
+// 서버가 발급한 id 로 바뀐다.
+export type EditableSession = {
+  id: string
+  name: string
+  startTime: string
+  endTime: string
+  mode: InterviewMode
+  place: string
+  slotDurationMinutes: number
+}
 
 const MODE_ITEMS: { id: InterviewMode; label: string }[] = [
   { id: "online", label: "비대면" },
   { id: "offline", label: "대면" },
 ]
+
+// 서버가 15 의 배수만 받는다. 고르는 값만 두어 거부당할 일을 없앤다.
+const SLOT_DURATION_OPTIONS = [15, 30, 45, 60]
 
 const PLACE_PLACEHOLDER: Record<InterviewMode, string> = {
   online: "지원자들에게 안내될 면접 링크나 노션 링크를 작성해 주세요",
@@ -18,17 +32,21 @@ const PLACE_PLACEHOLDER: Record<InterviewMode, string> = {
 }
 
 interface SessionEditorListProps {
-  sessions: InterviewSession[]
-  onChange: (sessions: InterviewSession[]) => void
-  onSave: () => void
+  sessions: EditableSession[]
+  onChange: (sessions: EditableSession[]) => void
+  onSaveSession: (session: EditableSession) => Promise<void>
+  onDeleteSession: (sessionId: string) => Promise<void>
+  isSaving: boolean
 }
 
 export function SessionEditorList({
   sessions,
   onChange,
-  onSave,
+  onSaveSession,
+  onDeleteSession,
+  isSaving,
 }: SessionEditorListProps) {
-  const update = (id: string, partial: Partial<InterviewSession>) => {
+  const update = (id: string, partial: Partial<EditableSession>) => {
     onChange(
       sessions.map((session) =>
         session.id === id ? { ...session, ...partial } : session,
@@ -41,12 +59,14 @@ export function SessionEditorList({
     onChange([
       ...sessions,
       {
-        id: `session-${Date.now()}`,
+        // 서버 id 와 섞이지 않게 접두사를 둔다. 저장 시 이 접두사로 생성·수정을 가른다.
+        id: `draft-${nextIndex}-${sessions.length}`,
         name: `면접 ${String.fromCharCode(64 + nextIndex)}`,
         startTime: "",
         endTime: "",
         mode: "online",
         place: "",
+        slotDurationMinutes: 30,
       },
     ])
   }
@@ -55,15 +75,24 @@ export function SessionEditorList({
     <div className="shadow-drop-neutral-3 border-teal-gray-100 mt-6 flex flex-col gap-9 rounded-[12px] border bg-white px-8 py-9">
       {sessions.map((session) => (
         <div key={session.id} className="flex flex-col gap-3">
-          <input
-            value={session.name}
-            onChange={(event) =>
-              update(session.id, { name: event.target.value })
-            }
-            placeholder="면접 이름을 입력해 주세요"
-            aria-label="면접 이름"
-            className="text-heading-6-semibold text-teal-gray-800 placeholder:text-teal-gray-300 w-full bg-transparent outline-none"
-          />
+          <div className="flex items-center gap-3">
+            <input
+              value={session.name}
+              onChange={(event) =>
+                update(session.id, { name: event.target.value })
+              }
+              placeholder="면접 이름을 입력해 주세요"
+              aria-label="면접 이름"
+              className="text-heading-6-semibold text-teal-gray-800 placeholder:text-teal-gray-300 flex-1 bg-transparent outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => void onDeleteSession(session.id)}
+              className="text-body-2-medium text-teal-gray-400 shrink-0 cursor-pointer hover:text-red-600"
+            >
+              삭제
+            </button>
+          </div>
 
           <div className="flex items-center gap-3">
             <TimeField
@@ -77,6 +106,23 @@ export function SessionEditorList({
               onChange={(endTime) => update(session.id, { endTime })}
               label="종료 시각"
             />
+
+            <select
+              value={session.slotDurationMinutes}
+              onChange={(event) =>
+                update(session.id, {
+                  slotDurationMinutes: Number(event.target.value),
+                })
+              }
+              aria-label="지원자 1명당 면접 시간"
+              className="border-teal-gray-200 text-body-2-regular text-teal-gray-700 h-11 rounded-[10px] border px-3 outline-none focus:border-teal-500"
+            >
+              {SLOT_DURATION_OPTIONS.map((minutes) => (
+                <option key={minutes} value={minutes}>
+                  {minutes}분씩
+                </option>
+              ))}
+            </select>
 
             <div
               role="radiogroup"
@@ -121,6 +167,16 @@ export function SessionEditorList({
               aria-label={session.mode === "online" ? "면접 링크" : "면접 위치"}
               className="border-teal-gray-200 text-body-2-regular text-teal-gray-700 placeholder:text-teal-gray-300 h-11 flex-1 rounded-[10px] border px-4 outline-none focus:border-teal-500"
             />
+
+            <Button
+              variant="weak"
+              color="primary"
+              size="s"
+              disabled={isSaving}
+              onClick={() => void onSaveSession(session)}
+            >
+              저장
+            </Button>
           </div>
 
           {session.mode === "offline" && (
@@ -128,6 +184,10 @@ export function SessionEditorList({
               ex. 한국대학교 유엠관 107호
             </span>
           )}
+          <span className="text-label-1-medium text-teal-gray-400 pl-1">
+            지원자 1명당 면접 시간은 {SLOT_DURATION_UNIT_MINUTES}분 단위로만
+            정할 수 있습니다.
+          </span>
         </div>
       ))}
 
@@ -139,12 +199,6 @@ export function SessionEditorList({
         <PlusIcon className="size-4" />
         면접 스케줄 추가
       </button>
-
-      <div className="flex justify-end">
-        <Button variant="fill" color="primary" size="m" onClick={onSave}>
-          저장하기
-        </Button>
-      </div>
     </div>
   )
 }
