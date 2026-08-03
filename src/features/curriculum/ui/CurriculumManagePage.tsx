@@ -84,12 +84,19 @@ export function CurriculumManagePage() {
       (item) => item.id === id,
     )
 
-    setCurriculumData((prev) => ({
-      ...prev,
-      [selectedPart]: (prev[selectedPart] || []).filter(
+    setCurriculumData((prev) => {
+      const filtered = (prev[selectedPart] || []).filter(
         (item) => item.id !== id,
-      ),
-    }))
+      )
+      const renumbered = filtered.map((item, idx) => ({
+        ...item,
+        number: String(idx + 1).padStart(2, "0"),
+      }))
+      return {
+        ...prev,
+        [selectedPart]: renumbered,
+      }
+    })
 
     const numericId = Number(id)
     if (!Number.isNaN(numericId) && numericId > 0) {
@@ -101,7 +108,11 @@ export function CurriculumManagePage() {
             const list = [...(prev[selectedPart] || [])]
             const insertIndex = Math.min(targetIndex, list.length)
             list.splice(insertIndex, 0, targetItem)
-            return { ...prev, [selectedPart]: list }
+            const renumbered = list.map((item, idx) => ({
+              ...item,
+              number: String(idx + 1).padStart(2, "0"),
+            }))
+            return { ...prev, [selectedPart]: renumbered }
           })
           addToast({
             message: "커리큘럼 삭제에 실패했습니다.",
