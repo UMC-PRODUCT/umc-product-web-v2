@@ -938,24 +938,54 @@ export function useCurriculumEditor({
       }
     } else if (activeData?.type === "workbook") {
       // 주차 순서(weekNo) 이동 변경 시 백엔드 weekNo 업데이트
-      const affected = curriculums.find((c) =>
-        c.workbooks.some((wb) => wb.id === String(active.id)),
-      )
-      if (affected) {
-        affected.workbooks.forEach(async (wb, idx) => {
-          const numericWbId = Number(wb.id)
-          if (!Number.isNaN(numericWbId) && numericWbId > 0) {
-            try {
-              await updateWeeklyCurriculum(numericWbId, {
-                weekNo: idx + 1,
-                title: wb.title,
-              })
-            } catch {
-              // Ignore background order sync error
+      const activeWbId = String(active.id)
+      ;(async () => {
+        let latestCurriculums = curriculums
+        setCurriculums((prev) => {
+          latestCurriculums = prev
+          return prev
+        })
+
+        const affected = latestCurriculums.find((c) =>
+          c.workbooks.some((wb) => wb.id === activeWbId),
+        )
+
+        if (affected) {
+          for (let idx = 0; idx < affected.workbooks.length; idx++) {
+            const wb = affected.workbooks[idx]
+            if (!wb) continue
+
+            let numericWbId = Number(wb.id)
+            if (Number.isNaN(numericWbId)) {
+              const pendingWbPromise = pendingWorkbookPromisesRef.current.get(
+                wb.id,
+              )
+              if (pendingWbPromise) {
+                const res = await pendingWbPromise
+                if (res) numericWbId = Number(res)
+              }
+            }
+
+            if (!Number.isNaN(numericWbId) && numericWbId > 0) {
+              try {
+                await updateWeeklyCurriculum(numericWbId, {
+                  weekNo: idx + 1,
+                  title: wb.title,
+                })
+              } catch {
+                addToast({
+                  message: "주차 순서 변경 저장에 실패했습니다.",
+                  color: "red",
+                  variant: "deep",
+                  type: "default",
+                  duration: 3000,
+                })
+                break
+              }
             }
           }
-        })
-      }
+        }
+      })()
     }
   }
 

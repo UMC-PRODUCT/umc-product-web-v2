@@ -184,3 +184,83 @@ describe("useCurriculumEditor - deletion failure restoration", () => {
     expect(result.current.curriculums[0]?.workbookCount).toBe(2)
   })
 })
+
+describe("useCurriculumEditor - handleDragEnd workbook sequential update", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("워크북 드래그앤드롭 후 순차적으로 updateWeeklyCurriculum을 호출한다", async () => {
+    vi.mocked(updateWeeklyCurriculum).mockResolvedValue(undefined)
+
+    const initialCurriculums = [
+      {
+        id: "100",
+        number: "01",
+        title: "커리큘럼 1",
+        workbookCount: 2,
+        missionCount: 2,
+        workbooks: [
+          { id: "10", number: 1, title: "Wb 1", missions: [""] },
+          { id: "20", number: 2, title: "Wb 2", missions: [""] },
+        ],
+      },
+    ]
+
+    const { result } = renderHook(() =>
+      useCurriculumEditor({ initialCurriculums, part: "PM" }),
+    )
+
+    await act(async () => {
+      // @ts-expect-error test event call
+      result.current.handleDragEnd({
+        active: { id: "10", data: { current: { type: "workbook" } } },
+        over: { id: "20" },
+      })
+    })
+
+    expect(updateWeeklyCurriculum).toHaveBeenCalledTimes(2)
+    expect(updateWeeklyCurriculum).toHaveBeenNthCalledWith(1, 10, {
+      weekNo: 1,
+      title: "Wb 1",
+    })
+    expect(updateWeeklyCurriculum).toHaveBeenNthCalledWith(2, 20, {
+      weekNo: 2,
+      title: "Wb 2",
+    })
+  })
+
+  it("updateWeeklyCurriculum 실패 시 순차 업데이트를 중단한다", async () => {
+    vi.mocked(updateWeeklyCurriculum).mockRejectedValueOnce(
+      new Error("Failed update"),
+    )
+
+    const initialCurriculums = [
+      {
+        id: "100",
+        number: "01",
+        title: "커리큘럼 1",
+        workbookCount: 2,
+        missionCount: 2,
+        workbooks: [
+          { id: "10", number: 1, title: "Wb 1", missions: [""] },
+          { id: "20", number: 2, title: "Wb 2", missions: [""] },
+        ],
+      },
+    ]
+
+    const { result } = renderHook(() =>
+      useCurriculumEditor({ initialCurriculums, part: "PM" }),
+    )
+
+    await act(async () => {
+      // @ts-expect-error test event call
+      result.current.handleDragEnd({
+        active: { id: "10", data: { current: { type: "workbook" } } },
+        over: { id: "20" },
+      })
+    })
+
+    expect(updateWeeklyCurriculum).toHaveBeenCalledTimes(1)
+  })
+})
