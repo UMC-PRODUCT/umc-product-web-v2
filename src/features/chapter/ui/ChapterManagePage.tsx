@@ -4,6 +4,7 @@ import {
   DragOverlay,
   type DragStartEvent,
 } from "@dnd-kit/core"
+import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
 import {
@@ -39,6 +40,7 @@ import { SchoolChip } from "./SchoolChip"
 import { SchoolListPanel } from "./SchoolListPanel"
 
 export function ChapterManagePage() {
+  const queryClient = useQueryClient()
   const addToast = useToastStore((state) => state.addToast)
   const [unassignedSchools, setUnassignedSchools] = useState<School[]>(
     INITIAL_UNASSIGNED_SCHOOLS,
@@ -318,15 +320,27 @@ export function ChapterManagePage() {
             return serverId ? { ...ch, id: serverId } : ch
           }),
         )
+        addToast({
+          message: "지부 정보가 저장되었습니다.",
+          color: "primary",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["chapters"] })
+        queryClient.invalidateQueries({ queryKey: ["chaptersWithSchools"] })
+        addToast({
+          message: "지부 정보 저장에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
       }
-      addToast({
-        message: "지부 정보가 저장되었습니다.",
-        color: "primary",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
     } catch {
+      queryClient.invalidateQueries({ queryKey: ["chapters"] })
+      queryClient.invalidateQueries({ queryKey: ["chaptersWithSchools"] })
       addToast({
         message: "지부 정보 저장에 실패했습니다.",
         color: "red",
