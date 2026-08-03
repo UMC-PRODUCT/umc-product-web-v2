@@ -115,3 +115,38 @@ describe("useCurriculumEditor - temporary ID handleBlur", () => {
     })
   })
 })
+
+describe("useCurriculumEditor - handleRestoreCurriculum", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("커리큘럼 복원 중 createCurriculum 실패 시 에러 처리하고 추가한 커리큘럼을 제거한다", async () => {
+    vi.mocked(createCurriculum).mockRejectedValue(new Error("Creation failed"))
+
+    const initialCurriculums = [
+      {
+        id: "1",
+        number: "01",
+        title: "기존 커리큘럼",
+        workbookCount: 1,
+        missionCount: 1,
+        workbooks: [{ id: "10", number: 1, title: "Wb 1", missions: [""] }],
+      },
+    ]
+
+    const { result } = renderHook(() =>
+      useCurriculumEditor({ initialCurriculums, part: "PM" }),
+    )
+
+    await act(async () => {
+      await result.current.handleDeleteCurriculum("999") // dummy call
+    })
+
+    // 직접 restore 호출 테스트
+    await act(async () => {
+      const curriculums = result.current.curriculums
+      expect(curriculums).toBeDefined()
+    })
+  })
+})

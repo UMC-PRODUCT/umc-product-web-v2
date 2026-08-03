@@ -754,48 +754,93 @@ export function useCurriculumEditor({
     })
 
     // 백엔드 재등록 API 연동
+    let newCurriculumId: number | null = null
     try {
       const apiPart = mapPartToApiEnum(part)
-      const newCurriculumId = await createCurriculum({
+      newCurriculumId = await createCurriculum({
         gisuId: activeGisuId,
         part: apiPart,
         title: restoredItem.title || "복원된 커리큘럼",
       })
-
-      if (newCurriculumId) {
-        setCurriculums((prev) =>
-          prev.map((c) =>
-            c.id === restoredItem.id
-              ? { ...c, id: String(newCurriculumId) }
-              : c,
-          ),
-        )
-
-        for (const wb of restoredItem.workbooks) {
-          const now = new Date()
-          const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-          const createdWbId = await createWeeklyCurriculum({
-            curriculumId: newCurriculumId,
-            weekNo: wb.number,
-            title: wb.title,
-            startsAt: now.toISOString(),
-            endsAt: nextWeek.toISOString(),
-          })
-          if (createdWbId) {
-            setCurriculums((prev) =>
-              prev.map((c) => {
-                if (c.id !== String(newCurriculumId)) return c
-                const updatedWbs = c.workbooks.map((w) =>
-                  w.id === wb.id ? { ...w, id: String(createdWbId) } : w,
-                )
-                return { ...c, workbooks: updatedWbs }
-              }),
-            )
-          }
-        }
-      }
     } catch {
-      // Ignore background restore sync fallback
+      setCurriculums((prev) => {
+        const filtered = prev.filter((c) => c.id !== restoredItem.id)
+        return recalculateCurriculumNumbers(filtered, baseCount)
+      })
+      addToast({
+        message: "커리큘럼 복원에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    if (!newCurriculumId) {
+      setCurriculums((prev) => {
+        const filtered = prev.filter((c) => c.id !== restoredItem.id)
+        return recalculateCurriculumNumbers(filtered, baseCount)
+      })
+      addToast({
+        message: "커리큘럼 복원에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    setCurriculums((prev) =>
+      prev.map((c) =>
+        c.id === restoredItem.id ? { ...c, id: String(newCurriculumId) } : c,
+      ),
+    )
+
+    let completedWbCount = 0
+    let wbFailed = false
+
+    for (const wb of restoredItem.workbooks) {
+      try {
+        const now = new Date()
+        const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+        const createdWbId = await createWeeklyCurriculum({
+          curriculumId: newCurriculumId,
+          weekNo: wb.number,
+          title: wb.title,
+          startsAt: now.toISOString(),
+          endsAt: nextWeek.toISOString(),
+        })
+        if (createdWbId) {
+          setCurriculums((prev) =>
+            prev.map((c) => {
+              if (c.id !== String(newCurriculumId)) return c
+              const updatedWbs = c.workbooks.map((w) =>
+                w.id === wb.id ? { ...w, id: String(createdWbId) } : w,
+              )
+              return { ...c, workbooks: updatedWbs }
+            }),
+          )
+          completedWbCount += 1
+        } else {
+          wbFailed = true
+          break
+        }
+      } catch {
+        wbFailed = true
+        break
+      }
+    }
+
+    if (wbFailed) {
+      addToast({
+        message: `커리큘럼은 복원되었으나 워크북 복원에 실패했습니다. (성공: ${completedWbCount}/${restoredItem.workbooks.length}개). 남은 워크북 복원이 필요합니다.`,
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 4000,
+      })
     }
   }
 
