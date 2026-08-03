@@ -31,10 +31,12 @@ export function ChapterTabs({
       )
     }
     if (serverChapters && serverChapters.length > 0) {
-      return serverChapters.map((ch) => ({
-        value: ch.chapterName,
-        label: ch.chapterName,
-      }))
+      return serverChapters.map(
+        (ch: { chapterId: string | number; chapterName: string }) => ({
+          value: ch.chapterName,
+          label: ch.chapterName,
+        }),
+      )
     }
     return CHAPTERS.map((chapter) => ({ value: chapter, label: chapter }))
   }, [customChapters, serverChapters])

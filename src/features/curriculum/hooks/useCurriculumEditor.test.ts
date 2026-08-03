@@ -212,11 +212,10 @@ describe("useCurriculumEditor - handleDragEnd workbook sequential update", () =>
     )
 
     await act(async () => {
-      // @ts-expect-error test event call
       result.current.handleDragEnd({
         active: { id: "10", data: { current: { type: "workbook" } } },
         over: { id: "20" },
-      })
+      } as unknown as Parameters<typeof result.current.handleDragEnd>[0])
     })
 
     expect(updateWeeklyCurriculum).toHaveBeenCalledTimes(2)
@@ -254,11 +253,10 @@ describe("useCurriculumEditor - handleDragEnd workbook sequential update", () =>
     )
 
     await act(async () => {
-      // @ts-expect-error test event call
       result.current.handleDragEnd({
         active: { id: "10", data: { current: { type: "workbook" } } },
         over: { id: "20" },
-      })
+      } as unknown as Parameters<typeof result.current.handleDragEnd>[0])
     })
 
     expect(updateWeeklyCurriculum).toHaveBeenCalledTimes(1)

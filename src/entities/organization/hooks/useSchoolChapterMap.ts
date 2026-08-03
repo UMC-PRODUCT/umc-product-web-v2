@@ -16,6 +16,8 @@ export function useSchoolChapterMap() {
     staleTime: 5 * 60 * 1000,
   })
 
+  const chapters = useMemo(() => chaptersData?.chapters ?? [], [chaptersData])
+
   const schoolToChapterId = useMemo(() => {
     const map = new Map<string, number>()
     for (const chapter of chaptersData?.chapters ?? []) {
@@ -45,6 +47,7 @@ export function useSchoolChapterMap() {
   )
 
   return {
+    chapters,
     getChapterIdBySchool,
     getChapterIdByName,
   }
