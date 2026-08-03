@@ -64,7 +64,7 @@ export interface DeleteSchoolsRequest {
 /** 학교 기본 정보 아이템 (SCHOOL-101) */
 export interface SchoolItem {
   /** 학교 ID */
-  schoolId: string
+  schoolId: number
   /** 학교명 */
   schoolName: string
   /** 약칭 */
