@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
-import { getServerErrorMessage } from "@/features/recruiting/api/errors"
+import {
+  getServerErrorMessage,
+  getServerErrorMessageFromBlob,
+} from "@/features/recruiting/api/errors"
 import { downloadDecisionHistoriesCsv } from "@/features/recruiting/api/recruitingApi"
 import { useEvaluationHistory } from "@/features/recruiting/hooks/useEvaluationHistory"
 import { formatBaseTime } from "@/features/recruiting/model/applicantListTypes"
@@ -92,9 +95,11 @@ function RouteComponent() {
       anchor.download = `평가이력_${sectionTitle}.csv`
       anchor.click()
       URL.revokeObjectURL(url)
-    } catch {
+    } catch (error) {
       addToast({
-        message: "평가 이력을 다운로드하지 못했습니다.",
+        message:
+          (await getServerErrorMessageFromBlob(error)) ??
+          "평가 이력을 다운로드하지 못했습니다.",
         color: "red",
         variant: "deep",
         type: "default",
