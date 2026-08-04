@@ -27,11 +27,14 @@ function parsePage(value: unknown): number {
 export function validateProjectListSearch(
   search: Record<string, unknown>,
 ): ProjectListSearch {
+  // 고른 파트가 없다는 뜻은 undefined 하나로만 표현한다. 걸러 낸 결과가 빈 배열로
+  // 남으면 같은 의미를 두 가지 값으로 흘려보내게 된다.
   let parts: ProjectPart[] | undefined
   if (isProjectPart(search.parts)) {
     parts = [search.parts]
   } else if (Array.isArray(search.parts)) {
-    parts = search.parts.filter(isProjectPart)
+    const valid = search.parts.filter(isProjectPart)
+    parts = valid.length > 0 ? valid : undefined
   }
 
   return {
