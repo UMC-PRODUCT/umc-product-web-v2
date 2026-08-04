@@ -72,6 +72,9 @@ export const recruitingKeys = {
   evaluatorProfiles: (memberIds: string[]) =>
     [...recruitingKeys.all, "evaluator-profiles", memberIds] as const,
 
+  schoolStaff: (schoolId: string, gisuId?: string) =>
+    [...recruitingKeys.all, "school-staff", schoolId, gisuId ?? ""] as const,
+
   interviewQuestions: () =>
     [...recruitingKeys.all, "interview-questions"] as const,
 
@@ -97,4 +100,12 @@ export const recruitingKeys = {
   // 보드는 KST 날짜 단위로 내려온다. 날짜를 키에 넣어야 탭을 옮길 때마다 다시 받는다.
   interviewScheduleBoard: (roundId: string, date: string) =>
     [...recruitingKeys.interviewSchedule(), "board", roundId, date] as const,
+
+  anonymousApplication: (sessionId: string) =>
+    [...recruitingKeys.all, "anonymous", sessionId] as const,
+
+  seasons: () => [...recruitingKeys.all, "seasons"] as const,
+
+  seasonConfiguration: (seasonId: string) =>
+    [...recruitingKeys.seasons(), seasonId] as const,
 }

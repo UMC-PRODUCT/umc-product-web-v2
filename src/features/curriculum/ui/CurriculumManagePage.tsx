@@ -1,12 +1,24 @@
 import { useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
+import {
+  createCurriculum,
+  createWeeklyCurriculum,
+  deleteCurriculum,
+  getCurriculumOverview,
+} from "@/entities/curriculum"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import SettingIcon from "@/shared/assets/icon/setting/SettingIcon"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { INITIAL_CURRICULUM_DATA } from "../model/curriculumData"
+import {
+  mapOverviewToCurriculumItem,
+  mapPartToApiEnum,
+} from "../model/curriculumMapper"
 import { CurriculumCardReadonly } from "./CurriculumCardReadonly"
 import { CurriculumSettingModal } from "./CurriculumSettingModal"
 import { PartTabs } from "./PartTabs"
@@ -18,11 +30,42 @@ export function CurriculumManagePage() {
   const [selectedPart, setSelectedPart] = useState<string>("PM")
   const [curriculumData, setCurriculumData] = useState(INITIAL_CURRICULUM_DATA)
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
+  const addToast = useToastStore((state) => state.addToast)
+  const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
 
   // Default expand card 01 (design-1)
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({
     "design-1": true,
   })
+
+  useEffect(() => {
+    if (isGisuLoading || activeGisuId == null) return
+
+    const currentGisuId = activeGisuId
+    let isSubscribed = true
+    async function loadCurriculum() {
+      try {
+        const apiPart = mapPartToApiEnum(selectedPart)
+        const overview = await getCurriculumOverview({
+          gisuId: currentGisuId,
+          part: apiPart,
+        })
+        if (isSubscribed && overview && overview.curriculumId) {
+          const item = mapOverviewToCurriculumItem(overview, 0)
+          setCurriculumData((prev) => ({
+            ...prev,
+            [selectedPart]: [item],
+          }))
+        }
+      } catch {
+        // Fallback to initial local mock data if api has no entry
+      }
+    }
+    loadCurriculum()
+    return () => {
+      isSubscribed = false
+    }
+  }, [activeGisuId, isGisuLoading, selectedPart])
 
   const currentItems = curriculumData[selectedPart] || []
 
@@ -33,13 +76,56 @@ export function CurriculumManagePage() {
     }))
   }
 
-  const handleDeleteItem = (id: string) => {
-    setCurriculumData((prev) => ({
-      ...prev,
-      [selectedPart]: (prev[selectedPart] || []).filter(
+  const handleDeleteItem = async (id: string): Promise<boolean> => {
+    const targetItem = (curriculumData[selectedPart] || []).find(
+      (item) => item.id === id,
+    )
+    const targetIndex = (curriculumData[selectedPart] || []).findIndex(
+      (item) => item.id === id,
+    )
+
+    setCurriculumData((prev) => {
+      const filtered = (prev[selectedPart] || []).filter(
         (item) => item.id !== id,
-      ),
-    }))
+      )
+      const renumbered = filtered.map((item, idx) => ({
+        ...item,
+        number: String(idx + 1).padStart(2, "0"),
+      }))
+      return {
+        ...prev,
+        [selectedPart]: renumbered,
+      }
+    })
+
+    const numericId = Number(id)
+    if (!Number.isNaN(numericId) && numericId > 0) {
+      try {
+        await deleteCurriculum(numericId)
+      } catch {
+        if (targetItem) {
+          setCurriculumData((prev) => {
+            const list = [...(prev[selectedPart] || [])]
+            const insertIndex = Math.min(targetIndex, list.length)
+            list.splice(insertIndex, 0, targetItem)
+            const renumbered = list.map((item, idx) => ({
+              ...item,
+              number: String(idx + 1).padStart(2, "0"),
+            }))
+            return { ...prev, [selectedPart]: renumbered }
+          })
+          addToast({
+            message: "커리큘럼 삭제에 실패했습니다.",
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+        }
+        return false
+      }
+    }
+    return true
   }
 
   const handleReorderItems = (fromIndex: number, toIndex: number) => {
@@ -59,7 +145,37 @@ export function CurriculumManagePage() {
     })
   }
 
-  const handleRestoreItem = (itemToRestore: CurriculumItem, index: number) => {
+  const handleRestoreItem = async (
+    itemToRestore: CurriculumItem,
+    index: number,
+  ) => {
+    if (isGisuLoading || activeGisuId == null) {
+      addToast({
+        message: "기수 정보를 불러오는 중이거나 선택된 기수가 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    const previousList = curriculumData[selectedPart] || []
+
+    const rollbackState = () => {
+      setCurriculumData((prev) => ({
+        ...prev,
+        [selectedPart]: previousList,
+      }))
+      addToast({
+        message: "커리큘럼 복원에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
+
     setCurriculumData((prev) => {
       const list = [...(prev[selectedPart] || [])]
       list.splice(index, 0, itemToRestore)
@@ -72,6 +188,64 @@ export function CurriculumManagePage() {
         [selectedPart]: renumbered,
       }
     })
+
+    try {
+      const apiPart = mapPartToApiEnum(selectedPart)
+      const newCurriculumId = await createCurriculum({
+        gisuId: activeGisuId,
+        part: apiPart,
+        title: itemToRestore.title || "복원된 커리큘럼",
+      })
+
+      if (!newCurriculumId) {
+        rollbackState()
+        return
+      }
+
+      setCurriculumData((prev) => {
+        const list = prev[selectedPart] || []
+        const updated = list.map((c) =>
+          c.id === itemToRestore.id ? { ...c, id: String(newCurriculumId) } : c,
+        )
+        return {
+          ...prev,
+          [selectedPart]: updated,
+        }
+      })
+
+      if (itemToRestore.workbooks && itemToRestore.workbooks.length > 0) {
+        for (const wb of itemToRestore.workbooks) {
+          const now = new Date()
+          const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+          const createdWbId = await createWeeklyCurriculum({
+            curriculumId: newCurriculumId,
+            weekNo: wb.number,
+            title: wb.title,
+            startsAt: now.toISOString(),
+            endsAt: nextWeek.toISOString(),
+          })
+
+          if (!createdWbId) {
+            rollbackState()
+            return
+          }
+
+          setCurriculumData((prev) => {
+            const list = prev[selectedPart] || []
+            const updated = list.map((c) => {
+              if (c.id !== String(newCurriculumId)) return c
+              const updatedWbs = c.workbooks.map((w) =>
+                w.id === wb.id ? { ...w, id: String(createdWbId) } : w,
+              )
+              return { ...c, workbooks: updatedWbs }
+            })
+            return { ...prev, [selectedPart]: updated }
+          })
+        }
+      }
+    } catch {
+      rollbackState()
+    }
   }
 
   return (

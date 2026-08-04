@@ -22,10 +22,12 @@ import type {
   RawInterviewScheduleBoard,
   RawInterviewSession,
   RawPartSummary,
+  RawRecruitingSeasonConfigurationResponse,
   RawStatusCounts,
   RawStatusSummary,
   RawTrackCount,
   RecruitingApplicationCreated,
+  RecruitingApplicationCredentialRequest,
   RecruitingApplicationDetail,
   RecruitingApplicationMutationResult,
   RecruitingApplicationPage,
@@ -35,18 +37,24 @@ import type {
   RecruitingEvaluation,
   RecruitingEvaluationStatistics,
   RecruitingFormStructure,
+  RecruitingIdResponse,
   RecruitingInterviewQuestion,
   RecruitingInterviewScheduleBoard,
   RecruitingInterviewSession,
   RecruitingInterviewSessionRequest,
+  RecruitingPublicApplicationResponse,
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
   RecruitingRoundPhase,
+  RecruitingSeasonConfigurationResponse,
   RecruitingStatusCounts,
   RecruitingStatusSummary,
+  ReplaceRecruitingSeasonTrackQuotasRequest,
   RoundApplicationsQuery,
   StatusSummaryQuery,
+  SubmitAnonymousApplicationRequest,
   SubmitEvaluationBody,
+  UpdateAnonymousApplicationRequest,
   UpdateApplicationDraftBody,
   UpdateRecruitingRoundRequest,
   UpdateRecruitingRoundStatusRequest,
@@ -429,6 +437,46 @@ export async function cancelApplication(applicationId: string): Promise<void> {
   await api.patch(`/v1/recruiting/applications/${applicationId}/cancel`)
 }
 
+// 익명 지원서 조회 (RECRUITING-PUBLIC-004)
+export async function lookupAnonymousApplication(
+  body: RecruitingApplicationCredentialRequest,
+): Promise<RecruitingPublicApplicationResponse> {
+  const { data } = await api.post<
+    ApiResponse<RecruitingPublicApplicationResponse>
+  >("/v1/recruiting/public/applications/lookup", body)
+  return data.result
+}
+
+// 익명 지원서 수정 (RECRUITING-PUBLIC-005)
+export async function updateAnonymousApplication(
+  body: UpdateAnonymousApplicationRequest,
+): Promise<RecruitingApplicationMutationResult> {
+  const { data } = await api.put<
+    ApiResponse<RecruitingApplicationMutationResult>
+  >("/v1/recruiting/public/applications", body)
+  return data.result
+}
+
+// 익명 지원서 철회 (RECRUITING-PUBLIC-007)
+export async function cancelAnonymousApplication(
+  body: RecruitingApplicationCredentialRequest,
+): Promise<RecruitingApplicationMutationResult> {
+  const { data } = await api.post<
+    ApiResponse<RecruitingApplicationMutationResult>
+  >("/v1/recruiting/public/applications/cancel", body)
+  return data.result
+}
+
+// 익명 지원서 제출 (RECRUITING-PUBLIC-006)
+export async function submitAnonymousApplication(
+  body: SubmitAnonymousApplicationRequest,
+): Promise<RecruitingApplicationMutationResult> {
+  const { data } = await api.post<
+    ApiResponse<RecruitingApplicationMutationResult>
+  >("/v1/recruiting/public/applications/submit", body)
+  return data.result
+}
+
 export async function getStageEvaluations(
   roundId: string,
   applicationId: string,
@@ -438,6 +486,42 @@ export async function getStageEvaluations(
     `/v1/recruiting/rounds/${roundId}/applications/${applicationId}/evaluations/${stage}`,
   )
   return data.result
+}
+
+// 모집 시즌의 쿼터(학교별 모집 TO)와 차수 설정 조회 (RECRUITING-ADMIN-001).
+export async function getRecruitingSeasonConfiguration(
+  seasonId: string,
+): Promise<RecruitingSeasonConfigurationResponse> {
+  const { data } = await api.get<
+    ApiResponse<RawRecruitingSeasonConfigurationResponse>
+  >(`/v1/recruiting/admin/seasons/${seasonId}`)
+  return normalizeRecruitingSeasonConfigurationResponse(data.result)
+}
+
+export function normalizeRecruitingSeasonConfigurationResponse(
+  raw: RawRecruitingSeasonConfigurationResponse,
+): RecruitingSeasonConfigurationResponse {
+  return {
+    id: String(raw.id ?? ""),
+    gisuId: String(raw.gisuId ?? ""),
+    schoolId: String(raw.schoolId ?? ""),
+    memo: raw.memo ?? null,
+    quotas: (raw.quotas ?? [])
+      .filter((quota) => Boolean(quota.track))
+      .map((quota) => ({
+        track: quota.track!,
+        targetCount: toCount(quota.targetCount),
+      })),
+    rounds: raw.rounds ?? [],
+  }
+}
+
+// 모집 시즌 트랙별 모집 인원(학교별 모집 TO) 전체 교체/수정 (RECRUITING-ADMIN-004).
+export async function updateRecruitingSeasonQuotas(
+  seasonId: string,
+  payload: ReplaceRecruitingSeasonTrackQuotasRequest,
+): Promise<void> {
+  await api.put(`/v1/recruiting/admin/seasons/${seasonId}/quotas`, payload)
 }
 
 export async function checkRecruitingRoundTitleAvailability(
@@ -532,6 +616,25 @@ export async function getRoundEvaluators(
     `/v1/recruiting/admin/rounds/${roundId}/evaluators`,
   )
   return data.result
+}
+
+export async function addRoundEvaluator(
+  roundId: string,
+  memberId: string,
+): Promise<RecruitingIdResponse> {
+  const { data } = await api.post<ApiResponse<RecruitingIdResponse>>(
+    `/v1/recruiting/admin/rounds/${roundId}/evaluators/${memberId}`,
+  )
+  return data.result
+}
+
+export async function removeRoundEvaluator(
+  roundId: string,
+  memberId: string,
+): Promise<void> {
+  await api.delete(
+    `/v1/recruiting/admin/rounds/${roundId}/evaluators/${memberId}`,
+  )
 }
 
 export async function submitEvaluation(
