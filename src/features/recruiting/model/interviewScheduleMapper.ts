@@ -65,11 +65,15 @@ export function toInstant(dateKey: string, time: string): string | null {
   return parsed.isValid() ? parsed.toISOString() : null
 }
 
+// 화면 편집용 세션. 저장 전 행은 draft- 로 시작하는 임시 id 를 갖고, 저장하면
+// 서버가 발급한 id 로 바뀐다.
+export type EditableSession = InterviewSession & { slotDurationMinutes: number }
+
 // 서버 세션을 화면 편집 모델로 옮긴다. 화면은 날짜 탭 안에서 시각만 다루므로
 // 날짜 부분은 떼어 낸다.
 export function toEditableSession(
   session: RecruitingInterviewSession,
-): InterviewSession & { slotDurationMinutes: number } {
+): EditableSession {
   return {
     id: session.id,
     name: session.name,
@@ -83,7 +87,7 @@ export function toEditableSession(
 
 // 화면 편집 모델을 서버 요청으로 되돌린다. 시각이 읽히지 않으면 null 이다.
 export function toSessionRequest(
-  session: InterviewSession & { slotDurationMinutes: number },
+  session: EditableSession,
   dateKey: string,
 ): RecruitingInterviewSessionRequest | null {
   const startsAt = toInstant(dateKey, session.startTime)

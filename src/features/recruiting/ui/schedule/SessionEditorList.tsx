@@ -1,22 +1,16 @@
+import { useState } from "react"
+
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/Button"
+import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 import { SLOT_DURATION_UNIT_MINUTES } from "../../model/interviewScheduleMapper"
 
 import type { InterviewMode } from "../../model/interviewSchedule"
+import type { EditableSession } from "../../model/interviewScheduleMapper"
 
-// 화면 편집용 세션. 저장 전 행은 draft- 로 시작하는 임시 id 를 갖고, 저장하면
-// 서버가 발급한 id 로 바뀐다.
-export type EditableSession = {
-  id: string
-  name: string
-  startTime: string
-  endTime: string
-  mode: InterviewMode
-  place: string
-  slotDurationMinutes: number
-}
+export type { EditableSession } from "../../model/interviewScheduleMapper"
 
 const MODE_ITEMS: { id: InterviewMode; label: string }[] = [
   { id: "online", label: "비대면" },
@@ -54,13 +48,18 @@ export function SessionEditorList({
     )
   }
 
+  // 삭제 확인 대상. 저장된 세션은 지우면 슬롯·배정까지 함께 사라지고 되돌릴 수
+  // 없어서 바로 지우지 않는다.
+  const [deleteTarget, setDeleteTarget] = useState<EditableSession | null>(null)
+
   const add = () => {
     const nextIndex = sessions.length + 1
     onChange([
       ...sessions,
       {
-        // 서버 id 와 섞이지 않게 접두사를 둔다. 저장 시 이 접두사로 생성·수정을 가른다.
-        id: `draft-${nextIndex}-${sessions.length}`,
+        // 서버 id 와 섞이지 않게 접두사를 둔다. 저장 시 이 접두사로 생성·수정을
+        // 가른다. 길이 기반 번호는 행을 지웠다 다시 만들면 겹치므로 난수 id 를 쓴다.
+        id: `draft-${crypto.randomUUID()}`,
         name: `면접 ${String.fromCharCode(64 + nextIndex)}`,
         startTime: "",
         endTime: "",
@@ -69,6 +68,15 @@ export function SessionEditorList({
         slotDurationMinutes: 30,
       },
     ])
+  }
+
+  const requestDelete = (session: EditableSession) => {
+    // 임시 행은 서버에 없는 것이라 바로 걷어낸다.
+    if (session.id.startsWith("draft-")) {
+      void onDeleteSession(session.id)
+      return
+    }
+    setDeleteTarget(session)
   }
 
   return (
@@ -87,7 +95,8 @@ export function SessionEditorList({
             />
             <button
               type="button"
-              onClick={() => void onDeleteSession(session.id)}
+              onClick={() => requestDelete(session)}
+              aria-label={`${session.name || "이름 없는 면접"} 삭제`}
               className="text-body-2-medium text-teal-gray-400 shrink-0 cursor-pointer hover:text-red-600"
             >
               삭제
@@ -199,6 +208,28 @@ export function SessionEditorList({
         <PlusIcon className="size-4" />
         면접 스케줄 추가
       </button>
+
+      <CtaModal
+        open={deleteTarget !== null}
+        title="면접을 삭제할까요?"
+        content={
+          <>
+            {deleteTarget?.name || "이름 없는 면접"} 을(를) 삭제하면
+            <br />
+            시간 슬롯과 지원자 배정도 함께 사라집니다.
+          </>
+        }
+        cancelText="돌아가기"
+        confirmText="삭제하기"
+        variant="error"
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
+        onConfirm={() => {
+          if (deleteTarget) void onDeleteSession(deleteTarget.id)
+          setDeleteTarget(null)
+        }}
+      />
     </div>
   )
 }
