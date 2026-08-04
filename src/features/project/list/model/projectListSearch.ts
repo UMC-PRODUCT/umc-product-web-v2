@@ -1,17 +1,12 @@
+import { PROJECT_PARTS } from "@/entities/project/api/matchingProject"
+
 import type { ProjectPart } from "@/entities/project/api/matchingProject"
 
 import type { ProjectListSearch } from "./matchingProjectList"
 
-const VALID_PARTS = new Set<string>([
-  "PLAN",
-  "DESIGN",
-  "WEB",
-  "ANDROID",
-  "IOS",
-  "NODEJS",
-  "SPRINGBOOT",
-  "ADMIN",
-])
+// 파트 목록은 타입과 같은 출처에서 온다. 여기에 다시 나열하면 파트가 늘었을 때
+// 타입 검사에 걸리지 않은 채 새 파트만 조용히 빠진다.
+const VALID_PARTS = new Set<string>(PROJECT_PARTS)
 
 function isProjectPart(value: unknown): value is ProjectPart {
   return typeof value === "string" && VALID_PARTS.has(value)
