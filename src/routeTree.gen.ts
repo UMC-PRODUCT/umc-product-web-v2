@@ -85,11 +85,13 @@ import { Route as ManageCurriculumIndexRouteImport } from './routes/manage/curri
 import { Route as RecruitingRecruitmentsQuotaRouteImport } from './routes/recruiting/recruitments/quota'
 import { Route as RecruitingRecruitmentsNewRouteImport } from './routes/recruiting/recruitments/new'
 import { Route as RecruitingHistoryArchiveRouteImport } from './routes/recruiting/history/archive'
+import { Route as RecruitingEvaluationsInterviewScheduleRouteImport } from './routes/recruiting/evaluations/interview-schedule'
 import { Route as RecruitingEvaluationsInterviewRouteImport } from './routes/recruiting/evaluations/interview'
 import { Route as RecruitingEvaluationsFinalRouteImport } from './routes/recruiting/evaluations/final'
 import { Route as RecruitingEvaluationsDocumentRouteImport } from './routes/recruiting/evaluations/document'
 import { Route as RecruitingDashboardEvaluationsRouteImport } from './routes/recruiting/dashboard/evaluations'
 import { Route as RecruitingDashboardApplicationsRouteImport } from './routes/recruiting/dashboard/applications'
+import { Route as ProjectsApplyRoundIdRouteImport } from './routes/projects/apply/$roundId'
 import { Route as ProjectsApplicationListRouteImport } from './routes/projects/application/list'
 import { Route as ProjectsApplicationApplicationIdRouteImport } from './routes/projects/application/$applicationId'
 import { Route as OauthKakaoCallbackRouteImport } from './routes/oauth/kakao/callback'
@@ -104,7 +106,9 @@ import { Route as AdminChallengerRecordsRouteImport } from './routes/admin/chall
 import { Route as AdminChallengerPointsRouteImport } from './routes/admin/challenger/points'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
 import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matching/projects/announce/index'
+import { Route as RecruitingRecruitmentsEditRoundIdRouteImport } from './routes/recruiting/recruitments/edit.$roundId'
 import { Route as RecruitingEvaluationsInterviewApplicationIdRouteImport } from './routes/recruiting/evaluations/interview.$applicationId'
+import { Route as RecruitingEvaluationsInterviewScheduleRoundIdRouteImport } from './routes/recruiting/evaluations/interview-schedule.$roundId'
 import { Route as RecruitingEvaluationsDocumentApplicationIdRouteImport } from './routes/recruiting/evaluations/document.$applicationId'
 import { Route as MatchingProjectsEditProjectIdRouteImport } from './routes/matching/projects/edit.$projectId'
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
@@ -505,6 +509,12 @@ const RecruitingHistoryArchiveRoute =
     path: '/history/archive',
     getParentRoute: () => RecruitingRouteRoute,
   } as any)
+const RecruitingEvaluationsInterviewScheduleRoute =
+  RecruitingEvaluationsInterviewScheduleRouteImport.update({
+    id: '/evaluations/interview-schedule',
+    path: '/evaluations/interview-schedule',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
 const RecruitingEvaluationsInterviewRoute =
   RecruitingEvaluationsInterviewRouteImport.update({
     id: '/evaluations/interview',
@@ -535,6 +545,11 @@ const RecruitingDashboardApplicationsRoute =
     path: '/dashboard/applications',
     getParentRoute: () => RecruitingRouteRoute,
   } as any)
+const ProjectsApplyRoundIdRoute = ProjectsApplyRoundIdRouteImport.update({
+  id: '/apply/$roundId',
+  path: '/apply/$roundId',
+  getParentRoute: () => ProjectsRouteRoute,
+} as any)
 const ProjectsApplicationListRoute = ProjectsApplicationListRouteImport.update({
   id: '/application/list',
   path: '/application/list',
@@ -610,11 +625,23 @@ const MatchingProjectsAnnounceIndexRoute =
     path: '/',
     getParentRoute: () => MatchingProjectsAnnounceRouteRoute,
   } as any)
+const RecruitingRecruitmentsEditRoundIdRoute =
+  RecruitingRecruitmentsEditRoundIdRouteImport.update({
+    id: '/recruitments/edit/$roundId',
+    path: '/recruitments/edit/$roundId',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
 const RecruitingEvaluationsInterviewApplicationIdRoute =
   RecruitingEvaluationsInterviewApplicationIdRouteImport.update({
     id: '/$applicationId',
     path: '/$applicationId',
     getParentRoute: () => RecruitingEvaluationsInterviewRoute,
+  } as any)
+const RecruitingEvaluationsInterviewScheduleRoundIdRoute =
+  RecruitingEvaluationsInterviewScheduleRoundIdRouteImport.update({
+    id: '/$roundId',
+    path: '/$roundId',
+    getParentRoute: () => RecruitingEvaluationsInterviewScheduleRoute,
   } as any)
 const RecruitingEvaluationsDocumentApplicationIdRoute =
   RecruitingEvaluationsDocumentApplicationIdRouteImport.update({
@@ -722,11 +749,13 @@ export interface FileRoutesByFullPath {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/projects/apply/$roundId': typeof ProjectsApplyRoundIdRoute
   '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
   '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/evaluations/interview-schedule': typeof RecruitingEvaluationsInterviewScheduleRouteWithChildren
   '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
   '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
@@ -739,7 +768,9 @@ export interface FileRoutesByFullPath {
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
+  '/recruiting/evaluations/interview-schedule/$roundId': typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
   '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
+  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -818,11 +849,13 @@ export interface FileRoutesByTo {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/projects/apply/$roundId': typeof ProjectsApplyRoundIdRoute
   '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
   '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/evaluations/interview-schedule': typeof RecruitingEvaluationsInterviewScheduleRouteWithChildren
   '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
   '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
@@ -835,7 +868,9 @@ export interface FileRoutesByTo {
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
+  '/recruiting/evaluations/interview-schedule/$roundId': typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
   '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
+  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -921,11 +956,13 @@ export interface FileRoutesById {
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
   '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
   '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/projects/apply/$roundId': typeof ProjectsApplyRoundIdRoute
   '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
   '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
   '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
   '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
   '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/evaluations/interview-schedule': typeof RecruitingEvaluationsInterviewScheduleRouteWithChildren
   '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
   '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
   '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
@@ -938,7 +975,9 @@ export interface FileRoutesById {
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
+  '/recruiting/evaluations/interview-schedule/$roundId': typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
   '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
+  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -1025,11 +1064,13 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/projects/application/$applicationId'
     | '/projects/application/list'
+    | '/projects/apply/$roundId'
     | '/recruiting/dashboard/applications'
     | '/recruiting/dashboard/evaluations'
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/recruiting/evaluations/interview-schedule'
     | '/recruiting/history/archive'
     | '/recruiting/recruitments/new'
     | '/recruiting/recruitments/quota'
@@ -1042,7 +1083,9 @@ export interface FileRouteTypes {
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
     | '/recruiting/evaluations/document/$applicationId'
+    | '/recruiting/evaluations/interview-schedule/$roundId'
     | '/recruiting/evaluations/interview/$applicationId'
+    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesByTo: FileRoutesByTo
@@ -1121,11 +1164,13 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/projects/application/$applicationId'
     | '/projects/application/list'
+    | '/projects/apply/$roundId'
     | '/recruiting/dashboard/applications'
     | '/recruiting/dashboard/evaluations'
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/recruiting/evaluations/interview-schedule'
     | '/recruiting/history/archive'
     | '/recruiting/recruitments/new'
     | '/recruiting/recruitments/quota'
@@ -1138,7 +1183,9 @@ export interface FileRouteTypes {
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
     | '/recruiting/evaluations/document/$applicationId'
+    | '/recruiting/evaluations/interview-schedule/$roundId'
     | '/recruiting/evaluations/interview/$applicationId'
+    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce'
     | '/matching/projects/announce/notice-publish/$noticeId'
   id:
@@ -1223,11 +1270,13 @@ export interface FileRouteTypes {
     | '/oauth/kakao/callback'
     | '/projects/application/$applicationId'
     | '/projects/application/list'
+    | '/projects/apply/$roundId'
     | '/recruiting/dashboard/applications'
     | '/recruiting/dashboard/evaluations'
     | '/recruiting/evaluations/document'
     | '/recruiting/evaluations/final'
     | '/recruiting/evaluations/interview'
+    | '/recruiting/evaluations/interview-schedule'
     | '/recruiting/history/archive'
     | '/recruiting/recruitments/new'
     | '/recruiting/recruitments/quota'
@@ -1240,7 +1289,9 @@ export interface FileRouteTypes {
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
     | '/recruiting/evaluations/document/$applicationId'
+    | '/recruiting/evaluations/interview-schedule/$roundId'
     | '/recruiting/evaluations/interview/$applicationId'
+    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesById: FileRoutesById
@@ -1839,6 +1890,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecruitingHistoryArchiveRouteImport
       parentRoute: typeof RecruitingRouteRoute
     }
+    '/recruiting/evaluations/interview-schedule': {
+      id: '/recruiting/evaluations/interview-schedule'
+      path: '/evaluations/interview-schedule'
+      fullPath: '/recruiting/evaluations/interview-schedule'
+      preLoaderRoute: typeof RecruitingEvaluationsInterviewScheduleRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
     '/recruiting/evaluations/interview': {
       id: '/recruiting/evaluations/interview'
       path: '/evaluations/interview'
@@ -1873,6 +1931,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/recruiting/dashboard/applications'
       preLoaderRoute: typeof RecruitingDashboardApplicationsRouteImport
       parentRoute: typeof RecruitingRouteRoute
+    }
+    '/projects/apply/$roundId': {
+      id: '/projects/apply/$roundId'
+      path: '/apply/$roundId'
+      fullPath: '/projects/apply/$roundId'
+      preLoaderRoute: typeof ProjectsApplyRoundIdRouteImport
+      parentRoute: typeof ProjectsRouteRoute
     }
     '/projects/application/list': {
       id: '/projects/application/list'
@@ -1972,12 +2037,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsAnnounceIndexRouteImport
       parentRoute: typeof MatchingProjectsAnnounceRouteRoute
     }
+    '/recruiting/recruitments/edit/$roundId': {
+      id: '/recruiting/recruitments/edit/$roundId'
+      path: '/recruitments/edit/$roundId'
+      fullPath: '/recruiting/recruitments/edit/$roundId'
+      preLoaderRoute: typeof RecruitingRecruitmentsEditRoundIdRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
     '/recruiting/evaluations/interview/$applicationId': {
       id: '/recruiting/evaluations/interview/$applicationId'
       path: '/$applicationId'
       fullPath: '/recruiting/evaluations/interview/$applicationId'
       preLoaderRoute: typeof RecruitingEvaluationsInterviewApplicationIdRouteImport
       parentRoute: typeof RecruitingEvaluationsInterviewRoute
+    }
+    '/recruiting/evaluations/interview-schedule/$roundId': {
+      id: '/recruiting/evaluations/interview-schedule/$roundId'
+      path: '/$roundId'
+      fullPath: '/recruiting/evaluations/interview-schedule/$roundId'
+      preLoaderRoute: typeof RecruitingEvaluationsInterviewScheduleRoundIdRouteImport
+      parentRoute: typeof RecruitingEvaluationsInterviewScheduleRoute
     }
     '/recruiting/evaluations/document/$applicationId': {
       id: '/recruiting/evaluations/document/$applicationId'
@@ -2133,6 +2212,7 @@ interface ProjectsRouteRouteChildren {
   ProjectsIndexRoute: typeof ProjectsIndexRoute
   ProjectsApplicationApplicationIdRoute: typeof ProjectsApplicationApplicationIdRoute
   ProjectsApplicationListRoute: typeof ProjectsApplicationListRoute
+  ProjectsApplyRoundIdRoute: typeof ProjectsApplyRoundIdRoute
   ProjectsApplicationIndexRoute: typeof ProjectsApplicationIndexRoute
 }
 
@@ -2141,6 +2221,7 @@ const ProjectsRouteRouteChildren: ProjectsRouteRouteChildren = {
   ProjectsIndexRoute: ProjectsIndexRoute,
   ProjectsApplicationApplicationIdRoute: ProjectsApplicationApplicationIdRoute,
   ProjectsApplicationListRoute: ProjectsApplicationListRoute,
+  ProjectsApplyRoundIdRoute: ProjectsApplyRoundIdRoute,
   ProjectsApplicationIndexRoute: ProjectsApplicationIndexRoute,
 }
 
@@ -2178,17 +2259,34 @@ const RecruitingEvaluationsInterviewRouteWithChildren =
     RecruitingEvaluationsInterviewRouteChildren,
   )
 
+interface RecruitingEvaluationsInterviewScheduleRouteChildren {
+  RecruitingEvaluationsInterviewScheduleRoundIdRoute: typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
+}
+
+const RecruitingEvaluationsInterviewScheduleRouteChildren: RecruitingEvaluationsInterviewScheduleRouteChildren =
+  {
+    RecruitingEvaluationsInterviewScheduleRoundIdRoute:
+      RecruitingEvaluationsInterviewScheduleRoundIdRoute,
+  }
+
+const RecruitingEvaluationsInterviewScheduleRouteWithChildren =
+  RecruitingEvaluationsInterviewScheduleRoute._addFileChildren(
+    RecruitingEvaluationsInterviewScheduleRouteChildren,
+  )
+
 interface RecruitingRouteRouteChildren {
   RecruitingDashboardApplicationsRoute: typeof RecruitingDashboardApplicationsRoute
   RecruitingDashboardEvaluationsRoute: typeof RecruitingDashboardEvaluationsRoute
   RecruitingEvaluationsDocumentRoute: typeof RecruitingEvaluationsDocumentRouteWithChildren
   RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
   RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRouteWithChildren
+  RecruitingEvaluationsInterviewScheduleRoute: typeof RecruitingEvaluationsInterviewScheduleRouteWithChildren
   RecruitingHistoryArchiveRoute: typeof RecruitingHistoryArchiveRoute
   RecruitingRecruitmentsNewRoute: typeof RecruitingRecruitmentsNewRoute
   RecruitingRecruitmentsQuotaRoute: typeof RecruitingRecruitmentsQuotaRoute
   RecruitingEvaluationsIndexRoute: typeof RecruitingEvaluationsIndexRoute
   RecruitingRecruitmentsIndexRoute: typeof RecruitingRecruitmentsIndexRoute
+  RecruitingRecruitmentsEditRoundIdRoute: typeof RecruitingRecruitmentsEditRoundIdRoute
 }
 
 const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
@@ -2199,11 +2297,15 @@ const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
   RecruitingEvaluationsFinalRoute: RecruitingEvaluationsFinalRoute,
   RecruitingEvaluationsInterviewRoute:
     RecruitingEvaluationsInterviewRouteWithChildren,
+  RecruitingEvaluationsInterviewScheduleRoute:
+    RecruitingEvaluationsInterviewScheduleRouteWithChildren,
   RecruitingHistoryArchiveRoute: RecruitingHistoryArchiveRoute,
   RecruitingRecruitmentsNewRoute: RecruitingRecruitmentsNewRoute,
   RecruitingRecruitmentsQuotaRoute: RecruitingRecruitmentsQuotaRoute,
   RecruitingEvaluationsIndexRoute: RecruitingEvaluationsIndexRoute,
   RecruitingRecruitmentsIndexRoute: RecruitingRecruitmentsIndexRoute,
+  RecruitingRecruitmentsEditRoundIdRoute:
+    RecruitingRecruitmentsEditRoundIdRoute,
 }
 
 const RecruitingRouteRouteWithChildren = RecruitingRouteRoute._addFileChildren(

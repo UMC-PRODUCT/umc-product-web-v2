@@ -20,7 +20,7 @@ export function TimeTextBox({
   return (
     <div
       className={cn(
-        "flex h-11 w-19 items-center justify-center rounded-[10px] border bg-white",
+        "flex h-11 w-19 items-center justify-center rounded-[12px] border bg-white",
         error
           ? "border-error-400"
           : disabled

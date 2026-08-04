@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
+import { useAdminSchoolsSummary } from "@/entities/organization/hooks/useSchool"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { ChapterTabs } from "@/features/recruiting/ui/ChapterTabs"
 import { SchoolCard } from "@/features/settings/ui/SchoolCard"
 import { SchoolPagination } from "@/features/settings/ui/SchoolPagination"
@@ -10,6 +12,7 @@ import {
   type SchoolSortOption,
 } from "@/features/settings/ui/SchoolSortDropdown"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
@@ -17,16 +20,75 @@ export const Route = createFileRoute("/manage/school/")({
   component: SchoolManagePage,
 })
 
-const MOCK_SCHOOLS = [
-  { id: "1", branch: "Chromium", name: "가가대학교", count: 127 },
-  { id: "2", branch: "Chromium", name: "가가대학교", count: 127 },
-  { id: "3", branch: "Chromium", name: "가가대학교", count: 127 },
-]
+const PAGE_SIZE = 20
 
 function SchoolManagePage() {
   const [selectedChapter, setSelectedChapter] = useState<string>("all")
   const [sortOption, setSortOption] = useState<SchoolSortOption>("name")
+  const [searchInputText, setSearchInputText] = useState("")
+  const [submittedSearchQuery, setSubmittedSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+
+  const handleSearchSubmit = () => {
+    setSubmittedSearchQuery(searchInputText)
+    setCurrentPage(1)
+  }
+
+  const { data: activeGisuData } = useActiveGisu()
+  const activeGisuId = activeGisuData?.gisuId
+    ? Number(activeGisuData.gisuId)
+    : undefined
+  const activeGisuText = activeGisuData?.gisu
+    ? `${activeGisuData.gisu}기`
+    : "11기"
+
+  const { getChapterIdBySchool, getChapterIdByName } = useSchoolChapterMap()
+
+  const chapterIdParam = useMemo(() => {
+    if (selectedChapter === "all") return undefined
+    const num = Number(selectedChapter)
+    if (!Number.isNaN(num)) return num
+    return getChapterIdByName(selectedChapter)
+  }, [selectedChapter, getChapterIdByName])
+
+  const isChapterUnresolved =
+    selectedChapter !== "all" && chapterIdParam === undefined
+
+  const { data: summaryData, isLoading: isSummaryLoading } =
+    useAdminSchoolsSummary({
+      gisuId: activeGisuId,
+      chapterId: chapterIdParam,
+      search: submittedSearchQuery.trim() || undefined,
+      page: currentPage - 1,
+      size: PAGE_SIZE,
+      sort: sortOption,
+      enabled: activeGisuId != null && !isChapterUnresolved,
+    })
+
+  const isLoading = isSummaryLoading
+
+  const paginatedSchools = useMemo(() => {
+    if (!summaryData?.content) return []
+    return summaryData.content
+      .filter((item) => item.schoolId != null)
+      .map((item) => {
+        const fallbackChapterId = item.schoolName
+          ? getChapterIdBySchool(item.schoolName)
+          : undefined
+        const chapterId = item.chapterId ?? fallbackChapterId
+        return {
+          id: String(item.schoolId),
+          name: item.schoolName ?? "",
+          chapterId,
+          branch:
+            item.chapterName ??
+            (chapterId ? `지부 ${chapterId}` : "지부 미지정"),
+          count: item.activeChallengerCount ?? 0,
+        }
+      })
+  }, [summaryData, getChapterIdBySchool])
+
+  const totalPages = Math.max(1, summaryData?.totalPages ?? 1)
 
   return (
     <div className="flex w-full max-w-244 flex-col gap-8">
@@ -36,18 +98,28 @@ function SchoolManagePage() {
           { id: "school", label: "학교 관리" },
         ]}
         title="학교 관리"
-        description="UMC 11기 소속의 학교 정보를 관리합니다."
+        description={`UMC ${activeGisuText} 소속의 학교 정보를 관리합니다.`}
         className="pl-3"
       />
 
       <div className="flex w-full flex-col gap-6">
         <ChapterTabs
           value={selectedChapter}
-          onValueChange={setSelectedChapter}
+          onValueChange={(val) => {
+            setSelectedChapter(val)
+            setCurrentPage(1)
+          }}
         />
 
         <div className="flex w-full items-center justify-between">
-          <SchoolSearchInput />
+          <SchoolSearchInput
+            value={searchInputText}
+            onChange={(e) => setSearchInputText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearchSubmit()
+            }}
+            onSearch={handleSearchSubmit}
+          />
 
           <div className="flex items-center gap-4">
             <Button
@@ -69,28 +141,42 @@ function SchoolManagePage() {
           </div>
         </div>
 
-        <div className="grid w-full grid-cols-2 gap-2">
-          {MOCK_SCHOOLS.map((school) => (
-            <Link
-              key={school.id}
-              to="/manage/school/$schoolId"
-              params={{ schoolId: school.id }}
-              className="block w-full text-left"
-            >
-              <SchoolCard
-                branch={school.branch}
-                name={school.name}
-                count={school.count}
-                className="cursor-pointer"
-              />
-            </Link>
-          ))}
-        </div>
+        {isChapterUnresolved ? (
+          <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
+            선택한 지부 정보를 찾을 수 없거나 불러오는 중입니다.
+          </div>
+        ) : isLoading ? (
+          <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
+            학교 정보를 불러오는 중입니다...
+          </div>
+        ) : paginatedSchools.length === 0 ? (
+          <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
+            등록된 학교가 없거나 검색 결과가 없습니다.
+          </div>
+        ) : (
+          <div className="grid w-full grid-cols-2 gap-2">
+            {paginatedSchools.map((school) => (
+              <Link
+                key={school.id}
+                to="/manage/school/$schoolId"
+                params={{ schoolId: school.id }}
+                className="block w-full text-left"
+              >
+                <SchoolCard
+                  branch={school.branch}
+                  name={school.name}
+                  count={school.count}
+                  className="cursor-pointer"
+                />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <SchoolPagination
         currentPage={currentPage}
-        totalPages={3}
+        totalPages={totalPages}
         onPageChange={setCurrentPage}
       />
     </div>

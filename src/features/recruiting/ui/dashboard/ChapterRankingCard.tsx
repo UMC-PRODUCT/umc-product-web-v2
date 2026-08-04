@@ -1,27 +1,40 @@
-import { CHAPTERS } from "@/entities/organization/model/chapters"
 import { GraphTooltip } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
 import { cn } from "@/shared/lib/utils"
 
-import type { Chapter } from "@/entities/organization/model/chapters"
-import type { PartBreakdown } from "@/features/recruiting/ui/dashboard/PartBreakdownTooltip"
+import type { PartBreakdown } from "@/features/recruiting/model/parts"
+
+// 지부 목록은 서버 응답에서 오므로 개수와 이름을 카드가 가정하지 않는다.
+// 지부별 값(count/compareCount/breakdown)을 Record 세 개로 나눠 받으면 키를
+// 서로 맞춰야 해서, 지부 하나가 한 항목인 배열로 합쳐 받는다.
+interface ChapterDatum {
+  chapterId: string
+  chapterName: string
+  count: number
+  // 평가 현황처럼 배경 막대로 겹쳐 보여줄 비교값(예: 지원자 수).
+  // compareLabels 가 있을 때만 쓰인다.
+  compareCount?: number
+  // 호버 툴팁용 파트 상세. 있으면 그 막대에 툴팁을 붙인다.
+  breakdown?: PartBreakdown
+}
 
 interface ChapterRankingCardProps {
   title: string
-  counts: Record<Chapter, number>
+  chapters: ChapterDatum[]
   // 절대 기준(예: 100% = 100명)을 쓸 때만 전달. 생략하면 최댓값 기준 상대 그래프.
   total?: number
-  // 평가 현황처럼 지원자 수 등 비교 데이터를 배경 막대로 겹쳐 보여줄 때만 전달.
-  compare?: {
-    counts: Record<Chapter, number>
+  // 비교 막대의 범례. 전달하면 compareCount 를 배경 막대로 렌더한다.
+  compareLabels?: {
     primaryLabel: string
     compareLabel: string
   }
-  // 호버 툴팁용 지부별 파트 상세. 있으면 막대에 툴팁을 붙인다.
-  breakdowns?: Record<Chapter, PartBreakdown>
   // 툴팁 하단 모집 상태(예: "모집 중", "추가 모집 중"). 없으면 미표기.
   footerStatus?: string
 }
 
+// 카드 폭에서 나온 값이다. 막대(82px) + 간격(10px) 기준으로 10개가 한계고
+// 11개부터 카드 밖으로 넘친다(막대가 shrink-0 이라 줄어들지 않는다).
+// 이름 그대로 랭킹 카드라 count 내림차순 상위 10개만 보여준다. 지부가 그보다
+// 많으면 나머지는 표시되지 않으므로, 전수 확인이 필요한 화면에는 쓰지 않는다.
 const MAX_CHAPTERS = 10
 const GRID_HEIGHT_PX = 200
 const FILLED_MIN_HEIGHT_PX = 28
@@ -31,9 +44,7 @@ const COMPARE_MIN_HEIGHT_PX = 32
 
 type ColorTier = 1 | 2 | 3 | 4
 
-interface ChapterBar {
-  chapter: Chapter
-  count: number
+interface ChapterBar extends ChapterDatum {
   colorTier: ColorTier
 }
 
@@ -52,12 +63,11 @@ const LEGEND_DOT_CLASSNAMES = [
   "bg-teal-200",
 ]
 
-function buildBars(counts: Record<Chapter, number>): ChapterBar[] {
-  const sorted = [...CHAPTERS]
-    .map((chapter) => ({ chapter, count: counts[chapter] }))
+function buildBars(chapters: ChapterDatum[]): ChapterBar[] {
+  const sorted = [...chapters]
     .sort((a, b) => {
       if (b.count !== a.count) return b.count - a.count
-      return a.chapter.localeCompare(b.chapter)
+      return a.chapterName.localeCompare(b.chapterName, "ko")
     })
     .slice(0, MAX_CHAPTERS)
 
@@ -81,18 +91,17 @@ function barHeightPx(count: number, base: number) {
 
 export function ChapterRankingCard({
   title,
-  counts,
+  chapters,
   total,
-  compare,
-  breakdowns,
+  compareLabels,
   footerStatus,
 }: ChapterRankingCardProps) {
-  const bars = buildBars(counts)
+  const bars = buildBars(chapters)
   const base =
     total ??
     Math.max(
       ...bars.map((bar) => bar.count),
-      ...(compare ? bars.map((bar) => compare.counts[bar.chapter]) : []),
+      ...(compareLabels ? bars.map((bar) => bar.compareCount ?? 0) : []),
       0,
     )
 
@@ -101,7 +110,7 @@ export function ChapterRankingCard({
       <div className="flex h-70 flex-col gap-5">
         <div className="flex items-center justify-between">
           <p className="text-heading-6-semibold text-teal-700">{title}</p>
-          {compare && (
+          {compareLabels && (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
                 <div className="flex h-2.5 w-7.75 shrink-0 items-center">
@@ -117,13 +126,13 @@ export function ChapterRankingCard({
                   ))}
                 </div>
                 <p className="text-caption-1-medium text-teal-gray-700 whitespace-nowrap">
-                  {compare.primaryLabel}
+                  {compareLabels.primaryLabel}
                 </p>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="bg-teal-gray-200 size-2.5 shrink-0 rounded-full" />
                 <p className="text-caption-1-medium text-teal-gray-700 whitespace-nowrap">
-                  {compare.compareLabel}
+                  {compareLabels.compareLabel}
                 </p>
               </div>
             </div>
@@ -137,16 +146,16 @@ export function ChapterRankingCard({
             ))}
           </div>
 
-          {compare && (
+          {compareLabels && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-58 items-end gap-2.5 px-2.5">
               {bars.map((bar) => (
                 <div
-                  key={bar.chapter}
+                  key={bar.chapterId}
                   className="bg-teal-gray-100 w-20.5 shrink-0 rounded-t-md"
                   style={{
                     height: Math.min(
                       Math.max(
-                        barHeightPx(compare.counts[bar.chapter], base),
+                        barHeightPx(bar.compareCount ?? 0, base),
                         COMPARE_MIN_HEIGHT_PX,
                       ),
                       GRID_HEIGHT_PX,
@@ -180,11 +189,11 @@ export function ChapterRankingCard({
                     )
                   : 1
 
-            const chapterBreakdown = breakdowns?.[bar.chapter]
+            const chapterBreakdown = bar.breakdown
 
             return (
               <div
-                key={bar.chapter}
+                key={bar.chapterId}
                 className="group relative flex w-20.5 shrink-0 flex-col items-start justify-end gap-2.5"
               >
                 <div className="flex items-end gap-px px-1">
@@ -205,7 +214,7 @@ export function ChapterRankingCard({
                     style={{ height: barPixelHeight }}
                   >
                     <p className="text-label-3-bold w-full truncate">
-                      {bar.chapter}
+                      {bar.chapterName}
                     </p>
                   </div>
                 )}
@@ -213,7 +222,7 @@ export function ChapterRankingCard({
                 {variant === "sliver" && (
                   <div className="flex w-full flex-1 flex-col items-start justify-end gap-1">
                     <p className="text-label-3-bold w-full truncate px-2 pt-1 text-center text-teal-500">
-                      {bar.chapter}
+                      {bar.chapterName}
                     </p>
                     <div
                       className="w-full rounded-t-sm bg-teal-200"
@@ -225,7 +234,7 @@ export function ChapterRankingCard({
                 {variant === "null" && (
                   <div className="flex w-full flex-1 flex-col items-start justify-end gap-1">
                     <p className="text-label-3-bold w-full truncate px-2 pt-1 text-center text-teal-500">
-                      {bar.chapter}
+                      {bar.chapterName}
                     </p>
                     <div className="h-px w-full rounded-t-sm bg-teal-200" />
                   </div>
@@ -235,7 +244,7 @@ export function ChapterRankingCard({
                   /* 세모 꼭지점을 이 막대의 세로 중앙(바닥에서 barPixelHeight/2),
                      막대 정중앙(컬럼 중앙)에 맞추고 본체는 아래로 내린다. */
                   <GraphTooltip
-                    name={bar.chapter}
+                    name={bar.chapterName}
                     breakdown={chapterBreakdown}
                     footerStatus={footerStatus}
                     className="left-1/2 -translate-x-1/2"

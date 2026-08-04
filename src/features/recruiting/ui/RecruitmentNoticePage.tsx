@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
 import FilterIcon from "@/shared/assets/icon/filter/FilterIcon"
@@ -6,8 +7,8 @@ import { PART_TAG_LABEL } from "@/shared/model/domain"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Segment } from "@/shared/ui/segment/Segment"
 
+import { usePublicRecruitmentNotices } from "../hooks/usePublicRecruitmentNotices"
 import { formatNoticePeriod } from "../model/recruitmentNotice"
-import { RECRUITMENT_NOTICE_ITEMS_MOCK } from "../model/recruitmentNotice.mock"
 import { RecruitmentApplyConfirmModal } from "./RecruitmentApplyConfirmModal"
 import { RecruitmentNoticeCard } from "./RecruitmentNoticeCard"
 import { RecruitmentNoticePreviewModal } from "./RecruitmentNoticePreviewModal"
@@ -34,6 +35,7 @@ const PART_FILTER_OPTIONS = NOTICE_FILTER_PARTS.map((part) => ({
 }))
 
 export function RecruitmentNoticePage() {
+  const navigate = useNavigate()
   const [search, setSearch] = useState("")
   const [tab, setTab] = useState<NoticeTab>("recruiting")
   const [openFilterKey, setOpenFilterKey] = useState<"school" | "part" | null>(
@@ -46,8 +48,7 @@ export function RecruitmentNoticePage() {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [applyConfirmOpen, setApplyConfirmOpen] = useState(false)
 
-  // TODO: API 연동 시 RECRUITMENT_NOTICE_ITEMS_MOCK 대신 실제 응답으로 교체
-  const allItems = RECRUITMENT_NOTICE_ITEMS_MOCK
+  const { items: allItems, isLoading, isError } = usePublicRecruitmentNotices()
 
   const schoolFilterOptions = useMemo(
     () =>
@@ -128,7 +129,15 @@ export function RecruitmentNoticePage() {
         onValueChange={(id) => setTab(id as NoticeTab)}
       />
 
-      {items.length === 0 ? (
+      {isLoading ? (
+        <p className="text-body-2-medium text-teal-gray-400 flex w-full items-center justify-center py-30">
+          모집 공고를 불러오는 중입니다.
+        </p>
+      ) : isError ? (
+        <p className="text-body-2-medium text-teal-gray-400 flex w-full items-center justify-center py-30">
+          모집 공고를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+        </p>
+      ) : items.length === 0 ? (
         <p className="text-body-2-medium text-teal-gray-400 flex w-full items-center justify-center py-30">
           등록된 모집 공고가 없습니다.
         </p>
@@ -173,8 +182,19 @@ export function RecruitmentNoticePage() {
           onOpenChange={setApplyConfirmOpen}
           status={selectedItem.appliedStatus ?? "confirm"}
           recruitmentTitle={selectedItem.title}
-          // TODO: 지원 폼 라우트 연결 (routes/projects/ 지원 방법 미구현 상태)
-          onConfirm={() => setApplyConfirmOpen(false)}
+          onConfirm={() => {
+            setApplyConfirmOpen(false)
+            // 아직 지원 전이면 지원서를 새로 쓰고, 이미 쓴 지원서가 있으면
+            // 내 지원서로 보낸다. 수정은 지원 폼이 아니라 그쪽 경로다.
+            if (selectedItem.appliedStatus == null) {
+              void navigate({
+                to: "/projects/apply/$roundId",
+                params: { roundId: selectedItem.id },
+              })
+              return
+            }
+            void navigate({ to: "/projects/application/list" })
+          }}
         />
       )}
     </div>

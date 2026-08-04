@@ -1,7 +1,22 @@
-import type { Chapter } from "@/entities/organization/model/chapters"
+import { shortenSchoolName } from "@/shared/lib/formatSchoolName"
+
 import type { PartTag } from "@/shared/model/domain"
 
+import type { RecruitingDecisionResult, RecruitingTrack } from "../api/types"
 import type { EvaluationResult } from "./applicantListTypes"
+
+// 화면 필터 값 -> 서버 파라미터. TRACK_PART_TAG(트랙 -> 파트)의 역방향이다.
+const PART_TAG_TRACK: Partial<Record<string, RecruitingTrack>> = {
+  pm: "PLAN",
+  design: "DESIGN",
+  "web-pe": "WEB_PRODUCT_ENGINEER",
+  "mobile-pe": "MOBILE_PRODUCT_ENGINEER",
+}
+
+const RESULT_TO_SERVER: Partial<Record<string, RecruitingDecisionResult>> = {
+  pass: "PASSED",
+  fail: "FAILED",
+}
 
 export const EVALUATION_RESULT_LABEL: Record<EvaluationResult, string> = {
   pass: "합격",
@@ -14,17 +29,26 @@ export interface EvaluationHistoryEntry {
   id: string
   processedAt: string // ISO 문자열. 처리 일시
   applicant: {
-    chapter: Chapter
+    // 서버 필터는 이름이 아니라 숫자 ID 를 받는다. CSV 다운로드에 필터를 그대로
+    // 넘기려면 행에 ID 를 들고 있어야 한다.
+    chapterId: string
+    schoolId: string
+    // 서버가 주는 지부명을 그대로 쓴다. 프론트 CHAPTERS 상수(6개)는 역대 지부
+    // 전체를 담지 않아 union 으로 좁히면 데이터가 사라진다.
+    chapter: string
     school: string
     name: string
-    part: PartTag // 테이블엔 안 보이지만 "지원 파트" 필터에 필요
+    // 매핑되는 파트가 없으면 null 이다(INFRA_PLUS). 감사 화면이라 임의 파트로
+    // 접지 않고 그대로 두어 파트 필터에서 빠지게 한다.
+    part: PartTag | null // 테이블엔 안 보이지만 "지원 파트" 필터에 필요
     result: EvaluationResult
   }
   evaluator: {
     id: string // 담당자별 그룹핑 기준 키
-    chapter: Chapter
+    // 중앙 직위 담당자는 지부·학교가 없어 빈 문자열로 온다.
+    chapter: string
     school: string
-    position: string // 직위(회장/부회장 등). TODO: 서버 연동 시 RoleType -> 라벨 매핑으로 대체
+    position: string // 직위 라벨. 판정 시점 roleType 스냅샷을 매핑한 값
     nickname: string
     name: string
   }
@@ -61,7 +85,8 @@ export interface EvaluationHistoryFilters {
   chapters: string[]
   schools: string[]
   parts: string[]
-  results: string[]
+  // 평가 결과는 단일 선택이다(기획 확정). 미선택은 빈 문자열.
+  result: string
 }
 
 export const DEFAULT_EVALUATION_HISTORY_FILTERS: EvaluationHistoryFilters = {
@@ -71,7 +96,7 @@ export const DEFAULT_EVALUATION_HISTORY_FILTERS: EvaluationHistoryFilters = {
   chapters: [],
   schools: [],
   parts: [],
-  results: [],
+  result: "",
 }
 
 // applicantListTypes.ts의 applyApplicantFilters 구조를 따른다.
@@ -107,14 +132,12 @@ export function applyEvaluationHistoryFilters(
     }
     if (
       filters.parts.length > 0 &&
-      !filters.parts.includes(row.applicant.part)
+      (row.applicant.part == null ||
+        !filters.parts.includes(row.applicant.part))
     ) {
       return false
     }
-    if (
-      filters.results.length > 0 &&
-      !filters.results.includes(row.applicant.result)
-    ) {
+    if (filters.result !== "" && filters.result !== row.applicant.result) {
       return false
     }
 
@@ -248,46 +271,99 @@ export function formatHistoryProcessedAt(processedAt: string) {
   }
 }
 
-const EVALUATION_HISTORY_CSV_HEADER = [
-  "처리일시",
-  "지원자 지부",
-  "지원자 학교",
-  "지원자 이름",
-  "지원자 결과",
-  "담당자 지부",
-  "담당자 학교",
-  "담당자 직위",
-  "담당자 닉네임",
-  "담당자 이름",
-]
-
-function escapeCsvCell(value: string) {
-  if (/[",\n]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`
-  }
-  return value
+// 서버 판정 이력 조회 파라미터로 옮긴다. CSV 다운로드가 화면과 같은 범위를 쓰도록
+// 목록 조회와 같은 조건을 넘긴다.
+//
+// 지부·학교·파트는 다중 선택, 평가 결과는 단일 선택이다(기획 확정). 서버가 모두
+// 배열 파라미터로 받으므로 화면 필터를 그대로 전달한다.
+// 필터 바는 지부·학교를 이름으로 다루는데 서버는 ID 를 받는다. 행에 실려 온 ID 를
+// 쓰므로 이름 -> ID 변환에 조회를 더 하지 않는다. 조회 결과에 없는 이름은 매칭할 ID 가
+// 없어 자연히 빠진다.
+function toIds(
+  rows: EvaluationHistoryEntry[],
+  selectedNames: string[],
+  pick: (row: EvaluationHistoryEntry) => { id: string; name: string },
+): string[] | undefined {
+  if (selectedNames.length === 0) return undefined
+  const idByName = new Map(rows.map((row) => [pick(row).name, pick(row).id]))
+  const ids = selectedNames
+    .map((name) => idByName.get(name))
+    .filter((id): id is string => id != null)
+  return ids.length > 0 ? ids : undefined
 }
 
-// CSV 문자열만 만드는 순수 함수. 실제로 파일로 내려받는 건 호출하는 쪽(archive.tsx)의 책임.
-export function toEvaluationHistoryCsv(rows: EvaluationHistoryEntry[]): string {
-  const lines = [EVALUATION_HISTORY_CSV_HEADER.join(",")]
+export function toDecisionHistoriesQuery(
+  filters: EvaluationHistoryFilters,
+  sort: EvaluationHistorySort,
+  byEvaluator: boolean,
+  rows: EvaluationHistoryEntry[],
+) {
+  const search = filters.search.trim()
+  const tracks = filters.parts
+    .map((part) => PART_TAG_TRACK[part])
+    .filter((track): track is RecruitingTrack => track != null)
+  const result = RESULT_TO_SERVER[filters.result]
 
-  for (const row of rows) {
-    const { date, time } = formatHistoryProcessedAt(row.processedAt)
-    const cells = [
-      `${date} ${time}`,
-      row.applicant.chapter,
-      row.applicant.school,
-      row.applicant.name,
-      EVALUATION_RESULT_LABEL[row.applicant.result],
-      row.evaluator.chapter,
-      row.evaluator.school,
-      row.evaluator.position,
-      row.evaluator.nickname,
-      row.evaluator.name,
-    ]
-    lines.push(cells.map(escapeCsvCell).join(","))
+  // 지부 탭으로 좁혀졌으면 그 지부가 곧 선택이다.
+  const chapterNames =
+    filters.chapterTab === EVALUATION_HISTORY_CHAPTER_TAB_ALL
+      ? filters.chapters
+      : [filters.chapterTab]
+
+  return {
+    chapterIds: toIds(rows, chapterNames, (row) => ({
+      id: row.applicant.chapterId,
+      name: row.applicant.chapter,
+    })),
+    schoolIds: toIds(rows, filters.schools, (row) => ({
+      id: row.applicant.schoolId,
+      name: row.applicant.school,
+    })),
+    tracks: tracks.length > 0 ? tracks : undefined,
+    results: result ? [result] : undefined,
+    searchName: search === "" ? undefined : search,
+    sort: sort === "latest" ? ("LATEST" as const) : ("OLDEST" as const),
+    groupByDecider: byEvaluator,
   }
+}
 
-  return lines.join("\n")
+export interface HistoryFilterOption {
+  value: string
+  label: string
+}
+
+function uniqueSorted(values: string[]): string[] {
+  return [...new Set(values.filter((value) => value !== ""))].sort((a, b) =>
+    a.localeCompare(b, "ko"),
+  )
+}
+
+// 필터 선택지를 하드코딩 상수가 아니라 실제 응답에서 만든다. 상수로 만들면 두 가지가
+// 깨진다.
+// 1) 학교: 상수는 약칭("가천대")인데 서버는 정식 명칭("가천대학교")을 준다. 값이
+//    달라 어떤 학교를 골라도 필터 결과가 0건이 된다.
+// 2) 지부: 상수는 현재 기수 6개뿐이라 과거 기수 지부(GOAT, 오션 등) 이력은 표에는
+//    보이는데 필터로 좁힐 수 없다.
+export function buildHistoryChapterOptions(
+  rows: EvaluationHistoryEntry[],
+): HistoryFilterOption[] {
+  return uniqueSorted(rows.map((row) => row.applicant.chapter)).map(
+    (chapter) => ({ value: chapter, label: chapter }),
+  )
+}
+
+// 값은 매칭용이라 서버 정식 명칭을 그대로 두고, 화면에 보이는 label 만 약칭으로 줄인다.
+// chapterNames 가 비어 있으면 전체 학교를 대상으로 한다.
+export function buildHistorySchoolOptions(
+  rows: EvaluationHistoryEntry[],
+  chapterNames: string[],
+): HistoryFilterOption[] {
+  const scoped =
+    chapterNames.length > 0
+      ? rows.filter((row) => chapterNames.includes(row.applicant.chapter))
+      : rows
+
+  return uniqueSorted(scoped.map((row) => row.applicant.school)).map(
+    (school) => ({ value: school, label: shortenSchoolName(school) }),
+  )
 }

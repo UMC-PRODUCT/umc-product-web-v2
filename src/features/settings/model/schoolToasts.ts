@@ -48,7 +48,7 @@ export function showSchoolDeletedToast(
 ) {
   addToast({
     message: "학교 정보가 삭제됐습니다.",
-    color: "primary",
+    color: "red",
     variant: "deep",
     type: "default",
     duration: 6000,
@@ -58,5 +58,15 @@ export function showSchoolDeletedToast(
         onUndo?.()
       },
     },
+  })
+}
+
+export function showSchoolDeleteFailedToast(addToast: AddToastFn) {
+  addToast({
+    message: "학교 정보 삭제에 실패했습니다.",
+    color: "red",
+    variant: "deep",
+    type: "default",
+    duration: 3000,
   })
 }

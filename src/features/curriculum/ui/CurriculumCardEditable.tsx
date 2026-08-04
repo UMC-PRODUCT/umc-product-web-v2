@@ -21,6 +21,7 @@ interface SortableWorkbookItemProps {
   wb: Workbook
   wbIndex: number
   onUpdateWorkbookTitle?: (wbIndex: number, title: string) => void
+  onBlurWorkbookTitle?: (wbIndex: number, title: string) => void
   onUpdateMission?: (
     wbIndex: number,
     missionIndex: number,
@@ -35,6 +36,7 @@ function SortableWorkbookItem({
   wb,
   wbIndex,
   onUpdateWorkbookTitle,
+  onBlurWorkbookTitle,
   onUpdateMission,
   onDeleteWorkbook,
   onAddMission,
@@ -42,6 +44,7 @@ function SortableWorkbookItem({
 }: SortableWorkbookItemProps) {
   const missionInputRefs = useRef<(HTMLInputElement | null)[]>([])
   const [focusIndex, setFocusIndex] = useState<number | null>(null)
+  const focusedTitleRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (focusIndex !== null && missionInputRefs.current[focusIndex]) {
@@ -99,7 +102,15 @@ function SortableWorkbookItem({
               type="text"
               value={wb.title}
               onPointerDown={(e) => e.stopPropagation()}
+              onFocus={() => {
+                focusedTitleRef.current = wb.title
+              }}
               onChange={(e) => onUpdateWorkbookTitle?.(wbIndex, e.target.value)}
+              onBlur={() => {
+                if (focusedTitleRef.current !== wb.title) {
+                  onBlurWorkbookTitle?.(wbIndex, wb.title)
+                }
+              }}
               placeholder="워크북 이름을 작성하세요"
               className="text-heading-7-semibold text-teal-gray-900 placeholder:text-teal-gray-400 min-w-48 bg-transparent outline-none"
             />
@@ -170,7 +181,9 @@ function SortableWorkbookItem({
 interface CurriculumCardEditableProps {
   curriculum: CurriculumItem
   onUpdateCurriculumTitle?: (title: string) => void
+  onBlurCurriculumTitle?: (title: string) => void
   onUpdateWorkbookTitle?: (wbIndex: number, title: string) => void
+  onBlurWorkbookTitle?: (wbIndex: number, title: string) => void
   onUpdateMission?: (
     wbIndex: number,
     missionIndex: number,
@@ -188,7 +201,9 @@ interface CurriculumCardEditableProps {
 export function CurriculumCardEditable({
   curriculum,
   onUpdateCurriculumTitle,
+  onBlurCurriculumTitle,
   onUpdateWorkbookTitle,
+  onBlurWorkbookTitle,
   onUpdateMission,
   onAddWorkbook,
   onDeleteWorkbook,
@@ -201,6 +216,7 @@ export function CurriculumCardEditable({
   const [moreOpen, setMoreOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const titleInputRef = useRef<HTMLInputElement>(null)
+  const focusedTitleRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (autoFocusTitle && titleInputRef.current) {
@@ -263,7 +279,15 @@ export function CurriculumCardEditable({
                 type="text"
                 value={curriculum.title}
                 onPointerDown={(e) => e.stopPropagation()}
+                onFocus={() => {
+                  focusedTitleRef.current = curriculum.title
+                }}
                 onChange={(e) => onUpdateCurriculumTitle?.(e.target.value)}
+                onBlur={() => {
+                  if (focusedTitleRef.current !== curriculum.title) {
+                    onBlurCurriculumTitle?.(curriculum.title)
+                  }
+                }}
                 placeholder="커리큘럼 이름을 작성하세요"
                 className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 w-full min-w-60 bg-transparent outline-none"
               />
@@ -367,6 +391,7 @@ export function CurriculumCardEditable({
               wb={wb}
               wbIndex={wbIndex}
               onUpdateWorkbookTitle={onUpdateWorkbookTitle}
+              onBlurWorkbookTitle={onBlurWorkbookTitle}
               onUpdateMission={onUpdateMission}
               onDeleteWorkbook={onDeleteWorkbook}
               onAddMission={onAddMission}

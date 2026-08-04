@@ -18,6 +18,7 @@ import type { RecruitingApplicationStatus } from "../api/types"
 import type {
   EvaluationBlockReason,
   EvaluatorState,
+  ManagePermission,
 } from "../model/evaluationRules"
 import type { EvaluationStage } from "../model/evaluationStage"
 
@@ -34,7 +35,10 @@ export function useStageEvaluations(
   roundId: string | undefined,
   stage: EvaluationStage,
   status: RecruitingApplicationStatus | undefined,
+  managePermission: ManagePermission,
 ) {
+  const { isGranted: hasManagePermission, isResolved: isPermissionResolved } =
+    managePermission
   const { data: me } = useMe()
   const apiStage = toApiStage(stage)
   // 평가 목록은 단계별 API 라 최종 단계에는 없지만, 평가자 명단은 차수 단위라
@@ -42,14 +46,12 @@ export function useStageEvaluations(
   // 관리 권한을 판정하지 못해 합불 처리가 잠긴다.
   const evaluationsEnabled = roundId != null && apiStage != null
 
-  // 평가자 명단은 모집 관리 권한이 있어야 조회할 수 있다. 평가자 whitelist 에만
-  // 올라간 운영진은 403 을 받으므로, 실패해도 평가 목록은 그대로 보여준다.
-  // 403 은 권한이 없다는 확정 답이라 재시도하지 않고, 나머지 오류만 재시도해
-  // 일시적 실패가 권한 없음으로 오인되지 않게 한다.
+  // 평가자 명단은 모집 관리 권한이 있어야 조회할 수 있다. 권한이 없다고 이미
+  // 알고 있으면 403 을 부르지 않는다. 명단은 총원(분모) 계산에만 쓴다.
   const evaluatorsQuery = useQuery({
     queryKey: recruitingKeys.evaluators(roundId ?? ""),
     queryFn: () => getRoundEvaluators(roundId!),
-    enabled: roundId != null,
+    enabled: roundId != null && hasManagePermission === true,
     retry: (failureCount, error) =>
       !(isAxiosError(error) && error.response?.status === 403) &&
       failureCount < 2,
@@ -60,16 +62,12 @@ export function useStageEvaluations(
     [evaluatorsQuery.data],
   )
   const rosterKnown = evaluatorsQuery.isSuccess
-  // 403 은 "관리 권한 없음"이라는 확정 답이고, 그 외 실패는 아무것도 알려주지
-  // 않는다. 둘을 한 값으로 접으면 장애를 권한 없음으로 오인한다.
-  const rosterDenied =
-    evaluatorsQuery.isError &&
-    isAxiosError(evaluatorsQuery.error) &&
-    evaluatorsQuery.error.response?.status === 403
-  const rosterUnavailable = evaluatorsQuery.isError && !rosterDenied
-  // 명단 조회가 끝나기 전에는 관리 권한 유무를 알 수 없다. 그 사이에 비운영진
-  // 화면을 보였다가 뒤바뀌지 않도록 결과가 확정된 뒤에 조립한다.
-  const rosterSettled = evaluatorsQuery.isSuccess || evaluatorsQuery.isError
+  // 명단은 관리 권한자만 조회한다. 권한 판정이 끝났고 권한자가 아니라면 기다릴
+  // 것이 없다. 판정 자체가 아직 안 끝났으면 기다린다.
+  const rosterSettled =
+    (isPermissionResolved && hasManagePermission !== true) ||
+    evaluatorsQuery.isSuccess ||
+    evaluatorsQuery.isError
 
   const evaluationsQuery = useQuery({
     queryKey: recruitingKeys.stageEvaluations(
@@ -113,22 +111,33 @@ export function useStageEvaluations(
   })
 
   // 평가 등록은 평가자 명단에 있는 사람만 할 수 있다.
-  //  · 명단을 받았으면 직접 확인한다.
-  //  · 403 이면 관리 권한이 없다는 뜻이고, 그런데도 평가 목록을 받았다면
-  //    서버가 평가자로 인정한 것이다(운영진 경로가 막혔으므로).
-  //  · 그 밖의 실패는 아무것도 증명하지 못한다. 운영진도 이 경로로 떨어질 수
-  //    있어 평가자로 단정하면 제출 단계에서 거부된다.
+  //  · 관리 권한이 있으면 명단을 직접 받아 확인한다.
+  //  · 권한이 없거나 판정하지 못했다면, 그런데도 평가 목록을 받았다는 사실이
+  //    서버가 평가자로 인정했다는 뜻이다(운영진 경로가 막혔으므로). 권한 조회
+  //    장애로 평가자를 막지 않는다. 평가자가 이 화면의 주 사용자다.
+  //  · 조회가 아직 끝나지 않았으면 단정하지 않는다.
   const evaluatorState: EvaluatorState = useMemo(() => {
     if (!me) return "unknown"
-    if (rosterKnown) {
+    if (hasManagePermission === true) {
+      if (!rosterKnown) return "unknown"
       const myId = String(me.id)
       return roster.some((evaluator) => String(evaluator.memberId) === myId)
         ? "yes"
         : "no"
     }
-    if (rosterDenied) return evaluationsQuery.isSuccess ? "yes" : "no"
+    if (!isPermissionResolved) return "unknown"
+    if (evaluationsQuery.isSuccess) return "yes"
+    if (evaluationsQuery.isError) return "no"
     return "unknown"
-  }, [me, rosterKnown, rosterDenied, roster, evaluationsQuery.isSuccess])
+  }, [
+    me,
+    hasManagePermission,
+    isPermissionResolved,
+    rosterKnown,
+    roster,
+    evaluationsQuery.isSuccess,
+    evaluationsQuery.isError,
+  ])
 
   const eligibility = resolveEvaluationEligibility(
     stage,
@@ -167,9 +176,7 @@ export function useStageEvaluations(
 
   return {
     evaluation,
-    // 명단을 못 받으면 아직 평가하지 않은 운영진을 알 수 없어 총원을 셀 수 없다.
-    rosterKnown,
-    rosterUnavailable,
+    hasManagePermission: hasManagePermission === true,
     canSubmit: eligibility.canSubmit,
     isLoading: evaluationsQuery.isLoading,
     isError: evaluationsQuery.isError,

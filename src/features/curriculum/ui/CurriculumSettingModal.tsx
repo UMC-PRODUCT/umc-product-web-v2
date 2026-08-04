@@ -16,6 +16,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { useState } from "react"
 
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
+import { Button } from "@/shared/ui/Button"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
@@ -105,7 +106,7 @@ interface CurriculumSettingModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   items: CurriculumItem[]
-  onDeleteItem: (id: string) => void
+  onDeleteItem: (id: string) => Promise<boolean> | boolean
   onReorderItems: (fromIndex: number, toIndex: number) => void
   onRestoreItem?: (item: CurriculumItem, index: number) => void
 }
@@ -138,30 +139,32 @@ export function CurriculumSettingModal({
     onReorderItems(fromIndex, toIndex)
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!itemToDelete) return
     const targetItem = itemToDelete
     const targetIndex = items.findIndex((i) => i.id === targetItem.id)
 
-    onDeleteItem(targetItem.id)
     setItemToDelete(null)
 
-    addToast({
-      message: "선택한 커리큘럼이 삭제되었습니다.",
-      color: "red",
-      variant: "deep",
-      type: "default",
-      duration: 5000,
-      action: {
-        label: "되돌리기",
-        onClick: () => {
-          onRestoreItem?.(
-            targetItem,
-            targetIndex >= 0 ? targetIndex : items.length,
-          )
+    const success = await onDeleteItem(targetItem.id)
+    if (success) {
+      addToast({
+        message: "선택한 커리큘럼이 삭제되었습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 5000,
+        action: {
+          label: "되돌리기",
+          onClick: () => {
+            onRestoreItem?.(
+              targetItem,
+              targetIndex >= 0 ? targetIndex : items.length,
+            )
+          },
         },
-      },
-    })
+      })
+    }
   }
 
   return (
@@ -170,9 +173,20 @@ export function CurriculumSettingModal({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content className="shadow-drop-neutral-2 border-teal-gray-100 flex h-180 w-227 flex-col gap-8 overflow-y-auto rounded-[16px] border bg-white px-8 py-7.5 focus:outline-none">
-            <Modal.Title className="text-heading-4-semibold text-teal-gray-900">
-              커리큘럼 설정
-            </Modal.Title>
+            <div className="flex w-full items-center justify-between">
+              <Modal.Title className="text-heading-4-semibold text-teal-gray-900">
+                커리큘럼 설정
+              </Modal.Title>
+
+              <Button
+                size="s"
+                color="primary"
+                variant="fill"
+                onClick={() => onOpenChange(false)}
+              >
+                완료
+              </Button>
+            </div>
 
             {items.length > 0 ? (
               <DndContext

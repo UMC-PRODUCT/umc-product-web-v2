@@ -1,7 +1,5 @@
-// 사용자의 지부 정보 조회 가능 훅입니다. (CHAPTER-102 연결)
-
 import { useQuery } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
@@ -18,6 +16,8 @@ export function useSchoolChapterMap() {
     staleTime: 5 * 60 * 1000,
   })
 
+  const chapters = useMemo(() => chaptersData?.chapters ?? [], [chaptersData])
+
   const schoolToChapterId = useMemo(() => {
     const map = new Map<string, number>()
     for (const chapter of chaptersData?.chapters ?? []) {
@@ -28,8 +28,27 @@ export function useSchoolChapterMap() {
     return map
   }, [chaptersData])
 
+  const chapterNameToId = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const chapter of chaptersData?.chapters ?? []) {
+      map.set(chapter.chapterName, Number(chapter.chapterId))
+    }
+    return map
+  }, [chaptersData])
+
+  const getChapterIdBySchool = useCallback(
+    (schoolName: string) => schoolToChapterId.get(schoolName),
+    [schoolToChapterId],
+  )
+
+  const getChapterIdByName = useCallback(
+    (chapterName: string) => chapterNameToId.get(chapterName),
+    [chapterNameToId],
+  )
+
   return {
-    getChapterIdBySchool: (schoolName: string) =>
-      schoolToChapterId.get(schoolName),
+    chapters,
+    getChapterIdBySchool,
+    getChapterIdByName,
   }
 }
