@@ -31,6 +31,7 @@ import type {
   RecruitingEvaluation,
   RecruitingEvaluationStatistics,
   RecruitingFormStructure,
+  RecruitingIdResponse,
   RecruitingInterviewQuestion,
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
@@ -563,6 +564,25 @@ export async function getRoundEvaluators(
     `/v1/recruiting/admin/rounds/${roundId}/evaluators`,
   )
   return data.result
+}
+
+export async function addRoundEvaluator(
+  roundId: string,
+  memberId: string,
+): Promise<RecruitingIdResponse> {
+  const { data } = await api.post<ApiResponse<RecruitingIdResponse>>(
+    `/v1/recruiting/admin/rounds/${roundId}/evaluators/${memberId}`,
+  )
+  return data.result
+}
+
+export async function removeRoundEvaluator(
+  roundId: string,
+  memberId: string,
+): Promise<void> {
+  await api.delete(
+    `/v1/recruiting/admin/rounds/${roundId}/evaluators/${memberId}`,
+  )
 }
 
 export async function submitEvaluation(

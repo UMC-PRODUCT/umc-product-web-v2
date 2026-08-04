@@ -1,11 +1,17 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
+
+import { api } from "@/shared/lib/axios"
 
 import {
+  addRoundEvaluator,
+  getAdminRounds,
+  getRoundEvaluators,
   mergeRoundGroups,
   normalizeAdminRoundGroups,
   normalizeEvaluationStatistics,
   normalizeRecruitingSeasonConfigurationResponse,
   normalizeStatusSummary,
+  removeRoundEvaluator,
 } from "./recruitingApi"
 
 import type {
@@ -17,6 +23,14 @@ import type {
   RecruitingRound,
   RecruitingRoundGroup,
 } from "./types"
+
+vi.mock("@/shared/lib/axios", () => ({
+  api: {
+    get: vi.fn(),
+    post: vi.fn(),
+    delete: vi.fn(),
+  },
+}))
 
 function round(roundId: string): RecruitingRound {
   return {
@@ -175,6 +189,76 @@ describe("mergeRoundGroups", () => {
 
   it("빈 입력은 빈 결과가 된다", () => {
     expect(mergeRoundGroups([])).toEqual([])
+  })
+})
+
+describe("evaluator API functions", () => {
+  it("getRoundEvaluators는 GET 요청을 보내고 결과 목록을 반환한다", async () => {
+    const mockData = [{ id: "1", roundId: "10", memberId: "100" }]
+    vi.mocked(api.get).mockResolvedValueOnce({
+      data: {
+        isSuccess: true,
+        code: "COMMON200",
+        message: "OK",
+        result: mockData,
+      },
+    })
+
+    const result = await getRoundEvaluators("10")
+
+    expect(api.get).toHaveBeenCalledWith(
+      "/v1/recruiting/admin/rounds/10/evaluators",
+    )
+    expect(result).toEqual(mockData)
+  })
+
+  it("addRoundEvaluator는 POST 요청을 보내고 생성된 ID 응답을 반환한다", async () => {
+    const mockResponse = { id: 1 }
+    vi.mocked(api.post).mockResolvedValueOnce({
+      data: {
+        isSuccess: true,
+        code: "COMMON200",
+        message: "OK",
+        result: mockResponse,
+      },
+    })
+
+    const result = await addRoundEvaluator("10", "100")
+
+    expect(api.post).toHaveBeenCalledWith(
+      "/v1/recruiting/admin/rounds/10/evaluators/100",
+    )
+    expect(result).toEqual(mockResponse)
+  })
+
+  it("getAdminRounds는 GET /v1/recruiting/admin/rounds 요청을 보내고 결과 목록을 반환한다", async () => {
+    const mockGroups = [group("100", [round("1")])]
+    vi.mocked(api.get).mockResolvedValueOnce({
+      data: {
+        isSuccess: true,
+        code: "COMMON200",
+        message: "OK",
+        result: mockGroups,
+      },
+    })
+
+    const result = await getAdminRounds({ gisuId: "5" })
+
+    expect(api.get).toHaveBeenCalledWith("/v1/recruiting/admin/rounds", {
+      params: { gisuId: "5" },
+      paramsSerializer: { indexes: null },
+    })
+    expect(result).toEqual(mockGroups)
+  })
+
+  it("removeRoundEvaluator는 DELETE 요청을 올바른 엔드포인트로 보낸다", async () => {
+    vi.mocked(api.delete).mockResolvedValueOnce({ data: {} })
+
+    await removeRoundEvaluator("10", "100")
+
+    expect(api.delete).toHaveBeenCalledWith(
+      "/v1/recruiting/admin/rounds/10/evaluators/100",
+    )
   })
 })
 
