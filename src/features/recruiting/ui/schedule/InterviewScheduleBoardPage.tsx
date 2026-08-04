@@ -61,6 +61,14 @@ import type {
 
 const LIST_PATH = "/recruiting/evaluations/interview-schedule"
 
+function BoardNotice({ message }: { message: string }) {
+  return (
+    <div className="shadow-drop-neutral-3 border-teal-gray-100 text-body-2-regular text-teal-gray-500 mt-6 flex min-h-60 items-center justify-center rounded-[12px] border bg-white">
+      {message}
+    </div>
+  )
+}
+
 interface InterviewScheduleBoardPageProps {
   roundId: string
 }
@@ -84,10 +92,19 @@ export function InterviewScheduleBoardPage({
   const [step, setStep] = useState<ScheduleStep>("sessions")
   const currentDate = activeDate || dates[0] || ""
 
-  const { sessions: serverSessions, isForbidden } =
-    useInterviewSessions(roundId)
-  const { board } = useInterviewScheduleBoard(roundId, currentDate)
-  const { contactByApplicationId } = useApplicantContacts(roundId)
+  const {
+    sessions: serverSessions,
+    isLoading: isSessionsLoading,
+    isError: isSessionsError,
+    isForbidden,
+  } = useInterviewSessions(roundId)
+  const {
+    board,
+    isLoading: isBoardLoading,
+    isError: isBoardError,
+  } = useInterviewScheduleBoard(roundId, currentDate)
+  const { contactByApplicationId, isLoading: isContactsLoading } =
+    useApplicantContacts(roundId)
 
   const createSession = useCreateInterviewSession()
   const updateSession = useUpdateInterviewSession()
@@ -369,13 +386,23 @@ export function InterviewScheduleBoardPage({
       <ScheduleStepTabs value={step} onValueChange={setStep} />
 
       {step === "sessions" ? (
-        <SessionEditorList
-          sessions={drafts}
-          onChange={setDrafts}
-          onSaveSession={handleSaveSession}
-          onDeleteSession={handleDeleteSession}
-          isSaving={createSession.isPending || updateSession.isPending}
-        />
+        isSessionsLoading ? (
+          <BoardNotice message="면접 정보를 불러오는 중입니다..." />
+        ) : isSessionsError ? (
+          <BoardNotice message="면접 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
+        ) : (
+          <SessionEditorList
+            sessions={drafts}
+            onChange={setDrafts}
+            onSaveSession={handleSaveSession}
+            onDeleteSession={handleDeleteSession}
+            isSaving={createSession.isPending || updateSession.isPending}
+          />
+        )
+      ) : isBoardLoading ? (
+        <BoardNotice message="배정 현황을 불러오는 중입니다..." />
+      ) : isBoardError ? (
+        <BoardNotice message="배정 현황을 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
       ) : (
         <DndContext
           sensors={sensors}
@@ -401,10 +428,14 @@ export function InterviewScheduleBoardPage({
               variant="fill"
               color="primary"
               size="m"
-              disabled={confirmSchedules.isPending}
+              disabled={confirmSchedules.isPending || isContactsLoading}
               onClick={() => void handleConfirm()}
             >
-              {confirmSchedules.isPending ? "확정 중..." : "일정 확정"}
+              {confirmSchedules.isPending
+                ? "확정 중..."
+                : isContactsLoading
+                  ? "연락처 불러오는 중..."
+                  : "일정 확정"}
             </Button>
           </div>
           <DragOverlay>
