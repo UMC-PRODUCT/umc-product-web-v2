@@ -82,9 +82,10 @@ export type RawAdminRoundGroup = Omit<RecruitingRoundGroup, "rounds"> & {
   rounds?: RawAdminRound[]
 }
 
-// interviewRequired=true 자체는 프론트에서 막아둔다 — 지원자가 면접 가능
-// 시간대를 제출하는 백엔드 기능(RECRUITING-0419)이 아직 501 스텁이라, 지금
-// 만들면 스케줄링이 동작하지 않는 반쪽짜리 라운드가 되기 때문이다.
+// interviewRequired=true 는 아직 프론트에서 막아둔다. 지원자가 면접 가능 시간을
+// 제출하는 경로(RECRUITING-SCHEDULE-001)는 구현됐지만, 면접 있는 차수를 만들려면
+// 가능 일정 Form 과 그 안의 일정 문항 ID 를 함께 지정해야 한다. 아래 타입에
+// availabilityScheduleQuestionId 가 없어 지금 열면 차수 생성이 거부된다.
 export type CreateRecruitingRoundInterviewFields =
   | {
       interviewRequired: true
@@ -526,8 +527,10 @@ export interface RecruitingInterviewQuestion {
   active: boolean
 }
 
-// 지원서 저장 요청의 답변 한 건. SCHEDULE 문항의 times 를 받는 필드가 없어
-// 일정 답변은 이 경로로 보낼 수 없다(RECRUITING-SCHEDULE-001 이 미구현).
+// 지원서 저장 요청의 답변 한 건. 일정(SCHEDULE) 답변은 여기로 보내지 않는다.
+// 지원서 저장은 제출 전까지 몇 번이든 고칠 수 있지만 면접 가능 시간은 조건이
+// 달라서(배정 상태, 정해진 기간, 1회 제출) 전용 경로로 갈라져 있다.
+// RECRUITING-SCHEDULE-001 을 호출하면 지원서의 times 도 함께 채워진다.
 export interface RecruitingAnswerRequest {
   questionId: number
   textValue?: string
