@@ -45,7 +45,7 @@ import {
   toAssignmentsFromBoard,
   toEditableSession,
   toInterviewApplicants,
-  toKstTimeLabel,
+  toKstDateKey,
   toSessionRequest,
 } from "../../model/interviewScheduleMapper"
 import { APPLICANT_POOL_ID, ApplicantPoolPanel } from "./ApplicantPoolPanel"
@@ -94,14 +94,15 @@ export function InterviewScheduleBoardPage({
   const deleteSession = useDeleteInterviewSession()
   const confirmSchedules = useConfirmInterviewSchedules()
 
-  // 세션 편집은 이 날짜에 속한 것만 다룬다. 서버 세션은 차수 전체로 오기 때문이다.
+  // 세션 편집은 이 날짜 탭에 속한 것만 다룬다. 서버 세션은 차수 전체로 오는데,
+  // 다른 날짜 세션이 목록에 섞이면 저장하는 순간 toSessionRequest 가 현재 탭
+  // 날짜로 시각을 다시 만들어 세션 날짜를 덮어쓴다.
   const sessionsOfDate = useMemo(
     () =>
       serverSessions.filter(
-        (session) =>
-          toKstTimeLabel(session.startsAt) !== "" && session.startsAt,
+        (session) => toKstDateKey(session.startsAt) === currentDate,
       ),
-    [serverSessions],
+    [serverSessions, currentDate],
   )
 
   const [drafts, setDrafts] = useState<EditableSession[]>([])
@@ -112,12 +113,14 @@ export function InterviewScheduleBoardPage({
   const boardSessions = useMemo(() => board?.sessions ?? [], [board])
 
   // 배정 상태는 서버 응답을 기준으로 두고, 드래그로 만든 변경만 위에 얹는다.
+  // 날짜 탭이 바뀔 때만 되돌린다. board 참조에 걸어 두면 창 포커스 복귀 같은
+  // 백그라운드 재조회가 확정 전 드래그 배정을 지워 버린다.
   const [localAssignments, setLocalAssignments] = useState<
     SlotAssignment[] | null
   >(null)
   useEffect(() => {
     setLocalAssignments(null)
-  }, [board])
+  }, [roundId, currentDate])
 
   const assignments = useMemo(
     () => localAssignments ?? toAssignmentsFromBoard(boardSessions),
@@ -196,6 +199,8 @@ export function InterviewScheduleBoardPage({
     void handleSaveSession({ ...draft, endTime: nextEnd })
   }
 
+  // 실패 안내는 mutation 훅의 onError 토스트가 맡는다. 여기서 거부를 다시 던지면
+  // 처리되지 않은 rejection 만 남는다.
   const handleSaveSession = async (session: EditableSession) => {
     const payload = toSessionRequest(session, currentDate)
     if (!payload) {
@@ -209,12 +214,20 @@ export function InterviewScheduleBoardPage({
       return
     }
 
-    // 새 행은 서버에서 발급한 id 를 받아야 배정 보드에서 슬롯을 붙일 수 있다.
-    if (session.id.startsWith("draft-")) {
-      await createSession.mutateAsync({ roundId, payload })
-      return
+    try {
+      // 새 행은 서버에서 발급한 id 를 받아야 배정 보드에서 슬롯을 붙일 수 있다.
+      if (session.id.startsWith("draft-")) {
+        await createSession.mutateAsync({ roundId, payload })
+        return
+      }
+      await updateSession.mutateAsync({
+        roundId,
+        sessionId: session.id,
+        payload,
+      })
+    } catch {
+      // onError 토스트가 이미 안내했다.
     }
-    await updateSession.mutateAsync({ roundId, sessionId: session.id, payload })
   }
 
   const handleDeleteSession = async (sessionId: string) => {
@@ -222,7 +235,11 @@ export function InterviewScheduleBoardPage({
       setDrafts((prev) => prev.filter((item) => item.id !== sessionId))
       return
     }
-    await deleteSession.mutateAsync({ roundId, sessionId })
+    try {
+      await deleteSession.mutateAsync({ roundId, sessionId })
+    } catch {
+      // onError 토스트가 이미 안내했다.
+    }
   }
 
   const handleConfirm = async () => {
@@ -232,9 +249,22 @@ export function InterviewScheduleBoardPage({
       contactByApplicationId,
     )
 
-    if (payload.length === 0) {
+    if (assignments.length === 0) {
       addToast({
         message: "확정할 배정이 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    // 배정은 있는데 보낼 것이 없다면 전원이 연락처 문제로 빠진 것이다. "배정이
+    // 없다" 고 안내하면 사용자가 원인을 찾을 수 없다.
+    if (payload.length === 0) {
+      addToast({
+        message: `연락처를 찾지 못해 ${skipped.length}명 모두 확정할 수 없습니다.`,
         color: "red",
         variant: "deep",
         type: "default",
@@ -265,10 +295,17 @@ export function InterviewScheduleBoardPage({
       })
     }
 
-    await confirmSchedules.mutateAsync({
-      roundId,
-      payload: { assignments: payload },
-    })
+    try {
+      await confirmSchedules.mutateAsync({
+        roundId,
+        payload: { assignments: payload },
+      })
+      // 확정이 반영된 서버 상태를 그대로 보여준다. 로컬 배정을 남겨 두면 재조회
+      // 결과를 덮는다.
+      setLocalAssignments(null)
+    } catch {
+      // onError 토스트가 이미 안내했다.
+    }
   }
 
   if (!round) {
