@@ -55,14 +55,42 @@ export function toKstTimeLabel(instant: string): string {
 
 // 날짜 탭과 "HH:mm" 을 합쳐 서버가 받는 Instant 로 만든다. 형식이 어긋나면
 // null 을 돌려주고 호출부가 저장을 막는다.
+//
+// 형식 검사만으로는 부족하다. 2월 31일이나 25시처럼 모양만 맞는 값을 dayjs 가
+// 다음 달·다음 날로 올려 버려, 잘못된 입력이 엉뚱한 시각으로 저장된다. 각 자리의
+// 범위와 달력 유효성까지 확인한다.
 export function toInstant(dateKey: string, time: string): string | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return null
-  if (!/^\d{2}:\d{2}$/.test(time)) return null
+  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateKey)
+  const timeMatch = /^(\d{2}):(\d{2})$/.exec(time)
+  if (!dateMatch || !timeMatch) return null
+
+  const [, year, month, day] = dateMatch.map(Number)
+  const [, hour, minute] = timeMatch.map(Number)
+  if (
+    year == null ||
+    month == null ||
+    day == null ||
+    hour == null ||
+    minute == null
+  )
+    return null
+  if (hour > 23 || minute > 59) return null
 
   const parsed = dayjs
     .utc(`${dateKey}T${time}:00`)
     .subtract(KST_OFFSET_MINUTES, "minute")
-  return parsed.isValid() ? parsed.toISOString() : null
+  if (!parsed.isValid()) return null
+
+  // dayjs 가 넘친 값을 정규화해 버렸다면 되읽은 날짜가 입력과 다르다.
+  const echoed = parsed.add(KST_OFFSET_MINUTES, "minute")
+  if (
+    echoed.year() !== year ||
+    echoed.month() + 1 !== month ||
+    echoed.date() !== day
+  )
+    return null
+
+  return parsed.toISOString()
 }
 
 // 화면 편집용 세션. 저장 전 행은 draft- 로 시작하는 임시 id 를 갖고, 저장하면

@@ -44,6 +44,20 @@ describe("KST 변환", () => {
     expect(toInstant("2026-08-04", "10시")).toBeNull()
     expect(toInstant("", "")).toBeNull()
   })
+
+  // 모양만 맞는 값을 dayjs 가 다음 달·다음 날로 올려 버리면 잘못된 입력이
+  // 엉뚱한 시각으로 저장된다.
+  it("달력에 없는 날짜와 범위 밖 시각은 만들지 않는다", () => {
+    expect(toInstant("2026-02-31", "10:00")).toBeNull()
+    expect(toInstant("2026-13-01", "10:00")).toBeNull()
+    expect(toInstant("2026-08-04", "25:00")).toBeNull()
+    expect(toInstant("2026-08-04", "10:99")).toBeNull()
+  })
+
+  it("윤년 2월 29일은 허용한다", () => {
+    expect(toInstant("2028-02-29", "10:00")).toBe("2028-02-29T01:00:00.000Z")
+    expect(toInstant("2026-02-29", "10:00")).toBeNull()
+  })
 })
 
 describe("isValidSlotDuration", () => {
