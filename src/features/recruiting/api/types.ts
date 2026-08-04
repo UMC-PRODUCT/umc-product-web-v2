@@ -36,9 +36,13 @@ export interface UpdateRecruitingRoundStatusRequest {
   status: RecruitingRoundStatus
 }
 
-// getPublicRounds(/public/rounds)와 getAdminRounds(/admin/rounds)가 같은 타입을
-// 공유하지만 실제 응답 스키마는 서로 달라 status/applicationOpen이 상호 배타적이다:
-// admin 응답에만 status(DRAFT/OPEN/CLOSED)가 있고, public 응답에만 applicationOpen이 있다.
+// getPublicRounds(/public/rounds)와 getAdminRounds(/admin/rounds)가 이 타입을 함께 쓰지만
+// 서버 응답 스키마는 서로 다르다. 차수 식별자부터 이름이 갈려서, admin 은 id 로 public 은
+// roundId 로 내려준다. getAdminRounds 가 normalizeAdminRoundGroups 로 roundId 에 맞춰
+// 넣어 주므로 이 타입을 쓰는 쪽은 그 차이를 몰라도 된다.
+//
+// 생성된 OpenAPI 문서만 보면 이 차이를 알 수 없다. 두 응답의 중첩 레코드 이름이 모두
+// RoundResponse 라 문서에서 하나로 합쳐지고, 공개 쪽 정의만 남는다.
 export interface RecruitingRound {
   roundId: string
   title: string
@@ -54,14 +58,28 @@ export interface RecruitingRound {
   interviewEndAt: string | null
   finalResultPublishedAt: string | null
   announcement: string | null
-  applicationFormId: string | null
-  formId: string | null
   // admin 전용
   status?: RecruitingRoundStatus
   availabilityFormId?: string | null
   contactText?: string | null
   // public 전용
+  applicationFormId?: string | null
+  formId?: string | null
   applicationOpen?: boolean
+}
+
+// admin 응답의 차수. 식별자가 id 로 오고, 공개 응답에만 있는 필드는 빠져 있다.
+// 공개 전용 필드를 빼 두어야 관리자 응답에서 그 값을 읽는 코드가 타입 검사에서 걸린다.
+export type RawAdminRound = Omit<
+  RecruitingRound,
+  "roundId" | "applicationFormId" | "formId" | "applicationOpen"
+> & {
+  id: RawId
+  roundId?: RawId
+}
+
+export type RawAdminRoundGroup = Omit<RecruitingRoundGroup, "rounds"> & {
+  rounds?: RawAdminRound[]
 }
 
 // interviewRequired=true 자체는 프론트에서 막아둔다 — 지원자가 면접 가능
@@ -117,6 +135,46 @@ export interface CloneRecruitingRoundRequest {
   title: string
   type: RecruitingRoundType
   roundNo?: number
+}
+
+// 모집 시즌의 쿼터(학교별 모집 TO)와 차수 설정 조회 응답 (RECRUITING-ADMIN-001).
+export interface RecruitingSeasonTrackQuota {
+  track: RecruitingTrack
+  targetCount: number
+}
+
+export interface RecruitingSeasonConfigurationResponse {
+  id: string
+  gisuId: string
+  schoolId: string
+  memo: string | null
+  quotas: RecruitingSeasonTrackQuota[]
+  rounds: RecruitingRound[]
+}
+
+export type RawRecruitingSeasonConfigurationResponse = Omit<
+  RecruitingSeasonConfigurationResponse,
+  "id" | "gisuId" | "schoolId" | "memo" | "quotas" | "rounds"
+> & {
+  id?: RawId
+  gisuId?: RawId
+  schoolId?: RawId
+  memo?: string | null
+  quotas?: {
+    track?: RecruitingTrack
+    targetCount?: RawCount
+  }[]
+  rounds?: RecruitingRound[]
+}
+
+// 모집 시즌 트랙별 모집 인원(학교별 모집 TO) 전체 교체/수정 요청 (RECRUITING-ADMIN-004).
+export interface RecruitingSeasonTrackQuotaRequest {
+  track: RecruitingTrack
+  targetCount: number
+}
+
+export interface ReplaceRecruitingSeasonTrackQuotasRequest {
+  quotas: RecruitingSeasonTrackQuotaRequest[]
 }
 
 export interface RecruitingRoundGroup {
@@ -497,6 +555,10 @@ export interface RecruitingRoundEvaluator {
   id: string
   roundId: string
   memberId: string
+}
+
+export interface RecruitingIdResponse {
+  id?: number
 }
 
 export interface RecruitingInterviewQuestion {

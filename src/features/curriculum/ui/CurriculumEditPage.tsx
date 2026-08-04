@@ -24,7 +24,9 @@ export function CurriculumEditPage({
     closestCenter,
     handleCreateCurriculum,
     handleUpdateCurriculumTitle,
+    handleBlurCurriculumTitle,
     handleUpdateWorkbookTitle,
+    handleBlurWorkbookTitle,
     handleUpdateMission,
     handleAddMission,
     handleRemoveMission,
@@ -85,8 +87,14 @@ export function CurriculumEditPage({
                   onUpdateCurriculumTitle={(title) =>
                     handleUpdateCurriculumTitle(item.id, title)
                   }
+                  onBlurCurriculumTitle={(title) =>
+                    handleBlurCurriculumTitle(item.id, title)
+                  }
                   onUpdateWorkbookTitle={(wbIndex, title) =>
                     handleUpdateWorkbookTitle(item.id, wbIndex, title)
+                  }
+                  onBlurWorkbookTitle={(wbIndex, title) =>
+                    handleBlurWorkbookTitle(item.id, wbIndex, title)
                   }
                   onUpdateMission={(wbIndex, missionIndex, value) =>
                     handleUpdateMission(item.id, wbIndex, missionIndex, value)

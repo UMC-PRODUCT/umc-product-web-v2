@@ -72,6 +72,9 @@ export const recruitingKeys = {
   evaluatorProfiles: (memberIds: string[]) =>
     [...recruitingKeys.all, "evaluator-profiles", memberIds] as const,
 
+  schoolStaff: (schoolId: string, gisuId?: string) =>
+    [...recruitingKeys.all, "school-staff", schoolId, gisuId ?? ""] as const,
+
   interviewQuestions: () =>
     [...recruitingKeys.all, "interview-questions"] as const,
 
@@ -90,4 +93,9 @@ export const recruitingKeys = {
 
   anonymousApplication: (sessionId: string) =>
     [...recruitingKeys.all, "anonymous", sessionId] as const,
+
+  seasons: () => [...recruitingKeys.all, "seasons"] as const,
+
+  seasonConfiguration: (seasonId: string) =>
+    [...recruitingKeys.seasons(), seasonId] as const,
 }

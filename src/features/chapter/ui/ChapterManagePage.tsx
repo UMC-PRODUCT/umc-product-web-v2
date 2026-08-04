@@ -4,10 +4,17 @@ import {
   DragOverlay,
   type DragStartEvent,
 } from "@dnd-kit/core"
+import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
+import {
+  useCreateChapter,
+  useCreateChaptersBulk,
+  useDeleteChapter,
+} from "@/entities/organization/hooks/useChapter"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -33,6 +40,7 @@ import { SchoolChip } from "./SchoolChip"
 import { SchoolListPanel } from "./SchoolListPanel"
 
 export function ChapterManagePage() {
+  const queryClient = useQueryClient()
   const addToast = useToastStore((state) => state.addToast)
   const [unassignedSchools, setUnassignedSchools] = useState<School[]>(
     INITIAL_UNASSIGNED_SCHOOLS,
@@ -41,6 +49,11 @@ export function ChapterManagePage() {
   const [activeSchoolVariant, setActiveSchoolVariant] = useState<
     "waiting" | "assigned"
   >("waiting")
+
+  const deleteChapterMutation = useDeleteChapter()
+  const createChapterMutation = useCreateChapter()
+  const createChaptersBulkMutation = useCreateChaptersBulk()
+  const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
 
   const assignedSchools = chapters.flatMap((ch) => ch.assignedSchools)
 
@@ -114,7 +127,7 @@ export function ChapterManagePage() {
     setSelectedChipId(null)
   }
 
-  function handleDeleteChapter(chapterId: string) {
+  async function handleDeleteChapter(chapterId: string) {
     const chapterToDelete = chapters.find((ch) => ch.id === chapterId)
     if (!chapterToDelete) return
     const targetIndex = chapters.indexOf(chapterToDelete)
@@ -126,6 +139,39 @@ export function ChapterManagePage() {
     setChapters((prev) => prev.filter((ch) => ch.id !== chapterId))
     setSelectedChipId(null)
 
+    const isExistingChapter = !chapterId.startsWith("chapter-")
+    if (isExistingChapter) {
+      try {
+        await deleteChapterMutation.mutateAsync(chapterId)
+      } catch {
+        setChapters((prev) => {
+          if (prev.some((ch) => ch.id === chapterToDelete.id)) return prev
+          const next = [...prev]
+          const insertIndex = Math.min(targetIndex, next.length)
+          next.splice(insertIndex, 0, chapterToDelete)
+          return next
+        })
+
+        if (chapterToDelete.assignedSchools.length > 0) {
+          const restoredSchoolIds = new Set(
+            chapterToDelete.assignedSchools.map((s) => s.id),
+          )
+          setUnassignedSchools((prev) =>
+            prev.filter((s) => !restoredSchoolIds.has(s.id)),
+          )
+        }
+
+        addToast({
+          message: "지부 삭제에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+        return
+      }
+    }
+
     addToast({
       message: "지부가 삭제되었습니다.",
       color: "red",
@@ -134,7 +180,7 @@ export function ChapterManagePage() {
       duration: 5000,
       action: {
         label: "되돌리기",
-        onClick: () => {
+        onClick: async () => {
           setChapters((prev) => {
             if (prev.some((ch) => ch.id === chapterToDelete.id)) return prev
             const next = [...prev]
@@ -150,6 +196,55 @@ export function ChapterManagePage() {
             setUnassignedSchools((prev) =>
               prev.filter((s) => !restoredSchoolIds.has(s.id)),
             )
+          }
+
+          if (isExistingChapter) {
+            if (isGisuLoading || activeGisuId == null) {
+              addToast({
+                message:
+                  "기수 정보를 불러오는 중이거나 선택된 기수가 없습니다.",
+                color: "red",
+                variant: "deep",
+                type: "default",
+                duration: 3000,
+              })
+              return
+            }
+
+            try {
+              const createdId = await createChapterMutation.mutateAsync({
+                gisuId: activeGisuId,
+                name: chapterToDelete.name,
+                schoolIds: chapterToDelete.assignedSchools
+                  .map((s) => Number(s.id))
+                  .filter((id) => !Number.isNaN(id)),
+              })
+              if (createdId != null) {
+                setChapters((prev) =>
+                  prev.map((ch) =>
+                    ch.id === chapterToDelete.id
+                      ? { ...ch, id: String(createdId) }
+                      : ch,
+                  ),
+                )
+              }
+            } catch {
+              setChapters((prev) =>
+                prev.filter((ch) => ch.id !== chapterToDelete.id),
+              )
+              if (chapterToDelete.assignedSchools.length > 0) {
+                setUnassignedSchools((prev) =>
+                  withSchoolsAppended(prev, chapterToDelete.assignedSchools),
+                )
+              }
+              addToast({
+                message: "지부 복원에 실패했습니다.",
+                color: "red",
+                variant: "deep",
+                type: "default",
+                duration: 3000,
+              })
+            }
           }
         },
       },
@@ -181,6 +276,79 @@ export function ChapterManagePage() {
       prev.map((ch) => (ch.id === id ? { ...ch, name: name.trim() } : ch)),
     )
     return true
+  }
+
+  async function handleSave() {
+    const newChapters = chapters.filter((ch) => ch.id.startsWith("chapter-"))
+    if (newChapters.length === 0) return
+
+    if (isGisuLoading || activeGisuId == null) {
+      addToast({
+        message: "기수 정보를 불러오는 중이거나 선택된 기수가 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
+    const bulkPayload = newChapters.map((ch) => ({
+      gisuId: activeGisuId,
+      name: ch.name,
+      schoolIds: ch.assignedSchools
+        .map((s) => Number(s.id))
+        .filter((id) => !Number.isNaN(id)),
+    }))
+
+    try {
+      const createdIds =
+        await createChaptersBulkMutation.mutateAsync(bulkPayload)
+      if (
+        Array.isArray(createdIds) &&
+        createdIds.length === newChapters.length
+      ) {
+        const idMap = new Map<string, string>()
+        newChapters.forEach((ch, idx) => {
+          if (createdIds[idx] != null) {
+            idMap.set(ch.id, String(createdIds[idx]))
+          }
+        })
+        setChapters((prev) =>
+          prev.map((ch) => {
+            const serverId = idMap.get(ch.id)
+            return serverId ? { ...ch, id: serverId } : ch
+          }),
+        )
+        addToast({
+          message: "지부 정보가 저장되었습니다.",
+          color: "primary",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["chapters"] })
+        queryClient.invalidateQueries({ queryKey: ["chaptersWithSchools"] })
+        addToast({
+          message: "지부 정보 저장에 실패했습니다.",
+          color: "red",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      }
+    } catch {
+      queryClient.invalidateQueries({ queryKey: ["chapters"] })
+      queryClient.invalidateQueries({ queryKey: ["chaptersWithSchools"] })
+      addToast({
+        message: "지부 정보 저장에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    }
   }
 
   return (
@@ -239,6 +407,7 @@ export function ChapterManagePage() {
               color="primary"
               variant="fill"
               className="w-fit rounded-[8px] px-3 py-1.5"
+              onClick={handleSave}
             >
               저장하기
             </Button>

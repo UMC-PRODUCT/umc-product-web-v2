@@ -60,6 +60,67 @@ function summary(
 }
 
 describe("toApplicationSections", () => {
+  // 문항 타입은 답변을 받은 뒤에도 바뀔 수 있다. 서버가 답변 시점의 타입을 함께
+  // 주므로 그것을 우선해야, 타입이 바뀐 뒤에도 예전 답변이 화면에 남는다.
+  it("답변에 실린 타입을 문항의 현재 타입보다 우선한다", () => {
+    const sections = toApplicationSections(
+      structure([
+        {
+          sectionId: "1",
+          title: "기본 문항",
+          description: null,
+          orderNo: 1,
+          questions: [
+            question({ questionId: "10", type: "CHECKBOX", orderNo: 1 }),
+          ],
+        },
+      ]),
+      [
+        {
+          questionId: "10",
+          type: "LONG_TEXT",
+          textValue: "서술형으로 적었던 답변",
+          selectedOptionIds: [],
+          fileIds: [],
+          times: [],
+        },
+      ],
+      CHOICES,
+    )
+
+    const answered = sections[0]?.questions[0]
+    expect(answered?.type).toBe("longText")
+    expect(answered?.textValue).toBe("서술형으로 적었던 답변")
+  })
+
+  it("답변에 타입이 없으면 문항의 타입을 쓴다", () => {
+    const sections = toApplicationSections(
+      structure([
+        {
+          sectionId: "1",
+          title: "기본 문항",
+          description: null,
+          orderNo: 1,
+          questions: [
+            question({ questionId: "10", type: "LONG_TEXT", orderNo: 1 }),
+          ],
+        },
+      ]),
+      [
+        {
+          questionId: "10",
+          textValue: "답변",
+          selectedOptionIds: [],
+          fileIds: [],
+          times: [],
+        },
+      ],
+      CHOICES,
+    )
+
+    expect(sections[0]?.questions[0]?.type).toBe("longText")
+  })
+
   it("questionId 로 답변을 문항에 붙인다", () => {
     const sections = toApplicationSections(
       structure([

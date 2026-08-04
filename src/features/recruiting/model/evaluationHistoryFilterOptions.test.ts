@@ -13,6 +13,21 @@ import type {
   EvaluationHistoryFilters,
 } from "./evaluationHistory"
 
+// 서버는 지부·학교를 숫자 ID 로 받는데 필터 바는 이름으로 다룬다. 픽스처의 ID 에
+// 이름을 넣어 두면 이름을 그대로 보내도 테스트가 통과해 버리므로, 이름마다 숫자 ID 를
+// 만들어 붙인다. 이름 목록을 따로 관리하면 빠뜨린 이름만 다른 모양의 ID 를 받아
+// 검증이 헐거워진다.
+const idsByName = new Map<string, string>()
+
+function fixtureId(name: string): string {
+  const assigned = idsByName.get(name)
+  if (assigned) return assigned
+
+  const id = String(100 + idsByName.size)
+  idsByName.set(name, id)
+  return id
+}
+
 function row(
   chapter: string,
   school: string,
@@ -22,8 +37,8 @@ function row(
     id: `${chapter}-${school}-${name}`,
     processedAt: "2026-07-30T10:00:00Z",
     applicant: {
-      chapterId: chapter,
-      schoolId: school,
+      chapterId: fixtureId(chapter),
+      schoolId: fixtureId(school),
       chapter,
       school,
       name,
@@ -163,7 +178,8 @@ describe("toDecisionHistoriesQuery", () => {
     ).toBeUndefined()
   })
 
-  it("지부 다중 선택을 chapterIds 배열로 옮긴다", () => {
+  // 서버는 숫자 ID 를 받는다. 이름을 그대로 보내면 필터가 통째로 무시된다.
+  it("지부 다중 선택을 이름이 아니라 chapterIds 로 옮긴다", () => {
     const query = toDecisionHistoriesQuery(
       filters({ chapters: ["Neon", "Chromium"] }),
       "latest",
@@ -171,10 +187,11 @@ describe("toDecisionHistoriesQuery", () => {
       rows,
     )
 
-    expect(query.chapterIds).toEqual(["Neon", "Chromium"])
+    expect(query.chapterIds).toEqual([fixtureId("Neon"), fixtureId("Chromium")])
+    expect(query.chapterIds).not.toContain("Neon")
   })
 
-  it("학교 다중 선택을 schoolIds 배열로 옮긴다", () => {
+  it("학교 다중 선택을 이름이 아니라 schoolIds 로 옮긴다", () => {
     const query = toDecisionHistoriesQuery(
       filters({ schools: ["광운대학교", "동국대학교"] }),
       "latest",
@@ -182,7 +199,11 @@ describe("toDecisionHistoriesQuery", () => {
       rows,
     )
 
-    expect(query.schoolIds).toEqual(["광운대학교", "동국대학교"])
+    expect(query.schoolIds).toEqual([
+      fixtureId("광운대학교"),
+      fixtureId("동국대학교"),
+    ])
+    expect(query.schoolIds).not.toContain("광운대학교")
   })
 
   it("지부 탭으로 좁혀졌으면 그 지부를 쓴다", () => {
@@ -193,7 +214,7 @@ describe("toDecisionHistoriesQuery", () => {
       rows,
     )
 
-    expect(query.chapterIds).toEqual(["Ferrum"])
+    expect(query.chapterIds).toEqual([fixtureId("Ferrum")])
   })
 
   it("아무것도 안 고르면 보내지 않는다", () => {
@@ -212,7 +233,7 @@ describe("toDecisionHistoriesQuery", () => {
       rows,
     )
 
-    expect(query.chapterIds).toEqual(["Neon"])
+    expect(query.chapterIds).toEqual([fixtureId("Neon")])
   })
 
   it("정렬과 담당자별 그룹을 옮긴다", () => {

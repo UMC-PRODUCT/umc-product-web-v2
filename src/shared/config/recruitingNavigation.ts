@@ -64,6 +64,11 @@ export const RECRUITING_SIDEBAR_ITEMS: RecruitingSideBarSection[] = [
         to: "/recruiting/evaluations/document",
       },
       {
+        id: "recruiting-evaluations-interview-schedule",
+        title: "면접 스케줄링",
+        to: "/recruiting/evaluations/interview-schedule",
+      },
+      {
         id: "recruiting-evaluations-interview",
         title: "면접 전형",
         to: "/recruiting/evaluations/interview",
