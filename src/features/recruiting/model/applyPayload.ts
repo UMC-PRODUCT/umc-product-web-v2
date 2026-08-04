@@ -100,8 +100,9 @@ function toAnswer(
       if (!value.fileId) return []
       return [{ ...base, fileIds: [value.fileId] }]
     }
-    // 일정 답변을 담을 필드가 저장 요청에 없다. 서버가 times 를 받게 되면
-    // 여기만 열면 된다.
+    // 일정 답변은 지원서 저장으로 보내지 않는다. 면접 가능 시간은 서류 합격 뒤
+    // 정해진 기간에 한 번만 받는 값이라 전용 경로로 갈라져 있고, 그 경로가
+    // 지원서의 times 까지 채운다.
     case "schedule":
       return []
   }

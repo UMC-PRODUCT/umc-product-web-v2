@@ -9,6 +9,8 @@ import {
   mergeRoundGroups,
   normalizeAdminRoundGroups,
   normalizeEvaluationStatistics,
+  normalizeInterviewScheduleBoard,
+  normalizeInterviewSessions,
   normalizeRecruitingSeasonConfigurationResponse,
   normalizeStatusSummary,
   removeRoundEvaluator,
@@ -465,5 +467,118 @@ describe("normalizeRecruitingSeasonConfigurationResponse", () => {
     })
 
     expect(result.quotas).toEqual([{ track: "DESIGN", targetCount: 3 }])
+  })
+})
+
+describe("normalizeInterviewSessions", () => {
+  it("숫자 ID 와 문자열 건수를 정규화한다", () => {
+    const [session] = normalizeInterviewSessions([
+      {
+        id: 10,
+        roundId: 3,
+        name: "면접 A",
+        startsAt: "2026-08-04T06:00:00Z",
+        endsAt: "2026-08-04T09:00:00Z",
+        slotDurationMinutes: "30",
+        mode: "ONLINE",
+        location: "링크",
+      },
+    ])
+
+    expect(session?.id).toBe("10")
+    expect(session?.roundId).toBe("3")
+    expect(session?.slotDurationMinutes).toBe(30)
+  })
+
+  it("빈 응답은 빈 배열이 된다", () => {
+    expect(
+      normalizeInterviewSessions(
+        undefined as unknown as Parameters<
+          typeof normalizeInterviewSessions
+        >[0],
+      ),
+    ).toEqual([])
+  })
+})
+
+describe("normalizeInterviewScheduleBoard", () => {
+  it("중첩 구조의 ID 를 전부 문자열로 고정한다", () => {
+    const board = normalizeInterviewScheduleBoard({
+      roundId: 3,
+      date: "2026-08-04",
+      sessions: [
+        {
+          sessionId: 10,
+          name: "면접 A",
+          startsAt: "2026-08-04T06:00:00Z",
+          endsAt: "2026-08-04T07:00:00Z",
+          mode: "ONLINE",
+          location: "링크",
+          slots: [
+            {
+              startsAt: "2026-08-04T06:00:00Z",
+              endsAt: "2026-08-04T06:30:00Z",
+              availableApplicationIds: [40, "41"],
+              assignedApplicant: { applicationId: 40, applicantName: "이예원" },
+            },
+          ],
+        },
+      ],
+      pendingApplicants: [{ applicationId: 41, applicantName: "황지원" }],
+      confirmedApplicants: [{ applicationId: 40, applicantName: "이예원" }],
+    })
+
+    expect(board.roundId).toBe("3")
+    expect(board.sessions[0]?.sessionId).toBe("10")
+    expect(board.sessions[0]?.slots[0]?.availableApplicationIds).toEqual([
+      "40",
+      "41",
+    ])
+    expect(board.sessions[0]?.slots[0]?.assignedApplicant).toEqual({
+      applicationId: "40",
+      applicantName: "이예원",
+    })
+    expect(board.pendingApplicants[0]?.applicationId).toBe("41")
+  })
+
+  it("빠진 배열과 빈 배정을 기본값으로 채운다", () => {
+    const board = normalizeInterviewScheduleBoard({
+      roundId: 3,
+      date: "2026-08-04",
+      sessions: [
+        {
+          sessionId: 10,
+          name: "면접 A",
+          startsAt: "2026-08-04T06:00:00Z",
+          endsAt: "2026-08-04T07:00:00Z",
+          mode: "OFFLINE",
+          location: "107호",
+          slots: [
+            {
+              startsAt: "2026-08-04T06:00:00Z",
+              endsAt: "2026-08-04T06:30:00Z",
+            },
+          ],
+        },
+      ],
+    })
+
+    expect(board.sessions[0]?.slots[0]?.availableApplicationIds).toEqual([])
+    expect(board.sessions[0]?.slots[0]?.assignedApplicant).toBeNull()
+    expect(board.pendingApplicants).toEqual([])
+    expect(board.confirmedApplicants).toEqual([])
+  })
+
+  it("지원자 이름이 빠져도 빈 문자열로 채운다", () => {
+    const board = normalizeInterviewScheduleBoard({
+      roundId: 3,
+      date: "2026-08-04",
+      pendingApplicants: [{ applicationId: 41 }],
+    })
+
+    expect(board.pendingApplicants[0]).toEqual({
+      applicationId: "41",
+      applicantName: "",
+    })
   })
 })

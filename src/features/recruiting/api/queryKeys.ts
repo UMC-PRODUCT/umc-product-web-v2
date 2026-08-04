@@ -91,6 +91,21 @@ export const recruitingKeys = {
   decisionHistories: (gisuId: string) =>
     [...recruitingKeys.all, "decision-histories", gisuId] as const,
 
+  interviewSchedule: () =>
+    [...recruitingKeys.all, "interview-schedule"] as const,
+
+  // 면접 스케줄링 접두사 밖에 둔다. 세션·확정 변경이 접두사를 통째로 무효화해도
+  // 연락처는 다시 받지 않기 위해서다.
+  applicantContacts: (roundId: string) =>
+    [...recruitingKeys.all, "applicant-contacts", roundId] as const,
+
+  interviewSessions: (roundId: string) =>
+    [...recruitingKeys.interviewSchedule(), "sessions", roundId] as const,
+
+  // 보드는 KST 날짜 단위로 내려온다. 날짜를 키에 넣어야 탭을 옮길 때마다 다시 받는다.
+  interviewScheduleBoard: (roundId: string, date: string) =>
+    [...recruitingKeys.interviewSchedule(), "board", roundId, date] as const,
+
   anonymousApplication: (sessionId: string) =>
     [...recruitingKeys.all, "anonymous", sessionId] as const,
 

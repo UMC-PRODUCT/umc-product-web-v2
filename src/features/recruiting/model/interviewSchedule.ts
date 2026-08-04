@@ -9,11 +9,6 @@ export interface InterviewSession {
   place: string
 }
 
-export interface InterviewTimeSlot {
-  start: string
-  end: string
-}
-
 export interface InterviewApplicant {
   id: string
   name: string
@@ -41,8 +36,6 @@ export function isInterviewApplicant(
   )
 }
 
-export const SLOT_STEP_MINUTES = 30
-
 export function toMinutes(time: string): number | null {
   const matched = /^(\d{1,2}):(\d{2})$/.exec(time.trim())
   if (!matched) return null
@@ -50,47 +43,6 @@ export function toMinutes(time: string): number | null {
   const minutes = Number(matched[2])
   if (hours > 23 || minutes > 59) return null
   return hours * 60 + minutes
-}
-
-// 하루의 마지막 시각. 이 값을 넘기면 toMinutes 가 되읽지 못해 슬롯 계산이
-// 통째로 무너진다.
-export const MAX_MINUTES_OF_DAY = 23 * 60 + 59
-
-export function toTimeLabel(minutes: number): string {
-  const clamped = Math.min(Math.max(minutes, 0), MAX_MINUTES_OF_DAY)
-  const hours = Math.floor(clamped / 60)
-  const rest = clamped % 60
-  return `${String(hours).padStart(2, "0")}:${String(rest).padStart(2, "0")}`
-}
-
-// 슬롯을 하나 더 붙일 수 있는지. 마지막 슬롯이 자정을 넘기면 안 된다.
-export function canExtendEndTime(
-  endTime: string,
-  stepMinutes: number = SLOT_STEP_MINUTES,
-): boolean {
-  const end = toMinutes(endTime)
-  return end != null && end + stepMinutes <= MAX_MINUTES_OF_DAY
-}
-
-// 시안의 슬롯은 항상 30분 단위다. 끝시각에 걸쳐 30분을 채우지 못하는 구간은
-// 면접을 배정할 수 없으므로 만들지 않는다.
-export function buildTimeSlots(
-  startTime: string,
-  endTime: string,
-  stepMinutes: number = SLOT_STEP_MINUTES,
-): InterviewTimeSlot[] {
-  const start = toMinutes(startTime)
-  const end = toMinutes(endTime)
-  if (start == null || end == null || stepMinutes <= 0) return []
-
-  const slots: InterviewTimeSlot[] = []
-  for (let cursor = start; cursor + stepMinutes <= end; cursor += stepMinutes) {
-    slots.push({
-      start: toTimeLabel(cursor),
-      end: toTimeLabel(cursor + stepMinutes),
-    })
-  }
-  return slots
 }
 
 function toDateKey(date: Date): string {
@@ -204,27 +156,4 @@ export function calcAllocationRate(
 ): number {
   if (totalCount <= 0) return 0
   return Math.round((assignedCount / totalCount) * 100)
-}
-
-export function createEmptySession(index: number): InterviewSession {
-  return {
-    id: `session-${index}`,
-    name: "",
-    startTime: "",
-    endTime: "",
-    mode: "online",
-    place: "",
-  }
-}
-
-export function isSessionComplete(session: InterviewSession): boolean {
-  const start = toMinutes(session.startTime)
-  const end = toMinutes(session.endTime)
-  return (
-    session.name.trim().length > 0 &&
-    start != null &&
-    end != null &&
-    start < end &&
-    session.place.trim().length > 0
-  )
 }

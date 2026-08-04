@@ -82,9 +82,10 @@ export type RawAdminRoundGroup = Omit<RecruitingRoundGroup, "rounds"> & {
   rounds?: RawAdminRound[]
 }
 
-// interviewRequired=true 자체는 프론트에서 막아둔다 — 지원자가 면접 가능
-// 시간대를 제출하는 백엔드 기능(RECRUITING-0419)이 아직 501 스텁이라, 지금
-// 만들면 스케줄링이 동작하지 않는 반쪽짜리 라운드가 되기 때문이다.
+// interviewRequired=true 는 아직 프론트에서 막아둔다. 지원자가 면접 가능 시간을
+// 제출하는 경로(RECRUITING-SCHEDULE-001)는 구현됐지만, 면접 있는 차수를 만들려면
+// 가능 일정 Form 과 그 안의 일정 문항 ID 를 함께 지정해야 한다. 아래 타입에
+// availabilityScheduleQuestionId 가 없어 지금 열면 차수 생성이 거부된다.
 export type CreateRecruitingRoundInterviewFields =
   | {
       interviewRequired: true
@@ -570,8 +571,10 @@ export interface RecruitingInterviewQuestion {
   active: boolean
 }
 
-// 지원서 저장 요청의 답변 한 건. SCHEDULE 문항의 times 를 받는 필드가 없어
-// 일정 답변은 이 경로로 보낼 수 없다(RECRUITING-SCHEDULE-001 이 미구현).
+// 지원서 저장 요청의 답변 한 건. 일정(SCHEDULE) 답변은 여기로 보내지 않는다.
+// 지원서 저장은 제출 전까지 몇 번이든 고칠 수 있지만 면접 가능 시간은 조건이
+// 달라서(배정 상태, 정해진 기간, 1회 제출) 전용 경로로 갈라져 있다.
+// RECRUITING-SCHEDULE-001 을 호출하면 지원서의 times 도 함께 채워진다.
 export interface RecruitingAnswerRequest {
   questionId: number
   textValue?: string
@@ -780,4 +783,112 @@ export interface RawDecisionHistoryPage {
     hasNext?: boolean
     hasPrevious?: boolean
   }
+}
+
+// 면접 스케줄링 (RECRUITING-ADMIN-053~058).
+// 서버는 시각을 ISO Instant 로, 화면은 날짜 탭과 "HH:mm" 으로 다룬다. 변환은
+// model/interviewScheduleMapper 에 모아 둔다.
+export type RecruitingInterviewMode = "ONLINE" | "OFFLINE"
+
+export interface RecruitingInterviewSession {
+  id: string
+  roundId: string
+  name: string
+  startsAt: string
+  endsAt: string
+  // 서버가 15 의 양의 배수만 받는다. 보드 슬롯 길이도 이 값으로 정해진다.
+  slotDurationMinutes: number
+  mode: RecruitingInterviewMode
+  location: string
+}
+
+export type RawInterviewSession = Omit<
+  RecruitingInterviewSession,
+  "id" | "roundId" | "slotDurationMinutes"
+> & {
+  id: RawId
+  roundId: RawId
+  slotDurationMinutes: RawCount
+}
+
+export interface RecruitingInterviewSessionRequest {
+  name: string
+  startsAt: string
+  endsAt: string
+  slotDurationMinutes: number
+  mode: RecruitingInterviewMode
+  location: string
+}
+
+export interface RecruitingBoardApplicant {
+  applicationId: string
+  applicantName: string
+}
+
+export type RawBoardApplicant = {
+  applicationId: RawId
+  applicantName?: string | null
+}
+
+export interface RecruitingBoardSlot {
+  startsAt: string
+  endsAt: string
+  // 이 슬롯에 면접 가능하다고 제출한 지원서들. 배정 가능 여부 표시에 쓴다.
+  availableApplicationIds: string[]
+  assignedApplicant: RecruitingBoardApplicant | null
+}
+
+export type RawBoardSlot = {
+  startsAt: string
+  endsAt: string
+  availableApplicationIds?: RawId[]
+  assignedApplicant?: RawBoardApplicant | null
+}
+
+export interface RecruitingBoardSession {
+  sessionId: string
+  name: string
+  startsAt: string
+  endsAt: string
+  mode: RecruitingInterviewMode
+  location: string
+  slots: RecruitingBoardSlot[]
+}
+
+export type RawBoardSession = Omit<
+  RecruitingBoardSession,
+  "sessionId" | "slots"
+> & {
+  sessionId: RawId
+  slots?: RawBoardSlot[]
+}
+
+// 대기자는 차수 전체, 확정자는 조회한 날짜의 세션만 담긴다. 범위가 달라서
+// 하루치 응답으로 차수 전체 배정률을 계산할 수 없다.
+export interface RecruitingInterviewScheduleBoard {
+  roundId: string
+  date: string
+  sessions: RecruitingBoardSession[]
+  pendingApplicants: RecruitingBoardApplicant[]
+  confirmedApplicants: RecruitingBoardApplicant[]
+}
+
+export type RawInterviewScheduleBoard = {
+  roundId: RawId
+  date: string
+  sessions?: RawBoardSession[]
+  pendingApplicants?: RawBoardApplicant[]
+  confirmedApplicants?: RawBoardApplicant[]
+}
+
+export interface RecruitingInterviewAssignmentRequest {
+  applicationId: number
+  sessionId: number
+  startsAt: string
+  // 확정 시점의 연락처. 서버가 빈 값을 거부한다.
+  contactSnapshot: string
+}
+
+export interface ConfirmInterviewSchedulesRequest {
+  assignments: RecruitingInterviewAssignmentRequest[]
 }
