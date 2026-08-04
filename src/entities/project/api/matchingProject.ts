@@ -2,15 +2,20 @@ import { api } from "@/shared/lib/axios"
 
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
-export type ProjectPart =
-  | "PLAN"
-  | "DESIGN"
-  | "WEB"
-  | "ANDROID"
-  | "IOS"
-  | "NODEJS"
-  | "SPRINGBOOT"
-  | "ADMIN"
+// 값 목록을 단일 출처로 두고 타입을 파생시킨다. 목록과 유니온을 따로 적으면
+// 파트를 추가했을 때 목록이 조용히 뒤처져 새 파트가 필터에서 사라진다.
+export const PROJECT_PARTS = [
+  "PLAN",
+  "DESIGN",
+  "WEB",
+  "ANDROID",
+  "IOS",
+  "NODEJS",
+  "SPRINGBOOT",
+  "ADMIN",
+] as const
+
+export type ProjectPart = (typeof PROJECT_PARTS)[number]
 
 export type PartQuotaStatus = "RECRUITING" | "COMPLETED"
 

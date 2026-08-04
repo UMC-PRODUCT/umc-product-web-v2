@@ -46,7 +46,6 @@ export default function RecruitingHeader({
     { label: "소개", to: "/intro" },
     // TODO: 모집 안내 랜딩 라우트 확정 전까지 비활성(홈으로 오연결 방지)
     { label: "모집 안내", to: "/", disabled: true },
-    // TODO: 프로젝트 라우트 확정(/projects vs /matching/projects)
     { label: "프로젝트", to: "/projects" },
     ...(showRecruiting
       ? [
