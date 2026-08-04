@@ -94,6 +94,11 @@ export const recruitingKeys = {
   interviewSchedule: () =>
     [...recruitingKeys.all, "interview-schedule"] as const,
 
+  // 면접 스케줄링 접두사 밖에 둔다. 세션·확정 변경이 접두사를 통째로 무효화해도
+  // 연락처는 다시 받지 않기 위해서다.
+  applicantContacts: (roundId: string) =>
+    [...recruitingKeys.all, "applicant-contacts", roundId] as const,
+
   interviewSessions: (roundId: string) =>
     [...recruitingKeys.interviewSchedule(), "sessions", roundId] as const,
 
