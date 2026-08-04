@@ -607,6 +607,57 @@ export interface RecruitingApplicationMutationResult {
   status: RecruitingApplicationStatus
 }
 
+// 익명 지원서 조회/철회 자격 증명 요청 DTO
+export interface RecruitingApplicationCredentialRequest {
+  email: string
+  applicationKey: string
+}
+
+// 익명 지원서 수정 요청 DTO
+export interface UpdateAnonymousApplicationRequest {
+  credentialEmail: string
+  applicationKey: string
+  applicantName: string
+  applicantEmail: string
+  firstChoice: RecruitingTrack
+  secondChoice?: RecruitingTrack
+  answers: RecruitingAnswerRequest[]
+}
+
+// 익명 지원서 제출 요청 DTO
+export interface SubmitAnonymousApplicationRequest {
+  email: string
+  applicationKey: string
+}
+
+// 익명 지원서 조회 응답 내 문항 답변 DTO (OpenAPI 스펙: AnswerResponse)
+export interface AnswerResponse {
+  questionId?: number
+  textValue?: string
+  selectedOptionIds?: number[]
+  fileIds?: string[]
+  times?: string[]
+}
+
+export type RecruitingPublicApplicationAnswer = AnswerResponse
+
+// 익명 지원서 조회 응답 DTO
+export interface RecruitingPublicApplicationResponse {
+  applicationId?: number
+  applicantName?: string
+  applicantEmail?: string
+  firstChoice?: RecruitingTrack
+  secondChoice?: RecruitingTrack
+  submitted?: boolean
+  cancelled?: boolean
+  editable?: boolean
+  documentResult?: "PENDING" | "APPROVED" | "REJECTED"
+  finalResult?: "PENDING" | "APPROVED" | "REJECTED"
+  acceptedTrack?: RecruitingTrack
+  answers?: AnswerResponse[]
+  formStructure?: RecruitingFormStructure
+}
+
 export type RecruitingDecision = "PASS" | "FAIL"
 
 // 합격에는 확정 트랙이 필수이고 지원자의 1·2지망 중 하나여야 한다. 불합격에는

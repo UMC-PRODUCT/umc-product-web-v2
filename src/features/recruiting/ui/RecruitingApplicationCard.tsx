@@ -12,13 +12,14 @@ import type { PartTag } from "@/shared/model/domain"
 export interface RecruitingApplication {
   id: number
   name: string
+  isSubmitted?: boolean
   submittedAt?: string | null
   updatedAt?: string | null
   result?: "pass" | "fail" | null
   roles: PartTag[]
   isClosed: boolean
   dDay?: number
-  period: string
+  period?: string | null
 }
 
 interface RecruitingApplicationCardProps {
@@ -37,10 +38,13 @@ export function RecruitingApplicationCard({
 
   useClickOutside(dropdownRef, () => setIsDropdownOpen(false), isDropdownOpen)
 
+  const isSubmitted =
+    application.isSubmitted ?? Boolean(application.submittedAt)
+
   // 모달 내용 조건 분기 (사용자가 직접 채워 넣을 수 있도록 조건 분기 구성)
   const getDeleteModalProps = () => {
     // 1) 제출한 지원서를 모집 기간 내에 삭제할 때
-    if (application.submittedAt && !application.isClosed) {
+    if (isSubmitted && !application.isClosed) {
       return {
         title: "지원서를 삭제하시겠습니까?",
         content: (
@@ -54,7 +58,7 @@ export function RecruitingApplicationCard({
     }
 
     // 2) 임시저장한 지원서를 모집 기간 내에 삭제할 때
-    if (!application.submittedAt && !application.isClosed) {
+    if (!isSubmitted && !application.isClosed) {
       return {
         title: "임시 저장한 지원서를 삭제하시겠습니까?",
         content: (
@@ -70,7 +74,7 @@ export function RecruitingApplicationCard({
     }
 
     // 3) 임시저장한 지원서를 모집 기간 외에 삭제할 때 (마감 이후)
-    if (!application.submittedAt && application.isClosed) {
+    if (!isSubmitted && application.isClosed) {
       return {
         title: "임시 저장한 지원서를 삭제하시겠습니까?",
         content: (
@@ -107,20 +111,26 @@ export function RecruitingApplicationCard({
       <div className="flex w-full max-w-[960px] flex-col gap-2">
         <div className="flex flex-col gap-0.5 pl-4">
           <div className="flex items-center gap-3">
-            {application.submittedAt ? (
+            {isSubmitted ? (
               <div className="flex items-center gap-[7px]">
-                <span className="text-subtitle-3-semibold text-teal-600">
-                  {application.submittedAt}
-                </span>
+                {application.submittedAt &&
+                  application.submittedAt !== "제출 완료" && (
+                    <span className="text-subtitle-3-semibold text-teal-600">
+                      {application.submittedAt}
+                    </span>
+                  )}
                 <span className="text-subtitle-3-semibold text-teal-600">
                   제출됨
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-[7px]">
-                <span className="text-subtitle-3-semibold text-teal-600">
-                  {application.updatedAt}
-                </span>
+                {application.updatedAt &&
+                  application.updatedAt !== "임시 저장됨" && (
+                    <span className="text-subtitle-3-semibold text-teal-600">
+                      {application.updatedAt}
+                    </span>
+                  )}
                 <span className="text-subtitle-3-semibold text-teal-600">
                   임시 저장됨
                 </span>
@@ -144,13 +154,13 @@ export function RecruitingApplicationCard({
             )}
           </div>
 
-          {!application.submittedAt && application.isClosed && (
+          {!isSubmitted && application.isClosed && (
             <div className="text-teal-gray-500 text-body-2-medium flex items-center gap-1">
               <CheckIcon className="size-4" />
               <p>모집 마감 전까지 제출하지 않아 지원이 완료되지 않았습니다.</p>
             </div>
           )}
-          {!application.submittedAt && !application.isClosed && (
+          {!isSubmitted && !application.isClosed && (
             <div className="text-teal-gray-500 text-body-2-medium flex items-center gap-1">
               <CheckIcon className="size-4" />
               <p>
@@ -170,9 +180,11 @@ export function RecruitingApplicationCard({
                 <p className="text-heading-7-semibold text-teal-900 group-hover:text-teal-500">
                   {application.name}
                 </p>
-                <p className="text-body-2-regular text-teal-gray-500">
-                  {application.period}
-                </p>
+                {application.period && application.period.trim() !== "" && (
+                  <p className="text-body-2-regular text-teal-gray-500">
+                    {application.period}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 {application.roles.map((role) => (
@@ -216,7 +228,7 @@ export function RecruitingApplicationCard({
                   role="menu"
                   className="shadow-drop-neutral-1 absolute top-6.5 right-0 z-50 flex flex-col rounded-[10px] bg-white py-0.5"
                 >
-                  {application.submittedAt ? (
+                  {isSubmitted ? (
                     <>
                       <button
                         type="button"

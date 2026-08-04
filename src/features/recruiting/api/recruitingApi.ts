@@ -23,6 +23,7 @@ import type {
   RawStatusSummary,
   RawTrackCount,
   RecruitingApplicationCreated,
+  RecruitingApplicationCredentialRequest,
   RecruitingApplicationDetail,
   RecruitingApplicationMutationResult,
   RecruitingApplicationPage,
@@ -33,6 +34,7 @@ import type {
   RecruitingFormStructure,
   RecruitingIdResponse,
   RecruitingInterviewQuestion,
+  RecruitingPublicApplicationResponse,
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
   RecruitingRoundPhase,
@@ -42,7 +44,9 @@ import type {
   ReplaceRecruitingSeasonTrackQuotasRequest,
   RoundApplicationsQuery,
   StatusSummaryQuery,
+  SubmitAnonymousApplicationRequest,
   SubmitEvaluationBody,
+  UpdateAnonymousApplicationRequest,
   UpdateApplicationDraftBody,
   UpdateRecruitingRoundRequest,
   UpdateRecruitingRoundStatusRequest,
@@ -423,6 +427,46 @@ export async function submitApplication(
 
 export async function cancelApplication(applicationId: string): Promise<void> {
   await api.patch(`/v1/recruiting/applications/${applicationId}/cancel`)
+}
+
+// 익명 지원서 조회 (RECRUITING-PUBLIC-004)
+export async function lookupAnonymousApplication(
+  body: RecruitingApplicationCredentialRequest,
+): Promise<RecruitingPublicApplicationResponse> {
+  const { data } = await api.post<
+    ApiResponse<RecruitingPublicApplicationResponse>
+  >("/v1/recruiting/public/applications/lookup", body)
+  return data.result
+}
+
+// 익명 지원서 수정 (RECRUITING-PUBLIC-005)
+export async function updateAnonymousApplication(
+  body: UpdateAnonymousApplicationRequest,
+): Promise<RecruitingApplicationMutationResult> {
+  const { data } = await api.put<
+    ApiResponse<RecruitingApplicationMutationResult>
+  >("/v1/recruiting/public/applications", body)
+  return data.result
+}
+
+// 익명 지원서 철회 (RECRUITING-PUBLIC-007)
+export async function cancelAnonymousApplication(
+  body: RecruitingApplicationCredentialRequest,
+): Promise<RecruitingApplicationMutationResult> {
+  const { data } = await api.post<
+    ApiResponse<RecruitingApplicationMutationResult>
+  >("/v1/recruiting/public/applications/cancel", body)
+  return data.result
+}
+
+// 익명 지원서 제출 (RECRUITING-PUBLIC-006)
+export async function submitAnonymousApplication(
+  body: SubmitAnonymousApplicationRequest,
+): Promise<RecruitingApplicationMutationResult> {
+  const { data } = await api.post<
+    ApiResponse<RecruitingApplicationMutationResult>
+  >("/v1/recruiting/public/applications/submit", body)
+  return data.result
 }
 
 export async function getStageEvaluations(

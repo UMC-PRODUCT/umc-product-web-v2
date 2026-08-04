@@ -91,6 +91,9 @@ export const recruitingKeys = {
   decisionHistories: (gisuId: string) =>
     [...recruitingKeys.all, "decision-histories", gisuId] as const,
 
+  anonymousApplication: (sessionId: string) =>
+    [...recruitingKeys.all, "anonymous", sessionId] as const,
+
   seasons: () => [...recruitingKeys.all, "seasons"] as const,
 
   seasonConfiguration: (seasonId: string) =>

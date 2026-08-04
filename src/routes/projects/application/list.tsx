@@ -1,9 +1,16 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import { useState } from "react"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
+import { useMemo } from "react"
 
-import { RecruitingApplicationCard } from "@/features/recruiting"
+import {
+  mapTrackToPartTag,
+  RecruitingApplicationCard,
+  useAnonymousApplicationQuery,
+  useCancelAnonymousApplication,
+} from "@/features/recruiting"
+import { Button } from "@/shared/ui/Button"
 
 import type { RecruitingApplication } from "@/features/recruiting"
+import type { PartTag } from "@/shared/model/domain"
 
 export const Route = createFileRoute("/projects/application/list")({
   beforeLoad: () => {
@@ -18,63 +25,108 @@ export const Route = createFileRoute("/projects/application/list")({
 })
 
 function ApplicationListPage() {
-  const [dummyApplications, setDummyApplications] = useState<
-    RecruitingApplication[]
-  >([
-    {
-      id: 1,
-      name: "한양대학교 ERICA UMC 11기 정규 모집",
-      submittedAt: "2026-07-11 23:35",
-      result: "fail",
-      roles: ["plan"],
-      isClosed: true,
-      period: "2026-06-15 00:00 ~ 2026-07-11 23:59",
-    },
-    {
-      id: 2,
-      name: "한양대학교 ERICA UMC 11기 2차 추가 모집",
-      submittedAt: null,
-      updatedAt: "2026-07-12 14:22",
-      result: null,
-      roles: ["design", "mobile-pe"],
-      isClosed: true,
-      period: "2026-07-12 00:00 ~ 2026-07-15 23:59",
-    },
-    {
-      id: 3,
-      name: "한양대학교 ERICA UMC 11기 3차 추가 모집",
-      submittedAt: null,
-      updatedAt: "2026-07-20 10:15",
-      result: null,
-      roles: ["web-pe", "plan"],
-      isClosed: false,
-      dDay: 10,
-      period: "2026-07-16 00:00 ~ 2026-07-31 23:59",
-    },
-    {
-      id: 4,
-      name: "한양대학교 ERICA UMC 11기 4차 추가 모집",
-      submittedAt: "2026-08-05 14:20",
-      result: "pass",
-      roles: ["springboot", "nodejs"],
-      isClosed: true,
-      period: "2026-08-01 00:00 ~ 2026-08-05 23:59",
-    },
-  ])
+  const navigate = useNavigate()
 
-  const handleDelete = (id: number) => {
-    setDummyApplications((prev) => prev.filter((app) => app.id !== id))
+  const email =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("anonymousEmail")
+      : null
+  const applicationKey =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("anonymousApplicationKey")
+      : null
+
+  const { data, isLoading } = useAnonymousApplicationQuery(
+    email,
+    applicationKey,
+  )
+  const cancelMutation = useCancelAnonymousApplication()
+
+  const application = useMemo<RecruitingApplication | null>(() => {
+    if (!data || data.cancelled || data.applicationId == null) return null
+    const roles = [
+      mapTrackToPartTag(data.firstChoice),
+      mapTrackToPartTag(data.secondChoice),
+    ].filter((role): role is PartTag => role !== null)
+
+    const result =
+      data.finalResult === "APPROVED"
+        ? "pass"
+        : data.finalResult === "REJECTED"
+          ? "fail"
+          : null
+
+    const rawData = data as {
+      submittedAt?: string
+      updatedAt?: string
+      period?: string
+    }
+
+    return {
+      id: data.applicationId,
+      name: data.applicantName
+        ? `${data.applicantName}님의 지원서`
+        : "익명 지원서",
+      isSubmitted: data.submitted,
+      submittedAt: data.submitted ? (rawData.submittedAt ?? null) : null,
+      updatedAt: !data.submitted ? (rawData.updatedAt ?? null) : null,
+      result,
+      roles,
+      isClosed: !data.editable,
+      period: rawData.period ?? null,
+    }
+  }, [data])
+
+  const handleDelete = () => {
+    if (!email || !applicationKey) return
+    cancelMutation.mutate({ email, applicationKey })
+  }
+
+  const handleResetVerification = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("isApplicationVerified")
+      sessionStorage.removeItem("anonymousEmail")
+      sessionStorage.removeItem("anonymousApplicationKey")
+      sessionStorage.removeItem("anonymousSessionId")
+    }
+    void navigate({ to: "/projects/application" })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex w-full items-center justify-center py-20">
+        <p className="text-body-1-medium text-teal-gray-500">
+          지원서를 불러오는 중입니다...
+        </p>
+      </div>
+    )
+  }
+
+  if (!application) {
+    return (
+      <div className="flex w-full flex-col items-center justify-center gap-4 py-20">
+        <p className="text-body-1-medium text-teal-gray-500">
+          조회된 지원서가 없습니다.
+        </p>
+        <Button
+          variant="fill"
+          color="neutral"
+          size="m"
+          onClick={handleResetVerification}
+        >
+          다른 지원서 조회하기
+        </Button>
+      </div>
+    )
   }
 
   return (
     <div className="flex w-full flex-col gap-8">
-      {dummyApplications.map((app) => (
-        <RecruitingApplicationCard
-          key={app.id}
-          application={app}
-          onDelete={handleDelete}
-        />
-      ))}
+      <RecruitingApplicationCard
+        key={application.id}
+        application={application}
+        onDelete={handleDelete}
+      />
     </div>
   )
 }
