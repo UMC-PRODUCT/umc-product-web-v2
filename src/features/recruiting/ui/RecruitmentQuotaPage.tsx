@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { Button } from "@/shared/ui/Button"
@@ -6,17 +6,17 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
-import {
-  getAllChaptersQuotaData,
-  getChapterQuotaData,
-  RECRUITMENT_QUOTA_MOCK,
-} from "../model/recruitmentQuota.mock"
+import { useAdminRecruitingRounds } from "../hooks/useAdminRecruitingRounds"
+import { useRecruitingSeasonQuotas } from "../hooks/useRecruitingSeasonQuotas"
+import { mapGroupsToChapterQuotaData } from "../model/recruitmentQuotaMapper"
 import {
   type AllocationStatus,
   ChapterQuotaTableCard,
 } from "./ChapterQuotaTableCard"
 import { ChapterTabs } from "./ChapterTabs"
 import { QuotaApplicantStatusCard } from "./QuotaApplicantStatusCard"
+
+import type { SchoolQuotaRow } from "../model/recruitmentQuota"
 
 export function RecruitmentQuotaPage() {
   const [chapterTab, setChapterTab] = useState("all")
@@ -26,15 +26,47 @@ export function RecruitmentQuotaPage() {
   const [autoModalOpen, setAutoModalOpen] = useState(false)
   const [autoAllocateTrigger, setAutoAllocateTrigger] = useState(0)
 
+  const [editedSchoolsMap, setEditedSchoolsMap] = useState<
+    Map<string, SchoolQuotaRow[]>
+  >(new Map())
+
   const addToast = useToastStore((state) => state.addToast)
+
+  const { groups } = useAdminRecruitingRounds()
+  const activeTabGroups = useMemo(
+    () =>
+      chapterTab === "all"
+        ? groups
+        : groups.filter((g) => g.chapterName === chapterTab),
+    [groups, chapterTab],
+  )
+  const seasonIds = useMemo(
+    () => [...new Set(activeTabGroups.map((g) => g.seasonId))],
+    [activeTabGroups],
+  )
+  const { seasonConfigsMap, updateQuotas, isSaving } =
+    useRecruitingSeasonQuotas(seasonIds)
+
+  const allChaptersData = useMemo(
+    () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
+    [groups, seasonConfigsMap],
+  )
+
+  const chaptersDataWithEdits = useMemo(() => {
+    return allChaptersData.map((chapterData) => {
+      const editedSchools = editedSchoolsMap.get(chapterData.chapter)
+      if (!editedSchools) return chapterData
+      return {
+        ...chapterData,
+        schools: editedSchools,
+      }
+    })
+  }, [allChaptersData, editedSchoolsMap])
 
   const isAll = chapterTab === "all"
 
   const handleTabChange = (nextValue: string) => {
     setChapterTab(nextValue)
-    setIsDirty(false)
-    setAllocationStatus("TO 설정 전")
-    setAutoAllocateTrigger(0)
   }
 
   const handleConfirmAutoAllocate = () => {
@@ -81,14 +113,86 @@ export function RecruitmentQuotaPage() {
     [addToast],
   )
 
-  const allChaptersData = getAllChaptersQuotaData(RECRUITMENT_QUOTA_MOCK)
+  const handleSchoolsDataChange = useCallback(
+    (chapter: string, schools: SchoolQuotaRow[]) => {
+      setEditedSchoolsMap((prev) => {
+        const next = new Map(prev)
+        next.set(chapter, schools)
+        return next
+      })
+    },
+    [],
+  )
 
-  const selectedChapterData = isAll
-    ? null
-    : getChapterQuotaData(RECRUITMENT_QUOTA_MOCK, chapterTab)
+  const handleSave = async () => {
+    const allEditedRows = Array.from(editedSchoolsMap.values()).flat()
+    const payloadList = allEditedRows
+      .filter((row): row is SchoolQuotaRow & { seasonId: string } =>
+        Boolean(row.seasonId),
+      )
+      .map((row) => ({
+        seasonId: row.seasonId,
+        schoolName: row.schoolName,
+        payload: {
+          quotas: [
+            { track: "PLAN" as const, targetCount: row.pm },
+            { track: "DESIGN" as const, targetCount: row.design },
+            { track: "WEB_PRODUCT_ENGINEER" as const, targetCount: row.webPe },
+            {
+              track: "MOBILE_PRODUCT_ENGINEER" as const,
+              targetCount: row.mobilePe,
+            },
+          ],
+        },
+      }))
+
+    if (payloadList.length === 0) return
+
+    try {
+      const result = await updateQuotas(payloadList)
+
+      if (result.failedCount === 0) {
+        setIsDirty(false)
+        setEditedSchoolsMap(new Map())
+      } else {
+        const successfulSchoolNames = new Set(
+          result.successfulVariables
+            .map((v) => v.schoolName)
+            .filter((name): name is string => Boolean(name)),
+        )
+
+        setEditedSchoolsMap((prev) => {
+          const next = new Map<string, SchoolQuotaRow[]>()
+          prev.forEach((rows, chapter) => {
+            const remainingRows = rows.filter(
+              (r) => !successfulSchoolNames.has(r.schoolName),
+            )
+            if (remainingRows.length > 0) {
+              next.set(chapter, remainingRows)
+            }
+          })
+          if (next.size === 0) {
+            setIsDirty(false)
+          }
+          return next
+        })
+      }
+    } catch {
+      // 에러 토스트는 useRecruitingSeasonQuotas 훅에서 처리됨
+    }
+  }
+
+  const selectedChapterData = chaptersDataWithEdits.find(
+    (item) => item.chapter === chapterTab,
+  ) ?? {
+    chapter: chapterTab,
+    schoolCount: 0,
+    schools: [],
+    totals: { pm: 0, design: 0, webPe: 0, mobilePe: 0, total: 0 },
+  }
 
   const currentPartCounts = isAll
-    ? allChaptersData.reduce(
+    ? chaptersDataWithEdits.reduce(
         (acc, item) => ({
           pm: acc.pm + item.totals.pm,
           design: acc.design + item.totals.design,
@@ -97,11 +201,11 @@ export function RecruitmentQuotaPage() {
         }),
         { pm: 0, design: 0, webPe: 0, mobilePe: 0 },
       )
-    : selectedChapterData!.totals
+    : selectedChapterData.totals
 
   const totalApplicants = isAll
-    ? allChaptersData.reduce((acc, item) => acc + item.totals.total, 0)
-    : selectedChapterData!.totals.total
+    ? chaptersDataWithEdits.reduce((acc, item) => acc + item.totals.total, 0)
+    : selectedChapterData.totals.total
 
   const hasApplicants = totalApplicants > 0
 
@@ -168,11 +272,15 @@ export function RecruitmentQuotaPage() {
                         size="xs"
                         color="primary"
                         variant="fill"
-                        disabled={!isDirty}
+                        disabled={!isDirty || isSaving}
                         className="w-auto px-3"
-                        onClick={() => {}}
+                        onClick={handleSave}
                       >
-                        {isDirty ? "저장" : "저장 완료"}
+                        {isSaving
+                          ? "저장 중..."
+                          : isDirty
+                            ? "저장"
+                            : "저장 완료"}
                       </Button>
                     )}
                   </div>
@@ -199,24 +307,33 @@ export function RecruitmentQuotaPage() {
             ) : (
               <div className="flex w-full flex-col gap-10">
                 {isAll ? (
-                  allChaptersData.map((chapterData) => (
+                  chaptersDataWithEdits.map((chapterData) => (
                     <ChapterQuotaTableCard
+                      key={chapterData.chapter}
+                      data={chapterData}
                       status={allocationStatus}
                       onDirtyChange={() => setIsDirty(true)}
                       onManualEdit={handleManualEdit}
                       onErrorExceeded={handleErrorExceeded}
+                      onSchoolsDataChange={(schools) =>
+                        handleSchoolsDataChange(chapterData.chapter, schools)
+                      }
                       autoAllocateTrigger={autoAllocateTrigger}
-                      key={chapterData.chapter}
-                      data={chapterData}
                     />
                   ))
                 ) : (
                   <ChapterQuotaTableCard
-                    data={selectedChapterData!}
+                    data={selectedChapterData}
                     status={allocationStatus}
                     onDirtyChange={() => setIsDirty(true)}
                     onManualEdit={handleManualEdit}
                     onErrorExceeded={handleErrorExceeded}
+                    onSchoolsDataChange={(schools) =>
+                      handleSchoolsDataChange(
+                        selectedChapterData.chapter,
+                        schools,
+                      )
+                    }
                     autoAllocateTrigger={autoAllocateTrigger}
                   />
                 )}

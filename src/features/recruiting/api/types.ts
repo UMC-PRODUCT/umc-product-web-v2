@@ -137,6 +137,46 @@ export interface CloneRecruitingRoundRequest {
   roundNo?: number
 }
 
+// 모집 시즌의 쿼터(학교별 모집 TO)와 차수 설정 조회 응답 (RECRUITING-ADMIN-001).
+export interface RecruitingSeasonTrackQuota {
+  track: RecruitingTrack
+  targetCount: number
+}
+
+export interface RecruitingSeasonConfigurationResponse {
+  id: string
+  gisuId: string
+  schoolId: string
+  memo: string | null
+  quotas: RecruitingSeasonTrackQuota[]
+  rounds: RecruitingRound[]
+}
+
+export type RawRecruitingSeasonConfigurationResponse = Omit<
+  RecruitingSeasonConfigurationResponse,
+  "id" | "gisuId" | "schoolId" | "memo" | "quotas" | "rounds"
+> & {
+  id?: RawId
+  gisuId?: RawId
+  schoolId?: RawId
+  memo?: string | null
+  quotas?: {
+    track?: RecruitingTrack
+    targetCount?: RawCount
+  }[]
+  rounds?: RecruitingRound[]
+}
+
+// 모집 시즌 트랙별 모집 인원(학교별 모집 TO) 전체 교체/수정 요청 (RECRUITING-ADMIN-004).
+export interface RecruitingSeasonTrackQuotaRequest {
+  track: RecruitingTrack
+  targetCount: number
+}
+
+export interface ReplaceRecruitingSeasonTrackQuotasRequest {
+  quotas: RecruitingSeasonTrackQuotaRequest[]
+}
+
 export interface RecruitingRoundGroup {
   seasonId: string
   gisuId: string

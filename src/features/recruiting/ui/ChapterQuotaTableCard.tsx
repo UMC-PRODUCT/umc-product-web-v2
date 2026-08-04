@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
 
@@ -17,6 +17,7 @@ interface ChapterQuotaTableCardProps {
   onDirtyChange?: (dirty: boolean) => void
   onManualEdit?: () => void
   onErrorExceeded?: (partName: string, maxAllowed: number) => void
+  onSchoolsDataChange?: (schools: SchoolQuotaRow[]) => void
   autoAllocateTrigger?: number
   className?: string
 }
@@ -27,6 +28,7 @@ export function ChapterQuotaTableCard({
   onDirtyChange,
   onManualEdit,
   onErrorExceeded,
+  onSchoolsDataChange,
   autoAllocateTrigger,
   className,
 }: ChapterQuotaTableCardProps) {
@@ -34,6 +36,11 @@ export function ChapterQuotaTableCard({
   const [lastValidSchoolsData, setLastValidSchoolsData] = useState<
     SchoolQuotaRow[]
   >(data.schools)
+
+  const onSchoolsDataChangeRef = useRef(onSchoolsDataChange)
+  useEffect(() => {
+    onSchoolsDataChangeRef.current = onSchoolsDataChange
+  }, [onSchoolsDataChange])
 
   useEffect(() => {
     setSchoolsData(data.schools)
@@ -76,6 +83,7 @@ export function ChapterQuotaTableCard({
 
     setSchoolsData(updatedSchools)
     setLastValidSchoolsData(updatedSchools)
+    onSchoolsDataChangeRef.current?.(updatedSchools)
   }, [autoAllocateTrigger, data.schools, data.totals])
 
   const hasApplicants = schoolsData.length > 0
@@ -115,6 +123,7 @@ export function ChapterQuotaTableCard({
 
     onDirtyChange?.(true)
     onManualEdit?.()
+    onSchoolsDataChange?.(nextSchoolsData)
   }
 
   const currentPMTotal = schoolsData.reduce((acc, s) => acc + s.pm, 0)
@@ -155,11 +164,13 @@ export function ChapterQuotaTableCard({
       <div className="flex w-full justify-between">
         <div />
         <div className="flex items-center gap-3 px-1">
-          <p className="text-body-1-regular text-teal-gray-400">
-            <span>{data.updatedDate}</span>
-            <span className="pl-1">{data.updatedTime}</span>
-            <span className="pl-0.5">기준</span>
-          </p>
+          {data.updatedDate && data.updatedTime && (
+            <p className="text-body-1-regular text-teal-gray-400">
+              <span>{data.updatedDate}</span>
+              <span className="pl-1">{data.updatedTime}</span>
+              <span className="pl-0.5">기준</span>
+            </p>
+          )}
 
           <div className="flex items-center gap-1.5">
             <div className="size-3 rounded-full bg-teal-500" />
