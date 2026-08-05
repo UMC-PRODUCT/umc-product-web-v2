@@ -15,6 +15,10 @@ export const HEADER_NAV_ITEMS: HeaderNavItem[] = [
     to: "/intro",
   },
   {
+    label: "프로젝트",
+    to: "/projects",
+  },
+  {
     label: "데모데이 매칭",
     to: "/matching/projects",
     activeBasePath: "/matching",

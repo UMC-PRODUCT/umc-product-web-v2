@@ -8,9 +8,14 @@ import {
 } from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
+import { SETTINGS_ENTRY_PATH } from "@/shared/config/settingsNavigation"
 import HeaderButton from "@/widgets/navigation/header/HeaderButton"
 import NavigationButton from "@/widgets/navigation/header/NavigationButton"
 import Profile from "@/widgets/navigation/header/Profile"
+import {
+  buildRecruitingNavItems,
+  isNavActive,
+} from "@/widgets/navigation/header/recruitingHeaderNav"
 import {
   type RecruitingStatus,
   RecruitingStatusButton,
@@ -21,13 +26,6 @@ interface RecruitingHeaderProps {
   // 없으면 상태 버튼을 렌더하지 않는다(연동 전 고정값 노출 방지)
   recruitingStatus?: RecruitingStatus
   activePathname?: string
-}
-
-type NavItem = { label: string; to: string; disabled?: boolean }
-
-function isNavActive(pathname: string, to: string): boolean {
-  if (to === "/") return pathname === "/"
-  return pathname === to || pathname.startsWith(to + "/")
 }
 
 export default function RecruitingHeader({
@@ -42,23 +40,12 @@ export default function RecruitingHeader({
   const showRecruiting = isAnyOperator(me)
   const showSettings = isSuperAdmin(me) || isCentralStaff(me)
 
-  const navItems: NavItem[] = [
-    { label: "소개", to: "/intro" },
-    // TODO: 모집 안내 랜딩 라우트 확정 전까지 비활성(홈으로 오연결 방지)
-    { label: "모집 안내", to: "/", disabled: true },
-    { label: "프로젝트", to: "/projects" },
-    ...(showRecruiting
-      ? [
-          {
-            label: "리크루팅",
-            to: "/recruiting/dashboard/applications",
-          } satisfies NavItem,
-        ]
-      : []),
-    ...(showSettings
-      ? [{ label: "설정", to: "/settings" } satisfies NavItem]
-      : []),
-  ]
+  const navItems = buildRecruitingNavItems({
+    isAuthed,
+    showRecruiting,
+    showSettings,
+    settingsEntryPath: SETTINGS_ENTRY_PATH,
+  })
 
   return (
     <header className="bg-teal-gray-50 shadow-drop-neutral-3 relative z-50 flex h-20 min-h-20 w-full items-center justify-between overflow-visible">
@@ -72,7 +59,7 @@ export default function RecruitingHeader({
             key={item.label}
             label={item.label}
             to={item.to}
-            selected={isNavActive(pathname, item.to)}
+            selected={isNavActive(pathname, item)}
             disabled={item.disabled}
             className="min-w-18 px-4.5"
           />
