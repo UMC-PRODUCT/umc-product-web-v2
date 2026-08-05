@@ -80,9 +80,11 @@ export const RECRUITING_SIDEBAR_ITEMS: RecruitingSideBarSection[] = [
   },
   {
     id: "recruiting-history",
+    // `/recruiting/history` 는 라우트가 없다. 실재하는 건 아래 archive 뿐이라
+    // 하위를 지우게 되더라도 링크가 깨지지 않도록 여기에 맞춰 둔다.
+    to: "/recruiting/history/archive",
     title: "히스토리",
     icon: TeamIcon,
-    to: "/recruiting/history",
     menus: [
       {
         id: "recruiting-history-archive",
