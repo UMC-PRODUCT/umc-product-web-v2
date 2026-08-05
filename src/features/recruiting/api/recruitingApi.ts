@@ -299,10 +299,14 @@ export function normalizeStatusSummary(
     totalCount: toCount(raw.totalCount),
     countByStatus: toStatusCounts(raw.countByStatus),
     parts: toPartSummaries(raw.parts),
+    // 이름은 스펙상 optional 이다(required 없음). 빠진 채로 두면 정렬의
+    // localeCompare 와 학교명 축약에서 화면 전체가 죽는다.
     schools: (raw.schools ?? []).map((school) => ({
       ...school,
       schoolId: String(school.schoolId),
+      schoolName: school.schoolName ?? "",
       chapterId: String(school.chapterId),
+      chapterName: school.chapterName ?? "",
       totalCount: toCount(school.totalCount),
       countByStatus: toStatusCounts(school.countByStatus),
       parts: toPartSummaries(school.parts),
@@ -335,15 +339,19 @@ export function normalizeEvaluationStatistics(
     applicantCount: toCount(raw.applicantCount),
     evaluatedCount: toCount(raw.evaluatedCount),
     byTrack: toTrackCounts(raw.byTrack),
+    // 이름은 스펙상 optional 이다(required 없음). 빠진 채로 두면 학교명 축약에서
+    // 화면 전체가 죽는다.
     chapters: (raw.chapters ?? []).map((chapter) => ({
       ...chapter,
       chapterId: String(chapter.chapterId),
+      chapterName: chapter.chapterName ?? "",
       applicantCount: toCount(chapter.applicantCount),
       evaluatedCount: toCount(chapter.evaluatedCount),
       byTrack: toTrackCounts(chapter.byTrack),
       schools: (chapter.schools ?? []).map((school) => ({
         ...school,
         schoolId: String(school.schoolId),
+        schoolName: school.schoolName ?? "",
         applicantCount: toCount(school.applicantCount),
         evaluatedCount: toCount(school.evaluatedCount),
         byTrack: toTrackCounts(school.byTrack),

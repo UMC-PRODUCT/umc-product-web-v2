@@ -318,12 +318,22 @@ export type RawRoundStatusSummary = Omit<
   parts?: RawPartSummary[]
 }
 
+// 이름은 스펙에 required 가 없어 빠질 수 있다. 정규화에서 빈 문자열로 채운다.
 export type RawSchoolStatusSummary = Omit<
   RecruitingSchoolStatusSummary,
-  "schoolId" | "chapterId" | "totalCount" | "countByStatus" | "parts" | "rounds"
+  | "schoolId"
+  | "schoolName"
+  | "chapterId"
+  | "chapterName"
+  | "totalCount"
+  | "countByStatus"
+  | "parts"
+  | "rounds"
 > & {
   schoolId: RawId
+  schoolName?: string
   chapterId: RawId
+  chapterName?: string
   totalCount: RawCount
   countByStatus?: RawStatusCounts
   parts?: RawPartSummary[]
@@ -393,11 +403,13 @@ export type RawTrackCount = Omit<
   evaluatedCount: RawCount
 }
 
+// 이름은 스펙에 required 가 없어 빠질 수 있다. 정규화에서 빈 문자열로 채운다.
 export type RawSchoolEvaluationStatistics = Omit<
   RecruitingSchoolEvaluationStatistics,
-  "schoolId" | "applicantCount" | "evaluatedCount" | "byTrack"
+  "schoolId" | "schoolName" | "applicantCount" | "evaluatedCount" | "byTrack"
 > & {
   schoolId: RawId
+  schoolName?: string
   applicantCount: RawCount
   evaluatedCount: RawCount
   byTrack?: RawTrackCount[]
@@ -405,9 +417,15 @@ export type RawSchoolEvaluationStatistics = Omit<
 
 export type RawChapterEvaluationStatistics = Omit<
   RecruitingChapterEvaluationStatistics,
-  "chapterId" | "applicantCount" | "evaluatedCount" | "byTrack" | "schools"
+  | "chapterId"
+  | "chapterName"
+  | "applicantCount"
+  | "evaluatedCount"
+  | "byTrack"
+  | "schools"
 > & {
   chapterId: RawId
+  chapterName?: string
   applicantCount: RawCount
   evaluatedCount: RawCount
   byTrack?: RawTrackCount[]

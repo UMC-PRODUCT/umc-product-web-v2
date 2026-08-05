@@ -349,6 +349,18 @@ describe("normalizeStatusSummary", () => {
     expect(normalizeStatusSummary({ totalCount: "abc" }).totalCount).toBe(0)
     expect(normalizeStatusSummary({ totalCount: "" }).totalCount).toBe(0)
   })
+
+  // 이름이 undefined 로 남으면 groupByChapter 의 localeCompare 와 학교명 축약이
+  // TypeError 로 터져 대시보드가 통째로 에러 화면이 된다.
+  it("이름이 빠져도 빈 문자열로 채운다", () => {
+    const result = normalizeStatusSummary({
+      totalCount: "0",
+      schools: [{ schoolId: "1", chapterId: "27", totalCount: "0" }],
+    })
+
+    expect(result.schools[0]?.schoolName).toBe("")
+    expect(result.schools[0]?.chapterName).toBe("")
+  })
 })
 
 describe("normalizeEvaluationStatistics", () => {
@@ -421,6 +433,27 @@ describe("normalizeEvaluationStatistics", () => {
     expect(result.asOf).toBeNull()
     expect(result.byTrack).toEqual([])
     expect(result.chapters).toEqual([])
+  })
+
+  // 이름이 undefined 로 남으면 학교명 축약(shortenSchoolName)이 TypeError 로 터진다.
+  it("이름이 빠져도 빈 문자열로 채운다", () => {
+    const result = normalizeEvaluationStatistics({
+      applicantCount: "0",
+      evaluatedCount: "0",
+      chapters: [
+        {
+          chapterId: "29",
+          applicantCount: "0",
+          evaluatedCount: "0",
+          schools: [
+            { schoolId: "6", applicantCount: "0", evaluatedCount: "0" },
+          ],
+        },
+      ],
+    })
+
+    expect(result.chapters[0]?.chapterName).toBe("")
+    expect(result.chapters[0]?.schools[0]?.schoolName).toBe("")
   })
 })
 
