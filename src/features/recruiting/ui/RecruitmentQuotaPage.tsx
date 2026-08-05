@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { Button } from "@/shared/ui/Button"
@@ -44,8 +44,58 @@ export function RecruitmentQuotaPage() {
     () => [...new Set(activeTabGroups.map((g) => g.seasonId))],
     [activeTabGroups],
   )
-  const { seasonConfigsMap, updateQuotas, isSaving } =
+  const { seasonConfigsMap, updateQuotas, isSaving, isLoading } =
     useRecruitingSeasonQuotas(seasonIds)
+
+  // TO 조회 결과가 null인 시즌에 대해 자동으로 0명 저장 요청 전송
+  const autoSavedSeasonsRef = useRef<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (isLoading || isSaving || groups.length === 0) return
+
+    const nullQuotaPayloads: Array<{
+      seasonId: string
+      schoolName?: string
+      payload: {
+        quotas: Array<{
+          track:
+            | "PLAN"
+            | "DESIGN"
+            | "WEB_PRODUCT_ENGINEER"
+            | "MOBILE_PRODUCT_ENGINEER"
+          targetCount: number
+        }>
+      }
+    }> = []
+
+    groups.forEach((group) => {
+      if (!group.seasonId || autoSavedSeasonsRef.current.has(group.seasonId))
+        return
+
+      const config = seasonConfigsMap.get(group.seasonId)
+      const hasQuotas = Boolean(config?.quotas && config.quotas.length > 0)
+
+      if (!hasQuotas) {
+        autoSavedSeasonsRef.current.add(group.seasonId)
+        nullQuotaPayloads.push({
+          seasonId: group.seasonId,
+          schoolName: group.schoolName,
+          payload: {
+            quotas: [
+              { track: "PLAN", targetCount: 0 },
+              { track: "DESIGN", targetCount: 0 },
+              { track: "WEB_PRODUCT_ENGINEER", targetCount: 0 },
+              { track: "MOBILE_PRODUCT_ENGINEER", targetCount: 0 },
+            ],
+          },
+        })
+      }
+    })
+
+    if (nullQuotaPayloads.length > 0) {
+      void updateQuotas(nullQuotaPayloads)
+    }
+  }, [isLoading, isSaving, groups, seasonConfigsMap, updateQuotas])
 
   const allChaptersData = useMemo(
     () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
@@ -125,8 +175,16 @@ export function RecruitmentQuotaPage() {
   )
 
   const handleSave = async () => {
-    const allEditedRows = Array.from(editedSchoolsMap.values()).flat()
-    const payloadList = allEditedRows
+    const targetChapters = isAll
+      ? chaptersDataWithEdits
+      : chaptersDataWithEdits.filter((c) => c.chapter === chapterTab)
+
+    const rawRows =
+      editedSchoolsMap.size > 0
+        ? Array.from(editedSchoolsMap.values()).flat()
+        : targetChapters.flatMap((c) => c.schools)
+
+    const payloadList = rawRows
       .filter((row): row is SchoolQuotaRow & { seasonId: string } =>
         Boolean(row.seasonId),
       )
@@ -203,14 +261,8 @@ export function RecruitmentQuotaPage() {
       )
     : selectedChapterData.totals
 
-  const totalApplicants = isAll
-    ? chaptersDataWithEdits.reduce((acc, item) => acc + item.totals.total, 0)
-    : selectedChapterData.totals.total
-
-  const hasApplicants = totalApplicants > 0
-
-  const showAutoAllocateButton = !isAll && hasApplicants
-  const showSaveButton = hasApplicants
+  const showAutoAllocateButton = !isAll
+  const showSaveButton = true
 
   const pageTitle = isAll ? "UMC 11th" : chapterTab
   const statusCardTitle = isAll ? "전체 지원자 현황" : "지부 지원자 현황"
@@ -298,47 +350,39 @@ export function RecruitmentQuotaPage() {
               </p>
             </div>
 
-            {!isAll && !hasApplicants ? (
-              <div className="flex h-65 w-full items-center justify-center">
-                <p className="text-body-2-medium text-teal-gray-400">
-                  현재 TO를 정할 지원자가 없습니다.
-                </p>
-              </div>
-            ) : (
-              <div className="flex w-full flex-col gap-10">
-                {isAll ? (
-                  chaptersDataWithEdits.map((chapterData) => (
-                    <ChapterQuotaTableCard
-                      key={chapterData.chapter}
-                      data={chapterData}
-                      status={allocationStatus}
-                      onDirtyChange={() => setIsDirty(true)}
-                      onManualEdit={handleManualEdit}
-                      onErrorExceeded={handleErrorExceeded}
-                      onSchoolsDataChange={(schools) =>
-                        handleSchoolsDataChange(chapterData.chapter, schools)
-                      }
-                      autoAllocateTrigger={autoAllocateTrigger}
-                    />
-                  ))
-                ) : (
+            <div className="flex w-full flex-col gap-10">
+              {isAll ? (
+                chaptersDataWithEdits.map((chapterData) => (
                   <ChapterQuotaTableCard
-                    data={selectedChapterData}
+                    key={chapterData.chapter}
+                    data={chapterData}
                     status={allocationStatus}
                     onDirtyChange={() => setIsDirty(true)}
                     onManualEdit={handleManualEdit}
                     onErrorExceeded={handleErrorExceeded}
                     onSchoolsDataChange={(schools) =>
-                      handleSchoolsDataChange(
-                        selectedChapterData.chapter,
-                        schools,
-                      )
+                      handleSchoolsDataChange(chapterData.chapter, schools)
                     }
                     autoAllocateTrigger={autoAllocateTrigger}
                   />
-                )}
-              </div>
-            )}
+                ))
+              ) : (
+                <ChapterQuotaTableCard
+                  data={selectedChapterData}
+                  status={allocationStatus}
+                  onDirtyChange={() => setIsDirty(true)}
+                  onManualEdit={handleManualEdit}
+                  onErrorExceeded={handleErrorExceeded}
+                  onSchoolsDataChange={(schools) =>
+                    handleSchoolsDataChange(
+                      selectedChapterData.chapter,
+                      schools,
+                    )
+                  }
+                  autoAllocateTrigger={autoAllocateTrigger}
+                />
+              )}
+            </div>
           </div>
 
           {/* 자동 배정 확인 CtaModal */}

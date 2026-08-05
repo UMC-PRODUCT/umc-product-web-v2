@@ -86,8 +86,6 @@ export function ChapterQuotaTableCard({
     onSchoolsDataChangeRef.current?.(updatedSchools)
   }, [autoAllocateTrigger, data.schools, data.totals])
 
-  const hasApplicants = schoolsData.length > 0
-
   const checkIsAllValid = (schools: SchoolQuotaRow[]) => {
     const pmSum = schools.reduce((acc, s) => acc + s.pm, 0)
     const designSum = schools.reduce((acc, s) => acc + s.design, 0)
@@ -229,221 +227,204 @@ export function ChapterQuotaTableCard({
           </div>
         </div>
 
-        {!hasApplicants ? (
-          /* row - 지원자가 없을 때 */
-          <div className="flex h-65 w-full items-center justify-center">
-            <p className="text-body-2-medium text-teal-gray-400">
-              현재 TO를 정할 지원자가 없습니다.
+        {/* School rows */}
+        {schoolsData.map((school) => {
+          return (
+            <div
+              key={school.schoolName}
+              className="divide-teal-gray-300 flex h-14 w-full divide-x"
+            >
+              <div className="bg-teal-gray-50 flex w-42.5 items-center justify-center">
+                <p className="text-heading-7-semibold text-teal-gray-700">
+                  {school.schoolName}
+                </p>
+              </div>
+              <QuotaEditableCell
+                partName="PM"
+                value={school.pm}
+                maxAllowed={getMaxAllowedForSchool("pm", school.schoolName)}
+                onChange={(val) =>
+                  handleCellChange(school.schoolName, "pm", val)
+                }
+                onErrorExceeded={onErrorExceeded}
+              />
+              <QuotaEditableCell
+                partName="Design"
+                value={school.design}
+                maxAllowed={getMaxAllowedForSchool("design", school.schoolName)}
+                onChange={(val) =>
+                  handleCellChange(school.schoolName, "design", val)
+                }
+                onErrorExceeded={onErrorExceeded}
+              />
+              <QuotaEditableCell
+                partName="Web PE"
+                value={school.webPe}
+                maxAllowed={getMaxAllowedForSchool("webPe", school.schoolName)}
+                onChange={(val) =>
+                  handleCellChange(school.schoolName, "webPe", val)
+                }
+                onErrorExceeded={onErrorExceeded}
+              />
+              <QuotaEditableCell
+                partName="Mobile PE"
+                value={school.mobilePe}
+                maxAllowed={getMaxAllowedForSchool(
+                  "mobilePe",
+                  school.schoolName,
+                )}
+                onChange={(val) =>
+                  handleCellChange(school.schoolName, "mobilePe", val)
+                }
+                onErrorExceeded={onErrorExceeded}
+              />
+              <div className="bg-teal-gray-100 relative w-35">
+                <p className="text-body-2-medium text-teal-gray-400 absolute inset-x-0 top-[3.5px] text-center">
+                  {school.schoolName}
+                </p>
+                <p className="absolute inset-x-0 bottom-[3.5px] text-center">
+                  <span className="text-heading-6-semibold text-teal-500">
+                    {school.total}
+                  </span>
+                  <span className="text-subtitle-1-medium text-teal-gray-400 pl-px">
+                    명
+                  </span>
+                </p>
+              </div>
+            </div>
+          )
+        })}
+
+        {/* Remaining row */}
+        <div className="divide-teal-gray-300 flex h-11 w-full divide-x">
+          <div className="bg-warning-50 flex w-42.5 items-center justify-center">
+            <p className="text-subtitle-1-medium text-warning-500">잔여</p>
+          </div>
+          <div className="flex flex-1 items-center justify-center bg-white">
+            {remainingPM > 0 ? (
+              <p>
+                <span className="text-subtitle-1-medium text-warning-500">
+                  {remainingPM}
+                </span>
+                <span className="text-subtitle-1-medium text-warning-500 pl-px">
+                  명
+                </span>
+              </p>
+            ) : (
+              <p className="text-subtitle-1-medium text-teal-gray-700">-</p>
+            )}
+          </div>
+          <div className="flex flex-1 items-center justify-center bg-white">
+            {remainingDesign > 0 ? (
+              <p>
+                <span className="text-subtitle-1-medium text-warning-500">
+                  {remainingDesign}
+                </span>
+                <span className="text-subtitle-1-medium text-warning-500 pl-px">
+                  명
+                </span>
+              </p>
+            ) : (
+              <p className="text-subtitle-1-medium text-teal-gray-700">-</p>
+            )}
+          </div>
+          <div className="flex flex-1 items-center justify-center bg-white">
+            {remainingWebPe > 0 ? (
+              <p>
+                <span className="text-subtitle-1-medium text-warning-500">
+                  {remainingWebPe}
+                </span>
+                <span className="text-subtitle-1-medium text-warning-500 pl-px">
+                  명
+                </span>
+              </p>
+            ) : (
+              <p className="text-subtitle-1-medium text-teal-gray-700">-</p>
+            )}
+          </div>
+          <div className="flex flex-1 items-center justify-center bg-white">
+            {remainingMobilePe > 0 ? (
+              <p>
+                <span className="text-subtitle-1-medium text-warning-500">
+                  {remainingMobilePe}
+                </span>
+                <span className="text-subtitle-1-medium text-warning-500 pl-px">
+                  명
+                </span>
+              </p>
+            ) : (
+              <p className="text-subtitle-1-medium text-teal-gray-700">-</p>
+            )}
+          </div>
+          <div className="bg-warning-50 text-subtitle-1-medium text-warning-500 flex w-35 items-center justify-center gap-1">
+            <p>총</p>
+            <p>{remainingTotal}</p>
+            <p>명</p>
+          </div>
+        </div>
+
+        {/* Totals row */}
+        <div className="divide-teal-gray-300 flex h-14 w-full divide-x">
+          <div className="bg-teal-gray-50 flex w-42.5 items-center justify-center">
+            <p className="text-subtitle-1-medium text-teal-gray-900">
+              지부 전체
             </p>
           </div>
-        ) : (
-          <>
-            {/* School rows */}
-            {schoolsData.map((school) => {
-              return (
-                <div
-                  key={school.schoolName}
-                  className="divide-teal-gray-300 flex h-14 w-full divide-x"
-                >
-                  <div className="bg-teal-gray-50 flex w-42.5 items-center justify-center">
-                    <p className="text-heading-7-semibold text-teal-gray-700">
-                      {school.schoolName}
-                    </p>
-                  </div>
-                  <QuotaEditableCell
-                    partName="PM"
-                    value={school.pm}
-                    maxAllowed={getMaxAllowedForSchool("pm", school.schoolName)}
-                    onChange={(val) =>
-                      handleCellChange(school.schoolName, "pm", val)
-                    }
-                    onErrorExceeded={onErrorExceeded}
-                  />
-                  <QuotaEditableCell
-                    partName="Design"
-                    value={school.design}
-                    maxAllowed={getMaxAllowedForSchool(
-                      "design",
-                      school.schoolName,
-                    )}
-                    onChange={(val) =>
-                      handleCellChange(school.schoolName, "design", val)
-                    }
-                    onErrorExceeded={onErrorExceeded}
-                  />
-                  <QuotaEditableCell
-                    partName="Web PE"
-                    value={school.webPe}
-                    maxAllowed={getMaxAllowedForSchool(
-                      "webPe",
-                      school.schoolName,
-                    )}
-                    onChange={(val) =>
-                      handleCellChange(school.schoolName, "webPe", val)
-                    }
-                    onErrorExceeded={onErrorExceeded}
-                  />
-                  <QuotaEditableCell
-                    partName="Mobile PE"
-                    value={school.mobilePe}
-                    maxAllowed={getMaxAllowedForSchool(
-                      "mobilePe",
-                      school.schoolName,
-                    )}
-                    onChange={(val) =>
-                      handleCellChange(school.schoolName, "mobilePe", val)
-                    }
-                    onErrorExceeded={onErrorExceeded}
-                  />
-                  <div className="bg-teal-gray-100 relative w-35">
-                    <p className="text-body-2-medium text-teal-gray-400 absolute inset-x-0 top-[3.5px] text-center">
-                      {school.schoolName}
-                    </p>
-                    <p className="absolute inset-x-0 bottom-[3.5px] text-center">
-                      <span className="text-heading-6-semibold text-teal-500">
-                        {school.total}
-                      </span>
-                      <span className="text-subtitle-1-medium text-teal-gray-400 pl-px">
-                        명
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
+          <div className="flex flex-1 items-center justify-center bg-teal-100">
+            <p>
+              <span className="text-heading-6-semibold text-teal-600">
+                {fixedTotals.pm}
+              </span>
+              <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
+                명
+              </span>
+            </p>
+          </div>
+          <div className="flex flex-1 items-center justify-center bg-teal-100">
+            <p>
+              <span className="text-heading-6-semibold text-teal-600">
+                {fixedTotals.design}
+              </span>
+              <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
+                명
+              </span>
+            </p>
+          </div>
+          <div className="flex flex-1 items-center justify-center bg-teal-100">
+            <p>
+              <span className="text-heading-6-semibold text-teal-600">
+                {fixedTotals.webPe}
+              </span>
+              <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
+                명
+              </span>
+            </p>
+          </div>
+          <div className="flex flex-1 items-center justify-center bg-teal-100">
+            <p>
+              <span className="text-heading-6-semibold text-teal-600">
+                {fixedTotals.mobilePe}
+              </span>
+              <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
+                명
+              </span>
+            </p>
+          </div>
 
-            {/* Remaining row */}
-            <div className="divide-teal-gray-300 flex h-11 w-full divide-x">
-              <div className="bg-warning-50 flex w-42.5 items-center justify-center">
-                <p className="text-subtitle-1-medium text-warning-500">잔여</p>
-              </div>
-              <div className="flex flex-1 items-center justify-center bg-white">
-                {remainingPM > 0 ? (
-                  <p>
-                    <span className="text-subtitle-1-medium text-warning-500">
-                      {remainingPM}
-                    </span>
-                    <span className="text-subtitle-1-medium text-warning-500 pl-px">
-                      명
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-subtitle-1-medium text-teal-gray-700">-</p>
-                )}
-              </div>
-              <div className="flex flex-1 items-center justify-center bg-white">
-                {remainingDesign > 0 ? (
-                  <p>
-                    <span className="text-subtitle-1-medium text-warning-500">
-                      {remainingDesign}
-                    </span>
-                    <span className="text-subtitle-1-medium text-warning-500 pl-px">
-                      명
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-subtitle-1-medium text-teal-gray-700">-</p>
-                )}
-              </div>
-              <div className="flex flex-1 items-center justify-center bg-white">
-                {remainingWebPe > 0 ? (
-                  <p>
-                    <span className="text-subtitle-1-medium text-warning-500">
-                      {remainingWebPe}
-                    </span>
-                    <span className="text-subtitle-1-medium text-warning-500 pl-px">
-                      명
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-subtitle-1-medium text-teal-gray-700">-</p>
-                )}
-              </div>
-              <div className="flex flex-1 items-center justify-center bg-white">
-                {remainingMobilePe > 0 ? (
-                  <p>
-                    <span className="text-subtitle-1-medium text-warning-500">
-                      {remainingMobilePe}
-                    </span>
-                    <span className="text-subtitle-1-medium text-warning-500 pl-px">
-                      명
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-subtitle-1-medium text-teal-gray-700">-</p>
-                )}
-              </div>
-              <div className="bg-warning-50 text-subtitle-1-medium text-warning-500 flex w-35 items-center justify-center gap-1">
-                <p>총</p>
-                <p>{remainingTotal}</p>
-                <p>명</p>
-              </div>
-            </div>
-
-            {/* Totals row */}
-            <div className="divide-teal-gray-300 flex h-14 w-full divide-x">
-              <div className="bg-teal-gray-50 flex w-42.5 items-center justify-center">
-                <p className="text-subtitle-1-medium text-teal-gray-900">
-                  지부 전체
-                </p>
-              </div>
-              <div className="flex flex-1 items-center justify-center bg-teal-100">
-                <p>
-                  <span className="text-heading-6-semibold text-teal-600">
-                    {fixedTotals.pm}
-                  </span>
-                  <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
-                    명
-                  </span>
-                </p>
-              </div>
-              <div className="flex flex-1 items-center justify-center bg-teal-100">
-                <p>
-                  <span className="text-heading-6-semibold text-teal-600">
-                    {fixedTotals.design}
-                  </span>
-                  <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
-                    명
-                  </span>
-                </p>
-              </div>
-              <div className="flex flex-1 items-center justify-center bg-teal-100">
-                <p>
-                  <span className="text-heading-6-semibold text-teal-600">
-                    {fixedTotals.webPe}
-                  </span>
-                  <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
-                    명
-                  </span>
-                </p>
-              </div>
-              <div className="flex flex-1 items-center justify-center bg-teal-100">
-                <p>
-                  <span className="text-heading-6-semibold text-teal-600">
-                    {fixedTotals.mobilePe}
-                  </span>
-                  <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
-                    명
-                  </span>
-                </p>
-              </div>
-
-              <div
-                className="flex h-14 w-35 shrink-0 items-center justify-center gap-1"
-                style={{
-                  background:
-                    "linear-gradient(0deg, rgba(199, 235, 230, 0.4), rgba(199, 235, 230, 0.4)), #E5F5F2",
-                }}
-              >
-                <p className="text-heading-6-semibold text-teal-600">총</p>
-                <p className="text-heading-6-semibold text-teal-600">
-                  {fixedTotals.total}
-                </p>
-                <p className="text-subtitle-1-medium text-teal-gray-400">명</p>
-              </div>
-            </div>
-          </>
-        )}
+          <div
+            className="flex h-14 w-35 shrink-0 items-center justify-center gap-1"
+            style={{
+              background:
+                "linear-gradient(0deg, rgba(199, 235, 230, 0.4), rgba(199, 235, 230, 0.4)), #E5F5F2",
+            }}
+          >
+            <p className="text-heading-6-semibold text-teal-600">총</p>
+            <p className="text-heading-6-semibold text-teal-600">
+              {fixedTotals.total}
+            </p>
+            <p className="text-subtitle-1-medium text-teal-gray-400">명</p>
+          </div>
+        </div>
       </div>
     </div>
   )
