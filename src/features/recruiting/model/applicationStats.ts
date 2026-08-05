@@ -63,6 +63,16 @@ export function groupByChapter(
     if (group) {
       group.totalCount += school.totalCount
       addPartCounts(group.partCounts, entry.partCounts)
+      // 같은 학교가 여러 행으로 오면 목록에 두 번 뜬다. countSchools 는 schoolId 로
+      // 세므로 카드 제목("총 N 학교")과 목록 개수가 어긋난다.
+      const existing = group.schools.find(
+        (item) => item.schoolId === entry.schoolId,
+      )
+      if (existing) {
+        existing.totalCount += entry.totalCount
+        addPartCounts(existing.partCounts, entry.partCounts)
+        continue
+      }
       group.schools.push(entry)
       continue
     }

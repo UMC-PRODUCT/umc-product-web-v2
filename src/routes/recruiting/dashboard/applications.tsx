@@ -154,9 +154,10 @@ function RouteComponent() {
               chapterId: group.chapterId,
               chapterName: group.chapterName,
               // 서버는 정식 명칭("가천대학교")을 주는데 카드가 2열 좁은 그리드라 줄여 쓴다.
-              schools: group.schools.map((school) =>
-                shortenSchoolName(school.schoolName),
-              ),
+              schools: group.schools.map((school) => ({
+                schoolId: school.schoolId,
+                name: shortenSchoolName(school.schoolName),
+              })),
             }))}
           />
         </div>

@@ -39,6 +39,21 @@ describe("groupByChapter", () => {
     expect(groupByChapter(summary([]))).toEqual([])
   })
 
+  // countSchools 는 schoolId 로 세므로, 여기서 합치지 않으면 카드 제목의 학교 수와
+  // 목록 항목 수가 어긋난다.
+  it("같은 학교가 여러 행으로 오면 한 항목으로 합친다", () => {
+    const groups = groupByChapter(
+      summary([
+        school({ schoolId: "1", schoolName: "가천대", totalCount: 10 }),
+        school({ schoolId: "1", schoolName: "가천대", totalCount: 5 }),
+      ]),
+    )
+
+    expect(groups[0]?.schools).toHaveLength(1)
+    expect(groups[0]?.schools[0]?.totalCount).toBe(15)
+    expect(groups[0]?.totalCount).toBe(15)
+  })
+
   it("같은 지부의 학교를 묶고 totalCount 를 합산한다", () => {
     const groups = groupByChapter(
       summary([
