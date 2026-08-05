@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react"
 import { useViewModeStore } from "@/entities/member/view-mode"
 import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
 import { resolveNavigationFromPathname } from "@/shared/config/navigationResolve"
-import { cn } from "@/shared/lib/utils"
+import { useActiveGeneration } from "@/shared/hooks/useActiveGisu"
+import { toDemoDayLabel } from "@/shared/lib/gisuLabel"
 
+import { BaseSideBar } from "./BaseSideBar"
 import { SideBarMenu } from "./menu/SideBarMenu"
 import { SideBarMenuItem } from "./menu/SideBarMenuItem"
 import { SideBarViewSwitcher } from "./SideBarViewSwitcher"
@@ -20,6 +22,7 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
   const currentPathname = useRouterState({ select: (s) => s.location.pathname })
   const pathname = activePathname ?? currentPathname
   const { visibleSections, isLoading } = useVisibleSidebarSections()
+  const { data: generation } = useActiveGeneration()
   const navigate = useNavigate()
   const mode = useViewModeStore((s) => s.mode)
   const prevModeRef = useRef(mode)
@@ -53,44 +56,37 @@ export default function SideBar({ className, activePathname }: SideBarProps) {
   }, [mode, visibleSections, pathname, navigate, activePathname])
 
   return (
-    <nav
-      aria-label="사이드 메뉴"
-      className={cn(
-        "border-teal-gray-200 flex w-55 shrink-0 flex-col items-center justify-start border-r pt-4",
-        className,
-      )}
+    <BaseSideBar
+      ariaLabel="사이드 메뉴"
+      label={isLoading ? undefined : toDemoDayLabel(generation)}
+      className={className}
+      header={<SideBarViewSwitcher />}
     >
-      <SideBarViewSwitcher />
-      {!isLoading && (
-        <div className="flex flex-col py-4">
-          <span className="text-body-3-regular text-teal-gray-400 mb-2 pl-0.5">
-            10th Demo Day
-          </span>
-          {visibleSections.map(({ id, title, icon, menus }) => (
-            <SideBarMenu
-              key={id}
-              id={id}
-              title={title}
-              icon={icon}
-              isActive={activeSectionId === id}
-              isOpen={activeSectionId === id || manualOpenSectionId === id}
-              onToggle={() => {
-                if (activeSectionId === id) return
-                setManualOpenSectionId((prev) => (prev === id ? "" : id))
-              }}
-            >
-              {menus.map((menu) => (
-                <SideBarMenuItem
-                  key={menu.id}
-                  title={menu.title}
-                  to={menu.to}
-                  activePathname={activePathname}
-                />
-              ))}
-            </SideBarMenu>
-          ))}
-        </div>
-      )}
-    </nav>
+      {/* 권한 필터 결과가 오기 전에 그리면 메뉴가 나타났다 사라진다 */}
+      {!isLoading &&
+        visibleSections.map(({ id, title, icon, menus }) => (
+          <SideBarMenu
+            key={id}
+            id={id}
+            title={title}
+            icon={icon}
+            isActive={activeSectionId === id}
+            isOpen={activeSectionId === id || manualOpenSectionId === id}
+            onToggle={() => {
+              if (activeSectionId === id) return
+              setManualOpenSectionId((prev) => (prev === id ? "" : id))
+            }}
+          >
+            {menus.map((menu) => (
+              <SideBarMenuItem
+                key={menu.id}
+                title={menu.title}
+                to={menu.to}
+                activePathname={activePathname}
+              />
+            ))}
+          </SideBarMenu>
+        ))}
+    </BaseSideBar>
   )
 }

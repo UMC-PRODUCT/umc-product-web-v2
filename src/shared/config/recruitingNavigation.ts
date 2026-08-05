@@ -6,8 +6,6 @@ export interface RecruitingSideBarSection extends SideBarSection {
   to?: string
 }
 
-export const RECRUITING_GISU_LABEL = "UMC 10th"
-
 export const RECRUITING_SIDEBAR_ITEMS: RecruitingSideBarSection[] = [
   {
     id: "recruiting-dashboard",

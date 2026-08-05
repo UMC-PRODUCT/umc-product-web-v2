@@ -1,4 +1,5 @@
 import {
+  type FlatNavItem,
   SIDEBAR_ITEMS,
   SIDEBAR_MENU_BY_ID,
   type SideBarMenu,
@@ -60,6 +61,29 @@ export function resolveNavigationFromPathname(
     }
   }
   return picked
+}
+
+/**
+ * 평면 사이드바에서 현재 경로에 해당하는 항목 id.
+ * 대분류가 없을 뿐 매칭 규칙(최장 일치 + matchPaths)은 위와 같아야 해서 같은 헬퍼를 쓴다.
+ */
+export function resolveFlatNavItemId(
+  pathname: string,
+  items: readonly FlatNavItem[],
+): string | undefined {
+  const path = normalizePathname(pathname)
+  let bestLen = -1
+  let pickedId: string | undefined
+
+  for (const item of items) {
+    const matchedPath = getMatchedPath(path, item)
+    if (matchedPath === null) continue
+    if (matchedPath.length > bestLen) {
+      bestLen = matchedPath.length
+      pickedId = item.id
+    }
+  }
+  return pickedId
 }
 
 /** 탭 id(menu.id) → 이동 경로 */
