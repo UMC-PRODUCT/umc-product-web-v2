@@ -9,6 +9,7 @@ import type {
   ConfirmInterviewSchedulesRequest,
   CreateApplicationDraftBody,
   CreateRecruitingRoundRequest,
+  CreateRecruitingSeasonRequest,
   DecisionHistoriesQuery,
   FinalDecisionBody,
   FormStructureQuery,
@@ -58,6 +59,7 @@ import type {
   UpdateApplicationDraftBody,
   UpdateRecruitingRoundRequest,
   UpdateRecruitingRoundStatusRequest,
+  UpdateRecruitingSeasonRequest,
   UpsertRecruitingApplicationFormRequest,
 } from "./types"
 
@@ -522,6 +524,25 @@ export async function updateRecruitingSeasonQuotas(
   payload: ReplaceRecruitingSeasonTrackQuotasRequest,
 ): Promise<void> {
   await api.put(`/v1/recruiting/admin/seasons/${seasonId}/quotas`, payload)
+}
+
+// 모집 시즌 생성 (RECRUITING-ADMIN-002).
+export async function createRecruitingSeason(
+  payload: CreateRecruitingSeasonRequest,
+): Promise<string> {
+  const { data } = await api.post<ApiResponse<{ id: number }>>(
+    "/v1/recruiting/admin/seasons",
+    payload,
+  )
+  return String(data.result.id)
+}
+
+// 모집 시즌 수정 (RECRUITING-ADMIN-003).
+export async function updateRecruitingSeason(
+  seasonId: string,
+  payload: UpdateRecruitingSeasonRequest,
+): Promise<void> {
+  await api.patch(`/v1/recruiting/admin/seasons/${seasonId}`, payload)
 }
 
 export async function checkRecruitingRoundTitleAvailability(

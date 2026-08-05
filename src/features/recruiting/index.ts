@@ -1,5 +1,10 @@
+export {
+  createRecruitingSeason,
+  updateRecruitingSeason,
+} from "./api/recruitingApi"
 export type {
   AnswerResponse,
+  CreateRecruitingSeasonRequest,
   RecruitingApplicationAnswer,
   RecruitingApplicationCredentialRequest,
   RecruitingFormQuestion,
@@ -10,6 +15,7 @@ export type {
   RecruitingTrack,
   SubmitAnonymousApplicationRequest,
   UpdateAnonymousApplicationRequest,
+  UpdateRecruitingSeasonRequest,
 } from "./api/types"
 export {
   getAnonymousSessionId,
