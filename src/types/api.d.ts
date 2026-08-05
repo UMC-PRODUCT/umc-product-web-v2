@@ -5360,6 +5360,26 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/v1/recruiting/admin/statistics/evaluations": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 평가 현황 집계 조회
+     * @description 기수 내 지부별·학교별·1지망 파트별 지원자 수와 평가 완료 수를 집계합니다. 평가 완료는 서류 불합격 또는 최종 판정이 확정된 지원서를 뜻하며, DRAFT와 CANCELLED 지원서는 집계에서 제외합니다.
+     */
+    get: operations["RECRUITING-ADMIN-083"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/v1/recruiting/admin/statistics.csv": {
     parameters: {
       query?: never
@@ -5432,6 +5452,46 @@ export interface paths {
      * @description 모집 차수의 서류·면접 공통 평가자 whitelist를 조회합니다.
      */
     get: operations["RECRUITING-ADMIN-033"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/decision-histories": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 평가 이력 조회
+     * @description 교내 회장단·중앙 총괄단의 서류/최종 판정 이력을 감사 목적으로 조회합니다. SUPER_ADMIN과 기수 내 중앙운영사무국 구성원만 접근할 수 있으며, 담당자별 정렬 시 담당자의 최초 판정 시각 순으로 그룹을 배치하고 그룹 내부는 요청한 정렬 순서를 따릅니다.
+     */
+    get: operations["RECRUITING-ADMIN-091"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/v1/recruiting/admin/decision-histories.csv": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 평가 이력 CSV 다운로드
+     * @description 평가 이력 조회와 같은 조건으로 원문 이메일과 실명을 제외한 CSV를 다운로드합니다.
+     */
+    get: operations["RECRUITING-ADMIN-092"]
     put?: never
     post?: never
     delete?: never
@@ -8400,6 +8460,11 @@ export interface components {
        */
       schoolName: string
       /**
+       * @description 학교 약칭
+       * @example 서울대
+       */
+      shortName?: string
+      /**
        * @description 비고
        * @example 관악캠퍼스
        */
@@ -10576,6 +10641,11 @@ export interface components {
        */
       schoolName?: string
       /**
+       * @description 학교 약칭 (수정할 경우만 입력)
+       * @example 서울대
+       */
+      shortName?: string
+      /**
        * Format: int64
        * @description 지부 ID (수정할 경우만 입력)
        * @example 1
@@ -11855,6 +11925,11 @@ export interface components {
        */
       schoolName?: string
       /**
+       * @description 학교 약칭
+       * @example 서울대
+       */
+      shortName?: string
+      /**
        * Format: int64
        * @description 학교 ID
        * @example 1
@@ -11914,6 +11989,7 @@ export interface components {
       chapterId?: number
       chapterName?: string
       schoolName?: string
+      shortName?: string
       /** Format: int64 */
       schoolId?: number
       remark?: string
@@ -12226,6 +12302,29 @@ export interface components {
        */
       location?: string
     }
+    /** @description 1지망 파트별 상태 교차집계 항목 */
+    PartSummaryResponse: {
+      /**
+       * @description 1지망 파트
+       * @enum {string}
+       */
+      part?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /**
+       * Format: int64
+       * @description 파트 지원서 수
+       * @example 24
+       */
+      totalCount?: number
+      /** @description 파트 내 지원서 상태별 수 */
+      countByStatus?: {
+        [key: string]: number
+      }
+    }
     /** @description 지원 현황 상태별 집계 응답 */
     RecruitingStatusSummaryResponse: {
       /**
@@ -12238,6 +12337,8 @@ export interface components {
       countByStatus?: {
         [key: string]: number
       }
+      /** @description 1지망 파트별 상태 교차집계 */
+      parts?: components["schemas"]["PartSummaryResponse"][]
       schools?: components["schemas"]["SchoolSummaryResponse"][]
     }
     RoundSummaryResponse: {
@@ -12253,6 +12354,7 @@ export interface components {
       countByStatus?: {
         [key: string]: number
       }
+      parts?: components["schemas"]["PartSummaryResponse"][]
     }
     SchoolSummaryResponse: {
       /** Format: int64 */
@@ -12266,7 +12368,67 @@ export interface components {
       countByStatus?: {
         [key: string]: number
       }
+      parts?: components["schemas"]["PartSummaryResponse"][]
       rounds?: components["schemas"]["RoundSummaryResponse"][]
+    }
+    /** @description 지부별 집계 (지부 가나다순, 지부 내 학교 가나다순) */
+    ChapterStatisticsResponse: {
+      /** Format: int64 */
+      chapterId?: number
+      chapterName?: string
+      /** Format: int64 */
+      applicantCount?: number
+      /** Format: int64 */
+      evaluatedCount?: number
+      byTrack?: components["schemas"]["TrackCountResponse"][]
+      schools?: components["schemas"]["SchoolStatisticsResponse"][]
+    }
+    /** @description 평가 현황 집계 응답 */
+    RecruitingEvaluationStatisticsResponse: {
+      /**
+       * Format: date-time
+       * @description 집계 기준 시각
+       */
+      asOf?: string
+      /**
+       * Format: int64
+       * @description 총 지원자 수 (DRAFT, CANCELLED 제외)
+       * @example 1500
+       */
+      applicantCount?: number
+      /**
+       * Format: int64
+       * @description 평가 완료 지원자 수 (서류 불합격 및 최종 판정 확정)
+       * @example 1000
+       */
+      evaluatedCount?: number
+      /** @description 1지망 파트별 집계 */
+      byTrack?: components["schemas"]["TrackCountResponse"][]
+      /** @description 지부별 집계 (지부 가나다순, 지부 내 학교 가나다순) */
+      chapters?: components["schemas"]["ChapterStatisticsResponse"][]
+    }
+    SchoolStatisticsResponse: {
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      /** Format: int64 */
+      applicantCount?: number
+      /** Format: int64 */
+      evaluatedCount?: number
+      byTrack?: components["schemas"]["TrackCountResponse"][]
+    }
+    TrackCountResponse: {
+      /** @enum {string} */
+      track?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** Format: int64 */
+      applicantCount?: number
+      /** Format: int64 */
+      evaluatedCount?: number
     }
     /** @description 트랙별 모집 목표 인원 */
     QuotaResponse: {
@@ -12417,6 +12579,101 @@ export interface components {
        * @example 99
        */
       memberId?: number
+    }
+    ApplicantResponse: {
+      /** Format: int64 */
+      chapterId?: number
+      chapterName?: string
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      name?: string
+      /** @enum {string} */
+      firstChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** @enum {string} */
+      secondChoice?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+      /** @enum {string} */
+      acceptedTrack?:
+        | "PLAN"
+        | "DESIGN"
+        | "WEB_PRODUCT_ENGINEER"
+        | "MOBILE_PRODUCT_ENGINEER"
+        | "INFRA_PLUS"
+    }
+    DeciderResponse: {
+      /** Format: int64 */
+      memberId?: number
+      /** Format: int64 */
+      chapterId?: number
+      chapterName?: string
+      /** Format: int64 */
+      schoolId?: number
+      schoolName?: string
+      /** @enum {string} */
+      roleType?:
+        | "CENTRAL_PRESIDENT"
+        | "CENTRAL_VICE_PRESIDENT"
+        | "CENTRAL_OPERATING_TEAM_MEMBER"
+        | "CENTRAL_EDUCATION_TEAM_MEMBER"
+        | "CHAPTER_PRESIDENT"
+        | "SCHOOL_PRESIDENT"
+        | "SCHOOL_VICE_PRESIDENT"
+        | "SCHOOL_PART_LEADER"
+        | "SCHOOL_ETC_ADMIN"
+      name?: string
+      nickname?: string
+    }
+    PageResponseRecruitingDecisionHistoryResponse: {
+      content?: components["schemas"]["RecruitingDecisionHistoryResponse"][]
+      /** Format: int32 */
+      page?: number
+      /** Format: int32 */
+      size?: number
+      /** Format: int64 */
+      totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
+      hasNext?: boolean
+      hasPrevious?: boolean
+    }
+    RecruitingDecisionHistoryPageResponse: {
+      /** Format: date-time */
+      asOf?: string
+      /** @enum {string} */
+      progressStatus?: "BEFORE_EVALUATION" | "IN_PROGRESS" | "COMPLETED"
+      histories?: components["schemas"]["PageResponseRecruitingDecisionHistoryResponse"]
+    }
+    RecruitingDecisionHistoryResponse: {
+      /** Format: int64 */
+      decisionHistoryId?: number
+      /** Format: int64 */
+      applicationId?: number
+      /** Format: date-time */
+      decidedAt?: string
+      /** @enum {string} */
+      decisionStatus?:
+        | "DRAFT"
+        | "SUBMITTED"
+        | "DOCUMENT_FAILED"
+        | "INTERVIEW_ASSIGNED"
+        | "INTERVIEW_SKIPPED"
+        | "FINAL_PASSED"
+        | "FINAL_FAILED"
+        | "CANCELLED"
+      /** @enum {string} */
+      result?: "PASSED" | "FAILED"
+      applicant?: components["schemas"]["ApplicantResponse"]
+      decider?: components["schemas"]["DeciderResponse"]
     }
     MemberBrief: {
       /** Format: int64 */
@@ -13982,12 +14239,12 @@ export interface components {
       /** Format: int64 */
       offset?: number
       sort?: components["schemas"]["SortObject"]
+      unpaged?: boolean
+      /** Format: int32 */
+      pageNumber?: number
       paged?: boolean
       /** Format: int32 */
       pageSize?: number
-      /** Format: int32 */
-      pageNumber?: number
-      unpaged?: boolean
     }
     SortObject: {
       empty?: boolean
@@ -22315,6 +22572,28 @@ export interface operations {
       }
     }
   }
+  "RECRUITING-ADMIN-083": {
+    parameters: {
+      query: {
+        gisuId: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingEvaluationStatisticsResponse"]
+        }
+      }
+    }
+  }
   "RECRUITING-ADMIN-082": {
     parameters: {
       query: {
@@ -22431,6 +22710,81 @@ export interface operations {
         }
         content: {
           "*/*": components["schemas"]["RecruitingRoundEvaluatorResponse"][]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-091": {
+    parameters: {
+      query: {
+        gisuId: number
+        chapterIds?: number[]
+        schoolIds?: number[]
+        tracks?: (
+          | "PLAN"
+          | "DESIGN"
+          | "WEB_PRODUCT_ENGINEER"
+          | "MOBILE_PRODUCT_ENGINEER"
+          | "INFRA_PLUS"
+        )[]
+        results?: ("PASSED" | "FAILED")[]
+        searchName?: string
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: "LATEST" | "OLDEST"
+        groupByDecider?: boolean
+        /** @description Zero-based page index (0..N) */
+        page?: number
+        /** @description The size of the page to be returned */
+        size?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["RecruitingDecisionHistoryPageResponse"]
+        }
+      }
+    }
+  }
+  "RECRUITING-ADMIN-092": {
+    parameters: {
+      query: {
+        gisuId: number
+        chapterIds?: number[]
+        schoolIds?: number[]
+        tracks?: (
+          | "PLAN"
+          | "DESIGN"
+          | "WEB_PRODUCT_ENGINEER"
+          | "MOBILE_PRODUCT_ENGINEER"
+          | "INFRA_PLUS"
+        )[]
+        results?: ("PASSED" | "FAILED")[]
+        searchName?: string
+        sort?: "LATEST" | "OLDEST"
+        groupByDecider?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": string
         }
       }
     }
