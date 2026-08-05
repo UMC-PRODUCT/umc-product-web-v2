@@ -313,6 +313,7 @@ export function normalizeStatusSummary(
       rounds: (school.rounds ?? []).map((round) => ({
         ...round,
         roundId: String(round.roundId),
+        roundNo: toCount(round.roundNo),
         totalCount: toCount(round.totalCount),
         countByStatus: toStatusCounts(round.countByStatus),
         parts: toPartSummaries(round.parts),

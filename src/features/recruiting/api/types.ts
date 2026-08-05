@@ -308,11 +308,13 @@ export type RawPartSummary = Omit<
   countByStatus?: RawStatusCounts
 }
 
+// roundNo 도 건수와 마찬가지로 문자열로 온다(2026-08-05 dev 실응답 "1").
 export type RawRoundStatusSummary = Omit<
   RecruitingRoundStatusSummary,
-  "roundId" | "totalCount" | "countByStatus" | "parts"
+  "roundId" | "roundNo" | "totalCount" | "countByStatus" | "parts"
 > & {
   roundId: RawId
+  roundNo: RawCount
   totalCount: RawCount
   countByStatus?: RawStatusCounts
   parts?: RawPartSummary[]

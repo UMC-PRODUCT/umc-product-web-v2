@@ -282,7 +282,7 @@ describe("normalizeStatusSummary", () => {
             roundId: "10",
             roundTitle: "10기 본모집",
             roundType: "REGULAR" as const,
-            roundNo: 1,
+            roundNo: "1",
             totalCount: "5",
             countByStatus: { SUBMITTED: "5" },
           },
@@ -308,6 +308,8 @@ describe("normalizeStatusSummary", () => {
     expect(result.schools[0]?.totalCount).toBe(5)
     expect(result.schools[0]?.rounds[0]?.totalCount).toBe(5)
     expect(result.schools[0]?.rounds[0]?.countByStatus.SUBMITTED).toBe(5)
+    // 차수 번호도 문자열로 온다. 타입만 number 라 비교 연산이 조용히 어긋난다.
+    expect(result.schools[0]?.rounds[0]?.roundNo).toBe(1)
   })
 
   // 문자열로 두면 합산이 "5" + "7" = "57" 이 되어 조용히 틀린다.
