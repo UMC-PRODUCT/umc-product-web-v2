@@ -154,9 +154,12 @@ export function useMatchingProjectListFilters() {
       : (userGisuId ?? activeGisuId)
 
   const { data: chaptersData } = useQuery({
-    queryKey: ["chaptersWithSchools", activeGisuId],
-    queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
-    enabled: activeGisuId != null,
+    // 필터 옵션은 목록과 같은 기수를 봐야 한다. 기수마다 지부 구성이 달라서
+    // (10기 6개 / 9기 7개) 기준이 어긋나면 목록에 없는 지부가 필터에 뜨거나
+    // 목록에만 있는 지부가 필터에서 빠진다.
+    queryKey: ["chaptersWithSchools", effectiveGisuId],
+    queryFn: () => getChaptersWithSchools(String(effectiveGisuId!)),
+    enabled: effectiveGisuId != null,
     staleTime: Infinity,
   })
 
