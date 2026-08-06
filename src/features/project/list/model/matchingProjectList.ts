@@ -129,7 +129,11 @@ export function useMatchingProjectListFilters() {
   const { me, viewContext } = useViewerIdentity()
   const userIsOperator = isOperator(me)
 
-  const { data: gisuData } = useActiveGisu()
+  const {
+    data: gisuData,
+    isLoading: isGisuLoading,
+    isError: isGisuError,
+  } = useActiveGisu()
 
   const activeGisuId = gisuData?.gisuId ? Number(gisuData.gisuId) : undefined
 
@@ -142,13 +146,20 @@ export function useMatchingProjectListFilters() {
     return latest ? Number(latest.gisuId) : undefined
   }, [me])
 
+  // 챌린저 기록이 없으면(비로그인 게스트) 활성 기수로 떨어뜨린다. 그렇지 않으면
+  // 기수가 undefined 라 목록 쿼리가 통째로 실행되지 않고 빈 화면이 남는다.
   const effectiveGisuId =
-    viewContext.isAdminView && userIsOperator ? activeGisuId : userGisuId
+    viewContext.isAdminView && userIsOperator
+      ? activeGisuId
+      : (userGisuId ?? activeGisuId)
 
   const { data: chaptersData } = useQuery({
-    queryKey: ["chaptersWithSchools", activeGisuId],
-    queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
-    enabled: activeGisuId != null,
+    // 필터 옵션은 목록과 같은 기수를 봐야 한다. 기수마다 지부 구성이 달라서
+    // (10기 6개 / 9기 7개) 기준이 어긋나면 목록에 없는 지부가 필터에 뜨거나
+    // 목록에만 있는 지부가 필터에서 빠진다.
+    queryKey: ["chaptersWithSchools", effectiveGisuId],
+    queryFn: () => getChaptersWithSchools(String(effectiveGisuId!)),
+    enabled: effectiveGisuId != null,
     staleTime: Infinity,
   })
 
@@ -332,8 +343,11 @@ export function useMatchingProjectListFilters() {
     totalPages: Math.max(1, Number(data?.totalPages ?? 1)),
     page,
     setPage,
-    isLoading,
-    isError,
+    // 게스트는 활성 기수를 받아야 목록 쿼리가 열린다. 그 조회 상태를 합치지
+    // 않으면 기수를 기다리는 동안 "프로젝트 없음"으로 보이고, 조회가 실패하면
+    // 불러오지 못한 것을 없는 것으로 안내하게 된다.
+    isLoading: isLoading || (effectiveGisuId == null && isGisuLoading),
+    isError: isError || (effectiveGisuId == null && isGisuError),
     searchQuery,
     setSearchQuery,
     filterDescriptors,

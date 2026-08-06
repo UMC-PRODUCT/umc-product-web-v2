@@ -177,10 +177,13 @@ export function ProfileDropdown({
             className="bg-teal-gray-100 h-px w-full rounded-[0.5px]"
           />
 
-          {/* TODO: 기수 관리 페이지로 연결 */}
           <div className="flex flex-col gap-1 px-1.5">
             {canManageMembers && (
-              <TextButton size="14" className="h-6 w-15">
+              <TextButton
+                onClick={() => navigate({ to: "/admin" })}
+                size="14"
+                className="h-6 w-15"
+              >
                 기수 관리
               </TextButton>
             )}
