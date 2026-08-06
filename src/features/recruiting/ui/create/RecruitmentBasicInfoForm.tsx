@@ -1165,12 +1165,14 @@ export function RecruitmentBasicInfoForm({
                             label="시작"
                             value={periodForm.interviewStartAt.date}
                             onChange={handleInterviewStartAtChange}
+                            disabled={!interviewRequired}
                           />
                           <TimeTextBox
                             value={periodForm.interviewStartAt.time}
                             onChange={(time) =>
                               updatePeriodField("interviewStartAt", { time })
                             }
+                            disabled={!interviewRequired}
                           />
                         </div>
                         <span className="text-teal-gray-400">~</span>
@@ -1179,12 +1181,14 @@ export function RecruitmentBasicInfoForm({
                             label="종료"
                             value={periodForm.interviewEndAt.date}
                             onChange={handleInterviewEndAtChange}
+                            disabled={!interviewRequired}
                           />
                           <TimeTextBox
                             value={periodForm.interviewEndAt.time}
                             onChange={(time) =>
                               updatePeriodField("interviewEndAt", { time })
                             }
+                            disabled={!interviewRequired}
                           />
                         </div>
                       </div>
