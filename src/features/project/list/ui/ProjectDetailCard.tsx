@@ -193,6 +193,10 @@ export function ProjectDetailCard({
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { me, viewContext } = useViewerIdentity()
+  // 비로그인 방문자. 팀원 조회는 아직 인증이 필요해서, 열어 두면 401 이 나고
+  // 토큰 갱신에 실패해 로그인 화면으로 튕긴다. 디자인에도 게스트 상세에는
+  // 작성자·모집 상태·액션 버튼이 없다.
+  const isGuest = me === undefined
   const addToast = useToastStore((s) => s.addToast)
   const userIsOperator = isOperator(me)
   const userIsPm = isCurrentTermPm(me)
@@ -518,11 +522,13 @@ export function ProjectDetailCard({
           </div>
 
           <div className="scrollbar-none mt-8.5 flex w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1">
-            <TeamMemberButton
-              variant="weak"
-              className="w-auto"
-              onClick={() => setIsTeamModalOpen(true)}
-            />
+            {!isGuest && (
+              <TeamMemberButton
+                variant="weak"
+                className="w-auto"
+                onClick={() => setIsTeamModalOpen(true)}
+              />
+            )}
             <Button
               variant="weak"
               color="primary"
@@ -787,7 +793,10 @@ export function ProjectDetailCard({
         </div>
       </div>
 
-      <Modal.Root open={isTeamModalOpen} onOpenChange={setIsTeamModalOpen}>
+      <Modal.Root
+        open={!isGuest && isTeamModalOpen}
+        onOpenChange={setIsTeamModalOpen}
+      >
         <Modal.Portal>
           <Modal.Overlay tone="light" />
           <Modal.Content aria-describedby={undefined}>

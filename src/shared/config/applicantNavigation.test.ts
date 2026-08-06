@@ -23,6 +23,13 @@ describe("지원자 사이드바 노출 범위", () => {
     expect(isApplicantFlowPath("/projects/application")).toBe(true)
     expect(isApplicantFlowPath("/projects/application/list")).toBe(true)
   })
+
+  // 접두사만 보면 이름이 겹치는 다른 화면이 지원 흐름으로 딸려 들어온다
+  it("이름이 겹치는 다른 경로는 붙지 않는다", () => {
+    expect(isApplicantFlowPath("/projects/apply-guide")).toBe(false)
+    expect(isApplicantFlowPath("/projects/applications")).toBe(false)
+    expect(isApplicantFlowPath("/projects/notice-archive")).toBe(false)
+  })
 })
 
 describe("지원자 사이드바 활성 항목", () => {
