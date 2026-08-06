@@ -63,6 +63,16 @@ export function groupByChapter(
     if (group) {
       group.totalCount += school.totalCount
       addPartCounts(group.partCounts, entry.partCounts)
+      // 같은 학교가 여러 행으로 오면 목록에 두 번 뜬다. countSchools 는 schoolId 로
+      // 세므로 카드 제목("총 N 학교")과 목록 개수가 어긋난다.
+      const existing = group.schools.find(
+        (item) => item.schoolId === entry.schoolId,
+      )
+      if (existing) {
+        existing.totalCount += entry.totalCount
+        addPartCounts(existing.partCounts, entry.partCounts)
+        continue
+      }
       group.schools.push(entry)
       continue
     }
@@ -84,7 +94,9 @@ export function groupByChapter(
   return groups
 }
 
-// 같은 학교가 여러 행으로 올 수 있어 schoolId 기준으로 센다.
-export function countSchools(summary: RecruitingStatusSummary): number {
-  return new Set(summary.schools.map((school) => school.schoolId)).size
+// 카드 제목의 학교 수는 목록에 실제로 그려지는 항목을 센다. 응답에서 세면
+// groupByChapter 의 병합 범위(지부 안)와 기준이 달라, 같은 학교가 다른 지부로
+// 실려 올 때 제목과 목록 개수가 어긋난다.
+export function countSchools(groups: ChapterApplicationGroup[]): number {
+  return groups.reduce((sum, group) => sum + group.schools.length, 0)
 }

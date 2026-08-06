@@ -8,7 +8,8 @@ import { cn } from "@/shared/lib/utils"
 interface ChapterSchools {
   chapterId: string
   chapterName: string
-  schools: string[]
+  // name 은 축약된 표시용이라 서로 겹칠 수 있다. key 는 schoolId 로 잡는다.
+  schools: { schoolId: string; name: string }[]
 }
 
 interface SchoolListCardProps {
@@ -56,10 +57,10 @@ export function SchoolListCard({ totalCount, chapters }: SchoolListCardProps) {
               <div className="grid flex-1 grid-cols-2 gap-x-4 gap-y-1.5">
                 {schools.map((school) => (
                   <p
-                    key={school}
+                    key={school.schoolId}
                     className="text-body-2-medium text-teal-gray-600"
                   >
-                    {school}
+                    {school.name}
                   </p>
                 ))}
               </div>

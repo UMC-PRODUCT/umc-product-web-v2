@@ -92,9 +92,14 @@ function RouteComponent() {
       const url = URL.createObjectURL(blob)
       const anchor = document.createElement("a")
       anchor.href = url
-      anchor.download = `평가이력_${sectionTitle}.csv`
+      // 지부명이 파일명에 그대로 들어가면 경로 구분자가 섞일 수 있다.
+      anchor.download = `평가이력_${sectionTitle.replace(/[/\\]/g, "_")}.csv`
+      // 문서에 붙이지 않고 클릭하면 일부 브라우저가 무시한다. 해제도 클릭 직후
+      // 동기로 하면 다운로드가 시작되기 전에 URL 이 사라져 실패할 수 있다.
+      document.body.appendChild(anchor)
       anchor.click()
-      URL.revokeObjectURL(url)
+      anchor.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 0)
     } catch (error) {
       addToast({
         message:
@@ -152,17 +157,21 @@ function RouteComponent() {
 
       {isLoading ? (
         <EmptyNotice message="평가 이력을 불러오는 중입니다." />
-      ) : !hasActiveGisu ? (
-        <EmptyNotice message="진행 중인 기수가 없어 평가 이력을 표시할 수 없습니다." />
       ) : isError ? (
         // 이 화면은 중앙 운영진만 조회할 수 있고 학교·지부 운영진은 403 을 받는다.
         // 기다려도 안 풀리는 실패라 서버가 주는 사유를 그대로 보여준다.
+        //
+        // 기수 없음보다 먼저 본다. 기수 조회가 실패해도 gisuId 가 비어
+        // hasActiveGisu 가 false 가 되는데, 그 순서로 두면 조회 실패를
+        // "기수가 없다"고 잘못 안내한다.
         <EmptyNotice
           message={
             getServerErrorMessage(error) ??
             "평가 이력을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
           }
         />
+      ) : !hasActiveGisu ? (
+        <EmptyNotice message="진행 중인 기수가 없어 평가 이력을 표시할 수 없습니다." />
       ) : (
         <EvaluationHistoryCard
           rows={orderedRows}

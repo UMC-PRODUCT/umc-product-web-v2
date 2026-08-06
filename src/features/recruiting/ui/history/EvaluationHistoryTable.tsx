@@ -72,7 +72,11 @@ function TableRow({
         <span className="text-body-2-medium text-teal-gray-900 w-15 truncate">
           {row.applicant.name}
         </span>
-        <StatusChipTag value={row.applicant.result} type="tag" />
+        {/* 판정 결과가 없으면 태그를 그리지 않는다. 행 자체는 남겨야 이력이
+            유실되지 않는다. */}
+        {row.applicant.result && (
+          <StatusChipTag value={row.applicant.result} type="tag" />
+        )}
       </div>
 
       <div className="bg-teal-gray-100 h-full w-px shrink-0" />

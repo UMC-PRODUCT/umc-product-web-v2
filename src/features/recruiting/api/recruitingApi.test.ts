@@ -8,6 +8,7 @@ import {
   getRoundEvaluators,
   mergeRoundGroups,
   normalizeAdminRoundGroups,
+  normalizeDecisionHistoryPage,
   normalizeEvaluationStatistics,
   normalizeInterviewScheduleBoard,
   normalizeInterviewSessions,
@@ -19,6 +20,7 @@ import {
 import type {
   RawAdminRound,
   RawAdminRoundGroup,
+  RawDecisionHistoryPage,
   RawEvaluationStatistics,
   RawRecruitingSeasonConfigurationResponse,
   RawStatusSummary,
@@ -282,7 +284,7 @@ describe("normalizeStatusSummary", () => {
             roundId: "10",
             roundTitle: "10기 본모집",
             roundType: "REGULAR" as const,
-            roundNo: 1,
+            roundNo: "1",
             totalCount: "5",
             countByStatus: { SUBMITTED: "5" },
           },
@@ -308,6 +310,8 @@ describe("normalizeStatusSummary", () => {
     expect(result.schools[0]?.totalCount).toBe(5)
     expect(result.schools[0]?.rounds[0]?.totalCount).toBe(5)
     expect(result.schools[0]?.rounds[0]?.countByStatus.SUBMITTED).toBe(5)
+    // 차수 번호도 문자열로 온다. 타입만 number 라 비교 연산이 조용히 어긋난다.
+    expect(result.schools[0]?.rounds[0]?.roundNo).toBe(1)
   })
 
   // 문자열로 두면 합산이 "5" + "7" = "57" 이 되어 조용히 틀린다.
@@ -348,6 +352,18 @@ describe("normalizeStatusSummary", () => {
   it("숫자로 바꿀 수 없는 값은 0 으로 둔다", () => {
     expect(normalizeStatusSummary({ totalCount: "abc" }).totalCount).toBe(0)
     expect(normalizeStatusSummary({ totalCount: "" }).totalCount).toBe(0)
+  })
+
+  // 이름이 undefined 로 남으면 groupByChapter 의 localeCompare 와 학교명 축약이
+  // TypeError 로 터져 대시보드가 통째로 에러 화면이 된다.
+  it("이름이 빠져도 빈 문자열로 채운다", () => {
+    const result = normalizeStatusSummary({
+      totalCount: "0",
+      schools: [{ schoolId: "1", chapterId: "27", totalCount: "0" }],
+    })
+
+    expect(result.schools[0]?.schoolName).toBe("")
+    expect(result.schools[0]?.chapterName).toBe("")
   })
 })
 
@@ -421,6 +437,27 @@ describe("normalizeEvaluationStatistics", () => {
     expect(result.asOf).toBeNull()
     expect(result.byTrack).toEqual([])
     expect(result.chapters).toEqual([])
+  })
+
+  // 이름이 undefined 로 남으면 학교명 축약(shortenSchoolName)이 TypeError 로 터진다.
+  it("이름이 빠져도 빈 문자열로 채운다", () => {
+    const result = normalizeEvaluationStatistics({
+      applicantCount: "0",
+      evaluatedCount: "0",
+      chapters: [
+        {
+          chapterId: "29",
+          applicantCount: "0",
+          evaluatedCount: "0",
+          schools: [
+            { schoolId: "6", applicantCount: "0", evaluatedCount: "0" },
+          ],
+        },
+      ],
+    })
+
+    expect(result.chapters[0]?.chapterName).toBe("")
+    expect(result.chapters[0]?.schools[0]?.schoolName).toBe("")
   })
 })
 
@@ -580,5 +617,107 @@ describe("normalizeInterviewScheduleBoard", () => {
       applicationId: "41",
       applicantName: "",
     })
+  })
+})
+
+describe("normalizeDecisionHistoryPage", () => {
+  // 이름이 undefined 로 남으면 검색 필터의 toLowerCase 와 필터 선택지의
+  // localeCompare 에서 TypeError 가 나 화면이 통째로 죽는다.
+  it("지원자·담당자 이름이 빠져도 빈 문자열로 채운다", () => {
+    const raw: RawDecisionHistoryPage = {
+      progressStatus: "IN_PROGRESS",
+      histories: {
+        content: [
+          {
+            decisionHistoryId: 1,
+            applicationId: 2,
+            decidedAt: "2026-08-05T00:00:00Z",
+            decisionStatus: "FINAL_PASSED",
+            result: "PASSED",
+            applicant: {
+              chapterId: 27,
+              schoolId: 1,
+              firstChoice: "PLAN",
+              secondChoice: null,
+              acceptedTrack: null,
+            },
+            decider: { memberId: 3, roleType: "CENTRAL_PRESIDENT" },
+          },
+        ],
+      },
+    }
+
+    const { content } = normalizeDecisionHistoryPage(raw)
+
+    expect(content[0]?.applicant.name).toBe("")
+    expect(content[0]?.applicant.chapterName).toBe("")
+    expect(content[0]?.applicant.schoolName).toBe("")
+    expect(content[0]?.decider.name).toBe("")
+    expect(content[0]?.decider.nickname).toBe("")
+    expect(content[0]?.decider.chapterName).toBeNull()
+    expect(content[0]?.decider.schoolName).toBeNull()
+  })
+
+  it("판정 결과가 빠지면 null 로 둔다", () => {
+    const { content } = normalizeDecisionHistoryPage({
+      progressStatus: "IN_PROGRESS",
+      histories: {
+        content: [
+          {
+            decisionHistoryId: 1,
+            applicationId: 2,
+            decidedAt: "2026-08-05T00:00:00Z",
+            decisionStatus: "FINAL_PASSED",
+            applicant: {
+              chapterId: 27,
+              schoolId: 1,
+              firstChoice: "PLAN",
+              secondChoice: null,
+              acceptedTrack: null,
+            },
+            decider: { memberId: 3, roleType: "CENTRAL_PRESIDENT" },
+          },
+        ],
+      },
+    })
+
+    expect(content[0]?.result).toBeNull()
+  })
+
+  it("중앙 담당자의 지부·학교는 null 로 남긴다", () => {
+    const { content } = normalizeDecisionHistoryPage({
+      progressStatus: "COMPLETED",
+      histories: {
+        content: [
+          {
+            decisionHistoryId: 1,
+            applicationId: 2,
+            decidedAt: "2026-08-05T00:00:00Z",
+            decisionStatus: "FINAL_PASSED",
+            result: "PASSED",
+            applicant: {
+              chapterId: 27,
+              chapterName: "Neon",
+              schoolId: 1,
+              schoolName: "가천대학교",
+              name: "김지원",
+              firstChoice: "PLAN",
+              secondChoice: null,
+              acceptedTrack: null,
+            },
+            decider: {
+              memberId: 3,
+              roleType: "CENTRAL_PRESIDENT",
+              name: "박담당",
+              nickname: "담당",
+            },
+          },
+        ],
+      },
+    })
+
+    expect(content[0]?.decider.chapterId).toBeNull()
+    expect(content[0]?.decider.schoolId).toBeNull()
+    expect(content[0]?.applicant.name).toBe("김지원")
   })
 })

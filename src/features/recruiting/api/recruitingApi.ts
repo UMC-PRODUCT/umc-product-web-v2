@@ -196,16 +196,29 @@ export function normalizeDecisionHistoryPage(
       ...item,
       decisionHistoryId: String(item.decisionHistoryId),
       applicationId: String(item.applicationId),
+      result: item.result ?? null,
+      // 이름이 undefined 로 남으면 검색 필터의 toLowerCase 와 필터 선택지의
+      // localeCompare 가 TypeError 로 터져 화면이 통째로 죽는다.
       applicant: {
         ...item.applicant,
         chapterId: String(item.applicant.chapterId),
+        chapterName: item.applicant.chapterName ?? "",
         schoolId: String(item.applicant.schoolId),
+        schoolName: item.applicant.schoolName ?? "",
+        name: item.applicant.name ?? "",
       },
       decider: {
         ...item.decider,
         memberId: String(item.decider.memberId),
+        // 담당자 지부·학교만 "" 가 아니라 null 로 둔다. 중앙 직위와 SUPER_ADMIN 은
+        // 소속 자체가 없어 서버가 null 을 주는데, "" 로 접으면 소속이 없는 것과
+        // 값이 안 온 것이 구분되지 않는다. 표시용 "" 변환은 매퍼가 맡는다.
         chapterId: toOptionalId(item.decider.chapterId),
+        chapterName: item.decider.chapterName ?? null,
         schoolId: toOptionalId(item.decider.schoolId),
+        schoolName: item.decider.schoolName ?? null,
+        name: item.decider.name ?? "",
+        nickname: item.decider.nickname ?? "",
       },
     })),
     page: toCount(histories.page),
@@ -299,16 +312,21 @@ export function normalizeStatusSummary(
     totalCount: toCount(raw.totalCount),
     countByStatus: toStatusCounts(raw.countByStatus),
     parts: toPartSummaries(raw.parts),
+    // 이름은 스펙상 optional 이다(required 없음). 빠진 채로 두면 정렬의
+    // localeCompare 와 학교명 축약에서 화면 전체가 죽는다.
     schools: (raw.schools ?? []).map((school) => ({
       ...school,
       schoolId: String(school.schoolId),
+      schoolName: school.schoolName ?? "",
       chapterId: String(school.chapterId),
+      chapterName: school.chapterName ?? "",
       totalCount: toCount(school.totalCount),
       countByStatus: toStatusCounts(school.countByStatus),
       parts: toPartSummaries(school.parts),
       rounds: (school.rounds ?? []).map((round) => ({
         ...round,
         roundId: String(round.roundId),
+        roundNo: toCount(round.roundNo),
         totalCount: toCount(round.totalCount),
         countByStatus: toStatusCounts(round.countByStatus),
         parts: toPartSummaries(round.parts),
@@ -335,15 +353,19 @@ export function normalizeEvaluationStatistics(
     applicantCount: toCount(raw.applicantCount),
     evaluatedCount: toCount(raw.evaluatedCount),
     byTrack: toTrackCounts(raw.byTrack),
+    // 이름은 스펙상 optional 이다(required 없음). 빠진 채로 두면 학교명 축약에서
+    // 화면 전체가 죽는다.
     chapters: (raw.chapters ?? []).map((chapter) => ({
       ...chapter,
       chapterId: String(chapter.chapterId),
+      chapterName: chapter.chapterName ?? "",
       applicantCount: toCount(chapter.applicantCount),
       evaluatedCount: toCount(chapter.evaluatedCount),
       byTrack: toTrackCounts(chapter.byTrack),
       schools: (chapter.schools ?? []).map((school) => ({
         ...school,
         schoolId: String(school.schoolId),
+        schoolName: school.schoolName ?? "",
         applicantCount: toCount(school.applicantCount),
         evaluatedCount: toCount(school.evaluatedCount),
         byTrack: toTrackCounts(school.byTrack),
