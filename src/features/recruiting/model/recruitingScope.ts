@@ -1,3 +1,5 @@
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
+
 import type { RecruitingRoundGroup } from "../api/types"
 
 export interface RecruitingScope {
@@ -73,7 +75,11 @@ export function applyScopeFilters(
   }
 
   if (showSchoolTabs && schoolTab !== "all") {
-    return scope.groups.filter((group) => group.schoolName === schoolTab)
+    // schoolTab은 SCHOOLS_BY_BRANCH 축약형("동국대")인데 group.schoolName은
+    // 백엔드 정식 명칭("동국대학교")이라 그대로 비교하면 항상 어긋난다.
+    return scope.groups.filter(
+      (group) => formatSchoolName(group.schoolName) === schoolTab,
+    )
   }
 
   return scope.groups
