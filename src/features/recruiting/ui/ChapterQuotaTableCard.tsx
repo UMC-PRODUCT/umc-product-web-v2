@@ -18,7 +18,8 @@ interface ChapterQuotaTableCardProps {
   onManualEdit?: () => void
   onErrorExceeded?: (partName: string, maxAllowed: number) => void
   onSchoolsDataChange?: (schools: SchoolQuotaRow[]) => void
-  autoAllocateTrigger?: number
+  /** 자동 배정 요청. 대상 지부가 자기 자신일 때만 한 번 실행한다. */
+  autoAllocateRequest?: { id: number; chapter: string } | null
   /** 시즌별 편집 가능 여부. 없으면 전부 편집 가능으로 본다. */
   canEditSeason?: (seasonId: string | undefined) => boolean
   className?: string
@@ -31,7 +32,7 @@ export function ChapterQuotaTableCard({
   onManualEdit,
   onErrorExceeded,
   onSchoolsDataChange,
-  autoAllocateTrigger,
+  autoAllocateRequest,
   canEditSeason,
   className,
 }: ChapterQuotaTableCardProps) {
@@ -45,7 +46,7 @@ export function ChapterQuotaTableCard({
     onSchoolsDataChangeRef.current = onSchoolsDataChange
   }, [onSchoolsDataChange])
 
-  // 자동 배정 effect 는 trigger 로만 돌아야 해서 의존성에 넣지 않는다.
+  // 자동 배정 effect 는 요청으로만 돌아야 해서 의존성에 넣지 않는다.
   const canEditSeasonRef = useRef(canEditSeason)
   useEffect(() => {
     canEditSeasonRef.current = canEditSeason
@@ -56,9 +57,17 @@ export function ChapterQuotaTableCard({
     setLastValidSchoolsData(data.schools)
   }, [data.schools])
 
+  // 처리한 요청 id. 같은 요청으로 두 번 배정하지 않는다.
+  const handledAutoAllocateIdRef = useRef(0)
+
   // Execute Auto Allocation when triggered
   useEffect(() => {
-    if (!autoAllocateTrigger || data.schools.length === 0) return
+    if (!autoAllocateRequest || data.schools.length === 0) return
+    // 요청은 누른 지부에만 적용한다. 지부 카운터 하나로 두면 탭을 옮기거나
+    // 전체 탭으로 갔을 때 다른 지부 카드가 마운트되며 같이 배정된다.
+    if (autoAllocateRequest.chapter !== data.chapter) return
+    if (handledAutoAllocateIdRef.current === autoAllocateRequest.id) return
+    handledAutoAllocateIdRef.current = autoAllocateRequest.id
 
     const N = data.schools.length
     const tPM = data.totals.pm
@@ -101,7 +110,7 @@ export function ChapterQuotaTableCard({
     setSchoolsData(updatedSchools)
     setLastValidSchoolsData(updatedSchools)
     onSchoolsDataChangeRef.current?.(updatedSchools)
-  }, [autoAllocateTrigger, data.schools, data.totals])
+  }, [autoAllocateRequest, data.chapter, data.schools, data.totals])
 
   const hasApplicants = schoolsData.length > 0
 

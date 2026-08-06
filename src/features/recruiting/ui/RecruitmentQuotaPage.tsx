@@ -26,7 +26,10 @@ export function RecruitmentQuotaPage() {
   const [allocationStatus, setAllocationStatus] =
     useState<AllocationStatus>("TO 설정 전")
   const [autoModalOpen, setAutoModalOpen] = useState(false)
-  const [autoAllocateTrigger, setAutoAllocateTrigger] = useState(0)
+  const [autoAllocateRequest, setAutoAllocateRequest] = useState<{
+    id: number
+    chapter: string
+  } | null>(null)
 
   const [editedSchoolsMap, setEditedSchoolsMap] = useState<
     Map<string, SchoolQuotaRow[]>
@@ -89,11 +92,18 @@ export function RecruitmentQuotaPage() {
 
   const handleTabChange = (nextValue: string) => {
     setChapterTab(nextValue)
+    // 지부를 옮기면 앞선 요청은 끝난 것으로 본다. 남겨 두면 새 지부 카드가
+    // 마운트되면서 누른 적 없는 자동 배정이 걸린다.
+    setAutoAllocateRequest(null)
   }
 
   const handleConfirmAutoAllocate = () => {
     setAutoModalOpen(false)
-    setAutoAllocateTrigger((prev) => prev + 1)
+    // 자동 배정은 전체 탭에서 막혀 있어 여기서는 항상 선택된 지부가 대상이다.
+    setAutoAllocateRequest((prev) => ({
+      id: (prev?.id ?? 0) + 1,
+      chapter: chapterTab,
+    }))
     setAllocationStatus("자동 배정 중")
     setIsDirty(true)
 
@@ -344,7 +354,7 @@ export function RecruitmentQuotaPage() {
                       onSchoolsDataChange={(schools) =>
                         handleSchoolsDataChange(chapterData.chapter, schools)
                       }
-                      autoAllocateTrigger={autoAllocateTrigger}
+                      autoAllocateRequest={autoAllocateRequest}
                     />
                   ))
                 ) : (
@@ -361,7 +371,7 @@ export function RecruitmentQuotaPage() {
                         schools,
                       )
                     }
-                    autoAllocateTrigger={autoAllocateTrigger}
+                    autoAllocateRequest={autoAllocateRequest}
                   />
                 )}
               </div>
