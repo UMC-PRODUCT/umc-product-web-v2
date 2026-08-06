@@ -154,3 +154,42 @@ describe("FilterDropdown 단일 선택", () => {
     expect(handleClose).toHaveBeenCalledOnce()
   })
 })
+
+describe("FilterDropdown 단일 선택 버튼 라벨", () => {
+  it("선택한 값의 라벨을 버튼에 보여준다", () => {
+    render(
+      <FilterDropdown
+        label="모집 상태"
+        options={OPTIONS}
+        selectedValue="web"
+      />,
+    )
+
+    expect(screen.getByRole("button", { name: "Web" })).toBeInTheDocument()
+  })
+
+  it("선택이 없으면 기본 label 을 보여준다", () => {
+    render(
+      <FilterDropdown label="평가 결과" options={OPTIONS} selectedValue="" />,
+    )
+
+    expect(
+      screen.getByRole("button", { name: "평가 결과" }),
+    ).toBeInTheDocument()
+  })
+
+  it("selectedLabel 을 직접 넘기면 그 값이 우선한다", () => {
+    render(
+      <FilterDropdown
+        label="모집 상태"
+        options={OPTIONS}
+        selectedValue="web"
+        selectedLabel="직접 지정"
+      />,
+    )
+
+    expect(
+      screen.getByRole("button", { name: "직접 지정" }),
+    ).toBeInTheDocument()
+  })
+})

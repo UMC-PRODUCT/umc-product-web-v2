@@ -102,10 +102,15 @@ export function FilterDropdown(props: FilterDropdownProps) {
     multiSelect && selectedOptions.length > 0
       ? props.formatSelectedLabel?.(selectedOptions)
       : undefined
+  const selectedSingleLabel =
+    multiSelect || !props.selectedValue
+      ? undefined
+      : (options?.find((option) => option.value === props.selectedValue)
+          ?.label ?? props.selectedValue)
   const displayLabel =
     selectedLabel ??
     formattedSelectedLabel ??
-    (multiSelect ? defaultMultiSelectLabel : props.selectedValue) ??
+    (multiSelect ? defaultMultiSelectLabel : selectedSingleLabel) ??
     label
 
   const handleSelect = (value: string) => {
