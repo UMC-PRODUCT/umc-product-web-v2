@@ -117,4 +117,36 @@ describe("mapGroupsToChapterQuotaData", () => {
     expect(chromium?.updatedDate).toBeUndefined()
     expect(chromium?.updatedTime).toBeUndefined()
   })
+
+  it("serverChapters에 존재하지만 groups에 없는 대학교도 0명으로 목록에 항상 포함한다", () => {
+    const serverChapters = [
+      {
+        chapterId: "1",
+        chapterName: "Chromium",
+        schools: [
+          { schoolId: "10", schoolName: "서울대학교" },
+          { schoolId: "20", schoolName: "연세대학교" },
+          { schoolId: "30", schoolName: "고려대학교" },
+        ],
+      },
+    ]
+
+    const result = mapGroupsToChapterQuotaData(
+      [groups[0]!], // 서울대학교만 그룹에 존재
+      seasonConfigsMap,
+      serverChapters,
+      "15",
+    )
+
+    const chromium = result.find((item) => item.chapter === "Chromium")
+    expect(chromium?.schools).toHaveLength(3)
+    expect(chromium?.schools[0]?.schoolName).toBe("서울대학교")
+    expect(chromium?.schools[0]?.seasonId).toBe("100")
+    expect(chromium?.schools[1]?.schoolName).toBe("연세대학교")
+    expect(chromium?.schools[1]?.seasonId).toBeUndefined()
+    expect(chromium?.schools[1]?.total).toBe(0)
+    expect(chromium?.schools[2]?.schoolName).toBe("고려대학교")
+    expect(chromium?.schools[2]?.seasonId).toBeUndefined()
+    expect(chromium?.schools[2]?.total).toBe(0)
+  })
 })

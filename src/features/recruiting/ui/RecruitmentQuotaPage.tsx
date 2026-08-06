@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from "react"
 
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -33,6 +35,12 @@ export function RecruitmentQuotaPage() {
   const addToast = useToastStore((state) => state.addToast)
 
   const { groups } = useAdminRecruitingRounds()
+  const { chapters: serverChapters } = useSchoolChapterMap()
+  const { data: activeGisuData } = useActiveGisu()
+  const activeGisuId = activeGisuData?.gisuId
+    ? String(activeGisuData.gisuId)
+    : undefined
+
   const activeTabGroups = useMemo(
     () =>
       chapterTab === "all"
@@ -48,8 +56,14 @@ export function RecruitmentQuotaPage() {
     useRecruitingSeasonQuotas(seasonIds)
 
   const allChaptersData = useMemo(
-    () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
-    [groups, seasonConfigsMap],
+    () =>
+      mapGroupsToChapterQuotaData(
+        groups,
+        seasonConfigsMap,
+        serverChapters,
+        activeGisuId,
+      ),
+    [groups, seasonConfigsMap, serverChapters, activeGisuId],
   )
 
   const chaptersDataWithEdits = useMemo(() => {
