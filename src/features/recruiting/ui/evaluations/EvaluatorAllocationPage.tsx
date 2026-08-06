@@ -240,6 +240,9 @@ export function EvaluatorAllocationPage({
               onClick={(e) => {
                 if (!isInitialized || !canEdit) return
                 e.stopPropagation()
+                // 저장 요청 중에 비우면, 앞선 요청의 성공 콜백이 이전 스냅샷을
+                // 되살린다. 다른 편집 경로처럼 새 편집으로 표시한다.
+                editRevisionRef.current += 1
                 setAssignedEvaluators([])
                 setIsDirty(true)
                 setSelectedChipId(null)
@@ -277,6 +280,7 @@ export function EvaluatorAllocationPage({
                 onSelectChip={setSelectedChipId}
                 onClear={() => {
                   if (!isInitialized || !canEdit) return
+                  editRevisionRef.current += 1
                   setAssignedEvaluators([])
                   setIsDirty(true)
                   setSelectedChipId(null)
