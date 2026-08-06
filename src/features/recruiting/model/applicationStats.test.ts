@@ -130,21 +130,35 @@ describe("groupByChapter", () => {
 
 describe("countSchools", () => {
   it("학교 수를 센다", () => {
-    expect(
-      countSchools(
-        summary([school({ schoolId: "1" }), school({ schoolId: "2" })]),
-      ),
-    ).toBe(2)
+    const groups = groupByChapter(
+      summary([school({ schoolId: "1" }), school({ schoolId: "2" })]),
+    )
+
+    expect(countSchools(groups)).toBe(2)
   })
 
-  it("같은 schoolId 가 여러 번 오면 한 번만 센다", () => {
-    expect(
-      countSchools(
-        summary([
-          school({ schoolId: "1", chapterId: "27" }),
-          school({ schoolId: "1", chapterId: "30" }),
-        ]),
-      ),
-    ).toBe(1)
+  it("같은 지부에서 중복된 학교는 한 번만 센다", () => {
+    const groups = groupByChapter(
+      summary([
+        school({ schoolId: "1", chapterId: "27" }),
+        school({ schoolId: "1", chapterId: "27" }),
+      ]),
+    )
+
+    expect(countSchools(groups)).toBe(1)
+  })
+
+  // 어느 지부가 맞는지 판정할 근거가 없어 목록에는 두 번 그려진다. 제목이 목록을
+  // 세도록 두어야 카드 안에서 숫자와 항목 수가 어긋나지 않는다.
+  it("지부가 다르면 목록에 그려지는 만큼 센다", () => {
+    const groups = groupByChapter(
+      summary([
+        school({ schoolId: "1", chapterId: "27" }),
+        school({ schoolId: "1", chapterId: "30" }),
+      ]),
+    )
+
+    expect(groups.flatMap((group) => group.schools)).toHaveLength(2)
+    expect(countSchools(groups)).toBe(2)
   })
 })

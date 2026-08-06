@@ -161,7 +161,7 @@ function RouteComponent() {
             className="absolute right-0 bottom-full mb-2"
           />
           <SchoolListCard
-            totalCount={countSchools(data)}
+            totalCount={countSchools(chapterGroups)}
             chapters={chapterGroups.map((group) => ({
               chapterId: group.chapterId,
               chapterName: group.chapterName,
