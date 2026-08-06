@@ -82,6 +82,8 @@ describe("mapGroupsToChapterQuotaData", () => {
 
     expect(chromium?.schools[0]).toEqual({
       seasonId: "100",
+      gisuId: "15",
+      schoolId: "10",
       schoolName: "서울대학교",
       pm: 2,
       design: 3,

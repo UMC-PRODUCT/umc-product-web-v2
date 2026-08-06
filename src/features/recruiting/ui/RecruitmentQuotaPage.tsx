@@ -44,10 +44,10 @@ export function RecruitmentQuotaPage() {
     () => [...new Set(activeTabGroups.map((g) => g.seasonId))],
     [activeTabGroups],
   )
-  const { seasonConfigsMap, updateQuotas, isSaving, isLoading } =
+  const { seasonConfigsMap, updateQuotas, createSeason, isSaving, isLoading } =
     useRecruitingSeasonQuotas(seasonIds)
 
-  // TO 조회 결과가 null인 시즌에 대해 자동으로 0명 저장 요청 전송
+  // TO 조회 결과가 null이거나 시즌이 생성이 안 된 경우 자동으로 생성/0명 저장 요청 전송
   const autoSavedSeasonsRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
@@ -68,30 +68,70 @@ export function RecruitmentQuotaPage() {
       }
     }> = []
 
+    const missingSeasonGroups: Array<{
+      gisuId: string
+      schoolId: string
+      key: string
+    }> = []
+
     groups.forEach((group) => {
-      if (!group.seasonId || autoSavedSeasonsRef.current.has(group.seasonId))
-        return
+      const key = group.seasonId || `${group.gisuId}-${group.schoolId}`
+      if (autoSavedSeasonsRef.current.has(key)) return
 
-      const config = seasonConfigsMap.get(group.seasonId)
-      if (!config) return
+      if (!group.seasonId) {
+        if (group.gisuId && group.schoolId) {
+          missingSeasonGroups.push({
+            gisuId: group.gisuId,
+            schoolId: group.schoolId,
+            key,
+          })
+        }
+      } else {
+        const config = seasonConfigsMap.get(group.seasonId)
+        if (!config) return
 
-      const hasQuotas = config.quotas.length > 0
+        const hasQuotas = config.quotas.length > 0
 
-      if (!hasQuotas) {
-        nullQuotaPayloads.push({
-          seasonId: group.seasonId,
-          schoolName: group.schoolName,
-          payload: {
+        if (!hasQuotas) {
+          nullQuotaPayloads.push({
+            seasonId: group.seasonId,
+            schoolName: group.schoolName,
+            payload: {
+              quotas: [
+                { track: "PLAN", targetCount: 0 },
+                { track: "DESIGN", targetCount: 0 },
+                { track: "WEB_PRODUCT_ENGINEER", targetCount: 0 },
+                { track: "MOBILE_PRODUCT_ENGINEER", targetCount: 0 },
+              ],
+            },
+          })
+        }
+      }
+    })
+
+    if (missingSeasonGroups.length > 0) {
+      void Promise.allSettled(
+        missingSeasonGroups.map(async (item) => {
+          await createSeason({
+            gisuId: item.gisuId,
+            schoolId: item.schoolId,
             quotas: [
               { track: "PLAN", targetCount: 0 },
               { track: "DESIGN", targetCount: 0 },
               { track: "WEB_PRODUCT_ENGINEER", targetCount: 0 },
               { track: "MOBILE_PRODUCT_ENGINEER", targetCount: 0 },
             ],
-          },
+          })
+          return item.key
+        }),
+      ).then((results) => {
+        results.forEach((res) => {
+          if (res.status === "fulfilled") {
+            autoSavedSeasonsRef.current.add(res.value)
+          }
         })
-      }
-    })
+      })
+    }
 
     if (nullQuotaPayloads.length > 0) {
       void updateQuotas(nullQuotaPayloads).then((result) => {
@@ -100,7 +140,14 @@ export function RecruitmentQuotaPage() {
         })
       })
     }
-  }, [isLoading, isSaving, groups, seasonConfigsMap, updateQuotas])
+  }, [
+    isLoading,
+    isSaving,
+    groups,
+    seasonConfigsMap,
+    updateQuotas,
+    createSeason,
+  ])
 
   const allChaptersData = useMemo(
     () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
@@ -150,8 +197,9 @@ export function RecruitmentQuotaPage() {
           duration: 3000,
         })
       }
-      return "임의 배정 중"
+      return "직접 수정 중"
     })
+    setIsDirty(true)
   }, [addToast])
 
   const handleErrorExceeded = useCallback(
@@ -188,56 +236,83 @@ export function RecruitmentQuotaPage() {
       (c) => editedSchoolsMap.get(c.chapter) ?? c.schools,
     )
 
-    const payloadList = rawRows
-      .filter((row): row is SchoolQuotaRow & { seasonId: string } =>
+    const existingSeasonRows = rawRows.filter(
+      (row): row is SchoolQuotaRow & { seasonId: string } =>
         Boolean(row.seasonId),
-      )
-      .map((row) => ({
-        seasonId: row.seasonId,
-        schoolName: row.schoolName,
-        payload: {
-          quotas: [
-            { track: "PLAN" as const, targetCount: row.pm },
-            { track: "DESIGN" as const, targetCount: row.design },
-            { track: "WEB_PRODUCT_ENGINEER" as const, targetCount: row.webPe },
-            {
-              track: "MOBILE_PRODUCT_ENGINEER" as const,
-              targetCount: row.mobilePe,
-            },
-          ],
-        },
-      }))
+    )
+    const newSeasonRows = rawRows.filter(
+      (row): row is SchoolQuotaRow & { gisuId: string; schoolId: string } =>
+        !row.seasonId && Boolean(row.gisuId) && Boolean(row.schoolId),
+    )
 
-    if (payloadList.length === 0) return
+    const payloadList = existingSeasonRows.map((row) => ({
+      seasonId: row.seasonId,
+      schoolName: row.schoolName,
+      payload: {
+        quotas: [
+          { track: "PLAN" as const, targetCount: row.pm },
+          { track: "DESIGN" as const, targetCount: row.design },
+          { track: "WEB_PRODUCT_ENGINEER" as const, targetCount: row.webPe },
+          {
+            track: "MOBILE_PRODUCT_ENGINEER" as const,
+            targetCount: row.mobilePe,
+          },
+        ],
+      },
+    }))
+
+    if (payloadList.length === 0 && newSeasonRows.length === 0) return
 
     try {
-      const result = await updateQuotas(payloadList)
+      if (newSeasonRows.length > 0) {
+        await Promise.all(
+          newSeasonRows.map((row) =>
+            createSeason({
+              gisuId: row.gisuId,
+              schoolId: row.schoolId,
+              quotas: [
+                { track: "PLAN", targetCount: row.pm },
+                { track: "DESIGN", targetCount: row.design },
+                { track: "WEB_PRODUCT_ENGINEER", targetCount: row.webPe },
+                { track: "MOBILE_PRODUCT_ENGINEER", targetCount: row.mobilePe },
+              ],
+            }),
+          ),
+        )
+      }
 
-      if (result.failedCount === 0) {
+      if (payloadList.length > 0) {
+        const result = await updateQuotas(payloadList)
+
+        if (result.failedCount === 0) {
+          setIsDirty(false)
+          setEditedSchoolsMap(new Map())
+        } else {
+          const successfulSchoolNames = new Set(
+            result.successfulVariables
+              .map((v) => v.schoolName)
+              .filter((name): name is string => Boolean(name)),
+          )
+
+          setEditedSchoolsMap((prev) => {
+            const next = new Map<string, SchoolQuotaRow[]>()
+            prev.forEach((rows, chapter) => {
+              const remainingRows = rows.filter(
+                (r) => !successfulSchoolNames.has(r.schoolName),
+              )
+              if (remainingRows.length > 0) {
+                next.set(chapter, remainingRows)
+              }
+            })
+            if (next.size === 0) {
+              setIsDirty(false)
+            }
+            return next
+          })
+        }
+      } else if (newSeasonRows.length > 0) {
         setIsDirty(false)
         setEditedSchoolsMap(new Map())
-      } else {
-        const successfulSchoolNames = new Set(
-          result.successfulVariables
-            .map((v) => v.schoolName)
-            .filter((name): name is string => Boolean(name)),
-        )
-
-        setEditedSchoolsMap((prev) => {
-          const next = new Map<string, SchoolQuotaRow[]>()
-          prev.forEach((rows, chapter) => {
-            const remainingRows = rows.filter(
-              (r) => !successfulSchoolNames.has(r.schoolName),
-            )
-            if (remainingRows.length > 0) {
-              next.set(chapter, remainingRows)
-            }
-          })
-          if (next.size === 0) {
-            setIsDirty(false)
-          }
-          return next
-        })
       }
     } catch {
       // 에러 토스트는 useRecruitingSeasonQuotas 훅에서 처리됨

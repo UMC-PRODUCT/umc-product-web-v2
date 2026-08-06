@@ -5,13 +5,17 @@ import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { recruitingKeys } from "../api/queryKeys"
 import {
+  createRecruitingSeason,
   getRecruitingSeasonConfiguration,
+  updateRecruitingSeason,
   updateRecruitingSeasonQuotas,
 } from "../api/recruitingApi"
 
 import type {
+  CreateRecruitingSeasonRequest,
   RecruitingSeasonConfigurationResponse,
   ReplaceRecruitingSeasonTrackQuotasRequest,
+  UpdateRecruitingSeasonRequest,
 } from "../api/types"
 
 export interface UpdateSeasonQuotaVariables {
@@ -56,6 +60,34 @@ export function useRecruitingSeasonQuotas(seasonIds: string[]) {
         isLoading: results.some((query) => query.isLoading),
         isError: results.some((query) => query.isError),
       }
+    },
+  })
+
+  const createSeasonMutation = useMutation({
+    mutationFn: (payload: CreateRecruitingSeasonRequest) =>
+      createRecruitingSeason(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: recruitingKeys.seasons(),
+      })
+      void queryClient.invalidateQueries({
+        queryKey: recruitingKeys.rounds(),
+      })
+    },
+  })
+
+  const updateSeasonMutation = useMutation({
+    mutationFn: ({
+      seasonId,
+      payload,
+    }: {
+      seasonId: string
+      payload: UpdateRecruitingSeasonRequest
+    }) => updateRecruitingSeason(seasonId, payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: recruitingKeys.seasons(),
+      })
     },
   })
 
@@ -134,6 +166,11 @@ export function useRecruitingSeasonQuotas(seasonIds: string[]) {
     isLoading,
     isError,
     updateQuotas: updateQuotasMutation.mutateAsync,
-    isSaving: updateQuotasMutation.isPending,
+    createSeason: createSeasonMutation.mutateAsync,
+    updateSeason: updateSeasonMutation.mutateAsync,
+    isSaving:
+      updateQuotasMutation.isPending ||
+      createSeasonMutation.isPending ||
+      updateSeasonMutation.isPending,
   }
 }

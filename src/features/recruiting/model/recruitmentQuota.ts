@@ -1,5 +1,7 @@
 export interface SchoolQuotaRow {
   seasonId?: string
+  gisuId?: string
+  schoolId?: string
   schoolName: string
   pm: number
   design: number

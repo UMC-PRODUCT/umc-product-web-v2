@@ -44,6 +44,8 @@ export function mapGroupsToChapterQuotaData(
 
       return {
         seasonId: group.seasonId,
+        gisuId: group.gisuId,
+        schoolId: group.schoolId,
         schoolName: group.schoolName,
         pm,
         design,
