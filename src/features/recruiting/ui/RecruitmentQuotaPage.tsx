@@ -131,7 +131,7 @@ export function RecruitmentQuotaPage() {
       : chaptersDataWithEdits.filter((c) => c.chapter === chapterTab)
 
     const rawRows = targetChapters.flatMap(
-      (c) => editedSchoolsMap.get(c.chapter) ?? c.schools,
+      (c) => editedSchoolsMap.get(c.chapter) ?? [],
     )
 
     const existingSeasonRows = rawRows.filter(
