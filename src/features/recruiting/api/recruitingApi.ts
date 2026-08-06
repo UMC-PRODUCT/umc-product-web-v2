@@ -196,6 +196,7 @@ export function normalizeDecisionHistoryPage(
       ...item,
       decisionHistoryId: String(item.decisionHistoryId),
       applicationId: String(item.applicationId),
+      result: item.result ?? null,
       // 이름이 undefined 로 남으면 검색 필터의 toLowerCase 와 필터 선택지의
       // localeCompare 가 TypeError 로 터져 화면이 통째로 죽는다.
       applicant: {

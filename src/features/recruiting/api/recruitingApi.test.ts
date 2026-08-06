@@ -654,6 +654,34 @@ describe("normalizeDecisionHistoryPage", () => {
     expect(content[0]?.applicant.schoolName).toBe("")
     expect(content[0]?.decider.name).toBe("")
     expect(content[0]?.decider.nickname).toBe("")
+    expect(content[0]?.decider.chapterName).toBeNull()
+    expect(content[0]?.decider.schoolName).toBeNull()
+  })
+
+  it("판정 결과가 빠지면 null 로 둔다", () => {
+    const { content } = normalizeDecisionHistoryPage({
+      progressStatus: "IN_PROGRESS",
+      histories: {
+        content: [
+          {
+            decisionHistoryId: 1,
+            applicationId: 2,
+            decidedAt: "2026-08-05T00:00:00Z",
+            decisionStatus: "FINAL_PASSED",
+            applicant: {
+              chapterId: 27,
+              schoolId: 1,
+              firstChoice: "PLAN",
+              secondChoice: null,
+              acceptedTrack: null,
+            },
+            decider: { memberId: 3, roleType: "CENTRAL_PRESIDENT" },
+          },
+        ],
+      },
+    })
+
+    expect(content[0]?.result).toBeNull()
   })
 
   it("중앙 담당자의 지부·학교는 null 로 남긴다", () => {

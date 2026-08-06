@@ -734,7 +734,7 @@ export interface RecruitingDecisionHistory {
   applicationId: string
   decidedAt: string
   decisionStatus: RecruitingApplicationStatus
-  result: RecruitingDecisionResult
+  result: RecruitingDecisionResult | null
   applicant: RecruitingDecisionApplicant
   decider: RecruitingDecisionDecider
 }
@@ -801,10 +801,11 @@ export type RawDecisionDecider = Omit<
 
 export type RawDecisionHistory = Omit<
   RecruitingDecisionHistory,
-  "decisionHistoryId" | "applicationId" | "applicant" | "decider"
+  "decisionHistoryId" | "applicationId" | "result" | "applicant" | "decider"
 > & {
   decisionHistoryId: RawId
   applicationId: RawId
+  result?: RecruitingDecisionResult
   applicant: RawDecisionApplicant
   decider: RawDecisionDecider
 }
