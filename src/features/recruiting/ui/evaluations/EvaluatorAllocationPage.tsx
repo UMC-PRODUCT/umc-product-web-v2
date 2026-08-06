@@ -172,9 +172,11 @@ export function EvaluatorAllocationPage({
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    // 잡고 있던 카드를 먼저 내려놓는다. 드래그 도중 권한 조회가 끝나거나
+    // 시즌이 바뀌면 아래 guard 에 걸려, 오버레이가 붙은 채 남는다.
+    setActiveStaff(null)
     if (!isInitialized || !canEdit) return
     const { active, over } = event
-    setActiveStaff(null)
 
     if (!over) return
 
