@@ -82,6 +82,8 @@ describe("mapGroupsToChapterQuotaData", () => {
 
     expect(chromium?.schools[0]).toEqual({
       seasonId: "100",
+      gisuId: "15",
+      schoolId: "10",
       schoolName: "서울대학교",
       pm: 2,
       design: 3,
@@ -99,11 +101,12 @@ describe("mapGroupsToChapterQuotaData", () => {
     })
   })
 
-  it("시즌 설정이 없으면 0명으로 처리한다", () => {
+  it("시즌 설정이 없으면 seasonId를 undefined로 처리하고 0명으로 초기화한다", () => {
     const fixedNow = new Date("2026-08-02T09:00:00Z")
     const result = mapGroupsToChapterQuotaData(groups, new Map(), fixedNow)
 
     const chromium = result.find((item) => item.chapter === "Chromium")
+    expect(chromium?.schools[0]?.seasonId).toBeUndefined()
     expect(chromium?.schools[0]?.total).toBe(0)
     expect(chromium?.totals.total).toBe(0)
   })
@@ -113,5 +116,37 @@ describe("mapGroupsToChapterQuotaData", () => {
     const chromium = result.find((item) => item.chapter === "Chromium")
     expect(chromium?.updatedDate).toBeUndefined()
     expect(chromium?.updatedTime).toBeUndefined()
+  })
+
+  it("serverChapters에 존재하지만 groups에 없는 대학교도 0명으로 목록에 항상 포함한다", () => {
+    const serverChapters = [
+      {
+        chapterId: "1",
+        chapterName: "Chromium",
+        schools: [
+          { schoolId: "10", schoolName: "서울대학교" },
+          { schoolId: "20", schoolName: "연세대학교" },
+          { schoolId: "30", schoolName: "고려대학교" },
+        ],
+      },
+    ]
+
+    const result = mapGroupsToChapterQuotaData(
+      [groups[0]!], // 서울대학교만 그룹에 존재
+      seasonConfigsMap,
+      serverChapters,
+      "15",
+    )
+
+    const chromium = result.find((item) => item.chapter === "Chromium")
+    expect(chromium?.schools).toHaveLength(3)
+    expect(chromium?.schools[0]?.schoolName).toBe("서울대학교")
+    expect(chromium?.schools[0]?.seasonId).toBe("100")
+    expect(chromium?.schools[1]?.schoolName).toBe("연세대학교")
+    expect(chromium?.schools[1]?.seasonId).toBeUndefined()
+    expect(chromium?.schools[1]?.total).toBe(0)
+    expect(chromium?.schools[2]?.schoolName).toBe("고려대학교")
+    expect(chromium?.schools[2]?.seasonId).toBeUndefined()
+    expect(chromium?.schools[2]?.total).toBe(0)
   })
 })

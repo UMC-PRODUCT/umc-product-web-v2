@@ -8,11 +8,31 @@ import type {
 } from "../api/types"
 import type { ChapterQuotaData, SchoolQuotaRow } from "./recruitmentQuota"
 
+export interface ServerChapterItem {
+  chapterId: string | number
+  chapterName: string
+  schools: Array<{
+    schoolId: string | number
+    schoolName: string
+  }>
+}
+
 export function mapGroupsToChapterQuotaData(
   groups: RecruitingRoundGroup[],
   seasonConfigsMap: Map<string, RecruitingSeasonConfigurationResponse>,
+  serverChaptersOrNow?: ServerChapterItem[] | Date,
+  gisuId?: string,
   now?: Date,
 ): ChapterQuotaData[] {
+  let serverChapters: ServerChapterItem[] | undefined
+  let actualNow = now
+
+  if (serverChaptersOrNow instanceof Date) {
+    actualNow = serverChaptersOrNow
+  } else {
+    serverChapters = serverChaptersOrNow
+  }
+
   const byChapter = new Map<string, RecruitingRoundGroup[]>()
 
   groups.forEach((group) => {
@@ -23,15 +43,43 @@ export function mapGroupsToChapterQuotaData(
     byChapter.get(chapterName)!.push(group)
   })
 
-  const updatedDate = now ? dayjs(now).format("YY-MM-DD") : undefined
-  const updatedTime = now ? dayjs(now).format("HH:mm") : undefined
+  const serverChaptersMap = new Map<
+    string,
+    Array<{ schoolId: string; schoolName: string }>
+  >()
+
+  if (serverChapters && serverChapters.length > 0) {
+    serverChapters.forEach((ch) => {
+      serverChaptersMap.set(
+        ch.chapterName,
+        ch.schools.map((s) => ({
+          schoolId: String(s.schoolId),
+          schoolName: s.schoolName,
+        })),
+      )
+    })
+  }
+
+  const updatedDate = actualNow
+    ? dayjs(actualNow).format("YY-MM-DD")
+    : undefined
+  const updatedTime = actualNow ? dayjs(actualNow).format("HH:mm") : undefined
 
   const chapters = CHAPTERS.length > 0 ? CHAPTERS : Array.from(byChapter.keys())
 
   return chapters.map((chapterName) => {
     const chapterGroups = byChapter.get(chapterName) ?? []
-    const schools: SchoolQuotaRow[] = chapterGroups.map((group) => {
+    const serverSchools = serverChaptersMap.get(chapterName) ?? []
+
+    const groupSchoolIds = new Set<string>()
+    const groupSchoolNames = new Set<string>()
+
+    const schoolsFromGroups: SchoolQuotaRow[] = chapterGroups.map((group) => {
+      groupSchoolIds.add(String(group.schoolId))
+      groupSchoolNames.add(group.schoolName)
+
       const config = seasonConfigsMap.get(group.seasonId)
+      const hasConfig = Boolean(config)
       const quotas = config?.quotas ?? []
 
       const pm = quotas.find((q) => q.track === "PLAN")?.targetCount ?? 0
@@ -43,7 +91,9 @@ export function mapGroupsToChapterQuotaData(
           ?.targetCount ?? 0
 
       return {
-        seasonId: group.seasonId,
+        seasonId: hasConfig ? group.seasonId : undefined,
+        gisuId: group.gisuId || gisuId,
+        schoolId: String(group.schoolId),
         schoolName: group.schoolName,
         pm,
         design,
@@ -52,6 +102,29 @@ export function mapGroupsToChapterQuotaData(
         total: pm + design + webPe + mobilePe,
       }
     })
+
+    const missingSchoolsFromChapter: SchoolQuotaRow[] = serverSchools
+      .filter(
+        (s) =>
+          !groupSchoolIds.has(s.schoolId) &&
+          !groupSchoolNames.has(s.schoolName),
+      )
+      .map((s) => ({
+        seasonId: undefined,
+        gisuId,
+        schoolId: s.schoolId,
+        schoolName: s.schoolName,
+        pm: 0,
+        design: 0,
+        webPe: 0,
+        mobilePe: 0,
+        total: 0,
+      }))
+
+    const schools: SchoolQuotaRow[] = [
+      ...schoolsFromGroups,
+      ...missingSchoolsFromChapter,
+    ]
 
     const totals = schools.reduce(
       (acc, s) => ({

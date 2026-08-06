@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from "react"
 
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -38,6 +40,12 @@ export function RecruitmentQuotaPage() {
   const addToast = useToastStore((state) => state.addToast)
 
   const { groups } = useAdminRecruitingRounds()
+  const { chapters: serverChapters } = useSchoolChapterMap()
+  const { data: activeGisuData } = useActiveGisu()
+  const activeGisuId = activeGisuData?.gisuId
+    ? String(activeGisuData.gisuId)
+    : undefined
+
   const activeTabGroups = useMemo(
     () =>
       chapterTab === "all"
@@ -49,7 +57,7 @@ export function RecruitmentQuotaPage() {
     () => [...new Set(activeTabGroups.map((g) => g.seasonId))],
     [activeTabGroups],
   )
-  const { seasonConfigsMap, updateQuotas, isSaving } =
+  const { seasonConfigsMap, updateQuotas, createSeason, isSaving } =
     useRecruitingSeasonQuotas(seasonIds)
 
   // 편집 권한은 시즌 단위라 서버 조회 결과를 그대로 쓴다. 권한을 확인하기
@@ -81,8 +89,14 @@ export function RecruitmentQuotaPage() {
     seasonIds.every((id) => permittedSeasonIds.has(String(id)))
 
   const allChaptersData = useMemo(
-    () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
-    [groups, seasonConfigsMap],
+    () =>
+      mapGroupsToChapterQuotaData(
+        groups,
+        seasonConfigsMap,
+        serverChapters,
+        activeGisuId,
+      ),
+    [groups, seasonConfigsMap, serverChapters, activeGisuId],
   )
 
   const chaptersDataWithEdits = useMemo(() => {
@@ -135,8 +149,9 @@ export function RecruitmentQuotaPage() {
           duration: 3000,
         })
       }
-      return "임의 배정 중"
+      return "직접 수정 중"
     })
+    setIsDirty(true)
   }, [addToast])
 
   const handleErrorExceeded = useCallback(
@@ -165,63 +180,143 @@ export function RecruitmentQuotaPage() {
   )
 
   const handleSave = async () => {
-    const allEditedRows = Array.from(editedSchoolsMap.values()).flat()
-    const payloadList = allEditedRows
-      // 편집 대상은 학교 행 단위인데 저장은 지부 전체 행을 모아 보낸다.
-      // 권한 없는 시즌이 섞이면 그 건은 서버가 거부해 부분 실패로 남는다.
-      .filter(
-        (row): row is SchoolQuotaRow & { seasonId: string } =>
-          Boolean(row.seasonId) && canEditSeason(row.seasonId),
-      )
-      .map((row) => ({
-        seasonId: row.seasonId,
-        schoolName: row.schoolName,
-        payload: {
-          quotas: [
-            { track: "PLAN" as const, targetCount: row.pm },
-            { track: "DESIGN" as const, targetCount: row.design },
-            { track: "WEB_PRODUCT_ENGINEER" as const, targetCount: row.webPe },
-            {
-              track: "MOBILE_PRODUCT_ENGINEER" as const,
-              targetCount: row.mobilePe,
-            },
-          ],
-        },
-      }))
+    const targetChapters = isAll
+      ? chaptersDataWithEdits
+      : chaptersDataWithEdits.filter((c) => c.chapter === chapterTab)
 
-    if (payloadList.length === 0) return
+    const rawRows = targetChapters.flatMap(
+      (c) => editedSchoolsMap.get(c.chapter) ?? [],
+    )
+
+    const existingSeasonRows = rawRows.filter(
+      (row): row is SchoolQuotaRow & { seasonId: string } =>
+        Boolean(row.seasonId) && canEditSeason(row.seasonId),
+    )
+    const newSeasonRows = rawRows.filter(
+      (row): row is SchoolQuotaRow & { gisuId: string; schoolId: string } =>
+        !row.seasonId && Boolean(row.gisuId) && Boolean(row.schoolId),
+    )
+
+    const payloadList = existingSeasonRows.map((row) => ({
+      seasonId: row.seasonId,
+      schoolName: row.schoolName,
+      payload: {
+        quotas: [
+          { track: "PLAN" as const, targetCount: row.pm },
+          { track: "DESIGN" as const, targetCount: row.design },
+          { track: "WEB_PRODUCT_ENGINEER" as const, targetCount: row.webPe },
+          {
+            track: "MOBILE_PRODUCT_ENGINEER" as const,
+            targetCount: row.mobilePe,
+          },
+        ],
+      },
+    }))
+
+    if (payloadList.length === 0 && newSeasonRows.length === 0) return
 
     try {
-      const result = await updateQuotas(payloadList)
+      const successfulSchoolNames = new Set<string>()
 
-      if (result.failedCount === 0) {
-        setIsDirty(false)
-        setEditedSchoolsMap(new Map())
-      } else {
-        const successfulSchoolNames = new Set(
-          result.successfulVariables
-            .map((v) => v.schoolName)
-            .filter((name): name is string => Boolean(name)),
+      if (newSeasonRows.length > 0) {
+        const createResults = await Promise.allSettled(
+          newSeasonRows.map(async (row) => {
+            await createSeason({
+              gisuId: row.gisuId,
+              schoolId: row.schoolId,
+              quotas: [
+                { track: "PLAN", targetCount: row.pm },
+                { track: "DESIGN", targetCount: row.design },
+                { track: "WEB_PRODUCT_ENGINEER", targetCount: row.webPe },
+                { track: "MOBILE_PRODUCT_ENGINEER", targetCount: row.mobilePe },
+              ],
+            })
+            return row
+          }),
         )
 
-        setEditedSchoolsMap((prev) => {
-          const next = new Map<string, SchoolQuotaRow[]>()
-          prev.forEach((rows, chapter) => {
-            const remainingRows = rows.filter(
-              (r) => !successfulSchoolNames.has(r.schoolName),
-            )
-            if (remainingRows.length > 0) {
-              next.set(chapter, remainingRows)
+        let isAlreadyExistsError = false
+        const failedCreateSchoolNames: string[] = []
+
+        createResults.forEach((result, index) => {
+          const row = newSeasonRows[index]
+          if (!row) return
+
+          if (result.status === "fulfilled") {
+            successfulSchoolNames.add(row.schoolName)
+          } else {
+            failedCreateSchoolNames.push(row.schoolName)
+            const err = result.reason as {
+              code?: string
+              response?: { data?: { code?: string; message?: string } }
+              message?: string
             }
-          })
-          if (next.size === 0) {
-            setIsDirty(false)
+            if (
+              err?.code === "RECRUITING-0103" ||
+              err?.response?.data?.code === "RECRUITING-0103" ||
+              err?.response?.data?.message?.includes(
+                "이미 같은 학교와 기수의 모집 시즌이 있어요",
+              )
+            ) {
+              isAlreadyExistsError = true
+            }
           }
-          return next
+        })
+
+        if (failedCreateSchoolNames.length > 0) {
+          const message = isAlreadyExistsError
+            ? `${failedCreateSchoolNames.join(", ")} 대학교는 이미 모집 시즌이 존재합니다. 페이지를 새로고침 해주세요.`
+            : `${failedCreateSchoolNames.join(", ")} 시즌 생성에 실패했습니다. 잠시 후 다시 시도해주세요.`
+
+          addToast({
+            message,
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+        }
+      }
+
+      if (payloadList.length > 0) {
+        const updateResult = await updateQuotas(payloadList)
+
+        updateResult.successfulVariables.forEach((v) => {
+          if (v.schoolName) {
+            successfulSchoolNames.add(v.schoolName)
+          }
         })
       }
+
+      if (successfulSchoolNames.size > 0) {
+        let remainingCount = 0
+        const nextMap = new Map<string, SchoolQuotaRow[]>()
+
+        editedSchoolsMap.forEach((rows, chapter) => {
+          const remainingRows = rows.filter(
+            (r) => !successfulSchoolNames.has(r.schoolName),
+          )
+          if (remainingRows.length > 0) {
+            nextMap.set(chapter, remainingRows)
+            remainingCount += remainingRows.length
+          }
+        })
+
+        if (remainingCount === 0) {
+          setIsDirty(false)
+          setEditedSchoolsMap(new Map())
+        } else {
+          setEditedSchoolsMap(nextMap)
+        }
+      }
     } catch {
-      // 에러 토스트는 useRecruitingSeasonQuotas 훅에서 처리됨
+      addToast({
+        message: "저장 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
     }
   }
 
@@ -246,14 +341,8 @@ export function RecruitmentQuotaPage() {
       )
     : selectedChapterData.totals
 
-  const totalApplicants = isAll
-    ? chaptersDataWithEdits.reduce((acc, item) => acc + item.totals.total, 0)
-    : selectedChapterData.totals.total
-
-  const hasApplicants = totalApplicants > 0
-
-  const showAutoAllocateButton = !isAll && hasApplicants && canEditEverySeason
-  const showSaveButton = hasApplicants && canEditAny
+  const showAutoAllocateButton = !isAll && canEditEverySeason
+  const showSaveButton = canEditAny
 
   const pageTitle = isAll ? "UMC 11th" : chapterTab
   const statusCardTitle = isAll ? "전체 지원자 현황" : "지부 지원자 현황"
@@ -341,49 +430,41 @@ export function RecruitmentQuotaPage() {
               </p>
             </div>
 
-            {!isAll && !hasApplicants ? (
-              <div className="flex h-65 w-full items-center justify-center">
-                <p className="text-body-2-medium text-teal-gray-400">
-                  현재 TO를 정할 지원자가 없습니다.
-                </p>
-              </div>
-            ) : (
-              <div className="flex w-full flex-col gap-10">
-                {isAll ? (
-                  chaptersDataWithEdits.map((chapterData) => (
-                    <ChapterQuotaTableCard
-                      key={chapterData.chapter}
-                      data={chapterData}
-                      status={allocationStatus}
-                      onDirtyChange={() => setIsDirty(true)}
-                      onManualEdit={handleManualEdit}
-                      onErrorExceeded={handleErrorExceeded}
-                      canEditSeason={canEditSeason}
-                      onSchoolsDataChange={(schools) =>
-                        handleSchoolsDataChange(chapterData.chapter, schools)
-                      }
-                      autoAllocateRequest={autoAllocateRequest}
-                    />
-                  ))
-                ) : (
+            <div className="flex w-full flex-col gap-10">
+              {isAll ? (
+                chaptersDataWithEdits.map((chapterData) => (
                   <ChapterQuotaTableCard
-                    data={selectedChapterData}
+                    key={chapterData.chapter}
+                    data={chapterData}
                     status={allocationStatus}
                     onDirtyChange={() => setIsDirty(true)}
                     onManualEdit={handleManualEdit}
                     onErrorExceeded={handleErrorExceeded}
                     canEditSeason={canEditSeason}
                     onSchoolsDataChange={(schools) =>
-                      handleSchoolsDataChange(
-                        selectedChapterData.chapter,
-                        schools,
-                      )
+                      handleSchoolsDataChange(chapterData.chapter, schools)
                     }
                     autoAllocateRequest={autoAllocateRequest}
                   />
-                )}
-              </div>
-            )}
+                ))
+              ) : (
+                <ChapterQuotaTableCard
+                  data={selectedChapterData}
+                  status={allocationStatus}
+                  onDirtyChange={() => setIsDirty(true)}
+                  onManualEdit={handleManualEdit}
+                  onErrorExceeded={handleErrorExceeded}
+                  canEditSeason={canEditSeason}
+                  onSchoolsDataChange={(schools) =>
+                    handleSchoolsDataChange(
+                      selectedChapterData.chapter,
+                      schools,
+                    )
+                  }
+                  autoAllocateRequest={autoAllocateRequest}
+                />
+              )}
+            </div>
           </div>
 
           {/* 자동 배정 확인 CtaModal */}

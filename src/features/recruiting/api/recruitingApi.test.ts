@@ -4,6 +4,7 @@ import { api } from "@/shared/lib/axios"
 
 import {
   addRoundEvaluator,
+  createRecruitingSeason,
   getAdminRounds,
   getRoundEvaluators,
   mergeRoundGroups,
@@ -15,6 +16,7 @@ import {
   normalizeRecruitingSeasonConfigurationResponse,
   normalizeStatusSummary,
   removeRoundEvaluator,
+  updateRecruitingSeason,
 } from "./recruitingApi"
 
 import type {
@@ -32,6 +34,8 @@ vi.mock("@/shared/lib/axios", () => ({
   api: {
     get: vi.fn(),
     post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
     delete: vi.fn(),
   },
 }))
@@ -616,6 +620,43 @@ describe("normalizeInterviewScheduleBoard", () => {
     expect(board.pendingApplicants[0]).toEqual({
       applicationId: "41",
       applicantName: "",
+    })
+  })
+})
+
+describe("createRecruitingSeason & updateRecruitingSeason", () => {
+  it("createRecruitingSeason 호출 시 POST /v1/recruiting/admin/seasons 요청을 보낸다", async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { result: { id: 123 } } })
+
+    const result = await createRecruitingSeason({
+      gisuId: "15",
+      schoolId: "10",
+      quotas: [{ track: "PLAN", targetCount: 0 }],
+    })
+
+    expect(api.post).toHaveBeenCalledWith("/v1/recruiting/admin/seasons", {
+      gisuId: "15",
+      schoolId: "10",
+      quotas: [{ track: "PLAN", targetCount: 0 }],
+    })
+    expect(result).toBe("123")
+  })
+
+  it("updateRecruitingSeason 호출 시 PATCH /v1/recruiting/admin/seasons/{seasonId} 요청을 보낸다", async () => {
+    vi.mocked(api.patch).mockResolvedValueOnce({ data: {} })
+
+    await updateRecruitingSeason("123", { memo: "시즌 공유 메모" })
+
+    expect(api.patch).toHaveBeenCalledWith("/v1/recruiting/admin/seasons/123", {
+      memo: "시즌 공유 메모",
+    })
+
+    vi.mocked(api.patch).mockResolvedValueOnce({ data: {} })
+
+    await updateRecruitingSeason("123", { memo: null })
+
+    expect(api.patch).toHaveBeenCalledWith("/v1/recruiting/admin/seasons/123", {
+      memo: null,
     })
   })
 })

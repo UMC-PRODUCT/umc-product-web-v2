@@ -178,6 +178,18 @@ export interface ReplaceRecruitingSeasonTrackQuotasRequest {
   quotas: RecruitingSeasonTrackQuotaRequest[]
 }
 
+// 모집 시즌 생성 요청 (RECRUITING-ADMIN-002)
+export interface CreateRecruitingSeasonRequest {
+  gisuId: string | number
+  schoolId: string | number
+  quotas?: RecruitingSeasonTrackQuotaRequest[]
+}
+
+// 모집 시즌 수정 요청 (RECRUITING-ADMIN-003)
+export interface UpdateRecruitingSeasonRequest {
+  memo?: string | null
+}
+
 export interface RecruitingRoundGroup {
   seasonId: string
   gisuId: string
