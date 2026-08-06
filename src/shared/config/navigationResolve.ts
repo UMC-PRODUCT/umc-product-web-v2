@@ -18,13 +18,20 @@ function matchesPath(path: string, target: string): boolean {
   return path === target || path.startsWith(`${target}/`)
 }
 
-/** menu.to 또는 matchPaths 중 path와 일치하는 경로 문자열을 반환 */
+/**
+ * menu.to 와 matchPaths 중 path 에 일치하는 것들 가운데 가장 긴 경로를 반환.
+ *
+ * to 에서 멈추면 안 된다. 항목이 넓은 to 와 좁은 별칭을 함께 가질 때
+ * (예: to `/manage` + 별칭 `/manage/school/detail`) 짧은 to 로 답해 버려,
+ * 다른 항목의 `/manage/school` 에 최장 일치를 빼앗긴다.
+ */
 function getMatchedPath(path: string, menu: SideBarMenu): string | null {
-  if (matchesPath(path, menu.to)) return menu.to
-  for (const alias of menu.matchPaths ?? []) {
-    if (matchesPath(path, alias)) return alias
+  let longest: string | null = null
+  for (const candidate of [menu.to, ...(menu.matchPaths ?? [])]) {
+    if (!matchesPath(path, candidate)) continue
+    if (candidate.length > (longest?.length ?? -1)) longest = candidate
   }
-  return null
+  return longest
 }
 
 export function resolveNavigationFromPathname(pathname: string): {

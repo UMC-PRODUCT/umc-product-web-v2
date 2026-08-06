@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { SIDEBAR_ITEMS } from "@/shared/config/navigation"
+import TeamIcon from "@/shared/assets/icon/people/TeamIcon"
+import { SIDEBAR_ITEMS, type SideBarSection } from "@/shared/config/navigation"
 import { filterSectionsByPermission } from "@/widgets/navigation/sidebar/utils"
 
 import { resolveNavigationFromPathname } from "./navigationResolve"
@@ -62,6 +63,31 @@ describe("resolveNavigationFromPathname", () => {
 
   it("알 수 없는 경로는 null", () => {
     expect(resolveNavigationFromPathname("/unknown/path")).toBeNull()
+  })
+
+  it("to 가 먼저 일치해도 더 긴 matchPaths 별칭이 최장 일치를 가져간다", () => {
+    const sections: SideBarSection[] = [
+      {
+        id: "settings",
+        title: "설정",
+        icon: TeamIcon,
+        menus: [
+          {
+            id: "manage-root",
+            title: "관리",
+            to: "/manage",
+            matchPaths: ["/manage/school/detail"],
+          },
+          { id: "manage-school", title: "학교 관리", to: "/manage/school" },
+        ],
+      },
+    ]
+
+    const resolved = resolveNavigationFromPathname(
+      "/manage/school/detail",
+      sections,
+    )
+    expect(resolved?.menu.id).toBe("manage-root")
   })
 
   it("프로젝트 관리 메뉴가 권한으로 제거되면 edit 경로는 별칭을 잃고 팀 매칭으로 fallback", () => {
