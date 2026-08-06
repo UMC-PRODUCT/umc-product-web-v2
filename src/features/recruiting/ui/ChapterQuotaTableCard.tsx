@@ -19,6 +19,8 @@ interface ChapterQuotaTableCardProps {
   onErrorExceeded?: (partName: string, maxAllowed: number) => void
   onSchoolsDataChange?: (schools: SchoolQuotaRow[]) => void
   autoAllocateTrigger?: number
+  /** 시즌별 편집 가능 여부. 없으면 전부 편집 가능으로 본다. */
+  canEditSeason?: (seasonId: string | undefined) => boolean
   className?: string
 }
 
@@ -30,6 +32,7 @@ export function ChapterQuotaTableCard({
   onErrorExceeded,
   onSchoolsDataChange,
   autoAllocateTrigger,
+  canEditSeason,
   className,
 }: ChapterQuotaTableCardProps) {
   const [schoolsData, setSchoolsData] = useState<SchoolQuotaRow[]>(data.schools)
@@ -240,6 +243,9 @@ export function ChapterQuotaTableCard({
           <>
             {/* School rows */}
             {schoolsData.map((school) => {
+              const readOnly = canEditSeason
+                ? !canEditSeason(school.seasonId)
+                : false
               return (
                 <div
                   key={school.schoolName}
@@ -252,6 +258,7 @@ export function ChapterQuotaTableCard({
                   </div>
                   <QuotaEditableCell
                     partName="PM"
+                    readOnly={readOnly}
                     value={school.pm}
                     maxAllowed={getMaxAllowedForSchool("pm", school.schoolName)}
                     onChange={(val) =>
@@ -261,6 +268,7 @@ export function ChapterQuotaTableCard({
                   />
                   <QuotaEditableCell
                     partName="Design"
+                    readOnly={readOnly}
                     value={school.design}
                     maxAllowed={getMaxAllowedForSchool(
                       "design",
@@ -273,6 +281,7 @@ export function ChapterQuotaTableCard({
                   />
                   <QuotaEditableCell
                     partName="Web PE"
+                    readOnly={readOnly}
                     value={school.webPe}
                     maxAllowed={getMaxAllowedForSchool(
                       "webPe",
@@ -285,6 +294,7 @@ export function ChapterQuotaTableCard({
                   />
                   <QuotaEditableCell
                     partName="Mobile PE"
+                    readOnly={readOnly}
                     value={school.mobilePe}
                     maxAllowed={getMaxAllowedForSchool(
                       "mobilePe",

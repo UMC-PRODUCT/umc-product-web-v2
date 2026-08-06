@@ -8,6 +8,7 @@ interface QuotaEditableCellProps {
   maxAllowed?: number
   onChange: (newValue: number) => void
   onErrorExceeded?: (partName: string, maxAllowed: number) => void
+  readOnly?: boolean
   className?: string
 }
 
@@ -17,6 +18,7 @@ export function QuotaEditableCell({
   maxAllowed = 9999,
   onChange,
   onErrorExceeded,
+  readOnly = false,
   className,
 }: QuotaEditableCellProps) {
   const [inputValue, setInputValue] = useState(String(value))
@@ -81,13 +83,16 @@ export function QuotaEditableCell({
           maxLength={4}
           value={inputValue}
           aria-label={`${partName} TO`}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onChange={handleChange}
+          readOnly={readOnly}
+          tabIndex={readOnly ? -1 : undefined}
+          onFocus={readOnly ? undefined : handleFocus}
+          onBlur={readOnly ? undefined : handleBlur}
+          onChange={readOnly ? undefined : handleChange}
           style={{ width: `${charLength}ch` }}
           className={cn(
             "text-heading-6-semibold min-w-[1ch] bg-transparent text-right outline-none focus:outline-none",
             isError ? "text-error-500" : "text-teal-500",
+            readOnly && "text-teal-gray-500 cursor-default",
           )}
         />
         <span

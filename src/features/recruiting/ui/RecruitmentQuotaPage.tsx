@@ -7,7 +7,9 @@ import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { useAdminRecruitingRounds } from "../hooks/useAdminRecruitingRounds"
+import { useRecruitingPermissions } from "../hooks/useRecruitingPermissions"
 import { useRecruitingSeasonQuotas } from "../hooks/useRecruitingSeasonQuotas"
+import { hasAnyEditableSeason } from "../model/recruitingEditLock"
 import { mapGroupsToChapterQuotaData } from "../model/recruitmentQuotaMapper"
 import {
   type AllocationStatus,
@@ -46,6 +48,20 @@ export function RecruitmentQuotaPage() {
   )
   const { seasonConfigsMap, updateQuotas, isSaving } =
     useRecruitingSeasonQuotas(seasonIds)
+
+  // 편집 권한은 시즌 단위라 서버 조회 결과를 그대로 쓴다. 권한을 확인하기
+  // 전에는 잠가 둔다. 열어 두면 못 고칠 값을 고치고 저장에서야 거부당한다.
+  const { permittedSeasonIds, isLoading: isPermissionLoading } =
+    useRecruitingPermissions(seasonIds)
+  const canEditSeason = useCallback(
+    (seasonId: string | undefined) =>
+      !isPermissionLoading &&
+      seasonId != null &&
+      permittedSeasonIds.has(String(seasonId)),
+    [permittedSeasonIds, isPermissionLoading],
+  )
+  const canEditAny =
+    !isPermissionLoading && hasAnyEditableSeason(seasonIds, permittedSeasonIds)
 
   const allChaptersData = useMemo(
     () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
@@ -209,8 +225,8 @@ export function RecruitmentQuotaPage() {
 
   const hasApplicants = totalApplicants > 0
 
-  const showAutoAllocateButton = !isAll && hasApplicants
-  const showSaveButton = hasApplicants
+  const showAutoAllocateButton = !isAll && hasApplicants && canEditAny
+  const showSaveButton = hasApplicants && canEditAny
 
   const pageTitle = isAll ? "UMC 11th" : chapterTab
   const statusCardTitle = isAll ? "전체 지원자 현황" : "지부 지원자 현황"
@@ -315,6 +331,7 @@ export function RecruitmentQuotaPage() {
                       onDirtyChange={() => setIsDirty(true)}
                       onManualEdit={handleManualEdit}
                       onErrorExceeded={handleErrorExceeded}
+                      canEditSeason={canEditSeason}
                       onSchoolsDataChange={(schools) =>
                         handleSchoolsDataChange(chapterData.chapter, schools)
                       }
@@ -328,6 +345,7 @@ export function RecruitmentQuotaPage() {
                     onDirtyChange={() => setIsDirty(true)}
                     onManualEdit={handleManualEdit}
                     onErrorExceeded={handleErrorExceeded}
+                    canEditSeason={canEditSeason}
                     onSchoolsDataChange={(schools) =>
                       handleSchoolsDataChange(
                         selectedChapterData.chapter,
