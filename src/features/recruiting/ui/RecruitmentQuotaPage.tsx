@@ -7,7 +7,9 @@ import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { useAdminRecruitingRounds } from "../hooks/useAdminRecruitingRounds"
+import { useRecruitingPermissions } from "../hooks/useRecruitingPermissions"
 import { useRecruitingSeasonQuotas } from "../hooks/useRecruitingSeasonQuotas"
+import { hasAnyEditableSeason } from "../model/recruitingEditLock"
 import { mapGroupsToChapterQuotaData } from "../model/recruitmentQuotaMapper"
 import {
   type AllocationStatus,
@@ -24,7 +26,10 @@ export function RecruitmentQuotaPage() {
   const [allocationStatus, setAllocationStatus] =
     useState<AllocationStatus>("TO 설정 전")
   const [autoModalOpen, setAutoModalOpen] = useState(false)
-  const [autoAllocateTrigger, setAutoAllocateTrigger] = useState(0)
+  const [autoAllocateRequest, setAutoAllocateRequest] = useState<{
+    id: number
+    chapter: string
+  } | null>(null)
 
   const [editedSchoolsMap, setEditedSchoolsMap] = useState<
     Map<string, SchoolQuotaRow[]>
@@ -47,6 +52,34 @@ export function RecruitmentQuotaPage() {
   const { seasonConfigsMap, updateQuotas, isSaving } =
     useRecruitingSeasonQuotas(seasonIds)
 
+  // 편집 권한은 시즌 단위라 서버 조회 결과를 그대로 쓴다. 권한을 확인하기
+  // 전에는 잠가 둔다. 열어 두면 못 고칠 값을 고치고 저장에서야 거부당한다.
+  //
+  // 조회 범위는 현재 탭이 아니라 지부 전체다. 저장은 탭을 옮겨 다니며 쌓인
+  // editedSchoolsMap 을 통째로 보내는데, 현재 탭 시즌만 조회하면 다른 지부에서
+  // 고친 값이 권한 없음으로 판정돼 조용히 빠진다.
+  const allSeasonIds = useMemo(
+    () => [...new Set(groups.map((g) => g.seasonId))],
+    [groups],
+  )
+  const { permittedSeasonIds, isLoading: isPermissionLoading } =
+    useRecruitingPermissions(allSeasonIds)
+  const canEditSeason = useCallback(
+    (seasonId: string | undefined) =>
+      !isPermissionLoading &&
+      seasonId != null &&
+      permittedSeasonIds.has(String(seasonId)),
+    [permittedSeasonIds, isPermissionLoading],
+  )
+  const canEditAny =
+    !isPermissionLoading && hasAnyEditableSeason(seasonIds, permittedSeasonIds)
+  // 자동 배정은 화면의 모든 학교 행을 한꺼번에 덮어쓴다. 일부만 편집 가능한
+  // 지부에서 열어 두면 잠긴 행까지 값이 바뀌고 저장에 실려 나간다.
+  const canEditEverySeason =
+    !isPermissionLoading &&
+    seasonIds.length > 0 &&
+    seasonIds.every((id) => permittedSeasonIds.has(String(id)))
+
   const allChaptersData = useMemo(
     () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
     [groups, seasonConfigsMap],
@@ -67,11 +100,18 @@ export function RecruitmentQuotaPage() {
 
   const handleTabChange = (nextValue: string) => {
     setChapterTab(nextValue)
+    // 지부를 옮기면 앞선 요청은 끝난 것으로 본다. 남겨 두면 새 지부 카드가
+    // 마운트되면서 누른 적 없는 자동 배정이 걸린다.
+    setAutoAllocateRequest(null)
   }
 
   const handleConfirmAutoAllocate = () => {
     setAutoModalOpen(false)
-    setAutoAllocateTrigger((prev) => prev + 1)
+    // 자동 배정은 전체 탭에서 막혀 있어 여기서는 항상 선택된 지부가 대상이다.
+    setAutoAllocateRequest((prev) => ({
+      id: (prev?.id ?? 0) + 1,
+      chapter: chapterTab,
+    }))
     setAllocationStatus("자동 배정 중")
     setIsDirty(true)
 
@@ -127,8 +167,11 @@ export function RecruitmentQuotaPage() {
   const handleSave = async () => {
     const allEditedRows = Array.from(editedSchoolsMap.values()).flat()
     const payloadList = allEditedRows
-      .filter((row): row is SchoolQuotaRow & { seasonId: string } =>
-        Boolean(row.seasonId),
+      // 편집 대상은 학교 행 단위인데 저장은 지부 전체 행을 모아 보낸다.
+      // 권한 없는 시즌이 섞이면 그 건은 서버가 거부해 부분 실패로 남는다.
+      .filter(
+        (row): row is SchoolQuotaRow & { seasonId: string } =>
+          Boolean(row.seasonId) && canEditSeason(row.seasonId),
       )
       .map((row) => ({
         seasonId: row.seasonId,
@@ -209,8 +252,8 @@ export function RecruitmentQuotaPage() {
 
   const hasApplicants = totalApplicants > 0
 
-  const showAutoAllocateButton = !isAll && hasApplicants
-  const showSaveButton = hasApplicants
+  const showAutoAllocateButton = !isAll && hasApplicants && canEditEverySeason
+  const showSaveButton = hasApplicants && canEditAny
 
   const pageTitle = isAll ? "UMC 11th" : chapterTab
   const statusCardTitle = isAll ? "전체 지원자 현황" : "지부 지원자 현황"
@@ -315,10 +358,11 @@ export function RecruitmentQuotaPage() {
                       onDirtyChange={() => setIsDirty(true)}
                       onManualEdit={handleManualEdit}
                       onErrorExceeded={handleErrorExceeded}
+                      canEditSeason={canEditSeason}
                       onSchoolsDataChange={(schools) =>
                         handleSchoolsDataChange(chapterData.chapter, schools)
                       }
-                      autoAllocateTrigger={autoAllocateTrigger}
+                      autoAllocateRequest={autoAllocateRequest}
                     />
                   ))
                 ) : (
@@ -328,13 +372,14 @@ export function RecruitmentQuotaPage() {
                     onDirtyChange={() => setIsDirty(true)}
                     onManualEdit={handleManualEdit}
                     onErrorExceeded={handleErrorExceeded}
+                    canEditSeason={canEditSeason}
                     onSchoolsDataChange={(schools) =>
                       handleSchoolsDataChange(
                         selectedChapterData.chapter,
                         schools,
                       )
                     }
-                    autoAllocateTrigger={autoAllocateTrigger}
+                    autoAllocateRequest={autoAllocateRequest}
                   />
                 )}
               </div>

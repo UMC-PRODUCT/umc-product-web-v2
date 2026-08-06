@@ -18,6 +18,7 @@ import {
   useSaveEvaluatorAllocation,
   useSchoolStaff,
 } from "../../hooks/useEvaluatorAllocation"
+import { useRecruitingPermissions } from "../../hooks/useRecruitingPermissions"
 import {
   isStaff,
   RECRUITMENT_BOX_ID,
@@ -44,6 +45,15 @@ export function EvaluatorAllocationPage({
         group.rounds.some((r) => String(r.roundId) === String(activeRoundId)),
       ) ?? groups[0])
     : groups[0]
+
+  // 배정 권한은 시즌 단위다. 권한을 확인하기 전에는 잠가 둔다.
+  const seasonIds = activeGroup?.seasonId ? [activeGroup.seasonId] : []
+  const { permittedSeasonIds, isLoading: isPermissionLoading } =
+    useRecruitingPermissions(seasonIds)
+  const canEdit =
+    !isPermissionLoading &&
+    activeGroup?.seasonId != null &&
+    permittedSeasonIds.has(String(activeGroup.seasonId))
 
   const schoolId = activeGroup?.schoolId
   const gisuId = activeGroup?.gisuId
@@ -115,7 +125,7 @@ export function EvaluatorAllocationPage({
     setActiveItem: setActiveStaff,
   } = useChipAssignment<Staff>({
     onRemoveSelected: (chipId) => {
-      if (!isInitialized) return
+      if (!isInitialized || !canEdit) return
       setAssignedEvaluators((prev) =>
         prev.filter((staff) => staff.id !== chipId),
       )
@@ -151,7 +161,7 @@ export function EvaluatorAllocationPage({
   }
 
   function handleDragStart(event: DragStartEvent) {
-    if (!isInitialized) return
+    if (!isInitialized || !canEdit) return
     const staff = event.active.data.current
     if (!isStaff(staff)) return
     setActiveStaff(staff)
@@ -162,7 +172,7 @@ export function EvaluatorAllocationPage({
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    if (!isInitialized) return
+    if (!isInitialized || !canEdit) return
     const { active, over } = event
     setActiveStaff(null)
 
@@ -228,13 +238,16 @@ export function EvaluatorAllocationPage({
           <div className="absolute -top-10.5 right-0.5 flex gap-2">
             <button
               onClick={(e) => {
-                if (!isInitialized) return
+                if (!isInitialized || !canEdit) return
                 e.stopPropagation()
+                // 저장 요청 중에 비우면, 앞선 요청의 성공 콜백이 이전 스냅샷을
+                // 되살린다. 다른 편집 경로처럼 새 편집으로 표시한다.
+                editRevisionRef.current += 1
                 setAssignedEvaluators([])
                 setIsDirty(true)
                 setSelectedChipId(null)
               }}
-              disabled={!isInitialized}
+              disabled={!isInitialized || !canEdit}
               className="border-teal-gray-400/15 box-border flex h-8.5 items-center gap-1 rounded-[10px] border bg-white px-3 py-1 pl-2.5 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ResetIcon className="h-4 w-4" />
@@ -247,7 +260,7 @@ export function EvaluatorAllocationPage({
               size="xs"
               color="primary"
               variant="fill"
-              disabled={saveMutation.isPending || !isInitialized}
+              disabled={saveMutation.isPending || !isInitialized || !canEdit}
               onClick={handleSave}
               className="w-fit rounded-[8px] px-3 py-1.5"
             >
@@ -266,7 +279,8 @@ export function EvaluatorAllocationPage({
                 selectedChipId={selectedChipId}
                 onSelectChip={setSelectedChipId}
                 onClear={() => {
-                  if (!isInitialized) return
+                  if (!isInitialized || !canEdit) return
+                  editRevisionRef.current += 1
                   setAssignedEvaluators([])
                   setIsDirty(true)
                   setSelectedChipId(null)

@@ -1,11 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router"
 
 import { useMe } from "@/entities/member/hooks/useMe"
-import {
-  isAnyOperator,
-  isCentralStaff,
-  isSuperAdmin,
-} from "@/entities/member/model/identity"
+import { isAnyOperator, isCentralAdmin } from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { SETTINGS_ENTRY_PATH } from "@/shared/config/settingsNavigation"
@@ -38,7 +34,7 @@ export default function RecruitingHeader({
   const isAuthed = useAuthStore((s) => s.isAuthed)
 
   const showRecruiting = isAnyOperator(me)
-  const showSettings = isSuperAdmin(me) || isCentralStaff(me)
+  const showSettings = isCentralAdmin(me)
 
   const navItems = buildRecruitingNavItems({
     isAuthed,
