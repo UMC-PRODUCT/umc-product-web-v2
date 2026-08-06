@@ -54,8 +54,16 @@ export function RecruitmentQuotaPage() {
 
   // 편집 권한은 시즌 단위라 서버 조회 결과를 그대로 쓴다. 권한을 확인하기
   // 전에는 잠가 둔다. 열어 두면 못 고칠 값을 고치고 저장에서야 거부당한다.
+  //
+  // 조회 범위는 현재 탭이 아니라 지부 전체다. 저장은 탭을 옮겨 다니며 쌓인
+  // editedSchoolsMap 을 통째로 보내는데, 현재 탭 시즌만 조회하면 다른 지부에서
+  // 고친 값이 권한 없음으로 판정돼 조용히 빠진다.
+  const allSeasonIds = useMemo(
+    () => [...new Set(groups.map((g) => g.seasonId))],
+    [groups],
+  )
   const { permittedSeasonIds, isLoading: isPermissionLoading } =
-    useRecruitingPermissions(seasonIds)
+    useRecruitingPermissions(allSeasonIds)
   const canEditSeason = useCallback(
     (seasonId: string | undefined) =>
       !isPermissionLoading &&
