@@ -195,6 +195,7 @@ export function RecruitmentQuotaPage() {
           }),
         )
 
+        let isAlreadyExistsError = false
         const failedCreateSchoolNames: string[] = []
 
         createResults.forEach((result, index) => {
@@ -205,12 +206,30 @@ export function RecruitmentQuotaPage() {
             successfulSchoolNames.add(row.schoolName)
           } else {
             failedCreateSchoolNames.push(row.schoolName)
+            const err = result.reason as {
+              code?: string
+              response?: { data?: { code?: string; message?: string } }
+              message?: string
+            }
+            if (
+              err?.code === "RECRUITING-0103" ||
+              err?.response?.data?.code === "RECRUITING-0103" ||
+              err?.response?.data?.message?.includes(
+                "이미 같은 학교와 기수의 모집 시즌이 있어요",
+              )
+            ) {
+              isAlreadyExistsError = true
+            }
           }
         })
 
         if (failedCreateSchoolNames.length > 0) {
+          const message = isAlreadyExistsError
+            ? `${failedCreateSchoolNames.join(", ")} 대학교는 이미 모집 시즌이 존재합니다. 페이지를 새로고침 해주세요.`
+            : `${failedCreateSchoolNames.join(", ")} 시즌 생성에 실패했습니다. 잠시 후 다시 시도해주세요.`
+
           addToast({
-            message: `${failedCreateSchoolNames.join(", ")} 시즌 생성에 실패했습니다. 잠시 후 다시 시도해주세요.`,
+            message,
             color: "red",
             variant: "deep",
             type: "default",

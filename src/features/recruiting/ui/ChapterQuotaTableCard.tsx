@@ -38,15 +38,24 @@ export function ChapterQuotaTableCard({
     SchoolQuotaRow[]
   >(data.schools)
 
+  const isTotalsEditedRef = useRef(false)
+  const prevSchoolsRef = useRef(data.schools)
+
   const onSchoolsDataChangeRef = useRef(onSchoolsDataChange)
   useEffect(() => {
     onSchoolsDataChangeRef.current = onSchoolsDataChange
   }, [onSchoolsDataChange])
 
   useEffect(() => {
-    setSchoolsData(data.schools)
-    setLastValidSchoolsData(data.schools)
-    setChapterTotals(data.totals)
+    if (prevSchoolsRef.current !== data.schools) {
+      prevSchoolsRef.current = data.schools
+      isTotalsEditedRef.current = false
+      setSchoolsData(data.schools)
+      setLastValidSchoolsData(data.schools)
+      setChapterTotals(data.totals)
+    } else if (!isTotalsEditedRef.current) {
+      setChapterTotals(data.totals)
+    }
   }, [data.schools, data.totals])
 
   // Execute Auto Allocation when triggered
@@ -106,6 +115,7 @@ export function ChapterQuotaTableCard({
     partKey: "pm" | "design" | "webPe" | "mobilePe",
     newTotal: number,
   ) => {
+    isTotalsEditedRef.current = true
     const updatedTotals = { ...chapterTotals, [partKey]: newTotal }
     updatedTotals.total =
       updatedTotals.pm +
@@ -114,32 +124,9 @@ export function ChapterQuotaTableCard({
       updatedTotals.mobilePe
 
     setChapterTotals(updatedTotals)
-
-    const N = schoolsData.length
-    if (N > 0) {
-      const base = Math.floor(newTotal / N)
-      const rem = newTotal % N
-
-      const updatedSchools = schoolsData.map((school, index) => {
-        const allocatedPartValue = base + (index < rem ? 1 : 0)
-        const updatedSchool = {
-          ...school,
-          [partKey]: allocatedPartValue,
-        }
-        const total =
-          updatedSchool.pm +
-          updatedSchool.design +
-          updatedSchool.webPe +
-          updatedSchool.mobilePe
-        return { ...updatedSchool, total }
-      })
-
-      setSchoolsData(updatedSchools)
-      setLastValidSchoolsData(updatedSchools)
-      onDirtyChange?.(true)
-      onManualEdit?.()
-      onSchoolsDataChange?.(updatedSchools)
-    }
+    onDirtyChange?.(true)
+    onManualEdit?.()
+    onSchoolsDataChange?.(schoolsData)
   }
 
   const handleCellChange = (
@@ -155,6 +142,7 @@ export function ChapterQuotaTableCard({
       return { ...updated, total }
     })
 
+    prevSchoolsRef.current = nextSchoolsData
     setSchoolsData(nextSchoolsData)
 
     const newSum = nextSchoolsData.reduce((acc, s) => acc + s[partKey], 0)
