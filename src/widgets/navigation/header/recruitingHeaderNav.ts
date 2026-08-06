@@ -30,7 +30,7 @@ export function buildRecruitingNavItems({
 }: HeaderNavVisibility): NavItem[] {
   return [
     { label: "소개", to: "/intro" },
-    // TODO: 모집 안내 랜딩 라우트 확정 전까지 비활성(홈으로 오연결 방지)
+    // TODO(#710): 모집 안내 랜딩 라우트 확정 전까지 비활성(홈으로 오연결 방지)
     { label: "모집 안내", to: "/", disabled: true },
     { label: "프로젝트", to: "/projects" },
     // 매칭은 로그인해야 들어갈 수 있다. 게스트에게 보이면 눌러도 로그인으로 튕긴다.
