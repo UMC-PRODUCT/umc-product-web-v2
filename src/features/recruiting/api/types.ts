@@ -624,6 +624,16 @@ export interface CreateApplicationDraftBody {
   secondChoice?: RecruitingTrack
 }
 
+export interface CreateAnonymousApplicationDraftBody {
+  applicationFormId: number
+  applicantName: string
+  applicantEmail: string
+  firstChoice: RecruitingTrack
+  secondChoice?: RecruitingTrack
+  privacyTermId: number
+  privacyAgreed: boolean
+}
+
 export interface UpdateApplicationDraftBody {
   applicantName: string
   applicantEmail: string

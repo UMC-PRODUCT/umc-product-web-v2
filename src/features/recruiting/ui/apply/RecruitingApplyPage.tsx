@@ -1,8 +1,11 @@
+import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
+import { useAuthStore } from "@/entities/member/store/authStore"
+import { getPublicTermByType } from "@/shared/api/terms"
 import { Button } from "@/shared/ui/Button"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
@@ -14,6 +17,7 @@ import {
 } from "../../hooks/useApplyMutations"
 import { clearApplyDraft, readApplyDraft } from "../../model/applyDraftStorage"
 import { buildApplyAnswerPayload } from "../../model/applyPayload"
+import { AnonymousPrivacyConsent } from "./AnonymousPrivacyConsent"
 import { ApplicantInfoFields } from "./ApplicantInfoFields"
 import { RecruitingApplyForm } from "./RecruitingApplyForm"
 
@@ -59,8 +63,21 @@ function Notice({ children }: { children: React.ReactNode }) {
 export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
   const navigate = useNavigate()
   const addToast = useToastStore((state) => state.addToast)
-  const { data: me } = useMe()
+  const isAuthed = useAuthStore((state) => state.isAuthed)
+  const isAnonymous = !isAuthed
+  const { data: me, isLoading: isMeLoading } = useMe()
   const memberId = me?.id ?? ""
+  const anonymousSessionId = useMemo(
+    () => (isAnonymous ? getOrCreateAnonymousSessionId() : ""),
+    [isAnonymous],
+  )
+  const storageIdentity = isAnonymous ? anonymousSessionId : memberId
+  const privacyTermQuery = useQuery({
+    queryKey: ["terms", "PRIVACY"],
+    queryFn: () => getPublicTermByType("PRIVACY"),
+    enabled: isAnonymous,
+    staleTime: 5 * 60 * 1000,
+  })
 
   const [applicant, setApplicant] = useState<ApplicantInfo>({
     applicantName: "",
@@ -70,6 +87,7 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
   })
   const [applicationKey, setApplicationKey] = useState<string | undefined>()
   const [resumeDecided, setResumeDecided] = useState(false)
+  const [privacyAgreed, setPrivacyAgreed] = useState(false)
 
   // 로그인 정보로 한 번만 채운다. me 가 다시 조회될 때마다 채우면 사용자가
   // 일부러 비운 칸이 되살아난다(빈 문자열은 falsy 라 폴백에 걸린다).
@@ -85,8 +103,8 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
   }, [me])
 
   const savedDraft = useMemo(
-    () => (memberId ? readApplyDraft(roundId, memberId) : null),
-    [roundId, memberId],
+    () => (storageIdentity ? readApplyDraft(roundId, storageIdentity) : null),
+    [roundId, storageIdentity],
   )
 
   const { round, config, isLoading, isStructureFetching, isError, isNotFound } =
@@ -94,8 +112,11 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
 
   const context = {
     roundId,
-    memberId,
+    memberId: storageIdentity,
     applicationFormId: round?.applicationFormId ?? "",
+    isAnonymous,
+    privacyTermId: privacyTermQuery.data?.id,
+    privacyAgreed,
   }
   const saveDraft = useSaveApplicationDraft(context)
   const submit = useSubmitApplication(context)
@@ -114,12 +135,22 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
   // 이름·이메일은 문항이 아니라 지원서 필드라 폼 검증에 걸리지 않는다.
   // 보내기 직전에 확인한다 — 없다고 폼을 감추면 작성 중인 답변이 사라진다.
   const missingApplicantInfo = () => {
+    if (isAuthed && !memberId) return "로그인 정보를 불러오는 중입니다."
     if (awaitingResumeChoice) {
       return "이어서 작성할지 새로 시작할지 먼저 선택해 주세요."
     }
     if (!applicant.applicantName.trim()) return "이름을 입력해 주세요."
     if (!applicant.applicantEmail.trim()) return "이메일을 입력해 주세요."
     if (!applicant.firstChoice) return "1지망 파트를 선택해 주세요."
+    if (isAnonymous && privacyTermQuery.isError) {
+      return "개인정보 처리방침을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+    }
+    if (isAnonymous && !privacyTermQuery.data) {
+      return "개인정보 처리방침을 불러오는 중입니다."
+    }
+    if (isAnonymous && !privacyAgreed) {
+      return "개인정보 처리방침에 동의해 주세요."
+    }
     return null
   }
 
@@ -179,13 +210,16 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
     try {
       // 제출은 저장된 내용을 확정하는 동작이라 마지막 저장을 먼저 보낸다.
       const draft = await persist(values)
-      await submit.mutateAsync(draft.applicationId)
+      await submit.mutateAsync({
+        applicationId: draft.applicationId,
+        applicationKey: draft.applicationKey,
+      })
     } catch (error) {
       // 서버는 이미 제출된 지원서에도 저장은 받아 주고 제출만 거부한다. 응답이
       // 유실돼 제출된 줄 모르고 다시 누르면 이 경로로 영원히 돌게 되므로,
       // 상태가 어긋났다는 답을 받으면 초안 참조를 정리하고 내 지원서로 보낸다.
       if (isFinalizedApplication(error)) {
-        clearApplyDraft(roundId, memberId)
+        clearApplyDraft(roundId, storageIdentity)
         showError("이미 제출된 지원서입니다. 내 지원서에서 확인해주세요.")
         void navigate({ to: LIST_PATH })
         throw new Error("already finalized")
@@ -252,8 +286,19 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
         }
         recruitableTracks={round.recruitableTracks}
         secondChoiceEnabled={round.secondChoiceEnabled}
-        disabled={saveDraft.isPending || submit.isPending}
+        disabled={
+          saveDraft.isPending || submit.isPending || (isAuthed && isMeLoading)
+        }
       />
+
+      {isAnonymous && (
+        <AnonymousPrivacyConsent
+          term={privacyTermQuery.data}
+          checked={privacyAgreed}
+          disabled={saveDraft.isPending || submit.isPending}
+          onChange={setPrivacyAgreed}
+        />
+      )}
 
       <p className="text-label-1-medium text-teal-gray-400 px-1">
         임시저장한 지원서는 이 브라우저에서만 이어서 작성할 수 있습니다.
