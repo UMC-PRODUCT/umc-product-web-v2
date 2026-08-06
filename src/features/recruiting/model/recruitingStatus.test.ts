@@ -80,6 +80,29 @@ describe("resolveRecruitingStatus", () => {
     ).toEqual({ phase: "closed" })
   })
 
+  // 경과 시간(24시간)으로 세면 마감 당일 자정 직후에도 1 이 나온다.
+  // 모집 공고 화면이 KST 날짜 경계를 쓰므로 헤더도 같은 값이어야 한다.
+  it("마감 당일이면 시각과 무관하게 0 이다", () => {
+    const kstMidnight = Date.parse("2026-08-01T00:01:00+09:00")
+    expect(
+      resolveRecruitingStatus(
+        [{ documentEndAt: "2026-08-01T23:59:00+09:00", applicationOpen: true }],
+        kstMidnight,
+      ),
+    ).toEqual({ phase: "open", dDay: 0 })
+  })
+
+  it("브라우저 시간대가 달라도 KST 날짜로 센다", () => {
+    // UTC 로 보면 7/31 이지만 KST 로는 8/1 이다
+    const beforeKstNoon = Date.parse("2026-08-01T09:30:00+09:00")
+    expect(
+      resolveRecruitingStatus(
+        [{ documentEndAt: "2026-08-03T10:00:00+09:00", applicationOpen: true }],
+        beforeKstNoon,
+      ),
+    ).toEqual({ phase: "open", dDay: 2 })
+  })
+
   it("날짜가 비어 있어도 터지지 않는다", () => {
     expect(
       resolveRecruitingStatus(

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
-import { getPublicRounds } from "../api/recruitingApi"
+import { getAllPublicRounds } from "../api/recruitingApi"
 import { resolveRecruitingStatus } from "../model/recruitingStatus"
 
 import type { RecruitingStatus } from "@/shared/model/recruitingStatus"
@@ -18,7 +18,9 @@ export function useHeaderRecruitingStatus(): RecruitingStatus | undefined {
 
   const { data } = useQuery({
     queryKey: ["headerRecruitingStatus", gisuId],
-    queryFn: () => getPublicRounds({ gisuId: String(gisuId) }),
+    // 공개 목록의 phase 기본값이 OPEN 이라 그대로 부르면 마감된 차수가 빠지고,
+    // 전부 마감된 기수에서 "모집 마감" 대신 아무것도 뜨지 않는다.
+    queryFn: () => getAllPublicRounds(String(gisuId)),
     enabled: gisuId != null,
     staleTime: 5 * 60 * 1000,
     // 실패해도 헤더는 그려야 한다. 상태 버튼만 빠진다.

@@ -1,6 +1,19 @@
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+
 import type { RecruitingStatus } from "@/shared/model/recruitingStatus"
 
-const DAY_MS = 24 * 60 * 60 * 1000
+// utcOffset 을 설정값으로 쓰려면 utc 플러그인이 필요하다.
+dayjs.extend(utc)
+
+// 모집 일정은 한국 기준이라 브라우저 시간대가 무엇이든 KST 날짜로 자른다.
+// 경과 시간(24시간 단위)으로 세면 마감 당일 자정 직후에도 D-1 이 되고,
+// 같은 값을 KST 날짜 경계로 세는 모집 공고 화면과 D-day 가 어긋난다.
+const KST_OFFSET_MINUTES = 9 * 60
+
+function toKstStartOfDay(value: number | string) {
+  return dayjs(value).utcOffset(KST_OFFSET_MINUTES).startOf("day")
+}
 
 export interface RecruitingPeriod {
   documentStartAt?: string | null
@@ -10,7 +23,7 @@ export interface RecruitingPeriod {
 
 /** 남은 일수. 같은 날이면 0, 지났으면 음수. */
 function daysUntil(target: number, now: number): number {
-  return Math.ceil((target - now) / DAY_MS)
+  return toKstStartOfDay(target).diff(toKstStartOfDay(now), "day")
 }
 
 /**
