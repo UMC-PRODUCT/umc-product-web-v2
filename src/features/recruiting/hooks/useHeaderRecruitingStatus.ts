@@ -1,14 +1,47 @@
 import { useQuery } from "@tanstack/react-query"
+import { useEffect, useState } from "react"
 
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
 import { recruitingKeys } from "../api/queryKeys"
 import { getPublicRounds } from "../api/recruitingApi"
-import { resolveRecruitingStatus } from "../model/recruitingStatus"
+import {
+  nextStatusBoundary,
+  resolveRecruitingStatus,
+} from "../model/recruitingStatus"
 
 import type { RecruitingStatus } from "@/shared/model/recruitingStatus"
 
+import type { RecruitingPeriod } from "../model/recruitingStatus"
+
 const ROUNDS_STALE_TIME = 5 * 60 * 1000
+
+/**
+ * 표시가 바뀌는 시각에 맞춰 한 번 리렌더한다.
+ *
+ * D-day 는 렌더 시점의 시각으로 계산하는데, 헤더는 이동이 없으면 다시 그려지지
+ * 않는다. 화면을 열어 둔 채 자정이나 마감을 넘기면 지난 D-day 가 그대로 남는다.
+ * 재조회로 풀면 전 화면에 뜨는 헤더가 주기적으로 요청을 날리게 되므로,
+ * 네트워크 없이 타이머로만 다시 계산한다.
+ */
+function useBoundaryTick(periods: readonly RecruitingPeriod[]): number {
+  const [tick, setTick] = useState(0)
+  const boundary =
+    periods.length > 0 ? nextStatusBoundary(periods, Date.now()) : undefined
+
+  useEffect(() => {
+    if (boundary === undefined) return
+    // setTimeout 은 약 24.8일이 넘으면 즉시 발화한다. 그 전에 다시 잡으면 된다.
+    const delay = Math.min(
+      Math.max(boundary - Date.now(), 0) + 1000,
+      2 ** 31 - 1,
+    )
+    const timer = setTimeout(() => setTick((n) => n + 1), delay)
+    return () => clearTimeout(timer)
+  }, [boundary])
+
+  return tick
+}
 
 /**
  * 헤더 우측 모집 상태(`지원하기 D-n`).
@@ -21,6 +54,8 @@ const ROUNDS_STALE_TIME = 5 * 60 * 1000
  *
  * 서버의 OPEN 은 "지금 접수 중", PAST 는 "마감됨" 이라 아직 시작하지 않은 차수는
  * 어느 쪽에도 실리지 않는다. 그래서 `모집 시작 D-n` 은 이 경로로는 나오지 않는다.
+ * 상태 계산기 자체는 예정 차수를 다루므로, 예정 차수를 주는 경로가 생기면
+ * 여기서 목록만 넘겨주면 된다.
  */
 export function useHeaderRecruitingStatus(): RecruitingStatus | undefined {
   const { data: gisuId } = useActiveGisuId()
@@ -49,9 +84,8 @@ export function useHeaderRecruitingStatus(): RecruitingStatus | undefined {
   })
 
   const groups = hasOpenRound ? openRounds : pastRounds
-  if (!groups) return undefined
 
-  const periods = groups.flatMap((group) =>
+  const periods: RecruitingPeriod[] = (groups ?? []).flatMap((group) =>
     (group.rounds ?? []).map((round) => ({
       documentStartAt: round.documentStartAt,
       documentEndAt: round.documentEndAt,
@@ -59,5 +93,8 @@ export function useHeaderRecruitingStatus(): RecruitingStatus | undefined {
     })),
   )
 
+  useBoundaryTick(periods)
+
+  if (!groups) return undefined
   return resolveRecruitingStatus(periods, Date.now())
 }
