@@ -1,10 +1,7 @@
 import { useRouterState } from "@tanstack/react-router"
 import { useState } from "react"
 
-import {
-  RECRUITING_SIDEBAR_ITEMS,
-  resolveRecruitingSectionId,
-} from "@/shared/config/recruitingNavigation"
+import { resolveRecruitingSectionId } from "@/shared/config/recruitingNavigation"
 import { useActiveGeneration } from "@/shared/hooks/useActiveGisu"
 import { toUmcGisuLabel } from "@/shared/lib/gisuLabel"
 
@@ -12,6 +9,7 @@ import { BaseSideBar } from "./BaseSideBar"
 import { FlatSideBarItem } from "./FlatSideBarItem"
 import { SideBarMenu } from "./menu/SideBarMenu"
 import { SideBarMenuItem } from "./menu/SideBarMenuItem"
+import { useVisibleRecruitingSections } from "./useVisibleRecruitingSections"
 
 interface RecruitingSideBarProps {
   className?: string
@@ -26,8 +24,10 @@ export default function RecruitingSideBar({
   const pathname = activePathname ?? currentPathname
   const activeSectionId = resolveRecruitingSectionId(pathname)
 
+  const visibleSections = useVisibleRecruitingSections()
+
   const [manualOpenSectionId, setManualOpenSectionId] = useState<string>(() =>
-    activeSectionId ? "" : (RECRUITING_SIDEBAR_ITEMS[0]?.id ?? ""),
+    activeSectionId ? "" : (visibleSections[0]?.id ?? ""),
   )
   const { data: generation } = useActiveGeneration()
 
@@ -37,7 +37,7 @@ export default function RecruitingSideBar({
       label={toUmcGisuLabel(generation)}
       className={className}
     >
-      {RECRUITING_SIDEBAR_ITEMS.map(({ id, title, icon, to, menus }) =>
+      {visibleSections.map(({ id, title, icon, to, menus }) =>
         menus.length === 0 && to ? (
           <FlatSideBarItem
             key={id}
