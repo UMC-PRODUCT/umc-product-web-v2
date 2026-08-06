@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { Button } from "@/shared/ui/Button"
@@ -44,110 +44,8 @@ export function RecruitmentQuotaPage() {
     () => [...new Set(activeTabGroups.map((g) => g.seasonId))],
     [activeTabGroups],
   )
-  const { seasonConfigsMap, updateQuotas, createSeason, isSaving, isLoading } =
+  const { seasonConfigsMap, updateQuotas, createSeason, isSaving } =
     useRecruitingSeasonQuotas(seasonIds)
-
-  // TO 조회 결과가 null이거나 시즌이 생성이 안 된 경우 자동으로 생성/0명 저장 요청 전송
-  const autoSavedSeasonsRef = useRef<Set<string>>(new Set())
-
-  useEffect(() => {
-    if (isLoading || isSaving || groups.length === 0) return
-
-    const nullQuotaPayloads: Array<{
-      seasonId: string
-      schoolName?: string
-      payload: {
-        quotas: Array<{
-          track:
-            | "PLAN"
-            | "DESIGN"
-            | "WEB_PRODUCT_ENGINEER"
-            | "MOBILE_PRODUCT_ENGINEER"
-          targetCount: number
-        }>
-      }
-    }> = []
-
-    const missingSeasonGroups: Array<{
-      gisuId: string
-      schoolId: string
-      key: string
-    }> = []
-
-    groups.forEach((group) => {
-      const key = group.seasonId || `${group.gisuId}-${group.schoolId}`
-      if (autoSavedSeasonsRef.current.has(key)) return
-
-      if (!group.seasonId) {
-        if (group.gisuId && group.schoolId) {
-          missingSeasonGroups.push({
-            gisuId: group.gisuId,
-            schoolId: group.schoolId,
-            key,
-          })
-        }
-      } else {
-        const config = seasonConfigsMap.get(group.seasonId)
-        if (!config) return
-
-        const hasQuotas = config.quotas.length > 0
-
-        if (!hasQuotas) {
-          nullQuotaPayloads.push({
-            seasonId: group.seasonId,
-            schoolName: group.schoolName,
-            payload: {
-              quotas: [
-                { track: "PLAN", targetCount: 0 },
-                { track: "DESIGN", targetCount: 0 },
-                { track: "WEB_PRODUCT_ENGINEER", targetCount: 0 },
-                { track: "MOBILE_PRODUCT_ENGINEER", targetCount: 0 },
-              ],
-            },
-          })
-        }
-      }
-    })
-
-    if (missingSeasonGroups.length > 0) {
-      void Promise.allSettled(
-        missingSeasonGroups.map(async (item) => {
-          await createSeason({
-            gisuId: item.gisuId,
-            schoolId: item.schoolId,
-            quotas: [
-              { track: "PLAN", targetCount: 0 },
-              { track: "DESIGN", targetCount: 0 },
-              { track: "WEB_PRODUCT_ENGINEER", targetCount: 0 },
-              { track: "MOBILE_PRODUCT_ENGINEER", targetCount: 0 },
-            ],
-          })
-          return item.key
-        }),
-      ).then((results) => {
-        results.forEach((res) => {
-          if (res.status === "fulfilled") {
-            autoSavedSeasonsRef.current.add(res.value)
-          }
-        })
-      })
-    }
-
-    if (nullQuotaPayloads.length > 0) {
-      void updateQuotas(nullQuotaPayloads).then((result) => {
-        result?.successfulVariables.forEach((item) => {
-          autoSavedSeasonsRef.current.add(item.seasonId)
-        })
-      })
-    }
-  }, [
-    isLoading,
-    isSaving,
-    groups,
-    seasonConfigsMap,
-    updateQuotas,
-    createSeason,
-  ])
 
   const allChaptersData = useMemo(
     () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
