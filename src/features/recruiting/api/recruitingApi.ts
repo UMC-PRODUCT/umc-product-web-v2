@@ -210,6 +210,9 @@ export function normalizeDecisionHistoryPage(
       decider: {
         ...item.decider,
         memberId: String(item.decider.memberId),
+        // 담당자 지부·학교만 "" 가 아니라 null 로 둔다. 중앙 직위와 SUPER_ADMIN 은
+        // 소속 자체가 없어 서버가 null 을 주는데, "" 로 접으면 소속이 없는 것과
+        // 값이 안 온 것이 구분되지 않는다. 표시용 "" 변환은 매퍼가 맡는다.
         chapterId: toOptionalId(item.decider.chapterId),
         chapterName: item.decider.chapterName ?? null,
         schoolId: toOptionalId(item.decider.schoolId),
