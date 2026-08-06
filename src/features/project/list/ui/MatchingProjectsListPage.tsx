@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { useMe } from "@/entities/member/hooks/useMe"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { MOCK_MATCHING_PROJECTS } from "@/entities/project/model/matchingProject.mock"
 import { trackEvent } from "@/shared/analytics"
@@ -92,8 +92,10 @@ export function MatchingProjectsListPage({
   } = useMatchingProjectListFilters()
   // 비로그인 게스트. 공개 응답은 작성자 이름·학교를 지우고 오므로 카드도
   // 디자인대로 작성자 줄과 모집 현황을 빼고 파트 이름만 보여준다.
-  const { data: me } = useMe()
-  const isGuest = me === undefined
+  //
+  // me 의 유무로 보면 안 된다. 회원 조회는 비동기라 로그인 사용자도 첫 렌더에는
+  // me 가 없어, 잠깐 게스트 카드가 스쳐 지나간다. 토큰 유무는 동기로 안다.
+  const isGuest = !useAuthStore((s) => s.isAuthed)
 
   const { getChapterIdBySchool } = useSchoolChapterMap()
 

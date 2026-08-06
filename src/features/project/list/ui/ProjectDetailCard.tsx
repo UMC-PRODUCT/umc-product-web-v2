@@ -10,6 +10,7 @@ import {
   isCurrentTermPm,
   isOperator,
 } from "@/entities/member/model/identity"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import {
   getActiveMatchingRound,
@@ -181,7 +182,10 @@ export function ProjectDetailCard({
   // 비로그인 방문자. 팀원 조회는 아직 인증이 필요해서, 열어 두면 401 이 나고
   // 토큰 갱신에 실패해 로그인 화면으로 튕긴다. 디자인에도 게스트 상세에는
   // 작성자·모집 상태·액션 버튼이 없다.
-  const isGuest = me === undefined
+  //
+  // me 의 유무로 보면 안 된다. 회원 조회는 비동기라 로그인 사용자도 첫 렌더에는
+  // me 가 없어, 잠깐 게스트 화면이 스쳐 지나간다. 토큰 유무는 동기로 안다.
+  const isGuest = !useAuthStore((s) => s.isAuthed)
   const addToast = useToastStore((s) => s.addToast)
   const userIsOperator = isOperator(me)
   const userIsPm = isCurrentTermPm(me)
