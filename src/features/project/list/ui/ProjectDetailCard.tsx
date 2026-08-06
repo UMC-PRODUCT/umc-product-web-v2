@@ -35,6 +35,7 @@ import { Button } from "@/shared/ui/Button"
 import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import { CounterLabel } from "@/shared/ui/CounterLabel"
+import { LoadingSpinner } from "@/shared/ui/LoadingSpinner"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
@@ -82,35 +83,18 @@ interface ProjectDetailCardProps {
   canManageProject?: boolean
 }
 
-function ProjectDetailCardSkeleton() {
+/**
+ * 카드 자리를 미리 잡지 않는다. 흰 판을 띄웠다가 내용이 들어오면서 높이가
+ * 튀는 것보다, 어두운 배경 위에 스피너만 두는 편이 덜 흔들린다.
+ */
+function ProjectDetailCardLoading() {
   return (
-    <div className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-135 min-w-0 flex-col items-start overflow-x-hidden overflow-y-auto rounded-2xl bg-white">
-      <div className="bg-teal-gray-200 aspect-[540/286] w-full shrink-0 animate-pulse" />
-      <div className="flex w-full flex-col items-start p-5">
-        <div className="flex w-full flex-col items-start gap-6">
-          <div className="flex w-full flex-col items-start gap-2.5">
-            <div className="flex w-full flex-row items-center justify-between gap-4">
-              <div className="bg-teal-gray-150 h-6 w-full max-w-52 animate-pulse rounded-md" />
-              <div className="bg-teal-gray-150 h-4 w-32 animate-pulse rounded-md" />
-            </div>
-            <div className="bg-teal-gray-150 h-4 w-full animate-pulse rounded-md" />
-          </div>
-          <div className="flex w-full flex-col items-start gap-1.5">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="flex w-full items-center justify-between">
-                <div className="bg-teal-gray-150 h-4 w-28 animate-pulse rounded-md" />
-                <div className="bg-teal-gray-150 h-6 w-14 animate-pulse rounded-full" />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mt-8.5 flex w-full flex-row items-start gap-2.5">
-          <div className="bg-teal-gray-150 h-11 w-11 animate-pulse rounded-xl" />
-          <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
-          <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
-        </div>
-      </div>
-    </div>
+    <LoadingSpinner
+      size="lg"
+      label="프로젝트를 불러오는 중"
+      className="text-white"
+      trackClassName="border-white/30 border-t-white"
+    />
   )
 }
 
@@ -459,7 +443,7 @@ export function ProjectDetailCard({
   }, [detail, projectId, ctaMode, viewOnly])
 
   if (isDetailLoading) {
-    return <ProjectDetailCardSkeleton />
+    return <ProjectDetailCardLoading />
   }
 
   return (

@@ -13,6 +13,7 @@ import { Pagination } from "@/shared/ui/Pagination"
 
 import { useMatchingProjectListFilters } from "../model/matchingProjectList"
 import { MatchingProjectCard } from "./MatchingProjectCard"
+import { MatchingProjectCardSkeleton } from "./MatchingProjectCardSkeleton"
 import { ProjectDetailCard } from "./ProjectDetailCard"
 import { ProjectSearchField } from "./ProjectSearchField"
 
@@ -29,6 +30,9 @@ const PART_LABEL: Record<string, string> = {
   NODEJS: "Node.js",
 }
 const PART_ORDER = ["DESIGN", "WEB", "IOS", "ANDROID", "SPRINGBOOT", "NODEJS"]
+
+/** 로딩 중 자리를 채울 카드 수. 한 화면에 대략 두 줄이 찬다. */
+const SKELETON_CARD_COUNT = 6
 
 function toMatchingProject(project: ProjectItem): MatchingProject {
   const owner = project.productOwner
@@ -222,10 +226,24 @@ export function MatchingProjectsListPage({
 
         <div
           className={cn(
-            "grid min-w-0 grid-cols-2 gap-5",
+            // 게스트는 사이드바가 없어 폭이 넓다. 2열로 두면 카드가 디자인의
+            // 두 배 가까이 커진다. 로그인 화면은 매칭과 같은 그리드라 건드리지 않는다.
+            "grid min-w-0 gap-5",
+            isGuest ? "grid-cols-3" : "grid-cols-2",
             openFilterId && "pointer-events-none",
           )}
         >
+          {/* 빈 그리드만 남으면 데이터가 없는 건지 로딩이 덜 된 건지 알 수 없다.
+              게스트는 활성 기수까지 기다려야 해서 이 구간이 특히 길다 */}
+          {!useMockData &&
+            isLoading &&
+            Array.from({ length: SKELETON_CARD_COUNT }).map((_, index) => (
+              <MatchingProjectCardSkeleton
+                key={index}
+                variant={isGuest ? "guest" : "default"}
+              />
+            ))}
+
           {visibleProjects.map((project, index) => {
             return (
               <div key={project.id} className="min-w-0">
@@ -262,11 +280,6 @@ export function MatchingProjectsListPage({
 
         {/* 빈 그리드만 남으면 데이터가 없는 건지 로딩이 덜 된 건지 알 수 없다.
             게스트는 활성 기수까지 기다려야 해서 이 구간이 특히 길다 */}
-        {!useMockData && isLoading && (
-          <p className="text-body-2-regular text-teal-gray-500 py-20 text-center">
-            프로젝트를 불러오는 중입니다.
-          </p>
-        )}
 
         {!useMockData && !isLoading && visibleProjects.length === 0 && (
           <p className="text-body-2-regular text-teal-gray-500 py-20 text-center">
