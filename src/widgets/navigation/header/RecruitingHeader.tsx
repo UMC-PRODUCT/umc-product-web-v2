@@ -70,7 +70,7 @@ export default function RecruitingHeader({
             )}
             <HeaderButton
               label="문의사항"
-              type="text"
+              type="trailing-icon"
               className="border-teal-gray-150 h-10 border"
             />
             <Profile />
@@ -79,7 +79,7 @@ export default function RecruitingHeader({
           <>
             <HeaderButton
               label="문의사항"
-              type="text"
+              type="trailing-icon"
               className="border-teal-gray-150 h-10 border"
             />
             {recruitingStatus && (

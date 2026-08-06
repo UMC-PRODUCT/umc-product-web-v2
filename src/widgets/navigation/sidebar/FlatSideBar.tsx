@@ -35,6 +35,7 @@ export function FlatSideBar({
           to={item.to}
           icon={item.icon}
           isActive={activeItemId === item.id}
+          disabled={item.disabled}
         />
       ))}
     </BaseSideBar>
