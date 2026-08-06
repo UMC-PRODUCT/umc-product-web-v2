@@ -43,6 +43,42 @@ describe("resolveRecruitingStatus", () => {
     ).toEqual({ phase: "open", dDay: 5 })
   })
 
+  it("시작 전이면 applicationOpen 이 켜져 있어도 시작까지 남은 일수를 준다", () => {
+    // 시작 시각을 안 보면 예정 차수를 "마감 D-n" 으로 잘못 알린다
+    expect(
+      resolveRecruitingStatus(
+        [
+          {
+            documentStartAt: at(7),
+            documentEndAt: at(20),
+            applicationOpen: true,
+          },
+        ],
+        NOW,
+      ),
+    ).toEqual({ phase: "before", dDay: 7 })
+  })
+
+  it("시작한 차수와 예정 차수가 섞이면 시작한 쪽의 마감을 쓴다", () => {
+    expect(
+      resolveRecruitingStatus(
+        [
+          {
+            documentStartAt: at(7),
+            documentEndAt: at(20),
+            applicationOpen: true,
+          },
+          {
+            documentStartAt: at(-1),
+            documentEndAt: at(10),
+            applicationOpen: true,
+          },
+        ],
+        NOW,
+      ),
+    ).toEqual({ phase: "open", dDay: 10 })
+  })
+
   it("아직 시작 전이면 시작까지 남은 일수를 준다", () => {
     expect(
       resolveRecruitingStatus(

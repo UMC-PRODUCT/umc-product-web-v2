@@ -48,7 +48,16 @@ export function resolveRecruitingStatus(
       : NaN
     const end = period.documentEndAt ? Date.parse(period.documentEndAt) : NaN
 
-    if (Number.isFinite(end) && end > now && period.applicationOpen) {
+    // 아직 시작 전이면 applicationOpen 이 켜져 있어도 접수 중이 아니다.
+    // 시작 시각을 안 보면 예정 차수를 "마감 D-n" 으로 잘못 알린다.
+    const started = !Number.isFinite(start) || start <= now
+
+    if (
+      started &&
+      Number.isFinite(end) &&
+      end > now &&
+      period.applicationOpen
+    ) {
       openEnds.push(end)
       continue
     }
@@ -67,4 +76,27 @@ export function resolveRecruitingStatus(
     }
   }
   return { phase: "closed" }
+}
+
+/**
+ * 표시가 바뀌는 다음 시각. 화면을 열어 둔 채 이 시각을 넘기면 D-day 나 단계가
+ * 실제와 어긋나므로, 호출부는 여기에 맞춰 다시 계산해야 한다.
+ *
+ * 후보는 두 종류다. 차수의 시작·마감 시각(단계가 바뀐다)과 다음 KST 자정
+ * (D-day 숫자가 바뀐다).
+ */
+export function nextStatusBoundary(
+  periods: readonly RecruitingPeriod[],
+  now: number,
+): number {
+  const nextKstMidnight = toKstStartOfDay(now).add(1, "day").valueOf()
+
+  const candidates = [nextKstMidnight]
+  for (const period of periods) {
+    for (const raw of [period.documentStartAt, period.documentEndAt]) {
+      const at = raw ? Date.parse(raw) : NaN
+      if (Number.isFinite(at) && at > now) candidates.push(at)
+    }
+  }
+  return Math.min(...candidates)
 }
