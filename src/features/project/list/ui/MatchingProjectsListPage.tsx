@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { useMe } from "@/entities/member/hooks/useMe"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { MOCK_MATCHING_PROJECTS } from "@/entities/project/model/matchingProject.mock"
 import { trackEvent } from "@/shared/analytics"
@@ -85,6 +86,10 @@ export function MatchingProjectsListPage({
     isError,
     filterDescriptors,
   } = useMatchingProjectListFilters()
+  // 비로그인 게스트. 공개 응답은 작성자 이름·학교를 지우고 오므로 카드도
+  // 디자인대로 작성자 줄과 모집 현황을 빼고 파트 이름만 보여준다.
+  const { data: me } = useMe()
+  const isGuest = me === undefined
 
   const { getChapterIdBySchool } = useSchoolChapterMap()
 
@@ -245,7 +250,10 @@ export function MatchingProjectsListPage({
                     )
                   }}
                 >
-                  <MatchingProjectCard variant="default" data={project} />
+                  <MatchingProjectCard
+                    variant={isGuest ? "guest" : "default"}
+                    data={project}
+                  />
                 </button>
               </div>
             )

@@ -126,6 +126,28 @@ describe("resolveProjectDetailCtaMode", () => {
     expect(resolveProjectDetailCtaMode(ctaParams)).toBe("apply")
   })
 
+  // 게스트는 지부도 지원 이력도 없어 아래 분기가 전부 기본값으로 흐른다.
+  // 먼저 가르지 않으면 지원할 수 없는 사람에게 지원하기가 열린다.
+  it("비로그인 게스트면 다른 조건과 무관하게 guest를 반환한다", () => {
+    expect(resolveProjectDetailCtaMode({ ...ctaParams, isGuest: true })).toBe(
+      "guest",
+    )
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isGuest: true,
+        isOperator: true,
+      }),
+    ).toBe("guest")
+    expect(
+      resolveProjectDetailCtaMode({
+        ...ctaParams,
+        isGuest: true,
+        isSameBranch: false,
+      }),
+    ).toBe("guest")
+  })
+
   it("내 파트를 모집하지 않는 프로젝트면 apply-blocked-part를 반환한다", () => {
     expect(
       resolveProjectDetailCtaMode({ ...ctaParams, isPartIneligible: true }),

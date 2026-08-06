@@ -29,6 +29,7 @@ import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
+import { cn } from "@/shared/lib/utils"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { Button } from "@/shared/ui/Button"
 import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
@@ -416,6 +417,7 @@ export function ProjectDetailCard({
   const ctaMode =
     viewOnly && !isAdminView && !isPmView
       ? resolveProjectDetailCtaMode({
+          isGuest,
           isOperator: false,
           isPm: false,
           isSameBranch,
@@ -427,6 +429,7 @@ export function ProjectDetailCard({
           isPartRecruitClosed,
         })
       : resolveProjectDetailCtaMode({
+          isGuest,
           isOperator: isAdminView,
           isPm: isPmView,
           isSameBranch,
@@ -496,32 +499,48 @@ export function ProjectDetailCard({
               </p>
             </div>
 
-            <div className="flex w-full flex-col items-start gap-1.5">
-              {data.recruitRows.map((row) => {
-                const done = isRecruitDone(row)
-                return (
-                  <div
-                    key={row.part}
-                    className="flex w-full min-w-0 items-center justify-between gap-3"
-                  >
-                    <div className="flex w-30.5 min-w-0 shrink-0 items-center justify-between gap-2">
-                      <span className="text-body-2-medium text-teal-gray-700 truncate">
-                        {row.part}
-                      </span>
-                      <CounterLabel
-                        size="sm"
-                        current={row.current}
-                        total={row.total}
-                      />
+            {/* 게스트에게는 모집 현황 대신 파트와 모집 인원만 한 줄로 준다 */}
+            {isGuest ? (
+              <p className="text-body-2-medium text-teal-gray-600 w-full">
+                {data.recruitRows
+                  .map((row) => `${row.part} ${row.total}`)
+                  .join(" · ")}
+              </p>
+            ) : (
+              <div className="flex w-full flex-col items-start gap-1.5">
+                {data.recruitRows.map((row) => {
+                  const done = isRecruitDone(row)
+                  return (
+                    <div
+                      key={row.part}
+                      className="flex w-full min-w-0 items-center justify-between gap-3"
+                    >
+                      <div className="flex w-30.5 min-w-0 shrink-0 items-center justify-between gap-2">
+                        <span className="text-body-2-medium text-teal-gray-700 truncate">
+                          {row.part}
+                        </span>
+                        <CounterLabel
+                          size="sm"
+                          current={row.current}
+                          total={row.total}
+                        />
+                      </div>
+                      <RecruitStatusChip done={done} />
                     </div>
-                    <RecruitStatusChip done={done} />
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
-          <div className="scrollbar-none mt-8.5 flex w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1">
+          {/* 게스트 상세에는 액션이 없다. 팀원·기획안·지원 모두 로그인이 필요해
+              눌러도 로그인으로 튕기므로 디자인대로 영역째 두지 않는다. */}
+          <div
+            className={cn(
+              "scrollbar-none mt-8.5 w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1",
+              isGuest ? "hidden" : "flex",
+            )}
+          >
             {!isGuest && (
               <TeamMemberButton
                 variant="weak"
