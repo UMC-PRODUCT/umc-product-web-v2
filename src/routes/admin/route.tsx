@@ -8,6 +8,7 @@ import {
 
 import { isOperator } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { notifyAccessDenied } from "@/shared/lib/accessDenied"
 import { cn } from "@/shared/lib/utils"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 
@@ -17,7 +18,10 @@ export const Route = createFileRoute("/admin")({
   }),
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
-    if (!isOperator(me)) throw redirect({ to: "/" })
+    if (!isOperator(me)) {
+      notifyAccessDenied()
+      throw redirect({ to: "/" })
+    }
   },
   component: AdminLayout,
 })

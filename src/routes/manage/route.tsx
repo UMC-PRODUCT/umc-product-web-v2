@@ -1,8 +1,10 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
+import { isCentralAdmin } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { SETTINGS_SIDEBAR_ITEMS } from "@/shared/config/settingsNavigation"
 import { useActiveGeneration } from "@/shared/hooks/useActiveGisu"
+import { notifyAccessDenied } from "@/shared/lib/accessDenied"
 import { toUmcGisuLabel } from "@/shared/lib/gisuLabel"
 import Footer from "@/widgets/footer/Footer"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
@@ -13,7 +15,13 @@ export const Route = createFileRoute("/manage")({
     meta: [{ name: "robots", content: "noindex, nofollow" }],
   }),
   beforeLoad: async ({ context, location }) => {
-    await ensureMe(context.queryClient, location.href)
+    const me = await ensureMe(context.queryClient, location.href)
+    // 헤더 `설정` 탭은 중앙 운영진에게만 보이지만, 탭을 감추는 것만으로는
+    // 주소를 직접 친 진입을 막지 못한다.
+    if (!isCentralAdmin(me)) {
+      notifyAccessDenied()
+      throw redirect({ to: "/" })
+    }
   },
   component: ManageLayout,
 })
