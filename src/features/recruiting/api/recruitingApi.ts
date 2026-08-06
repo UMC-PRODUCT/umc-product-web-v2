@@ -7,6 +7,7 @@ import type {
   ApiEvaluationStage,
   CloneRecruitingRoundRequest,
   ConfirmInterviewSchedulesRequest,
+  CreateAnonymousApplicationDraftBody,
   CreateApplicationDraftBody,
   CreateRecruitingRoundRequest,
   CreateRecruitingSeasonRequest,
@@ -432,6 +433,16 @@ export async function createApplicationDraft(
 ): Promise<RecruitingApplicationCreated> {
   const { data } = await api.post<ApiResponse<RecruitingApplicationCreated>>(
     "/v1/recruiting/applications",
+    body,
+  )
+  return data.result
+}
+
+export async function createAnonymousApplicationDraft(
+  body: CreateAnonymousApplicationDraftBody,
+): Promise<RecruitingApplicationCreated> {
+  const { data } = await api.post<ApiResponse<RecruitingApplicationCreated>>(
+    "/v1/recruiting/public/applications",
     body,
   )
   return data.result

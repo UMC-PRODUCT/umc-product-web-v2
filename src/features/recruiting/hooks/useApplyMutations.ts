@@ -2,9 +2,12 @@ import { useMutation } from "@tanstack/react-query"
 import { isAxiosError } from "axios"
 
 import {
+  createAnonymousApplicationDraft,
   createApplicationDraft,
   saveApplicationDraft,
+  submitAnonymousApplication,
   submitApplication,
+  updateAnonymousApplication,
 } from "../api/recruitingApi"
 import {
   clearApplyDraft,
@@ -27,6 +30,14 @@ interface ApplySaveContext {
   roundId: string
   memberId: string
   applicationFormId: string
+  isAnonymous: boolean
+  privacyTermId?: number
+  privacyAgreed: boolean
+}
+
+function getAnonymousCredentialEmail() {
+  if (typeof window === "undefined") return null
+  return sessionStorage.getItem("anonymousEmail")
 }
 
 // 브라우저에 남은 초안을 버려도 되는 경우만 고른다. 4xx 전체로 넓히면 세션
@@ -55,13 +66,23 @@ async function createAndRemember(
   context: ApplySaveContext,
   input: ApplySaveInput,
 ): Promise<ApplyDraftRef> {
-  const created = await createApplicationDraft({
-    applicationFormId: Number(context.applicationFormId),
-    applicantName: input.applicantName,
-    applicantEmail: input.applicantEmail,
-    firstChoice: input.firstChoice,
-    secondChoice: input.secondChoice,
-  })
+  const created = context.isAnonymous
+    ? await createAnonymousApplicationDraft({
+        applicationFormId: Number(context.applicationFormId),
+        applicantName: input.applicantName,
+        applicantEmail: input.applicantEmail,
+        firstChoice: input.firstChoice,
+        secondChoice: input.secondChoice,
+        privacyTermId: context.privacyTermId ?? 0,
+        privacyAgreed: context.privacyAgreed,
+      })
+    : await createApplicationDraft({
+        applicationFormId: Number(context.applicationFormId),
+        applicantName: input.applicantName,
+        applicantEmail: input.applicantEmail,
+        firstChoice: input.firstChoice,
+        secondChoice: input.secondChoice,
+      })
   const draft: ApplyDraftRef = {
     applicationId: String(created.applicationId),
     applicationKey: created.applicationKey,
@@ -86,13 +107,32 @@ export function useSaveApplicationDraft(context: ApplySaveContext) {
       }
 
       try {
-        await saveApplicationDraft(draft.applicationId, body)
+        if (context.isAnonymous) {
+          const credentialEmail =
+            (existing ? getAnonymousCredentialEmail() : null) ??
+            input.applicantEmail
+          await updateAnonymousApplication({
+            credentialEmail,
+            applicationKey: draft.applicationKey,
+            ...body,
+          })
+        } else {
+          await saveApplicationDraft(draft.applicationId, body)
+        }
         return draft
       } catch (error) {
         if (!existing || !isStaleDraft(error)) throw error
         clearApplyDraft(context.roundId, context.memberId)
         const recreated = await createAndRemember(context, input)
-        await saveApplicationDraft(recreated.applicationId, body)
+        if (context.isAnonymous) {
+          await updateAnonymousApplication({
+            credentialEmail: input.applicantEmail,
+            applicationKey: recreated.applicationKey,
+            ...body,
+          })
+        } else {
+          await saveApplicationDraft(recreated.applicationId, body)
+        }
         return recreated
       }
     },
@@ -101,11 +141,26 @@ export function useSaveApplicationDraft(context: ApplySaveContext) {
 
 export function useSubmitApplication(context: ApplySaveContext) {
   return useMutation({
-    mutationFn: (applicationId: string) => submitApplication(applicationId),
+    mutationFn: ({ applicationId, applicationKey }: ApplySubmitInput) => {
+      if (context.isAnonymous) {
+        const email = getAnonymousCredentialEmail()
+        if (!email) throw new Error("anonymous credential missing")
+        return submitAnonymousApplication({
+          email,
+          applicationKey,
+        })
+      }
+      return submitApplication(applicationId)
+    },
     onSuccess: () => {
       // 제출하면 더 이상 이어쓸 초안이 아니다. 남겨 두면 다음 진입에서
       // 제출된 지원서를 초안으로 오인해 덮어쓰기를 시도한다.
       clearApplyDraft(context.roundId, context.memberId)
     },
   })
+}
+
+interface ApplySubmitInput {
+  applicationId: string
+  applicationKey: string
 }
