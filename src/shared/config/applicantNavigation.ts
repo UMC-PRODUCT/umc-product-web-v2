@@ -33,12 +33,20 @@ export const APPLICANT_SIDEBAR_ITEMS: FlatNavItem[] = [
   },
 ]
 
-/** 지원자 사이드바를 붙일 경로. 프로젝트 목록에는 사이드바가 없다. */
+const APPLICANT_FLOW_BASE_PATHS = [
+  "/projects/notice",
+  "/projects/apply",
+  "/projects/application",
+] as const
+
+/**
+ * 지원자 사이드바를 붙일 경로. 프로젝트 목록에는 사이드바가 없다.
+ *
+ * 세그먼트 경계까지 봐야 한다. 접두사만 보면 `/projects/apply-guide` 처럼
+ * 이름이 겹치는 다른 화면이 생기는 순간 지원 흐름으로 딸려 들어온다.
+ */
 export function isApplicantFlowPath(pathname: string): boolean {
-  return (
-    pathname === "/projects/notice" ||
-    pathname.startsWith("/projects/notice/") ||
-    pathname.startsWith("/projects/apply") ||
-    pathname.startsWith("/projects/application")
+  return APPLICANT_FLOW_BASE_PATHS.some(
+    (base) => pathname === base || pathname.startsWith(`${base}/`),
   )
 }
