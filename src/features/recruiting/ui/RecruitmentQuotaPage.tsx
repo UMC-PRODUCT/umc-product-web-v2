@@ -73,10 +73,11 @@ export function RecruitmentQuotaPage() {
         return
 
       const config = seasonConfigsMap.get(group.seasonId)
-      const hasQuotas = Boolean(config?.quotas && config.quotas.length > 0)
+      if (!config) return
+
+      const hasQuotas = config.quotas.length > 0
 
       if (!hasQuotas) {
-        autoSavedSeasonsRef.current.add(group.seasonId)
         nullQuotaPayloads.push({
           seasonId: group.seasonId,
           schoolName: group.schoolName,
@@ -93,7 +94,11 @@ export function RecruitmentQuotaPage() {
     })
 
     if (nullQuotaPayloads.length > 0) {
-      void updateQuotas(nullQuotaPayloads)
+      void updateQuotas(nullQuotaPayloads).then((result) => {
+        result?.successfulVariables.forEach((item) => {
+          autoSavedSeasonsRef.current.add(item.seasonId)
+        })
+      })
     }
   }, [isLoading, isSaving, groups, seasonConfigsMap, updateQuotas])
 
