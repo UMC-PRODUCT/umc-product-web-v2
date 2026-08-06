@@ -16,6 +16,13 @@ export type MatchingProjectCardVariant =
   | "default"
   | "defaultAnimation"
   | "hoverAnimation"
+  /**
+   * 비로그인 게스트용. 작성자 줄과 파트별 모집 현황을 빼고 파트 이름만 나열한다.
+   *
+   * 디자인이 그렇기도 하지만 데이터도 없다. 공개 응답은 작성자의 이름과 학교를
+   * 지우고 내려주므로, 기본 카드로 그리면 작성자 줄에 구분점만 남는다.
+   */
+  | "guest"
 
 interface MatchingProjectCardProps {
   variant?: MatchingProjectCardVariant
@@ -34,6 +41,35 @@ function RecruitRowItem(row: ProjectRecruitRow) {
         <CounterLabel size="xs" current={current} total={total} />
       </div>
       <RecruitStatusChip done={isDone} className="shrink-0" />
+    </div>
+  )
+}
+
+function GuestCardBody({ data }: { data: MatchingProject }) {
+  const cover = data.coverImage
+  const partNames = data.recruitRows.map((row) => row.part).filter(Boolean)
+
+  return (
+    <div className="flex w-full min-w-0 flex-col items-stretch self-stretch">
+      <div className="bg-teal-gray-200 relative z-0 aspect-[348/184] w-full min-w-0 shrink-0 self-stretch overflow-hidden">
+        <ProjectThumbnail
+          src={cover?.src}
+          alt={cover?.alt ?? `${data.title} 대표 이미지`}
+        />
+      </div>
+
+      <div className="flex w-full min-w-0 flex-col items-start gap-3 p-5">
+        <h3 className="text-heading-7-semibold text-teal-gray-900 w-full min-w-0 truncate">
+          {data.title}
+        </h3>
+        {/* 로그인 카드는 한 줄이지만 게스트 카드는 두 줄까지 보여준다 */}
+        <p className="text-body-2-medium text-teal-gray-600 line-clamp-2 h-10.5 w-full min-w-0">
+          {data.description}
+        </p>
+        <p className="text-caption-2-regular text-teal-gray-500 line-clamp-1 w-full min-w-0">
+          {partNames.join(" · ")}
+        </p>
+      </div>
     </div>
   )
 }
@@ -97,7 +133,9 @@ export function MatchingProjectCard({
   const data = dataProp ?? DEFAULT_MATCHING_PROJECT_MOCK
   const forcedHover = variant === "hoverAnimation"
   const interactiveHover =
-    variant === "default" || variant === "defaultAnimation"
+    variant === "default" ||
+    variant === "defaultAnimation" ||
+    variant === "guest"
 
   return (
     <div
@@ -114,7 +152,11 @@ export function MatchingProjectCard({
           interactiveHover && !forcedHover && "group-hover:-translate-y-1",
         )}
       >
-        <CardBody data={data} />
+        {variant === "guest" ? (
+          <GuestCardBody data={data} />
+        ) : (
+          <CardBody data={data} />
+        )}
         <div
           aria-hidden
           className={cn(

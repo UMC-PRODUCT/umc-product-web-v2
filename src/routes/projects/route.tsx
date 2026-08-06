@@ -11,10 +11,10 @@ import Footer from "@/widgets/footer/Footer"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 import { FlatSideBar } from "@/widgets/navigation/sidebar/FlatSideBar"
 
+// robots 는 하위 라우트에서 각자 정한다. 여기서 한 번에 걸면 색인시켜야 할
+// 프로젝트 목록까지 막힌다. 지원서 작성·조회처럼 개인 화면은 각 라우트에서
+// noindex 를 명시한다.
 export const Route = createFileRoute("/projects")({
-  head: () => ({
-    meta: [{ name: "robots", content: "noindex, nofollow" }],
-  }),
   component: ProjectsLayout,
 })
 

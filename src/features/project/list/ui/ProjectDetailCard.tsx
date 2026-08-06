@@ -10,6 +10,7 @@ import {
   isCurrentTermPm,
   isOperator,
 } from "@/entities/member/model/identity"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import {
   getActiveMatchingRound,
@@ -29,11 +30,13 @@ import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
+import { cn } from "@/shared/lib/utils"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { Button } from "@/shared/ui/Button"
 import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import { CounterLabel } from "@/shared/ui/CounterLabel"
+import { LoadingSpinner } from "@/shared/ui/LoadingSpinner"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
@@ -81,35 +84,18 @@ interface ProjectDetailCardProps {
   canManageProject?: boolean
 }
 
-function ProjectDetailCardSkeleton() {
+/**
+ * 카드 자리를 미리 잡지 않는다. 흰 판을 띄웠다가 내용이 들어오면서 높이가
+ * 튀는 것보다, 어두운 배경 위에 스피너만 두는 편이 덜 흔들린다.
+ */
+function ProjectDetailCardLoading() {
   return (
-    <div className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-135 min-w-0 flex-col items-start overflow-x-hidden overflow-y-auto rounded-2xl bg-white">
-      <div className="bg-teal-gray-200 aspect-[540/286] w-full shrink-0 animate-pulse" />
-      <div className="flex w-full flex-col items-start p-5">
-        <div className="flex w-full flex-col items-start gap-6">
-          <div className="flex w-full flex-col items-start gap-2.5">
-            <div className="flex w-full flex-row items-center justify-between gap-4">
-              <div className="bg-teal-gray-150 h-6 w-full max-w-52 animate-pulse rounded-md" />
-              <div className="bg-teal-gray-150 h-4 w-32 animate-pulse rounded-md" />
-            </div>
-            <div className="bg-teal-gray-150 h-4 w-full animate-pulse rounded-md" />
-          </div>
-          <div className="flex w-full flex-col items-start gap-1.5">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="flex w-full items-center justify-between">
-                <div className="bg-teal-gray-150 h-4 w-28 animate-pulse rounded-md" />
-                <div className="bg-teal-gray-150 h-6 w-14 animate-pulse rounded-full" />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mt-8.5 flex w-full flex-row items-start gap-2.5">
-          <div className="bg-teal-gray-150 h-11 w-11 animate-pulse rounded-xl" />
-          <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
-          <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
-        </div>
-      </div>
-    </div>
+    <LoadingSpinner
+      size="lg"
+      label="프로젝트를 불러오는 중"
+      className="text-white"
+      trackClassName="border-white/30 border-t-white"
+    />
   )
 }
 
@@ -196,7 +182,10 @@ export function ProjectDetailCard({
   // 비로그인 방문자. 팀원 조회는 아직 인증이 필요해서, 열어 두면 401 이 나고
   // 토큰 갱신에 실패해 로그인 화면으로 튕긴다. 디자인에도 게스트 상세에는
   // 작성자·모집 상태·액션 버튼이 없다.
-  const isGuest = me === undefined
+  //
+  // me 의 유무로 보면 안 된다. 회원 조회는 비동기라 로그인 사용자도 첫 렌더에는
+  // me 가 없어, 잠깐 게스트 화면이 스쳐 지나간다. 토큰 유무는 동기로 안다.
+  const isGuest = !useAuthStore((s) => s.isAuthed)
   const addToast = useToastStore((s) => s.addToast)
   const userIsOperator = isOperator(me)
   const userIsPm = isCurrentTermPm(me)
@@ -416,6 +405,7 @@ export function ProjectDetailCard({
   const ctaMode =
     viewOnly && !isAdminView && !isPmView
       ? resolveProjectDetailCtaMode({
+          isGuest,
           isOperator: false,
           isPm: false,
           isSameBranch,
@@ -427,6 +417,7 @@ export function ProjectDetailCard({
           isPartRecruitClosed,
         })
       : resolveProjectDetailCtaMode({
+          isGuest,
           isOperator: isAdminView,
           isPm: isPmView,
           isSameBranch,
@@ -456,7 +447,7 @@ export function ProjectDetailCard({
   }, [detail, projectId, ctaMode, viewOnly])
 
   if (isDetailLoading) {
-    return <ProjectDetailCardSkeleton />
+    return <ProjectDetailCardLoading />
   }
 
   return (
@@ -496,32 +487,48 @@ export function ProjectDetailCard({
               </p>
             </div>
 
-            <div className="flex w-full flex-col items-start gap-1.5">
-              {data.recruitRows.map((row) => {
-                const done = isRecruitDone(row)
-                return (
-                  <div
-                    key={row.part}
-                    className="flex w-full min-w-0 items-center justify-between gap-3"
-                  >
-                    <div className="flex w-30.5 min-w-0 shrink-0 items-center justify-between gap-2">
-                      <span className="text-body-2-medium text-teal-gray-700 truncate">
-                        {row.part}
-                      </span>
-                      <CounterLabel
-                        size="sm"
-                        current={row.current}
-                        total={row.total}
-                      />
+            {/* 게스트에게는 모집 현황 대신 파트와 모집 인원만 한 줄로 준다 */}
+            {isGuest ? (
+              <p className="text-body-2-medium text-teal-gray-600 w-full">
+                {data.recruitRows
+                  .map((row) => `${row.part} ${row.total}`)
+                  .join(" · ")}
+              </p>
+            ) : (
+              <div className="flex w-full flex-col items-start gap-1.5">
+                {data.recruitRows.map((row) => {
+                  const done = isRecruitDone(row)
+                  return (
+                    <div
+                      key={row.part}
+                      className="flex w-full min-w-0 items-center justify-between gap-3"
+                    >
+                      <div className="flex w-30.5 min-w-0 shrink-0 items-center justify-between gap-2">
+                        <span className="text-body-2-medium text-teal-gray-700 truncate">
+                          {row.part}
+                        </span>
+                        <CounterLabel
+                          size="sm"
+                          current={row.current}
+                          total={row.total}
+                        />
+                      </div>
+                      <RecruitStatusChip done={done} />
                     </div>
-                    <RecruitStatusChip done={done} />
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
-          <div className="scrollbar-none mt-8.5 flex w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1">
+          {/* 게스트 상세에는 액션이 없다. 팀원·기획안·지원 모두 로그인이 필요해
+              눌러도 로그인으로 튕기므로 디자인대로 영역째 두지 않는다. */}
+          <div
+            className={cn(
+              "scrollbar-none mt-8.5 w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1",
+              isGuest ? "hidden" : "flex",
+            )}
+          >
             {!isGuest && (
               <TeamMemberButton
                 variant="weak"

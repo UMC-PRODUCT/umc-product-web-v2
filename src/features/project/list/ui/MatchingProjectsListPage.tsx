@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { MOCK_MATCHING_PROJECTS } from "@/entities/project/model/matchingProject.mock"
 import { trackEvent } from "@/shared/analytics"
@@ -12,6 +13,7 @@ import { Pagination } from "@/shared/ui/Pagination"
 
 import { useMatchingProjectListFilters } from "../model/matchingProjectList"
 import { MatchingProjectCard } from "./MatchingProjectCard"
+import { MatchingProjectCardSkeleton } from "./MatchingProjectCardSkeleton"
 import { ProjectDetailCard } from "./ProjectDetailCard"
 import { ProjectSearchField } from "./ProjectSearchField"
 
@@ -28,6 +30,9 @@ const PART_LABEL: Record<string, string> = {
   NODEJS: "Node.js",
 }
 const PART_ORDER = ["DESIGN", "WEB", "IOS", "ANDROID", "SPRINGBOOT", "NODEJS"]
+
+/** 로딩 중 자리를 채울 카드 수. 한 화면에 대략 두 줄이 찬다. */
+const SKELETON_CARD_COUNT = 6
 
 function toMatchingProject(project: ProjectItem): MatchingProject {
   const owner = project.productOwner
@@ -85,6 +90,12 @@ export function MatchingProjectsListPage({
     isError,
     filterDescriptors,
   } = useMatchingProjectListFilters()
+  // 비로그인 게스트. 공개 응답은 작성자 이름·학교를 지우고 오므로 카드도
+  // 디자인대로 작성자 줄과 모집 현황을 빼고 파트 이름만 보여준다.
+  //
+  // me 의 유무로 보면 안 된다. 회원 조회는 비동기라 로그인 사용자도 첫 렌더에는
+  // me 가 없어, 잠깐 게스트 카드가 스쳐 지나간다. 토큰 유무는 동기로 안다.
+  const isGuest = !useAuthStore((s) => s.isAuthed)
 
   const { getChapterIdBySchool } = useSchoolChapterMap()
 
@@ -217,10 +228,24 @@ export function MatchingProjectsListPage({
 
         <div
           className={cn(
-            "grid min-w-0 grid-cols-2 gap-5",
+            // 게스트는 사이드바가 없어 폭이 넓다. 2열로 두면 카드가 디자인의
+            // 두 배 가까이 커진다. 로그인 화면은 매칭과 같은 그리드라 건드리지 않는다.
+            "grid min-w-0 gap-5",
+            isGuest ? "grid-cols-3" : "grid-cols-2",
             openFilterId && "pointer-events-none",
           )}
         >
+          {/* 빈 그리드만 남으면 데이터가 없는 건지 로딩이 덜 된 건지 알 수 없다.
+              게스트는 활성 기수까지 기다려야 해서 이 구간이 특히 길다 */}
+          {!useMockData &&
+            isLoading &&
+            Array.from({ length: SKELETON_CARD_COUNT }).map((_, index) => (
+              <MatchingProjectCardSkeleton
+                key={index}
+                variant={isGuest ? "guest" : "default"}
+              />
+            ))}
+
           {visibleProjects.map((project, index) => {
             return (
               <div key={project.id} className="min-w-0">
@@ -245,7 +270,10 @@ export function MatchingProjectsListPage({
                     )
                   }}
                 >
-                  <MatchingProjectCard variant="default" data={project} />
+                  <MatchingProjectCard
+                    variant={isGuest ? "guest" : "default"}
+                    data={project}
+                  />
                 </button>
               </div>
             )
@@ -254,11 +282,6 @@ export function MatchingProjectsListPage({
 
         {/* 빈 그리드만 남으면 데이터가 없는 건지 로딩이 덜 된 건지 알 수 없다.
             게스트는 활성 기수까지 기다려야 해서 이 구간이 특히 길다 */}
-        {!useMockData && isLoading && (
-          <p className="text-body-2-regular text-teal-gray-500 py-20 text-center">
-            프로젝트를 불러오는 중입니다.
-          </p>
-        )}
 
         {!useMockData && !isLoading && visibleProjects.length === 0 && (
           <p className="text-body-2-regular text-teal-gray-500 py-20 text-center">

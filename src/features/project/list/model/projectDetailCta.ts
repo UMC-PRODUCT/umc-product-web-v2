@@ -1,6 +1,7 @@
 import type { ProjectDetail } from "@/entities/project/api/matchingProject"
 
 export type ProjectDetailCtaMode =
+  | "guest"
   | "recruit-questions"
   | "my-application"
   | "apply"
@@ -13,6 +14,7 @@ export type ProjectDetailCtaMode =
   | "plan-only"
 
 interface ResolveCtaParams {
+  isGuest?: boolean
   isOperator: boolean
   isPm: boolean
   isSameBranch: boolean
@@ -26,6 +28,7 @@ interface ResolveCtaParams {
 }
 
 export function resolveProjectDetailCtaMode({
+  isGuest = false,
   isOperator,
   isPm,
   isSameBranch,
@@ -37,6 +40,9 @@ export function resolveProjectDetailCtaMode({
   isPartRecruitClosed,
   hasActiveRound,
 }: ResolveCtaParams): ProjectDetailCtaMode {
+  // 게스트는 지부도 지원 이력도 없어 아래 분기가 전부 기본값으로 흐른다.
+  // 그대로 두면 지원할 수 없는 사람에게 지원하기가 열리므로 먼저 가른다.
+  if (isGuest) return "guest"
   if (isOperator) return "recruit-questions"
   if (isPm) return "recruit-questions"
   if (!isSameBranch) return "other-branch"
