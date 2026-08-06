@@ -17,6 +17,10 @@ import type {
 import type { ApplicationSection } from "@/features/recruiting/model/applicationDetail"
 
 export const Route = createFileRoute("/projects/application/$applicationId")({
+  // 개인 지원 정보라 색인시키지 않는다.
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   beforeLoad: () => {
     if (typeof window !== "undefined") {
       const isVerified = sessionStorage.getItem("isApplicationVerified")

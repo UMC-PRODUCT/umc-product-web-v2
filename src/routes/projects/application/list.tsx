@@ -13,6 +13,10 @@ import type { RecruitingApplication } from "@/features/recruiting"
 import type { PartTag } from "@/shared/model/domain"
 
 export const Route = createFileRoute("/projects/application/list")({
+  // 개인 지원 정보라 색인시키지 않는다.
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   beforeLoad: () => {
     if (typeof window !== "undefined") {
       const isVerified = sessionStorage.getItem("isApplicationVerified")

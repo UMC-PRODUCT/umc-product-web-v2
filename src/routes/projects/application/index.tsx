@@ -15,6 +15,10 @@ import { CodeInput } from "@/shared/ui/input/CodeInput"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 
 export const Route = createFileRoute("/projects/application/")({
+  // 개인 지원 정보라 색인시키지 않는다.
+  head: () => ({
+    meta: [{ name: "robots", content: "noindex, nofollow" }],
+  }),
   beforeLoad: () => {
     if (typeof window !== "undefined") {
       const isVerified = sessionStorage.getItem("isApplicationVerified")
