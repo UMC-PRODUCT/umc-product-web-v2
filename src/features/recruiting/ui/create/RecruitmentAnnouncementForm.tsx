@@ -14,8 +14,8 @@ import {
 import { getRecruitableTracks } from "../../model/parts"
 import {
   buildRecruitmentPreviewTitle,
+  buildRoundConfigurationPayload,
   composeRecruitmentTitle,
-  periodFieldToInstant,
 } from "../../model/recruitmentCreate"
 import { useRecruitmentCreateStore } from "../../model/useRecruitmentCreateStore"
 import { RecruitmentSectionHeader } from "../RecruitmentSectionHeader"
@@ -76,20 +76,48 @@ export function RecruitmentAnnouncementForm({
     !!seasonId &&
     !!roundId
   const hasUnsavedChanges = savedSnapshotRef.current !== announcement
-  const canTempSave = hasUnsavedChanges && !isSaving
+  const canTempSave = hasUnsavedChanges && !isSaving && !!seasonId && !!roundId
 
   useEffect(() => {
     onDirtyChange?.(hasUnsavedChanges)
   }, [hasUnsavedChanges, onDirtyChange])
 
-  const handleTempSave = () => {
+  // Round PUT은 완전 교체라 recruitableTracks/기간 등 필수 필드를 스토어의
+  // 최신 값으로 매번 전부 채워 보내야 한다(announcement만 담아 보내면 400).
+  // interviewRequired는 2단계 진입 시점에 이미 false로 고정된 상태로만 Round가
+  // 만들어졌으므로(면접 있는 모집은 그 전에 막힘) 여기서도 동일하게 false로 보낸다.
+  const buildRoundUpdatePayload = () =>
+    buildRoundConfigurationPayload({
+      title: composeRecruitmentTitle(previewTitle, basicInfo.footer),
+      recruitableTracks: getRecruitableTracks(enabledParts),
+      secondChoiceEnabled,
+      periodForm: basicInfo.periodForm,
+      interviewRequired: false,
+      announcement,
+      contactText,
+    })
+
+  const handleTempSave = async () => {
+    if (isSaving || !seasonId || !roundId) return
     setIsSaving(true)
-    // TODO: 실제 임시 저장 API 호출로 교체 (지금은 로딩 상태만 흉내)
-    setTimeout(() => {
+    try {
+      await updateRecruitingRound(seasonId, roundId, buildRoundUpdatePayload())
       savedSnapshotRef.current = announcement
-      setIsSaving(false)
       setShowTempSaveModal(true)
-    }, 600)
+    } catch (error) {
+      const message = isAxiosError(error)
+        ? (error.response?.data as { message?: string } | undefined)?.message
+        : undefined
+      addToast({
+        message: message ?? "임시 저장에 실패했습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -146,7 +174,7 @@ export function RecruitmentAnnouncementForm({
             isLoading={isPublishing}
             onClick={() => setOpenModal("publishConfirm")}
           >
-            {isPublished ? "모집 공고 완료" : "모집 공고 올리기"}
+            {isPublished ? "모집 공고 완료" : "모집 공고 게시"}
           </Button>
         </div>
       </div>
@@ -172,32 +200,11 @@ export function RecruitmentAnnouncementForm({
           setOpenModal(null)
           setIsPublishing(true)
           try {
-            // interviewRequired는 2단계 진입 시점에 이미 false로 고정된 상태로만
-            // Round가 만들어졌으므로(면접 있는 모집은 그 전에 막힘) 여기서도 동일하게
-            // false로 보낸다 — Round 생성(createRecruitingRound)과 대칭.
-            await updateRecruitingRound(seasonId, roundId, {
-              title: composeRecruitmentTitle(
-                buildRecruitmentPreviewTitle({ ...basicInfo, gisuGeneration }),
-                basicInfo.footer,
-              ),
-              recruitableTracks: getRecruitableTracks(enabledParts),
-              secondChoiceEnabled,
-              documentStartAt: periodFieldToInstant(
-                basicInfo.periodForm.documentStartAt,
-              ),
-              documentEndAt: periodFieldToInstant(
-                basicInfo.periodForm.documentEndAt,
-              ),
-              documentResultPublishedAt: periodFieldToInstant(
-                basicInfo.periodForm.documentResultPublishedAt,
-              ),
-              finalResultPublishedAt: periodFieldToInstant(
-                basicInfo.periodForm.finalResultPublishedAt,
-              ),
-              interviewRequired: false,
-              announcement,
-              contactText,
-            })
+            await updateRecruitingRound(
+              seasonId,
+              roundId,
+              buildRoundUpdatePayload(),
+            )
             await updateRecruitingRoundStatus(seasonId, roundId, {
               status: "OPEN",
             })

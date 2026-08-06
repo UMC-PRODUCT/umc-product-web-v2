@@ -58,7 +58,10 @@ function DraftPostRow({
           onPublish={() => onPublish(post.postId)}
           // 임시 보관함 안에서는 이미 DRAFT라 비공개 액션이 노출되지 않음
           onPrivatize={() => {}}
-          // TODO: 모집 공고 수정 페이지 라우트 연결
+          // TODO: DRAFT 수정은 생성 마법사 재사용 편집이 필요하다(문항 프리필용 조회
+          // API가 아직 없어 대기 중). /recruiting/recruitments/edit/$roundId는 OPEN
+          // 전용이라 DRAFT를 여기로 보내면 "공유 보관함에서 수정해달라"는 안내로
+          // 되돌아오는 순환이 생겨 연결하지 않는다.
           onEdit={() => console.info("TODO: 모집 공고 수정", post.postId)}
           onDuplicate={() => onDuplicate(post.postId)}
           onDelete={() => onDelete(post.postId)}

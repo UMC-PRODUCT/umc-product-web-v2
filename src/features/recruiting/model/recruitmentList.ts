@@ -3,6 +3,7 @@ import dayjs from "dayjs"
 
 import { isChapter } from "@/entities/organization/model/chapters"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
@@ -14,11 +15,19 @@ import type {
 } from "../api/types"
 
 // 모집 생성(013)에 필요한 seasonId는 화면에서 새로 만드는 게 아니라, 이미
-// 존재하는 시즌 목록(공개 차수 목록 응답에 포함됨)에서 학교명으로 찾아 쓴다.
+// 존재하는 시즌 목록(관리자용 차수 목록 응답에 포함됨)에서 찾아 쓴다.
+// schoolId가 있으면 그걸 우선 쓴다 — schoolName은 조직 서비스(학교 드롭다운)와
+// 모집 서비스(시즌 목록)가 각자 따로 관리하는 문자열이라, 표기가 살짝만
+// 달라도(공백·축약 등) 일치 비교가 깨져 시즌이 있는데도 못 찾는 경우 대비
 export function findSeasonIdBySchool(
   groups: RecruitingRoundGroup[],
   school: string | null | undefined,
+  schoolId?: string | null,
 ): string | undefined {
+  if (schoolId) {
+    const bySchoolId = groups.find((group) => group.schoolId === schoolId)
+    if (bySchoolId) return bySchoolId.seasonId
+  }
   return groups.find((group) => group.schoolName === school)?.seasonId
 }
 
@@ -50,6 +59,7 @@ export interface RecruitmentPost {
 // 이 목록 자체를 받지 못한다(useAdminRecruitingRounds의 isForbidden 참고).
 export function mapRoundGroupsToPosts(
   groups: RecruitingRoundGroup[],
+  authorLabel?: string,
 ): RecruitmentPost[] {
   return groups.flatMap((group) => {
     if (!isChapter(group.chapterName)) return []
@@ -59,15 +69,15 @@ export function mapRoundGroupsToPosts(
         (round): round is RecruitingRound & { status: RecruitingRoundStatus } =>
           round.status != null,
       )
-      .map((round) => mapRoundToPost(group, chapter, round))
+      .map((round) => mapRoundToPost(group, chapter, round, authorLabel))
   })
 }
 
-// 백엔드 응답에 작성자 정보가 없어 authorLabel은 항상 비어 있다.
 function mapRoundToPost(
   group: RecruitingRoundGroup,
   chapter: Chapter,
   round: RecruitingRound & { status: RecruitingRoundStatus },
+  authorLabel?: string,
 ): RecruitmentPost {
   const start = round.documentStartAt ? dayjs(round.documentStartAt) : null
   const end = round.documentEndAt ? dayjs(round.documentEndAt) : null
@@ -76,7 +86,9 @@ function mapRoundToPost(
     postId: round.roundId,
     seasonId: group.seasonId,
     chapter,
-    school: group.schoolName,
+    // SCHOOLS_BY_BRANCH(SchoolTabs 등 세그먼트가 쓰는 축약형)와 비교 가능하도록
+    // 백엔드 정식 명칭("동국대학교")을 여기서 축약형("동국대")으로 통일한다.
+    school: formatSchoolName(group.schoolName),
     title: round.title,
     status: round.status,
     type: round.type,
@@ -90,6 +102,7 @@ function mapRoundToPost(
         )
       : undefined,
     dateLabel: start?.format("YYYY.MM.DD"),
+    authorLabel,
   }
 }
 

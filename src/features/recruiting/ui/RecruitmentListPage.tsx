@@ -5,6 +5,7 @@ import { useMe } from "@/entities/member/hooks/useMe"
 import { CHAPTERS, isChapter } from "@/entities/organization/model/chapters"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { IconButton } from "@/shared/ui/button/IconButton"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -22,13 +23,21 @@ import {
   resolveViewerChapter,
   resolveViewerSchool,
 } from "../model/recruitingRole"
+import {
+  applyScopeFilters,
+  resolveRecruitingScope,
+} from "../model/recruitingScope"
 import { resolveAvailableTitle } from "../model/recruitmentCreate"
 import {
   groupPostsByChapter,
   mapRoundGroupsToPosts,
   RECRUITMENT_SORT_OPTIONS,
 } from "../model/recruitmentList"
-import { RECRUITMENT_LIST_MOCK } from "../model/recruitmentList.mock"
+import {
+  RECRUITING_MY_CHAPTER_MOCK,
+  RECRUITING_MY_SCHOOL_MOCK,
+  RECRUITMENT_LIST_MOCK,
+} from "../model/recruitmentList.mock"
 import { ChapterTabs } from "./ChapterTabs"
 import { RecruitmentCreateButton } from "./RecruitmentCreateButton"
 import { RecruitmentDraftArchiveCard } from "./RecruitmentDraftArchiveCard"
@@ -38,6 +47,7 @@ import { RecruitmentSchoolSearchDropdown } from "./RecruitmentSchoolSearchDropdo
 import { SchoolTabs } from "./SchoolTabs"
 
 import type { RecruitingListRole } from "../model/recruitingListRole"
+import type { RecruitingScope } from "../model/recruitingScope"
 import type { RecruitmentPost, RecruitmentSort } from "../model/recruitmentList"
 
 interface RecruitmentListPageProps {
@@ -47,16 +57,66 @@ interface RecruitmentListPageProps {
   useMockData?: boolean
 }
 
+// 테스트 라우트 전용: 실 데이터 없이 role만으로 조회 스코프를 흉내낸다.
+// 실 데이터 경로는 resolveRecruitingScope(권한 조회 결과)를 그대로 쓴다.
+function buildMockScope(role: RecruitingListRole): RecruitingScope {
+  if (role === "central") {
+    return {
+      groups: [],
+      chapters: [...CHAPTERS],
+      schools: [],
+      isFallback: false,
+    }
+  }
+  if (role === "chapterAdmin") {
+    return {
+      groups: [],
+      chapters: [RECRUITING_MY_CHAPTER_MOCK],
+      schools: [...SCHOOLS_BY_BRANCH[RECRUITING_MY_CHAPTER_MOCK]],
+      isFallback: false,
+    }
+  }
+  return {
+    groups: [],
+    chapters: [RECRUITING_MY_CHAPTER_MOCK],
+    schools: [RECRUITING_MY_SCHOOL_MOCK],
+    isFallback: true,
+  }
+}
+
+function filterMockPosts(
+  posts: RecruitmentPost[],
+  showChapterTabs: boolean,
+  showSchoolTabs: boolean,
+  chapterTab: string,
+  schoolTab: string,
+): RecruitmentPost[] {
+  if (showChapterTabs) {
+    return chapterTab === "all"
+      ? posts
+      : posts.filter((post) => post.chapter === chapterTab)
+  }
+  if (showSchoolTabs && schoolTab !== "all") {
+    return posts.filter((post) => post.school === schoolTab)
+  }
+  return posts
+}
+
 export function RecruitmentListPage({
   role: roleOverride,
   useMockData = false,
 }: RecruitmentListPageProps) {
   const navigate = useNavigate()
   const { data: me } = useMe()
+  // RecruitmentCreatePage(BasicInfoForm)가 진입 지점별 필드 잠금에 쓰는 값이라
+  // role 자체는 계속 넘긴다. 이 화면의 조회 범위는 더 이상 role로 가르지 않고
+  // resolveRecruitingScope의 실제 EDIT 권한 결과를 따른다.
   const role = roleOverride ?? resolveRecruitingListRole(me)
-  const viewerChapter = resolveViewerChapter(me)
   const viewerSchool = resolveViewerSchool(me)
-  const myChapter = isChapter(viewerChapter) ? viewerChapter : undefined
+  const viewerChapterName = resolveViewerChapter(me)
+  const viewerChapter = isChapter(viewerChapterName)
+    ? viewerChapterName
+    : undefined
 
   const [chapterTab, setChapterTab] = useState("all")
   const [schoolTab, setSchoolTab] = useState("all")
@@ -67,31 +127,73 @@ export function RecruitmentListPage({
   const [sort, setSort] = useState<RecruitmentSort>("NEWEST")
   const [sortOpen, setSortOpen] = useState(false)
 
-  // /admin/rounds는 학교 회장단 이상만 조회 가능하다(isForbidden). SCHOOL_STAFF는
-  // 현재 이 화면에서 공고 목록을 볼 수 없다 — 알려진 백엔드 권한 제약.
   const {
     groups,
     isLoading: isRoundsLoading,
     isError: isRoundsError,
     isForbidden,
   } = useAdminRecruitingRounds(sort)
-  const fetchedPosts = useMemo(() => mapRoundGroupsToPosts(groups), [groups])
+
+  // 편집 권한은 role이 아니라 시즌 단위 실제 EDIT 권한으로 판정한다(canEditRecruitmentPost 참고).
+  const seasonIds = useMemo(
+    () => [...new Set(groups.map((group) => group.seasonId))],
+    [groups],
+  )
+  const { permittedSeasonIds } = useRecruitingPermissions(seasonIds)
+
+  // EDIT 권한이 있는 시즌이 조회 범위. 권한이 하나도 없으면 내 학교로 좁혀 시도한다
+  // (resolveRecruitingScope 참고). 지부가 여럿이면 지부 탭, 한 지부에 학교가
+  // 여럿이면 학교 탭으로 가른다 — role 기반 3분기 렌더링을 대체한다.
+  const scope = useMemo(
+    () => resolveRecruitingScope(groups, permittedSeasonIds, viewerSchool),
+    [groups, permittedSeasonIds, viewerSchool],
+  )
+  const mockScope = useMemo(() => buildMockScope(role), [role])
+  const activeScope = useMockData ? mockScope : scope
+  // 세그먼트(지부/학교 탭) 노출은 현재 조회된 데이터 양이 아니라 역할 자체로 정한다.
+  // central=지부 세그먼트, chapterAdmin/schoolStaff=학교 세그먼트 — 게시글이
+  // 하나도 없어도(혹은 EDIT 권한 조회가 아직 비어도) 세그먼트는 항상 보여야 한다.
+  const showChapterTabs = role === "central"
+  const ownScopeChapter = useMockData
+    ? RECRUITING_MY_CHAPTER_MOCK
+    : viewerChapter
+  const showSchoolTabs =
+    (role === "chapterAdmin" || role === "schoolStaff") && !!ownScopeChapter
+
+  const authorLabel = me
+    ? `${me.nickname}/${me.name} · ${formatSchoolName(me.schoolName)}`
+    : undefined
+
+  const fetchedPosts = useMemo(() => {
+    const scopedGroups = applyScopeFilters(
+      scope,
+      chapterTab,
+      schoolTab,
+      scope.chapters,
+    )
+    return mapRoundGroupsToPosts(scopedGroups, authorLabel)
+  }, [scope, chapterTab, schoolTab, authorLabel])
 
   // mock 모드(테스트 라우트 전용)만 낙관적 업데이트를 위한 로컬 state가 필요하다.
   // 실제 모드는 mutation 성공 후 재조회된 fetchedPosts를 그대로 파생값으로 쓴다.
   const [mockPosts, setMockPosts] = useState<RecruitmentPost[]>(
     RECRUITMENT_LIST_MOCK,
   )
-  const posts = useMockData ? mockPosts : fetchedPosts
+  const viewPosts = useMockData
+    ? filterMockPosts(
+        mockPosts,
+        showChapterTabs,
+        showSchoolTabs,
+        chapterTab,
+        schoolTab,
+      )
+    : fetchedPosts
+  // 탭 필터와 무관하게 스코프 전체에서 postId로 찾아야 하는 액션(발행/삭제 등)에 쓴다.
+  const basePosts = useMockData
+    ? mockPosts
+    : mapRoundGroupsToPosts(scope.groups)
   const setPosts = setMockPosts
   const lastDeletedPostRef = useRef<RecruitmentPost | null>(null)
-
-  // 편집 권한은 role이 아니라 시즌 단위 실제 EDIT 권한으로 판정한다(canEditRecruitmentPost 참고).
-  const seasonIds = useMemo(
-    () => [...new Set(posts.map((post) => post.seasonId))],
-    [posts],
-  )
-  const { permittedSeasonIds } = useRecruitingPermissions(seasonIds)
 
   const updateRoundStatus = useUpdateRecruitingRoundStatus()
   const cloneRound = useCloneRecruitingRound()
@@ -106,7 +208,7 @@ export function RecruitmentListPage({
       )
       return
     }
-    const post = posts.find((item) => item.postId === postId)
+    const post = basePosts.find((item) => item.postId === postId)
     if (!post) return
     updateRoundStatus.mutate({
       seasonId: post.seasonId,
@@ -124,7 +226,7 @@ export function RecruitmentListPage({
       )
       return
     }
-    const post = posts.find((item) => item.postId === postId)
+    const post = basePosts.find((item) => item.postId === postId)
     if (!post) return
     updateRoundStatus.mutate({
       seasonId: post.seasonId,
@@ -136,11 +238,11 @@ export function RecruitmentListPage({
   const handleDelete = (postId: string) => {
     if (useMockData) {
       lastDeletedPostRef.current =
-        posts.find((post) => post.postId === postId) ?? null
+        basePosts.find((post) => post.postId === postId) ?? null
       setPosts((prev) => prev.filter((post) => post.postId !== postId))
       return
     }
-    const post = posts.find((item) => item.postId === postId)
+    const post = basePosts.find((item) => item.postId === postId)
     if (!post) return
     deleteRound.mutate({ seasonId: post.seasonId, roundId: postId })
   }
@@ -167,7 +269,7 @@ export function RecruitmentListPage({
       })
       return
     }
-    const post = posts.find((item) => item.postId === postId)
+    const post = basePosts.find((item) => item.postId === postId)
     if (!post) return
     // 같은 글을 여러 번 복제해도 제목이 겹치지 않도록 사용 가능한 제목을 먼저 찾는다.
     void resolveAvailableTitle(`${post.title} 복제본`, (title) =>
@@ -187,9 +289,10 @@ export function RecruitmentListPage({
     })
   }
 
-  // 공유 보관함이 보이는 뷰로 전환 (해당 학교가 속한 지부 탭 + 학교 드릴다운)
+  // 공유 보관함이 보이는 뷰로 전환 (지부 탭이 없는 스코프는 학교 탭만 바꾸고,
+  // 지부 탭이 있는 스코프는 해당 학교가 속한 지부 탭 + 학교 드릴다운으로 전환)
   const handleNavigateToArchive = (school: string) => {
-    if (role === "chapterAdmin" || role === "schoolStaff") {
+    if (!showChapterTabs) {
       setSchoolTab(school)
       return
     }
@@ -200,20 +303,23 @@ export function RecruitmentListPage({
     setSelectedSchool(school)
   }
 
-  const scopeChapters =
+  // central 세그먼트는 데이터 유무와 무관하게 조직의 전체 지부를 보여준다.
+  const centralChapters =
     chapterTab === "all"
       ? [...CHAPTERS]
       : isChapter(chapterTab)
         ? [chapterTab]
         : []
-  const chapterGroups = groupPostsByChapter(posts, scopeChapters)
-  const myChapterPosts = myChapter
-    ? posts.filter((post) => post.chapter === myChapter)
+  const chapterGroups = groupPostsByChapter(viewPosts, centralChapters)
+
+  const ownScopeSchools = ownScopeChapter
+    ? SCHOOLS_BY_BRANCH[ownScopeChapter]
     : []
-  const myScopedPosts =
-    schoolTab === "all"
-      ? myChapterPosts
-      : myChapterPosts.filter((post) => post.school === schoolTab)
+  // 학교 탭이 없는 단일 학교 스코프에서는 schoolTab이 항상 "all"로 머무르므로,
+  // 헤딩·보관함·생성 버튼 판단에는 실제 학교 이름을 대신 쓴다.
+  const ownScopeSchoolTab = showSchoolTabs
+    ? schoolTab
+    : ((useMockData ? RECRUITING_MY_SCHOOL_MOCK : viewerSchool) ?? schoolTab)
 
   return (
     <div className="flex w-full max-w-286.5 flex-col">
@@ -254,7 +360,7 @@ export function RecruitmentListPage({
         </div>
       ) : (
         <>
-          {role === "central" && (
+          {showChapterTabs && (
             <ChapterTabs
               value={chapterTab}
               onValueChange={(value) => {
@@ -264,9 +370,9 @@ export function RecruitmentListPage({
               className="mt-8"
             />
           )}
-          {(role === "chapterAdmin" || role === "schoolStaff") && myChapter && (
+          {!showChapterTabs && showSchoolTabs && (
             <SchoolTabs
-              schools={SCHOOLS_BY_BRANCH[myChapter]}
+              schools={ownScopeSchools}
               value={schoolTab}
               onValueChange={setSchoolTab}
               allLabel={role === "chapterAdmin" ? "지부 전체" : "학교 전체"}
@@ -274,7 +380,7 @@ export function RecruitmentListPage({
             />
           )}
 
-          {role === "central" && (
+          {showChapterTabs && (
             <div className="mt-8 flex flex-col gap-11">
               {chapterGroups.map(({ chapter, posts: chapterPosts }) => {
                 const scopedPosts = selectedSchool
@@ -360,11 +466,11 @@ export function RecruitmentListPage({
             </div>
           )}
 
-          {role === "chapterAdmin" && myChapter && (
+          {!showChapterTabs && ownScopeChapter && (
             <RecruitmentOwnScopeSection
-              chapter={myChapter}
-              posts={myScopedPosts}
-              schoolTab={schoolTab}
+              chapter={ownScopeChapter}
+              posts={viewPosts}
+              schoolTab={ownScopeSchoolTab}
               permittedSeasonIds={permittedSeasonIds}
               onPrivatize={handlePrivatize}
               onPublish={handlePublish}
@@ -373,33 +479,20 @@ export function RecruitmentListPage({
               onUndoDelete={handleUndoDelete}
               onNavigateToArchive={handleNavigateToArchive}
               archiveVisible
-              onCreate={() =>
-                navigate({
-                  to: "/recruiting/recruitments/new",
-                  search: {
-                    role,
-                    chapter: myChapter,
-                    school: schoolTab,
-                  },
-                })
+              archiveTitle={activeScope.isFallback ? "공유 보관함" : undefined}
+              onCreate={
+                activeScope.isFallback
+                  ? undefined
+                  : () =>
+                      navigate({
+                        to: "/recruiting/recruitments/new",
+                        search: {
+                          role,
+                          chapter: ownScopeChapter,
+                          school: ownScopeSchoolTab,
+                        },
+                      })
               }
-            />
-          )}
-
-          {role === "schoolStaff" && myChapter && (
-            <RecruitmentOwnScopeSection
-              chapter={myChapter}
-              posts={myScopedPosts}
-              schoolTab={schoolTab}
-              permittedSeasonIds={permittedSeasonIds}
-              onPrivatize={handlePrivatize}
-              onPublish={handlePublish}
-              onDuplicate={handleDuplicate}
-              onDelete={handleDelete}
-              onUndoDelete={handleUndoDelete}
-              onNavigateToArchive={handleNavigateToArchive}
-              archiveVisible={schoolTab === viewerSchool}
-              archiveTitle="공유 보관함"
             />
           )}
         </>

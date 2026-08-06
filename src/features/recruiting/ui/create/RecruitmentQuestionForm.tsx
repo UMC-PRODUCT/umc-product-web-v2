@@ -39,8 +39,8 @@ import {
 } from "../../model/parts"
 import {
   buildRecruitmentPreviewTitle,
+  buildRoundConfigurationPayload,
   composeRecruitmentTitle,
-  periodFieldToInstant,
 } from "../../model/recruitmentCreate"
 import {
   buildCommonSectionUpsertRequest,
@@ -650,16 +650,6 @@ export function RecruitmentQuestionForm({
     onBlankPartsChange?.(hasBlankEnabledPart)
   }, [hasBlankEnabledPart, onBlankPartsChange])
 
-  const handleTempSave = () => {
-    setIsSaving(true)
-    // TODO: 실제 임시 저장 API 호출로 교체 (지금은 로딩 상태만 흉내)
-    setTimeout(() => {
-      savedSnapshotRef.current = currentSnapshot
-      setIsSaving(false)
-      setShowTempSaveModal(true)
-    }, 600)
-  }
-
   const showErrorToast = (message: string) => {
     addToast({
       message,
@@ -670,102 +660,118 @@ export function RecruitmentQuestionForm({
     })
   }
 
-  const handleNext = async () => {
-    if (hasBlankEnabledPart) {
-      showErrorToast("사용 중인 섹션의 항목을 모두 적어주세요.")
-      return
-    }
+  // "임시 저장"과 "다음"이 공유하는 핵심 로직: roundId가 없으면 Round를 새로
+  // 만들고(있으면 재사용), Form 구조를 통째로 upsert한다. 실패 원인(Round 생성 vs
+  // Form 저장)에 따라 서로 다른 에러 메시지를 던진다.
+  const ensureRoundAndSaveForm = async (): Promise<string> => {
     const recruitableTracks = getRecruitableTracks(enabledParts)
-    if (recruitableTracks.length === 0) {
-      showErrorToast("모집할 트랙을 최소 1개 선택해 주세요.")
-      return
-    }
-    if (basicInfo.interviewRequired) {
-      // availabilityFormId 자체는 서버가 형식만 보고(> 0) 통과시키는 느슨한 참조라
-      // 프론트에서 채워 넣는 것만으로는 막힐 이유가 없다. 진짜 이유는 그 뒤 단계:
-      // 지원자가 면접 가능 시간대를 제출하는 백엔드 기능(RecruitingInterviewScheduleController
-      // .submitAvailability, RECRUITING-0419)이 Form 엔진 연동 전까지 501로 스텁 처리돼 있어
-      // 아직 개발되지 않았다. 즉 프론트가 뭘 만들든 지원자 쪽 제출 경로가 없어 면접
-      // 스케줄링이 end-to-end로 동작하지 않으므로, 그 기능이 나오기 전까지는 여기서 막는다.
-      showErrorToast(
-        "면접이 있는 모집은 아직 지원되지 않습니다. 1단계에서 면접 진행을 꺼주세요.",
-      )
-      return
-    }
-    if (!seasonId) {
-      showErrorToast("시즌 정보가 없어 모집 차수를 생성할 수 없습니다.")
-      return
-    }
-    if (!basicInfo.chapter || !basicInfo.school || !basicInfo.recruitmentType) {
-      showErrorToast("1단계 기본 정보를 먼저 입력해 주세요.")
-      return
-    }
 
-    setIsSubmitting(true)
+    let currentRoundId: string
     try {
       // roundId가 이미 있으면(직전 시도에서 Round 생성은 성공하고 Form 저장만
       // 실패한 경우) 재시도 시 Round를 또 만들지 않고 같은 roundId로 Form만 다시 저장한다.
-      const currentRoundId =
+      currentRoundId =
         roundId ??
-        (await createRecruitingRound(seasonId, {
-          title: composeRecruitmentTitle(
-            buildRecruitmentPreviewTitle({ ...basicInfo, gisuGeneration }),
-            basicInfo.footer,
-          ),
-          type: basicInfo.recruitmentType,
+        (await createRecruitingRound(seasonId!, {
+          ...buildRoundConfigurationPayload({
+            title: composeRecruitmentTitle(
+              buildRecruitmentPreviewTitle({ ...basicInfo, gisuGeneration }),
+              basicInfo.footer,
+            ),
+            recruitableTracks,
+            secondChoiceEnabled: questionToggleState["04"]?.enabled ?? true,
+            periodForm: basicInfo.periodForm,
+            interviewRequired: basicInfo.interviewRequired,
+          }),
+          type: basicInfo.recruitmentType!,
           roundNo:
             basicInfo.recruitmentType === "ADDITIONAL" && basicInfo.roundNo
               ? Number(basicInfo.roundNo)
               : undefined,
-          recruitableTracks,
-          secondChoiceEnabled: questionToggleState["04"]?.enabled ?? true,
-          documentStartAt: periodFieldToInstant(
-            basicInfo.periodForm.documentStartAt,
-          ),
-          documentEndAt: periodFieldToInstant(
-            basicInfo.periodForm.documentEndAt,
-          ),
-          documentResultPublishedAt: periodFieldToInstant(
-            basicInfo.periodForm.documentResultPublishedAt,
-          ),
-          finalResultPublishedAt: periodFieldToInstant(
-            basicInfo.periodForm.finalResultPublishedAt,
-          ),
-          interviewRequired: false,
         }))
-      if (!roundId) setRoundId(currentRoundId)
+    } catch (error) {
+      throw new Error(getRecruitingRoundCreateErrorMessage(error))
+    }
+    if (!roundId) setRoundId(currentRoundId)
 
-      try {
-        const trackSections = PARTS.filter(
-          (part) => enabledParts[part.key],
-        ).map((part) =>
+    try {
+      const trackSections = PARTS.filter((part) => enabledParts[part.key]).map(
+        (part) =>
           buildTrackSectionUpsertRequest(
             part.label,
             PART_KEY_TO_TRACK[part.key],
             partQuestionDrafts[part.key],
           ),
-        )
-        await upsertRecruitingApplicationForm(seasonId, currentRoundId, {
-          sections: [
-            buildCommonSectionUpsertRequest(
-              removedOptionsByQuestionIndex,
-              questionToggleState,
-            ),
-            ...trackSections,
-          ],
-        })
-      } catch (formError) {
-        const message = isAxiosError(formError)
-          ? (formError.response?.data as { message?: string } | undefined)
-              ?.message
-          : undefined
-        showErrorToast(message ?? "모집 문항 저장에 실패했습니다.")
-        return
-      }
+      )
+      await upsertRecruitingApplicationForm(seasonId!, currentRoundId, {
+        sections: [
+          buildCommonSectionUpsertRequest(
+            removedOptionsByQuestionIndex,
+            questionToggleState,
+          ),
+          ...trackSections,
+        ],
+      })
+    } catch (formError) {
+      const message = isAxiosError(formError)
+        ? (formError.response?.data as { message?: string } | undefined)
+            ?.message
+        : undefined
+      throw new Error(message ?? "모집 문항 저장에 실패했습니다.")
+    }
 
+    return currentRoundId
+  }
+
+  const validateBeforeSave = (): string | null => {
+    if (hasBlankEnabledPart) return "사용 중인 섹션의 항목을 모두 적어주세요."
+    if (getRecruitableTracks(enabledParts).length === 0)
+      return "모집할 트랙을 최소 1개 선택해 주세요."
+    if (!seasonId) return "시즌 정보가 없어 모집 차수를 생성할 수 없습니다."
+    if (!basicInfo.chapter || !basicInfo.school || !basicInfo.recruitmentType)
+      return "1단계 기본 정보를 먼저 입력해 주세요."
+    return null
+  }
+
+  const handleTempSave = async () => {
+    if (isSaving) return
+    const validationError = validateBeforeSave()
+    if (validationError) {
+      showErrorToast(validationError)
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      await ensureRoundAndSaveForm()
+      savedSnapshotRef.current = currentSnapshot
+      setShowTempSaveModal(true)
+    } catch (error) {
+      showErrorToast(
+        error instanceof Error ? error.message : "임시 저장에 실패했습니다.",
+      )
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleNext = async () => {
+    const validationError = validateBeforeSave()
+    if (validationError) {
+      showErrorToast(validationError)
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await ensureRoundAndSaveForm()
       onNext()
     } catch (error) {
-      showErrorToast(getRecruitingRoundCreateErrorMessage(error))
+      showErrorToast(
+        error instanceof Error
+          ? error.message
+          : "모집 차수 생성에 실패했습니다.",
+      )
     } finally {
       setIsSubmitting(false)
     }

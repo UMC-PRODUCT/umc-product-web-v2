@@ -82,16 +82,16 @@ export type RawAdminRoundGroup = Omit<RecruitingRoundGroup, "rounds"> & {
   rounds?: RawAdminRound[]
 }
 
-// interviewRequired=true 는 아직 프론트에서 막아둔다. 지원자가 면접 가능 시간을
-// 제출하는 경로(RECRUITING-SCHEDULE-001)는 구현됐지만, 면접 있는 차수를 만들려면
-// 가능 일정 Form 과 그 안의 일정 문항 ID 를 함께 지정해야 한다. 아래 타입에
-// availabilityScheduleQuestionId 가 없어 지금 열면 차수 생성이 거부된다.
+// 백엔드(RecruitingRoundConfiguration.validateInterviewShape)는 interviewRequired=true일
+// 때 interviewStartAt/interviewEndAt만 필수로 본다. availabilityFormId는 생성 시점엔
+// 없어도 되고(OPEN 전환 전까지만 채우면 됨), 대신 availabilityFormId와
+// availabilityScheduleQuestionId는 둘 다 있거나 둘 다 없어야 한다.
 export type CreateRecruitingRoundInterviewFields =
   | {
       interviewRequired: true
       interviewStartAt: string
       interviewEndAt: string
-      availabilityFormId: string
+      availabilityFormId?: string
     }
   | {
       interviewRequired: false

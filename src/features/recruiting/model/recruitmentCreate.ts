@@ -1,3 +1,4 @@
+import type { RecruitingTrack } from "../api/types"
 import type { RecruitmentRoundType } from "./recruitmentList"
 
 export type PeriodFieldKey =
@@ -54,6 +55,52 @@ export function periodFieldToInstant(value: PeriodFieldValue): string {
 
 export function composeRecruitmentTitle(baseTitle: string, footer: string) {
   return footer ? `${baseTitle} ${footer}` : baseTitle
+}
+
+// Round 생성(POST)·수정(PUT) 요청 바디에서 공통되는 부분을 조립한다.
+// PUT은 부분 수정이 아니라 완전 교체라 title/recruitableTracks/기간 필드가 전부
+// 필수다(비면 400) — 호출부는 반드시 스토어의 최신 enabledParts·periodForm을
+// 통째로 넘겨야 하고, announcement 텍스트만 담아 보내면 안 된다.
+// 생성은 여기에 type/roundNo를 더해서, 수정은 그대로 보낸다.
+export function buildRoundConfigurationPayload({
+  title,
+  recruitableTracks,
+  secondChoiceEnabled,
+  periodForm,
+  interviewRequired,
+  announcement,
+  contactText,
+}: {
+  title: string
+  recruitableTracks: RecruitingTrack[]
+  secondChoiceEnabled: boolean
+  periodForm: Record<PeriodFieldKey, PeriodFieldValue>
+  interviewRequired: boolean
+  announcement?: string
+  contactText?: string
+}) {
+  return {
+    title,
+    recruitableTracks,
+    secondChoiceEnabled,
+    documentStartAt: periodFieldToInstant(periodForm.documentStartAt),
+    documentEndAt: periodFieldToInstant(periodForm.documentEndAt),
+    documentResultPublishedAt: periodFieldToInstant(
+      periodForm.documentResultPublishedAt,
+    ),
+    finalResultPublishedAt: periodFieldToInstant(
+      periodForm.finalResultPublishedAt,
+    ),
+    announcement,
+    contactText,
+    ...(interviewRequired
+      ? ({
+          interviewRequired: true as const,
+          interviewStartAt: periodFieldToInstant(periodForm.interviewStartAt),
+          interviewEndAt: periodFieldToInstant(periodForm.interviewEndAt),
+        } as const)
+      : ({ interviewRequired: false as const } as const)),
+  }
 }
 
 export const MAX_TITLE_LENGTH = 10000
