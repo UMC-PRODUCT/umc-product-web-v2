@@ -184,10 +184,9 @@ export function RecruitmentQuotaPage() {
       ? chaptersDataWithEdits
       : chaptersDataWithEdits.filter((c) => c.chapter === chapterTab)
 
-    const rawRows =
-      editedSchoolsMap.size > 0
-        ? Array.from(editedSchoolsMap.values()).flat()
-        : targetChapters.flatMap((c) => c.schools)
+    const rawRows = targetChapters.flatMap(
+      (c) => editedSchoolsMap.get(c.chapter) ?? c.schools,
+    )
 
     const payloadList = rawRows
       .filter((row): row is SchoolQuotaRow & { seasonId: string } =>
