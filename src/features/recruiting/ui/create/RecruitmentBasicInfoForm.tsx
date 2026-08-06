@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
+import { isAxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
@@ -25,8 +26,12 @@ import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
-import { checkRecruitingRoundTitleAvailability } from "../../api/recruitingApi"
+import {
+  checkRecruitingRoundTitleAvailability,
+  updateRecruitingRound,
+} from "../../api/recruitingApi"
 import { useAdminRecruitingRounds } from "../../hooks/useAdminRecruitingRounds"
+import { getRecruitableTracks } from "../../model/parts"
 import {
   resolveRecruitingListRole,
   resolveViewerChapter,
@@ -34,6 +39,7 @@ import {
 } from "../../model/recruitingRole"
 import {
   buildRecruitmentPreviewTitle,
+  buildRoundConfigurationPayload,
   composeRecruitmentTitle,
   dayCountInclusive,
   dayGap,
@@ -124,16 +130,29 @@ function formatMonthDay(dateStr: string): string {
 // 이미 완료된 일정(수정 불가) / 진행 중인 일정 / 예정된 일정
 type ScheduleItemStatus = "completed" | "active" | "upcoming"
 
+// 두 일정 사이의 선후 관계 검증(종료가 시작보다 앞서는지). 같은 구간의
+// 시작·종료뿐 아니라 서류 종료 ~ 면접 시작처럼 단계 간 순서를 볼 때도 재사용한다.
+function validateDateOrder(
+  start: Date | null,
+  end: Date | null,
+): string | null {
+  if (!start || !end) return null
+  if (end < start) {
+    return "종료 날짜는 시작 날짜 이후로 설정해 주세요."
+  }
+  return null
+}
+
 // 서류 접수 기간 검증. 필드 변경 시(handleDocumentEndAtChange)와 다음 단계 진입 시(handleNext) 공용으로 쓴다.
 function validateDocumentPeriod(
   recruitmentType: RecruitmentRoundType | undefined,
   start: Date | null,
   end: Date | null,
 ): string | null {
-  if (!recruitmentType || !start || !end) return null
-  if (end < start) {
-    return "종료 날짜는 시작 날짜 이후로 설정해 주세요."
-  }
+  if (!recruitmentType) return null
+  const orderError = validateDateOrder(start, end)
+  if (orderError) return orderError
+  if (!start || !end) return null
   const { min, max } = DOC_PERIOD_DAYS[recruitmentType]
   const days = dayCountInclusive(start, end)
   if (days < min || days > max) {
@@ -185,6 +204,8 @@ export function RecruitmentBasicInfoForm({
   const addToast = useToastStore((state) => state.addToast)
   const navigate = useNavigate()
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
+  const [tempSaveMessage, setTempSaveMessage] =
+    useState("임시저장이 완료되었습니다.")
   const [schoolSearchOpen, setSchoolSearchOpen] = useState(false)
   const chapter = useRecruitmentCreateStore((s) => s.basicInfo.chapter)
   const school = useRecruitmentCreateStore((s) => s.basicInfo.school)
@@ -204,6 +225,13 @@ export function RecruitmentBasicInfoForm({
   const setGisuGeneration = useRecruitmentCreateStore(
     (s) => s.setGisuGeneration,
   )
+  const roundId = useRecruitmentCreateStore((s) => s.roundId)
+  const enabledParts = useRecruitmentCreateStore((s) => s.enabledParts)
+  const secondChoiceEnabled = useRecruitmentCreateStore(
+    (s) => s.secondChoiceEnabled,
+  )
+  const announcement = useRecruitmentCreateStore((s) => s.announcement)
+  const contactText = useRecruitmentCreateStore((s) => s.contactText)
   const {
     groups: seasonGroups,
     isLoading: isSeasonGroupsLoading,
@@ -247,17 +275,23 @@ export function RecruitmentBasicInfoForm({
   const chapterOptions = chapterEntries
     .map((entry) => entry.chapterName)
     .filter(isChapter)
+  const selectedChapterEntry = chapterEntries.find(
+    (entry) => entry.chapterName === chapter,
+  )
   const schoolOptions =
-    chapterEntries
-      .find((entry) => entry.chapterName === chapter)
-      ?.schools.map((school) => school.schoolName) ?? []
+    selectedChapterEntry?.schools.map((school) => school.schoolName) ?? []
+  const selectedSchoolId = selectedChapterEntry?.schools.find(
+    (entry) => entry.schoolName === school,
+  )?.schoolId
 
   // seasonId는 URL param(목록 화면에서 넘어온 값)에 의존하지 않고, 학교가
   // 정해질 때마다 여기서 직접 조회해 스토어에 반영한다. 사이드바에서 이
   // 화면으로 바로 들어와 seasonId가 아예 없이 시작해도 동작하게 하기 위함.
   useEffect(() => {
-    setSeasonId(findSeasonIdBySchool(seasonGroups, school) ?? null)
-  }, [school, seasonGroups, setSeasonId])
+    setSeasonId(
+      findSeasonIdBySchool(seasonGroups, school, selectedSchoolId) ?? null,
+    )
+  }, [school, selectedSchoolId, seasonGroups, setSeasonId])
 
   // 모집 제목("UMC N기 ...")에 쓰는 기수 번호도 다른 단계(2·3단계)에서 재조회
   // 없이 쓸 수 있도록 여기서 한 번만 스토어에 반영해둔다.
@@ -460,6 +494,39 @@ export function RecruitmentBasicInfoForm({
     }
   }
 
+  // Round는 2단계(모집 문항)에서 트랙을 골라야 생성할 수 있어(백엔드가
+  // recruitableTracks를 필수로 검증), roundId가 아직 없으면 1단계 값을 보낼
+  // 서버 자원 자체가 없다 — 이 경우 클라이언트 상태로만 들고 있는다.
+  // roundId가 이미 있으면(2단계 이상 진행했다가 되돌아온 경우) 언제든 PUT으로
+  // 재수정할 수 있으므로 그때는 즉시 반영한다.
+  const persistBasicInfoIfRoundExists = async (
+    resolvedFooter: string,
+  ): Promise<boolean> => {
+    if (!roundId || !seasonId) return true
+    try {
+      await updateRecruitingRound(
+        seasonId,
+        roundId,
+        buildRoundConfigurationPayload({
+          title: composeRecruitmentTitle(previewTitle, resolvedFooter),
+          recruitableTracks: getRecruitableTracks(enabledParts),
+          secondChoiceEnabled,
+          periodForm,
+          interviewRequired,
+          announcement,
+          contactText,
+        }),
+      )
+      return true
+    } catch (error) {
+      const message = isAxiosError(error)
+        ? (error.response?.data as { message?: string } | undefined)?.message
+        : undefined
+      showPeriodErrorToast(message ?? "모집 정보 저장에 실패했습니다.")
+      return false
+    }
+  }
+
   const handleTempSave = async () => {
     if (isSaving) return
     setIsSaving(true)
@@ -472,12 +539,20 @@ export function RecruitmentBasicInfoForm({
       showTitleAdjustedToast()
     }
 
-    // TODO: 실제 임시 저장 API 호출로 교체 (지금은 로딩 상태만 흉내)
-    setTimeout(() => {
-      savedSnapshotRef.current = currentSnapshot
+    const persisted = await persistBasicInfoIfRoundExists(resolvedFooter)
+    if (!persisted) {
       setIsSaving(false)
-      setShowTempSaveModal(true)
-    }, 600)
+      return
+    }
+
+    savedSnapshotRef.current = currentSnapshot
+    setIsSaving(false)
+    setTempSaveMessage(
+      roundId
+        ? "임시저장이 완료되었습니다."
+        : "이 브라우저에 임시 저장되었습니다. 서버 저장은 다음 단계까지 진행해야 완료됩니다.",
+    )
+    setShowTempSaveModal(true)
   }
 
   const showPeriodErrorToast = (message: string) => {
@@ -504,7 +579,11 @@ export function RecruitmentBasicInfoForm({
 
   const handleDocumentEndAtChange = (date: string) => {
     updatePeriodField("documentEndAt", { date })
-    if (!periodForm.documentStartAt.date || !date) return
+    if (
+      !isCompleteDate(periodForm.documentStartAt.date) ||
+      !isCompleteDate(date)
+    )
+      return
 
     const start = parsePeriodDateTime(periodForm.documentStartAt)
     const end = parsePeriodDateTime({
@@ -515,9 +594,78 @@ export function RecruitmentBasicInfoForm({
     if (message) showPeriodErrorToast(message)
   }
 
+  const handleInterviewStartAtChange = (date: string) => {
+    updatePeriodField("interviewStartAt", { date })
+    if (!isCompleteDate(date)) return
+
+    const start = parsePeriodDateTime({
+      date,
+      time: periodForm.interviewStartAt.time,
+    })
+
+    // 서류 결과 발표보다 면접 시작이 앞서면(서류 > 면접 순서가 깨지면) 막는다.
+    // 결과 발표일이 아직 없으면 최소한 서류 모집 종료 기준으로라도 체크한다.
+    const documentGateField = isPeriodFieldComplete(
+      periodForm.documentResultPublishedAt,
+    )
+      ? periodForm.documentResultPublishedAt
+      : isCompleteDate(periodForm.documentEndAt.date)
+        ? periodForm.documentEndAt
+        : null
+    if (documentGateField) {
+      const documentGate = parsePeriodDateTime(documentGateField)
+      const crossStageError = validateDateOrder(documentGate, start)
+      if (crossStageError) {
+        showPeriodErrorToast(crossStageError)
+        return
+      }
+    }
+
+    if (isCompleteDate(periodForm.interviewEndAt.date)) {
+      const end = parsePeriodDateTime(periodForm.interviewEndAt)
+      const message = validateDateOrder(start, end)
+      if (message) showPeriodErrorToast(message)
+    }
+  }
+
+  const handleInterviewEndAtChange = (date: string) => {
+    updatePeriodField("interviewEndAt", { date })
+    if (
+      !isCompleteDate(periodForm.interviewStartAt.date) ||
+      !isCompleteDate(date)
+    )
+      return
+
+    const start = parsePeriodDateTime(periodForm.interviewStartAt)
+    const end = parsePeriodDateTime({
+      date,
+      time: periodForm.interviewEndAt.time,
+    })
+    const message = validateDateOrder(start, end)
+    if (message) showPeriodErrorToast(message)
+  }
+
+  const handleDocumentResultPublishedAtChange = (date: string) => {
+    updatePeriodField("documentResultPublishedAt", { date })
+    if (!isCompleteDate(periodForm.documentEndAt.date) || !isCompleteDate(date))
+      return
+
+    const documentEnd = parsePeriodDateTime(periodForm.documentEndAt)
+    const result = parsePeriodDateTime({
+      date,
+      time: periodForm.documentResultPublishedAt.time,
+    })
+    const message = validateDateOrder(documentEnd, result)
+    if (message) showPeriodErrorToast(message)
+  }
+
   const handleFinalResultPublishedAtChange = (date: string) => {
     updatePeriodField("finalResultPublishedAt", { date })
-    if (!periodForm.interviewEndAt.date || !date) return
+    if (
+      !isCompleteDate(periodForm.interviewEndAt.date) ||
+      !isCompleteDate(date)
+    )
+      return
 
     const interviewEnd = parsePeriodDate(periodForm.interviewEndAt)
     const result = parsePeriodDate({
@@ -568,6 +716,44 @@ export function RecruitmentBasicInfoForm({
       return
     }
 
+    // 서류 모집 종료보다 서류 결과 발표가 앞서면 막는다
+    const documentResultError = validateDateOrder(
+      documentEnd,
+      parsePeriodDateTime(periodForm.documentResultPublishedAt),
+    )
+    if (documentResultError) {
+      showPeriodErrorToast(documentResultError)
+      setIsAdvancing(false)
+      return
+    }
+
+    if (interviewRequired) {
+      const interviewStartDt = parsePeriodDateTime(periodForm.interviewStartAt)
+      const interviewEndDt = parsePeriodDateTime(periodForm.interviewEndAt)
+      const interviewOrderError = validateDateOrder(
+        interviewStartDt,
+        interviewEndDt,
+      )
+      if (interviewOrderError) {
+        showPeriodErrorToast(interviewOrderError)
+        setIsAdvancing(false)
+        return
+      }
+
+      // 서류 결과 발표보다 면접 시작이 앞서면(서류 > 면접 순서가 깨지면) 막는다
+      const documentGate = isPeriodFieldComplete(
+        periodForm.documentResultPublishedAt,
+      )
+        ? parsePeriodDateTime(periodForm.documentResultPublishedAt)
+        : documentEnd
+      const crossStageError = validateDateOrder(documentGate, interviewStartDt)
+      if (crossStageError) {
+        showPeriodErrorToast(crossStageError)
+        setIsAdvancing(false)
+        return
+      }
+    }
+
     const interviewEnd = parsePeriodDate(periodForm.interviewEndAt)
     const finalResult = parsePeriodDate(periodForm.finalResultPublishedAt)
     const interviewDelayError = interviewRequired
@@ -590,11 +776,16 @@ export function RecruitmentBasicInfoForm({
       }
     }
 
-    // TODO: 실제로는 1단계 데이터 저장 API 호출 후 다음 단계로 이동
-    setTimeout(() => {
+    // roundId가 아직 없으면(2단계 이전) 저장할 서버 자원이 없어 그냥 다음
+    // 단계로 넘어간다 — Round 생성은 2단계에서 트랙이 정해진 뒤 이루어진다.
+    const persisted = await persistBasicInfoIfRoundExists(resolvedFooter)
+    if (!persisted) {
       setIsAdvancing(false)
-      onNext()
-    }, 600)
+      return
+    }
+
+    setIsAdvancing(false)
+    onNext()
   }
 
   return (
@@ -766,9 +957,6 @@ export function RecruitmentBasicInfoForm({
                             },
                       })
                     }}
-                    disabled // TODO(면접 가능 시간대 Form 빌더 미구현): availabilityFormId를 세팅하는 화면이
-                    // 아직 없어서 interviewRequired=true로 OPEN 전환하면 RECRUITING_ROUND_INVALID_SCHEDULE로
-                    // 무조건 실패함. availability form 빌더 붙으면 이 disabled 제거.
                     variant="primary"
                     size="lg"
                     aria-label="면접 진행 여부"
@@ -794,8 +982,8 @@ export function RecruitmentBasicInfoForm({
                         : "2000-00-00 00:00"
                     }
                     endLabel={
-                      periodForm.documentEndAt.date
-                        ? `${periodForm.documentEndAt.date.slice(5)} ${periodForm.documentEndAt.time}`
+                      periodForm.finalResultPublishedAt.date
+                        ? `${periodForm.finalResultPublishedAt.date.slice(5)} ${periodForm.finalResultPublishedAt.time}`
                         : "00-00 23:59"
                     }
                     className="flex-1"
@@ -952,11 +1140,7 @@ export function RecruitmentBasicInfoForm({
                         <DateTextBox
                           label="시작"
                           value={periodForm.documentResultPublishedAt.date}
-                          onChange={(date) =>
-                            updatePeriodField("documentResultPublishedAt", {
-                              date,
-                            })
-                          }
+                          onChange={handleDocumentResultPublishedAtChange}
                         />
                         <TimeTextBox
                           value={periodForm.documentResultPublishedAt.time}
@@ -972,14 +1156,7 @@ export function RecruitmentBasicInfoForm({
 
                   <div className="flex flex-col gap-7">
                     <div className="flex flex-col gap-2">
-                      <span
-                        className={cn(
-                          "text-subtitle-3-semibold",
-                          interviewRequired
-                            ? "text-teal-600"
-                            : "text-teal-gray-300",
-                        )}
-                      >
+                      <span className="text-subtitle-3-semibold text-teal-600">
                         면접 진행 기간
                       </span>
                       <div className="flex items-center gap-2">
@@ -987,17 +1164,13 @@ export function RecruitmentBasicInfoForm({
                           <DateTextBox
                             label="시작"
                             value={periodForm.interviewStartAt.date}
-                            onChange={(date) =>
-                              updatePeriodField("interviewStartAt", { date })
-                            }
-                            disabled={!interviewRequired}
+                            onChange={handleInterviewStartAtChange}
                           />
                           <TimeTextBox
                             value={periodForm.interviewStartAt.time}
                             onChange={(time) =>
                               updatePeriodField("interviewStartAt", { time })
                             }
-                            disabled={!interviewRequired}
                           />
                         </div>
                         <span className="text-teal-gray-400">~</span>
@@ -1005,17 +1178,13 @@ export function RecruitmentBasicInfoForm({
                           <DateTextBox
                             label="종료"
                             value={periodForm.interviewEndAt.date}
-                            onChange={(date) =>
-                              updatePeriodField("interviewEndAt", { date })
-                            }
-                            disabled={!interviewRequired}
+                            onChange={handleInterviewEndAtChange}
                           />
                           <TimeTextBox
                             value={periodForm.interviewEndAt.time}
                             onChange={(time) =>
                               updatePeriodField("interviewEndAt", { time })
                             }
-                            disabled={!interviewRequired}
                           />
                         </div>
                       </div>
@@ -1101,7 +1270,7 @@ export function RecruitmentBasicInfoForm({
         onOpenChange={setShowTempSaveModal}
         variant="success"
         title="임시 저장 완료"
-        content="임시저장이 완료되었습니다."
+        content={tempSaveMessage}
         confirmText="확인"
         onConfirm={() => navigate({ to: "/recruiting/recruitments" })}
       />

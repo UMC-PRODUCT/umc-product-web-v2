@@ -22,7 +22,7 @@ export function DateTextBox({
   return (
     <div
       className={cn(
-        "group flex h-11 w-[172px] items-center gap-2.5 rounded-[10px] border bg-white px-4",
+        "group flex h-11 w-[188px] items-center gap-2.5 rounded-[10px] border bg-white px-4",
         error
           ? "border-error-400"
           : disabled
