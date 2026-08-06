@@ -782,11 +782,19 @@ export type RawDecisionApplicant = Omit<
 
 export type RawDecisionDecider = Omit<
   RecruitingDecisionDecider,
-  "memberId" | "chapterId" | "schoolId" | "name" | "nickname"
+  | "memberId"
+  | "chapterId"
+  | "chapterName"
+  | "schoolId"
+  | "schoolName"
+  | "name"
+  | "nickname"
 > & {
   memberId: RawId
   chapterId?: RawId | null
+  chapterName?: string | null
   schoolId?: RawId | null
+  schoolName?: string | null
   name?: string
   nickname?: string
 }
