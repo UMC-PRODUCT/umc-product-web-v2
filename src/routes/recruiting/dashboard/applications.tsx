@@ -81,6 +81,23 @@ function RouteComponent() {
     )
   }
 
+  // 실패를 기수 없음보다 먼저 본다. 기수 조회가 실패해도 gisuId 가 비어
+  // hasActiveGisu 가 false 가 되는데, 그 순서로 두면 조회 실패를 "기수가 없다"고
+  // 잘못 안내한다.
+  if (isError) {
+    // 권한 부족처럼 원인이 확정된 실패는 서버 문구를 그대로 보여준다.
+    // 그래야 "잠시 후 다시 시도"라는 잘못된 안내를 하지 않는다.
+    const message =
+      getServerErrorMessage(error) ??
+      "지원 현황을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+    return (
+      <div>
+        {header}
+        <EmptyNotice message={message} />
+      </div>
+    )
+  }
+
   // 활성 기수가 없으면 조회 자체를 하지 않는다. 실패가 아니라 표시할 대상이
   // 없는 상태라 안내를 구분한다.
   if (!hasActiveGisu) {
@@ -92,16 +109,11 @@ function RouteComponent() {
     )
   }
 
-  if (isError || !data) {
-    // 권한 부족처럼 원인이 확정된 실패는 서버 문구를 그대로 보여준다.
-    // 그래야 "잠시 후 다시 시도"라는 잘못된 안내를 하지 않는다.
-    const message =
-      getServerErrorMessage(error) ??
-      "지원 현황을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+  if (!data) {
     return (
       <div>
         {header}
-        <EmptyNotice message={message} />
+        <EmptyNotice message="지원 현황을 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
       </div>
     )
   }
