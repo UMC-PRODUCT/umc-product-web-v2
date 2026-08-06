@@ -613,5 +613,13 @@ describe("createRecruitingSeason & updateRecruitingSeason", () => {
     expect(api.patch).toHaveBeenCalledWith("/v1/recruiting/admin/seasons/123", {
       memo: "시즌 공유 메모",
     })
+
+    vi.mocked(api.patch).mockResolvedValueOnce({ data: {} })
+
+    await updateRecruitingSeason("123", { memo: null })
+
+    expect(api.patch).toHaveBeenCalledWith("/v1/recruiting/admin/seasons/123", {
+      memo: null,
+    })
   })
 })
