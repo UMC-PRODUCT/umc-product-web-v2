@@ -68,6 +68,21 @@ describe("toEvaluationHistoryEntry", () => {
     ).toBe("fail")
   })
 
+  // 감사 화면이라 없는 판정을 불합격으로 접으면 안 된다. 결과 태그만 빠지고
+  // 행 자체는 남아야 이력이 유실되지 않는다.
+  it("판정 결과가 없으면 null 로 두고 불합격으로 접지 않는다", () => {
+    // 타입에는 result 가 필수지만 스펙에 required 가 없어 응답이 빠뜨릴 수 있다.
+    const missingResult = {
+      ...history(),
+      result: undefined,
+    } as unknown as RecruitingDecisionHistory
+
+    const entry = toEvaluationHistoryEntry(missingResult)
+
+    expect(entry.applicant.result).toBeNull()
+    expect(entry.applicant.name).toBe("김지원")
+  })
+
   // 파트는 1지망 기준이다. 2지망이 달라도 영향을 주지 않는다.
   it("지원 파트는 1지망을 쓴다", () => {
     const entry = toEvaluationHistoryEntry(

@@ -38,7 +38,9 @@ export function toEvaluationHistoryEntry(
       // 되는데, 임의 파트로 접으면 감사 화면에서 잘못 분류된다. null 로 두어 파트
       // 필터에서 빠지게 한다.
       part: TRACK_PART_TAG[applicant.firstChoice],
-      result: RESULT[history.result] ?? "fail",
+      // 스펙상 result 도 optional 이다. 없는 값을 "fail" 로 접으면 판정하지 않은
+      // 건이 불합격으로 기록된 것처럼 보인다. 감사 화면에서 지어내면 안 된다.
+      result: RESULT[history.result] ?? null,
     },
     evaluator: {
       id: decider.memberId,
