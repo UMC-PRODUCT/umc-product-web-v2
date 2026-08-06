@@ -3,6 +3,7 @@ import { Link, useLocation } from "@tanstack/react-router"
 import { useMe } from "@/entities/member/hooks/useMe"
 import { isAnyOperator, isCentralAdmin } from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
+import { useHeaderRecruitingStatus } from "@/features/recruiting/hooks/useHeaderRecruitingStatus"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { SETTINGS_ENTRY_PATH } from "@/shared/config/settingsNavigation"
 import HeaderButton from "@/widgets/navigation/header/HeaderButton"
@@ -32,6 +33,9 @@ export default function RecruitingHeader({
   const pathname = activePathname ?? location.pathname
   const { data: me } = useMe()
   const isAuthed = useAuthStore((s) => s.isAuthed)
+  // 모집 상태는 공개 API 라 게스트도 받는다. prop 으로 받은 값이 우선.
+  const resolvedStatus = useHeaderRecruitingStatus()
+  const status = recruitingStatus ?? resolvedStatus
 
   const showRecruiting = isAnyOperator(me)
   const showSettings = isCentralAdmin(me)
@@ -65,9 +69,7 @@ export default function RecruitingHeader({
       <div className="flex items-center justify-end gap-4 pr-8.5">
         {isAuthed ? (
           <>
-            {recruitingStatus && (
-              <RecruitingStatusButton status={recruitingStatus} />
-            )}
+            {status && <RecruitingStatusButton status={status} />}
             <HeaderButton
               label="문의사항"
               type="trailing-icon"
@@ -82,9 +84,7 @@ export default function RecruitingHeader({
               type="trailing-icon"
               className="border-teal-gray-150 h-10 border"
             />
-            {recruitingStatus && (
-              <RecruitingStatusButton status={recruitingStatus} />
-            )}
+            {status && <RecruitingStatusButton status={status} />}
             <Link
               to="/login"
               className="text-label-1-semibold flex h-10 min-w-16 items-center justify-center rounded-[10px] bg-teal-100 px-5 text-center tracking-[-0.32px] text-teal-600"

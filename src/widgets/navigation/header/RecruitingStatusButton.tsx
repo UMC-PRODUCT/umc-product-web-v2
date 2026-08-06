@@ -1,10 +1,8 @@
 import { cn } from "@/shared/lib/utils"
 
-// before/open은 D-day가 필수, closed는 D-day 없음(discriminated union으로 D-undefined 방지).
-export type RecruitingStatus =
-  | { phase: "before"; dDay: number } // 모집 시작까지 남은 일수
-  | { phase: "open"; dDay: number } // 지원 마감까지 남은 일수
-  | { phase: "closed" }
+import type { RecruitingStatus } from "@/shared/model/recruitingStatus"
+
+export type { RecruitingStatus }
 
 // 헤더 우측의 모집 상태 표시. 상호작용 없는 라벨 전용 버튼(디자인상 '버튼' 형태).
 // before: "모집 시작 D-n" / open: "지원하기 D-n"(마감일 기준) / closed: "모집 마감"
