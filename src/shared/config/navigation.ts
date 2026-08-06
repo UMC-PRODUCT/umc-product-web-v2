@@ -16,6 +16,13 @@ export interface SideBarSection {
   menus: SideBarMenu[]
 }
 
+/** 대분류 없이 링크만 나열하는 사이드바(지원자용·설정용)의 항목 */
+export interface FlatNavItem extends SideBarMenu {
+  icon: ComponentType<SVGProps<SVGSVGElement>>
+  /** 대응 라우트가 아직 없는 항목. 활성 표시는 하되 이동은 막는다 */
+  disabled?: boolean
+}
+
 export const SIDEBAR_ITEMS: SideBarSection[] = [
   {
     id: "project-settings",

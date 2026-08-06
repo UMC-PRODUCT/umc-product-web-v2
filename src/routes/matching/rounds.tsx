@@ -31,6 +31,7 @@ import { BranchSelector } from "@/features/matching/ui/BranchSelector"
 import { CalendarScheduleList } from "@/features/matching/ui/CalendarScheduleList"
 import { RoundForm } from "@/features/matching/ui/RoundForm"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
+import { notifyAccessDenied } from "@/shared/lib/accessDenied"
 import { Button } from "@/shared/ui/Button"
 import { Calendar } from "@/shared/ui/calendar/Calendar"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
@@ -44,7 +45,10 @@ import type { AxiosError } from "axios"
 export const Route = createFileRoute("/matching/rounds")({
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
-    if (!canManageMatchingRounds(me)) throw redirect({ to: "/" })
+    if (!canManageMatchingRounds(me)) {
+      notifyAccessDenied()
+      throw redirect({ to: "/" })
+    }
   },
   component: MatchingRoundsPage,
 })

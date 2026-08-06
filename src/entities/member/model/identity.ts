@@ -55,6 +55,11 @@ export function isCentralStaff(me: MemberInfoResponse | undefined): boolean {
   return hasAnyRoleType(me, CENTRAL_ROLE_TYPES)
 }
 
+/** 설정(학교·지부·커리큘럼) 영역을 쓸 수 있는 범위. 헤더 `설정` 탭 노출 조건과 같다. */
+export function isCentralAdmin(me: MemberInfoResponse | undefined): boolean {
+  return isSuperAdmin(me) || isCentralStaff(me)
+}
+
 export function isCentralCore(me: MemberInfoResponse | undefined): boolean {
   return hasAnyRoleType(me, CENTRAL_CORE_ROLE_TYPES)
 }

@@ -91,8 +91,10 @@ export function PartDistributionCard({
     >
       <div className="flex flex-col gap-0.5">
         <h3 className="text-heading-6-semibold text-teal-700">{title}</h3>
+        {/* 도넛은 어느 화면에서든 total(= count 합)을 100%로 둔 파트 구성비다.
+            평가현황의 count 는 평가 완료 수라 기준이 지원자 수가 아니다. */}
         <p className="text-label-2-medium text-teal-gray-500">
-          전체 지원자 수 대비
+          {isEvaluation ? "전체 평가 완료 수 대비" : "전체 지원자 수 대비"}
         </p>
       </div>
 

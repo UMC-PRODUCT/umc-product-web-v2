@@ -1,6 +1,8 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
+import { isAnyOperator } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { notifyAccessDenied } from "@/shared/lib/accessDenied"
 import Footer from "@/widgets/footer/Footer"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 import RecruitingSideBar from "@/widgets/navigation/sidebar/RecruitingSideBar"
@@ -10,7 +12,13 @@ export const Route = createFileRoute("/recruiting")({
     meta: [{ name: "robots", content: "noindex, nofollow" }],
   }),
   beforeLoad: async ({ context, location }) => {
-    await ensureMe(context.queryClient, location.href)
+    const me = await ensureMe(context.queryClient, location.href)
+    // 리크루팅은 운영진 전용이다. 헤더에서 탭을 감추는 것만으로는 주소를 직접
+    // 친 진입을 막지 못해, 역할이 없는 챌린저까지 들어오고 있었다.
+    if (!isAnyOperator(me)) {
+      notifyAccessDenied()
+      throw redirect({ to: "/" })
+    }
   },
   component: RecruitingLayout,
 })

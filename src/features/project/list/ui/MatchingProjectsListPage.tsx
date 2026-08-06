@@ -252,6 +252,22 @@ export function MatchingProjectsListPage({
           })}
         </div>
 
+        {/* 빈 그리드만 남으면 데이터가 없는 건지 로딩이 덜 된 건지 알 수 없다.
+            게스트는 활성 기수까지 기다려야 해서 이 구간이 특히 길다 */}
+        {!useMockData && isLoading && (
+          <p className="text-body-2-regular text-teal-gray-500 py-20 text-center">
+            프로젝트를 불러오는 중입니다.
+          </p>
+        )}
+
+        {!useMockData && !isLoading && visibleProjects.length === 0 && (
+          <p className="text-body-2-regular text-teal-gray-500 py-20 text-center">
+            {isError
+              ? "프로젝트를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+              : "표시할 프로젝트가 없습니다."}
+          </p>
+        )}
+
         {!useMockData && projects.length > 0 && (
           <Pagination
             className="mt-5 self-center"

@@ -271,3 +271,38 @@ describe("applyEvaluationHistoryFilters - 파트가 null 인 행", () => {
     ).toHaveLength(2)
   })
 })
+
+describe("applyEvaluationHistoryFilters - 판정 결과가 null 인 행", () => {
+  function rowWithResult(
+    result: EvaluationHistoryEntry["applicant"]["result"],
+  ) {
+    const base = row("Neon", "가천대학교")
+    return { ...base, applicant: { ...base.applicant, result } }
+  }
+
+  it("결과 필터를 걸면 판정 결과가 없는 행은 빠진다", () => {
+    const rows = [rowWithResult("pass"), rowWithResult(null)]
+
+    expect(
+      applyEvaluationHistoryFilters(rows, {
+        ...DEFAULT_EVALUATION_HISTORY_FILTERS,
+        result: "pass",
+      }),
+    ).toHaveLength(1)
+    expect(
+      applyEvaluationHistoryFilters(rows, {
+        ...DEFAULT_EVALUATION_HISTORY_FILTERS,
+        result: "fail",
+      }),
+    ).toHaveLength(0)
+  })
+
+  // 감사 화면이라 결과를 모르는 건도 목록에는 남아야 한다.
+  it("결과 필터가 없으면 판정 결과가 없는 행도 남는다", () => {
+    const rows = [rowWithResult("pass"), rowWithResult(null)]
+
+    expect(
+      applyEvaluationHistoryFilters(rows, DEFAULT_EVALUATION_HISTORY_FILTERS),
+    ).toHaveLength(2)
+  })
+})

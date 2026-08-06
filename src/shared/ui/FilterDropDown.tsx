@@ -84,9 +84,13 @@ export function FilterDropdown(props: FilterDropdownProps) {
         return option ? [option] : []
       })
     : []
+  // 값이 "0" 인 옵션도 선택으로 본다. falsy 검사로 두면 id 나 인덱스를 값으로
+  // 쓰는 필터가 붙었을 때 조용히 미선택 취급된다.
+  const hasSingleSelection =
+    !multiSelect && props.selectedValue != null && props.selectedValue !== ""
   const hasSelection = multiSelect
     ? selectedValues.length > 0
-    : Boolean(props.selectedValue)
+    : hasSingleSelection
   const highlighted = open || hasSelection
   const firstSelectedValue = selectedValues[0]
   const firstSelectedLabel =
@@ -102,10 +106,14 @@ export function FilterDropdown(props: FilterDropdownProps) {
     multiSelect && selectedOptions.length > 0
       ? props.formatSelectedLabel?.(selectedOptions)
       : undefined
+  const selectedSingleLabel = hasSingleSelection
+    ? (options?.find((option) => option.value === props.selectedValue)?.label ??
+      props.selectedValue)
+    : undefined
   const displayLabel =
     selectedLabel ??
     formattedSelectedLabel ??
-    (multiSelect ? defaultMultiSelectLabel : props.selectedValue) ??
+    (multiSelect ? defaultMultiSelectLabel : selectedSingleLabel) ??
     label
 
   const handleSelect = (value: string) => {

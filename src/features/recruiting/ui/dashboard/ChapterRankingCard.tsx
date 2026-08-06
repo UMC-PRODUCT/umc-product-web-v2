@@ -35,6 +35,11 @@ interface ChapterRankingCardProps {
 // 11개부터 카드 밖으로 넘친다(막대가 shrink-0 이라 줄어들지 않는다).
 // 이름 그대로 랭킹 카드라 count 내림차순 상위 10개만 보여준다. 지부가 그보다
 // 많으면 나머지는 표시되지 않으므로, 전수 확인이 필요한 화면에는 쓰지 않는다.
+//
+// TODO: 지부가 11개를 넘으면 잘린 사실이 화면에 드러나지 않는다. 지금은 집계에
+// 실려 오는 지부가 6개라(2026-08-05 dev) 발생하지 않지만, 넘어가면 같은 화면의
+// 평가 완료 카드는 전체를 스크롤로 보여주므로 지부 수가 서로 달라 보인다.
+// 잘림 표기든 스크롤이든 디자인 확인이 필요하다.
 const MAX_CHAPTERS = 10
 const GRID_HEIGHT_PX = 200
 const FILLED_MIN_HEIGHT_PX = 28
@@ -148,21 +153,28 @@ export function ChapterRankingCard({
 
           {compareLabels && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-58 items-end gap-2.5 px-2.5">
-              {bars.map((bar) => (
-                <div
-                  key={bar.chapterId}
-                  className="bg-teal-gray-100 w-20.5 shrink-0 rounded-t-md"
-                  style={{
-                    height: Math.min(
-                      Math.max(
-                        barHeightPx(bar.compareCount ?? 0, base),
-                        COMPARE_MIN_HEIGHT_PX,
-                      ),
-                      GRID_HEIGHT_PX,
-                    ),
-                  }}
-                />
-              ))}
+              {bars.map((bar) => {
+                const compareCount = bar.compareCount ?? 0
+                // 만약 지원자가 없다면 지원현황의 default 그래프처럼 보이도록 한다.
+                return (
+                  <div
+                    key={bar.chapterId}
+                    className="bg-teal-gray-100 w-20.5 shrink-0 rounded-t-md"
+                    style={{
+                      height:
+                        compareCount > 0
+                          ? Math.min(
+                              Math.max(
+                                barHeightPx(compareCount, base),
+                                COMPARE_MIN_HEIGHT_PX,
+                              ),
+                              GRID_HEIGHT_PX,
+                            )
+                          : 0,
+                    }}
+                  />
+                )
+              })}
             </div>
           )}
 

@@ -46,16 +46,33 @@
 }
 
 /* 피그마에 커스텀 스크롤바가 명시적으로 그려진 영역용 - 얇은 회색 막대만
-   보이게 근사치로 구현(피그마의 절대좌표 thumb 정밀 재현은 생략) */
+   보이게 근사치로 구현(피그마의 절대좌표 thumb 정밀 재현은 생략)
+
+   thumb 색은 teal-gray-600 15%(#656B6B26). 토큰에 투명도를 씌워 두면 토큰이
+   바뀔 때 함께 따라간다.
+
+   webkit 계열은 pseudo-element 에 스타일을 주면 오버레이 스크롤바(가만히 두면
+   사라지는 것) 대신 항상 떠 있는 스크롤바로 바뀐다. Firefox 는 scrollbar-color
+   를 지정해야 같은 동작이 된다. */
 @utility scrollbar-thin {
   scrollbar-width: thin;
+  scrollbar-color: color-mix(
+      in srgb,
+      var(--color-teal-gray-600) 15%,
+      transparent
+    )
+    transparent;
 
   &::-webkit-scrollbar {
     width: 6px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: var(--color-teal-gray-300);
+    background-color: color-mix(
+      in srgb,
+      var(--color-teal-gray-600) 15%,
+      transparent
+    );
     border-radius: 1000px;
   }
 

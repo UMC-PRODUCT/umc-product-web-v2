@@ -292,9 +292,10 @@ export interface RecruitingRoundStatusSummary {
 export interface RecruitingSchoolStatusSummary {
   schoolId: string
   schoolName: string
-  // 지부명은 프론트 CHAPTERS 상수(6개)와 일치하지 않는다. dev 에는 지부가 32개
-  // 있고 이름이 중복되는 건(Pegasus id 7/23)도 있어서 그룹핑 키로는 chapterId 를
-  // 쓰고 chapterName 은 표시에만 쓴다.
+  // 그룹핑 키로는 chapterId 를 쓰고 chapterName 은 표시에만 쓴다. 지부명이 중복될
+  // 수 있어서다(dev 조직 목록에 Pegasus id 7/23 이 있었다).
+  // 다만 이 집계에 실려 오는 지부는 리크루팅 대상 학교가 속한 곳뿐이라 그보다
+  // 훨씬 적다. 2026-08-05 dev 실응답 기준 6개(id 27~32)이고 이름 중복은 없었다.
   chapterId: string
   chapterName: string
   totalCount: number
@@ -320,22 +321,34 @@ export type RawPartSummary = Omit<
   countByStatus?: RawStatusCounts
 }
 
+// roundNo 도 건수와 마찬가지로 문자열로 온다(2026-08-05 dev 실응답 "1").
 export type RawRoundStatusSummary = Omit<
   RecruitingRoundStatusSummary,
-  "roundId" | "totalCount" | "countByStatus" | "parts"
+  "roundId" | "roundNo" | "totalCount" | "countByStatus" | "parts"
 > & {
   roundId: RawId
+  roundNo: RawCount
   totalCount: RawCount
   countByStatus?: RawStatusCounts
   parts?: RawPartSummary[]
 }
 
+// 이름은 스펙에 required 가 없어 빠질 수 있다. 정규화에서 빈 문자열로 채운다.
 export type RawSchoolStatusSummary = Omit<
   RecruitingSchoolStatusSummary,
-  "schoolId" | "chapterId" | "totalCount" | "countByStatus" | "parts" | "rounds"
+  | "schoolId"
+  | "schoolName"
+  | "chapterId"
+  | "chapterName"
+  | "totalCount"
+  | "countByStatus"
+  | "parts"
+  | "rounds"
 > & {
   schoolId: RawId
+  schoolName?: string
   chapterId: RawId
+  chapterName?: string
   totalCount: RawCount
   countByStatus?: RawStatusCounts
   parts?: RawPartSummary[]
@@ -405,11 +418,13 @@ export type RawTrackCount = Omit<
   evaluatedCount: RawCount
 }
 
+// 이름은 스펙에 required 가 없어 빠질 수 있다. 정규화에서 빈 문자열로 채운다.
 export type RawSchoolEvaluationStatistics = Omit<
   RecruitingSchoolEvaluationStatistics,
-  "schoolId" | "applicantCount" | "evaluatedCount" | "byTrack"
+  "schoolId" | "schoolName" | "applicantCount" | "evaluatedCount" | "byTrack"
 > & {
   schoolId: RawId
+  schoolName?: string
   applicantCount: RawCount
   evaluatedCount: RawCount
   byTrack?: RawTrackCount[]
@@ -417,9 +432,15 @@ export type RawSchoolEvaluationStatistics = Omit<
 
 export type RawChapterEvaluationStatistics = Omit<
   RecruitingChapterEvaluationStatistics,
-  "chapterId" | "applicantCount" | "evaluatedCount" | "byTrack" | "schools"
+  | "chapterId"
+  | "chapterName"
+  | "applicantCount"
+  | "evaluatedCount"
+  | "byTrack"
+  | "schools"
 > & {
   chapterId: RawId
+  chapterName?: string
   applicantCount: RawCount
   evaluatedCount: RawCount
   byTrack?: RawTrackCount[]
@@ -725,7 +746,7 @@ export interface RecruitingDecisionHistory {
   applicationId: string
   decidedAt: string
   decisionStatus: RecruitingApplicationStatus
-  result: RecruitingDecisionResult
+  result: RecruitingDecisionResult | null
   applicant: RecruitingDecisionApplicant
   decider: RecruitingDecisionDecider
 }
@@ -759,26 +780,44 @@ export interface DecisionHistoriesQuery {
   size?: number
 }
 
+// 이름은 스펙에 required 가 없어 빠질 수 있다. 정규화에서 빈 문자열로 채운다.
 export type RawDecisionApplicant = Omit<
   RecruitingDecisionApplicant,
-  "chapterId" | "schoolId"
-> & { chapterId: RawId; schoolId: RawId }
+  "chapterId" | "chapterName" | "schoolId" | "schoolName" | "name"
+> & {
+  chapterId: RawId
+  chapterName?: string
+  schoolId: RawId
+  schoolName?: string
+  name?: string
+}
 
 export type RawDecisionDecider = Omit<
   RecruitingDecisionDecider,
-  "memberId" | "chapterId" | "schoolId"
+  | "memberId"
+  | "chapterId"
+  | "chapterName"
+  | "schoolId"
+  | "schoolName"
+  | "name"
+  | "nickname"
 > & {
   memberId: RawId
   chapterId?: RawId | null
+  chapterName?: string | null
   schoolId?: RawId | null
+  schoolName?: string | null
+  name?: string
+  nickname?: string
 }
 
 export type RawDecisionHistory = Omit<
   RecruitingDecisionHistory,
-  "decisionHistoryId" | "applicationId" | "applicant" | "decider"
+  "decisionHistoryId" | "applicationId" | "result" | "applicant" | "decider"
 > & {
   decisionHistoryId: RawId
   applicationId: RawId
+  result?: RecruitingDecisionResult
   applicant: RawDecisionApplicant
   decider: RawDecisionDecider
 }

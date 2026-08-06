@@ -8,6 +8,12 @@ import { RecruitmentQuotaPage } from "./RecruitmentQuotaPage"
 
 vi.mock("../hooks/useAdminRecruitingRounds")
 vi.mock("../hooks/useRecruitingSeasonQuotas")
+vi.mock("../hooks/useRecruitingPermissions", () => ({
+  useRecruitingPermissions: () => ({
+    permittedSeasonIds: new Set(["unconfigured-season-123"]),
+    isLoading: false,
+  }),
+}))
 vi.mock("@/shared/ui/toast/useToastStore", () => ({
   useToastStore: () => vi.fn(),
 }))

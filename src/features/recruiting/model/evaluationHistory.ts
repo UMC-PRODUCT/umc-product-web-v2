@@ -41,7 +41,9 @@ export interface EvaluationHistoryEntry {
     // 매핑되는 파트가 없으면 null 이다(INFRA_PLUS). 감사 화면이라 임의 파트로
     // 접지 않고 그대로 두어 파트 필터에서 빠지게 한다.
     part: PartTag | null // 테이블엔 안 보이지만 "지원 파트" 필터에 필요
-    result: EvaluationResult
+    // 판정 결과가 빠져 오면 null 이다. 감사 화면이라 없는 값을 불합격으로 접지
+    // 않는다. 지원자 목록(applicantListTypes)도 같은 규칙을 쓴다.
+    result: EvaluationResult | null
   }
   evaluator: {
     id: string // 담당자별 그룹핑 기준 키
