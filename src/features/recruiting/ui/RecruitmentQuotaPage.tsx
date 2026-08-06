@@ -149,7 +149,7 @@ export function RecruitmentQuotaPage() {
           duration: 3000,
         })
       }
-      return "직접 수정 중"
+      return "임의 배정 중"
     })
     setIsDirty(true)
   }, [addToast])

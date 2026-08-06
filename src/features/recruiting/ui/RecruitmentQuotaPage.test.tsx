@@ -73,7 +73,7 @@ describe("RecruitmentQuotaPage 저장 경로 분류", () => {
       isLoading: false,
       isError: false,
       isForbidden: false,
-    } as ReturnType<typeof useAdminRecruitingRounds>)
+    } as unknown as ReturnType<typeof useAdminRecruitingRounds>)
 
     // seasonConfigsMap에 unconfigured-season-123 설정이 없음
     vi.mocked(useRecruitingSeasonQuotas).mockReturnValue({
@@ -95,7 +95,11 @@ describe("RecruitmentQuotaPage 저장 경로 분류", () => {
     )
 
     // 수정 트리거 발생
-    fireEvent.click(screen.getAllByTestId("edit-school-btn")[0])
+    const editBtn = screen.getAllByTestId("edit-school-btn")[0]
+    expect(editBtn).toBeDefined()
+    if (editBtn) {
+      fireEvent.click(editBtn)
+    }
 
     const saveButton = screen.getByRole("button", { name: "저장" })
     expect(saveButton).not.toBeDisabled()
