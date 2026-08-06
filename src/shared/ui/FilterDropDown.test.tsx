@@ -193,3 +193,28 @@ describe("FilterDropdown 단일 선택 버튼 라벨", () => {
     ).toBeInTheDocument()
   })
 })
+
+describe("FilterDropdown 단일 선택 falsy 값", () => {
+  const ZERO_OPTIONS = [
+    { value: "0", label: "0순위" },
+    { value: "1", label: "1순위" },
+  ]
+
+  it('값이 "0" 이어도 선택으로 보고 라벨을 보여준다', () => {
+    render(
+      <FilterDropdown
+        label="우선순위"
+        options={ZERO_OPTIONS}
+        selectedValue="0"
+      />,
+    )
+
+    expect(screen.getByRole("button", { name: "0순위" })).toBeInTheDocument()
+  })
+
+  it("selectedValue 를 넘기지 않으면 기본 label 을 보여준다", () => {
+    render(<FilterDropdown label="우선순위" options={ZERO_OPTIONS} />)
+
+    expect(screen.getByRole("button", { name: "우선순위" })).toBeInTheDocument()
+  })
+})
