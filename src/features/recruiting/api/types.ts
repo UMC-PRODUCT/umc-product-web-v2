@@ -768,18 +768,27 @@ export interface DecisionHistoriesQuery {
   size?: number
 }
 
+// 이름은 스펙에 required 가 없어 빠질 수 있다. 정규화에서 빈 문자열로 채운다.
 export type RawDecisionApplicant = Omit<
   RecruitingDecisionApplicant,
-  "chapterId" | "schoolId"
-> & { chapterId: RawId; schoolId: RawId }
+  "chapterId" | "chapterName" | "schoolId" | "schoolName" | "name"
+> & {
+  chapterId: RawId
+  chapterName?: string
+  schoolId: RawId
+  schoolName?: string
+  name?: string
+}
 
 export type RawDecisionDecider = Omit<
   RecruitingDecisionDecider,
-  "memberId" | "chapterId" | "schoolId"
+  "memberId" | "chapterId" | "schoolId" | "name" | "nickname"
 > & {
   memberId: RawId
   chapterId?: RawId | null
   schoolId?: RawId | null
+  name?: string
+  nickname?: string
 }
 
 export type RawDecisionHistory = Omit<

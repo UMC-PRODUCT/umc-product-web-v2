@@ -8,6 +8,7 @@ import {
   getRoundEvaluators,
   mergeRoundGroups,
   normalizeAdminRoundGroups,
+  normalizeDecisionHistoryPage,
   normalizeEvaluationStatistics,
   normalizeInterviewScheduleBoard,
   normalizeInterviewSessions,
@@ -19,6 +20,7 @@ import {
 import type {
   RawAdminRound,
   RawAdminRoundGroup,
+  RawDecisionHistoryPage,
   RawEvaluationStatistics,
   RawRecruitingSeasonConfigurationResponse,
   RawStatusSummary,
@@ -615,5 +617,79 @@ describe("normalizeInterviewScheduleBoard", () => {
       applicationId: "41",
       applicantName: "",
     })
+  })
+})
+
+describe("normalizeDecisionHistoryPage", () => {
+  // 이름이 undefined 로 남으면 검색 필터의 toLowerCase 와 필터 선택지의
+  // localeCompare 에서 TypeError 가 나 화면이 통째로 죽는다.
+  it("지원자·담당자 이름이 빠져도 빈 문자열로 채운다", () => {
+    const raw: RawDecisionHistoryPage = {
+      progressStatus: "IN_PROGRESS",
+      histories: {
+        content: [
+          {
+            decisionHistoryId: 1,
+            applicationId: 2,
+            decidedAt: "2026-08-05T00:00:00Z",
+            decisionStatus: "FINAL_PASSED",
+            result: "PASSED",
+            applicant: {
+              chapterId: 27,
+              schoolId: 1,
+              firstChoice: "PLAN",
+              secondChoice: null,
+              acceptedTrack: null,
+            },
+            decider: { memberId: 3, roleType: "CENTRAL_PRESIDENT" },
+          },
+        ],
+      },
+    }
+
+    const { content } = normalizeDecisionHistoryPage(raw)
+
+    expect(content[0]?.applicant.name).toBe("")
+    expect(content[0]?.applicant.chapterName).toBe("")
+    expect(content[0]?.applicant.schoolName).toBe("")
+    expect(content[0]?.decider.name).toBe("")
+    expect(content[0]?.decider.nickname).toBe("")
+  })
+
+  it("중앙 담당자의 지부·학교는 null 로 남긴다", () => {
+    const { content } = normalizeDecisionHistoryPage({
+      progressStatus: "COMPLETED",
+      histories: {
+        content: [
+          {
+            decisionHistoryId: 1,
+            applicationId: 2,
+            decidedAt: "2026-08-05T00:00:00Z",
+            decisionStatus: "FINAL_PASSED",
+            result: "PASSED",
+            applicant: {
+              chapterId: 27,
+              chapterName: "Neon",
+              schoolId: 1,
+              schoolName: "가천대학교",
+              name: "김지원",
+              firstChoice: "PLAN",
+              secondChoice: null,
+              acceptedTrack: null,
+            },
+            decider: {
+              memberId: 3,
+              roleType: "CENTRAL_PRESIDENT",
+              name: "박담당",
+              nickname: "담당",
+            },
+          },
+        ],
+      },
+    })
+
+    expect(content[0]?.decider.chapterId).toBeNull()
+    expect(content[0]?.decider.schoolId).toBeNull()
+    expect(content[0]?.applicant.name).toBe("김지원")
   })
 })

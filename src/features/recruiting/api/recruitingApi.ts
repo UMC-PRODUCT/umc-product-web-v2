@@ -196,16 +196,23 @@ export function normalizeDecisionHistoryPage(
       ...item,
       decisionHistoryId: String(item.decisionHistoryId),
       applicationId: String(item.applicationId),
+      // 이름이 undefined 로 남으면 검색 필터의 toLowerCase 와 필터 선택지의
+      // localeCompare 가 TypeError 로 터져 화면이 통째로 죽는다.
       applicant: {
         ...item.applicant,
         chapterId: String(item.applicant.chapterId),
+        chapterName: item.applicant.chapterName ?? "",
         schoolId: String(item.applicant.schoolId),
+        schoolName: item.applicant.schoolName ?? "",
+        name: item.applicant.name ?? "",
       },
       decider: {
         ...item.decider,
         memberId: String(item.decider.memberId),
         chapterId: toOptionalId(item.decider.chapterId),
         schoolId: toOptionalId(item.decider.schoolId),
+        name: item.decider.name ?? "",
+        nickname: item.decider.nickname ?? "",
       },
     })),
     page: toCount(histories.page),
