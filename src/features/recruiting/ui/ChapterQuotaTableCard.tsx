@@ -33,6 +33,7 @@ export function ChapterQuotaTableCard({
   className,
 }: ChapterQuotaTableCardProps) {
   const [schoolsData, setSchoolsData] = useState<SchoolQuotaRow[]>(data.schools)
+  const [chapterTotals, setChapterTotals] = useState(data.totals)
   const [lastValidSchoolsData, setLastValidSchoolsData] = useState<
     SchoolQuotaRow[]
   >(data.schools)
@@ -45,17 +46,18 @@ export function ChapterQuotaTableCard({
   useEffect(() => {
     setSchoolsData(data.schools)
     setLastValidSchoolsData(data.schools)
-  }, [data.schools])
+    setChapterTotals(data.totals)
+  }, [data.schools, data.totals])
 
   // Execute Auto Allocation when triggered
   useEffect(() => {
     if (!autoAllocateTrigger || data.schools.length === 0) return
 
     const N = data.schools.length
-    const tPM = data.totals.pm
-    const tDesign = data.totals.design
-    const tWebPe = data.totals.webPe
-    const tMobilePe = data.totals.mobilePe
+    const tPM = chapterTotals.pm
+    const tDesign = chapterTotals.design
+    const tWebPe = chapterTotals.webPe
+    const tMobilePe = chapterTotals.mobilePe
 
     const maxPM = Math.floor(tPM / N)
     const maxDesign = Math.floor(tDesign / N)
@@ -84,7 +86,7 @@ export function ChapterQuotaTableCard({
     setSchoolsData(updatedSchools)
     setLastValidSchoolsData(updatedSchools)
     onSchoolsDataChangeRef.current?.(updatedSchools)
-  }, [autoAllocateTrigger, data.schools, data.totals])
+  }, [autoAllocateTrigger, data.schools, chapterTotals])
 
   const checkIsAllValid = (schools: SchoolQuotaRow[]) => {
     const pmSum = schools.reduce((acc, s) => acc + s.pm, 0)
@@ -93,11 +95,51 @@ export function ChapterQuotaTableCard({
     const mobilePeSum = schools.reduce((acc, s) => acc + s.mobilePe, 0)
 
     return (
-      pmSum <= data.totals.pm &&
-      designSum <= data.totals.design &&
-      webPeSum <= data.totals.webPe &&
-      mobilePeSum <= data.totals.mobilePe
+      pmSum <= chapterTotals.pm &&
+      designSum <= chapterTotals.design &&
+      webPeSum <= chapterTotals.webPe &&
+      mobilePeSum <= chapterTotals.mobilePe
     )
+  }
+
+  const handleChapterTotalChange = (
+    partKey: "pm" | "design" | "webPe" | "mobilePe",
+    newTotal: number,
+  ) => {
+    const updatedTotals = { ...chapterTotals, [partKey]: newTotal }
+    updatedTotals.total =
+      updatedTotals.pm +
+      updatedTotals.design +
+      updatedTotals.webPe +
+      updatedTotals.mobilePe
+
+    setChapterTotals(updatedTotals)
+
+    const N = schoolsData.length
+    if (N > 0) {
+      const base = Math.floor(newTotal / N)
+      const rem = newTotal % N
+
+      const updatedSchools = schoolsData.map((school, index) => {
+        const allocatedPartValue = base + (index < rem ? 1 : 0)
+        const updatedSchool = {
+          ...school,
+          [partKey]: allocatedPartValue,
+        }
+        const total =
+          updatedSchool.pm +
+          updatedSchool.design +
+          updatedSchool.webPe +
+          updatedSchool.mobilePe
+        return { ...updatedSchool, total }
+      })
+
+      setSchoolsData(updatedSchools)
+      setLastValidSchoolsData(updatedSchools)
+      onDirtyChange?.(true)
+      onManualEdit?.()
+      onSchoolsDataChange?.(updatedSchools)
+    }
   }
 
   const handleCellChange = (
@@ -114,6 +156,15 @@ export function ChapterQuotaTableCard({
     })
 
     setSchoolsData(nextSchoolsData)
+
+    const newSum = nextSchoolsData.reduce((acc, s) => acc + s[partKey], 0)
+    if (newSum > chapterTotals[partKey]) {
+      setChapterTotals((prev) => {
+        const next = { ...prev, [partKey]: newSum }
+        next.total = next.pm + next.design + next.webPe + next.mobilePe
+        return next
+      })
+    }
 
     if (checkIsAllValid(nextSchoolsData)) {
       setLastValidSchoolsData(nextSchoolsData)
@@ -132,7 +183,7 @@ export function ChapterQuotaTableCard({
     0,
   )
 
-  const fixedTotals = data.totals
+  const fixedTotals = chapterTotals
 
   const remainingPM = fixedTotals.pm - currentPMTotal
   const remainingDesign = fixedTotals.design - currentDesignTotal
@@ -370,46 +421,30 @@ export function ChapterQuotaTableCard({
               지부 전체
             </p>
           </div>
-          <div className="flex flex-1 items-center justify-center bg-teal-100">
-            <p>
-              <span className="text-heading-6-semibold text-teal-600">
-                {fixedTotals.pm}
-              </span>
-              <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
-                명
-              </span>
-            </p>
-          </div>
-          <div className="flex flex-1 items-center justify-center bg-teal-100">
-            <p>
-              <span className="text-heading-6-semibold text-teal-600">
-                {fixedTotals.design}
-              </span>
-              <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
-                명
-              </span>
-            </p>
-          </div>
-          <div className="flex flex-1 items-center justify-center bg-teal-100">
-            <p>
-              <span className="text-heading-6-semibold text-teal-600">
-                {fixedTotals.webPe}
-              </span>
-              <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
-                명
-              </span>
-            </p>
-          </div>
-          <div className="flex flex-1 items-center justify-center bg-teal-100">
-            <p>
-              <span className="text-heading-6-semibold text-teal-600">
-                {fixedTotals.mobilePe}
-              </span>
-              <span className="text-subtitle-1-medium text-teal-gray-400 pl-0.5">
-                명
-              </span>
-            </p>
-          </div>
+          <QuotaEditableCell
+            partName="지부 전체 PM"
+            value={chapterTotals.pm}
+            onChange={(val) => handleChapterTotalChange("pm", val)}
+            className="bg-teal-100"
+          />
+          <QuotaEditableCell
+            partName="지부 전체 Design"
+            value={chapterTotals.design}
+            onChange={(val) => handleChapterTotalChange("design", val)}
+            className="bg-teal-100"
+          />
+          <QuotaEditableCell
+            partName="지부 전체 Web PE"
+            value={chapterTotals.webPe}
+            onChange={(val) => handleChapterTotalChange("webPe", val)}
+            className="bg-teal-100"
+          />
+          <QuotaEditableCell
+            partName="지부 전체 Mobile PE"
+            value={chapterTotals.mobilePe}
+            onChange={(val) => handleChapterTotalChange("mobilePe", val)}
+            className="bg-teal-100"
+          />
 
           <div
             className="flex h-14 w-35 shrink-0 items-center justify-center gap-1"
@@ -420,7 +455,7 @@ export function ChapterQuotaTableCard({
           >
             <p className="text-heading-6-semibold text-teal-600">총</p>
             <p className="text-heading-6-semibold text-teal-600">
-              {fixedTotals.total}
+              {chapterTotals.total}
             </p>
             <p className="text-subtitle-1-medium text-teal-gray-400">명</p>
           </div>
