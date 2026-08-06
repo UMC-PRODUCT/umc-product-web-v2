@@ -92,7 +92,7 @@ export function PartDistributionCard({
       <div className="flex flex-col gap-0.5">
         <h3 className="text-heading-6-semibold text-teal-700">{title}</h3>
         <p className="text-label-2-medium text-teal-gray-500">
-          전체 지원자 수 대비
+          전체 평가 완료 수 대비
         </p>
       </div>
 
