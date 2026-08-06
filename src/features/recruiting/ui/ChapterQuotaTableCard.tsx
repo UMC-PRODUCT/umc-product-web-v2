@@ -45,6 +45,12 @@ export function ChapterQuotaTableCard({
     onSchoolsDataChangeRef.current = onSchoolsDataChange
   }, [onSchoolsDataChange])
 
+  // 자동 배정 effect 는 trigger 로만 돌아야 해서 의존성에 넣지 않는다.
+  const canEditSeasonRef = useRef(canEditSeason)
+  useEffect(() => {
+    canEditSeasonRef.current = canEditSeason
+  }, [canEditSeason])
+
   useEffect(() => {
     setSchoolsData(data.schools)
     setLastValidSchoolsData(data.schools)
@@ -72,7 +78,15 @@ export function ChapterQuotaTableCard({
     const allocWebPe = Math.floor(u * 2.5)
     const allocMobilePe = Math.floor(u * 2.5)
 
+    // 잠긴 행은 원래 값을 유지한다. 버튼을 가려도 이 effect 가 단독으로 돌 수
+    // 있어, 여기서도 막지 않으면 권한 없는 시즌 값이 바뀐 채 저장에 실린다.
     const updatedSchools = data.schools.map((school) => {
+      if (
+        canEditSeasonRef.current &&
+        !canEditSeasonRef.current(school.seasonId)
+      ) {
+        return school
+      }
       const total = allocPM + allocDesign + allocWebPe + allocMobilePe
       return {
         ...school,

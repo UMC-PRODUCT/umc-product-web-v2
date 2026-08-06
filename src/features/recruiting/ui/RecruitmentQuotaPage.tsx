@@ -62,6 +62,12 @@ export function RecruitmentQuotaPage() {
   )
   const canEditAny =
     !isPermissionLoading && hasAnyEditableSeason(seasonIds, permittedSeasonIds)
+  // 자동 배정은 화면의 모든 학교 행을 한꺼번에 덮어쓴다. 일부만 편집 가능한
+  // 지부에서 열어 두면 잠긴 행까지 값이 바뀌고 저장에 실려 나간다.
+  const canEditEverySeason =
+    !isPermissionLoading &&
+    seasonIds.length > 0 &&
+    seasonIds.every((id) => permittedSeasonIds.has(String(id)))
 
   const allChaptersData = useMemo(
     () => mapGroupsToChapterQuotaData(groups, seasonConfigsMap),
@@ -143,8 +149,11 @@ export function RecruitmentQuotaPage() {
   const handleSave = async () => {
     const allEditedRows = Array.from(editedSchoolsMap.values()).flat()
     const payloadList = allEditedRows
-      .filter((row): row is SchoolQuotaRow & { seasonId: string } =>
-        Boolean(row.seasonId),
+      // 편집 대상은 학교 행 단위인데 저장은 지부 전체 행을 모아 보낸다.
+      // 권한 없는 시즌이 섞이면 그 건은 서버가 거부해 부분 실패로 남는다.
+      .filter(
+        (row): row is SchoolQuotaRow & { seasonId: string } =>
+          Boolean(row.seasonId) && canEditSeason(row.seasonId),
       )
       .map((row) => ({
         seasonId: row.seasonId,
@@ -225,7 +234,7 @@ export function RecruitmentQuotaPage() {
 
   const hasApplicants = totalApplicants > 0
 
-  const showAutoAllocateButton = !isAll && hasApplicants && canEditAny
+  const showAutoAllocateButton = !isAll && hasApplicants && canEditEverySeason
   const showSaveButton = hasApplicants && canEditAny
 
   const pageTitle = isAll ? "UMC 11th" : chapterTab
