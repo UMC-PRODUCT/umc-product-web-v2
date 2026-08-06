@@ -216,21 +216,25 @@ export function RecruitmentQuotaPage() {
       }
 
       if (successfulSchoolNames.size > 0) {
-        setEditedSchoolsMap((prev) => {
-          const next = new Map<string, SchoolQuotaRow[]>()
-          prev.forEach((rows, chapter) => {
-            const remainingRows = rows.filter(
-              (r) => !successfulSchoolNames.has(r.schoolName),
-            )
-            if (remainingRows.length > 0) {
-              next.set(chapter, remainingRows)
-            }
-          })
-          if (next.size === 0) {
-            setIsDirty(false)
+        let remainingCount = 0
+        const nextMap = new Map<string, SchoolQuotaRow[]>()
+
+        editedSchoolsMap.forEach((rows, chapter) => {
+          const remainingRows = rows.filter(
+            (r) => !successfulSchoolNames.has(r.schoolName),
+          )
+          if (remainingRows.length > 0) {
+            nextMap.set(chapter, remainingRows)
+            remainingCount += remainingRows.length
           }
-          return next
         })
+
+        if (remainingCount === 0) {
+          setIsDirty(false)
+          setEditedSchoolsMap(new Map())
+        } else {
+          setEditedSchoolsMap(nextMap)
+        }
       }
     } catch {
       addToast({
