@@ -32,6 +32,7 @@ export function mapGroupsToChapterQuotaData(
     const chapterGroups = byChapter.get(chapterName) ?? []
     const schools: SchoolQuotaRow[] = chapterGroups.map((group) => {
       const config = seasonConfigsMap.get(group.seasonId)
+      const hasConfig = Boolean(config)
       const quotas = config?.quotas ?? []
 
       const pm = quotas.find((q) => q.track === "PLAN")?.targetCount ?? 0
@@ -43,7 +44,7 @@ export function mapGroupsToChapterQuotaData(
           ?.targetCount ?? 0
 
       return {
-        seasonId: group.seasonId,
+        seasonId: hasConfig ? group.seasonId : undefined,
         gisuId: group.gisuId,
         schoolId: group.schoolId,
         schoolName: group.schoolName,

@@ -101,11 +101,12 @@ describe("mapGroupsToChapterQuotaData", () => {
     })
   })
 
-  it("시즌 설정이 없으면 0명으로 처리한다", () => {
+  it("시즌 설정이 없으면 seasonId를 undefined로 처리하고 0명으로 초기화한다", () => {
     const fixedNow = new Date("2026-08-02T09:00:00Z")
     const result = mapGroupsToChapterQuotaData(groups, new Map(), fixedNow)
 
     const chromium = result.find((item) => item.chapter === "Chromium")
+    expect(chromium?.schools[0]?.seasonId).toBeUndefined()
     expect(chromium?.schools[0]?.total).toBe(0)
     expect(chromium?.totals.total).toBe(0)
   })
