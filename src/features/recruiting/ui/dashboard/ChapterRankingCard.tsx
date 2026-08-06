@@ -148,21 +148,28 @@ export function ChapterRankingCard({
 
           {compareLabels && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-58 items-end gap-2.5 px-2.5">
-              {bars.map((bar) => (
-                <div
-                  key={bar.chapterId}
-                  className="bg-teal-gray-100 w-20.5 shrink-0 rounded-t-md"
-                  style={{
-                    height: Math.min(
-                      Math.max(
-                        barHeightPx(bar.compareCount ?? 0, base),
-                        COMPARE_MIN_HEIGHT_PX,
-                      ),
-                      GRID_HEIGHT_PX,
-                    ),
-                  }}
-                />
-              ))}
+              {bars.map((bar) => {
+                const compareCount = bar.compareCount ?? 0
+                // 만약 지원자가 없다면 지원현황의 default 그래프처럼 보이도록 한다.
+                return (
+                  <div
+                    key={bar.chapterId}
+                    className="bg-teal-gray-100 w-20.5 shrink-0 rounded-t-md"
+                    style={{
+                      height:
+                        compareCount > 0
+                          ? Math.min(
+                              Math.max(
+                                barHeightPx(compareCount, base),
+                                COMPARE_MIN_HEIGHT_PX,
+                              ),
+                              GRID_HEIGHT_PX,
+                            )
+                          : 0,
+                    }}
+                  />
+                )
+              })}
             </div>
           )}
 
