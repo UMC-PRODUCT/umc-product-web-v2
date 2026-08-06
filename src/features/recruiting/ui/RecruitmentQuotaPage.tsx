@@ -162,10 +162,12 @@ export function RecruitmentQuotaPage() {
     if (payloadList.length === 0 && newSeasonRows.length === 0) return
 
     try {
+      const successfulSchoolNames = new Set<string>()
+
       if (newSeasonRows.length > 0) {
-        await Promise.all(
-          newSeasonRows.map((row) =>
-            createSeason({
+        const createResults = await Promise.allSettled(
+          newSeasonRows.map(async (row) => {
+            await createSeason({
               gisuId: row.gisuId,
               schoolId: row.schoolId,
               quotas: [
@@ -174,46 +176,70 @@ export function RecruitmentQuotaPage() {
                 { track: "WEB_PRODUCT_ENGINEER", targetCount: row.webPe },
                 { track: "MOBILE_PRODUCT_ENGINEER", targetCount: row.mobilePe },
               ],
-            }),
-          ),
+            })
+            return row
+          }),
         )
+
+        const failedCreateSchoolNames: string[] = []
+
+        createResults.forEach((result, index) => {
+          const row = newSeasonRows[index]
+          if (!row) return
+
+          if (result.status === "fulfilled") {
+            successfulSchoolNames.add(row.schoolName)
+          } else {
+            failedCreateSchoolNames.push(row.schoolName)
+          }
+        })
+
+        if (failedCreateSchoolNames.length > 0) {
+          addToast({
+            message: `${failedCreateSchoolNames.join(", ")} 시즌 생성에 실패했습니다. 잠시 후 다시 시도해주세요.`,
+            color: "red",
+            variant: "deep",
+            type: "default",
+            duration: 3000,
+          })
+        }
       }
 
       if (payloadList.length > 0) {
-        const result = await updateQuotas(payloadList)
+        const updateResult = await updateQuotas(payloadList)
 
-        if (result.failedCount === 0) {
-          setIsDirty(false)
-          setEditedSchoolsMap(new Map())
-        } else {
-          const successfulSchoolNames = new Set(
-            result.successfulVariables
-              .map((v) => v.schoolName)
-              .filter((name): name is string => Boolean(name)),
-          )
+        updateResult.successfulVariables.forEach((v) => {
+          if (v.schoolName) {
+            successfulSchoolNames.add(v.schoolName)
+          }
+        })
+      }
 
-          setEditedSchoolsMap((prev) => {
-            const next = new Map<string, SchoolQuotaRow[]>()
-            prev.forEach((rows, chapter) => {
-              const remainingRows = rows.filter(
-                (r) => !successfulSchoolNames.has(r.schoolName),
-              )
-              if (remainingRows.length > 0) {
-                next.set(chapter, remainingRows)
-              }
-            })
-            if (next.size === 0) {
-              setIsDirty(false)
+      if (successfulSchoolNames.size > 0) {
+        setEditedSchoolsMap((prev) => {
+          const next = new Map<string, SchoolQuotaRow[]>()
+          prev.forEach((rows, chapter) => {
+            const remainingRows = rows.filter(
+              (r) => !successfulSchoolNames.has(r.schoolName),
+            )
+            if (remainingRows.length > 0) {
+              next.set(chapter, remainingRows)
             }
-            return next
           })
-        }
-      } else if (newSeasonRows.length > 0) {
-        setIsDirty(false)
-        setEditedSchoolsMap(new Map())
+          if (next.size === 0) {
+            setIsDirty(false)
+          }
+          return next
+        })
       }
     } catch {
-      // 에러 토스트는 useRecruitingSeasonQuotas 훅에서 처리됨
+      addToast({
+        message: "저장 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
     }
   }
 
