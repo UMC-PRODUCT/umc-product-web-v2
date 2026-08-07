@@ -193,8 +193,17 @@ export function RecruitmentQuotaPage() {
         Boolean(row.seasonId) && canEditSeason(row.seasonId),
     )
     const newSeasonRows = rawRows.filter(
-      (row): row is SchoolQuotaRow & { gisuId: string; schoolId: string } =>
-        !row.seasonId && Boolean(row.gisuId) && Boolean(row.schoolId),
+      (row): row is SchoolQuotaRow & { gisuId: string; schoolId: string } => {
+        if (!row.seasonId && Boolean(row.gisuId) && Boolean(row.schoolId)) {
+          const targetGroup = groups.find(
+            (g) =>
+              String(g.schoolId) === String(row.schoolId) &&
+              String(g.gisuId) === String(row.gisuId),
+          )
+          return canEditEverySeason || canEditSeason(targetGroup?.seasonId)
+        }
+        return false
+      },
     )
 
     const payloadList = existingSeasonRows.map((row) => ({
@@ -293,9 +302,20 @@ export function RecruitmentQuotaPage() {
         const nextMap = new Map<string, SchoolQuotaRow[]>()
 
         editedSchoolsMap.forEach((rows, chapter) => {
-          const remainingRows = rows.filter(
-            (r) => !successfulSchoolNames.has(r.schoolName),
-          )
+          const remainingRows = rows.filter((r) => {
+            const seasonIdToCheck =
+              r.seasonId ??
+              groups.find(
+                (g) =>
+                  String(g.schoolId) === String(r.schoolId) &&
+                  String(g.gisuId) === String(r.gisuId),
+              )?.seasonId
+            const isPermitted =
+              canEditEverySeason || canEditSeason(seasonIdToCheck)
+            const isSuccessfullySaved =
+              successfulSchoolNames.has(r.schoolName) && isPermitted
+            return !isSuccessfullySaved
+          })
           if (remainingRows.length > 0) {
             nextMap.set(chapter, remainingRows)
             remainingCount += remainingRows.length

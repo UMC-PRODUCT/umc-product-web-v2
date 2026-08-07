@@ -3,6 +3,7 @@ import { isAxiosError } from "axios"
 import { Info } from "lucide-react"
 import { useState } from "react"
 
+import { useAuthStore } from "@/entities/member/store/authStore"
 import {
   getOrCreateAnonymousSessionId,
   useLookupAnonymousApplication,
@@ -21,8 +22,9 @@ export const Route = createFileRoute("/projects/application/")({
   }),
   beforeLoad: () => {
     if (typeof window !== "undefined") {
+      const isAuthed = useAuthStore.getState().isAuthed
       const isVerified = sessionStorage.getItem("isApplicationVerified")
-      if (isVerified === "true") {
+      if (isAuthed || isVerified === "true") {
         throw redirect({ to: "/projects/application/list" })
       }
     }

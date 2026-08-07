@@ -1,6 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useMemo } from "react"
 
+import { useAuthStore } from "@/entities/member/store/authStore"
 import {
   toApplicationSections,
   useAnonymousApplicationQuery,
@@ -23,8 +24,9 @@ export const Route = createFileRoute("/projects/application/$applicationId")({
   }),
   beforeLoad: () => {
     if (typeof window !== "undefined") {
+      const isAuthed = useAuthStore.getState().isAuthed
       const isVerified = sessionStorage.getItem("isApplicationVerified")
-      if (isVerified !== "true") {
+      if (!isAuthed && isVerified !== "true") {
         throw redirect({ to: "/projects/application" })
       }
     }
@@ -143,13 +145,14 @@ function toApplicationSectionsFromPublicAnswers(
 function ApplicationDetailPage() {
   const navigate = useNavigate()
   const { applicationId } = Route.useParams()
+  const isAuthed = useAuthStore((s) => s.isAuthed)
 
   const email =
-    typeof window !== "undefined"
+    !isAuthed && typeof window !== "undefined"
       ? sessionStorage.getItem("anonymousEmail")
       : null
   const applicationKey =
-    typeof window !== "undefined"
+    !isAuthed && typeof window !== "undefined"
       ? sessionStorage.getItem("anonymousApplicationKey")
       : null
 
