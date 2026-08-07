@@ -38,6 +38,14 @@ describe("applyDraftStorage", () => {
     expect(readApplyDraft("7", "member-1")).toBeNull()
   })
 
+  it("익명 세션 식별자로 게스트 초안을 지운다", () => {
+    writeApplyDraft("7", "anonymous-session-1", DRAFT)
+    clearApplyDraft("7", "anonymous-session-1")
+
+    expect(readApplyDraft("7", "anonymous-session-1")).toBeNull()
+    expect(readApplyDraft("7", "")).toBeNull()
+  })
+
   it("깨진 값은 없는 것으로 본다", () => {
     localStorage.setItem("umc:recruiting:draft:7:member-1", "{ not json")
     expect(readApplyDraft("7", "member-1")).toBeNull()

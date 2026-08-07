@@ -266,7 +266,7 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
               color="neutral"
               size="s"
               onClick={() => {
-                clearApplyDraft(roundId, memberId)
+                clearApplyDraft(roundId, storageIdentity)
                 setResumeDecided(true)
               }}
             >
