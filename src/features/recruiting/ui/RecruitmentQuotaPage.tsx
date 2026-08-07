@@ -302,11 +302,20 @@ export function RecruitmentQuotaPage() {
         const nextMap = new Map<string, SchoolQuotaRow[]>()
 
         editedSchoolsMap.forEach((rows, chapter) => {
-          const remainingRows = rows.filter(
-            (r) =>
-              !successfulSchoolNames.has(r.schoolName) &&
-              (canEditSeason(r.seasonId) || canEditEverySeason),
-          )
+          const remainingRows = rows.filter((r) => {
+            const seasonIdToCheck =
+              r.seasonId ??
+              groups.find(
+                (g) =>
+                  String(g.schoolId) === String(r.schoolId) &&
+                  String(g.gisuId) === String(r.gisuId),
+              )?.seasonId
+            const isPermitted =
+              canEditEverySeason || canEditSeason(seasonIdToCheck)
+            const isSuccessfullySaved =
+              successfulSchoolNames.has(r.schoolName) && isPermitted
+            return !isSuccessfullySaved
+          })
           if (remainingRows.length > 0) {
             nextMap.set(chapter, remainingRows)
             remainingCount += remainingRows.length
