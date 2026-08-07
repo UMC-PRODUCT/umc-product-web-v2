@@ -9,6 +9,7 @@ const GUEST = {
   showRecruiting: false,
   showSettings: false,
   settingsEntryPath: SETTINGS_ENTRY,
+  isRecruitingPeriod: false,
 }
 const CHALLENGER = { ...GUEST, isAuthed: true }
 const SCHOOL_STAFF = { ...CHALLENGER, showRecruiting: true }
@@ -43,6 +44,29 @@ describe("역할별 노출 탭", () => {
   })
 })
 
+// 데모데이와 리크루팅은 같이 돌지 않는다. 모집 중에 매칭 탭을 열어 두면
+// 지난 시즌 화면으로 보낸다.
+describe("모집 기간에는 데모데이 매칭을 감춘다", () => {
+  it("로그인 사용자도 모집 중이면 매칭 탭이 없다", () => {
+    const labels = labelsFor({ ...CHALLENGER, isRecruitingPeriod: true })
+    expect(labels).not.toContain("데모데이 매칭")
+    expect(labels).toEqual(["소개", "모집 안내", "프로젝트"])
+  })
+
+  it("운영진은 모집 중이어도 리크루팅 탭은 남는다", () => {
+    const labels = labelsFor({ ...CENTRAL, isRecruitingPeriod: true })
+    expect(labels).not.toContain("데모데이 매칭")
+    expect(labels).toContain("리크루팅")
+    expect(labels).toContain("설정")
+  })
+
+  it("모집이 끝나면 매칭 탭이 돌아온다", () => {
+    expect(labelsFor({ ...CHALLENGER, isRecruitingPeriod: false })).toContain(
+      "데모데이 매칭",
+    )
+  })
+})
+
 describe("경로별 활성 표시", () => {
   // 탭 목적지는 대시보드인데 활성은 영역 전체여야 한다
   it("리크루팅 하위 어디서든 리크루팅이 활성이다", () => {
@@ -74,13 +98,17 @@ describe("경로별 활성 표시", () => {
     expect(activeLabels("/manage/curriculum/create", CENTRAL)).toEqual(["설정"])
   })
 
-  it("프로젝트 하위는 게스트에게도 활성이다", () => {
+  it("프로젝트 목록과 상세는 프로젝트 탭이 활성이다", () => {
     expect(activeLabels("/projects", GUEST)).toEqual(["프로젝트"])
-    expect(activeLabels("/projects/notice", GUEST)).toEqual(["프로젝트"])
+    expect(activeLabels("/projects/49", GUEST)).toEqual(["프로젝트"])
   })
 
-  // `모집 안내`가 자리표시자 `/` 를 목적지로 갖고 있어 루트에서 켜지던 문제
-  it("비활성 탭은 루트에서도 켜지지 않는다", () => {
+  it("모집 공고와 지원 화면은 모집 안내 탭이 활성이다", () => {
+    expect(activeLabels("/projects/notice", GUEST)).toEqual(["모집 안내"])
+    expect(activeLabels("/projects/apply/7", GUEST)).toEqual(["모집 안내"])
+  })
+
+  it("루트에서는 모집 안내 탭이 활성화되지 않는다", () => {
     expect(activeLabels("/", CENTRAL)).toEqual([])
   })
 
