@@ -1,9 +1,11 @@
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api } from "@/shared/lib/axios"
 
 import {
   addRoundEvaluator,
+  createAnonymousApplicationDraft,
+  createApplicationDraft,
   createRecruitingSeason,
   getAdminRounds,
   getRoundEvaluators,
@@ -16,6 +18,10 @@ import {
   normalizeRecruitingSeasonConfigurationResponse,
   normalizeStatusSummary,
   removeRoundEvaluator,
+  saveApplicationDraft,
+  submitAnonymousApplication,
+  submitApplication,
+  updateAnonymousApplication,
   updateRecruitingSeason,
 } from "./recruitingApi"
 
@@ -266,6 +272,115 @@ describe("evaluator API functions", () => {
 
     expect(api.delete).toHaveBeenCalledWith(
       "/v1/recruiting/admin/rounds/10/evaluators/100",
+    )
+  })
+})
+
+describe("지원자 유형별 API", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("게스트 지원서는 공개 API를 사용한다", async () => {
+    const created = {
+      applicationId: "application-1",
+      applicationKey: "key-1",
+      status: "DRAFT" as const,
+    }
+    const draftBody = {
+      applicationFormId: 9,
+      applicantName: "홍길동",
+      applicantEmail: "guest@example.com",
+      firstChoice: "PLAN" as const,
+      privacyTermId: 1,
+      privacyAgreed: true,
+    }
+    const updateBody = {
+      credentialEmail: "guest@example.com",
+      applicationKey: "key-1",
+      applicantName: "홍길동",
+      applicantEmail: "guest@example.com",
+      firstChoice: "PLAN" as const,
+      answers: [],
+    }
+
+    vi.mocked(api.post).mockResolvedValue({
+      data: { isSuccess: true, code: "COMMON200", message: "OK", result: created },
+    })
+    vi.mocked(api.put).mockResolvedValue({
+      data: {
+        isSuccess: true,
+        code: "COMMON200",
+        message: "OK",
+        result: { applicationId: "application-1", status: "DRAFT" },
+      },
+    })
+
+    await createAnonymousApplicationDraft(draftBody)
+    await updateAnonymousApplication(updateBody)
+    await submitAnonymousApplication({
+      email: "guest@example.com",
+      applicationKey: "key-1",
+    })
+
+    expect(api.post).toHaveBeenNthCalledWith(
+      1,
+      "/v1/recruiting/public/applications",
+      draftBody,
+    )
+    expect(api.put).toHaveBeenCalledWith(
+      "/v1/recruiting/public/applications",
+      updateBody,
+    )
+    expect(api.post).toHaveBeenNthCalledWith(
+      2,
+      "/v1/recruiting/public/applications/submit",
+      { email: "guest@example.com", applicationKey: "key-1" },
+    )
+  })
+
+  it("로그인 지원서는 인증 API를 사용한다", async () => {
+    const draftBody = {
+      applicationFormId: 9,
+      applicantName: "홍길동",
+      applicantEmail: "member@example.com",
+      firstChoice: "PLAN" as const,
+    }
+    const updateBody = {
+      applicantName: "홍길동",
+      applicantEmail: "member@example.com",
+      firstChoice: "PLAN" as const,
+      answers: [],
+    }
+    const response = {
+      data: {
+        isSuccess: true,
+        code: "COMMON200",
+        message: "OK",
+        result: { applicationId: "application-1", status: "DRAFT" },
+      },
+    }
+
+    vi.mocked(api.post).mockResolvedValue(response)
+    vi.mocked(api.put).mockResolvedValue(response)
+
+    await createApplicationDraft(draftBody)
+    await saveApplicationDraft("application-1", updateBody)
+    await submitApplication("application-1")
+
+    expect(api.post).toHaveBeenNthCalledWith(
+      1,
+      "/v1/recruiting/applications",
+      draftBody,
+    )
+    expect(api.put).toHaveBeenCalledWith(
+      "/v1/recruiting/applications/application-1",
+      updateBody,
+    )
+    expect(api.post).toHaveBeenNthCalledWith(
+      2,
+      "/v1/recruiting/applications/application-1/submit",
+      {},
     )
   })
 })
