@@ -193,11 +193,17 @@ export function RecruitmentQuotaPage() {
         Boolean(row.seasonId) && canEditSeason(row.seasonId),
     )
     const newSeasonRows = rawRows.filter(
-      (row): row is SchoolQuotaRow & { gisuId: string; schoolId: string } =>
-        !row.seasonId &&
-        Boolean(row.gisuId) &&
-        Boolean(row.schoolId) &&
-        (canEditEverySeason || canEditSeason(row.seasonId)),
+      (row): row is SchoolQuotaRow & { gisuId: string; schoolId: string } => {
+        if (!row.seasonId && Boolean(row.gisuId) && Boolean(row.schoolId)) {
+          const targetGroup = groups.find(
+            (g) =>
+              String(g.schoolId) === String(row.schoolId) &&
+              String(g.gisuId) === String(row.gisuId),
+          )
+          return canEditEverySeason || canEditSeason(targetGroup?.seasonId)
+        }
+        return false
+      },
     )
 
     const payloadList = existingSeasonRows.map((row) => ({
