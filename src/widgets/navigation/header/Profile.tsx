@@ -1,13 +1,16 @@
 import { useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
-import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import { cn } from "@/shared/lib/utils"
+import {
+  ProfileAvatar,
+  type ProfileAvatarSize,
+} from "@/shared/ui/profile/ProfileAvatar"
 
 import { ProfileDropdown } from "./ProfileDropdown"
 
 interface ProfileProps {
-  size?: number
+  size?: ProfileAvatarSize
   src?: string | null
   className?: string
 }
@@ -28,15 +31,11 @@ export default function Profile({ size = 40, src, className }: ProfileProps) {
       )}
       triggerStyle={{ width: size, height: size }}
     >
-      {profileSrc ? (
-        <img
-          src={profileSrc}
-          alt={me?.name ?? "profile"}
-          className="size-full object-cover"
-        />
-      ) : (
-        <ProfileIcon className="size-full" />
-      )}
+      <ProfileAvatar
+        size={size}
+        src={profileSrc}
+        alt={me?.name ?? "프로필 이미지"}
+      />
     </ProfileDropdown>
   )
 }
