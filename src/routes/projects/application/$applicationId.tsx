@@ -1,7 +1,6 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useMemo } from "react"
 
-import { useMe } from "@/entities/member/hooks/useMe"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import {
   toApplicationSections,
@@ -147,14 +146,13 @@ function ApplicationDetailPage() {
   const navigate = useNavigate()
   const { applicationId } = Route.useParams()
   const isAuthed = useAuthStore((s) => s.isAuthed)
-  const { data: me } = useMe()
 
   const email =
-    (typeof window !== "undefined"
+    !isAuthed && typeof window !== "undefined"
       ? sessionStorage.getItem("anonymousEmail")
-      : null) ?? (isAuthed ? (me?.email ?? null) : null)
+      : null
   const applicationKey =
-    typeof window !== "undefined"
+    !isAuthed && typeof window !== "undefined"
       ? sessionStorage.getItem("anonymousApplicationKey")
       : null
 
