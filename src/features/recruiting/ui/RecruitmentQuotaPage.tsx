@@ -194,7 +194,10 @@ export function RecruitmentQuotaPage() {
     )
     const newSeasonRows = rawRows.filter(
       (row): row is SchoolQuotaRow & { gisuId: string; schoolId: string } =>
-        !row.seasonId && Boolean(row.gisuId) && Boolean(row.schoolId),
+        !row.seasonId &&
+        Boolean(row.gisuId) &&
+        Boolean(row.schoolId) &&
+        (canEditEverySeason || canEditSeason(row.seasonId)),
     )
 
     const payloadList = existingSeasonRows.map((row) => ({
@@ -294,7 +297,9 @@ export function RecruitmentQuotaPage() {
 
         editedSchoolsMap.forEach((rows, chapter) => {
           const remainingRows = rows.filter(
-            (r) => !successfulSchoolNames.has(r.schoolName),
+            (r) =>
+              !successfulSchoolNames.has(r.schoolName) &&
+              (canEditSeason(r.seasonId) || canEditEverySeason),
           )
           if (remainingRows.length > 0) {
             nextMap.set(chapter, remainingRows)
