@@ -19,13 +19,18 @@ const IDLE_CLASS =
  * 막다른 길이 된다. 헤더 `모집 안내` 탭이 아직 비활성이라(#710) 게스트에게는
  * 이게 모집 흐름으로 들어가는 유일한 경로다.
  *
- * 시작 전과 마감은 알리기만 하면 되므로 라벨 그대로 둔다.
+ * D-day 는 붙이지 않는다. 학교마다 모집 기간이 달라 헤더에 띄울 숫자의 기준이
+ * 없다. 마감은 알리기만 하면 되므로 라벨로 둔다.
  */
 export function RecruitingStatusButton({
   status,
+  isAuthed,
 }: {
   status: RecruitingStatus
+  isAuthed: boolean
 }) {
+  if (status.phase === "closed" && isAuthed) return null
+
   if (status.phase === "open") {
     return (
       <Link
@@ -35,16 +40,8 @@ export function RecruitingStatusButton({
           "text-label-1-semibold bg-teal-600 text-white transition-colors hover:bg-teal-700",
         )}
       >
-        지원하기 D-{status.dDay}
+        지원하기
       </Link>
-    )
-  }
-
-  if (status.phase === "before") {
-    return (
-      <span className={cn(BASE_CLASS, IDLE_CLASS)}>
-        모집 시작 D-{status.dDay}
-      </span>
     )
   }
 
