@@ -1,0 +1,104 @@
+import { useState } from "react"
+
+import { cn } from "@/shared/lib/utils"
+
+import { ABOUT_RECRUIT } from "../../constants"
+import { glassBackground } from "../glassBackground"
+import { GlassCtaButton } from "../GlassCtaButton"
+import { PartCard } from "../PartCard"
+
+const TRAIT_PANEL_BACKGROUND = glassBackground(166.74, -18.09)
+
+type PartId = (typeof ABOUT_RECRUIT.parts)[number]["id"]
+
+export function RecruitPartsSection() {
+  const [activePartId, setActivePartId] = useState<PartId>(
+    ABOUT_RECRUIT.parts[0].id,
+  )
+  const activePart =
+    ABOUT_RECRUIT.parts.find((part) => part.id === activePartId) ??
+    ABOUT_RECRUIT.parts[0]
+
+  return (
+    <section className="flex flex-col items-center gap-13.5 pt-75">
+      <div className="flex w-full flex-col items-start gap-25">
+        <div className="flex w-full max-w-300 flex-col items-center gap-18">
+          <div className="flex w-270 flex-col items-center gap-6">
+            <h2 className="text-center text-5xl leading-[1.2] font-bold tracking-[-1.44px] text-white">
+              {ABOUT_RECRUIT.headline}
+            </h2>
+            <p className="text-teal-gray-400 max-w-250 text-center text-2xl leading-[1.5] font-light tracking-[-0.72px]">
+              {ABOUT_RECRUIT.description}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-7">
+            {ABOUT_RECRUIT.parts.map((part) => (
+              <PartCard
+                key={part.id}
+                titleLines={part.titleLines}
+                description={part.description}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col items-start gap-7">
+          <h3 className="w-full pl-1 text-[32px] leading-[1.3] font-semibold text-white">
+            {ABOUT_RECRUIT.traitsHeadline}
+          </h3>
+
+          <div className="flex w-full flex-col items-start gap-6.5">
+            <div role="tablist" className="flex items-center gap-3">
+              {ABOUT_RECRUIT.parts.map((part) => {
+                const isActive = part.id === activePart.id
+                return (
+                  <button
+                    key={part.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls="about-recruit-traits"
+                    onClick={() => setActivePartId(part.id)}
+                    className={cn(
+                      "cursor-pointer rounded-full px-4 py-1.75 text-xl leading-[1.4] tracking-[-0.2px] transition-colors",
+                      isActive
+                        ? "bg-teal-900 text-white"
+                        : "text-teal-gray-500 bg-[rgba(6,43,41,0.3)] hover:text-white",
+                    )}
+                  >
+                    {part.tabLabel}
+                  </button>
+                )
+              })}
+            </div>
+
+            <div
+              id="about-recruit-traits"
+              role="tabpanel"
+              className="relative flex w-full items-center rounded-[30px] px-7 py-8"
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-[30px]"
+              >
+                <span className="absolute inset-0 rounded-[30px] bg-[rgba(38,38,38,0.2)] mix-blend-color-dodge" />
+                <span
+                  className="absolute inset-0 rounded-[30px]"
+                  style={{ backgroundImage: TRAIT_PANEL_BACKGROUND }}
+                />
+              </span>
+              <ul className="text-teal-gray-300 relative min-h-24 w-full list-disc ps-7.5 text-xl leading-[1.6] tracking-[-0.2px]">
+                {activePart.traits.map((trait) => (
+                  <li key={trait}>{trait}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <GlassCtaButton>{ABOUT_RECRUIT.ctaLabel}</GlassCtaButton>
+    </section>
+  )
+}
