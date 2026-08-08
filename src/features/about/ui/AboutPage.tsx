@@ -2,6 +2,7 @@ import { HeroSection } from "./sections/HeroSection"
 import { IntroSection } from "./sections/IntroSection"
 import { PossibilitySection } from "./sections/PossibilitySection"
 import { RecruitPartsSection } from "./sections/RecruitPartsSection"
+import { SchoolsSection } from "./sections/SchoolsSection"
 
 // 앱 전체는 밝은 배경(__root 의 bg-teal-gray-50)인데 이 페이지만 다크다.
 // 라우트 안에서 자체 배경을 깐다.
@@ -42,6 +43,7 @@ export function AboutPage() {
         <IntroSection />
         <PossibilitySection />
         <RecruitPartsSection />
+        <SchoolsSection />
       </div>
     </div>
   )
