@@ -18,7 +18,7 @@ describe("getPublicTermByType", () => {
   it("문자열 약관 ID를 숫자로 정규화한다", async () => {
     vi.mocked(api.get).mockResolvedValueOnce({
       data: {
-        isSuccess: true,
+        success: true,
         code: "COMMON200",
         message: "OK",
         result: {
@@ -43,7 +43,7 @@ describe("getPublicTermByType", () => {
   it("숫자로 변환할 수 없는 약관 ID는 거부한다", async () => {
     vi.mocked(api.get).mockResolvedValueOnce({
       data: {
-        isSuccess: true,
+        success: true,
         code: "COMMON200",
         message: "OK",
         result: { id: "invalid", link: "", isMandatory: true },
