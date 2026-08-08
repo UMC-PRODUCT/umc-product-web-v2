@@ -400,4 +400,100 @@ describe("RecruitmentQuotaPage 저장 경로 분류", () => {
     )
     expect(screen.queryByText("Ferrum")).not.toBeInTheDocument()
   })
+
+  it("학교 운영진의 지부명이 없으면 모집 데이터를 조회하지 않는다", () => {
+    const schoolPresidentWithoutChapterName: MemberInfoResponse = {
+      id: "member-1",
+      name: "가천대 회장",
+      nickname: "가천대 회장",
+      email: "gacheon_10_schoolpresident@umc.dev",
+      schoolId: "10",
+      schoolName: "가천대학교",
+      profileImageLink: null,
+      status: "ACTIVE",
+      hasLocalCredential: true,
+      roles: [
+        {
+          challengerRoleId: "role-1",
+          challengerId: "challenger-1",
+          roleType: "SCHOOL_PRESIDENT",
+          organizationType: "SCHOOL",
+          organizationId: "10",
+          gisuId: "15",
+          gisu: "10",
+        },
+      ],
+      currentGisuMemberInfo: {
+        gisuId: "15",
+        generation: "10",
+        challenger: {
+          challengerId: "challenger-1",
+          part: "PLAN",
+          challengerStatus: "ACTIVE",
+        },
+        isAdmin: true,
+        roleTypes: ["SCHOOL_PRESIDENT"],
+      },
+      challengerRecords: [
+        {
+          challengerId: "challenger-1",
+          memberId: "member-1",
+          gisuId: "15",
+          gisu: "10",
+          chapterId: "29",
+          chapterName: "",
+          part: "PLAN",
+          challengerStatus: "ACTIVE",
+          name: "가천대 회장",
+          nickname: "가천대 회장",
+          email: "gacheon_10_schoolpresident@umc.dev",
+          schoolId: "10",
+          schoolName: "가천대학교",
+        },
+      ],
+    }
+
+    vi.mocked(useMe).mockReturnValue({
+      data: schoolPresidentWithoutChapterName,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useMe>)
+    vi.mocked(useAdminRecruitingRounds).mockReturnValue({
+      groups: [
+        {
+          seasonId: "chromium-season",
+          gisuId: "15",
+          chapterId: "29",
+          chapterName: "Chromium",
+          schoolId: "10",
+          schoolName: "가천대학교",
+          rounds: [],
+        },
+      ],
+      generation: 10,
+      isLoading: false,
+      isError: false,
+      isForbidden: false,
+    } as unknown as ReturnType<typeof useAdminRecruitingRounds>)
+    vi.mocked(useRecruitingSeasonQuotas).mockReturnValue({
+      seasonConfigsMap: new Map(),
+      updateQuotas: vi.fn(),
+      createSeason: vi.fn(),
+      updateSeason: vi.fn(),
+      isSaving: false,
+      isLoading: false,
+      isError: false,
+    })
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RecruitmentQuotaPage />
+      </QueryClientProvider>,
+    )
+
+    expect(useAdminRecruitingRounds).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({ chapterId: "29", enabled: false }),
+    )
+    expect(screen.getByTestId("quota-schools")).toHaveTextContent(/^$/)
+  })
 })

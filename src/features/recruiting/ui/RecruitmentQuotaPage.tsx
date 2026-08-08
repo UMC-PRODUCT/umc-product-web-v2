@@ -63,7 +63,9 @@ export function RecruitmentQuotaPage() {
   const viewerChapterName = viewerChapterRecord?.chapterName
   const isSchoolScoped = isSchoolLeadership(me) && !isCentralCore(me)
   const canLoadRounds =
-    !isMeLoading && (!isSchoolScoped || Boolean(viewerChapterId))
+    !isMeLoading &&
+    (!isSchoolScoped ||
+      (Boolean(viewerChapterId) && Boolean(viewerChapterName)))
   const isAll = !isSchoolScoped && chapterTab === "all"
   const activeChapter = isSchoolScoped ? viewerChapterName : chapterTab
 
@@ -134,7 +136,8 @@ export function RecruitmentQuotaPage() {
       activeGisuId,
     )
 
-    if (!isSchoolScoped || !viewerChapterName) return mapped
+    if (!isSchoolScoped) return mapped
+    if (!viewerChapterName) return []
     return mapped.filter(
       (chapterData) => chapterData.chapter === viewerChapterName,
     )
