@@ -14,8 +14,14 @@ export const recruitingKeys = {
     [...recruitingKeys.rounds(), gisuId, "OPEN"] as const,
   pastRoundList: (gisuId: string) =>
     [...recruitingKeys.rounds(), gisuId, "PAST"] as const,
-  adminRoundList: (gisuId: string, sort?: string) =>
-    [...recruitingKeys.rounds(), "admin", gisuId, sort ?? "NEWEST"] as const,
+  adminRoundList: (gisuId: string, sort?: string, chapterId?: string) =>
+    [
+      ...recruitingKeys.rounds(),
+      "admin",
+      gisuId,
+      sort ?? "NEWEST",
+      chapterId ?? "all",
+    ] as const,
 
   round: (gisuId: string, roundId: string) =>
     [...recruitingKeys.rounds(), gisuId, roundId] as const,

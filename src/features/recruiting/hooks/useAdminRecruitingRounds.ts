@@ -11,6 +11,8 @@ import type { AdminRoundsQuery } from "../api/types"
 export interface AdminRecruitingRoundsOptions {
   fresh?: boolean
   refetchInterval?: number | false
+  chapterId?: string
+  enabled?: boolean
 }
 
 // 모집 생성 화면에서 seasonId를 찾는 용도 전용. 공개 목록(useRecruitingRounds)은
@@ -22,23 +24,30 @@ export function useAdminRecruitingRounds(
   options: AdminRecruitingRoundsOptions = {},
 ) {
   const shouldRefresh = options.fresh ?? false
+  const isEnabled = options.enabled ?? true
   const gisuQuery = useActiveGisu()
   const gisuId =
     gisuQuery.data?.gisuId != null ? String(gisuQuery.data.gisuId) : null
+  const chapterId = options.chapterId
 
   const roundsQuery = useQuery({
-    queryKey: recruitingKeys.adminRoundList(gisuId ?? "", sort),
+    queryKey: recruitingKeys.adminRoundList(gisuId ?? "", sort, chapterId),
     queryFn: async () => {
       try {
-        return await getAdminRounds({ gisuId: gisuId!, sort })
+        return await getAdminRounds({ gisuId: gisuId!, chapterId, sort })
       } catch (error) {
         if (isAxiosError(error) && error.response?.status === 403) {
-          return await getAllPublicRounds(gisuId!)
+          const publicGroups = await getAllPublicRounds(gisuId!)
+          return chapterId
+            ? publicGroups.filter(
+                (group) => String(group.chapterId) === String(chapterId),
+              )
+            : publicGroups
         }
         throw error
       }
     },
-    enabled: gisuId != null,
+    enabled: isEnabled && gisuId != null,
     retry: (failureCount, error) =>
       !(isAxiosError(error) && error.response?.status === 403) &&
       failureCount < 2,

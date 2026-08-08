@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
+import { useMe } from "@/entities/member/hooks/useMe"
+import {
+  isCentralCore,
+  isSchoolLeadership,
+} from "@/entities/member/model/identity"
+import { getCurrentGisuChallengerRecords } from "@/entities/member/view-mode/currentGisuRecords"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
@@ -32,6 +38,7 @@ import { QuotaApplicantStatusCard } from "./QuotaApplicantStatusCard"
 const QUOTA_PAGE_REFETCH_INTERVAL = 30_000
 
 export function RecruitmentQuotaPage() {
+  const { data: me, isLoading: isMeLoading } = useMe()
   const [chapterTab, setChapterTab] = useState("all")
   const [isDirty, setIsDirty] = useState(false)
   const [allocationStatus, setAllocationStatus] =
@@ -48,13 +55,33 @@ export function RecruitmentQuotaPage() {
 
   const addToast = useToastStore((state) => state.addToast)
 
+  const viewerChapterRecord = useMemo(
+    () => getCurrentGisuChallengerRecords(me)[0],
+    [me],
+  )
+  const viewerChapterId = viewerChapterRecord?.chapterId
+  const viewerChapterName = viewerChapterRecord?.chapterName
+  const isSchoolScoped = isSchoolLeadership(me) && !isCentralCore(me)
+  const canLoadRounds =
+    !isMeLoading && (!isSchoolScoped || Boolean(viewerChapterId))
+  const isAll = !isSchoolScoped && chapterTab === "all"
+  const activeChapter = isSchoolScoped ? viewerChapterName : chapterTab
+
   const { groups } = useAdminRecruitingRounds(undefined, {
     fresh: true,
     refetchInterval: QUOTA_PAGE_REFETCH_INTERVAL,
+    chapterId: isSchoolScoped ? viewerChapterId : undefined,
+    enabled: canLoadRounds,
   })
   const { chapters: serverChapters } = useSchoolChapterMap({
     refetchInterval: QUOTA_PAGE_REFETCH_INTERVAL,
   })
+  const visibleGroups = useMemo(() => {
+    if (!isSchoolScoped || !viewerChapterId) return groups
+    return groups.filter(
+      (group) => String(group.chapterId) === String(viewerChapterId),
+    )
+  }, [groups, isSchoolScoped, viewerChapterId])
   const { data: activeGisuData } = useActiveGisu()
   const activeGisuId = activeGisuData?.gisuId
     ? String(activeGisuData.gisuId)
@@ -62,10 +89,10 @@ export function RecruitmentQuotaPage() {
 
   const activeTabGroups = useMemo(
     () =>
-      chapterTab === "all"
-        ? groups
-        : groups.filter((g) => g.chapterName === chapterTab),
-    [groups, chapterTab],
+      isAll
+        ? visibleGroups
+        : visibleGroups.filter((g) => g.chapterName === activeChapter),
+    [activeChapter, isAll, visibleGroups],
   )
   const seasonIds = useMemo(
     () => [...new Set(activeTabGroups.map((g) => g.seasonId))],
@@ -78,8 +105,8 @@ export function RecruitmentQuotaPage() {
     })
 
   const allSeasonIds = useMemo(
-    () => [...new Set(groups.map((g) => g.seasonId))],
-    [groups],
+    () => [...new Set(visibleGroups.map((g) => g.seasonId))],
+    [visibleGroups],
   )
   const { permittedSeasonIds, isLoading: isPermissionLoading } =
     useRecruitingPermissions(allSeasonIds)
@@ -99,16 +126,26 @@ export function RecruitmentQuotaPage() {
     seasonIds.length > 0 &&
     seasonIds.every((id) => permittedSeasonIds.has(String(id)))
 
-  const allChaptersData = useMemo(
-    () =>
-      mapGroupsToChapterQuotaData(
-        groups,
-        seasonConfigsMap,
-        serverChapters,
-        activeGisuId,
-      ),
-    [groups, seasonConfigsMap, serverChapters, activeGisuId],
-  )
+  const allChaptersData = useMemo(() => {
+    const mapped = mapGroupsToChapterQuotaData(
+      visibleGroups,
+      seasonConfigsMap,
+      serverChapters,
+      activeGisuId,
+    )
+
+    if (!isSchoolScoped || !viewerChapterName) return mapped
+    return mapped.filter(
+      (chapterData) => chapterData.chapter === viewerChapterName,
+    )
+  }, [
+    activeGisuId,
+    visibleGroups,
+    isSchoolScoped,
+    seasonConfigsMap,
+    serverChapters,
+    viewerChapterName,
+  ])
 
   const chaptersDataWithEdits = useMemo(() => {
     return allChaptersData.map((chapterData) => {
@@ -180,8 +217,6 @@ export function RecruitmentQuotaPage() {
 
     if (isSynced) setEditedSchoolsMap(new Map())
   }, [allChaptersData, editedSchoolsMap, isDirty])
-
-  const isAll = chapterTab === "all"
 
   const handleTabChange = (nextValue: string) => {
     setChapterTab(nextValue)
@@ -324,7 +359,7 @@ export function RecruitmentQuotaPage() {
   const handleSave = async () => {
     const targetChapters = isAll
       ? allChaptersData
-      : allChaptersData.filter((c) => c.chapter === chapterTab)
+      : allChaptersData.filter((c) => c.chapter === activeChapter)
 
     const changedRows = targetChapters.flatMap((chapterData) => {
       const edits = editedSchoolsMap.get(chapterData.chapter)
@@ -343,7 +378,7 @@ export function RecruitmentQuotaPage() {
     const newSeasonRows = changedRows.filter(
       (row): row is SchoolQuotaRow & { gisuId: string; schoolId: string } => {
         if (!row.seasonId && Boolean(row.gisuId) && Boolean(row.schoolId)) {
-          const targetGroup = groups.find(
+          const targetGroup = visibleGroups.find(
             (g) =>
               String(g.schoolId) === String(row.schoolId) &&
               String(g.gisuId) === String(row.gisuId),
@@ -462,9 +497,9 @@ export function RecruitmentQuotaPage() {
   }
 
   const selectedChapterData = chaptersDataWithEdits.find(
-    (item) => item.chapter === chapterTab,
+    (item) => item.chapter === activeChapter,
   ) ?? {
-    chapter: chapterTab,
+    chapter: activeChapter ?? "",
     schoolCount: 0,
     schools: [],
     totals: { pm: 0, design: 0, webPe: 0, mobilePe: 0, total: 0 },
@@ -485,7 +520,7 @@ export function RecruitmentQuotaPage() {
   const showAutoAllocateButton = !isAll && canEditEverySeason
   const showSaveButton = canEditAny
 
-  const pageTitle = isAll ? "UMC 11th" : chapterTab
+  const pageTitle = isAll ? "UMC 11th" : (activeChapter ?? "")
   const statusCardTitle = isAll ? "전체 지원자 현황" : "지부 지원자 현황"
 
   return (
@@ -501,7 +536,9 @@ export function RecruitmentQuotaPage() {
         className="pl-3"
       />
 
-      <ChapterTabs value={chapterTab} onValueChange={handleTabChange} />
+      {!isSchoolScoped && !isMeLoading && (
+        <ChapterTabs value={chapterTab} onValueChange={handleTabChange} />
+      )}
 
       <div className="flex w-full flex-col gap-6">
         <p className="text-heading-3-semibold px-3 text-teal-700">
