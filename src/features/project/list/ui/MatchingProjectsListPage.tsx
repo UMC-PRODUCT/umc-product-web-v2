@@ -72,10 +72,19 @@ function toMatchingProject(project: ProjectItem): MatchingProject {
 
 interface MatchingProjectsListPageProps {
   useMockData?: boolean
+  /**
+   * 카드 그리드 열 수.
+   *
+   * 로그인 여부가 아니라 화면 폭이 정한다. 이 목록은 사이드바가 있는
+   * `/matching/projects` 와 사이드바가 없는 `/projects` 가 함께 쓰는데,
+   * 같은 열 수를 주면 한쪽 카드가 디자인보다 커진다.
+   */
+  columns?: 2 | 3
 }
 
 export function MatchingProjectsListPage({
   useMockData = false,
+  columns = 2,
 }: MatchingProjectsListPageProps) {
   const {
     openFilterId,
@@ -228,10 +237,8 @@ export function MatchingProjectsListPage({
 
         <div
           className={cn(
-            // 게스트는 사이드바가 없어 폭이 넓다. 2열로 두면 카드가 디자인의
-            // 두 배 가까이 커진다. 로그인 화면은 매칭과 같은 그리드라 건드리지 않는다.
             "grid min-w-0 gap-5",
-            isGuest ? "grid-cols-3" : "grid-cols-2",
+            columns === 3 ? "grid-cols-3" : "grid-cols-2",
             openFilterId && "pointer-events-none",
           )}
         >

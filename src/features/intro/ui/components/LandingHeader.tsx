@@ -1,6 +1,7 @@
-import { useLocation, useNavigate } from "@tanstack/react-router"
+import { Link, useLocation, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
+import { useAuthStore } from "@/entities/member/store/authStore"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import {
   getDisabledNavMessage,
@@ -8,12 +9,33 @@ import {
   type HeaderNavItem,
   isHeaderNavItemActive,
 } from "@/shared/config/headerNavPolicy"
+import {
+  buildLoginRedirectSearch,
+  getCurrentReturnTo,
+} from "@/shared/lib/loginRedirect"
 import { cn } from "@/shared/lib/utils"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
-export function LandingHeader() {
+import type { RecruitingStatus } from "@/shared/model/recruitingStatus"
+
+/** 어두운 히어로 위에 얹히는 헤더라 우측 버튼도 밝은 배경을 쓸 수 없다. */
+const SLOT_BUTTON_CLASS =
+  "flex h-10 min-w-16 items-center justify-center rounded-[10px] px-5 text-center text-[16px] font-semibold tracking-[-0.32px] whitespace-nowrap transition-colors"
+
+interface LandingHeaderProps {
+  /**
+   * 모집 상태. 라우트에서 넣어 준다.
+   *
+   * 여기서 직접 조회하지 않는 이유는 조회 훅이 리크루팅 기능에 있어서다.
+   * 소개 화면이 그 훅을 바로 부르면 기능끼리 가로로 엮여 경계 검사에 걸린다.
+   */
+  recruitingStatus?: RecruitingStatus
+}
+
+export function LandingHeader({ recruitingStatus }: LandingHeaderProps) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const isAuthed = useAuthStore((s) => s.isAuthed)
   const [isVisible, setIsVisible] = useState(true)
   const lastScrollY = useRef(0)
   const visibleRef = useRef(true)
@@ -142,7 +164,40 @@ export function LandingHeader() {
           })}
         </nav>
 
-        <div className="h-full w-55" />
+        {/* 랜딩에서 지원 흐름으로 들어가는 유일한 진입로다. 비로그인 방문자가
+            대부분이라 로그인 자리도 함께 둔다. */}
+        <div className="flex h-full w-55 items-center justify-end gap-4 pr-12.5">
+          {recruitingStatus?.phase === "open" && (
+            <Link
+              to="/projects/notice"
+              className={cn(
+                SLOT_BUTTON_CLASS,
+                "border border-white/20 bg-white/15 text-white hover:bg-white/25",
+              )}
+            >
+              지원하기
+            </Link>
+          )}
+          {recruitingStatus?.phase === "closed" && !isAuthed && (
+            <span
+              className={cn(
+                SLOT_BUTTON_CLASS,
+                "border border-white/10 bg-white/5 font-medium text-white/50",
+              )}
+            >
+              모집 마감
+            </span>
+          )}
+          {!isAuthed && (
+            <Link
+              to="/login"
+              search={buildLoginRedirectSearch(getCurrentReturnTo())}
+              className="text-[16px] font-semibold tracking-[-0.32px] whitespace-nowrap text-white transition-colors hover:text-white/70"
+            >
+              로그인
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   )

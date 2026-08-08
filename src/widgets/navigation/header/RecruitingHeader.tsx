@@ -8,7 +8,9 @@ import {
 import { useAuthStore } from "@/entities/member/store/authStore"
 import { useHeaderRecruitingStatus } from "@/features/recruiting/hooks/useHeaderRecruitingStatus"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
+import { getDisabledNavMessage } from "@/shared/config/headerNavPolicy"
 import { SETTINGS_ENTRY_PATH } from "@/shared/config/settingsNavigation"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { GuestProfileButton } from "@/widgets/navigation/header/GuestProfileButton"
 import HeaderButton from "@/widgets/navigation/header/HeaderButton"
 import NavigationButton from "@/widgets/navigation/header/NavigationButton"
@@ -16,6 +18,7 @@ import Profile from "@/widgets/navigation/header/Profile"
 import {
   buildRecruitingNavItems,
   isNavActive,
+  type NavItem,
 } from "@/widgets/navigation/header/recruitingHeaderNav"
 import {
   type RecruitingStatus,
@@ -47,6 +50,21 @@ export default function RecruitingHeader({
   // 잠깐 더 보이는 편이 덜 어색하다.
   const isRecruitingPeriod = status?.phase === "open"
 
+  const addToast = useToastStore((s) => s.addToast)
+
+  // 비활성 탭은 Link 가 아니라 버튼으로 그려진다. 핸들러를 안 주면 눌러도
+  // 아무 일도 일어나지 않아 고장 난 것처럼 보인다. 아직 없는 화면이라는 안내는
+  // 실패가 아니므로 에러(red)가 아닌 공지(notice)로 띄운다.
+  const notifyComingSoon = (item: NavItem) => {
+    addToast({
+      message: getDisabledNavMessage(item),
+      color: "primary",
+      variant: "deep",
+      type: "notice",
+      duration: 3000,
+    })
+  }
+
   const navItems = buildRecruitingNavItems({
     isAuthed,
     showRecruiting,
@@ -69,6 +87,7 @@ export default function RecruitingHeader({
             to={item.to}
             selected={isNavActive(pathname, item)}
             disabled={item.disabled}
+            onClick={item.disabled ? () => notifyComingSoon(item) : undefined}
             className="min-w-18 px-4.5"
           />
         ))}
