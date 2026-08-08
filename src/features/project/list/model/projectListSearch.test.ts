@@ -106,14 +106,4 @@ describe("validateProjectListSearch", () => {
       expect(search.keyword).toBeUndefined()
     })
   })
-
-  describe("mock", () => {
-    it("projects 만 통과시킨다", () => {
-      expect(validateProjectListSearch({ mock: "projects" }).mock).toBe(
-        "projects",
-      )
-      expect(validateProjectListSearch({ mock: "true" }).mock).toBeUndefined()
-      expect(validateProjectListSearch({}).mock).toBeUndefined()
-    })
-  })
 })

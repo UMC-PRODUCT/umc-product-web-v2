@@ -15,8 +15,4 @@ export type {
   ProjectCoverImage,
   ProjectRecruitRow,
 } from "@/entities/project/model/matchingProject"
-export {
-  DEFAULT_MATCHING_PROJECT_MOCK,
-  MOCK_MATCHING_PROJECTS,
-} from "@/entities/project/model/matchingProject.mock"
 export { FilterDropdown } from "@/shared/ui/FilterDropDown"

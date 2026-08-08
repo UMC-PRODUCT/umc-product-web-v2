@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router"
 
-import { calcAllocationRate } from "../../model/interviewSchedule"
-
-import type { InterviewScheduleRound } from "../../model/interviewSchedule.mock"
+import {
+  calcAllocationRate,
+  type InterviewScheduleRound,
+} from "../../model/interviewSchedule"
 
 function formatPeriod(startAt: string, endAt: string) {
   const start = new Date(startAt)
@@ -23,7 +24,12 @@ interface InterviewScheduleRoundCardProps {
 export function InterviewScheduleRoundCard({
   round,
 }: InterviewScheduleRoundCardProps) {
-  const rate = calcAllocationRate(round.assignedCount, round.totalCount)
+  const assignedCount = round.assignedCount
+  const totalCount = round.totalCount
+  const rate =
+    assignedCount !== undefined && totalCount !== undefined
+      ? calcAllocationRate(assignedCount, totalCount)
+      : null
 
   return (
     <Link
@@ -45,23 +51,29 @@ export function InterviewScheduleRoundCard({
         </div>
       </div>
 
-      <div className="flex shrink-0 flex-col items-end gap-1.5">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-body-2-medium text-teal-gray-600">
-            면접 배정률
-          </span>
-          <span className="text-label-1-medium text-teal-gray-400">
-            ({round.assignedCount}/{round.totalCount})
-          </span>
-          <span className="text-heading-6-semibold text-teal-600">{rate}%</span>
-        </div>
-        <div className="bg-teal-gray-100 h-1.5 w-45 overflow-hidden rounded-full">
-          <div
-            className="h-full rounded-full bg-teal-500"
-            style={{ width: `${rate}%` }}
-          />
-        </div>
-      </div>
+      {rate !== null &&
+        assignedCount !== undefined &&
+        totalCount !== undefined && (
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-body-2-medium text-teal-gray-600">
+                면접 배정률
+              </span>
+              <span className="text-label-1-medium text-teal-gray-400">
+                ({assignedCount}/{totalCount})
+              </span>
+              <span className="text-heading-6-semibold text-teal-600">
+                {rate}%
+              </span>
+            </div>
+            <div className="bg-teal-gray-100 h-1.5 w-45 overflow-hidden rounded-full">
+              <div
+                className="h-full rounded-full bg-teal-500"
+                style={{ width: `${rate}%` }}
+              />
+            </div>
+          </div>
+        )}
     </Link>
   )
 }

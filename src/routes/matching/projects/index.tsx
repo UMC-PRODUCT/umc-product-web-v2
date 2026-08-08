@@ -12,7 +12,5 @@ export const Route = createFileRoute("/matching/projects/")({
 })
 
 function MatchingProjectsRoute() {
-  const { mock } = Route.useSearch()
-
-  return <MatchingProjectsListPage useMockData={mock === "projects"} />
+  return <MatchingProjectsListPage />
 }
