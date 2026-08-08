@@ -18,10 +18,12 @@ interface ChapterQuotaTableCardProps {
   onManualEdit?: () => void
   onErrorExceeded?: (partName: string, maxAllowed: number) => void
   onSchoolsDataChange?: (schools: SchoolQuotaRow[]) => void
+  onSchoolDataChange?: (school: SchoolQuotaRow) => void
   /** 자동 배정 요청. 대상 지부가 자기 자신일 때만 한 번 실행한다. */
   autoAllocateRequest?: { id: number; chapter: string } | null
   /** 시즌별 편집 가능 여부. 없으면 전부 편집 가능으로 본다. */
   canEditSeason?: (seasonId: string | undefined) => boolean
+  conflictedSchoolNames?: ReadonlySet<string>
   className?: string
 }
 
@@ -32,8 +34,10 @@ export function ChapterQuotaTableCard({
   onManualEdit,
   onErrorExceeded,
   onSchoolsDataChange,
+  onSchoolDataChange,
   autoAllocateRequest,
   canEditSeason,
+  conflictedSchoolNames,
   className,
 }: ChapterQuotaTableCardProps) {
   const [schoolsData, setSchoolsData] = useState<SchoolQuotaRow[]>(data.schools)
@@ -167,6 +171,9 @@ export function ChapterQuotaTableCard({
         updated.pm + updated.design + updated.webPe + updated.mobilePe
       return { ...updated, total }
     })
+    const updatedSchool = nextSchoolsData.find(
+      (school) => school.schoolName === schoolName,
+    )
 
     prevSchoolsRef.current = nextSchoolsData
     setSchoolsData(nextSchoolsData)
@@ -186,7 +193,7 @@ export function ChapterQuotaTableCard({
 
     onDirtyChange?.(true)
     onManualEdit?.()
-    onSchoolsDataChange?.(nextSchoolsData)
+    if (updatedSchool) onSchoolDataChange?.(updatedSchool)
   }
 
   const currentPMTotal = schoolsData.reduce((acc, s) => acc + s.pm, 0)
@@ -297,14 +304,25 @@ export function ChapterQuotaTableCard({
           const readOnly = canEditSeason
             ? !canEditSeason(school.seasonId)
             : false
+          const isConflicted = conflictedSchoolNames?.has(school.schoolName)
           return (
             <div
               key={school.schoolName}
               className="divide-teal-gray-300 flex h-14 w-full divide-x"
             >
-              <div className="bg-teal-gray-50 flex w-42.5 items-center justify-center">
+              <div
+                className={cn(
+                  "bg-teal-gray-50 flex w-42.5 items-center justify-center",
+                  isConflicted && "bg-warning-50",
+                )}
+              >
                 <p className="text-heading-7-semibold text-teal-gray-700">
                   {school.schoolName}
+                  {isConflicted && (
+                    <span className="text-label-2-medium text-warning-500 pl-1">
+                      충돌
+                    </span>
+                  )}
                 </p>
               </div>
               <QuotaEditableCell

@@ -6,6 +6,8 @@ import { useAdminRecruitingRounds } from "../hooks/useAdminRecruitingRounds"
 import { useRecruitingSeasonQuotas } from "../hooks/useRecruitingSeasonQuotas"
 import { RecruitmentQuotaPage } from "./RecruitmentQuotaPage"
 
+import type { RecruitingSeasonConfigurationResponse } from "../api/types"
+
 vi.mock("../hooks/useAdminRecruitingRounds")
 vi.mock("../hooks/useRecruitingSeasonQuotas")
 vi.mock("../hooks/useRecruitingPermissions", () => ({
@@ -19,15 +21,18 @@ vi.mock("@/shared/ui/toast/useToastStore", () => ({
 }))
 
 vi.mock("./ChapterQuotaTableCard", () => ({
-  ChapterQuotaTableCard: vi.fn(({ onSchoolsDataChange, onDirtyChange }) => (
-    <div>
-      <button
-        type="button"
-        data-testid="edit-school-btn"
-        onClick={() => {
-          onDirtyChange()
-          onSchoolsDataChange([
-            {
+  ChapterQuotaTableCard: vi.fn(
+    ({ onSchoolDataChange, onDirtyChange, conflictedSchoolNames }) => (
+      <div>
+        <div data-testid="conflict-names">
+          {[...(conflictedSchoolNames ?? [])].join(",")}
+        </div>
+        <button
+          type="button"
+          data-testid="edit-school-btn"
+          onClick={() => {
+            onDirtyChange()
+            onSchoolDataChange?.({
               seasonId: undefined,
               gisuId: "15",
               schoolId: "10",
@@ -37,14 +42,14 @@ vi.mock("./ChapterQuotaTableCard", () => ({
               webPe: 5,
               mobilePe: 5,
               total: 14,
-            },
-          ])
-        }}
-      >
-        Trigger Edit
-      </button>
-    </div>
-  )),
+            })
+          }}
+        >
+          Trigger Edit
+        </button>
+      </div>
+    ),
+  ),
 }))
 
 describe("RecruitmentQuotaPage 저장 경로 분류", () => {
@@ -119,5 +124,104 @@ describe("RecruitmentQuotaPage 저장 경로 분류", () => {
       })
       expect(mockUpdateQuotas).not.toHaveBeenCalled()
     })
+  })
+
+  it("편집 중인 row는 서버 갱신으로 덮어쓰지 않고 충돌을 표시한다", async () => {
+    const seasonConfigsMap = new Map<
+      string,
+      RecruitingSeasonConfigurationResponse
+    >([
+      [
+        "unconfigured-season-123",
+        {
+          id: "unconfigured-season-123",
+          gisuId: "15",
+          schoolId: "10",
+          memo: null,
+          quotas: [
+            { track: "PLAN", targetCount: 1 },
+            { track: "DESIGN", targetCount: 1 },
+            { track: "WEB_PRODUCT_ENGINEER", targetCount: 1 },
+            { track: "MOBILE_PRODUCT_ENGINEER", targetCount: 1 },
+          ],
+          rounds: [],
+        },
+      ],
+    ])
+
+    vi.mocked(useAdminRecruitingRounds).mockReturnValue({
+      groups: [
+        {
+          seasonId: "unconfigured-season-123",
+          gisuId: "15",
+          chapterId: "1",
+          chapterName: "Chromium",
+          schoolId: "10",
+          schoolName: "서울대학교",
+          rounds: [],
+        },
+      ],
+      generation: 15,
+      isLoading: false,
+      isError: false,
+      isForbidden: false,
+    } as unknown as ReturnType<typeof useAdminRecruitingRounds>)
+
+    vi.mocked(useRecruitingSeasonQuotas).mockReturnValue({
+      seasonConfigsMap,
+      updateQuotas: vi.fn(),
+      createSeason: vi.fn(),
+      updateSeason: vi.fn(),
+      isSaving: false,
+      isLoading: false,
+      isError: false,
+    })
+
+    const queryClient = new QueryClient()
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <RecruitmentQuotaPage />
+      </QueryClientProvider>,
+    )
+
+    fireEvent.click(screen.getAllByTestId("edit-school-btn")[0]!)
+
+    seasonConfigsMap.set("unconfigured-season-123", {
+      id: "unconfigured-season-123",
+      gisuId: "15",
+      schoolId: "10",
+      memo: null,
+      quotas: [
+        { track: "PLAN", targetCount: 3 },
+        { track: "DESIGN", targetCount: 1 },
+        { track: "WEB_PRODUCT_ENGINEER", targetCount: 1 },
+        { track: "MOBILE_PRODUCT_ENGINEER", targetCount: 1 },
+      ],
+      rounds: [],
+    })
+    vi.mocked(useRecruitingSeasonQuotas).mockReturnValue({
+      seasonConfigsMap: new Map(seasonConfigsMap),
+      updateQuotas: vi.fn(),
+      createSeason: vi.fn(),
+      updateSeason: vi.fn(),
+      isSaving: false,
+      isLoading: false,
+      isError: false,
+    })
+
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <RecruitmentQuotaPage />
+      </QueryClientProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("conflict-names")[0]).toHaveTextContent(
+        "서울대학교",
+      )
+    })
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "현재 입력값은 유지하고 있습니다",
+    )
   })
 })

@@ -1,5 +1,5 @@
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
@@ -31,21 +31,49 @@ export interface UpdateSeasonQuotasResult {
   failedCount: number
 }
 
-export function useRecruitingSeasonQuotas(seasonIds: string[]) {
+export interface RecruitingSeasonQuotasOptions {
+  fresh?: boolean
+  refetchInterval?: number | false
+}
+
+const SEASON_CONFIGURATION_REQUEST_GAP = 100
+
+const wait = (milliseconds: number) =>
+  new Promise<void>((resolve) => {
+    window.setTimeout(resolve, milliseconds)
+  })
+
+export function useRecruitingSeasonQuotas(
+  seasonIds: string[],
+  options: RecruitingSeasonQuotasOptions = {},
+) {
+  const shouldRefresh = options.fresh ?? false
+  const refetchInterval = options.refetchInterval ?? false
+  const shouldUseSequentialRefetch =
+    typeof refetchInterval === "number" && refetchInterval > 0
   const queryClient = useQueryClient()
   const addToast = useToastStore((state) => state.addToast)
+  const [isSequentialLoading, setIsSequentialLoading] = useState(false)
+  const seasonIdsKey = seasonIds.join("|")
 
   const uniqueSeasonIds = useMemo(
-    () => [...new Set(seasonIds.filter(Boolean))].sort(),
-    [seasonIds],
+    () => [...new Set(seasonIdsKey.split("|").filter(Boolean))].sort(),
+    [seasonIdsKey],
   )
 
   const { seasonConfigsMap, isLoading, isError } = useQueries({
     queries: uniqueSeasonIds.map((seasonId) => ({
       queryKey: recruitingKeys.seasonConfiguration(seasonId),
       queryFn: () => getRecruitingSeasonConfiguration(seasonId),
-      enabled: Boolean(seasonId),
-      staleTime: 5 * 60 * 1000,
+      enabled: !shouldUseSequentialRefetch && Boolean(seasonId),
+      staleTime: shouldRefresh ? 0 : 5 * 60 * 1000,
+      refetchOnMount: shouldUseSequentialRefetch
+        ? false
+        : shouldRefresh
+          ? "always"
+          : true,
+      refetchOnWindowFocus: shouldUseSequentialRefetch ? false : shouldRefresh,
+      refetchInterval: false,
     })),
     combine: (results) => {
       const map = new Map<string, RecruitingSeasonConfigurationResponse>()
@@ -63,13 +91,62 @@ export function useRecruitingSeasonQuotas(seasonIds: string[]) {
     },
   })
 
+  useEffect(() => {
+    if (!shouldUseSequentialRefetch || uniqueSeasonIds.length === 0) {
+      setIsSequentialLoading(false)
+      return
+    }
+
+    let cancelled = false
+    let isFetching = false
+
+    const fetchSeasonConfigurations = async (initialFetch: boolean) => {
+      if (cancelled || isFetching) return
+
+      isFetching = true
+      if (initialFetch) setIsSequentialLoading(true)
+
+      for (const [index, seasonId] of uniqueSeasonIds.entries()) {
+        if (cancelled) break
+
+        await queryClient
+          .fetchQuery({
+            queryKey: recruitingKeys.seasonConfiguration(seasonId),
+            queryFn: () => getRecruitingSeasonConfiguration(seasonId),
+            staleTime: 0,
+            retry: false,
+          })
+          .catch(() => undefined)
+
+        if (!cancelled && index < uniqueSeasonIds.length - 1) {
+          await wait(SEASON_CONFIGURATION_REQUEST_GAP)
+        }
+      }
+
+      if (initialFetch && !cancelled) setIsSequentialLoading(false)
+      isFetching = false
+    }
+
+    void fetchSeasonConfigurations(true)
+    const intervalId = window.setInterval(() => {
+      void fetchSeasonConfigurations(false)
+    }, refetchInterval)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(intervalId)
+    }
+  }, [
+    queryClient,
+    refetchInterval,
+    shouldUseSequentialRefetch,
+    uniqueSeasonIds,
+  ])
+
   const createSeasonMutation = useMutation({
     mutationFn: (payload: CreateRecruitingSeasonRequest) =>
       createRecruitingSeason(payload),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: recruitingKeys.seasons(),
-      })
       void queryClient.invalidateQueries({
         queryKey: recruitingKeys.rounds(),
       })
@@ -84,9 +161,12 @@ export function useRecruitingSeasonQuotas(seasonIds: string[]) {
       seasonId: string
       payload: UpdateRecruitingSeasonRequest
     }) => updateRecruitingSeason(seasonId, payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: recruitingKeys.seasons(),
+    onSuccess: (_data, variables) => {
+      void queryClient.fetchQuery({
+        queryKey: recruitingKeys.seasonConfiguration(variables.seasonId),
+        queryFn: () => getRecruitingSeasonConfiguration(variables.seasonId),
+        staleTime: 0,
+        retry: false,
       })
     },
   })
@@ -127,8 +207,17 @@ export function useRecruitingSeasonQuotas(seasonIds: string[]) {
       if (!data) return
 
       if (data.fulfilledCount > 0) {
-        void queryClient.invalidateQueries({
-          queryKey: recruitingKeys.seasons(),
+        const successfulSeasonIds = new Set(
+          data.successfulVariables.map(({ seasonId }) => seasonId),
+        )
+
+        successfulSeasonIds.forEach((seasonId) => {
+          void queryClient.fetchQuery({
+            queryKey: recruitingKeys.seasonConfiguration(seasonId),
+            queryFn: () => getRecruitingSeasonConfiguration(seasonId),
+            staleTime: 0,
+            retry: false,
+          })
         })
       }
 
@@ -163,7 +252,7 @@ export function useRecruitingSeasonQuotas(seasonIds: string[]) {
 
   return {
     seasonConfigsMap,
-    isLoading,
+    isLoading: shouldUseSequentialRefetch ? isSequentialLoading : isLoading,
     isError,
     updateQuotas: updateQuotasMutation.mutateAsync,
     createSeason: createSeasonMutation.mutateAsync,

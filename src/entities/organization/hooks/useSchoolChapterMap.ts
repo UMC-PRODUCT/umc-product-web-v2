@@ -4,7 +4,11 @@ import { useCallback, useMemo } from "react"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 
-export function useSchoolChapterMap() {
+export interface SchoolChapterMapOptions {
+  refetchInterval?: number | false
+}
+
+export function useSchoolChapterMap(options: SchoolChapterMapOptions = {}) {
   const { data: gisuData } = useActiveGisu()
 
   const activeGisuId = gisuData?.gisuId ? Number(gisuData.gisuId) : undefined
@@ -14,6 +18,7 @@ export function useSchoolChapterMap() {
     queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
     enabled: activeGisuId != null,
     staleTime: 5 * 60 * 1000,
+    refetchInterval: options.refetchInterval ?? false,
   })
 
   const chapters = useMemo(() => chaptersData?.chapters ?? [], [chaptersData])

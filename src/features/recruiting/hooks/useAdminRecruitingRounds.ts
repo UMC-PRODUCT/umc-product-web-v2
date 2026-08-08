@@ -8,11 +8,20 @@ import { getAdminRounds, getAllPublicRounds } from "../api/recruitingApi"
 
 import type { AdminRoundsQuery } from "../api/types"
 
+export interface AdminRecruitingRoundsOptions {
+  fresh?: boolean
+  refetchInterval?: number | false
+}
+
 // 모집 생성 화면에서 seasonId를 찾는 용도 전용. 공개 목록(useRecruitingRounds)은
 // OPEN/CLOSED 차수만 내려줘서 차수가 하나도 없는 시즌은 빠지므로, 관리자용
 // 목록(GET /admin/rounds)에서 시즌 자체를 조회해야 한다.
 // 평가자 권한만 있는 운영진 등 권한 부족으로 403을 받는 경우 공개 목록으로 폴백한다.
-export function useAdminRecruitingRounds(sort?: AdminRoundsQuery["sort"]) {
+export function useAdminRecruitingRounds(
+  sort?: AdminRoundsQuery["sort"],
+  options: AdminRecruitingRoundsOptions = {},
+) {
+  const shouldRefresh = options.fresh ?? false
   const gisuQuery = useActiveGisu()
   const gisuId =
     gisuQuery.data?.gisuId != null ? String(gisuQuery.data.gisuId) : null
@@ -33,7 +42,10 @@ export function useAdminRecruitingRounds(sort?: AdminRoundsQuery["sort"]) {
     retry: (failureCount, error) =>
       !(isAxiosError(error) && error.response?.status === 403) &&
       failureCount < 2,
-    staleTime: 5 * 60 * 1000,
+    staleTime: shouldRefresh ? 0 : 5 * 60 * 1000,
+    refetchOnMount: shouldRefresh ? "always" : true,
+    refetchOnWindowFocus: shouldRefresh,
+    refetchInterval: options.refetchInterval ?? false,
   })
 
   const isForbidden =
