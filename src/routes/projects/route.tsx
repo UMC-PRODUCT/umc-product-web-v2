@@ -38,7 +38,16 @@ function ProjectsLayout() {
     trail = ["리크루팅", "지원하기", "모집 공고"]
     title = "모집 공고"
     description = "학교별 모집 공고를 확인하고 지원할 수 있습니다."
-  } else if (normalizedPathname.startsWith("/projects/apply")) {
+  } else if (normalizedPathname === "/projects/apply-guide") {
+    trail = ["리크루팅", "지원하기", "지원 방법"]
+    title = "지원 방법"
+    description = undefined
+    // 아래 조건은 세그먼트 경계까지 본다. 접두사만 보면 `/projects/apply-guide`
+    // 같은 이웃 화면을 지원 폼으로 착각한다.
+  } else if (
+    normalizedPathname === "/projects/apply" ||
+    normalizedPathname.startsWith("/projects/apply/")
+  ) {
     // 지원 폼은 모집 공고 위에 카드로 올라오는 구조라 타이틀이 공고 그대로다
     trail = ["리크루팅", "지원하기", "지원 방법"]
     title = "모집 공고"

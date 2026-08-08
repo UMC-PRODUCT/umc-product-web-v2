@@ -27,14 +27,22 @@ export const HEADER_NAV_ITEMS: HeaderNavItem[] = [
   {
     label: "모집 안내",
     to: "/projects/notice",
-    // 지원 폼도 모집 안내에서 이어지는 화면이라 같은 탭이 켜져야 한다.
-    activeBasePaths: ["/projects/notice", "/projects/apply"],
+    // 지원 방법·지원 폼도 모집 안내에서 이어지는 화면이라 같은 탭이 켜져야 한다.
+    activeBasePaths: [
+      "/projects/notice",
+      "/projects/apply",
+      "/projects/apply-guide",
+    ],
   },
   {
     label: "프로젝트",
     to: "/projects",
     // `/projects` 로 시작하는 모집 흐름까지 삼키면 두 탭이 같이 켜진다.
-    inactiveBasePaths: ["/projects/notice", "/projects/apply"],
+    inactiveBasePaths: [
+      "/projects/notice",
+      "/projects/apply",
+      "/projects/apply-guide",
+    ],
   },
 ]
 

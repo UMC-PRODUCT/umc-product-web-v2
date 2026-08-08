@@ -71,6 +71,7 @@ import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
 import { Route as SignupOauthRouteImport } from './routes/signup/oauth'
 import { Route as ProjectsNoticeRouteImport } from './routes/projects/notice'
+import { Route as ProjectsApplyGuideRouteImport } from './routes/projects/apply-guide'
 import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
@@ -434,6 +435,11 @@ const ProjectsNoticeRoute = ProjectsNoticeRouteImport.update({
   path: '/notice',
   getParentRoute: () => ProjectsRouteRoute,
 } as any)
+const ProjectsApplyGuideRoute = ProjectsApplyGuideRouteImport.update({
+  id: '/apply-guide',
+  path: '/apply-guide',
+  getParentRoute: () => ProjectsRouteRoute,
+} as any)
 const MatchingStatusRoute = MatchingStatusRouteImport.update({
   id: '/status',
   path: '/status',
@@ -692,6 +698,7 @@ export interface FileRoutesByFullPath {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
+  '/projects/apply-guide': typeof ProjectsApplyGuideRoute
   '/projects/notice': typeof ProjectsNoticeRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
@@ -793,6 +800,7 @@ export interface FileRoutesByTo {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
+  '/projects/apply-guide': typeof ProjectsApplyGuideRoute
   '/projects/notice': typeof ProjectsNoticeRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
@@ -900,6 +908,7 @@ export interface FileRoutesById {
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
+  '/projects/apply-guide': typeof ProjectsApplyGuideRoute
   '/projects/notice': typeof ProjectsNoticeRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
@@ -1009,6 +1018,7 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
+    | '/projects/apply-guide'
     | '/projects/notice'
     | '/signup/oauth'
     | '/test/application-form'
@@ -1110,6 +1120,7 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
+    | '/projects/apply-guide'
     | '/projects/notice'
     | '/signup/oauth'
     | '/test/application-form'
@@ -1216,6 +1227,7 @@ export interface FileRouteTypes {
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
+    | '/projects/apply-guide'
     | '/projects/notice'
     | '/signup/oauth'
     | '/test/application-form'
@@ -1761,6 +1773,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsNoticeRouteImport
       parentRoute: typeof ProjectsRouteRoute
     }
+    '/projects/apply-guide': {
+      id: '/projects/apply-guide'
+      path: '/apply-guide'
+      fullPath: '/projects/apply-guide'
+      preLoaderRoute: typeof ProjectsApplyGuideRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
     '/matching/status': {
       id: '/matching/status'
       path: '/status'
@@ -2184,6 +2203,7 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
 )
 
 interface ProjectsRouteRouteChildren {
+  ProjectsApplyGuideRoute: typeof ProjectsApplyGuideRoute
   ProjectsNoticeRoute: typeof ProjectsNoticeRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
   ProjectsApplicationApplicationIdRoute: typeof ProjectsApplicationApplicationIdRoute
@@ -2193,6 +2213,7 @@ interface ProjectsRouteRouteChildren {
 }
 
 const ProjectsRouteRouteChildren: ProjectsRouteRouteChildren = {
+  ProjectsApplyGuideRoute: ProjectsApplyGuideRoute,
   ProjectsNoticeRoute: ProjectsNoticeRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
   ProjectsApplicationApplicationIdRoute: ProjectsApplicationApplicationIdRoute,
