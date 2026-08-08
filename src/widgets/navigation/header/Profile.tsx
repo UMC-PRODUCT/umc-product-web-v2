@@ -36,6 +36,7 @@ export default function Profile({ size = 40, src, className }: ProfileProps) {
         src={profileSrc}
         alt={me?.name ?? "프로필 이미지"}
       />
+      <span className="sr-only">프로필 메뉴</span>
     </ProfileDropdown>
   )
 }
