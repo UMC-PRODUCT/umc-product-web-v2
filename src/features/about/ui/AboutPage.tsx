@@ -1,3 +1,5 @@
+import { HeroSection } from "./sections/HeroSection"
+
 // 앱 전체는 밝은 배경(__root 의 bg-teal-gray-50)인데 이 페이지만 다크다.
 // 라우트 안에서 자체 배경을 깐다.
 //
@@ -32,7 +34,9 @@ export function AboutPage() {
             "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 100%)",
         }}
       />
-      <div className="relative mx-auto w-300"></div>
+      <div className="relative mx-auto w-300">
+        <HeroSection />
+      </div>
     </div>
   )
 }
