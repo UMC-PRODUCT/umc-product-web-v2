@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
@@ -26,6 +26,7 @@ import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
+import { recruitingKeys } from "../../api/queryKeys"
 import {
   checkRecruitingRoundTitleAvailability,
   updateRecruitingRound,
@@ -37,6 +38,12 @@ import {
   resolveViewerChapter,
   resolveViewerSchool,
 } from "../../model/recruitingRole"
+import { clearRecruitmentBasicDraft } from "../../model/recruitmentBasicDraft"
+import {
+  readRecruitmentBasicDraft,
+  recruitmentBasicInfoSnapshot,
+  writeRecruitmentBasicDraft,
+} from "../../model/recruitmentBasicDraft"
 import {
   buildRecruitmentPreviewTitle,
   buildRoundConfigurationPayload,
@@ -192,6 +199,7 @@ interface RecruitmentBasicInfoFormProps {
   // - chapterAdmin: 값이 있으면(학교 페이지에서 진입) 학교도 텍스트로 고정, 없으면(지부 페이지에서 진입) 드롭다운으로 선택 가능
   // - schoolStaff: 항상 고정
   initialSchool?: string
+  isServerDraft?: boolean
 }
 
 export function RecruitmentBasicInfoForm({
@@ -200,8 +208,10 @@ export function RecruitmentBasicInfoForm({
   role: roleProp,
   initialChapter,
   initialSchool,
+  isServerDraft = false,
 }: RecruitmentBasicInfoFormProps) {
   const addToast = useToastStore((state) => state.addToast)
+  const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
   const [tempSaveMessage, setTempSaveMessage] =
@@ -238,6 +248,7 @@ export function RecruitmentBasicInfoForm({
     isForbidden: isAdminRoundsForbidden,
   } = useAdminRecruitingRounds()
   const { data: me } = useMe()
+  const memberId = me?.id ?? null
   // role은 목록 화면(또는 사이드바 직접 진입)에서 넘어온 값이 있으면 그걸 우선
   // 쓰고(진입 지점에 따른 고정 문맥), 없으면 실제 로그인 사용자의 권한으로 판단한다.
   // me.roles(RoleType)가 정상적으로 채워져 있으면 그걸 신뢰하지만, 계정에 따라
@@ -259,6 +270,9 @@ export function RecruitmentBasicInfoForm({
     ? viewerChapterName
     : CHAPTERS[0]
   const viewerSchool = resolveViewerSchool(me)
+  const draftRestoreStatusRef = useRef<"pending" | "none" | "restored">(
+    isServerDraft ? "restored" : "pending",
+  )
 
   // 지부·학교 선택지는 실제 기수 기준 조직 데이터(GISU-201: 다른 화면들도 쓰는 getChaptersWithSchools)에서 가져온다.
   const gisuQuery = useActiveGisu()
@@ -288,10 +302,18 @@ export function RecruitmentBasicInfoForm({
   // 정해질 때마다 여기서 직접 조회해 스토어에 반영한다. 사이드바에서 이
   // 화면으로 바로 들어와 seasonId가 아예 없이 시작해도 동작하게 하기 위함.
   useEffect(() => {
+    if (isServerDraft && seasonId) return
     setSeasonId(
       findSeasonIdBySchool(seasonGroups, school, selectedSchoolId) ?? null,
     )
-  }, [school, selectedSchoolId, seasonGroups, setSeasonId])
+  }, [
+    isServerDraft,
+    school,
+    seasonId,
+    selectedSchoolId,
+    seasonGroups,
+    setSeasonId,
+  ])
 
   // 모집 제목("UMC N기 ...")에 쓰는 기수 번호도 다른 단계(2·3단계)에서 재조회
   // 없이 쓸 수 있도록 여기서 한 번만 스토어에 반영해둔다.
@@ -316,6 +338,7 @@ export function RecruitmentBasicInfoForm({
   // 로그인 정보가 늦게 도착해도 다시 채운다.
   useEffect(() => {
     if (!isRoleResolved) return
+    if (draftRestoreStatusRef.current === "restored") return
     patchBasicInfo({
       chapter:
         initialChapter ?? (role === "central" ? CHAPTERS[0] : viewerChapter),
@@ -337,7 +360,7 @@ export function RecruitmentBasicInfoForm({
   const [isSaving, setIsSaving] = useState(false)
   const [isAdvancing, setIsAdvancing] = useState(false)
   const savedSnapshotRef = useRef(
-    JSON.stringify({
+    recruitmentBasicInfoSnapshot({
       chapter,
       school,
       recruitmentType,
@@ -347,6 +370,23 @@ export function RecruitmentBasicInfoForm({
       periodForm,
     }),
   )
+
+  useEffect(() => {
+    if (
+      !memberId ||
+      !isRoleResolved ||
+      draftRestoreStatusRef.current !== "pending"
+    )
+      return
+
+    draftRestoreStatusRef.current = "none"
+    const draft = readRecruitmentBasicDraft(memberId)
+    if (!draft) return
+
+    patchBasicInfo(draft.basicInfo)
+    savedSnapshotRef.current = recruitmentBasicInfoSnapshot(draft.basicInfo)
+    draftRestoreStatusRef.current = "restored"
+  }, [isRoleResolved, memberId, patchBasicInfo])
 
   const previewTitle = buildRecruitmentPreviewTitle({
     school,
@@ -517,6 +557,7 @@ export function RecruitmentBasicInfoForm({
           contactText,
         }),
       )
+      void queryClient.invalidateQueries({ queryKey: recruitingKeys.rounds() })
       return true
     } catch (error) {
       const message = isAxiosError(error)
@@ -545,12 +586,25 @@ export function RecruitmentBasicInfoForm({
       return
     }
 
-    savedSnapshotRef.current = currentSnapshot
+    const savedBasicInfo = {
+      chapter,
+      school,
+      recruitmentType,
+      roundNo,
+      interviewRequired,
+      footer: resolvedFooter,
+      periodForm,
+    }
+    if (memberId) {
+      if (roundId) clearRecruitmentBasicDraft(memberId)
+      else writeRecruitmentBasicDraft(memberId, savedBasicInfo)
+    }
+    savedSnapshotRef.current = recruitmentBasicInfoSnapshot(savedBasicInfo)
     setIsSaving(false)
     setTempSaveMessage(
       roundId
         ? "임시저장이 완료되었습니다."
-        : "이 브라우저에 임시 저장되었습니다. 서버 저장은 다음 단계까지 진행해야 완료됩니다.",
+        : "이 브라우저에 임시 저장되었습니다.",
     )
     setShowTempSaveModal(true)
   }

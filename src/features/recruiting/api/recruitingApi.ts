@@ -24,10 +24,12 @@ import type {
   RawInterviewScheduleBoard,
   RawInterviewSession,
   RawPartSummary,
+  RawRecruitingAdminFormStructure,
   RawRecruitingSeasonConfigurationResponse,
   RawStatusCounts,
   RawStatusSummary,
   RawTrackCount,
+  RecruitingAdminFormStructure,
   RecruitingApplicationCreated,
   RecruitingApplicationCredentialRequest,
   RecruitingApplicationDetail,
@@ -626,6 +628,63 @@ export async function upsertRecruitingApplicationForm(
     payload,
   )
   return String(data.result.id)
+}
+
+export async function getAdminFormStructure(
+  seasonId: string,
+  roundId: string,
+): Promise<RecruitingAdminFormStructure> {
+  const { data } = await api.get<ApiResponse<RawRecruitingAdminFormStructure>>(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/form`,
+  )
+  return normalizeAdminFormStructure(data.result)
+}
+
+export function normalizeAdminFormStructure(
+  structure: RawRecruitingAdminFormStructure,
+): RecruitingAdminFormStructure {
+  const toNumber = (value: RawCount | null | undefined): number => {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+
+  return {
+    exists: structure.exists ?? false,
+    applicationFormId:
+      structure.applicationFormId == null
+        ? null
+        : String(structure.applicationFormId),
+    formId: structure.formId == null ? null : String(structure.formId),
+    title: structure.title ?? "",
+    description: structure.description ?? null,
+    status: structure.status ?? null,
+    sections: (structure.sections ?? []).map((section) => ({
+      sectionId: String(section.sectionId ?? ""),
+      clientKey: section.clientKey ?? "",
+      title: section.title ?? "",
+      description: section.description ?? null,
+      orderNo: toNumber(section.orderNo),
+      type: section.type ?? "COMMON",
+      track: section.track ?? null,
+      questions: (section.questions ?? []).map((question) => ({
+        questionId: String(question.questionId ?? ""),
+        title: question.title ?? "",
+        description: question.description ?? null,
+        type: question.type ?? "SHORT_TEXT",
+        required: question.required ?? false,
+        orderNo: toNumber(question.orderNo),
+        options: (question.options ?? []).map((option) => ({
+          optionId: String(option.optionId ?? ""),
+          content: option.content ?? "",
+          orderNo: toNumber(option.orderNo),
+          other: option.other ?? false,
+          nextSectionId:
+            option.nextSectionId == null ? null : String(option.nextSectionId),
+          nextSectionKey: option.nextSectionKey ?? null,
+        })),
+      })),
+    })),
+  }
 }
 
 // Round와 지원 Form 상태를 함께 변경한다. 지원서·Form 응답이 없는 OPEN Round만

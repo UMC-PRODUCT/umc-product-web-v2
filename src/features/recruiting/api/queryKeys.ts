@@ -26,6 +26,15 @@ export const recruitingKeys = {
   round: (gisuId: string, roundId: string) =>
     [...recruitingKeys.rounds(), gisuId, roundId] as const,
 
+  adminDraft: (gisuId: string, roundId: string, seasonId?: string) =>
+    [
+      ...recruitingKeys.rounds(),
+      "admin-draft",
+      gisuId,
+      roundId,
+      seasonId ?? "",
+    ] as const,
+
   applications: () => [...recruitingKeys.all, "applications"] as const,
 
   schoolApplications: (roundIds: string[], stage: EvaluationStage) =>

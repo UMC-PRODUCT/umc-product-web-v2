@@ -26,4 +26,16 @@ describe("QuestionItemTitle", () => {
     rerender(<QuestionItemTitle index="Q1" title="지원 동기" />)
     expect(screen.queryByText("보이는 설명")).not.toBeInTheDocument()
   })
+
+  it("caption이 없으면 설정된 placeholder를 표시한다", () => {
+    render(
+      <QuestionItemTitle
+        index="Q1"
+        title="지원 동기"
+        captionPlaceholder="설명을 입력하세요"
+      />,
+    )
+
+    expect(screen.getByText("설명을 입력하세요")).toBeInTheDocument()
+  })
 })

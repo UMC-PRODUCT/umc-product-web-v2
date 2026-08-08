@@ -7,9 +7,11 @@ import {
   createAnonymousApplicationDraft,
   createApplicationDraft,
   createRecruitingSeason,
+  getAdminFormStructure,
   getAdminRounds,
   getRoundEvaluators,
   mergeRoundGroups,
+  normalizeAdminFormStructure,
   normalizeAdminRoundGroups,
   normalizeDecisionHistoryPage,
   normalizeEvaluationStatistics,
@@ -30,6 +32,7 @@ import type {
   RawAdminRoundGroup,
   RawDecisionHistoryPage,
   RawEvaluationStatistics,
+  RawRecruitingAdminFormStructure,
   RawRecruitingSeasonConfigurationResponse,
   RawStatusSummary,
   RecruitingRound,
@@ -265,6 +268,77 @@ describe("evaluator API functions", () => {
     expect(result).toEqual(mockGroups)
   })
 
+  it("getAdminFormStructure는 DRAFT 모집의 편집용 Form을 조회한다", async () => {
+    const mockStructure: RawRecruitingAdminFormStructure = {
+      exists: true,
+      applicationFormId: "50",
+      formId: "100",
+      title: "모집 지원서",
+      description: null,
+      status: "DRAFT",
+      sections: [],
+    }
+    vi.mocked(api.get).mockResolvedValueOnce({
+      data: {
+        isSuccess: true,
+        code: "COMMON200",
+        message: "OK",
+        result: mockStructure,
+      },
+    })
+
+    const result = await getAdminFormStructure("10", "20")
+
+    expect(api.get).toHaveBeenCalledWith(
+      "/v1/recruiting/admin/seasons/10/rounds/20/form",
+    )
+    expect(result.applicationFormId).toBe("50")
+    expect(result.status).toBe("DRAFT")
+  })
+
+  it("normalizeAdminFormStructure는 Form의 ID와 순서를 문자열 응답에서 정규화한다", () => {
+    const result = normalizeAdminFormStructure({
+      exists: true,
+      applicationFormId: "50",
+      formId: 100,
+      title: "모집 지원서",
+      sections: [
+        {
+          sectionId: "300",
+          clientKey: "track-PLAN",
+          title: "PM",
+          type: "TRACK",
+          track: "PLAN",
+          orderNo: "1",
+          questions: [
+            {
+              questionId: "400",
+              title: "지원 동기",
+              type: "LONG_TEXT",
+              required: true,
+              orderNo: "1",
+              options: [
+                {
+                  optionId: "500",
+                  content: "기타",
+                  orderNo: "1",
+                  other: false,
+                  nextSectionId: null,
+                  nextSectionKey: null,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    })
+
+    expect(result.sections[0]?.sectionId).toBe("300")
+    expect(result.sections[0]?.questions[0]?.questionId).toBe("400")
+    expect(result.sections[0]?.questions[0]?.options[0]?.optionId).toBe("500")
+    expect(result.sections[0]?.orderNo).toBe(1)
+  })
+
   it("removeRoundEvaluator는 DELETE 요청을 올바른 엔드포인트로 보낸다", async () => {
     vi.mocked(api.delete).mockResolvedValueOnce({ data: {} })
 
@@ -305,7 +379,12 @@ describe("지원자 유형별 API", () => {
     }
 
     vi.mocked(api.post).mockResolvedValue({
-      data: { isSuccess: true, code: "COMMON200", message: "OK", result: created },
+      data: {
+        isSuccess: true,
+        code: "COMMON200",
+        message: "OK",
+        result: created,
+      },
     })
     vi.mocked(api.put).mockResolvedValue({
       data: {

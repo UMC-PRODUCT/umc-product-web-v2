@@ -12,6 +12,8 @@ interface RecruitmentCreateSearch {
   role?: RecruitingListRole
   chapter?: Chapter
   school?: string
+  draftRoundId?: string
+  draftSeasonId?: string
 }
 
 export const Route = createFileRoute("/recruiting/recruitments/new")({
@@ -30,18 +32,29 @@ export const Route = createFileRoute("/recruiting/recruitments/new")({
       role: isRecruitingListRole(search.role) ? search.role : undefined,
       chapter,
       school,
+      draftRoundId:
+        typeof search.draftRoundId === "string" && search.draftRoundId !== ""
+          ? search.draftRoundId
+          : undefined,
+      draftSeasonId:
+        typeof search.draftSeasonId === "string" && search.draftSeasonId !== ""
+          ? search.draftSeasonId
+          : undefined,
     }
   },
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { role, chapter, school } = Route.useSearch()
+  const { role, chapter, school, draftRoundId, draftSeasonId } =
+    Route.useSearch()
   return (
     <RecruitmentCreatePage
       role={role}
       initialChapter={chapter}
       initialSchool={school}
+      draftRoundId={draftRoundId}
+      draftSeasonId={draftSeasonId}
     />
   )
 }

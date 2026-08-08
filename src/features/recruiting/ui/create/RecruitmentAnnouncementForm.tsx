@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
@@ -7,6 +8,7 @@ import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
+import { recruitingKeys } from "../../api/queryKeys"
 import {
   updateRecruitingRound,
   updateRecruitingRoundStatus,
@@ -36,13 +38,16 @@ function formatDocumentStartAtLabel(
 interface RecruitmentAnnouncementFormProps {
   onPrev: () => void
   onDirtyChange?: (dirty: boolean) => void
+  onSaveComplete?: () => void
 }
 
 export function RecruitmentAnnouncementForm({
   onPrev,
   onDirtyChange,
+  onSaveComplete,
 }: RecruitmentAnnouncementFormProps) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const addToast = useToastStore((state) => state.addToast)
   const announcement = useRecruitmentCreateStore((s) => s.announcement)
   const setAnnouncement = useRecruitmentCreateStore((s) => s.setAnnouncement)
@@ -102,7 +107,9 @@ export function RecruitmentAnnouncementForm({
     setIsSaving(true)
     try {
       await updateRecruitingRound(seasonId, roundId, buildRoundUpdatePayload())
+      void queryClient.invalidateQueries({ queryKey: recruitingKeys.rounds() })
       savedSnapshotRef.current = announcement
+      onSaveComplete?.()
       setShowTempSaveModal(true)
     } catch (error) {
       const message = isAxiosError(error)
@@ -208,8 +215,12 @@ export function RecruitmentAnnouncementForm({
             await updateRecruitingRoundStatus(seasonId, roundId, {
               status: "OPEN",
             })
+            void queryClient.invalidateQueries({
+              queryKey: recruitingKeys.rounds(),
+            })
             setIsPublished(true)
             savedSnapshotRef.current = announcement
+            onSaveComplete?.()
             setOpenModal("complete")
           } catch (error) {
             const message = isAxiosError(error)

@@ -15,6 +15,15 @@ export type RecruitmentFieldType =
 export interface RecruitmentQuestionOption {
   content: string
   optionId?: number
+  nextSectionKey?: string
+}
+
+export interface RecruitmentQuestionToggleState {
+  enabled: boolean
+  required: boolean
+  questionId?: number
+  optionIdsByContent?: Record<string, number>
+  nextSectionKeysByContent?: Record<string, string>
 }
 
 export interface RecruitmentQuestion {
@@ -190,30 +199,17 @@ export const RECRUITMENT_DEFAULT_QUESTIONS: RecruitmentDefaultQuestion[] = [
   },
 ]
 
-// 공통 문항은 radio/text만 다루므로 RecruitingQuestionType 전체가 아니라 이 두 값으로만 좁혀 반환한다.
 function toRecruitingQuestionType(
   type: RecruitmentDefaultQuestion["type"],
 ): "RADIO" | "SHORT_TEXT" {
   return type === "radio" ? "RADIO" : "SHORT_TEXT"
 }
 
-// 공통 문항(01~05) 섹션을 Form Upsert 요청 payload로 직렬화한다.
-// 파트별(TRACK) 섹션 직렬화는 buildTrackSectionUpsertRequest가 별도로 담당한다.
-export function buildCommonSectionUpsertRequest(
+export function buildBasicSectionUpsertRequest(
   removedOptionsByQuestionIndex: Record<string, string[]>,
-  questionToggleState: Record<string, { enabled: boolean; required: boolean }>,
-): {
-  clientKey: string
-  title: string
-  type: "COMMON"
-  questions: {
-    type: "RADIO" | "SHORT_TEXT"
-    title: string
-    description?: string
-    required: boolean
-    options?: { content: string; other: boolean }[]
-  }[]
-} {
+  questionToggleState: Record<string, RecruitmentQuestionToggleState>,
+  sectionId?: number,
+): UpsertRecruitingSectionRequest {
   const questions = RECRUITMENT_DEFAULT_QUESTIONS.filter(
     (question) => questionToggleState[question.index]?.enabled ?? true,
   ).map((question) => {
@@ -221,20 +217,70 @@ export function buildCommonSectionUpsertRequest(
     const activeOptions = question.options?.filter(
       (option) => !removed.includes(option),
     )
+    const toggleState = questionToggleState[question.index]
     return {
+      ...(toggleState?.questionId != null
+        ? { questionId: toggleState.questionId }
+        : {}),
       type: toRecruitingQuestionType(question.type),
       title: question.title,
       description: question.caption,
-      required: questionToggleState[question.index]?.required ?? true,
-      options: activeOptions?.map((content) => ({ content, other: false })),
+      required: toggleState?.required ?? true,
+      options: activeOptions?.map((content) => ({
+        ...(toggleState?.optionIdsByContent?.[content] != null
+          ? { optionId: toggleState.optionIdsByContent[content] }
+          : {}),
+        content,
+        other: false,
+        ...(toggleState?.nextSectionKeysByContent?.[content]
+          ? { nextSectionKey: toggleState.nextSectionKeysByContent[content] }
+          : {}),
+      })),
     }
   })
 
   return {
-    clientKey: "common",
+    ...(sectionId != null ? { sectionId } : {}),
+    clientKey: "basic",
     title: "기본 문항",
     type: "COMMON",
     questions,
+  }
+}
+
+function toCommonQuestionUpsertRequest(
+  question: RecruitmentQuestion,
+): UpsertRecruitingSectionRequest["questions"][number] {
+  return {
+    ...(question.questionId != null ? { questionId: question.questionId } : {}),
+    type: toRecruitingQuestionTypeFromField(question.fieldType),
+    title: question.title,
+    description: question.caption || undefined,
+    required: question.required,
+    options:
+      question.fieldType === "radio" || question.fieldType === "checkbox"
+        ? question.options.map((option) => ({
+            ...(option.optionId != null ? { optionId: option.optionId } : {}),
+            content: option.content,
+            other: false,
+            ...(option.nextSectionKey
+              ? { nextSectionKey: option.nextSectionKey }
+              : {}),
+          }))
+        : undefined,
+  }
+}
+
+export function buildCommonQuestionSectionUpsertRequest(
+  questions: RecruitmentQuestion[],
+  sectionId?: number,
+): UpsertRecruitingSectionRequest {
+  return {
+    ...(sectionId != null ? { sectionId } : {}),
+    clientKey: "common",
+    title: "공통 문항",
+    type: "COMMON",
+    questions: questions.map(toCommonQuestionUpsertRequest),
   }
 }
 
@@ -261,13 +307,18 @@ export function buildTrackSectionUpsertRequest(
   partLabel: string,
   track: RecruitingTrack,
   questions: RecruitmentQuestion[],
+  sectionId?: number,
 ): UpsertRecruitingSectionRequest {
   return {
+    ...(sectionId != null ? { sectionId } : {}),
     clientKey: `track-${track}`,
     title: partLabel,
     type: "TRACK",
     track,
     questions: questions.map((question) => ({
+      ...(question.questionId != null
+        ? { questionId: question.questionId }
+        : {}),
       type: toRecruitingQuestionTypeFromField(question.fieldType),
       title: question.title,
       description: question.caption || undefined,
@@ -275,8 +326,12 @@ export function buildTrackSectionUpsertRequest(
       options:
         question.fieldType === "radio" || question.fieldType === "checkbox"
           ? question.options.map((option) => ({
+              ...(option.optionId != null ? { optionId: option.optionId } : {}),
               content: option.content,
               other: false,
+              ...(option.nextSectionKey
+                ? { nextSectionKey: option.nextSectionKey }
+                : {}),
             }))
           : undefined,
     })),

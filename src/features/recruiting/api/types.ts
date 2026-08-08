@@ -501,6 +501,88 @@ export interface RecruitingFormStructure {
   sections: RecruitingFormSection[]
 }
 
+export type RecruitingApplicationFormStatus = "DRAFT" | "PUBLISHED" | "CLOSED"
+
+export interface RecruitingAdminFormOption {
+  optionId: string
+  content: string
+  orderNo: number
+  other: boolean
+  nextSectionId: string | null
+  nextSectionKey: string | null
+}
+
+export interface RecruitingAdminFormQuestion {
+  questionId: string
+  title: string
+  description: string | null
+  type: RecruitingQuestionType
+  required: boolean
+  orderNo: number
+  options: RecruitingAdminFormOption[]
+}
+
+export interface RecruitingAdminFormSection {
+  sectionId: string
+  clientKey: string
+  title: string
+  description: string | null
+  orderNo: number
+  type: RecruitingSectionType
+  track: RecruitingTrack | null
+  questions: RecruitingAdminFormQuestion[]
+}
+
+export interface RecruitingAdminFormStructure {
+  exists: boolean
+  applicationFormId: string | null
+  formId: string | null
+  title: string
+  description: string | null
+  status: RecruitingApplicationFormStatus | null
+  sections: RecruitingAdminFormSection[]
+}
+
+export interface RawRecruitingAdminFormStructure {
+  exists?: boolean
+  applicationFormId?: RawId | null
+  formId?: RawId | null
+  title?: string | null
+  description?: string | null
+  status?: RecruitingApplicationFormStatus | null
+  sections?: RawRecruitingAdminFormSection[]
+}
+
+export interface RawRecruitingAdminFormSection {
+  sectionId?: RawId | null
+  clientKey?: string | null
+  title?: string | null
+  description?: string | null
+  orderNo?: RawCount | null
+  type?: RecruitingSectionType | null
+  track?: RecruitingTrack | null
+  questions?: RawRecruitingAdminFormQuestion[]
+}
+
+export interface RawRecruitingAdminFormQuestion {
+  questionId?: RawId | null
+  title?: string | null
+  description?: string | null
+  type?: RecruitingQuestionType | null
+  required?: boolean
+  orderNo?: RawCount | null
+  options?: RawRecruitingAdminFormOption[]
+}
+
+export interface RawRecruitingAdminFormOption {
+  optionId?: RawId | null
+  content?: string | null
+  orderNo?: RawCount | null
+  other?: boolean
+  nextSectionId?: RawId | null
+  nextSectionKey?: string | null
+}
+
 export type RecruitingSectionType = "COMMON" | "TRACK"
 
 // Form 전체 구조 Upsert(PUT .../rounds/{roundId}/form) 요청. Round가 DRAFT일 때만

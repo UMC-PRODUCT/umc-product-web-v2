@@ -4,6 +4,7 @@ interface QuestionItemTitleProps {
   index: string
   title: string
   caption?: string
+  captionPlaceholder?: string
   required?: boolean
   className?: string
 }
@@ -12,6 +13,7 @@ export function QuestionItemTitle({
   index,
   title,
   caption,
+  captionPlaceholder,
   required = false,
   className,
 }: QuestionItemTitleProps) {
@@ -33,11 +35,16 @@ export function QuestionItemTitle({
             </span>
           )}
         </span>
-        {caption !== undefined && caption !== "" && (
-          <span className="text-body-2-regular text-teal-gray-600 break-keep whitespace-pre-wrap">
-            {caption}
+        {(caption !== undefined && caption !== "") || captionPlaceholder ? (
+          <span
+            className={cn(
+              "text-body-2-regular break-keep whitespace-pre-wrap",
+              caption ? "text-teal-gray-600" : "text-teal-gray-300",
+            )}
+          >
+            {caption || captionPlaceholder}
           </span>
-        )}
+        ) : null}
       </div>
     </div>
   )

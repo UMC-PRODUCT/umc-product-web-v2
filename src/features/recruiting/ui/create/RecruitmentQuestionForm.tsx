@@ -1,9 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
 
+import { useMe } from "@/entities/member/hooks/useMe"
 import CloseThinIcon from "@/shared/assets/icon/close/CloseThinIcon"
-import DragAndDrop from "@/shared/assets/icon/drag-and-drop/DragAndDrop"
 import ToggleCheckboxIcon from "@/shared/assets/icon/toggle/ToggleCheckboxIcon"
 import ToggleFileUploadIcon from "@/shared/assets/icon/toggle/ToggleFileUploadIcon"
 import ToggleRadioIcon from "@/shared/assets/icon/toggle/ToggleRadioIcon"
@@ -28,6 +29,7 @@ import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { Toggle } from "@/shared/ui/Toggle"
 
+import { recruitingKeys } from "../../api/queryKeys"
 import {
   createRecruitingRound,
   upsertRecruitingApplicationForm,
@@ -37,13 +39,15 @@ import {
   PART_KEY_TO_TRACK,
   PARTS,
 } from "../../model/parts"
+import { clearRecruitmentBasicDraft } from "../../model/recruitmentBasicDraft"
 import {
   buildRecruitmentPreviewTitle,
   buildRoundConfigurationPayload,
   composeRecruitmentTitle,
 } from "../../model/recruitmentCreate"
 import {
-  buildCommonSectionUpsertRequest,
+  buildBasicSectionUpsertRequest,
+  buildCommonQuestionSectionUpsertRequest,
   buildTrackSectionUpsertRequest,
   getRecruitmentFieldTypePatch,
   makeRecruitmentQuestion,
@@ -57,6 +61,7 @@ import { RecruitmentSectionHeader } from "../RecruitmentSectionHeader"
 import type { FieldTypeOption } from "@/shared/ui/button/FieldTypeButtonGroup"
 
 import type { PartKey } from "../../model/parts"
+import type { RecruitmentQuestionDraftState } from "../../model/recruitingDraftHydration"
 import type {
   RecruitmentDefaultQuestion,
   RecruitmentFieldType,
@@ -174,7 +179,11 @@ function PartQuestionFieldRenderer({
     case "text":
       return (
         <div className="pointer-events-none w-full">
-          <TextQuestionField value="" onChange={() => {}} />
+          <TextQuestionField
+            value=""
+            onChange={() => {}}
+            placeholder="답변을 작성하세요."
+          />
         </div>
       )
     case "radio":
@@ -221,6 +230,7 @@ function PartSectionBody({
   onUpdate,
   onAdd,
   onDelete,
+  captionPlaceholder,
 }: {
   questions: RecruitmentQuestion[]
   focusedQuestionId: string | null
@@ -228,12 +238,18 @@ function PartSectionBody({
   onUpdate: (id: string, patch: Partial<RecruitmentQuestion>) => void
   onAdd: () => void
   onDelete: (id: string) => void
+  captionPlaceholder?: string
 }) {
   const focusedQuestion = questions.find((q) => q.id === focusedQuestionId)
 
   return (
     <>
-      <div className="bg-teal-gray-100 flex w-full flex-col items-center gap-4 rounded-br-xl rounded-bl-xl border-r border-b border-l border-teal-200 pb-5">
+      <div
+        className={cn(
+          "bg-teal-gray-100 flex w-full flex-col items-center gap-4 rounded-br-xl rounded-bl-xl border-r border-b border-l border-teal-200",
+          questions.length === 0 && "p-2",
+        )}
+      >
         {questions.map((question, index) => {
           const focused = question.id === focusedQuestionId
           return (
@@ -248,6 +264,7 @@ function PartSectionBody({
                 title={question.title}
                 onTitleChange={(title) => onUpdate(question.id, { title })}
                 caption={question.caption}
+                captionPlaceholder={captionPlaceholder}
                 onCaptionChange={(caption) =>
                   onUpdate(question.id, { caption })
                 }
@@ -334,6 +351,8 @@ function DefaultRadioQuestion({
   onRemoveOption,
   onRestoreOption,
   allowDisable,
+  alwaysShowControls = false,
+  disableFocus = false,
   enabled,
   required,
   onEnabledChange,
@@ -344,6 +363,8 @@ function DefaultRadioQuestion({
   onRemoveOption: (option: string) => void
   onRestoreOption: (option: string) => void
   allowDisable: boolean
+  alwaysShowControls?: boolean
+  disableFocus?: boolean
   enabled: boolean
   required: boolean
   onEnabledChange: (enabled: boolean) => void
@@ -353,10 +374,11 @@ function DefaultRadioQuestion({
   const containerRef = useRef<HTMLDivElement>(null)
   const options = question.options ?? []
   const isDisabled = allowDisable && !enabled
-  const showControls = allowDisable && (focused || isDisabled)
+  const showControls =
+    allowDisable && (alwaysShowControls || focused || isDisabled)
 
   useEffect(() => {
-    if (!focused) return
+    if (!focused || disableFocus) return
     const handleOutsidePointerDown = (event: MouseEvent) => {
       if (!containerRef.current?.contains(event.target as Node)) {
         setFocused(false)
@@ -365,7 +387,7 @@ function DefaultRadioQuestion({
     document.addEventListener("mousedown", handleOutsidePointerDown)
     return () =>
       document.removeEventListener("mousedown", handleOutsidePointerDown)
-  }, [focused])
+  }, [disableFocus, focused])
 
   const controlsRow = allowDisable && (
     <div className="flex items-center gap-4">
@@ -375,10 +397,15 @@ function DefaultRadioQuestion({
           componentName="Checkbox"
           checked={required}
           onChange={onRequiredChange}
+          disabled={!enabled}
           aria-label="필수 항목 여부"
           className="inline-flex items-center justify-center"
         >
-          <CheckboxIndicator checked={required} variant="list" />
+          <CheckboxIndicator
+            checked={required}
+            disabled={!enabled}
+            variant="list"
+          />
         </ToggleButton>
         <span className="text-body-1-medium text-teal-gray-600">필수 항목</span>
       </div>
@@ -396,74 +423,29 @@ function DefaultRadioQuestion({
 
   const titleAndOptions = (
     <div className="flex w-full flex-col items-start gap-2.5">
-      {isDisabled ? (
-        <div className="flex items-start gap-1.5">
-          <span className="text-heading-7-semibold text-teal-gray-400 w-7 shrink-0">
-            00
-          </span>
-          <span className="text-heading-7-semibold text-teal-gray-400">
-            {question.title}
-          </span>
-        </div>
-      ) : (
-        <QuestionItemTitle
-          index={question.index}
-          title={question.title}
-          required={allowDisable ? required : true}
-        />
-      )}
+      <QuestionItemTitle
+        index={question.index}
+        title={question.title}
+        required={allowDisable ? required : true}
+      />
 
       <div className="w-full pl-3">
-        {isDisabled ? (
-          <StaticRadioOptionsList options={options} muted />
-        ) : (
-          <ToggleableRadioOptionsBox
-            options={options}
-            removedOptions={removedOptions}
-            onRemoveOption={onRemoveOption}
-            onRestoreOption={onRestoreOption}
-          />
-        )}
+        <ToggleableRadioOptionsBox
+          options={options}
+          removedOptions={removedOptions}
+          onRemoveOption={onRemoveOption}
+          onRestoreOption={onRestoreOption}
+        />
       </div>
     </div>
   )
 
-  if (isDisabled && !focused) {
-    return (
-      <div
-        ref={containerRef}
-        tabIndex={0}
-        onFocus={() => setFocused(true)}
-        onClick={() => setFocused(true)}
-        className="bg-teal-gray-100 flex w-full flex-col items-end gap-4 rounded-br-xl rounded-bl-xl border-r border-b border-l border-teal-300 px-5 pt-8.5 pb-9.5"
-      >
-        {titleAndOptions}
-      </div>
-    )
-  }
-
   return (
     <div
       ref={containerRef}
-      onFocus={() => setFocused(true)}
-      className={cn(
-        "relative flex w-full flex-col items-end gap-4",
-        focused &&
-          "bg-teal-gray-100 rounded-br-xl rounded-bl-xl border-r border-b border-l border-teal-200 px-5 pt-4 pb-5",
-      )}
+      onFocus={disableFocus ? undefined : () => setFocused(true)}
+      className="relative flex w-full flex-col items-end gap-4"
     >
-      {focused && (
-        <>
-          <span
-            aria-hidden="true"
-            className="absolute top-0 bottom-0 left-0 w-2 rounded-bl-xl bg-teal-500"
-          />
-          <div className="flex w-full justify-center">
-            <DragAndDrop className="h-2.5 w-4" aria-hidden="true" />
-          </div>
-        </>
-      )}
-
       {titleAndOptions}
 
       {showControls && controlsRow}
@@ -476,6 +458,7 @@ interface RecruitmentQuestionFormProps {
   onNext: () => void
   onDirtyChange?: (dirty: boolean) => void
   onBlankPartsChange?: (hasBlankEnabledPart: boolean) => void
+  initialDraft?: RecruitmentQuestionDraftState
 }
 
 export function RecruitmentQuestionForm({
@@ -483,9 +466,12 @@ export function RecruitmentQuestionForm({
   onNext,
   onDirtyChange,
   onBlankPartsChange,
+  initialDraft,
 }: RecruitmentQuestionFormProps) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const addToast = useToastStore((state) => state.addToast)
+  const { data: me } = useMe()
   const enabledParts = useRecruitmentCreateStore((s) => s.enabledParts)
   const setEnabledParts = useRecruitmentCreateStore((s) => s.setEnabledParts)
   const setSecondChoiceEnabled = useRecruitmentCreateStore(
@@ -498,16 +484,27 @@ export function RecruitmentQuestionForm({
   const setRoundId = useRecruitmentCreateStore((s) => s.setRoundId)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [removedOptionsByQuestionIndex, setRemovedOptionsByQuestionIndex] =
-    useState<Record<string, string[]>>({})
+    useState<Record<string, string[]>>(
+      () => initialDraft?.removedOptionsByQuestionIndex ?? {},
+    )
+  const initialPartQuestionDrafts =
+    initialDraft?.partQuestionDrafts ??
+    (Object.fromEntries(
+      PARTS.map((part) => [part.key, [makeRecruitmentQuestion()]]),
+    ) as Record<PartKey, RecruitmentQuestion[]>)
+  const initialCommonQuestionDrafts = initialDraft?.commonQuestionDrafts ?? [
+    makeRecruitmentQuestion(),
+  ]
+  const [commonQuestionDrafts, setCommonQuestionDrafts] = useState<
+    RecruitmentQuestion[]
+  >(() => initialCommonQuestionDrafts)
+  const [focusedCommonQuestionId, setFocusedCommonQuestionId] = useState<
+    string | null
+  >(() => initialCommonQuestionDrafts[0]?.id ?? null)
   // 파트별 섹션의 문항 목록 편집 상태. 파트당 여러 문항을 가질 수 있다.
   const [partQuestionDrafts, setPartQuestionDrafts] = useState<
     Record<PartKey, RecruitmentQuestion[]>
-  >(
-    () =>
-      Object.fromEntries(
-        PARTS.map((part) => [part.key, [makeRecruitmentQuestion()]]),
-      ) as Record<PartKey, RecruitmentQuestion[]>,
-  )
+  >(() => initialPartQuestionDrafts)
   // 파트별로 현재 편집 중(카드가 펼쳐진 상태)인 문항 id.
   const [focusedQuestionIdByPart, setFocusedQuestionIdByPart] = useState<
     Record<PartKey, string | null>
@@ -516,19 +513,21 @@ export function RecruitmentQuestionForm({
       Object.fromEntries(
         PARTS.map((part) => [
           part.key,
-          (partQuestionDrafts[part.key] ?? [])[0]?.id ?? null,
+          (initialPartQuestionDrafts[part.key] ?? [])[0]?.id ?? null,
         ]),
       ) as Record<PartKey, string | null>,
   )
   const [questionToggleState, setQuestionToggleState] = useState<
     Record<string, { enabled: boolean; required: boolean }>
-  >(() =>
-    Object.fromEntries(
-      OPTIONAL_TOGGLE_QUESTION_INDEXES.map((index) => [
-        index,
-        { enabled: true, required: true },
-      ]),
-    ),
+  >(
+    () =>
+      initialDraft?.questionToggleState ??
+      Object.fromEntries(
+        OPTIONAL_TOGGLE_QUESTION_INDEXES.map((index) => [
+          index,
+          { enabled: true, required: true },
+        ]),
+      ),
   )
   const [isSaving, setIsSaving] = useState(false)
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
@@ -538,6 +537,7 @@ export function RecruitmentQuestionForm({
       enabledParts,
       removedOptionsByQuestionIndex,
       questionToggleState,
+      commonQuestionDrafts,
       partQuestionDrafts,
     }),
   )
@@ -553,6 +553,33 @@ export function RecruitmentQuestionForm({
         question.id === questionId ? { ...question, ...patch } : question,
       ),
     }))
+  }
+
+  const updateCommonQuestionDraft = (
+    questionId: string,
+    patch: Partial<RecruitmentQuestion>,
+  ) => {
+    setCommonQuestionDrafts((prev) =>
+      prev.map((question) =>
+        question.id === questionId ? { ...question, ...patch } : question,
+      ),
+    )
+  }
+
+  const addCommonQuestion = () => {
+    const newQuestion = makeRecruitmentQuestion()
+    setCommonQuestionDrafts((prev) => [...prev, newQuestion])
+    setFocusedCommonQuestionId(newQuestion.id)
+  }
+
+  const deleteCommonQuestion = (questionId: string) => {
+    const nextQuestions = commonQuestionDrafts.filter(
+      (question) => question.id !== questionId,
+    )
+    setCommonQuestionDrafts(nextQuestions)
+    setFocusedCommonQuestionId((currentId) =>
+      currentId === questionId ? (nextQuestions[0]?.id ?? null) : currentId,
+    )
   }
 
   const addPartQuestion = (part: PartKey) => {
@@ -605,8 +632,9 @@ export function RecruitmentQuestionForm({
     setQuestionToggleState((prev) => ({
       ...prev,
       [questionIndex]: {
+        ...prev[questionIndex],
         enabled,
-        required: prev[questionIndex]?.required ?? true,
+        required: enabled ? (prev[questionIndex]?.required ?? true) : false,
       },
     }))
     if (questionIndex === "04") setSecondChoiceEnabled(enabled)
@@ -616,6 +644,7 @@ export function RecruitmentQuestionForm({
     setQuestionToggleState((prev) => ({
       ...prev,
       [questionIndex]: {
+        ...prev[questionIndex],
         enabled: prev[questionIndex]?.enabled ?? true,
         required,
       },
@@ -626,6 +655,7 @@ export function RecruitmentQuestionForm({
     enabledParts,
     removedOptionsByQuestionIndex,
     questionToggleState,
+    commonQuestionDrafts,
     partQuestionDrafts,
   })
   const hasUnsavedChanges = savedSnapshotRef.current !== currentSnapshot
@@ -643,12 +673,15 @@ export function RecruitmentQuestionForm({
       questions: partQuestionDrafts[part.key],
     }),
   )
-  const hasBlankEnabledPart =
-    validateRecruitmentQuestionForm([], partSectionsForValidation).length > 0
+  const hasBlankQuestion =
+    validateRecruitmentQuestionForm(
+      commonQuestionDrafts,
+      partSectionsForValidation,
+    ).length > 0
 
   useEffect(() => {
-    onBlankPartsChange?.(hasBlankEnabledPart)
-  }, [hasBlankEnabledPart, onBlankPartsChange])
+    onBlankPartsChange?.(hasBlankQuestion)
+  }, [hasBlankQuestion, onBlankPartsChange])
 
   const showErrorToast = (message: string) => {
     addToast({
@@ -701,17 +734,25 @@ export function RecruitmentQuestionForm({
             part.label,
             PART_KEY_TO_TRACK[part.key],
             partQuestionDrafts[part.key],
+            initialDraft?.partSectionIds[part.key],
           ),
       )
       await upsertRecruitingApplicationForm(seasonId!, currentRoundId, {
         sections: [
-          buildCommonSectionUpsertRequest(
+          buildBasicSectionUpsertRequest(
             removedOptionsByQuestionIndex,
             questionToggleState,
+            initialDraft?.basicSectionId,
+          ),
+          buildCommonQuestionSectionUpsertRequest(
+            commonQuestionDrafts,
+            initialDraft?.commonSectionId,
           ),
           ...trackSections,
         ],
       })
+      void queryClient.invalidateQueries({ queryKey: recruitingKeys.rounds() })
+      if (me?.id) clearRecruitmentBasicDraft(me.id)
     } catch (formError) {
       const message = isAxiosError(formError)
         ? (formError.response?.data as { message?: string } | undefined)
@@ -724,7 +765,7 @@ export function RecruitmentQuestionForm({
   }
 
   const validateBeforeSave = (): string | null => {
-    if (hasBlankEnabledPart) return "사용 중인 섹션의 항목을 모두 적어주세요."
+    if (hasBlankQuestion) return "사용 중인 섹션의 항목을 모두 적어주세요."
     if (getRecruitableTracks(enabledParts).length === 0)
       return "모집할 트랙을 최소 1개 선택해 주세요."
     if (!seasonId) return "시즌 정보가 없어 모집 차수를 생성할 수 없습니다."
@@ -804,6 +845,10 @@ export function RecruitmentQuestionForm({
                   allowDisable={QUESTION_DISABLE_TOGGLE_INDEXES.includes(
                     question.index,
                   )}
+                  alwaysShowControls={question.index === "04"}
+                  disableFocus={
+                    question.index === "03" || question.index === "04"
+                  }
                   enabled={questionToggleState[question.index]?.enabled ?? true}
                   required={
                     questionToggleState[question.index]?.required ?? true
@@ -844,29 +889,17 @@ export function RecruitmentQuestionForm({
           })}
         </div>
       </div>
-      {/* 공통 문항이 하나도 없으면(엣지 케이스) 지원자 화면에는 이 섹션 자체가 노출되지 않는다.
-          여기 보이는 빈 상태(01 질문을 작성하세요.)는 관리자 작성 화면 전용 placeholder다. */}
       <div className="flex flex-col">
         <FormHeader variant="common" />
-        <div className="bg-teal-gray-50 flex flex-col gap-10 rounded-b-xl border-r border-b border-l border-teal-300 px-5 pt-8.5 pb-9.5">
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-start gap-1.5">
-              <span className="text-heading-7-semibold text-teal-gray-400 w-7 shrink-0">
-                01
-              </span>
-              <span className="text-heading-7-semibold text-teal-gray-400">
-                질문을 작성하세요.
-              </span>
-            </div>
-            <div className="pl-3">
-              <QuestionFieldBox>
-                <span className="text-body-1-regular text-teal-gray-400">
-                  답변을 작성하세요.
-                </span>
-              </QuestionFieldBox>
-            </div>
-          </div>
-        </div>
+        <PartSectionBody
+          questions={commonQuestionDrafts}
+          focusedQuestionId={focusedCommonQuestionId}
+          onFocus={setFocusedCommonQuestionId}
+          onUpdate={updateCommonQuestionDraft}
+          onAdd={addCommonQuestion}
+          onDelete={deleteCommonQuestion}
+          captionPlaceholder="설명을 입력하세요"
+        />
       </div>
       <div className="flex flex-col gap-4">
         {PARTS.map((part) => (

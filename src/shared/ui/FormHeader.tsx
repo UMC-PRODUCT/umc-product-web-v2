@@ -32,7 +32,7 @@ export function FormHeader(props: FormHeaderProps) {
       <div
         className={cn("flex w-full items-end self-stretch", props.className)}
       >
-        <div className="rounded-t-[12px] bg-teal-500 px-10.5 pt-2 pb-0.5">
+        <div className="rounded-t-[12px] bg-teal-500 px-10.5 pt-1.5 pb-1">
           <span className="text-heading-7-semibold text-white">
             {props.variant === "common" ? "공통 문항" : "기본 문항"}
           </span>

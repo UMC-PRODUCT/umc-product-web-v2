@@ -13,6 +13,7 @@ interface QuestionFormProps {
   title: string
   onTitleChange?: (value: string) => void
   caption?: string
+  captionPlaceholder?: string
   onCaptionChange?: (value: string) => void
   focused?: boolean
   isFirst?: boolean
@@ -39,6 +40,7 @@ export function QuestionForm({
   title,
   onTitleChange,
   caption,
+  captionPlaceholder,
   onCaptionChange,
   focused = false,
   isFirst = false,
@@ -140,7 +142,8 @@ export function QuestionForm({
                   onCaptionChange?.(e.target.value)
                   autoResize(e.target)
                 }}
-                placeholder="설명을 입력하세요"
+                aria-label="문항 설명"
+                placeholder={captionPlaceholder ?? "설명을 입력하세요"}
                 className="text-body-2-regular text-teal-gray-600 placeholder:text-teal-gray-300 w-full resize-none overflow-hidden bg-transparent outline-none"
               />
             </div>
@@ -150,6 +153,7 @@ export function QuestionForm({
             index={index}
             title={title}
             caption={caption}
+            captionPlaceholder={captionPlaceholder}
             required={required}
             className="self-stretch"
           />
