@@ -21,7 +21,15 @@ export async function getPublicTermByType(
   const { data } = await api.get<ApiResponse<RawPublicTermResponse>>(
     `/v1/terms/type/${termType}`,
   )
-  const id = Number(data.result.id)
-  if (!Number.isFinite(id)) throw new Error("invalid public term id")
+  const rawId = data.result.id
+  if (
+    typeof rawId !== "number" &&
+    (typeof rawId !== "string" || rawId.trim() === "")
+  ) {
+    throw new Error("invalid public term id")
+  }
+
+  const id = Number(rawId)
+  if (!Number.isSafeInteger(id)) throw new Error("invalid public term id")
   return { ...data.result, id }
 }

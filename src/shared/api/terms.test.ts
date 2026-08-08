@@ -54,4 +54,38 @@ describe("getPublicTermByType", () => {
       "invalid public term id",
     )
   })
+
+  it("빈 문자열 약관 ID는 거부한다", async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({
+      data: {
+        success: true,
+        code: "COMMON200",
+        message: "OK",
+        result: { id: "", link: "", isMandatory: true },
+      },
+    })
+
+    await expect(getPublicTermByType("PRIVACY")).rejects.toThrow(
+      "invalid public term id",
+    )
+  })
+
+  it("안전 정수 범위를 벗어난 약관 ID는 거부한다", async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({
+      data: {
+        success: true,
+        code: "COMMON200",
+        message: "OK",
+        result: {
+          id: "9007199254740993",
+          link: "",
+          isMandatory: true,
+        },
+      },
+    })
+
+    await expect(getPublicTermByType("PRIVACY")).rejects.toThrow(
+      "invalid public term id",
+    )
+  })
 })
