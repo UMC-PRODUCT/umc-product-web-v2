@@ -1,3 +1,4 @@
+import { ClosingSection } from "./sections/ClosingSection"
 import { HeroSection } from "./sections/HeroSection"
 import { IntroSection } from "./sections/IntroSection"
 import { PossibilitySection } from "./sections/PossibilitySection"
@@ -44,6 +45,7 @@ export function AboutPage() {
         <PossibilitySection />
         <RecruitPartsSection />
         <SchoolsSection />
+        <ClosingSection />
       </div>
     </div>
   )
