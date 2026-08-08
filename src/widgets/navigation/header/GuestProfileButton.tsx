@@ -1,5 +1,9 @@
 import { Link } from "@tanstack/react-router"
 
+import {
+  buildLoginRedirectSearch,
+  getCurrentReturnTo,
+} from "@/shared/lib/loginRedirect"
 import { cn } from "@/shared/lib/utils"
 
 import type { RecruitingStatus } from "@/shared/model/recruitingStatus"
@@ -20,10 +24,12 @@ export function GuestProfileButton({
   className,
 }: GuestProfileButtonProps) {
   const isClosed = recruitingStatus?.phase === "closed"
+  const returnTo = getCurrentReturnTo()
 
   return (
     <Link
       to="/login"
+      search={buildLoginRedirectSearch(returnTo)}
       className={cn(
         "text-label-1-semibold flex h-10 min-w-16 shrink-0 items-center justify-center rounded-[10px] px-5 text-center tracking-[-0.32px] transition-colors",
         isClosed

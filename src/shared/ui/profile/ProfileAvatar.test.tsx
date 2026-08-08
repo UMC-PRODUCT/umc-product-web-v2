@@ -34,7 +34,7 @@ describe("ProfileAvatar", () => {
     expect(screen.getByAltText("사용자 프로필")).toBeInTheDocument()
   })
 
-  it("hover-upload 상태에서 업로드 overlay를 표시한다", () => {
+  it("hover-upload 상태에서 피그마의 반투명 원형 상태를 표시한다", () => {
     render(
       <ProfileAvatar
         src="https://example.com/profile.png"
@@ -43,7 +43,19 @@ describe("ProfileAvatar", () => {
       />,
     )
 
-    expect(screen.getByAltText("사용자 프로필")).toBeInTheDocument()
-    expect(screen.getByTestId("profile-avatar-upload")).toBeInTheDocument()
+    const avatar = screen.getByTestId("profile-avatar-upload")
+    expect(avatar).toBeInTheDocument()
+    expect(avatar).toHaveClass("border", "opacity-[0.34]")
+    expect(screen.queryByAltText("사용자 프로필")).not.toBeInTheDocument()
+  })
+
+  it("기본 상태에서 크기에 맞춰 프로필 아이콘을 배치한다", () => {
+    const { container } = render(<ProfileAvatar size={100} />)
+
+    expect(container.querySelector("svg")).toHaveStyle({
+      width: "87px",
+      height: "87px",
+      top: "17.39px",
+    })
   })
 })

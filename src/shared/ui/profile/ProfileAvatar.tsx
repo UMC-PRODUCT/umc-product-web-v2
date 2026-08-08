@@ -1,5 +1,4 @@
 import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
-import CloudUploadIcon from "@/shared/assets/icon/upload/CloudUploadIcon"
 import { cn } from "@/shared/lib/utils"
 
 export type ProfileAvatarSize = 40 | 46 | 100
@@ -20,27 +19,36 @@ export function ProfileAvatar({
   state = src ? "filled" : "default",
   className,
 }: ProfileAvatarProps) {
+  const isDefault = state === "default"
+  const isFilled = state === "filled"
+  const isHoverUpload = state === "hover-upload"
+  const profileIconSize = size === 100 ? 87 : size === 46 ? 40 : 36
+  const profileIconTop = size === 100 ? 17.39 : size === 46 ? 8 : 7
+
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 overflow-hidden rounded-full",
+        "bg-teal-gray-200 relative inline-flex shrink-0 overflow-hidden rounded-full",
+        (isFilled || isHoverUpload) && "border-teal-gray-100 border",
+        isHoverUpload && "opacity-[0.34]",
         className,
       )}
+      data-testid={isHoverUpload ? "profile-avatar-upload" : undefined}
       style={{ width: size, height: size }}
     >
-      {src ? (
+      {isFilled && src ? (
         <img src={src} alt={alt} className="size-full object-cover" />
-      ) : (
-        <ProfileIcon className="size-full" aria-hidden="true" />
-      )}
-      {state === "hover-upload" && (
-        <span
-          data-testid="profile-avatar-upload"
-          className="absolute inset-0 flex items-center justify-center bg-black/40 text-white"
-        >
-          <CloudUploadIcon className="size-5" aria-hidden="true" />
-        </span>
-      )}
+      ) : isDefault ? (
+        <ProfileIcon
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{
+            width: profileIconSize,
+            height: profileIconSize,
+            top: profileIconTop,
+          }}
+          aria-hidden="true"
+        />
+      ) : null}
     </span>
   )
 }

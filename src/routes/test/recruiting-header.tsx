@@ -8,7 +8,10 @@ import { cn } from "@/shared/lib/utils"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 
 import type { MemberInfoResponse } from "@/entities/member/api/me"
-import type { RoleType } from "@/entities/member/model/challenger"
+import type {
+  OrganizationType,
+  RoleType,
+} from "@/entities/member/model/challenger"
 import type { RecruitingStatus } from "@/widgets/navigation/header/RecruitingStatusButton"
 
 export const Route = createFileRoute("/test/recruiting-header")({
@@ -18,6 +21,7 @@ export const Route = createFileRoute("/test/recruiting-header")({
 type RoleScenario =
   | "centralCore"
   | "schoolLeadership"
+  | "schoolViceLeadership"
   | "centralStaff"
   | "chapterPresident"
   | "challenger"
@@ -25,7 +29,8 @@ type RoleScenario =
 
 const ROLE_OPTIONS: { label: string; value: RoleScenario }[] = [
   { label: "중앙 핵심", value: "centralCore" },
-  { label: "학교 회장단", value: "schoolLeadership" },
+  { label: "학교 회장", value: "schoolLeadership" },
+  { label: "학교 부회장", value: "schoolViceLeadership" },
   { label: "중앙 운영팀원", value: "centralStaff" },
   { label: "지부장", value: "chapterPresident" },
   { label: "챌린저", value: "challenger" },
@@ -35,12 +40,25 @@ const ROLE_OPTIONS: { label: string; value: RoleScenario }[] = [
 const SCENARIO_ROLE_TYPE: Record<Exclude<RoleScenario, "guest">, RoleType> = {
   centralCore: "CENTRAL_PRESIDENT",
   schoolLeadership: "SCHOOL_PRESIDENT",
+  schoolViceLeadership: "SCHOOL_VICE_PRESIDENT",
   centralStaff: "CENTRAL_OPERATING_TEAM_MEMBER",
   chapterPresident: "CHAPTER_PRESIDENT",
   challenger: "CHALLENGER",
 }
 
-function makeMe(roleType: RoleType): MemberInfoResponse {
+const SCENARIO_ORGANIZATION_TYPE: Record<
+  Exclude<RoleScenario, "guest">,
+  OrganizationType
+> = {
+  centralCore: "CENTRAL",
+  schoolLeadership: "SCHOOL",
+  schoolViceLeadership: "SCHOOL",
+  centralStaff: "CENTRAL",
+  chapterPresident: "CHAPTER",
+  challenger: "SCHOOL",
+}
+
+function makeMe(role: Exclude<RoleScenario, "guest">): MemberInfoResponse {
   return {
     id: "1",
     name: "미리보기",
@@ -55,8 +73,8 @@ function makeMe(roleType: RoleType): MemberInfoResponse {
       {
         challengerRoleId: "1",
         challengerId: "1",
-        roleType,
-        organizationType: "CENTRAL",
+        roleType: SCENARIO_ROLE_TYPE[role],
+        organizationType: SCENARIO_ORGANIZATION_TYPE[role],
         organizationId: "1",
         gisuId: "1",
         gisu: "11",
@@ -86,7 +104,7 @@ function RecruitingHeaderTestPage() {
       queryClient.removeQueries({ queryKey: authKeys.me })
     } else {
       useAuthStore.setState({ isAuthed: true })
-      queryClient.setQueryData(authKeys.me, makeMe(SCENARIO_ROLE_TYPE[role]))
+      queryClient.setQueryData(authKeys.me, makeMe(role))
     }
 
     return () => {

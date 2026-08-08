@@ -2,6 +2,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useMemo } from "react"
 
 import {
+  clearAnonymousApplicationSession,
   mapTrackToPartTag,
   RecruitingApplicationCard,
   useAnonymousApplicationQuery,
@@ -87,12 +88,7 @@ function ApplicationListPage() {
   }
 
   const handleResetVerification = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("isApplicationVerified")
-      sessionStorage.removeItem("anonymousEmail")
-      sessionStorage.removeItem("anonymousApplicationKey")
-      sessionStorage.removeItem("anonymousSessionId")
-    }
+    clearAnonymousApplicationSession()
     void navigate({ to: "/projects/application" })
   }
 

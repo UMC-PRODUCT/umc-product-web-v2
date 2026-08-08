@@ -9,7 +9,10 @@ import { getPublicTermByType } from "@/shared/api/terms"
 import { Button } from "@/shared/ui/Button"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
-import { getOrCreateAnonymousSessionId } from "../../hooks/useAnonymousApplication"
+import {
+  clearAnonymousApplicationSession,
+  getOrCreateAnonymousSessionId,
+} from "../../hooks/useAnonymousApplication"
 import { useApplyForm } from "../../hooks/useApplyForm"
 import {
   useSaveApplicationDraft,
@@ -164,7 +167,7 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
       answers: toPayload(values),
     })
     setApplicationKey(draft.applicationKey)
-    if (typeof window !== "undefined" && draft.applicationKey) {
+    if (isAnonymous && typeof window !== "undefined" && draft.applicationKey) {
       sessionStorage.setItem("isApplicationVerified", "true")
       sessionStorage.setItem("anonymousEmail", applicant.applicantEmail.trim())
       sessionStorage.setItem("anonymousApplicationKey", draft.applicationKey)
@@ -267,6 +270,8 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
               size="s"
               onClick={() => {
                 clearApplyDraft(roundId, storageIdentity)
+                if (isAnonymous) clearAnonymousApplicationSession()
+                setApplicationKey(undefined)
                 setResumeDecided(true)
               }}
             >
