@@ -57,7 +57,7 @@ export function isCentralStaff(me: MemberInfoResponse | undefined): boolean {
 
 /** 설정(학교·지부·커리큘럼) 영역을 쓸 수 있는 범위. 헤더 `설정` 탭 노출 조건과 같다. */
 export function isCentralAdmin(me: MemberInfoResponse | undefined): boolean {
-  return isSuperAdmin(me) || isCentralStaff(me)
+  return isCentralCore(me)
 }
 
 export function isCentralCore(me: MemberInfoResponse | undefined): boolean {
@@ -96,6 +96,22 @@ export function isSchoolLeadership(
 
 export function isAnyOperator(me: MemberInfoResponse | undefined): boolean {
   return isOperator(me) || isSchoolStaff(me)
+}
+
+/**
+ * 리크루팅을 다룰 수 있는 역할.
+ *
+ * 서버가 모집 시즌·차수·폼·평가자·합불을 허용하는 범위에 맞춘다. 학교 쪽은
+ * 회장단만 통과하고 파트장·기타 운영진은 거부되므로, 메뉴를 열어 주면 들어가서
+ * 막히기만 한다.
+ *
+ * `isAnyOperator` 와 따로 두는 이유는 그 함수가 사이드바·뷰 모드·프로젝트 관리 등
+ * 열 곳에서 학교 역할 4종을 포함하는 의미로 쓰이고 있어서다.
+ */
+export function isRecruitingOperator(
+  me: MemberInfoResponse | undefined,
+): boolean {
+  return isCentralCore(me) || isSchoolLeadership(me)
 }
 
 export function canAccessProjectSettings(

@@ -1,7 +1,10 @@
 import { Link, useLocation } from "@tanstack/react-router"
 
 import { useMe } from "@/entities/member/hooks/useMe"
-import { isAnyOperator, isCentralAdmin } from "@/entities/member/model/identity"
+import {
+  isCentralAdmin,
+  isRecruitingOperator,
+} from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import { useHeaderRecruitingStatus } from "@/features/recruiting/hooks/useHeaderRecruitingStatus"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
@@ -38,14 +41,18 @@ export default function RecruitingHeader({
   const resolvedStatus = useHeaderRecruitingStatus()
   const status = recruitingStatus ?? resolvedStatus
 
-  const showRecruiting = isAnyOperator(me)
+  const showRecruiting = isRecruitingOperator(me)
   const showSettings = isCentralAdmin(me)
+  // 상태를 아직 못 받았으면 감추지 않는다. 있던 탭이 잠깐 사라지는 것보다
+  // 잠깐 더 보이는 편이 덜 어색하다.
+  const isRecruitingPeriod = status?.phase === "open"
 
   const navItems = buildRecruitingNavItems({
     isAuthed,
     showRecruiting,
     showSettings,
     settingsEntryPath: SETTINGS_ENTRY_PATH,
+    isRecruitingPeriod,
   })
 
   return (
@@ -67,17 +74,22 @@ export default function RecruitingHeader({
         ))}
       </nav>
 
-      {/* 로그인 여부와 무관하게 배치가 같다. 게스트는 프로필 자리를 로그인
-          진입점으로 쓴다(디자인 확인 완료). 자리를 비우면 로그인 전후로
-          헤더가 흔들린다. */}
+      {/* 비로그인은 `로그인` 버튼, 로그인 사용자는 프로필. 디자인이 권한별
+          헤더 스펙에서 이 둘을 명시적으로 갈라 놓았다. */}
       <div className="flex items-center justify-end gap-4 pr-8.5">
-        {status && <RecruitingStatusButton status={status} />}
+        {status && (
+          <RecruitingStatusButton status={status} isAuthed={isAuthed} />
+        )}
         <HeaderButton
           label="문의사항"
           type="trailing-icon"
           className="border-teal-gray-150 h-10 border"
         />
-        {isAuthed ? <Profile /> : <GuestProfileButton />}
+        {isAuthed ? (
+          <Profile />
+        ) : (
+          <GuestProfileButton recruitingStatus={status} />
+        )}
       </div>
     </header>
   )

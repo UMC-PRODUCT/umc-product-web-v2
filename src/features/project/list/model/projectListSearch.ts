@@ -38,7 +38,6 @@ export function validateProjectListSearch(
   }
 
   return {
-    mock: search.mock === "projects" ? "projects" : undefined,
     branch: typeof search.branch === "string" ? search.branch : undefined,
     school: typeof search.school === "string" ? search.school : undefined,
     parts,

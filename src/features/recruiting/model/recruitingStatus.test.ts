@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { resolveRecruitingStatus } from "./recruitingStatus"
+import { nextStatusBoundary, resolveRecruitingStatus } from "./recruitingStatus"
 
 const NOW = Date.parse("2026-08-01T00:00:00Z")
 
@@ -14,7 +14,7 @@ describe("resolveRecruitingStatus", () => {
     expect(resolveRecruitingStatus([], NOW)).toBeUndefined()
   })
 
-  it("열린 차수가 있으면 지원 마감까지 남은 일수를 준다", () => {
+  it("접수 중인 차수가 있으면 접수 중이다", () => {
     expect(
       resolveRecruitingStatus(
         [
@@ -26,11 +26,12 @@ describe("resolveRecruitingStatus", () => {
         ],
         NOW,
       ),
-    ).toEqual({ phase: "open", dDay: 22 })
+    ).toEqual({ phase: "open" })
   })
 
-  // 마감이 임박한 쪽을 보여줘야 지원자가 놓치지 않는다
-  it("열린 차수가 여럿이면 가장 먼저 마감하는 것을 쓴다", () => {
+  // 학교마다 기간이 달라 어느 차수를 대표로 고를 근거가 없다. 하나라도 열려
+  // 있으면 열린 것이고, 그 이상은 말하지 않는다
+  it("접수 중인 차수가 여럿이어도 접수 중 하나로만 말한다", () => {
     expect(
       resolveRecruitingStatus(
         [
@@ -40,11 +41,11 @@ describe("resolveRecruitingStatus", () => {
         ],
         NOW,
       ),
-    ).toEqual({ phase: "open", dDay: 5 })
+    ).toEqual({ phase: "open" })
   })
 
-  it("시작 전이면 applicationOpen 이 켜져 있어도 시작까지 남은 일수를 준다", () => {
-    // 시작 시각을 안 보면 예정 차수를 "마감 D-n" 으로 잘못 알린다
+  it("시작 전 차수만 있으면 아무것도 표시하지 않는다", () => {
+    // 아직 열리지 않은 것을 마감이라고 하면 틀린 말이 된다
     expect(
       resolveRecruitingStatus(
         [
@@ -56,10 +57,10 @@ describe("resolveRecruitingStatus", () => {
         ],
         NOW,
       ),
-    ).toEqual({ phase: "before", dDay: 7 })
+    ).toBeUndefined()
   })
 
-  it("시작한 차수와 예정 차수가 섞이면 시작한 쪽의 마감을 쓴다", () => {
+  it("시작한 차수와 예정 차수가 섞이면 접수 중이다", () => {
     expect(
       resolveRecruitingStatus(
         [
@@ -76,19 +77,7 @@ describe("resolveRecruitingStatus", () => {
         ],
         NOW,
       ),
-    ).toEqual({ phase: "open", dDay: 10 })
-  })
-
-  it("아직 시작 전이면 시작까지 남은 일수를 준다", () => {
-    expect(
-      resolveRecruitingStatus(
-        [
-          { documentStartAt: at(7), documentEndAt: at(20) },
-          { documentStartAt: at(15), documentEndAt: at(30) },
-        ],
-        NOW,
-      ),
-    ).toEqual({ phase: "before", dDay: 7 })
+    ).toEqual({ phase: "open" })
   })
 
   // applicationOpen 이 false 면 기간이 남았어도 지원을 받지 않는다
@@ -116,27 +105,24 @@ describe("resolveRecruitingStatus", () => {
     ).toEqual({ phase: "closed" })
   })
 
-  // 경과 시간(24시간)으로 세면 마감 당일 자정 직후에도 1 이 나온다.
-  // 모집 공고 화면이 KST 날짜 경계를 쓰므로 헤더도 같은 값이어야 한다.
-  it("마감 당일이면 시각과 무관하게 0 이다", () => {
-    const kstMidnight = Date.parse("2026-08-01T00:01:00+09:00")
+  it("마감 시각을 넘기기 전까지는 접수 중이다", () => {
+    const justBeforeClose = Date.parse("2026-08-01T23:58:00+09:00")
     expect(
       resolveRecruitingStatus(
         [{ documentEndAt: "2026-08-01T23:59:00+09:00", applicationOpen: true }],
-        kstMidnight,
+        justBeforeClose,
       ),
-    ).toEqual({ phase: "open", dDay: 0 })
+    ).toEqual({ phase: "open" })
   })
 
-  it("브라우저 시간대가 달라도 KST 날짜로 센다", () => {
-    // UTC 로 보면 7/31 이지만 KST 로는 8/1 이다
-    const beforeKstNoon = Date.parse("2026-08-01T09:30:00+09:00")
+  it("마감 시각을 넘기면 마감이다", () => {
+    const justAfterClose = Date.parse("2026-08-02T00:00:00+09:00")
     expect(
       resolveRecruitingStatus(
-        [{ documentEndAt: "2026-08-03T10:00:00+09:00", applicationOpen: true }],
-        beforeKstNoon,
+        [{ documentEndAt: "2026-08-01T23:59:00+09:00", applicationOpen: true }],
+        justAfterClose,
       ),
-    ).toEqual({ phase: "open", dDay: 2 })
+    ).toEqual({ phase: "closed" })
   })
 
   it("날짜가 비어 있어도 터지지 않는다", () => {
@@ -146,5 +132,33 @@ describe("resolveRecruitingStatus", () => {
         NOW,
       ),
     ).toEqual({ phase: "closed" })
+  })
+})
+
+describe("nextStatusBoundary", () => {
+  it("가장 먼저 오는 시작·마감 시각을 준다", () => {
+    expect(
+      nextStatusBoundary(
+        [
+          { documentStartAt: at(3), documentEndAt: at(20) },
+          { documentStartAt: at(-1), documentEndAt: at(10) },
+        ],
+        NOW,
+      ),
+    ).toBe(Date.parse(at(3)))
+  })
+
+  // 지난 차수만 남으면 표시가 더 바뀔 일이 없다. 타이머를 걸 이유가 없다
+  it("지난 시각뿐이면 경계가 없다", () => {
+    expect(
+      nextStatusBoundary(
+        [{ documentStartAt: at(-30), documentEndAt: at(-1) }],
+        NOW,
+      ),
+    ).toBeUndefined()
+  })
+
+  it("차수가 없으면 경계가 없다", () => {
+    expect(nextStatusBoundary([], NOW)).toBeUndefined()
   })
 })

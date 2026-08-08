@@ -333,6 +333,3 @@ const RAW_MOCK_PROJECTS: MatchingProjectMock[] = [
 
 /** 목록 그리드, 카드에서 동일하게 사용하는 목 데이터 리스트 */
 export const MOCK_MATCHING_PROJECTS: MatchingProjectMock[] = RAW_MOCK_PROJECTS
-
-/** 카드 단독 사용 시 기본값 */
-export const DEFAULT_MATCHING_PROJECT_MOCK = MOCK_MATCHING_PROJECTS[0]! // Selenium (임시 지부로 설정)

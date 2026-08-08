@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 
 import {
   getViewerBranch,
-  isAnyOperator,
+  isRecruitingOperator,
 } from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import { isChapter } from "@/entities/organization/model/chapters"
@@ -21,9 +21,9 @@ export const Route = createFileRoute("/")({
 
     const me = await ensureMe(context.queryClient)
 
-    // 학교 운영진까지 포함한다. isOperator 는 학교 역할을 빼고 있어서, 교내
-    // 회장이 리크루팅을 쓰는데도 매칭으로 떨어지고 있었다.
-    if (isAnyOperator(me)) {
+    // 리크루팅 진입 가드와 같은 판정을 써야 한다. 여기서 더 넓게 보내면
+    // 가드가 되돌려보내고 다시 여기로 와서 무한히 오간다.
+    if (isRecruitingOperator(me)) {
       throw redirect({ to: OPERATOR_LANDING_PATH })
     }
 

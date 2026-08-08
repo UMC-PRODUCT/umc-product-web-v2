@@ -19,6 +19,14 @@ export function getAnonymousSessionId(): string | null {
   return sessionStorage.getItem("anonymousSessionId")
 }
 
+export function clearAnonymousApplicationSession(): void {
+  if (typeof window === "undefined") return
+  sessionStorage.removeItem("isApplicationVerified")
+  sessionStorage.removeItem("anonymousEmail")
+  sessionStorage.removeItem("anonymousApplicationKey")
+  sessionStorage.removeItem("anonymousSessionId")
+}
+
 export function getOrCreateAnonymousSessionId(): string {
   if (typeof window === "undefined") return ""
   let sessionId = sessionStorage.getItem("anonymousSessionId")
@@ -91,12 +99,7 @@ export function useCancelAnonymousApplication() {
           queryKey: recruitingKeys.anonymousApplication(sessionId),
         })
       }
-      if (typeof window !== "undefined") {
-        sessionStorage.removeItem("isApplicationVerified")
-        sessionStorage.removeItem("anonymousEmail")
-        sessionStorage.removeItem("anonymousApplicationKey")
-        sessionStorage.removeItem("anonymousSessionId")
-      }
+      clearAnonymousApplicationSession()
     },
   })
 }

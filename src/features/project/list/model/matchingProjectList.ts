@@ -61,7 +61,6 @@ export type MatchingProjectListFilterDescriptor =
     )
 
 export type ProjectListSearch = {
-  mock?: "projects"
   branch?: string
   school?: string
   parts?: ProjectPart[]

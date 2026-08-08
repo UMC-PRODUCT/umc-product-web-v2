@@ -3,6 +3,7 @@ import { useMemo } from "react"
 
 import { useAuthStore } from "@/entities/member/store/authStore"
 import {
+  clearAnonymousApplicationSession,
   mapTrackToPartTag,
   RecruitingApplicationCard,
   useAnonymousApplicationQuery,
@@ -90,12 +91,7 @@ function ApplicationListPage() {
   }
 
   const handleResetVerification = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("isApplicationVerified")
-      sessionStorage.removeItem("anonymousEmail")
-      sessionStorage.removeItem("anonymousApplicationKey")
-      sessionStorage.removeItem("anonymousSessionId")
-    }
+    clearAnonymousApplicationSession()
     void navigate({ to: "/projects/application" })
   }
 

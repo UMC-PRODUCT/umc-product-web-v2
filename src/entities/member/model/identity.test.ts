@@ -7,9 +7,11 @@ import {
   getCurrentChallengerPart,
   getProjectPmSearchScope,
   isAnyOperator,
+  isCentralAdmin,
   isCentralCore,
   isCurrentTermPm,
   isProjectRegistrationQuotaLimited,
+  isRecruitingOperator,
   isSchoolLeadership,
 } from "./identity"
 
@@ -96,6 +98,55 @@ function makeMe(
     ...overrides,
   }
 }
+
+// 서버가 모집 시즌·차수·폼·합불을 허용하는 범위와 같아야 한다. 넓히면 메뉴만
+// 열리고 들어가서 막히고, 좁히면 권한 있는 사람이 메뉴를 못 본다
+describe("isRecruitingOperator", () => {
+  it("중앙 핵심은 true", () => {
+    expect(isRecruitingOperator(makeMe(["SUPER_ADMIN"]))).toBe(true)
+    expect(isRecruitingOperator(makeMe(["CENTRAL_PRESIDENT"]))).toBe(true)
+    expect(isRecruitingOperator(makeMe(["CENTRAL_VICE_PRESIDENT"]))).toBe(true)
+  })
+
+  it("학교 회장단은 true", () => {
+    expect(isRecruitingOperator(makeMe(["SCHOOL_PRESIDENT"]))).toBe(true)
+    expect(isRecruitingOperator(makeMe(["SCHOOL_VICE_PRESIDENT"]))).toBe(true)
+  })
+
+  it("중앙 실무·교육팀원과 지부장은 false", () => {
+    expect(
+      isRecruitingOperator(makeMe(["CENTRAL_OPERATING_TEAM_MEMBER"])),
+    ).toBe(false)
+    expect(
+      isRecruitingOperator(makeMe(["CENTRAL_EDUCATION_TEAM_MEMBER"])),
+    ).toBe(false)
+    expect(isRecruitingOperator(makeMe(["CHAPTER_PRESIDENT"]))).toBe(false)
+  })
+
+  it("학교 파트장·기타운영진은 false", () => {
+    expect(isRecruitingOperator(makeMe(["SCHOOL_PART_LEADER"]))).toBe(false)
+    expect(isRecruitingOperator(makeMe(["SCHOOL_ETC_ADMIN"]))).toBe(false)
+  })
+
+  it("일반 챌린저와 비로그인은 false", () => {
+    expect(isRecruitingOperator(makeMe(["CHALLENGER"]))).toBe(false)
+    expect(isRecruitingOperator(undefined)).toBe(false)
+  })
+})
+
+describe("isCentralAdmin", () => {
+  it("중앙 핵심만 true", () => {
+    expect(isCentralAdmin(makeMe(["SUPER_ADMIN"]))).toBe(true)
+    expect(isCentralAdmin(makeMe(["CENTRAL_PRESIDENT"]))).toBe(true)
+    expect(isCentralAdmin(makeMe(["CENTRAL_VICE_PRESIDENT"]))).toBe(true)
+    expect(isCentralAdmin(makeMe(["CENTRAL_OPERATING_TEAM_MEMBER"]))).toBe(
+      false,
+    )
+    expect(isCentralAdmin(makeMe(["CENTRAL_EDUCATION_TEAM_MEMBER"]))).toBe(
+      false,
+    )
+  })
+})
 
 describe("isSchoolLeadership", () => {
   it("학교 회장·부회장은 true", () => {

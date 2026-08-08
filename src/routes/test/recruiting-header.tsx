@@ -8,30 +8,57 @@ import { cn } from "@/shared/lib/utils"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 
 import type { MemberInfoResponse } from "@/entities/member/api/me"
-import type { RoleType } from "@/entities/member/model/challenger"
+import type {
+  OrganizationType,
+  RoleType,
+} from "@/entities/member/model/challenger"
 import type { RecruitingStatus } from "@/widgets/navigation/header/RecruitingStatusButton"
 
 export const Route = createFileRoute("/test/recruiting-header")({
   component: RecruitingHeaderTestPage,
 })
 
-// 역할 시나리오: 관리자급 / 운영진급 / 챌린저급 / 게스트
-type RoleScenario = "admin" | "operator" | "challenger" | "guest"
+type RoleScenario =
+  | "centralCore"
+  | "schoolLeadership"
+  | "schoolViceLeadership"
+  | "centralStaff"
+  | "chapterPresident"
+  | "challenger"
+  | "guest"
 
 const ROLE_OPTIONS: { label: string; value: RoleScenario }[] = [
-  { label: "관리자급 (SUPER/중앙)", value: "admin" },
-  { label: "운영진급 (지부장/교내)", value: "operator" },
-  { label: "챌린저급", value: "challenger" },
+  { label: "중앙 핵심", value: "centralCore" },
+  { label: "학교 회장", value: "schoolLeadership" },
+  { label: "학교 부회장", value: "schoolViceLeadership" },
+  { label: "중앙 운영팀원", value: "centralStaff" },
+  { label: "지부장", value: "chapterPresident" },
+  { label: "챌린저", value: "challenger" },
   { label: "게스트 (비로그인)", value: "guest" },
 ]
 
 const SCENARIO_ROLE_TYPE: Record<Exclude<RoleScenario, "guest">, RoleType> = {
-  admin: "CENTRAL_OPERATING_TEAM_MEMBER",
-  operator: "CHAPTER_PRESIDENT",
+  centralCore: "CENTRAL_PRESIDENT",
+  schoolLeadership: "SCHOOL_PRESIDENT",
+  schoolViceLeadership: "SCHOOL_VICE_PRESIDENT",
+  centralStaff: "CENTRAL_OPERATING_TEAM_MEMBER",
+  chapterPresident: "CHAPTER_PRESIDENT",
   challenger: "CHALLENGER",
 }
 
-function makeMe(roleType: RoleType): MemberInfoResponse {
+const SCENARIO_ORGANIZATION_TYPE: Record<
+  Exclude<RoleScenario, "guest">,
+  OrganizationType
+> = {
+  centralCore: "CENTRAL",
+  schoolLeadership: "SCHOOL",
+  schoolViceLeadership: "SCHOOL",
+  centralStaff: "CENTRAL",
+  chapterPresident: "CHAPTER",
+  challenger: "SCHOOL",
+}
+
+function makeMe(role: Exclude<RoleScenario, "guest">): MemberInfoResponse {
   return {
     id: "1",
     name: "미리보기",
@@ -46,8 +73,8 @@ function makeMe(roleType: RoleType): MemberInfoResponse {
       {
         challengerRoleId: "1",
         challengerId: "1",
-        roleType,
-        organizationType: "CENTRAL",
+        roleType: SCENARIO_ROLE_TYPE[role],
+        organizationType: SCENARIO_ORGANIZATION_TYPE[role],
         organizationId: "1",
         gisuId: "1",
         gisu: "11",
@@ -58,15 +85,14 @@ function makeMe(roleType: RoleType): MemberInfoResponse {
 }
 
 const PHASE_OPTIONS: { label: string; value: RecruitingStatus }[] = [
-  { label: "모집 직전", value: { phase: "before", dDay: 7 } },
-  { label: "진행중", value: { phase: "open", dDay: 22 } },
+  { label: "진행중", value: { phase: "open" } },
   { label: "마감", value: { phase: "closed" } },
 ]
 
 function RecruitingHeaderTestPage() {
   const queryClient = useQueryClient()
-  const [role, setRole] = useState<RoleScenario>("admin")
-  const [phaseIndex, setPhaseIndex] = useState(1)
+  const [role, setRole] = useState<RoleScenario>("centralCore")
+  const [phaseIndex, setPhaseIndex] = useState(0)
 
   // 선택한 역할 시나리오에 맞춰 auth/me를 목킹. 언마운트 시 원복.
   useEffect(() => {
@@ -78,7 +104,7 @@ function RecruitingHeaderTestPage() {
       queryClient.removeQueries({ queryKey: authKeys.me })
     } else {
       useAuthStore.setState({ isAuthed: true })
-      queryClient.setQueryData(authKeys.me, makeMe(SCENARIO_ROLE_TYPE[role]))
+      queryClient.setQueryData(authKeys.me, makeMe(role))
     }
 
     return () => {

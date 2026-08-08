@@ -7,11 +7,106 @@ import {
   parseSlotKey,
   resolveScheduleDates,
   splitApplicantsByAssignment,
+  toInterviewScheduleRounds,
   toSlotKey,
   unassignApplicant,
 } from "./interviewSchedule"
 
+import type {
+  RecruitingRoundGroup,
+  RecruitingStatusSummary,
+} from "../api/types"
 import type { SlotAssignment } from "./interviewSchedule"
+
+function group(rounds: RecruitingRoundGroup["rounds"]): RecruitingRoundGroup {
+  return {
+    seasonId: "season-1",
+    gisuId: "gisu-1",
+    chapterId: "chapter-1",
+    chapterName: "서울",
+    schoolId: "school-1",
+    schoolName: "중앙대학교",
+    rounds,
+  }
+}
+
+function round(
+  overrides: Partial<RecruitingRoundGroup["rounds"][number]> = {},
+) {
+  return {
+    roundId: "round-1",
+    title: "중앙대학교 UMC 11기 모집",
+    type: "REGULAR" as const,
+    roundNo: 1,
+    recruitableTracks: [],
+    secondChoiceEnabled: false,
+    documentStartAt: null,
+    documentEndAt: "2026-07-17T23:59:00Z",
+    documentResultPublishedAt: null,
+    interviewRequired: true,
+    interviewStartAt: "2026-07-18T01:00:00Z",
+    interviewEndAt: "2026-07-26T14:59:00Z",
+    finalResultPublishedAt: null,
+    announcement: null,
+    ...overrides,
+  }
+}
+
+const statusSummary: RecruitingStatusSummary = {
+  totalCount: 1,
+  countByStatus: {},
+  parts: [],
+  schools: [
+    {
+      schoolId: "school-1",
+      schoolName: "중앙대학교",
+      chapterId: "chapter-1",
+      chapterName: "서울",
+      totalCount: 12,
+      countByStatus: {},
+      parts: [],
+      rounds: [
+        {
+          roundId: "round-1",
+          roundTitle: "중앙대학교 UMC 11기 모집",
+          roundType: "REGULAR",
+          roundNo: 1,
+          totalCount: 12,
+          countByStatus: { INTERVIEW_ASSIGNED: 5 },
+          parts: [],
+        },
+      ],
+    },
+  ],
+}
+
+describe("toInterviewScheduleRounds", () => {
+  it("서버 차수와 서버 집계로 면접 스케줄 목록을 만든다", () => {
+    expect(
+      toInterviewScheduleRounds([group([round()])], statusSummary),
+    ).toEqual([
+      expect.objectContaining({
+        roundId: "round-1",
+        schoolName: "중앙대학교",
+        roundTitle: "중앙대학교 UMC 11기 모집",
+        assignedCount: 5,
+        totalCount: 12,
+      }),
+    ])
+  })
+
+  it("DRAFT이거나 면접 일정이 없는 차수는 제외한다", () => {
+    expect(
+      toInterviewScheduleRounds([
+        group([
+          round({ status: "DRAFT" }),
+          round({ roundId: "round-2", interviewRequired: false }),
+          round({ roundId: "round-3", interviewStartAt: null }),
+        ]),
+      ]),
+    ).toEqual([])
+  })
+})
 
 describe("resolveScheduleDates", () => {
   it("면접 기간을 하루 단위로 펼친다", () => {

@@ -6,12 +6,12 @@ import { isCentralStaff, isSuperAdmin } from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import { logout as apiLogout } from "@/features/auth/api/credentials"
 import { logout as localLogout } from "@/features/auth/lib/logout"
-import ProfileIcon from "@/shared/assets/icon/people/ProfileIcon"
 import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { toRoleTag } from "@/shared/lib/roleTagMapper"
 import { cn } from "@/shared/lib/utils"
 import { TextButton } from "@/shared/ui/button/TextButton"
 import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
+import { ProfileAvatar } from "@/shared/ui/profile/ProfileAvatar"
 import GenerationListItem from "@/widgets/navigation/header/GenerationListItem"
 
 interface ProfileDropdownProps {
@@ -109,15 +109,11 @@ export function ProfileDropdown({
                 handleOpenChange(false)
               }}
             >
-              {me?.profileImageLink ? (
-                <img
-                  src={me.profileImageLink}
-                  alt={me.name}
-                  className="size-full object-cover"
-                />
-              ) : (
-                <ProfileIcon className="size-full" />
-              )}
+              <ProfileAvatar
+                size={46}
+                src={me?.profileImageLink}
+                alt={me?.name ?? "프로필 이미지"}
+              />
             </button>
 
             <div className="flex flex-col gap-0.5">

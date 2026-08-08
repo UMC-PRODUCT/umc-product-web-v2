@@ -18,7 +18,6 @@ import {
   getProjectDetail,
 } from "@/entities/project/api/matchingProject"
 import { isRecruitDone } from "@/entities/project/model/matchingProject"
-import { DEFAULT_MATCHING_PROJECT_MOCK } from "@/entities/project/model/matchingProject.mock"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   getApplicationForm,
@@ -234,6 +233,7 @@ export function ProjectDetailCard({
     data: detail,
     dataUpdatedAt: detailDataUpdatedAt,
     isLoading: isDetailLoading,
+    isError: isDetailError,
   } = useQuery({
     queryKey: ["projectDetail", projectId],
     queryFn: () => getProjectDetail(projectId),
@@ -257,9 +257,7 @@ export function ProjectDetailCard({
 
   const isAlreadyApproved = selectIsAlreadyApproved(myApplications)
 
-  const data = detail
-    ? toMatchingProject(detail, detailDataUpdatedAt)
-    : DEFAULT_MATCHING_PROJECT_MOCK
+  const data = detail ? toMatchingProject(detail, detailDataUpdatedAt) : null
 
   const isShowingFormModal = isApplyModalOpen || isRecruitQuestionsModalOpen
   const {
@@ -430,7 +428,7 @@ export function ProjectDetailCard({
           hasActiveRound: hasActiveRoundForCtaMode,
         })
 
-  const cover = data.coverImage
+  const cover = data?.coverImage
   const showLogo = logo === "on"
   const shouldShowEditCta =
     showEditCta && (resolvedEditPermissionLoading || resolvedCanEditProject)
@@ -448,6 +446,14 @@ export function ProjectDetailCard({
 
   if (isDetailLoading) {
     return <ProjectDetailCardLoading />
+  }
+
+  if (isDetailError || !data) {
+    return (
+      <div className="text-body-2-regular text-teal-gray-500 flex min-h-50 items-center justify-center rounded-2xl bg-white px-6 text-center">
+        프로젝트를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+      </div>
+    )
   }
 
   return (

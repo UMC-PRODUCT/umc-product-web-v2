@@ -1,4 +1,20 @@
+import type {
+  RecruitingRoundGroup,
+  RecruitingStatusSummary,
+} from "../api/types"
+
 export type InterviewMode = "online" | "offline"
+
+export interface InterviewScheduleRound {
+  roundId: string
+  schoolName: string
+  roundTitle: string
+  documentClosedLabel: string
+  interviewStartAt: string
+  interviewEndAt: string
+  assignedCount?: number
+  totalCount?: number
+}
 
 export interface InterviewSession {
   id: string
@@ -19,6 +35,58 @@ export interface SlotAssignment {
   sessionId: string
   slotStart: string
   applicantId: string
+}
+
+function createRoundStatusMap(summary: RecruitingStatusSummary | undefined) {
+  const statusMap = new Map<
+    string,
+    { assignedCount: number; totalCount: number }
+  >()
+
+  for (const school of summary?.schools ?? []) {
+    for (const round of school.rounds) {
+      statusMap.set(round.roundId, {
+        assignedCount: round.countByStatus.INTERVIEW_ASSIGNED ?? 0,
+        totalCount: round.totalCount,
+      })
+    }
+  }
+
+  return statusMap
+}
+
+export function toInterviewScheduleRounds(
+  groups: RecruitingRoundGroup[],
+  summary?: RecruitingStatusSummary,
+): InterviewScheduleRound[] {
+  const statusMap = createRoundStatusMap(summary)
+
+  return groups.flatMap((group) =>
+    group.rounds.flatMap((round) => {
+      if (
+        round.status === "DRAFT" ||
+        !round.interviewRequired ||
+        !round.interviewStartAt ||
+        !round.interviewEndAt
+      ) {
+        return []
+      }
+
+      const status = statusMap.get(round.roundId)
+      return [
+        {
+          roundId: round.roundId,
+          schoolName: group.schoolName,
+          roundTitle: round.title,
+          documentClosedLabel: "서류 지원 마감",
+          interviewStartAt: round.interviewStartAt,
+          interviewEndAt: round.interviewEndAt,
+          assignedCount: status?.assignedCount,
+          totalCount: status?.totalCount,
+        },
+      ]
+    }),
+  )
 }
 
 export function isInterviewApplicant(

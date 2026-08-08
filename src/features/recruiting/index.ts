@@ -18,6 +18,7 @@ export type {
   UpdateRecruitingSeasonRequest,
 } from "./api/types"
 export {
+  clearAnonymousApplicationSession,
   getAnonymousSessionId,
   getOrCreateAnonymousSessionId,
   useAnonymousApplicationQuery,

@@ -18,6 +18,7 @@ import { Segment } from "@/shared/ui/segment/Segment"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { INTERVIEW_ASSIGNMENT_LIMIT } from "../../api/recruitingApi"
+import { useAdminRecruitingRounds } from "../../hooks/useAdminRecruitingRounds"
 import {
   useApplicantContacts,
   useInterviewScheduleBoard,
@@ -36,9 +37,9 @@ import {
   parseSlotKey,
   resolveScheduleDates,
   splitApplicantsByAssignment,
+  toInterviewScheduleRounds,
   unassignApplicant,
 } from "../../model/interviewSchedule"
-import { INTERVIEW_SCHEDULE_ROUNDS_MOCK } from "../../model/interviewSchedule.mock"
 import {
   buildAssignmentPayload,
   toApplicantAvailabilities,
@@ -78,9 +79,18 @@ export function InterviewScheduleBoardPage({
 }: InterviewScheduleBoardPageProps) {
   const addToast = useToastStore((state) => state.addToast)
 
-  // 차수 메타(학교명·제목·면접 기간)는 아직 목이다. 목록 화면 연동과 함께 걷어낸다.
-  const round = INTERVIEW_SCHEDULE_ROUNDS_MOCK.find(
-    (item) => item.roundId === roundId,
+  const {
+    groups,
+    isLoading: isRoundsLoading,
+    isError: isRoundsError,
+    isForbidden: isRoundsForbidden,
+  } = useAdminRecruitingRounds()
+  const round = useMemo(
+    () =>
+      toInterviewScheduleRounds(groups).find(
+        (item) => item.roundId === roundId,
+      ),
+    [groups, roundId],
   )
 
   const dates = useMemo(
@@ -96,7 +106,7 @@ export function InterviewScheduleBoardPage({
     sessions: serverSessions,
     isLoading: isSessionsLoading,
     isError: isSessionsError,
-    isForbidden,
+    isForbidden: isSessionsForbidden,
   } = useInterviewSessions(roundId)
   const {
     board,
@@ -325,6 +335,22 @@ export function InterviewScheduleBoardPage({
     }
   }
 
+  if (isRoundsLoading) {
+    return (
+      <div className="flex w-full max-w-286.5 flex-col">
+        <BoardNotice message="모집 정보를 불러오는 중입니다..." />
+      </div>
+    )
+  }
+
+  if (isRoundsError || isRoundsForbidden) {
+    return (
+      <div className="flex w-full max-w-286.5 flex-col">
+        <BoardNotice message="모집 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." />
+      </div>
+    )
+  }
+
   if (!round) {
     return (
       <div className="flex w-full max-w-286.5 flex-col">
@@ -335,7 +361,7 @@ export function InterviewScheduleBoardPage({
     )
   }
 
-  if (isForbidden) {
+  if (isSessionsForbidden) {
     return (
       <div className="flex w-full max-w-286.5 flex-col">
         <div className="border-teal-gray-100 text-body-2-regular text-teal-gray-500 mt-8 flex min-h-50 items-center justify-center rounded-[12px] border bg-white">

@@ -1,7 +1,6 @@
 /** 피그마 기준 Project Card_Md입니다. */
 
 import { isRecruitDone } from "@/entities/project/model/matchingProject"
-import { DEFAULT_MATCHING_PROJECT_MOCK } from "@/entities/project/model/matchingProject.mock"
 import { cn } from "@/shared/lib/utils"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
 import { CounterLabel } from "@/shared/ui/CounterLabel"
@@ -26,7 +25,7 @@ export type MatchingProjectCardVariant =
 
 interface MatchingProjectCardProps {
   variant?: MatchingProjectCardVariant
-  data?: MatchingProject
+  data: MatchingProject
 }
 
 function RecruitRowItem(row: ProjectRecruitRow) {
@@ -128,9 +127,8 @@ function CardBody({ data }: { data: MatchingProject }) {
 
 export function MatchingProjectCard({
   variant = "default",
-  data: dataProp,
+  data,
 }: MatchingProjectCardProps) {
-  const data = dataProp ?? DEFAULT_MATCHING_PROJECT_MOCK
   const forcedHover = variant === "hoverAnimation"
   const interactiveHover =
     variant === "default" ||
