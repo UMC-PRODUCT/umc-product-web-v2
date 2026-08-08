@@ -255,7 +255,7 @@ export async function getPublicTermByType(
   termType: TermType,
 ): Promise<PublicTermResponse> {
   const { data } = await api.get<ApiResponse<RawPublicTermResponse>>(
-    `/v1/terms/type/\${termType}`,
+    `/v1/terms/type/${termType}`,
   )
   const id = Number(data.result.id)
   if (!Number.isFinite(id)) throw new Error("invalid public term id")
