@@ -113,14 +113,14 @@ describe("isRecruitingOperator", () => {
     expect(isRecruitingOperator(makeMe(["SCHOOL_VICE_PRESIDENT"]))).toBe(true)
   })
 
-  it("중앙 실무·교육팀원과 지부장은 false", () => {
+  it("중앙 실무·교육팀원은 false, 지부장은 true", () => {
     expect(
       isRecruitingOperator(makeMe(["CENTRAL_OPERATING_TEAM_MEMBER"])),
     ).toBe(false)
     expect(
       isRecruitingOperator(makeMe(["CENTRAL_EDUCATION_TEAM_MEMBER"])),
     ).toBe(false)
-    expect(isRecruitingOperator(makeMe(["CHAPTER_PRESIDENT"]))).toBe(false)
+    expect(isRecruitingOperator(makeMe(["CHAPTER_PRESIDENT"]))).toBe(true)
   })
 
   it("학교 파트장·기타운영진은 false", () => {
