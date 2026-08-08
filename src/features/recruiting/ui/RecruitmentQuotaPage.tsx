@@ -1,5 +1,11 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
+import { useMe } from "@/entities/member/hooks/useMe"
+import {
+  isCentralCore,
+  isSchoolLeadership,
+} from "@/entities/member/model/identity"
+import { getCurrentGisuChallengerRecords } from "@/entities/member/view-mode/currentGisuRecords"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
@@ -12,6 +18,15 @@ import { useAdminRecruitingRounds } from "../hooks/useAdminRecruitingRounds"
 import { useRecruitingPermissions } from "../hooks/useRecruitingPermissions"
 import { useRecruitingSeasonQuotas } from "../hooks/useRecruitingSeasonQuotas"
 import { hasAnyEditableSeason } from "../model/recruitingEditLock"
+import {
+  findMatchingSchoolQuotaRow,
+  getChangedSchoolQuotaRows,
+  getConflictedSchoolQuotaRows,
+  getSchoolQuotaIdentity,
+  mergeSchoolQuotaRows,
+  type SchoolQuotaEdits,
+  type SchoolQuotaRow,
+} from "../model/recruitmentQuota"
 import { mapGroupsToChapterQuotaData } from "../model/recruitmentQuotaMapper"
 import {
   type AllocationStatus,
@@ -20,9 +35,10 @@ import {
 import { ChapterTabs } from "./ChapterTabs"
 import { QuotaApplicantStatusCard } from "./QuotaApplicantStatusCard"
 
-import type { SchoolQuotaRow } from "../model/recruitmentQuota"
+const QUOTA_PAGE_REFETCH_INTERVAL = 30_000
 
 export function RecruitmentQuotaPage() {
+  const { data: me, isLoading: isMeLoading } = useMe()
   const [chapterTab, setChapterTab] = useState("all")
   const [isDirty, setIsDirty] = useState(false)
   const [allocationStatus, setAllocationStatus] =
@@ -34,13 +50,40 @@ export function RecruitmentQuotaPage() {
   } | null>(null)
 
   const [editedSchoolsMap, setEditedSchoolsMap] = useState<
-    Map<string, SchoolQuotaRow[]>
+    Map<string, SchoolQuotaEdits>
   >(new Map())
 
   const addToast = useToastStore((state) => state.addToast)
 
-  const { groups } = useAdminRecruitingRounds()
-  const { chapters: serverChapters } = useSchoolChapterMap()
+  const viewerChapterRecord = useMemo(
+    () => getCurrentGisuChallengerRecords(me)[0],
+    [me],
+  )
+  const viewerChapterId = viewerChapterRecord?.chapterId
+  const viewerChapterName = viewerChapterRecord?.chapterName
+  const isSchoolScoped = isSchoolLeadership(me) && !isCentralCore(me)
+  const canLoadRounds =
+    !isMeLoading &&
+    (!isSchoolScoped ||
+      (Boolean(viewerChapterId) && Boolean(viewerChapterName)))
+  const isAll = !isSchoolScoped && chapterTab === "all"
+  const activeChapter = isSchoolScoped ? viewerChapterName : chapterTab
+
+  const { groups } = useAdminRecruitingRounds(undefined, {
+    fresh: true,
+    refetchInterval: QUOTA_PAGE_REFETCH_INTERVAL,
+    chapterId: isSchoolScoped ? viewerChapterId : undefined,
+    enabled: canLoadRounds,
+  })
+  const { chapters: serverChapters } = useSchoolChapterMap({
+    refetchInterval: QUOTA_PAGE_REFETCH_INTERVAL,
+  })
+  const visibleGroups = useMemo(() => {
+    if (!isSchoolScoped || !viewerChapterId) return groups
+    return groups.filter(
+      (group) => String(group.chapterId) === String(viewerChapterId),
+    )
+  }, [groups, isSchoolScoped, viewerChapterId])
   const { data: activeGisuData } = useActiveGisu()
   const activeGisuId = activeGisuData?.gisuId
     ? String(activeGisuData.gisuId)
@@ -48,27 +91,24 @@ export function RecruitmentQuotaPage() {
 
   const activeTabGroups = useMemo(
     () =>
-      chapterTab === "all"
-        ? groups
-        : groups.filter((g) => g.chapterName === chapterTab),
-    [groups, chapterTab],
+      isAll
+        ? visibleGroups
+        : visibleGroups.filter((g) => g.chapterName === activeChapter),
+    [activeChapter, isAll, visibleGroups],
   )
   const seasonIds = useMemo(
     () => [...new Set(activeTabGroups.map((g) => g.seasonId))],
     [activeTabGroups],
   )
   const { seasonConfigsMap, updateQuotas, createSeason, isSaving } =
-    useRecruitingSeasonQuotas(seasonIds)
+    useRecruitingSeasonQuotas(seasonIds, {
+      fresh: true,
+      refetchInterval: QUOTA_PAGE_REFETCH_INTERVAL,
+    })
 
-  // 편집 권한은 시즌 단위라 서버 조회 결과를 그대로 쓴다. 권한을 확인하기
-  // 전에는 잠가 둔다. 열어 두면 못 고칠 값을 고치고 저장에서야 거부당한다.
-  //
-  // 조회 범위는 현재 탭이 아니라 지부 전체다. 저장은 탭을 옮겨 다니며 쌓인
-  // editedSchoolsMap 을 통째로 보내는데, 현재 탭 시즌만 조회하면 다른 지부에서
-  // 고친 값이 권한 없음으로 판정돼 조용히 빠진다.
   const allSeasonIds = useMemo(
-    () => [...new Set(groups.map((g) => g.seasonId))],
-    [groups],
+    () => [...new Set(visibleGroups.map((g) => g.seasonId))],
+    [visibleGroups],
   )
   const { permittedSeasonIds, isLoading: isPermissionLoading } =
     useRecruitingPermissions(allSeasonIds)
@@ -88,16 +128,27 @@ export function RecruitmentQuotaPage() {
     seasonIds.length > 0 &&
     seasonIds.every((id) => permittedSeasonIds.has(String(id)))
 
-  const allChaptersData = useMemo(
-    () =>
-      mapGroupsToChapterQuotaData(
-        groups,
-        seasonConfigsMap,
-        serverChapters,
-        activeGisuId,
-      ),
-    [groups, seasonConfigsMap, serverChapters, activeGisuId],
-  )
+  const allChaptersData = useMemo(() => {
+    const mapped = mapGroupsToChapterQuotaData(
+      visibleGroups,
+      seasonConfigsMap,
+      serverChapters,
+      activeGisuId,
+    )
+
+    if (!isSchoolScoped) return mapped
+    if (!viewerChapterName) return []
+    return mapped.filter(
+      (chapterData) => chapterData.chapter === viewerChapterName,
+    )
+  }, [
+    activeGisuId,
+    visibleGroups,
+    isSchoolScoped,
+    seasonConfigsMap,
+    serverChapters,
+    viewerChapterName,
+  ])
 
   const chaptersDataWithEdits = useMemo(() => {
     return allChaptersData.map((chapterData) => {
@@ -105,12 +156,70 @@ export function RecruitmentQuotaPage() {
       if (!editedSchools) return chapterData
       return {
         ...chapterData,
-        schools: editedSchools,
+        schools: mergeSchoolQuotaRows(chapterData.schools, editedSchools),
       }
     })
   }, [allChaptersData, editedSchoolsMap])
 
-  const isAll = chapterTab === "all"
+  const conflictedSchoolNamesByChapter = useMemo(() => {
+    const conflicts = new Map<string, Set<string>>()
+
+    allChaptersData.forEach((chapterData) => {
+      const edits = editedSchoolsMap.get(chapterData.chapter)
+      if (!edits) return
+
+      const conflictedRows = getConflictedSchoolQuotaRows(
+        chapterData.schools,
+        edits,
+      )
+      if (conflictedRows.length === 0) return
+
+      conflicts.set(
+        chapterData.chapter,
+        new Set(conflictedRows.map((row) => row.schoolName)),
+      )
+    })
+
+    return conflicts
+  }, [allChaptersData, editedSchoolsMap])
+
+  const conflictSummary = useMemo(
+    () =>
+      [...conflictedSchoolNamesByChapter.entries()].flatMap(
+        ([chapter, schoolNames]) =>
+          [...schoolNames].map((schoolName) => `${chapter} ${schoolName}`),
+      ),
+    [conflictedSchoolNamesByChapter],
+  )
+
+  useEffect(() => {
+    if (isDirty || editedSchoolsMap.size === 0) return
+
+    const isSynced = [...editedSchoolsMap.entries()].every(
+      ([chapter, edits]) => {
+        const serverRows = allChaptersData.find(
+          (chapterData) => chapterData.chapter === chapter,
+        )?.schools
+        if (!serverRows) return false
+
+        const serverRowsByIdentity = new Map(
+          serverRows.map((row) => [getSchoolQuotaIdentity(row), row]),
+        )
+
+        return [...edits.values()].every((edit) => {
+          const serverRow = serverRowsByIdentity.get(
+            getSchoolQuotaIdentity(edit.row),
+          )
+          return (
+            serverRow != null &&
+            getChangedSchoolQuotaRows([serverRow], [edit.row]).length === 0
+          )
+        })
+      },
+    )
+
+    if (isSynced) setEditedSchoolsMap(new Map())
+  }, [allChaptersData, editedSchoolsMap, isDirty])
 
   const handleTabChange = (nextValue: string) => {
     setChapterTab(nextValue)
@@ -172,30 +281,107 @@ export function RecruitmentQuotaPage() {
     (chapter: string, schools: SchoolQuotaRow[]) => {
       setEditedSchoolsMap((prev) => {
         const next = new Map(prev)
-        next.set(chapter, schools)
+
+        const serverRows =
+          allChaptersData.find((chapterData) => chapterData.chapter === chapter)
+            ?.schools ?? []
+        const chapterEdits = new Map(next.get(chapter) ?? [])
+
+        schools.forEach((row) => {
+          const existingEntry = [...chapterEdits.entries()].find(([, edit]) =>
+            findMatchingSchoolQuotaRow([edit.row], row),
+          )
+          const serverRow = findMatchingSchoolQuotaRow(serverRows, row)
+          const identity =
+            existingEntry?.[0] ?? getSchoolQuotaIdentity(serverRow ?? row)
+          const originalRow = existingEntry?.[1].originalRow ?? serverRow
+          const isChanged =
+            serverRow == null ||
+            getChangedSchoolQuotaRows([serverRow], [row]).length > 0
+
+          if (!isChanged) {
+            chapterEdits.delete(identity)
+            return
+          }
+
+          if (existingEntry && existingEntry[0] !== identity) {
+            chapterEdits.delete(existingEntry[0])
+          }
+          chapterEdits.set(identity, { row, originalRow })
+        })
+
+        if (chapterEdits.size === 0) {
+          next.delete(chapter)
+        } else {
+          next.set(chapter, chapterEdits)
+        }
+
         return next
       })
     },
-    [],
+    [allChaptersData],
+  )
+
+  const handleSchoolDataChange = useCallback(
+    (chapter: string, school: SchoolQuotaRow) => {
+      setEditedSchoolsMap((prev) => {
+        const next = new Map(prev)
+        const serverRows =
+          allChaptersData.find((chapterData) => chapterData.chapter === chapter)
+            ?.schools ?? []
+        const chapterEdits = new Map(next.get(chapter) ?? [])
+        const existingEntry = [...chapterEdits.entries()].find(([, edit]) =>
+          findMatchingSchoolQuotaRow([edit.row], school),
+        )
+        const serverRow = findMatchingSchoolQuotaRow(serverRows, school)
+        const identity =
+          existingEntry?.[0] ?? getSchoolQuotaIdentity(serverRow ?? school)
+        const originalRow = existingEntry?.[1].originalRow ?? serverRow
+        const isChanged =
+          serverRow == null ||
+          getChangedSchoolQuotaRows([serverRow], [school]).length > 0
+
+        if (!isChanged) {
+          chapterEdits.delete(identity)
+        } else {
+          chapterEdits.set(identity, { row: school, originalRow })
+        }
+
+        if (chapterEdits.size === 0) {
+          next.delete(chapter)
+        } else {
+          next.set(chapter, chapterEdits)
+        }
+
+        return next
+      })
+    },
+    [allChaptersData],
   )
 
   const handleSave = async () => {
     const targetChapters = isAll
-      ? chaptersDataWithEdits
-      : chaptersDataWithEdits.filter((c) => c.chapter === chapterTab)
+      ? allChaptersData
+      : allChaptersData.filter((c) => c.chapter === activeChapter)
 
-    const rawRows = targetChapters.flatMap(
-      (c) => editedSchoolsMap.get(c.chapter) ?? [],
-    )
+    const changedRows = targetChapters.flatMap((chapterData) => {
+      const edits = editedSchoolsMap.get(chapterData.chapter)
+      if (!edits) return []
 
-    const existingSeasonRows = rawRows.filter(
+      return getChangedSchoolQuotaRows(
+        chapterData.schools,
+        [...edits.values()].map((edit) => edit.row),
+      )
+    })
+
+    const existingSeasonRows = changedRows.filter(
       (row): row is SchoolQuotaRow & { seasonId: string } =>
         Boolean(row.seasonId) && canEditSeason(row.seasonId),
     )
-    const newSeasonRows = rawRows.filter(
+    const newSeasonRows = changedRows.filter(
       (row): row is SchoolQuotaRow & { gisuId: string; schoolId: string } => {
         if (!row.seasonId && Boolean(row.gisuId) && Boolean(row.schoolId)) {
-          const targetGroup = groups.find(
+          const targetGroup = visibleGroups.find(
             (g) =>
               String(g.schoolId) === String(row.schoolId) &&
               String(g.gisuId) === String(row.gisuId),
@@ -222,10 +408,14 @@ export function RecruitmentQuotaPage() {
       },
     }))
 
-    if (payloadList.length === 0 && newSeasonRows.length === 0) return
+    if (payloadList.length === 0 && newSeasonRows.length === 0) {
+      setIsDirty(false)
+      return
+    }
 
     try {
-      const successfulSchoolNames = new Set<string>()
+      let hasSuccessfulWrite = false
+      let hasWriteFailure = false
 
       if (newSeasonRows.length > 0) {
         const createResults = await Promise.allSettled(
@@ -252,8 +442,9 @@ export function RecruitmentQuotaPage() {
           if (!row) return
 
           if (result.status === "fulfilled") {
-            successfulSchoolNames.add(row.schoolName)
+            hasSuccessfulWrite = true
           } else {
+            hasWriteFailure = true
             failedCreateSchoolNames.push(row.schoolName)
             const err = result.reason as {
               code?: string
@@ -290,44 +481,12 @@ export function RecruitmentQuotaPage() {
       if (payloadList.length > 0) {
         const updateResult = await updateQuotas(payloadList)
 
-        updateResult.successfulVariables.forEach((v) => {
-          if (v.schoolName) {
-            successfulSchoolNames.add(v.schoolName)
-          }
-        })
+        hasSuccessfulWrite ||= updateResult.fulfilledCount > 0
+        hasWriteFailure ||= updateResult.failedCount > 0
       }
 
-      if (successfulSchoolNames.size > 0) {
-        let remainingCount = 0
-        const nextMap = new Map<string, SchoolQuotaRow[]>()
-
-        editedSchoolsMap.forEach((rows, chapter) => {
-          const remainingRows = rows.filter((r) => {
-            const seasonIdToCheck =
-              r.seasonId ??
-              groups.find(
-                (g) =>
-                  String(g.schoolId) === String(r.schoolId) &&
-                  String(g.gisuId) === String(r.gisuId),
-              )?.seasonId
-            const isPermitted =
-              canEditEverySeason || canEditSeason(seasonIdToCheck)
-            const isSuccessfullySaved =
-              successfulSchoolNames.has(r.schoolName) && isPermitted
-            return !isSuccessfullySaved
-          })
-          if (remainingRows.length > 0) {
-            nextMap.set(chapter, remainingRows)
-            remainingCount += remainingRows.length
-          }
-        })
-
-        if (remainingCount === 0) {
-          setIsDirty(false)
-          setEditedSchoolsMap(new Map())
-        } else {
-          setEditedSchoolsMap(nextMap)
-        }
+      if (hasSuccessfulWrite && !hasWriteFailure) {
+        setIsDirty(false)
       }
     } catch {
       addToast({
@@ -341,9 +500,9 @@ export function RecruitmentQuotaPage() {
   }
 
   const selectedChapterData = chaptersDataWithEdits.find(
-    (item) => item.chapter === chapterTab,
+    (item) => item.chapter === activeChapter,
   ) ?? {
-    chapter: chapterTab,
+    chapter: activeChapter ?? "",
     schoolCount: 0,
     schools: [],
     totals: { pm: 0, design: 0, webPe: 0, mobilePe: 0, total: 0 },
@@ -364,7 +523,7 @@ export function RecruitmentQuotaPage() {
   const showAutoAllocateButton = !isAll && canEditEverySeason
   const showSaveButton = canEditAny
 
-  const pageTitle = isAll ? "UMC 11th" : chapterTab
+  const pageTitle = isAll ? "UMC 11th" : (activeChapter ?? "")
   const statusCardTitle = isAll ? "전체 지원자 현황" : "지부 지원자 현황"
 
   return (
@@ -380,7 +539,9 @@ export function RecruitmentQuotaPage() {
         className="pl-3"
       />
 
-      <ChapterTabs value={chapterTab} onValueChange={handleTabChange} />
+      {!isSchoolScoped && !isMeLoading && (
+        <ChapterTabs value={chapterTab} onValueChange={handleTabChange} />
+      )}
 
       <div className="flex w-full flex-col gap-6">
         <p className="text-heading-3-semibold px-3 text-teal-700">
@@ -388,6 +549,21 @@ export function RecruitmentQuotaPage() {
         </p>
 
         <div className="flex w-full flex-col gap-4">
+          {conflictSummary.length > 0 && (
+            <div
+              role="alert"
+              className="border-warning-200 bg-warning-50 text-warning-600 rounded-[8px] border px-4 py-3"
+            >
+              <p className="text-body-2-semibold">
+                서버에서 모집 인원이 변경되었습니다.
+              </p>
+              <p className="text-body-2-medium mt-1">
+                {conflictSummary.join(", ")}의 현재 입력값은 유지하고 있습니다.
+                저장하면 서버의 최신 값을 덮어쓸 수 있습니다.
+              </p>
+            </div>
+          )}
+
           {/* 지원자 현황 */}
           <QuotaApplicantStatusCard
             title={statusCardTitle}
@@ -461,9 +637,15 @@ export function RecruitmentQuotaPage() {
                     onManualEdit={handleManualEdit}
                     onErrorExceeded={handleErrorExceeded}
                     canEditSeason={canEditSeason}
+                    onSchoolDataChange={(school) =>
+                      handleSchoolDataChange(chapterData.chapter, school)
+                    }
                     onSchoolsDataChange={(schools) =>
                       handleSchoolsDataChange(chapterData.chapter, schools)
                     }
+                    conflictedSchoolNames={conflictedSchoolNamesByChapter.get(
+                      chapterData.chapter,
+                    )}
                     autoAllocateRequest={autoAllocateRequest}
                   />
                 ))
@@ -475,12 +657,18 @@ export function RecruitmentQuotaPage() {
                   onManualEdit={handleManualEdit}
                   onErrorExceeded={handleErrorExceeded}
                   canEditSeason={canEditSeason}
+                  onSchoolDataChange={(school) =>
+                    handleSchoolDataChange(selectedChapterData.chapter, school)
+                  }
                   onSchoolsDataChange={(schools) =>
                     handleSchoolsDataChange(
                       selectedChapterData.chapter,
                       schools,
                     )
                   }
+                  conflictedSchoolNames={conflictedSchoolNamesByChapter.get(
+                    selectedChapterData.chapter,
+                  )}
                   autoAllocateRequest={autoAllocateRequest}
                 />
               )}

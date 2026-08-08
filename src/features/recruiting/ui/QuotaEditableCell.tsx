@@ -12,6 +12,20 @@ interface QuotaEditableCellProps {
   className?: string
 }
 
+export function normalizeQuotaInput(
+  previousValue: string,
+  nextValue: string,
+): string {
+  const digitsOnly = nextValue.replace(/[^0-9]/g, "").slice(0, 4)
+
+  if (previousValue === "0" && digitsOnly.length === 2) {
+    const withoutExistingZero = digitsOnly.replace("0", "")
+    if (withoutExistingZero.length === 1) return withoutExistingZero
+  }
+
+  return digitsOnly.replace(/^0+(?=\d)/, "")
+}
+
 export function QuotaEditableCell({
   partName,
   value,
@@ -42,10 +56,10 @@ export function QuotaEditableCell({
   }, [isError, partName, maxAllowed, onErrorExceeded])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const digitsOnly = e.target.value.replace(/[^0-9]/g, "").slice(0, 4)
-    setInputValue(digitsOnly)
+    const normalizedValue = normalizeQuotaInput(inputValue, e.target.value)
+    setInputValue(normalizedValue)
 
-    const parsed = digitsOnly === "" ? 0 : Number(digitsOnly)
+    const parsed = normalizedValue === "" ? 0 : Number(normalizedValue)
     onChange(parsed)
   }
 
