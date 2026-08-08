@@ -12,6 +12,8 @@ import { ProductTeamIntroSection } from "./sections/ProductTeamIntroSection"
 import { ProductTeamMembersSection } from "./sections/ProductTeamMembersSection"
 import { SolutionSection } from "./sections/SolutionSection"
 
+import type { RecruitingStatus } from "@/shared/model/recruitingStatus"
+
 const LANDING_BACKGROUND_FADE_LEFT = 40
 const LANDING_BACKGROUND_FADE_RIGHT = 120
 const LANDING_BACKGROUND_MASK = `linear-gradient(to right, transparent, #000 ${LANDING_BACKGROUND_FADE_LEFT}px, #000 calc(100% - ${LANDING_BACKGROUND_FADE_RIGHT}px), transparent)`
@@ -47,7 +49,12 @@ function StaticGlow({
   )
 }
 
-export function IntroPage() {
+interface IntroPageProps {
+  /** 헤더 우측 모집 상태. 조회는 라우트가 하고 여기는 받아서 넘기기만 한다. */
+  recruitingStatus?: RecruitingStatus
+}
+
+export function IntroPage({ recruitingStatus }: IntroPageProps) {
   return (
     <main
       className="flex w-full justify-center"
@@ -56,7 +63,7 @@ export function IntroPage() {
         overflowX: "clip",
       }}
     >
-      <LandingHeader />
+      <LandingHeader recruitingStatus={recruitingStatus} />
       <div className="relative w-[1440px]">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div

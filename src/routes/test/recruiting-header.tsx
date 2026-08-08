@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 
 import { authKeys } from "@/entities/member/hooks/useMe"
 import { useAuthStore } from "@/entities/member/store/authStore"
+import { LandingHeader } from "@/features/intro/ui/components/LandingHeader"
 import { cn } from "@/shared/lib/utils"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 
@@ -89,10 +90,18 @@ const PHASE_OPTIONS: { label: string; value: RecruitingStatus }[] = [
   { label: "마감", value: { phase: "closed" } },
 ]
 
+type HeaderKind = "app" | "landing"
+
+const HEADER_OPTIONS: { label: string; value: HeaderKind }[] = [
+  { label: "앱 안쪽 (Dark=False)", value: "app" },
+  { label: "랜딩 소개 (Dark=True)", value: "landing" },
+]
+
 function RecruitingHeaderTestPage() {
   const queryClient = useQueryClient()
   const [role, setRole] = useState<RoleScenario>("centralCore")
   const [phaseIndex, setPhaseIndex] = useState(0)
+  const [headerKind, setHeaderKind] = useState<HeaderKind>("app")
 
   // 선택한 역할 시나리오에 맞춰 auth/me를 목킹. 언마운트 시 원복.
   useEffect(() => {
@@ -115,9 +124,47 @@ function RecruitingHeaderTestPage() {
 
   return (
     <main className="min-h-screen w-full">
-      <RecruitingHeader recruitingStatus={PHASE_OPTIONS[phaseIndex]!.value} />
+      {headerKind === "app" ? (
+        <RecruitingHeader recruitingStatus={PHASE_OPTIONS[phaseIndex]!.value} />
+      ) : (
+        // 랜딩 헤더는 fixed 라 그대로 두면 화면 맨 위에 붙는다. transform 을 준
+        // 상자가 fixed 의 기준이 되므로 이 자리에 갇혀서 그려진다.
+        <div
+          className="relative h-20 w-full bg-[#101f1e]"
+          style={{ transform: "translateZ(0)" }}
+        >
+          <LandingHeader recruitingStatus={PHASE_OPTIONS[phaseIndex]!.value} />
+        </div>
+      )}
 
       <div className="flex flex-col gap-6 p-8">
+        <div className="flex flex-col gap-2">
+          <span className="text-label-1-medium text-teal-gray-600">헤더</span>
+          <div className="flex flex-wrap gap-2">
+            {HEADER_OPTIONS.map(({ label, value }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setHeaderKind(value)}
+                className={cn(
+                  "text-body-3-medium rounded-full border px-3 py-1.5",
+                  headerKind === value
+                    ? "border-teal-600 bg-teal-600 text-white"
+                    : "border-teal-gray-200 text-teal-gray-500 bg-white",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {headerKind === "landing" && (
+            <p className="text-body-3-regular text-teal-gray-500">
+              랜딩 헤더는 탭이 소개·모집 안내·프로젝트 셋뿐이고 역할에 따라
+              늘어나지 않는다. 역할 선택은 앱 안쪽 헤더에만 영향을 준다.
+            </p>
+          )}
+        </div>
+
         <div className="flex flex-col gap-2">
           <span className="text-label-1-medium text-teal-gray-600">역할</span>
           <div className="flex flex-wrap gap-2">
