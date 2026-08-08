@@ -698,7 +698,7 @@ git commit -m "test: 서버 역할별 헤더 시나리오 확장"
 
 - Create: `src/routes/test/route.tsx`
 - Modify: `src/routeTree.gen.ts`
-- Test: `pnpm build` production bundle
+- Test: `pnpm build` 및 production preview 런타임 접근 차단
 
 - [ ] **Step 1: 테스트 디렉터리 공통 부모 라우트를 추가한다.**
 
@@ -722,11 +722,11 @@ pnpm build
 rg -n "TestRouteRoute|Test.*Route.*getParentRoute.*TestRouteRoute" src/routeTree.gen.ts
 ```
 
-Expected: `TestRouteRoute`가 생성되고 테스트 하위 라우트의 `getParentRoute`가 공통 테스트 부모를 가리키며 production build가 PASS한다.
+Expected: `TestRouteRoute`가 생성되고 테스트 하위 라우트의 `getParentRoute`가 공통 테스트 부모를 가리키며 production build가 PASS한다. 테스트 라우트 모듈의 번들 포함 여부가 아니라 production에서의 런타임 접근 차단을 완료 기준으로 삼는다.
 
 - [ ] **Step 3: production 빌드 가드와 개발 빌드 접근을 확인한다.**
 
-개발 서버에서는 `/test/recruiting-header`와 기존 `/test/*` 페이지가 렌더링되어야 한다. production preview에서는 동일한 경로가 `/`로 이동해야 한다.
+개발 서버에서는 `/test/recruiting-header`와 기존 `/test/*` 페이지가 렌더링되어야 한다. production preview에서는 동일한 경로가 `/`로 이동해야 한다. 별도 빌드 제외 설정은 추가하지 않고 공통 부모 라우트의 `beforeLoad` 리다이렉트를 운영 접근 제한의 단일 기준으로 사용한다.
 
 ```bash
 pnpm build
