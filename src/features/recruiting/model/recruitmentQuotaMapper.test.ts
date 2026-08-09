@@ -101,14 +101,29 @@ describe("mapGroupsToChapterQuotaData", () => {
     })
   })
 
-  it("시즌 설정이 없으면 seasonId를 undefined로 처리하고 0명으로 초기화한다", () => {
+  // 설정 응답은 시즌마다 따로 온다. 아직 안 온 것을 시즌이 없는 것으로 접으면
+  // 그 행이 잠겨 버려, 화면을 열자마자는 입력이 안 된다.
+  it("시즌 설정이 아직 없어도 seasonId는 유지하고 인원만 0으로 둔다", () => {
     const fixedNow = new Date("2026-08-02T09:00:00Z")
     const result = mapGroupsToChapterQuotaData(groups, new Map(), fixedNow)
 
     const chromium = result.find((item) => item.chapter === "Chromium")
-    expect(chromium?.schools[0]?.seasonId).toBeUndefined()
+    expect(chromium?.schools[0]?.seasonId).toBe("100")
     expect(chromium?.schools[0]?.total).toBe(0)
     expect(chromium?.totals.total).toBe(0)
+  })
+
+  // 일부만 도착한 중간 상태에서도 도착하지 않은 쪽이 잠기면 안 된다.
+  it("설정이 일부만 도착해도 모든 그룹이 seasonId를 갖는다", () => {
+    const partialConfigs = new Map([["100", seasonConfigsMap.get("100")!]])
+
+    const result = mapGroupsToChapterQuotaData(groups, partialConfigs)
+    const chromium = result.find((item) => item.chapter === "Chromium")
+
+    expect(chromium?.schools[0]?.seasonId).toBe("100")
+    expect(chromium?.schools[0]?.total).toBe(14)
+    expect(chromium?.schools[1]?.seasonId).toBe("200")
+    expect(chromium?.schools[1]?.total).toBe(0)
   })
 
   it("now 인자가 없으면 updatedDate와 updatedTime을 undefined로 설정한다", () => {

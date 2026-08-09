@@ -2,6 +2,7 @@ import MoreVerticalIcon from "@/shared/assets/icon/more/MoreVerticalIcon"
 import { cn } from "@/shared/lib/utils"
 import { Timestamp } from "@/shared/ui/timestamp/Timestamp"
 
+import { isRecruitmentClosed } from "../model/recruitmentPostStatus"
 import { RecruitmentStatusChip } from "./RecruitmentStatusChip"
 
 import type { ReactNode } from "react"
@@ -17,6 +18,8 @@ interface RecruitmentPostRowProps {
   // 모집중 상태일 때
   startLabel?: string
   endLabel?: string
+  /** 서류 접수 마감 시각. 마감 표시는 status 가 아니라 이 값으로 정한다. */
+  documentEndAt?: string | null
   done?: boolean
   // 임시저장 상태일 때
   dateLabel?: string
@@ -31,6 +34,7 @@ export function RecruitmentPostRow({
   status,
   startLabel,
   endLabel,
+  documentEndAt,
   done = false,
   dateLabel,
   authorLabel,
@@ -39,7 +43,10 @@ export function RecruitmentPostRow({
 }: RecruitmentPostRowProps) {
   const isRecruiting =
     status != null ? status !== "DRAFT" : startLabel != null && endLabel != null
-  const isClosed = status != null ? status === "CLOSED" : done
+  // 마감 처리를 누르지 않아도 서류 기간이 끝나면 마감이다. status 만 보면 몇 주
+  // 전에 끝난 공고가 계속 모집 중으로 보인다.
+  const isClosed =
+    status != null ? isRecruitmentClosed({ status, documentEndAt }) : done
 
   return (
     <div

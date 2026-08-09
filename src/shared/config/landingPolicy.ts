@@ -1,14 +1,9 @@
 /**
- * 루트(`/`) 진입 시 역할별로 어디로 보낼지.
+ * 루트(`/`) 진입 시 어디로 보낼지.
  *
- * 목적지는 시즌 성격에 따라 달라진다(리크루팅 기간 / 데모데이 기간). 서버가
- * 모집 상태를 내려주기 전까지는 상수로 고정하고, 기간이 바뀌면 이 파일만 고친다.
- *
- * 현재: 리크루팅 기간
+ * 역할과 상관없이 프로젝트 목록으로 보낸다. 운영진도 로그인하면 먼저 프로젝트를
+ * 보고, 리크루팅은 헤더 탭으로 들어간다.
  */
-
-/** 운영진(학교 운영진 이상)의 기본 화면 */
-export const OPERATOR_LANDING_PATH = "/recruiting/dashboard/applications"
 
 /** 일반 챌린저의 기본 화면 */
 export const CHALLENGER_LANDING_PATH = "/projects"
@@ -20,3 +15,11 @@ export const CHALLENGER_LANDING_PATH = "/projects"
  * 비어 보인다.
  */
 export const GUEST_LANDING_PATH = "/projects"
+
+/**
+ * 리크루팅 영역의 기본 화면.
+ *
+ * 루트 진입 목적지가 아니라, 편집 권한이 없는 사람을 편집 화면에서 되돌려 보낼
+ * 자리다. 읽기 권한만 있어도 볼 수 있는 화면이어야 한다.
+ */
+export const RECRUITING_HOME_PATH = "/recruiting/dashboard/applications"

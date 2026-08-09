@@ -401,6 +401,115 @@ describe("RecruitmentQuotaPage 저장 경로 분류", () => {
     expect(screen.queryByText("Ferrum")).not.toBeInTheDocument()
   })
 
+  // 지부장은 학교 회장단과 역할 타입이 달라 지부 좁히기에서 빠져 있었다.
+  // 중앙이 아닌 리크루팅 운영진은 모두 자기 지부만 봐야 한다.
+  it("지부장은 본인 지부만 조회하고 지부 세그먼트를 숨긴다", () => {
+    const chapterPresident: MemberInfoResponse = {
+      id: "member-2",
+      name: "Neon 지부장",
+      nickname: "Neon 지부장",
+      email: "neon_chapterpresident@umc.dev",
+      schoolId: "10",
+      schoolName: "가천대학교",
+      profileImageLink: null,
+      status: "ACTIVE",
+      hasLocalCredential: true,
+      roles: [
+        {
+          challengerRoleId: "role-2",
+          challengerId: "challenger-2",
+          roleType: "CHAPTER_PRESIDENT",
+          organizationType: "CHAPTER",
+          organizationId: "29",
+          gisuId: "15",
+          gisu: "10",
+        },
+      ],
+      currentGisuMemberInfo: {
+        gisuId: "15",
+        generation: "10",
+        challenger: {
+          challengerId: "challenger-2",
+          part: "ADMIN",
+          challengerStatus: "ACTIVE",
+        },
+        isAdmin: true,
+        roleTypes: ["CHAPTER_PRESIDENT"],
+      },
+      challengerRecords: [
+        {
+          challengerId: "challenger-2",
+          memberId: "member-2",
+          gisuId: "15",
+          gisu: "10",
+          chapterId: "29",
+          chapterName: "Chromium",
+          part: "ADMIN",
+          challengerStatus: "ACTIVE",
+          name: "Neon 지부장",
+          nickname: "Neon 지부장",
+          email: "neon_chapterpresident@umc.dev",
+          schoolId: "10",
+          schoolName: "가천대학교",
+        },
+      ],
+    }
+
+    vi.mocked(useMe).mockReturnValue({
+      data: chapterPresident,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useMe>)
+    vi.mocked(useAdminRecruitingRounds).mockReturnValue({
+      groups: [
+        {
+          seasonId: "chromium-season",
+          gisuId: "15",
+          chapterId: "29",
+          chapterName: "Chromium",
+          schoolId: "10",
+          schoolName: "가천대학교",
+          rounds: [],
+        },
+        {
+          seasonId: "ferrum-season",
+          gisuId: "15",
+          chapterId: "30",
+          chapterName: "Ferrum",
+          schoolId: "11",
+          schoolName: "연세대학교",
+          rounds: [],
+        },
+      ],
+      generation: 10,
+      isLoading: false,
+      isError: false,
+      isForbidden: false,
+    } as unknown as ReturnType<typeof useAdminRecruitingRounds>)
+    vi.mocked(useRecruitingSeasonQuotas).mockReturnValue({
+      seasonConfigsMap: new Map(),
+      updateQuotas: vi.fn(),
+      createSeason: vi.fn(),
+      updateSeason: vi.fn(),
+      isSaving: false,
+      isLoading: false,
+      isError: false,
+    })
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RecruitmentQuotaPage />
+      </QueryClientProvider>,
+    )
+
+    expect(useAdminRecruitingRounds).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({ chapterId: "29", enabled: true }),
+    )
+    expect(screen.queryByTestId("chapter-tabs")).not.toBeInTheDocument()
+    expect(screen.getByText("Chromium")).toBeInTheDocument()
+    expect(screen.queryByText("Ferrum")).not.toBeInTheDocument()
+  })
+
   it("학교 운영진의 지부명이 없으면 모집 데이터를 조회하지 않는다", () => {
     const schoolPresidentWithoutChapterName: MemberInfoResponse = {
       id: "member-1",

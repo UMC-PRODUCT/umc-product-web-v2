@@ -98,7 +98,25 @@ export function isAnyOperator(me: MemberInfoResponse | undefined): boolean {
   return isOperator(me) || isSchoolStaff(me)
 }
 
+/**
+ * 리크루팅 화면에 들어올 수 있는 범위. 서버의 모집 READ 권한과 같다.
+ *
+ * 학교 운영진은 회장단뿐 아니라 파트장·기타 운영진까지 조회할 수 있다. 회장단만
+ * 본다고 좁혀 두면 나머지는 헤더에 탭이 뜨지 않아 볼 수 있는 화면조차 못 찾는다.
+ */
 export function isRecruitingOperator(
+  me: MemberInfoResponse | undefined,
+): boolean {
+  return isCentralCore(me) || isChapterPresident(me) || isSchoolStaff(me)
+}
+
+/**
+ * 리크루팅을 고칠 수 있는 범위. 서버의 모집 WRITE·EDIT 권한과 같다.
+ *
+ * 조회보다 좁다. 학교는 회장단까지만 고칠 수 있어, 파트장·기타 운영진에게
+ * 편집 화면을 열어 주면 눌러 놓고 저장에서 거부당한다.
+ */
+export function isRecruitingEditor(
   me: MemberInfoResponse | undefined,
 ): boolean {
   return isCentralCore(me) || isChapterPresident(me) || isSchoolLeadership(me)

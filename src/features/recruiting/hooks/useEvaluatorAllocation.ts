@@ -9,6 +9,7 @@ import {
   getRoundEvaluators,
   removeRoundEvaluator,
 } from "../api/recruitingApi"
+import { isRecruitingStaffRole } from "../model/evaluatorAllocation"
 
 import type { Staff } from "../model/evaluatorAllocation"
 
@@ -17,20 +18,33 @@ interface SaveEvaluatorAllocationParams {
   assignedEvaluators: Staff[]
 }
 
-export function useSchoolStaff(schoolId?: string, gisuId?: string) {
+export function useSchoolStaff(
+  schoolId?: string,
+  gisuId?: string,
+  chapterId?: string,
+) {
   return useQuery({
-    queryKey: recruitingKeys.schoolStaff(schoolId ?? "", gisuId ?? ""),
+    queryKey: recruitingKeys.schoolStaff(
+      schoolId ?? "",
+      gisuId ?? "",
+      chapterId ?? "",
+    ),
     queryFn: async () => {
       if (!schoolId) return []
       const response = await searchAllMembers({
         schoolId,
         ...(gisuId ? { gisuId } : {}),
+        ...(chapterId ? { chapterId } : {}),
       })
-      return response.page.content.map((member) => ({
-        id: String(member.memberId),
-        nickname: member.nickname || member.name,
-        name: member.name,
-      }))
+      // 회원 검색에는 역할 필터가 없어 학교의 모든 챌린저가 온다. 평가 담당자로
+      // 배정할 수 있는 건 운영진뿐이라 여기서 거른다.
+      return response.page.content
+        .filter((member) => isRecruitingStaffRole(member.roleTypes))
+        .map((member) => ({
+          id: String(member.memberId),
+          nickname: member.nickname || member.name,
+          name: member.name,
+        }))
     },
     enabled: Boolean(schoolId),
   })

@@ -22,10 +22,10 @@ export function isNavActive(pathname: string, item: NavItem): boolean {
     return false
   }
 
-  const activeBasePaths = item.activeBasePaths ?? [item.activeBasePath ?? item.to]
-  return activeBasePaths.some((basePath) =>
-    matchesBasePath(pathname, basePath),
-  )
+  const activeBasePaths = item.activeBasePaths ?? [
+    item.activeBasePath ?? item.to,
+  ]
+  return activeBasePaths.some((basePath) => matchesBasePath(pathname, basePath))
 }
 
 interface HeaderNavVisibility {
@@ -49,12 +49,20 @@ export function buildRecruitingNavItems({
     {
       label: "모집 안내",
       to: "/projects/notice",
-      activeBasePaths: ["/projects/notice", "/projects/apply"],
+      activeBasePaths: [
+        "/projects/notice",
+        "/projects/apply",
+        "/projects/apply-guide",
+      ],
     },
     {
       label: "프로젝트",
       to: "/projects",
-      inactiveBasePaths: ["/projects/notice", "/projects/apply"],
+      inactiveBasePaths: [
+        "/projects/notice",
+        "/projects/apply",
+        "/projects/apply-guide",
+      ],
     },
     // 매칭은 로그인해야 들어갈 수 있다. 게스트에게 보이면 눌러도 로그인으로 튕긴다.
     // 모집 기간에는 감춘다. 데모데이와 리크루팅은 같이 돌지 않아서, 모집 중에
