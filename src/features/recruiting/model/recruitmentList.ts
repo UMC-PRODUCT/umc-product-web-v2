@@ -134,7 +134,9 @@ export function groupPostsBySchool(
   posts: RecruitmentPost[],
   chapter: Chapter,
 ): SchoolPostGroup[] {
-  return SCHOOLS_BY_BRANCH[chapter].map((school) => ({
+  const branchMap = SCHOOLS_BY_BRANCH as Record<string, readonly string[]>
+  const schools = branchMap[chapter] ?? []
+  return schools.map((school: string) => ({
     school,
     posts: posts.filter((post) => post.school === school),
   }))

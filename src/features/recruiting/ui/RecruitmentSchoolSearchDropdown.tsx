@@ -45,13 +45,14 @@ export function RecruitmentSchoolSearchDropdown({
 
   // 호출부가 조회 중이라 빈 배열을 넘기는 경우가 있다. 그때까지 "검색 결과가
   // 없습니다" 를 보여주지 않도록 지부 목록으로 받쳐 준다.
+  const branchMap = SCHOOLS_BY_BRANCH as Record<string, readonly string[]>
   const schoolList =
     schools && schools.length > 0
       ? schools
       : chapter
-        ? SCHOOLS_BY_BRANCH[chapter]
+        ? (branchMap[chapter] ?? [])
         : []
-  const filteredSchools = schoolList.filter((school) =>
+  const filteredSchools = schoolList.filter((school: string) =>
     school.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
@@ -83,7 +84,7 @@ export function RecruitmentSchoolSearchDropdown({
             검색 결과가 없습니다.
           </li>
         ) : (
-          filteredSchools.map((school) => (
+          filteredSchools.map((school: string) => (
             <li
               key={school}
               role="option"
