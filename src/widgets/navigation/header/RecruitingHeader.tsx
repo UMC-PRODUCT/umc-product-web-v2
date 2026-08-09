@@ -11,9 +11,16 @@ import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { getDisabledNavMessage } from "@/shared/config/headerNavPolicy"
 import { SETTINGS_ENTRY_PATH } from "@/shared/config/settingsNavigation"
 import { useIsWithinHeaderRecruitingWindow } from "@/shared/hooks/useHeaderRecruitingWindow"
+import { cn } from "@/shared/lib/utils"
+import { GlassRim } from "@/shared/ui/GlassRim"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { GuestProfileButton } from "@/widgets/navigation/header/GuestProfileButton"
 import HeaderButton from "@/widgets/navigation/header/HeaderButton"
+import {
+  GLASS_RIM_PILL,
+  HEADER_TONE,
+  type HeaderTone,
+} from "@/widgets/navigation/header/headerTone"
 import NavigationButton from "@/widgets/navigation/header/NavigationButton"
 import Profile from "@/widgets/navigation/header/Profile"
 import {
@@ -31,12 +38,17 @@ interface RecruitingHeaderProps {
   // 없으면 상태 버튼을 렌더하지 않는다(연동 전 고정값 노출 방지)
   recruitingStatus?: RecruitingStatus
   activePathname?: string
+  /** 소개 랜딩처럼 어두운 배경 위에 얹을 때 `glass` 를 쓴다. */
+  tone?: HeaderTone
 }
 
 export default function RecruitingHeader({
   recruitingStatus,
   activePathname,
+  tone = "light",
 }: RecruitingHeaderProps) {
+  const toneClass = HEADER_TONE[tone]
+  const isGlass = tone === "glass"
   const location = useLocation()
   const pathname = activePathname ?? location.pathname
   const { data: me } = useMe()
@@ -75,12 +87,29 @@ export default function RecruitingHeader({
   })
 
   return (
-    <header className="bg-teal-gray-50 shadow-drop-neutral-3 relative z-50 flex h-20 min-h-20 w-full items-center justify-between overflow-visible">
+    <header
+      className={cn(
+        "relative z-50 flex h-20 min-h-20 w-full items-center justify-between overflow-visible",
+        toneClass.root,
+      )}
+    >
       <Link to="/" className="flex w-55 items-center pl-10">
-        <UmcLogo className="text-teal-gray-700 h-5.5 w-17.5" />
+        <UmcLogo className={cn("h-5.5 w-17.5", toneClass.logo)} />
       </Link>
 
-      <nav className="bg-teal-gray-50 border-teal-gray-100 flex shrink-0 items-center gap-1.5 rounded-full border p-1.5 drop-shadow-[0_0_8px_rgba(10,86,80,0.04)]">
+      {/* 탭 묶음은 화면 정중앙에 고정한다. 흐름에 두면 좌우 블록 폭에 따라
+          위치가 밀려, 화면을 옮길 때마다 탭이 좌우로 튄다. 시안도 좌우 슬롯을
+          같은 폭으로 잡아 가운데에 둔다. */}
+      <nav
+        className={cn(
+          "absolute left-1/2 flex shrink-0 -translate-x-1/2 items-center gap-1.5 rounded-full p-1.5",
+          toneClass.nav,
+        )}
+      >
+        {/* 알약이라 코너 반지름은 높이의 절반이다. rounded-full 의 999 를 그대로
+            넘기면 코너 페이드가 요소보다 커져 테두리가 통째로 지워진다.
+            시안의 알약은 코너 하이라이트 없이 상·하가 고르다. */}
+        {isGlass && <GlassRim radius={24} variant="pill" {...GLASS_RIM_PILL} />}
         {navItems.map((item) => (
           <NavigationButton
             key={item.label}
@@ -90,23 +119,43 @@ export default function RecruitingHeader({
             disabled={item.disabled}
             onClick={item.disabled ? () => notifyComingSoon(item) : undefined}
             className="min-w-18 px-4.5"
+            tone={tone}
           />
         ))}
       </nav>
 
       {/* 비로그인은 `로그인` 버튼, 로그인 사용자는 프로필. 디자인이 권한별
-          헤더 스펙에서 이 둘을 명시적으로 갈라 놓았다. */}
+          헤더 스펙에서 이 둘을 명시적으로 갈라 놓았다.
+
+          유리 톤(소개 랜딩)은 구성이 다르다. 시안에 문의사항이 없고, 지원하기는
+          항상 두되 로그인은 모집 기간에만 뺀다. 모집 중에는 지원으로 시선을
+          몰고, 그 밖에는 로그인 진입로를 같이 연다. */}
       <div className="flex items-center justify-end gap-4 pr-8.5">
-        <RecruitingStatusButton />
-        <HeaderButton
-          label="문의사항"
-          type="trailing-icon"
-          className="border-teal-gray-150 h-10 border"
-        />
-        {isAuthed ? (
-          <Profile />
+        {isGlass ? (
+          <>
+            <RecruitingStatusButton tone={tone} alwaysVisible />
+            {!isRecruitingPeriod && !isAuthed && (
+              <GuestProfileButton
+                recruitingStatus={status}
+                className="bg-transparent text-white hover:bg-transparent hover:text-white/80"
+              />
+            )}
+            {isAuthed && <Profile />}
+          </>
         ) : (
-          <GuestProfileButton recruitingStatus={status} />
+          <>
+            <RecruitingStatusButton tone={tone} />
+            <HeaderButton
+              label="문의사항"
+              type="trailing-icon"
+              className={cn("h-10", toneClass.inquiry)}
+            />
+            {isAuthed ? (
+              <Profile />
+            ) : (
+              <GuestProfileButton recruitingStatus={status} />
+            )}
+          </>
         )}
       </div>
     </header>
