@@ -7,7 +7,7 @@ import {
   isChapterPresident,
   isOperator,
 } from "@/entities/member/model/identity"
-import { type Chapter, CHAPTERS } from "@/entities/organization/model/chapters"
+import { type Chapter } from "@/entities/organization/model/chapters"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
@@ -33,12 +33,17 @@ function MatchingStatusPage() {
     () => chaptersQuery.data?.chapters ?? [],
     [chaptersQuery.data],
   )
+  const chapterNames = useMemo(
+    () => chapters.map((c) => c.name).filter(Boolean),
+    [chapters],
+  )
 
   // challenger records에서 지부명 추출 (어드민 포함 모든 역할)
   const userChapter = getViewerBranch(me)
-  const defaultChapter: Chapter = CHAPTERS.includes(userChapter as Chapter)
-    ? (userChapter as Chapter)
-    : CHAPTERS[0]
+  const defaultChapter: Chapter =
+    userChapter && chapterNames.includes(userChapter)
+      ? userChapter
+      : (chapterNames[0] ?? "")
 
   const [selectedChapter, setSelectedChapter] =
     useState<Chapter>(defaultChapter)
@@ -48,14 +53,14 @@ function MatchingStatusPage() {
   useLayoutEffect(() => {
     if (hasAutoSelected.current || !me || chapters.length === 0) return
     if (!isChapterPresident(me)) return
-    if (CHAPTERS.includes(userChapter as Chapter)) return // 이미 records로 처리됨
+    if (userChapter && chapterNames.includes(userChapter)) return // 이미 records로 처리됨
     const myChapterId = me.roles?.find(
       (r) => r.roleType === "CHAPTER_PRESIDENT",
     )?.organizationId
     if (!myChapterId) return
     const myChapter = chapters.find((c) => c.id === myChapterId)
-    if (myChapter && CHAPTERS.includes(myChapter.name as Chapter)) {
-      setSelectedChapter(myChapter.name as Chapter)
+    if (myChapter && chapterNames.includes(myChapter.name)) {
+      setSelectedChapter(myChapter.name)
       hasAutoSelected.current = true
     }
   }, [me, chapters, userChapter])
@@ -95,7 +100,7 @@ function MatchingStatusPage() {
         {/* 지부 선택 + 콘텐츠 */}
         <div className="mt-6 flex w-263 flex-col gap-13">
           <SegmentButton
-            items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+            items={chapterNames.map((ch) => ({ value: ch, label: ch }))}
             value={selectedChapter}
             onValueChange={(v) => setSelectedChapter(v as Chapter)}
             className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"

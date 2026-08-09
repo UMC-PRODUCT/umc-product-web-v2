@@ -16,11 +16,8 @@ import {
   getAllChapters,
   getAllGisu,
 } from "@/entities/organization/api/organization"
-import {
-  type Chapter,
-  CHAPTERS,
-  isChapter,
-} from "@/entities/organization/model/chapters"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
+import { type Chapter, isChapter } from "@/entities/organization/model/chapters"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   NoticeCardList,
@@ -96,7 +93,7 @@ function readHashNoticeId() {
 export const Route = createFileRoute("/matching/projects/announce/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
     return {
-      chapter: isChapter(search.chapter) ? search.chapter : CHAPTERS[0],
+      chapter: isChapter(search.chapter) ? (search.chapter as Chapter) : "",
       page: parsePage(search.page),
     }
   },
@@ -109,19 +106,21 @@ export const Route = createFileRoute("/matching/projects/announce/")({
     if (isChapter(userChapter) && search.chapter !== userChapter) {
       throw redirect({
         to: "/matching/projects/announce",
-        search: { ...search, chapter: userChapter },
+        search: { chapter: userChapter, page: search.page },
       })
     }
   },
-  component: ProjectSettingsAnnouncePage,
+  component: ProjectMatchingAnnouncePage,
 })
 
-function ProjectSettingsAnnouncePage() {
+function ProjectMatchingAnnouncePage() {
   const { chapter, page } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const addToast = useToastStore((state) => state.addToast)
   const [pendingNotice] = useState(readPendingNotice)
   const [hashNoticeId] = useState(readHashNoticeId)
+
+  const { chapterNames: serverChapterNames } = useSchoolChapterMap()
 
   const { data: me } = useMe()
   const { me: identity } = useViewerIdentity()
@@ -316,7 +315,10 @@ function ProjectSettingsAnnouncePage() {
           <div className="flex w-full flex-col items-center gap-2.5">
             <div className="flex w-full flex-row items-center gap-2.5">
               <SegmentButton
-                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+                items={serverChapterNames.map((ch: string) => ({
+                  value: ch,
+                  label: ch,
+                }))}
                 value={chapter}
                 onValueChange={(v) => handleChapterChange(v as Chapter)}
                 className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
