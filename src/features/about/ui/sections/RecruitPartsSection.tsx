@@ -3,11 +3,11 @@ import { useState } from "react"
 import { cn } from "@/shared/lib/utils"
 
 import { ABOUT_RECRUIT } from "../../constants"
-import { glassBackground } from "../glassBackground"
 import { GlassCtaButton } from "../GlassCtaButton"
+import { glassSurface } from "../glassSurface"
 import { PartCard } from "../PartCard"
 
-const TRAIT_PANEL_BACKGROUND = glassBackground(166.74, -18.09)
+const TRAIT_PANEL_SURFACE = glassSurface(166.7392, -18.091)
 
 type PartId = (typeof ABOUT_RECRUIT.parts)[number]["id"]
 
@@ -76,19 +76,10 @@ export function RecruitPartsSection() {
             <div
               id="about-recruit-traits"
               role="tabpanel"
-              className="relative flex w-full items-center rounded-[30px] px-7 py-8"
+              className="flex w-full items-center rounded-[30px] px-7 py-8"
+              style={TRAIT_PANEL_SURFACE}
             >
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-[30px]"
-              >
-                <span className="absolute inset-0 rounded-[30px] bg-[rgba(38,38,38,0.2)] mix-blend-color-dodge" />
-                <span
-                  className="absolute inset-0 rounded-[30px]"
-                  style={{ backgroundImage: TRAIT_PANEL_BACKGROUND }}
-                />
-              </span>
-              <ul className="text-teal-gray-300 relative min-h-24 w-full list-disc ps-7.5 text-xl leading-[1.6] tracking-[-0.2px]">
+              <ul className="text-teal-gray-300 min-h-24 w-full list-disc ps-7.5 text-xl leading-[1.6] tracking-[-0.2px]">
                 {activePart.traits.map((trait) => (
                   <li key={trait}>{trait}</li>
                 ))}
