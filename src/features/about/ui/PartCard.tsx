@@ -1,4 +1,5 @@
-import { GlassRim } from "./GlassRim"
+import { GlassRim } from "@/shared/ui/GlassRim"
+
 import { glassSurface } from "./glassSurface"
 
 const CARD_SURFACE = glassSurface(123.4432, -64.524)

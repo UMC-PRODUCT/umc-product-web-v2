@@ -24,6 +24,14 @@ interface GlassRimProps {
   bottomRight?: number
   /** 좌상 코너에서 도드라지는 밝기. 생략하면 기준값을 그대로 쓴다 */
   topLeft?: number
+  /**
+   * `corner` 는 사각형 기준이다. 좌상을 밝히고 우상·좌하를 지운다.
+   *
+   * `pill` 은 알약처럼 양 끝이 통째로 호인 모양용이다. 사각형 코너 모델을 쓰면
+   * 하이라이트가 끝에서 덩어리로 번진다. 시안의 알약은 가로 원기둥처럼 위아래
+   * 면만 빛을 받고 양 끝은 비어 있어, 세로로 대칭인 그라데이션을 쓴다.
+   */
+  variant?: "corner" | "pill"
 }
 
 // 코너 radial 은 대각 그라데이션 위에 얹히므로 합쳐서 목표값이 되게 역산한다.
@@ -36,32 +44,37 @@ export function GlassRim({
   to,
   topLeft = from,
   bottomRight = to,
+  variant = "corner",
 }: GlassRimProps) {
+  const isPill = variant === "pill"
   // 코너 호는 모서리 점에서 radius 안에 전부 들어온다. 그 밖에서 변으로 넘어간다.
   const fade = `${radius + 14}px ${radius + 14}px`
   const glow = `${radius + 24}px ${radius + 24}px`
   const hold = `${Math.round((radius / (radius + 24)) * 100)}%`
   const fadeHold = `${Math.round((radius / (radius + 14)) * 100)}%`
 
-  const tl = over(topLeft, from)
-  const br = over(bottomRight, to)
+  const tl = isPill ? 0 : over(topLeft, from)
+  const br = isPill ? 0 : over(bottomRight, to)
 
   // 우상·좌하를 지우고(intersect) 안쪽을 도려내 테두리만 남긴다(exclude).
   // 실제 border 로 그리면 요소가 2px 커진다.
   const cut = (at: string) =>
     `radial-gradient(${fade} at ${at}, transparent 0%, transparent ${fadeHold}, #fff 100%)`
-  const maskLayers = [
-    cut("100% 0%"),
-    cut("0% 100%"),
+  const ring = [
     "linear-gradient(#fff 0 0) padding-box",
     "linear-gradient(#fff 0 0)",
-  ].join(", ")
+  ]
+  const maskLayers = (
+    isPill ? ring : [cut("100% 0%"), cut("0% 100%"), ...ring]
+  ).join(", ")
 
   const rim: CSSProperties = {
     background: [
       `radial-gradient(${glow} at 0% 0%, rgba(255,255,255,${tl}) 0%, rgba(255,255,255,${tl}) ${hold}, rgba(255,255,255,0) 100%)`,
       `radial-gradient(${glow} at 100% 100%, rgba(255,255,255,${br}) 0%, rgba(255,255,255,${br}) ${hold}, rgba(255,255,255,0) 100%)`,
-      `linear-gradient(135deg, rgba(255,255,255,${from}) 0%, rgba(255,255,255,${to}) 100%)`,
+      isPill
+        ? `linear-gradient(180deg, rgba(255,255,255,${from}) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,${to}) 100%)`
+        : `linear-gradient(135deg, rgba(255,255,255,${from}) 0%, rgba(255,255,255,${to}) 100%)`,
     ].join(", "),
     mixBlendMode: "plus-lighter",
     borderRadius: radius,
@@ -73,9 +86,11 @@ export function GlassRim({
     // 합성 키워드는 두 문법이 서로 다르다(표준 exclude/intersect,
     // -webkit- xor/source-in). 양쪽에 각자 값을 준다.
     WebkitMask: maskLayers,
-    WebkitMaskComposite: "source-in, source-in, xor, source-over",
+    WebkitMaskComposite: isPill
+      ? "xor"
+      : "source-in, source-in, xor, source-over",
     mask: maskLayers,
-    maskComposite: "intersect, intersect, exclude, add",
+    maskComposite: isPill ? "exclude" : "intersect, intersect, exclude, add",
   }
 
   return (
