@@ -38,7 +38,7 @@ export function RecruitPartsSection() {
               <PartCard
                 key={part.id}
                 titleLines={part.titleLines}
-                description={part.description}
+                descriptionLines={part.descriptionLines}
               />
             ))}
           </div>

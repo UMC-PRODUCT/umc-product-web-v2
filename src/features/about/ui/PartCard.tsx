@@ -6,10 +6,10 @@ const CARD_SURFACE = glassSurface(123.4432, -64.524)
 
 interface PartCardProps {
   titleLines: readonly string[]
-  description: string
+  descriptionLines: readonly string[]
 }
 
-export function PartCard({ titleLines, description }: PartCardProps) {
+export function PartCard({ titleLines, descriptionLines }: PartCardProps) {
   return (
     <div
       className="relative flex h-full flex-col items-start self-stretch rounded-[30px] border-t-4 border-teal-300 px-7 pt-9 pb-10"
@@ -31,8 +31,12 @@ export function PartCard({ titleLines, description }: PartCardProps) {
             </span>
           ))}
         </h3>
-        <p className="text-teal-gray-300 w-full text-base leading-[1.45] tracking-[-0.16px]">
-          {description}
+        {/* 줄바꿈 위치를 카피에서 정한다. 자동 줄바꿈에 맡기면 단어 중간에서
+            끊긴다. */}
+        <p className="text-teal-gray-300 flex w-full flex-col text-base leading-[1.45] tracking-[-0.16px]">
+          {descriptionLines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
         </p>
       </div>
     </div>

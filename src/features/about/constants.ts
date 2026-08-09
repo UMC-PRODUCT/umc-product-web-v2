@@ -19,12 +19,6 @@ import seoulWomens from "@/shared/assets/image/about/schools/seoul-womens.svg"
 import soongsil from "@/shared/assets/image/about/schools/soongsil.svg"
 import sungshin from "@/shared/assets/image/about/schools/sungshin.svg"
 
-// 소개 랜딩 카피 단일 소스.
-//
-// 기준 시안: 13114-127804 (1440 프레임). 이전 시안(12836-123251)의 주석에만 있던
-// 제안 문구들이 이 프레임에서 본문으로 확정됐다.
-//
-// TODO: (미확정) 표시가 붙은 값만 아직 임시 문구다.
 export const ABOUT_RECRUIT = {
   headline: "UMC 11기 모집 분야",
   description:
@@ -35,44 +29,70 @@ export const ABOUT_RECRUIT = {
     {
       id: "pm",
       tabLabel: "PM",
-      // 카드 제목은 시안에서 줄바꿈이 지정돼 있어 줄 단위로 나눈다.
       titleLines: ["PM"],
-      // TODO: (미확정) 시안 임시 문구
-      description: "피엠에 대한 설명 피엠에 대한 설명피엠에 대한 설명",
+      descriptionLines: [
+        "서비스의 문제를 정의하고,",
+        "아이디어를 구체화해 실제 제품으로",
+        "만들어가는 역할입니다.",
+      ],
       traits: [
-        "마음에 품고 있는 서비스 목표나 아이디어가 있으신 분",
-        "데이터 기반 의사 결정에 큰 관심이 있으신 분",
-        "팀을 이끌어나갈 책임감이 있으신 분",
+        "아이디어를 직접 서비스로 만들어보고 싶은 분",
+        "사용자 관점에서 문제를 발견하고 해결책을 고민하는 것을 좋아하는 분",
+        "팀원들과 소통하며 하나의 목표를 향해 프로젝트를 이끌어보고 싶은 분",
       ],
     },
     {
       id: "design",
       tabLabel: "Design",
       titleLines: ["Design"],
-      // TODO: (미확정) 시안 임시 문구
-      description:
-        "프로덕트 디자인에 대한 설명 프로덕트 디자인에 대한 설명 디자인에 대한 설명",
-      // TODO: (미확정) 시안에 PM 탭 내용만 있다. 나머지 파트 문구 필요.
-      traits: [],
+      descriptionLines: [
+        "사용자에게 필요한 경험을 고민하고,",
+        "이를 직관적이고 매력적인 화면과",
+        "인터랙션으로 구현하는 역할입니다.",
+      ],
+      traits: [
+        "사용자가 어떻게 서비스를 사용할지 고민하는 것이 재미있는 분",
+        "UX/UI 디자인을 실제 서비스에 적용해보고 싶은 분",
+        "디자인을 혼자 완성하는 것보다 기획·개발자와 함께 제품을 만들어보고 싶은 분",
+      ],
     },
     {
       id: "web-pe",
       tabLabel: "Web PE",
       titleLines: ["Web", "Product Engineer"],
-      // TODO: (미확정) 시안 임시 문구
-      description: "웹 프덕 엔지니어에 대한 설명 웹 프덕 엔지니어에 대한 설명",
-      // TODO: (미확정) 시안에 내용 없음
-      traits: [],
+      descriptionLines: [
+        "웹 서비스의 기획된 기능을",
+        "실제 동작하는 제품으로",
+        "구현하는 역할입니다.",
+        "Frontend와 Backend를",
+        "아우르며 화면 구현부터 API,",
+        "데이터베이스, 인증, 배포까지",
+        "제품 개발의 전 과정을 경험합니다.",
+      ],
+      traits: [
+        "웹 서비스를 처음부터 끝까지 직접 만들어보고 싶은 분",
+        "프론트엔드와 백엔드를 함께 경험하며 개발의 시야를 넓히고 싶은 분",
+        "AI를 활용해 더 빠르고 효율적으로 제품을 개발하는 방법을 경험하고 싶은 분",
+      ],
     },
     {
       id: "mobile-pe",
       tabLabel: "Mobile PE",
       titleLines: ["Mobile", "Product Engineer"],
-      // TODO: (미확정) 시안 임시 문구
-      description:
-        "모바일 프덕 엔지니어에 대한 설명 모바일 프덕 엔지니어에 대한 설명 모바일 프덕 엔지니어에 대한 설명",
-      // TODO: (미확정) 시안에 내용 없음
-      traits: [],
+      descriptionLines: [
+        "모바일 환경에서 사용자가",
+        "직접 사용하는 앱 서비스를",
+        "기획된 기능에 맞춰 구현하는",
+        "역할입니다. 화면 구현부터",
+        "기능 개발, 서버 연동,",
+        "데이터 처리, 배포까지 모바일",
+        "제품 개발의 전 과정을 경험합니다.",
+      ],
+      traits: [
+        "직접 사용할 수 있는 모바일 앱을 만들어보고 싶은 분",
+        "앱 개발을 배우고 실제 서비스까지 구현해보고 싶은 분",
+        "기획·디자인·개발이 협업하는 하나의 제품팀을 경험해보고 싶은 분",
+      ],
     },
   ],
 } as const
