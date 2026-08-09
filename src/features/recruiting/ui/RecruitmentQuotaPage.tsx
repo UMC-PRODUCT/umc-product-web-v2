@@ -545,7 +545,16 @@ export function RecruitmentQuotaPage() {
     : selectedChapterData.totals
 
   const showAutoAllocateButton = !isAll && canEditEverySeason
-  const showSaveButton = canEditAny
+  // 모집이 하나도 없는 지부에서는 기존 시즌이 없어 canEditAny 가 거짓이다. 행은
+  // 열어 두고 저장 버튼만 감추면, 첫 인원을 넣어 놓고 저장할 방법이 없다.
+  const canCreateAnyVisibleSeason = chaptersDataWithEdits
+    .filter((chapterData) => isAll || chapterData.chapter === activeChapter)
+    .some((chapterData) =>
+      chapterData.schools.some(
+        (school) => !school.seasonId && canCreateSeason(school.schoolId),
+      ),
+    )
+  const showSaveButton = canEditAny || canCreateAnyVisibleSeason
 
   const pageTitle = isAll ? "UMC 11th" : (activeChapter ?? "")
   const statusCardTitle = isAll ? "전체 지원자 현황" : "지부 지원자 현황"
