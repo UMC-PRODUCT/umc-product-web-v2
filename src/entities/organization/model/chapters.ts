@@ -3,8 +3,6 @@
 
 export type Chapter = string
 
-export const CHAPTERS: readonly string[] = []
-
 export function isChapter(value: unknown): value is Chapter {
   return typeof value === "string" && value.trim().length > 0
 }
