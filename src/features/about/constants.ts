@@ -171,8 +171,7 @@ export const ABOUT_SCHOOLS = {
 
 export const ABOUT_CLOSING = {
   eyebrow: EYEBROW,
-  // TODO: 시안은 KIMM Bold 100px 이라 BreakTheRules 처럼 벡터가 필요하다.
-  // 에셋이 들어오면 텍스트 대신 그 컴포넌트로 교체한다.
+  // 텍스트가 아니라 벡터(UmcEleventh)로 그린다. 대체 텍스트로만 쓴다.
   headline: "UMC 11th",
   description:
     "기획부터 서비스 런칭까지 가능한 대학생 IT 창업 연합 동아리, 새로운 가능성을 UMC에서",
