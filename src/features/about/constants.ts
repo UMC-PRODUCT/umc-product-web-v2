@@ -149,8 +149,10 @@ const EYEBROW = "UNIVERSITY MAKEUS CHALLENGE"
 export const ABOUT_HERO = {
   eyebrow: EYEBROW,
   headlineAlt: "BREAK THE RULES",
-  description:
-    "기획부터 개발까지 가능한 대학생 IT 창업 연합 동아리, 새로운 가능성을 UMC에서",
+  descriptionLines: [
+    "기획부터 개발까지 가능한 대학생 IT 창업 연합 동아리,",
+    "새로운 가능성을 UMC에서",
+  ],
   ctaLabel: "11기 지원하기",
   // 헤더 지원하기와 같은 곳으로 보낸다. 진입로가 갈리면 한쪽만 바뀐다.
   ctaTo: APPLY_ENTRY_PATH,
@@ -198,8 +200,10 @@ export const ABOUT_CLOSING = {
   eyebrow: EYEBROW,
   // 텍스트가 아니라 벡터(UmcEleventh)로 그린다. 대체 텍스트로만 쓴다.
   headline: "UMC 11th",
-  description:
-    "기획부터 서비스 런칭까지 가능한 대학생 IT 창업 연합 동아리, 새로운 가능성을 UMC에서",
+  descriptionLines: [
+    "기획부터 서비스 런칭까지 가능한 대학생 IT 창업 연합 동아리,",
+    "새로운 가능성을 UMC에서",
+  ],
   ctaLabel: "11기 지원하기",
   // 헤더 지원하기와 같은 곳으로 보낸다. 진입로가 갈리면 한쪽만 바뀐다.
   ctaTo: APPLY_ENTRY_PATH,

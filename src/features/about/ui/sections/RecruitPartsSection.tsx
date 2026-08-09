@@ -21,11 +21,11 @@ export function RecruitPartsSection() {
     ABOUT_RECRUIT.parts[0]
 
   return (
-    <section className="flex flex-col items-center gap-13.5 pt-75">
+    <section className="flex flex-col items-center gap-13.5 pt-60 lg:pt-75">
       <div className="flex w-full flex-col items-start gap-25">
-        <div className="flex w-full max-w-300 flex-col items-center gap-18">
+        <div className="flex w-full max-w-300 flex-col items-center gap-16 lg:gap-18">
           <div className="flex w-full flex-col items-center gap-6">
-            <h2 className="text-center text-[38px] leading-[1.2] font-bold tracking-[-0.76px] text-white xl:text-5xl xl:tracking-[-1.44px]">
+            <h2 className="text-center text-[32px] leading-[1.2] font-bold tracking-[-0.64px] text-white lg:text-[38px] lg:tracking-[-0.76px] xl:text-5xl xl:tracking-[-1.44px]">
               {ABOUT_RECRUIT.headline}
             </h2>
 
@@ -36,7 +36,7 @@ export function RecruitPartsSection() {
 
           {/* 1024 는 2x2, 1440 은 한 줄이다. 양쪽 다 그리드로 두면 칸이 균등하게
               나뉘고 카드 높이도 함께 맞는다. */}
-          <div className="grid w-full max-w-[780px] grid-cols-2 gap-7 xl:max-w-none xl:grid-cols-4">
+          <div className="grid w-full max-w-[586px] grid-cols-2 gap-7 lg:max-w-[780px] xl:max-w-none xl:grid-cols-4">
             {ABOUT_RECRUIT.parts.map((part) => (
               <PartCard
                 key={part.id}
@@ -48,11 +48,11 @@ export function RecruitPartsSection() {
         </div>
 
         <div className="flex w-full flex-col items-center gap-7">
-          <h3 className="w-full max-w-[780px] pl-1 text-center text-[32px] leading-[1.3] font-semibold text-white xl:max-w-none">
+          <h3 className="w-full max-w-[576px] text-center text-[32px] leading-[1.3] font-semibold text-white lg:max-w-[780px] lg:pl-1 xl:max-w-none">
             {ABOUT_RECRUIT.traitsHeadline}
           </h3>
 
-          <div className="flex w-full max-w-[780px] flex-col items-center gap-6.5 xl:max-w-none">
+          <div className="flex w-full max-w-[576px] flex-col items-center gap-6.5 lg:max-w-[780px] xl:max-w-none">
             <div role="tablist" className="flex items-center gap-3">
               {ABOUT_RECRUIT.parts.map((part) => {
                 const isActive = part.id === activePart.id

@@ -36,10 +36,10 @@ function SchoolMarqueeRow({ direction }: { direction: "left" | "right" }) {
 
 export function SchoolsSection() {
   return (
-    <section className="flex flex-col items-center gap-26 pt-75 xl:gap-30">
-      <div className="flex w-full flex-col items-center gap-18">
+    <section className="flex flex-col items-center gap-22 pt-60 lg:gap-26 lg:pt-75 xl:gap-30">
+      <div className="flex w-full flex-col items-center gap-16 lg:gap-18">
         <div className="flex w-full max-w-270 flex-col items-center gap-6">
-          <h2 className="text-center text-[38px] leading-[1.2] font-bold tracking-[-0.76px] text-white xl:text-5xl xl:tracking-[-1.44px]">
+          <h2 className="text-center text-[32px] leading-[1.2] font-bold tracking-[-0.64px] text-white lg:text-[38px] lg:tracking-[-0.76px] xl:text-5xl xl:tracking-[-1.44px]">
             {ABOUT_SCHOOLS.headline}
           </h2>
           <p className="text-teal-gray-400 flex max-w-250 flex-col text-center text-[22px] leading-normal font-light tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
