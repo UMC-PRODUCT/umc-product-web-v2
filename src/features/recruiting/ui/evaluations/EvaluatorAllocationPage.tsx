@@ -180,19 +180,17 @@ export function EvaluatorAllocationPage({
     if (!isInitialized || !canEdit) return
     const { active, over } = event
 
-    if (!over) return
-
     const staff = active.data.current
     if (!isStaff(staff)) return
 
-    const targetId = resolveDropTargetId(
-      String(over.id),
-      assignedEvaluators,
-      staffList,
-    )
-    if (!targetId) return
+    const targetId = over
+      ? resolveDropTargetId(String(over.id), assignedEvaluators, staffList)
+      : null
 
-    if (targetId === SCHOOL_STAFF_PANEL_ID) {
+    // 담당자 영역 밖으로 끌어내면 배정을 푼다. 명단으로 되돌려 놓는 것과 같은
+    // 뜻이라, 정확히 명단 위에 떨어뜨렸는지까지 따지지 않는다. 빈 곳에 놓았을 때
+    // 아무 일도 일어나지 않으면 왜 안 풀리는지 알 길이 없다.
+    if (targetId === null || targetId === SCHOOL_STAFF_PANEL_ID) {
       const isAssigned = assignedEvaluators.some((item) => item.id === staff.id)
       if (!isAssigned) return
 
