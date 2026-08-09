@@ -42,7 +42,7 @@ export function SchoolsSection() {
           <h2 className="text-center text-[30px] leading-[1.2] font-bold tracking-[-0.6px] text-white md:text-[32px] md:tracking-[-0.64px] lg:text-[38px] lg:tracking-[-0.76px] xl:text-5xl xl:tracking-[-1.44px]">
             {ABOUT_SCHOOLS.headline}
           </h2>
-          <p className="text-teal-gray-400 flex max-w-250 flex-col text-center text-base leading-normal font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
+          <p className="text-teal-gray-400 font-suit flex max-w-250 flex-col text-center text-base leading-normal font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
             {ABOUT_SCHOOLS.descriptionLines.map((line) => (
               <span key={line}>{line}</span>
             ))}

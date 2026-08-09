@@ -37,7 +37,7 @@ export function HeroSection() {
               />
             </div>
           </div>
-          <p className="text-teal-gray-400 w-full pt-0.5 pb-4.5 text-center text-base leading-6 font-light tracking-[-0.48px] md:text-[22px] md:leading-7 md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
+          <p className="text-teal-gray-400 font-suit w-full pt-0.5 pb-4.5 text-center text-base leading-6 font-light tracking-[-0.48px] md:text-[22px] md:leading-7 md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
             {ABOUT_HERO.descriptionLines.map((line, index) => (
               <span key={line}>
                 {/* 1024 부터는 한 줄로 흐른다. 시안이 768 이하에서만 끊는다. */}

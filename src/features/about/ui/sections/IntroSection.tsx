@@ -5,7 +5,7 @@ import { ABOUT_INTRO } from "../../constants"
 
 export function IntroSection() {
   return (
-    <section className="flex flex-col items-center gap-16 pt-37.5 md:gap-25 md:pt-60 lg:gap-28 lg:pt-75">
+    <section className="flex flex-col items-center gap-16 pt-50 md:gap-25 md:pt-60 lg:gap-28 lg:pt-75">
       <div className="flex w-full flex-col items-center gap-8">
         <div className="flex flex-col items-start gap-6">
           <p className="w-full text-center text-[22px] leading-[20.8px] font-medium tracking-normal text-teal-400 uppercase">
@@ -17,7 +17,7 @@ export function IntroSection() {
             ))}
           </h2>
         </div>
-        <p className="text-teal-gray-400 max-w-250 text-center text-base leading-[1.5] font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
+        <p className="text-teal-gray-400 font-suit max-w-250 text-center text-base leading-[1.5] font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
           {ABOUT_INTRO.description}
         </p>
       </div>

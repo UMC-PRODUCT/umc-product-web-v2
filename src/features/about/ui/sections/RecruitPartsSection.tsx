@@ -29,7 +29,7 @@ export function RecruitPartsSection() {
               {ABOUT_RECRUIT.headline}
             </h2>
 
-            <p className="text-teal-gray-400 w-full text-center text-base leading-normal font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
+            <p className="text-teal-gray-400 font-suit w-full text-center text-base leading-normal font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
               {ABOUT_RECRUIT.descriptionLines.map((line, index) => (
                 <span
                   key={line}

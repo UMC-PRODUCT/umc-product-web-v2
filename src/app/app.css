@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "../styles/font.css";
 @import "../styles/color.css";
 @import "../styles/typography.css";
 @import "../styles/shadow.css";
@@ -20,6 +21,11 @@
   /* 소개 랜딩 히어로 헤드라인만 쓰는 구간이다. 벡터라 글자를 접을 수 없어
      390 을 기준으로 두 줄짜리와 세 줄짜리 파일이 갈린다. 390px = 24.375rem. */
   --breakpoint-xs: 24.375rem;
+
+  /* 소개 랜딩 본문 전용. 시안이 이 문단들만 SUIT 로 잡았다. */
+  --font-suit:
+    "SUIT Variable", "Pretendard Variable", "Pretendard", -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 
   --font-heading: var(--font-sans);
   --font-sans:

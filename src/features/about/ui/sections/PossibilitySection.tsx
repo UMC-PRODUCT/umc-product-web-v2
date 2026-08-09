@@ -9,7 +9,7 @@ export function PossibilitySection() {
           <h2 className="text-center text-[30px] leading-[1.2] font-bold tracking-[-0.6px] text-white md:text-[32px] md:tracking-[-0.64px] lg:text-[38px] lg:tracking-[-0.76px] xl:text-5xl xl:tracking-[-1.44px]">
             {ABOUT_POSSIBILITY.headline}
           </h2>
-          <p className="text-teal-gray-400 w-full text-center text-base leading-[1.5] font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
+          <p className="text-teal-gray-400 font-suit w-full text-center text-base leading-[1.5] font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
             {ABOUT_POSSIBILITY.description}
           </p>
         </div>
@@ -30,7 +30,7 @@ export function PossibilitySection() {
             <dt className="w-11 text-center text-[26px] leading-[34px] font-extrabold tracking-[-1px] text-teal-300 md:w-18 md:text-[42px] md:leading-[50px]">
               {value.keyword}
             </dt>
-            <dd className="text-teal-gray-300 flex flex-col text-base leading-[1.5] font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] lg:text-2xl lg:tracking-[-0.72px]">
+            <dd className="text-teal-gray-300 font-suit flex flex-col text-base leading-[1.5] font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] lg:text-2xl lg:tracking-[-0.72px]">
               {value.lines.map((line) => (
                 <span key={line}>{line}</span>
               ))}
