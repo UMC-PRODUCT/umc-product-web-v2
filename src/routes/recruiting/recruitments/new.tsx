@@ -32,10 +32,11 @@ export const Route = createFileRoute("/recruiting/recruitments/new")({
     search: Record<string, unknown>,
   ): RecruitmentCreateSearch => {
     const chapter = isChapter(search.chapter) ? search.chapter : undefined
+    const branchMap = SCHOOLS_BY_BRANCH as Record<string, readonly string[]>
     const school =
       chapter &&
       typeof search.school === "string" &&
-      (SCHOOLS_BY_BRANCH[chapter] as readonly string[]).includes(search.school)
+      (branchMap[chapter] ?? []).includes(search.school)
         ? search.school
         : undefined
 

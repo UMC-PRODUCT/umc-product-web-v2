@@ -4,11 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
-import {
-  type Chapter,
-  CHAPTERS,
-  isChapter,
-} from "@/entities/organization/model/chapters"
+import { type Chapter, isChapter } from "@/entities/organization/model/chapters"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
@@ -239,14 +235,6 @@ export function RecruitmentBasicInfoForm({
     isForbidden: isAdminRoundsForbidden,
   } = useAdminRecruitingRounds()
   const { data: me } = useMe()
-  // role은 목록 화면(또는 사이드바 직접 진입)에서 넘어온 값이 있으면 그걸 우선
-  // 쓰고(진입 지점에 따른 고정 문맥), 없으면 실제 로그인 사용자의 권한으로 판단한다.
-  // me.roles(RoleType)가 정상적으로 채워져 있으면 그걸 신뢰하지만, 계정에 따라
-  // roles가 빈 배열로 내려오는 데이터 결손이 실제로 확인됐다(#657 평가 화면에서도
-  // 같은 이유로 RoleType 대신 실제 권한 걸린 엔드포인트의 성공/403 응답으로 판단하는
-  // 패턴을 씀). roles가 비어있을 때만 그 패턴을 빌려, admin 전용 조회(GET /admin/rounds)가
-  // 403이면 schoolStaff로, 성공(또는 아직 로딩 중)이면 central로 대체 판단한다 —
-  // chapterAdmin까지는 이 신호만으로 구분할 수 없어 더 넓은 central 쪽으로 폴백한다.
   const hasRoleTypeData = !!me?.roles?.length
   const role =
     roleProp ??
@@ -255,11 +243,6 @@ export function RecruitmentBasicInfoForm({
       : isAdminRoundsForbidden
         ? "schoolStaff"
         : "central")
-  const viewerChapterName = resolveViewerChapter(me)
-  const viewerChapter = isChapter(viewerChapterName)
-    ? viewerChapterName
-    : CHAPTERS[0]
-  const viewerSchool = resolveViewerSchool(me)
 
   // 지부·학교 선택지는 실제 기수 기준 조직 데이터(GISU-201: 다른 화면들도 쓰는 getChaptersWithSchools)에서 가져온다.
   const gisuQuery = useActiveGisu()
@@ -273,7 +256,12 @@ export function RecruitmentBasicInfoForm({
     staleTime: 5 * 60 * 1000,
   })
   const chapterEntries = chaptersQuery.data?.chapters ?? []
-  const chapterOptions = CHAPTERS
+  const chapterOptions = chapterEntries.map((e) => e.chapterName)
+  const viewerChapterName = resolveViewerChapter(me)
+  const viewerChapter = isChapter(viewerChapterName)
+    ? viewerChapterName
+    : (chapterEntries[0]?.chapterName ?? "")
+  const viewerSchool = resolveViewerSchool(me)
   const selectedChapterEntry = chapterEntries.find(
     (entry) => entry.chapterName === chapter,
   )
@@ -346,16 +334,29 @@ export function RecruitmentBasicInfoForm({
   // 판정되므로, 그 상태로 초기화하면 실제 role이 늦게 schoolStaff로 확정될 때 그 사이
   // 사용자가 고른 지부·학교를 되돌려버린다. 두 판단 근거 중 하나라도 확정될 때까지 보류한다.
   const isRoleResolved = !!roleProp || hasRoleTypeData || !isSeasonGroupsLoading
+  const isChaptersLoading = chaptersQuery.isLoading || gisuQuery.isLoading
+  const isChapterResolved =
+    !!initialChapter ||
+    (role === "central"
+      ? !isChaptersLoading && (gisuId == null || chaptersQuery.data != null)
+      : true)
+  const isInitResolved = isRoleResolved && isChapterResolved
 
   // 진입 지점(role·initialChapter·initialSchool)이 바뀌면 상위(RecruitmentCreatePage)가
   // key를 바꿔 이 컴포넌트를 통째로 리마운트시킨다. 그때마다 지부·학교 초기값을 새로 채운다.
   // role/viewerChapter/viewerSchool은 useMe 조회가 끝나야 채워지므로 의존성에 넣어
   // 로그인 정보가 늦게 도착해도 다시 채운다.
   useEffect(() => {
-    if (!isRoleResolved) return
+    if (!isInitResolved) return
+    const defaultChapter =
+      initialChapter ??
+      (chapter && isChapter(chapter) ? chapter : undefined) ??
+      (role === "central"
+        ? (chapterEntries[0]?.chapterName ?? "")
+        : viewerChapter)
+
     const prefill = {
-      chapter:
-        initialChapter ?? (role === "central" ? CHAPTERS[0] : viewerChapter),
+      chapter: defaultChapter,
       school:
         initialSchool ?? (role === "schoolStaff" ? viewerSchool : undefined),
     }
@@ -372,7 +373,7 @@ export function RecruitmentBasicInfoForm({
       periodForm,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRoleResolved, role, viewerChapter, viewerSchool])
+  }, [isInitResolved, role, viewerChapter, viewerSchool, chapterEntries])
 
   // 지부는 central만 자유 선택. 학교는 central이거나(지부 선택 후),
   // chapterAdmin이 지부 페이지(학교 미고정)에서 들어왔을 때만 선택 가능.
