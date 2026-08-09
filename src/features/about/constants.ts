@@ -22,8 +22,10 @@ import { APPLY_ENTRY_PATH } from "@/shared/config/headerRecruitingWindow"
 
 export const ABOUT_RECRUIT = {
   headline: "UMC 11기 모집 분야",
-  description:
-    "하나의 프로덕트를 완성하는 4가지 핵심 분야. 당신의 역량을 가장 명확하게 보여줄 파트에 지원하세요!",
+  descriptionLines: [
+    "하나의 프로덕트를 완성하는 4가지 핵심 분야.",
+    "당신의 역량을 가장 명확하게 보여줄 파트에 지원하세요!",
+  ],
   traitsHeadline: "이런 분이면 좋아요 !",
   ctaLabel: "모집 안내 보러 가기 →",
   ctaTo: "/projects/notice",

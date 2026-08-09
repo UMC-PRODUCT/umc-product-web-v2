@@ -30,7 +30,17 @@ export function RecruitPartsSection() {
             </h2>
 
             <p className="text-teal-gray-400 w-full text-center text-base leading-normal font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
-              {ABOUT_RECRUIT.description}
+              {ABOUT_RECRUIT.descriptionLines.map((line, index) => (
+                <span
+                  key={line}
+                  // 390~1023 만 두 줄로 끊는다. 나머지 구간은 한 줄로 흐르다
+                  // 폭이 모자라면 알아서 접힌다.
+                  className={index > 0 ? undefined : "xs:block lg:inline"}
+                >
+                  {line}
+                  {index === 0 && " "}
+                </span>
+              ))}
             </p>
           </div>
 
