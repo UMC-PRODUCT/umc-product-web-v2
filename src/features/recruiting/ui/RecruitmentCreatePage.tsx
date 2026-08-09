@@ -242,6 +242,7 @@ function RecruitmentCreatePageInner({
           role={role}
           initialChapter={resolvedChapter}
           initialSchool={resolvedSchool}
+          lockOrganization={draft != null}
         />
       </div>
       <div className={step === 2 ? undefined : "hidden"}>
