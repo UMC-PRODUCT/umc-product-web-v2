@@ -49,9 +49,9 @@ export function SchoolsSection() {
           </p>
         </div>
         <div className="flex w-[max(100vw,1440px)] flex-col gap-7.5 overflow-hidden">
-          <SchoolMarqueeRow direction="left" />
+          <SchoolMarqueeRow direction="right" />
           <div aria-hidden>
-            <SchoolMarqueeRow direction="right" />
+            <SchoolMarqueeRow direction="left" />
           </div>
         </div>
       </div>

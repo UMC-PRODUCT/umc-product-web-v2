@@ -45,7 +45,7 @@
 }
 
 @utility animate-school-marquee-right {
-  /* 음수 delay 로 위상을 어긋내지 않으면 첫 화면에서 윗줄과 딱 겹친다. */
+  /* 음수 delay 로 위상을 어긋내지 않으면 첫 화면에서 두 줄이 딱 겹친다. */
   animation: school-marquee-right 80s linear -20s infinite;
   will-change: transform;
 
