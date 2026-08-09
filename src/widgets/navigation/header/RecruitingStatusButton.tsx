@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 
-import { APPLY_ENTRY_PATH } from "@/shared/config/recruitingPeriod"
-import { useIsRecruitingPeriod } from "@/shared/hooks/useIsRecruitingPeriod"
+import { APPLY_ENTRY_PATH } from "@/shared/config/headerRecruitingWindow"
+import { useIsWithinHeaderRecruitingWindow } from "@/shared/hooks/useHeaderRecruitingWindow"
 import { cn } from "@/shared/lib/utils"
 
 import type { RecruitingStatus } from "@/shared/model/recruitingStatus"
@@ -21,9 +21,9 @@ const BASE_CLASS =
  * 없다.
  */
 export function RecruitingStatusButton() {
-  const isRecruitingPeriod = useIsRecruitingPeriod()
+  const showApplyCta = useIsWithinHeaderRecruitingWindow()
 
-  if (!isRecruitingPeriod) return null
+  if (!showApplyCta) return null
 
   return (
     <Link

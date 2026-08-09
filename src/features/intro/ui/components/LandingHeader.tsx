@@ -9,8 +9,8 @@ import {
   type HeaderNavItem,
   isHeaderNavItemActive,
 } from "@/shared/config/headerNavPolicy"
-import { APPLY_ENTRY_PATH } from "@/shared/config/recruitingPeriod"
-import { useIsRecruitingPeriod } from "@/shared/hooks/useIsRecruitingPeriod"
+import { APPLY_ENTRY_PATH } from "@/shared/config/headerRecruitingWindow"
+import { useIsWithinHeaderRecruitingWindow } from "@/shared/hooks/useHeaderRecruitingWindow"
 import {
   buildLoginRedirectSearch,
   getCurrentReturnTo,
@@ -26,7 +26,7 @@ export function LandingHeader() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const isAuthed = useAuthStore((s) => s.isAuthed)
-  const isRecruitingPeriod = useIsRecruitingPeriod()
+  const showApplyCta = useIsWithinHeaderRecruitingWindow()
   const [isVisible, setIsVisible] = useState(true)
   const lastScrollY = useRef(0)
   const visibleRef = useRef(true)
@@ -158,7 +158,7 @@ export function LandingHeader() {
         {/* 랜딩에서 지원 흐름으로 들어가는 유일한 진입로다. 비로그인 방문자가
             대부분이라 로그인 자리도 함께 둔다. */}
         <div className="flex h-full w-55 items-center justify-end gap-4 pr-12.5">
-          {isRecruitingPeriod && (
+          {showApplyCta && (
             <Link
               to={APPLY_ENTRY_PATH}
               className={cn(
