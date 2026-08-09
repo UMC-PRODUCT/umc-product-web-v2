@@ -53,6 +53,9 @@ export const recruitingKeys = {
 
   forms: () => [...recruitingKeys.all, "forms"] as const,
 
+  adminFormStructure: (seasonId: string, roundId: string) =>
+    [...recruitingKeys.forms(), "admin", seasonId, roundId] as const,
+
   formStructure: (
     applicationFormId: string,
     firstChoice: string,
