@@ -50,7 +50,7 @@ export function buildRecruitmentPreviewTitle({
 // periodForm의 {date: "YYYY-MM-DD", time: "HH:mm"}을 백엔드가 요구하는
 // Instant(ISO 8601, UTC) 문자열로 변환한다.
 export function periodFieldToInstant(value: PeriodFieldValue): string {
-  return new Date(`${value.date}T${value.time}:00`).toISOString()
+  return new Date(`${value.date}T${value.time}:00Z`).toISOString()
 }
 
 export function composeRecruitmentTitle(baseTitle: string, footer: string) {

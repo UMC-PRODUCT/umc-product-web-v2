@@ -190,6 +190,7 @@ interface RecruitmentBasicInfoFormProps {
   // - chapterAdmin: 값이 있으면(학교 페이지에서 진입) 학교도 텍스트로 고정, 없으면(지부 페이지에서 진입) 드롭다운으로 선택 가능
   // - schoolStaff: 항상 고정
   initialSchool?: string
+  lockOrganization?: boolean
 }
 
 export function RecruitmentBasicInfoForm({
@@ -198,6 +199,7 @@ export function RecruitmentBasicInfoForm({
   role: roleProp,
   initialChapter,
   initialSchool,
+  lockOrganization = false,
 }: RecruitmentBasicInfoFormProps) {
   const addToast = useToastStore((state) => state.addToast)
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
@@ -377,9 +379,10 @@ export function RecruitmentBasicInfoForm({
 
   // 지부는 central만 자유 선택. 학교는 central이거나(지부 선택 후),
   // chapterAdmin이 지부 페이지(학교 미고정)에서 들어왔을 때만 선택 가능.
-  const isChapterEditable = role === "central"
+  const isChapterEditable = !lockOrganization && role === "central"
   const isSchoolEditable =
-    role === "central" || (role === "chapterAdmin" && !initialSchool)
+    !lockOrganization &&
+    (role === "central" || (role === "chapterAdmin" && !initialSchool))
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const today = new Date()
     return { year: today.getFullYear(), month: today.getMonth() + 1 }
