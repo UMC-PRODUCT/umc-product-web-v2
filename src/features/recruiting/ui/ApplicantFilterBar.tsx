@@ -40,6 +40,7 @@ function buildSchoolOptions(
     schools: Array<{ schoolName: string }>
   }>,
   chapterScope?: Chapter,
+  isFallbackNeeded = false,
 ): FilterDropdownOption[] {
   const branchMap = SCHOOLS_BY_BRANCH as Record<string, readonly string[]>
 
@@ -47,11 +48,17 @@ function buildSchoolOptions(
     const chapterObj = serverChapters.find(
       (c) => c.chapterName === chapterScope,
     )
-    const schools =
-      chapterObj?.schools.map((s) => s.schoolName) ??
-      branchMap[chapterScope] ??
-      []
-    return schools.map((school: string) => ({ value: school, label: school }))
+    if (chapterObj) {
+      return chapterObj.schools.map((s) => ({
+        value: s.schoolName,
+        label: s.schoolName,
+      }))
+    }
+    if (isFallbackNeeded) {
+      const schools = branchMap[chapterScope] ?? []
+      return schools.map((school: string) => ({ value: school, label: school }))
+    }
+    return []
   }
 
   const selectedChapters =
@@ -71,7 +78,7 @@ function buildSchoolOptions(
     })
   })
 
-  if (schoolSet.size === 0) {
+  if (schoolSet.size === 0 && isFallbackNeeded) {
     const fallbackChapters =
       selectedChapters.length > 0 ? selectedChapters : Object.keys(branchMap)
     fallbackChapters.forEach((ch) => {
@@ -103,7 +110,7 @@ export function ApplicantFilterBar({
   className,
 }: ApplicantFilterBarProps) {
   const [openKey, setOpenKey] = useState<string | null>(null)
-  const { chapters: serverChapters } = useSchoolChapterMap()
+  const { chapters: serverChapters, isLoading, isError } = useSchoolChapterMap()
 
   const chapterOptions = useMemo(
     () => [
@@ -117,8 +124,14 @@ export function ApplicantFilterBar({
   )
 
   const schoolOptions = useMemo(
-    () => buildSchoolOptions(filters, serverChapters, chapterScope),
-    [filters, serverChapters, chapterScope],
+    () =>
+      buildSchoolOptions(
+        filters,
+        serverChapters,
+        chapterScope,
+        isLoading || Boolean(isError),
+      ),
+    [filters, serverChapters, chapterScope, isLoading, isError],
   )
   const showChapterFilter =
     filters.chapterTab === CHAPTER_ALL_VALUE &&
