@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { isAxiosError } from "axios"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
@@ -30,6 +30,7 @@ import {
   updateRecruitingRound,
 } from "../../api/recruitingApi"
 import { useAdminRecruitingRounds } from "../../hooks/useAdminRecruitingRounds"
+import { resolveAdditionalRoundNoOptions } from "../../model/additionalRoundNo"
 import { getRecruitableTracks } from "../../model/parts"
 import {
   resolveRecruitingListRole,
@@ -73,6 +74,8 @@ const RECRUITMENT_ROUNDS = [
   { value: "4", label: "4차" },
   { value: "5", label: "5차" },
 ] as const
+
+const MAX_ADDITIONAL_ROUND_NO = RECRUITMENT_ROUNDS.length
 
 function parsePeriodDate(value: PeriodFieldValue): Date | null {
   const parts = value.date.split("-")
@@ -300,6 +303,44 @@ export function RecruitmentBasicInfoForm({
   // 시즌이 세팅되지 않은 것이므로, 2단계까지 다 채운 뒤 생성 시점에야 막히지 않도록
   // 여기서 바로 안내하고 다음 단계 진행 자체를 막는다.
   const isSeasonMissing = !!school && !isSeasonGroupsLoading && !seasonId
+
+  // 추가 모집 차수도 같은 이유로 여기서 미리 좁힌다. 서버는 이전 차수 바로
+  // 다음 번호만 받는데, 1~5 를 그대로 열어 두면 이미 쓴 번호를 골라 놓고
+  // 생성 시점에야 튕긴다.
+  const selectedSeasonRounds = useMemo(
+    () =>
+      seasonGroups.find((group) => group.seasonId === seasonId)?.rounds ?? [],
+    [seasonGroups, seasonId],
+  )
+  const additionalRoundNoOptions = useMemo(
+    () =>
+      resolveAdditionalRoundNoOptions(
+        selectedSeasonRounds,
+        MAX_ADDITIONAL_ROUND_NO,
+        roundId,
+      ),
+    [selectedSeasonRounds, roundId],
+  )
+  const takenRoundNoLabel = additionalRoundNoOptions.takenRoundNos
+    .map((roundNumber) => `${roundNumber}차`)
+    .join(", ")
+
+  // 고를 수 있는 번호가 하나뿐이라 사용자가 찍게 두지 않고 미리 넣어 준다.
+  useEffect(() => {
+    if (recruitmentType !== "ADDITIONAL") return
+    if (isSeasonGroupsLoading || !seasonId) return
+    const { nextRoundNo } = additionalRoundNoOptions
+    if (nextRoundNo == null) return
+    if (roundNo === String(nextRoundNo)) return
+    patchBasicInfo({ roundNo: String(nextRoundNo) })
+  }, [
+    recruitmentType,
+    isSeasonGroupsLoading,
+    seasonId,
+    additionalRoundNoOptions,
+    roundNo,
+    patchBasicInfo,
+  ])
 
   // role이 확정되기 전(me.roles도 안 채워졌고 admin 조회도 로딩 중)엔 central로 임시
   // 판정되므로, 그 상태로 초기화하면 실제 role이 늦게 schoolStaff로 확정될 때 그 사이
@@ -929,29 +970,56 @@ export function RecruitmentBasicInfoForm({
                     ))}
                   </OptionButtonGroup>
                 </div>
-                <div className="flex items-center gap-5">
-                  <span className="text-body-1-regular text-teal-gray-700 shrink-0">
-                    차수
-                  </span>
-                  <OptionButtonGroup
-                    variant="segmented"
-                    value={roundNo}
-                    onValueChange={(value) =>
-                      patchBasicInfo({ roundNo: value })
-                    }
-                  >
-                    {RECRUITMENT_ROUNDS.map(({ value, label }) => (
-                      <OptionButton
-                        key={value}
-                        value={value}
-                        disabled={
-                          recruitmentType === "REGULAR" && value !== roundNo
-                        }
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-5">
+                    <span className="text-body-1-regular text-teal-gray-700 shrink-0">
+                      차수
+                    </span>
+                    <OptionButtonGroup
+                      variant="segmented"
+                      value={roundNo}
+                      onValueChange={(value) =>
+                        patchBasicInfo({ roundNo: value })
+                      }
+                    >
+                      {RECRUITMENT_ROUNDS.map(({ value, label }) => (
+                        <OptionButton
+                          key={value}
+                          value={value}
+                          disabled={
+                            recruitmentType === "REGULAR"
+                              ? value !== roundNo
+                              : // 서버가 이전 차수 다음 번호만 받는다. 이미 쓴
+                                // 번호도, 건너뛴 번호도 거절당한다.
+                                value !==
+                                String(additionalRoundNoOptions.nextRoundNo)
+                          }
+                        >
+                          {label}
+                        </OptionButton>
+                      ))}
+                    </OptionButtonGroup>
+                  </div>
+
+                  {recruitmentType === "ADDITIONAL" &&
+                    !!seasonId &&
+                    additionalRoundNoOptions.takenRoundNos.length > 0 && (
+                      <p
+                        className={cn(
+                          "text-body-3-regular pl-11",
+                          additionalRoundNoOptions.isExhausted
+                            ? "text-error-500"
+                            : "text-teal-gray-500",
+                        )}
                       >
-                        {label}
-                      </OptionButton>
-                    ))}
-                  </OptionButtonGroup>
+                        {takenRoundNoLabel}
+                        {additionalRoundNoOptions.isExhausted
+                          ? `는 이미 만들어져 있습니다. 추가 모집은 ${MAX_ADDITIONAL_ROUND_NO}차까지라 더 만들 수 없습니다.`
+                          : "는 이미 만들어져 있어 다음 차수만 고를 수 있습니다."}
+                        {additionalRoundNoOptions.hasDraftHoldingRoundNo &&
+                          " 임시저장 차수도 번호를 차지하니, 쓰지 않는 것은 모집 목록에서 지워 주세요."}
+                      </p>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-body-1-medium text-teal-gray-600">
