@@ -187,7 +187,9 @@ export function useStageEvaluations(
     hasManagePermission: hasManagePermission === true,
     canSubmit: eligibility.canSubmit,
     isLoading: evaluationsQuery.isLoading,
-    isError: evaluationsQuery.isError,
+    // 첫 조회 실패만 오류로 본다. 창으로 돌아올 때마다 다시 묻는데, 그 재조회가
+    // 한 번 실패했다고 이미 받아 둔 평가 목록을 오류 화면으로 바꾸면 안 된다.
+    isError: evaluationsQuery.isLoadingError,
     // 화면을 보고 있는 채로 다른 평가자의 평가를 확인하고 싶을 때 쓴다.
     refetch: evaluationsQuery.refetch,
     isRefetching: evaluationsQuery.isFetching,
