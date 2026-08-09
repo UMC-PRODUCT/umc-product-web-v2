@@ -91,7 +91,9 @@ export function OperatorEvaluationList({
 
       {!revealed ? (
         <EmptyMessage>나의 평가를 등록 후에 확인할 수 있습니다.</EmptyMessage>
-      ) : othersDone === 0 ? (
+      ) : /* 헤더는 본인까지 세는데 목록에서 본인을 빼면, 내가 방금 낸 평가가
+             `1/2` 로만 잡히고 아래는 비어 보인다. 같은 기준으로 센다. */
+      done === 0 ? (
         <EmptyMessage>현재 완료된 평가가 없습니다.</EmptyMessage>
       ) : (
         <ul className="flex flex-col">

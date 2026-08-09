@@ -49,7 +49,8 @@ describe("OperatorEvaluationList", () => {
     expect(screen.queryByText("김운영")).not.toBeInTheDocument()
   })
 
-  it("내 평가만 완료되고 다른 운영진 완료 건이 없으면 안내 문구를 보여준다", () => {
+  // 헤더는 본인을 세는데 목록만 빼면 "1/2 인데 아무것도 없다"로 읽힌다
+  it("내 평가만 완료돼도 목록에 내 평가를 보여준다", () => {
     render(
       <OperatorEvaluationList
         evaluation={buildEvaluation([
@@ -58,7 +59,28 @@ describe("OperatorEvaluationList", () => {
             evaluatorName: "나",
             progress: "done",
             result: "pass",
+            comment: "충분합니다",
           }),
+          buildOperator({ evaluatorId: "other", evaluatorName: "김운영" }),
+        ])}
+      />,
+    )
+
+    expect(
+      screen.queryByText("현재 완료된 평가가 없습니다."),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText("나")).toBeInTheDocument()
+    expect(screen.getByText("충분합니다")).toBeInTheDocument()
+    // 아직 평가하지 않은 사람도 자리는 남는다
+    expect(screen.getByText("김운영")).toBeInTheDocument()
+  })
+
+  it("아무도 평가하지 않았으면 안내 문구를 보여준다", () => {
+    render(
+      <OperatorEvaluationList
+        viewerIsAdmin
+        evaluation={buildEvaluation([
+          buildOperator({ evaluatorId: "me", evaluatorName: "나" }),
           buildOperator({ evaluatorId: "other", evaluatorName: "김운영" }),
         ])}
       />,
