@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
 
-import { QuotaEditableCell } from "./QuotaEditableCell"
-
-import type {
-  ChapterQuotaData,
-  SchoolQuotaRow,
+import {
+  type ChapterQuotaData,
+  getSchoolQuotaRowsSignature,
+  type SchoolQuotaRow,
 } from "../model/recruitmentQuota"
+import { QuotaEditableCell } from "./QuotaEditableCell"
 
 export type AllocationStatus = "TO 설정 전" | "자동 배정 중" | "임의 배정 중"
 
@@ -47,7 +47,11 @@ export function ChapterQuotaTableCard({
   >(data.schools)
 
   const isTotalsEditedRef = useRef(false)
-  const prevSchoolsRef = useRef(data.schools)
+  // 배열 동일성이 아니라 내용으로 비교한다. 상위가 목록을 다시 만들기만 해도
+  // 새 배열이 오는데, 그때마다 되맞추면 방금 친 값이 지워진다. 모집 설정을
+  // 30초마다 시즌 수만큼 나눠 받아 오므로 이 일이 계속 일어난다.
+  const schoolsSignature = getSchoolQuotaRowsSignature(data.schools)
+  const prevSchoolsSignatureRef = useRef(schoolsSignature)
 
   const onSchoolsDataChangeRef = useRef(onSchoolsDataChange)
   useEffect(() => {
@@ -61,8 +65,8 @@ export function ChapterQuotaTableCard({
   }, [canEditSeason])
 
   useEffect(() => {
-    if (prevSchoolsRef.current !== data.schools) {
-      prevSchoolsRef.current = data.schools
+    if (prevSchoolsSignatureRef.current !== schoolsSignature) {
+      prevSchoolsSignatureRef.current = schoolsSignature
       isTotalsEditedRef.current = false
       setSchoolsData(data.schools)
       setLastValidSchoolsData(data.schools)
@@ -70,7 +74,7 @@ export function ChapterQuotaTableCard({
     } else if (!isTotalsEditedRef.current) {
       setChapterTotals(data.totals)
     }
-  }, [data.schools, data.totals])
+  }, [schoolsSignature, data.schools, data.totals])
 
   // 처리한 요청 id. 같은 요청으로 두 번 배정하지 않는다.
   const handledAutoAllocateIdRef = useRef(0)
@@ -175,7 +179,9 @@ export function ChapterQuotaTableCard({
       (school) => school.schoolName === schoolName,
     )
 
-    prevSchoolsRef.current = nextSchoolsData
+    // 방금 친 값을 상위 데이터가 되돌아오며 지우지 않도록 기준을 옮겨 둔다.
+    prevSchoolsSignatureRef.current =
+      getSchoolQuotaRowsSignature(nextSchoolsData)
     setSchoolsData(nextSchoolsData)
 
     const newSum = nextSchoolsData.reduce((acc, s) => acc + s[partKey], 0)
