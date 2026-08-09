@@ -106,6 +106,7 @@ describe("경로별 활성 표시", () => {
   it("모집 공고와 지원 화면은 모집 안내 탭이 활성이다", () => {
     expect(activeLabels("/projects/notice", GUEST)).toEqual(["모집 안내"])
     expect(activeLabels("/projects/apply/7", GUEST)).toEqual(["모집 안내"])
+    expect(activeLabels("/projects/apply-guide", GUEST)).toEqual(["모집 안내"])
   })
 
   it("루트에서는 모집 안내 탭이 활성화되지 않는다", () => {
@@ -116,6 +117,8 @@ describe("경로별 활성 표시", () => {
     for (const path of [
       "/intro",
       "/projects",
+      "/projects/apply-guide",
+      "/projects/apply/7",
       "/matching/projects",
       "/recruiting/recruitments",
       "/manage/school",

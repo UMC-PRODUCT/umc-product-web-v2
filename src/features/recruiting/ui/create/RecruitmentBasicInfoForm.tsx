@@ -1,15 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
-import {
-  type Chapter,
-  CHAPTERS,
-  isChapter,
-} from "@/entities/organization/model/chapters"
+import { type Chapter, isChapter } from "@/entities/organization/model/chapters"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
@@ -31,6 +26,7 @@ import {
   updateRecruitingRound,
 } from "../../api/recruitingApi"
 import { useAdminRecruitingRounds } from "../../hooks/useAdminRecruitingRounds"
+import { resolveAdditionalRoundNoOptions } from "../../model/additionalRoundNo"
 import { getRecruitableTracks } from "../../model/parts"
 import {
   resolveRecruitingListRole,
@@ -74,6 +70,8 @@ const RECRUITMENT_ROUNDS = [
   { value: "4", label: "4차" },
   { value: "5", label: "5차" },
 ] as const
+
+const MAX_ADDITIONAL_ROUND_NO = RECRUITMENT_ROUNDS.length
 
 function parsePeriodDate(value: PeriodFieldValue): Date | null {
   const parts = value.date.split("-")
@@ -192,6 +190,7 @@ interface RecruitmentBasicInfoFormProps {
   // - chapterAdmin: 값이 있으면(학교 페이지에서 진입) 학교도 텍스트로 고정, 없으면(지부 페이지에서 진입) 드롭다운으로 선택 가능
   // - schoolStaff: 항상 고정
   initialSchool?: string
+  lockOrganization?: boolean
 }
 
 export function RecruitmentBasicInfoForm({
@@ -200,9 +199,9 @@ export function RecruitmentBasicInfoForm({
   role: roleProp,
   initialChapter,
   initialSchool,
+  lockOrganization = false,
 }: RecruitmentBasicInfoFormProps) {
   const addToast = useToastStore((state) => state.addToast)
-  const navigate = useNavigate()
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
   const [tempSaveMessage, setTempSaveMessage] =
     useState("임시저장이 완료되었습니다.")
@@ -238,14 +237,6 @@ export function RecruitmentBasicInfoForm({
     isForbidden: isAdminRoundsForbidden,
   } = useAdminRecruitingRounds()
   const { data: me } = useMe()
-  // role은 목록 화면(또는 사이드바 직접 진입)에서 넘어온 값이 있으면 그걸 우선
-  // 쓰고(진입 지점에 따른 고정 문맥), 없으면 실제 로그인 사용자의 권한으로 판단한다.
-  // me.roles(RoleType)가 정상적으로 채워져 있으면 그걸 신뢰하지만, 계정에 따라
-  // roles가 빈 배열로 내려오는 데이터 결손이 실제로 확인됐다(#657 평가 화면에서도
-  // 같은 이유로 RoleType 대신 실제 권한 걸린 엔드포인트의 성공/403 응답으로 판단하는
-  // 패턴을 씀). roles가 비어있을 때만 그 패턴을 빌려, admin 전용 조회(GET /admin/rounds)가
-  // 403이면 schoolStaff로, 성공(또는 아직 로딩 중)이면 central로 대체 판단한다 —
-  // chapterAdmin까지는 이 신호만으로 구분할 수 없어 더 넓은 central 쪽으로 폴백한다.
   const hasRoleTypeData = !!me?.roles?.length
   const role =
     roleProp ??
@@ -254,11 +245,6 @@ export function RecruitmentBasicInfoForm({
       : isAdminRoundsForbidden
         ? "schoolStaff"
         : "central")
-  const viewerChapterName = resolveViewerChapter(me)
-  const viewerChapter = isChapter(viewerChapterName)
-    ? viewerChapterName
-    : CHAPTERS[0]
-  const viewerSchool = resolveViewerSchool(me)
 
   // 지부·학교 선택지는 실제 기수 기준 조직 데이터(GISU-201: 다른 화면들도 쓰는 getChaptersWithSchools)에서 가져온다.
   const gisuQuery = useActiveGisu()
@@ -272,9 +258,12 @@ export function RecruitmentBasicInfoForm({
     staleTime: 5 * 60 * 1000,
   })
   const chapterEntries = chaptersQuery.data?.chapters ?? []
-  const chapterOptions = chapterEntries
-    .map((entry) => entry.chapterName)
-    .filter(isChapter)
+  const chapterOptions = chapterEntries.map((e) => e.chapterName)
+  const viewerChapterName = resolveViewerChapter(me)
+  const viewerChapter = isChapter(viewerChapterName)
+    ? viewerChapterName
+    : (chapterEntries[0]?.chapterName ?? "")
+  const viewerSchool = resolveViewerSchool(me)
   const selectedChapterEntry = chapterEntries.find(
     (entry) => entry.chapterName === chapter,
   )
@@ -305,31 +294,95 @@ export function RecruitmentBasicInfoForm({
   // 여기서 바로 안내하고 다음 단계 진행 자체를 막는다.
   const isSeasonMissing = !!school && !isSeasonGroupsLoading && !seasonId
 
+  // 추가 모집 차수도 같은 이유로 여기서 미리 좁힌다. 서버는 이전 차수 바로
+  // 다음 번호만 받는데, 1~5 를 그대로 열어 두면 이미 쓴 번호를 골라 놓고
+  // 생성 시점에야 튕긴다.
+  const selectedSeasonRounds = useMemo(
+    () =>
+      seasonGroups.find((group) => group.seasonId === seasonId)?.rounds ?? [],
+    [seasonGroups, seasonId],
+  )
+  const additionalRoundNoOptions = useMemo(
+    () =>
+      resolveAdditionalRoundNoOptions(
+        selectedSeasonRounds,
+        MAX_ADDITIONAL_ROUND_NO,
+        roundId,
+      ),
+    [selectedSeasonRounds, roundId],
+  )
+  const takenRoundNoLabel = additionalRoundNoOptions.takenRoundNos
+    .map((roundNumber) => `${roundNumber}차`)
+    .join(", ")
+
+  // 고를 수 있는 번호가 하나뿐이라 사용자가 찍게 두지 않고 미리 넣어 준다.
+  useEffect(() => {
+    if (recruitmentType !== "ADDITIONAL") return
+    if (isSeasonGroupsLoading || !seasonId) return
+    const { nextRoundNo } = additionalRoundNoOptions
+    if (nextRoundNo == null) return
+    if (roundNo === String(nextRoundNo)) return
+    patchBasicInfo({ roundNo: String(nextRoundNo) })
+  }, [
+    recruitmentType,
+    isSeasonGroupsLoading,
+    seasonId,
+    additionalRoundNoOptions,
+    roundNo,
+    patchBasicInfo,
+  ])
+
   // role이 확정되기 전(me.roles도 안 채워졌고 admin 조회도 로딩 중)엔 central로 임시
   // 판정되므로, 그 상태로 초기화하면 실제 role이 늦게 schoolStaff로 확정될 때 그 사이
   // 사용자가 고른 지부·학교를 되돌려버린다. 두 판단 근거 중 하나라도 확정될 때까지 보류한다.
   const isRoleResolved = !!roleProp || hasRoleTypeData || !isSeasonGroupsLoading
+  const isChaptersLoading = chaptersQuery.isLoading || gisuQuery.isLoading
+  const isChapterResolved =
+    !!initialChapter ||
+    (role === "central"
+      ? !isChaptersLoading && (gisuId == null || chaptersQuery.data != null)
+      : true)
+  const isInitResolved = isRoleResolved && isChapterResolved
 
   // 진입 지점(role·initialChapter·initialSchool)이 바뀌면 상위(RecruitmentCreatePage)가
   // key를 바꿔 이 컴포넌트를 통째로 리마운트시킨다. 그때마다 지부·학교 초기값을 새로 채운다.
   // role/viewerChapter/viewerSchool은 useMe 조회가 끝나야 채워지므로 의존성에 넣어
   // 로그인 정보가 늦게 도착해도 다시 채운다.
   useEffect(() => {
-    if (!isRoleResolved) return
-    patchBasicInfo({
-      chapter:
-        initialChapter ?? (role === "central" ? CHAPTERS[0] : viewerChapter),
+    if (!isInitResolved) return
+    const defaultChapter =
+      initialChapter ??
+      (chapter && isChapter(chapter) ? chapter : undefined) ??
+      (role === "central"
+        ? (chapterEntries[0]?.chapterName ?? "")
+        : viewerChapter)
+
+    const prefill = {
+      chapter: defaultChapter,
       school:
         initialSchool ?? (role === "schoolStaff" ? viewerSchool : undefined),
+    }
+    patchBasicInfo(prefill)
+    // 이 프리필은 사용자 입력이 아니라 초기값 채움이므로, 스냅샷 캡처(마운트) 이후에
+    // 반영되더라도 기준선에 포함시켜 이탈 모달이 곧바로 뜨지 않게 한다.
+    savedSnapshotRef.current = JSON.stringify({
+      chapter: prefill.chapter,
+      school: prefill.school,
+      recruitmentType,
+      roundNo,
+      interviewRequired,
+      footer,
+      periodForm,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRoleResolved, role, viewerChapter, viewerSchool])
+  }, [isInitResolved, role, viewerChapter, viewerSchool, chapterEntries])
 
   // 지부는 central만 자유 선택. 학교는 central이거나(지부 선택 후),
   // chapterAdmin이 지부 페이지(학교 미고정)에서 들어왔을 때만 선택 가능.
-  const isChapterEditable = role === "central"
+  const isChapterEditable = !lockOrganization && role === "central"
   const isSchoolEditable =
-    role === "central" || (role === "chapterAdmin" && !initialSchool)
+    !lockOrganization &&
+    (role === "central" || (role === "chapterAdmin" && !initialSchool))
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const today = new Date()
     return { year: today.getFullYear(), month: today.getMonth() + 1 }
@@ -545,7 +598,15 @@ export function RecruitmentBasicInfoForm({
       return
     }
 
-    savedSnapshotRef.current = currentSnapshot
+    savedSnapshotRef.current = JSON.stringify({
+      chapter,
+      school,
+      recruitmentType,
+      roundNo,
+      interviewRequired,
+      footer: resolvedFooter,
+      periodForm,
+    })
     setIsSaving(false)
     setTempSaveMessage(
       roundId
@@ -687,10 +748,10 @@ export function RecruitmentBasicInfoForm({
     isPeriodFieldComplete(periodForm.documentStartAt) &&
     isPeriodFieldComplete(periodForm.documentEndAt) &&
     isPeriodFieldComplete(periodForm.documentResultPublishedAt) &&
+    isPeriodFieldComplete(periodForm.finalResultPublishedAt) &&
     (!interviewRequired ||
       (isPeriodFieldComplete(periodForm.interviewStartAt) &&
-        isPeriodFieldComplete(periodForm.interviewEndAt))) &&
-    isPeriodFieldComplete(periodForm.finalResultPublishedAt)
+        isPeriodFieldComplete(periodForm.interviewEndAt)))
 
   const handleNext = async () => {
     if (isAdvancing) return
@@ -913,29 +974,56 @@ export function RecruitmentBasicInfoForm({
                     ))}
                   </OptionButtonGroup>
                 </div>
-                <div className="flex items-center gap-5">
-                  <span className="text-body-1-regular text-teal-gray-700 shrink-0">
-                    차수
-                  </span>
-                  <OptionButtonGroup
-                    variant="segmented"
-                    value={roundNo}
-                    onValueChange={(value) =>
-                      patchBasicInfo({ roundNo: value })
-                    }
-                  >
-                    {RECRUITMENT_ROUNDS.map(({ value, label }) => (
-                      <OptionButton
-                        key={value}
-                        value={value}
-                        disabled={
-                          recruitmentType === "REGULAR" && value !== roundNo
-                        }
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-5">
+                    <span className="text-body-1-regular text-teal-gray-700 shrink-0">
+                      차수
+                    </span>
+                    <OptionButtonGroup
+                      variant="segmented"
+                      value={roundNo}
+                      onValueChange={(value) =>
+                        patchBasicInfo({ roundNo: value })
+                      }
+                    >
+                      {RECRUITMENT_ROUNDS.map(({ value, label }) => (
+                        <OptionButton
+                          key={value}
+                          value={value}
+                          disabled={
+                            recruitmentType === "REGULAR"
+                              ? value !== roundNo
+                              : // 서버가 이전 차수 다음 번호만 받는다. 이미 쓴
+                                // 번호도, 건너뛴 번호도 거절당한다.
+                                value !==
+                                String(additionalRoundNoOptions.nextRoundNo)
+                          }
+                        >
+                          {label}
+                        </OptionButton>
+                      ))}
+                    </OptionButtonGroup>
+                  </div>
+
+                  {recruitmentType === "ADDITIONAL" &&
+                    !!seasonId &&
+                    additionalRoundNoOptions.takenRoundNos.length > 0 && (
+                      <p
+                        className={cn(
+                          "text-body-3-regular pl-11",
+                          additionalRoundNoOptions.isExhausted
+                            ? "text-error-500"
+                            : "text-teal-gray-500",
+                        )}
                       >
-                        {label}
-                      </OptionButton>
-                    ))}
-                  </OptionButtonGroup>
+                        {takenRoundNoLabel}
+                        {additionalRoundNoOptions.isExhausted
+                          ? `는 이미 만들어져 있습니다. 추가 모집은 ${MAX_ADDITIONAL_ROUND_NO}차까지라 더 만들 수 없습니다.`
+                          : "는 이미 만들어져 있어 다음 차수만 고를 수 있습니다."}
+                        {additionalRoundNoOptions.hasDraftHoldingRoundNo &&
+                          " 임시저장 차수도 번호를 차지하니, 쓰지 않는 것은 모집 목록에서 지워 주세요."}
+                      </p>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-body-1-medium text-teal-gray-600">
@@ -981,11 +1069,14 @@ export function RecruitmentBasicInfoForm({
                         ? `${periodForm.documentStartAt.date} ${periodForm.documentStartAt.time}`
                         : "2000-00-00 00:00"
                     }
-                    endLabel={
-                      periodForm.finalResultPublishedAt.date
-                        ? `${periodForm.finalResultPublishedAt.date.slice(5)} ${periodForm.finalResultPublishedAt.time}`
+                    endLabel={(() => {
+                      const endField = interviewRequired
+                        ? periodForm.finalResultPublishedAt
+                        : periodForm.documentResultPublishedAt
+                      return endField.date
+                        ? `${endField.date.slice(5)} ${endField.time}`
                         : "00-00 23:59"
-                    }
+                    })()}
                     className="flex-1"
                   />
                 </div>
@@ -1276,7 +1367,7 @@ export function RecruitmentBasicInfoForm({
         title="임시 저장 완료"
         content={tempSaveMessage}
         confirmText="확인"
-        onConfirm={() => navigate({ to: "/recruiting/recruitments" })}
+        onConfirm={() => setShowTempSaveModal(false)}
       />
     </>
   )

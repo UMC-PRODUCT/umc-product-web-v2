@@ -133,7 +133,8 @@ function RecruitingHeaderTestPage() {
           className="relative h-20 w-full bg-[#101f1e]"
           style={{ transform: "translateZ(0)" }}
         >
-          <LandingHeader recruitingStatus={PHASE_OPTIONS[phaseIndex]!.value} />
+          {/* 지원하기 노출은 하드코딩한 모집 기간이 정해서 phase 토글과 무관하다 */}
+          <LandingHeader />
         </div>
       )}
 

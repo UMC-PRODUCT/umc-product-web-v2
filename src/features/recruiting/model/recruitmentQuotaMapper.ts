@@ -1,7 +1,5 @@
 import dayjs from "dayjs"
 
-import { CHAPTERS } from "@/entities/organization/model/chapters"
-
 import type {
   RecruitingRoundGroup,
   RecruitingSeasonConfigurationResponse,
@@ -65,7 +63,17 @@ export function mapGroupsToChapterQuotaData(
     : undefined
   const updatedTime = actualNow ? dayjs(actualNow).format("HH:mm") : undefined
 
-  const chapters = CHAPTERS.length > 0 ? CHAPTERS : Array.from(byChapter.keys())
+  const chapterNamesSet = new Set<string>()
+  if (serverChapters && serverChapters.length > 0) {
+    serverChapters.forEach((ch) => {
+      if (ch.chapterName) chapterNamesSet.add(ch.chapterName)
+    })
+  }
+  byChapter.forEach((_, chapterName) => {
+    if (chapterName) chapterNamesSet.add(chapterName)
+  })
+
+  const chapters = Array.from(chapterNamesSet)
 
   return chapters.map((chapterName) => {
     const chapterGroups = byChapter.get(chapterName) ?? []
@@ -79,7 +87,6 @@ export function mapGroupsToChapterQuotaData(
       groupSchoolNames.add(group.schoolName)
 
       const config = seasonConfigsMap.get(group.seasonId)
-      const hasConfig = Boolean(config)
       const quotas = config?.quotas ?? []
 
       const pm = quotas.find((q) => q.track === "PLAN")?.targetCount ?? 0
@@ -91,7 +98,7 @@ export function mapGroupsToChapterQuotaData(
           ?.targetCount ?? 0
 
       return {
-        seasonId: hasConfig ? group.seasonId : undefined,
+        seasonId: group.seasonId,
         gisuId: group.gisuId || gisuId,
         schoolId: String(group.schoolId),
         schoolName: group.schoolName,

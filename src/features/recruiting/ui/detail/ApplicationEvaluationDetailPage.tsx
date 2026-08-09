@@ -84,6 +84,8 @@ export function ApplicationEvaluationDetailPage({
     evaluation,
     hasManagePermission: viewerIsAdmin,
     isError: isEvaluationError,
+    refetch: refetchEvaluations,
+    isRefetching: isEvaluationRefetching,
   } = useStageEvaluations(
     applicationId,
     roundId,
@@ -191,6 +193,8 @@ export function ApplicationEvaluationDetailPage({
                   <OperatorEvaluationList
                     evaluation={evaluation}
                     viewerIsAdmin={viewerIsAdmin}
+                    onRefresh={() => void refetchEvaluations()}
+                    isRefreshing={isEvaluationRefetching}
                   />
                 </>
               )

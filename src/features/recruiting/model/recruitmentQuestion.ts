@@ -1,6 +1,9 @@
-import { type PartKey, PARTS } from "./parts"
+import { PART_KEY_TO_TRACK, type PartKey, PARTS } from "./parts"
 
 import type {
+  RecruitingAdminFormQuestionResponse,
+  RecruitingAdminFormStructureResponse,
+  RecruitingQuestionType,
   RecruitingTrack,
   UpsertRecruitingSectionRequest,
 } from "../api/types"
@@ -197,24 +200,16 @@ function toRecruitingQuestionType(
   return type === "radio" ? "RADIO" : "SHORT_TEXT"
 }
 
-// 공통 문항(01~05) 섹션을 Form Upsert 요청 payload로 직렬화한다.
-// 파트별(TRACK) 섹션 직렬화는 buildTrackSectionUpsertRequest가 별도로 담당한다.
+// 공통 문항(01~05 고정 문항 + 운영진이 추가한 자유 문항) 섹션을 Form Upsert 요청
+// payload로 직렬화한다. 파트별(TRACK) 섹션 직렬화는 buildTrackSectionUpsertRequest가
+// 별도로 담당한다.
 export function buildCommonSectionUpsertRequest(
   removedOptionsByQuestionIndex: Record<string, string[]>,
   questionToggleState: Record<string, { enabled: boolean; required: boolean }>,
-): {
-  clientKey: string
-  title: string
-  type: "COMMON"
-  questions: {
-    type: "RADIO" | "SHORT_TEXT"
-    title: string
-    description?: string
-    required: boolean
-    options?: { content: string; other: boolean }[]
-  }[]
-} {
-  const questions = RECRUITMENT_DEFAULT_QUESTIONS.filter(
+  additionalQuestions: RecruitmentQuestion[] = [],
+  sectionId?: number,
+): UpsertRecruitingSectionRequest {
+  const defaultQuestions = RECRUITMENT_DEFAULT_QUESTIONS.filter(
     (question) => questionToggleState[question.index]?.enabled ?? true,
   ).map((question) => {
     const removed = removedOptionsByQuestionIndex[question.index] ?? []
@@ -230,11 +225,28 @@ export function buildCommonSectionUpsertRequest(
     }
   })
 
+  const extraQuestions = additionalQuestions.map((question) => ({
+    questionId: question.questionId,
+    type: toRecruitingQuestionTypeFromField(question.fieldType),
+    title: question.title,
+    description: question.caption || undefined,
+    required: question.required,
+    options:
+      question.fieldType === "radio" || question.fieldType === "checkbox"
+        ? question.options.map((option) => ({
+            optionId: option.optionId,
+            content: option.content,
+            other: false,
+          }))
+        : undefined,
+  }))
+
   return {
+    sectionId,
     clientKey: "common",
     title: "기본 문항",
     type: "COMMON",
-    questions,
+    questions: [...defaultQuestions, ...extraQuestions],
   }
 }
 
@@ -261,13 +273,16 @@ export function buildTrackSectionUpsertRequest(
   partLabel: string,
   track: RecruitingTrack,
   questions: RecruitmentQuestion[],
+  sectionId?: number,
 ): UpsertRecruitingSectionRequest {
   return {
+    sectionId,
     clientKey: `track-${track}`,
     title: partLabel,
     type: "TRACK",
     track,
     questions: questions.map((question) => ({
+      questionId: question.questionId,
       type: toRecruitingQuestionTypeFromField(question.fieldType),
       title: question.title,
       description: question.caption || undefined,
@@ -275,10 +290,160 @@ export function buildTrackSectionUpsertRequest(
       options:
         question.fieldType === "radio" || question.fieldType === "checkbox"
           ? question.options.map((option) => ({
+              optionId: option.optionId,
               content: option.content,
               other: false,
             }))
           : undefined,
     })),
+  }
+}
+
+const TRACK_TO_PART_KEY: Record<RecruitingTrack, PartKey | undefined> =
+  Object.fromEntries(
+    Object.entries(PART_KEY_TO_TRACK).map(([partKey, track]) => [
+      track,
+      partKey as PartKey,
+    ]),
+  ) as Record<RecruitingTrack, PartKey | undefined>
+
+// 생성 마법사가 다루는 문항 유형(text/radio/checkbox/file/portfolio) 밖의
+// 응답 타입(LONG_TEXT/DROPDOWN/SCHEDULE 등)은 아직 편집 UI가 없어 "text"로
+// 안전하게 내려서 최소한 값이 사라지진 않게 한다.
+function toRecruitmentFieldType(
+  type: RecruitingQuestionType,
+): RecruitmentFieldType {
+  switch (type) {
+    case "RADIO":
+      return "radio"
+    case "CHECKBOX":
+      return "checkbox"
+    case "FILE":
+      return "file"
+    case "PORTFOLIO":
+      return "portfolio"
+    default:
+      return "text"
+  }
+}
+
+function mapAdminQuestionResponseToRecruitmentQuestion(
+  question: RecruitingAdminFormQuestionResponse,
+): RecruitmentQuestion {
+  const fieldType = toRecruitmentFieldType(question.type)
+  return makeRecruitmentQuestion({
+    questionId: question.questionId,
+    title: fieldType === "portfolio" ? "" : question.title,
+    caption: question.description ?? "",
+    fieldType,
+    required: question.required,
+    options: (question.options ?? []).map((option) => ({
+      optionId: option.optionId,
+      content: option.content,
+    })),
+  })
+}
+
+export interface RecruitmentQuestionDraftState {
+  questionToggleState: Record<string, { enabled: boolean; required: boolean }>
+  removedOptionsByQuestionIndex: Record<string, string[]>
+  commonQuestionDrafts: RecruitmentQuestion[]
+  partQuestionDrafts: Partial<Record<PartKey, RecruitmentQuestion[]>>
+  enabledParts: Partial<Record<PartKey, boolean>>
+  secondChoiceEnabled: boolean
+  // 저장 시 기존 섹션을 새 섹션처럼 보내 백엔드가 지우고 다시 만들지 않도록,
+  // GET 응답의 sectionId를 그대로 들고 있다가 Upsert 요청에 되돌려 보낸다.
+  commonSectionId?: number
+  sectionIdByPart: Partial<Record<PartKey, number>>
+}
+
+// GET .../rounds/{roundId}/form(RecruitingAdminFormStructureResponse) 응답을
+// 생성 마법사 Step2(RecruitmentQuestionForm)가 쓰는 내부 draft 모델로 되돌린다.
+// 고정 문항(01~05)은 제목을 못 바꾸므로 title로 매칭하고, 나머지 COMMON 문항은
+// 운영진이 추가한 자유 문항으로 취급한다. Form이 아직 없으면(exists: false)
+// undefined를 반환해 호출부가 생성 모드와 동일한 빈 draft로 폴백하게 한다.
+export function mapAdminFormToQuestionDraft(
+  structure: RecruitingAdminFormStructureResponse | undefined,
+): RecruitmentQuestionDraftState | undefined {
+  if (!structure || !structure.exists) return undefined
+
+  const commonSection = structure.sections.find((s) => s.type === "COMMON")
+  const trackSections = structure.sections.filter((s) => s.type === "TRACK")
+
+  const questionToggleState: Record<
+    string,
+    { enabled: boolean; required: boolean }
+  > = {}
+  const removedOptionsByQuestionIndex: Record<string, string[]> = {}
+  const commonQuestionDrafts: RecruitmentQuestion[] = []
+
+  const responseQuestions = commonSection?.questions ?? []
+  const matchedResponseQuestions =
+    new Set<RecruitingAdminFormQuestionResponse>()
+
+  for (const defaultQuestion of RECRUITMENT_DEFAULT_QUESTIONS) {
+    const matched = responseQuestions.find(
+      (q) => q.title === defaultQuestion.title,
+    )
+    if (["03", "04"].includes(defaultQuestion.index)) {
+      if (matched) {
+        const responseOptionContents = new Set(
+          (matched.options ?? []).map((o) => o.content),
+        )
+        const removed = (defaultQuestion.options ?? []).filter(
+          (option) => !responseOptionContents.has(option),
+        )
+        questionToggleState[defaultQuestion.index] = {
+          enabled: true,
+          required: matched.required,
+        }
+        if (removed.length > 0) {
+          removedOptionsByQuestionIndex[defaultQuestion.index] = removed
+        }
+      } else {
+        // 2지망(04)만 통째로 끌 수 있다. 1지망(03)이 응답에 없는 건
+        // 비정상 상태라 기본값(활성)으로 둔다.
+        questionToggleState[defaultQuestion.index] = {
+          enabled: defaultQuestion.index !== "04",
+          required: true,
+        }
+      }
+    }
+    if (matched) matchedResponseQuestions.add(matched)
+  }
+
+  for (const question of responseQuestions) {
+    if (matchedResponseQuestions.has(question)) continue
+    commonQuestionDrafts.push(
+      mapAdminQuestionResponseToRecruitmentQuestion(question),
+    )
+  }
+
+  const partQuestionDrafts: Partial<Record<PartKey, RecruitmentQuestion[]>> = {}
+  const enabledParts: Partial<Record<PartKey, boolean>> = {}
+  const sectionIdByPart: Partial<Record<PartKey, number>> = {}
+
+  for (const section of trackSections) {
+    const partKey = section.track && TRACK_TO_PART_KEY[section.track]
+    if (!partKey) continue
+    enabledParts[partKey] = true
+    partQuestionDrafts[partKey] = section.questions.map((question) =>
+      mapAdminQuestionResponseToRecruitmentQuestion(question),
+    )
+    if (section.sectionId != null) sectionIdByPart[partKey] = section.sectionId
+  }
+
+  return {
+    questionToggleState,
+    removedOptionsByQuestionIndex,
+    commonQuestionDrafts:
+      commonQuestionDrafts.length > 0
+        ? commonQuestionDrafts
+        : [makeRecruitmentQuestion()],
+    partQuestionDrafts,
+    enabledParts,
+    secondChoiceEnabled: questionToggleState["04"]?.enabled ?? true,
+    commonSectionId: commonSection?.sectionId,
+    sectionIdByPart,
   }
 }

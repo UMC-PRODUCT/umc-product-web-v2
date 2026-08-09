@@ -14,6 +14,14 @@ export const recruitingKeys = {
     [...recruitingKeys.rounds(), gisuId, "OPEN"] as const,
   pastRoundList: (gisuId: string) =>
     [...recruitingKeys.rounds(), gisuId, "PAST"] as const,
+  adminDraftRound: (gisuId: string, roundId: string, seasonId?: string) =>
+    [
+      ...recruitingKeys.rounds(),
+      "admin-draft",
+      gisuId,
+      roundId,
+      seasonId ?? "",
+    ] as const,
   adminRoundList: (gisuId: string, sort?: string, chapterId?: string) =>
     [
       ...recruitingKeys.rounds(),
@@ -53,6 +61,9 @@ export const recruitingKeys = {
 
   forms: () => [...recruitingKeys.all, "forms"] as const,
 
+  adminFormStructure: (seasonId: string, roundId: string) =>
+    [...recruitingKeys.forms(), "admin", seasonId, roundId] as const,
+
   formStructure: (
     applicationFormId: string,
     firstChoice: string,
@@ -80,8 +91,14 @@ export const recruitingKeys = {
   evaluatorProfiles: (memberIds: string[]) =>
     [...recruitingKeys.all, "evaluator-profiles", memberIds] as const,
 
-  schoolStaff: (schoolId: string, gisuId?: string) =>
-    [...recruitingKeys.all, "school-staff", schoolId, gisuId ?? ""] as const,
+  schoolStaff: (schoolId: string, gisuId?: string, chapterId?: string) =>
+    [
+      ...recruitingKeys.all,
+      "school-staff",
+      schoolId,
+      gisuId ?? "",
+      chapterId ?? "",
+    ] as const,
 
   interviewQuestions: () =>
     [...recruitingKeys.all, "interview-questions"] as const,

@@ -250,7 +250,7 @@ export function ApplicantTableCard({
       </div>
       <div role="table" className="mt-8 flex flex-col">
         {isEmpty ? (
-          <div className="flex min-h-75 items-center justify-center">
+          <div className="flex min-h-20 items-center justify-center">
             <p className="text-body-2-regular text-teal-gray-400">
               {deriveEmptyMessage(cardFilters, hasRecruitment)}
             </p>

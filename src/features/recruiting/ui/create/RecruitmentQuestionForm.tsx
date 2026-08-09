@@ -1,4 +1,3 @@
-import { useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
 
@@ -47,6 +46,7 @@ import {
   buildTrackSectionUpsertRequest,
   getRecruitmentFieldTypePatch,
   makeRecruitmentQuestion,
+  mapAdminFormToQuestionDraft,
   RECRUITMENT_DEFAULT_QUESTIONS,
   validateRecruitmentQuestionForm,
 } from "../../model/recruitmentQuestion"
@@ -56,6 +56,7 @@ import { RecruitmentSectionHeader } from "../RecruitmentSectionHeader"
 
 import type { FieldTypeOption } from "@/shared/ui/button/FieldTypeButtonGroup"
 
+import type { RecruitingAdminFormStructureResponse } from "../../api/types"
 import type { PartKey } from "../../model/parts"
 import type {
   RecruitmentDefaultQuestion,
@@ -472,10 +473,15 @@ function DefaultRadioQuestion({
 }
 
 interface RecruitmentQuestionFormProps {
-  onPrev: () => void
-  onNext: () => void
+  onPrev?: () => void
+  onNext?: () => void
   onDirtyChange?: (dirty: boolean) => void
   onBlankPartsChange?: (hasBlankEnabledPart: boolean) => void
+  // "edit"는 모집 공고 수정 화면 전용. 생성 마법사의 이전/다음 이동 없이
+  // 문항만 불러와 고치고 그 자리에서 저장한다.
+  mode?: "create" | "edit"
+  initialFormStructure?: RecruitingAdminFormStructureResponse
+  sectionIndex?: number
 }
 
 export function RecruitmentQuestionForm({
@@ -483,9 +489,20 @@ export function RecruitmentQuestionForm({
   onNext,
   onDirtyChange,
   onBlankPartsChange,
+  mode = "create",
+  initialFormStructure,
+  sectionIndex = 3,
 }: RecruitmentQuestionFormProps) {
-  const navigate = useNavigate()
   const addToast = useToastStore((state) => state.addToast)
+  const initialDraft = useState(() =>
+    mapAdminFormToQuestionDraft(initialFormStructure),
+  )[0]
+  // 기존 섹션을 저장 시 새 섹션처럼 보내면 백엔드가 지우고 다시 만들어버리므로,
+  // GET 응답에서 받은 sectionId를 그대로 들고 있다가 Upsert 요청에 되돌려 보낸다.
+  const commonSectionId = initialDraft?.commonSectionId
+  const [sectionIdByPart] = useState<Partial<Record<PartKey, number>>>(
+    () => initialDraft?.sectionIdByPart ?? {},
+  )
   const enabledParts = useRecruitmentCreateStore((s) => s.enabledParts)
   const setEnabledParts = useRecruitmentCreateStore((s) => s.setEnabledParts)
   const setSecondChoiceEnabled = useRecruitmentCreateStore(
@@ -498,14 +515,21 @@ export function RecruitmentQuestionForm({
   const setRoundId = useRecruitmentCreateStore((s) => s.setRoundId)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [removedOptionsByQuestionIndex, setRemovedOptionsByQuestionIndex] =
-    useState<Record<string, string[]>>({})
+    useState<Record<string, string[]>>(
+      () => initialDraft?.removedOptionsByQuestionIndex ?? {},
+    )
   // 파트별 섹션의 문항 목록 편집 상태. 파트당 여러 문항을 가질 수 있다.
   const [partQuestionDrafts, setPartQuestionDrafts] = useState<
     Record<PartKey, RecruitmentQuestion[]>
   >(
     () =>
       Object.fromEntries(
-        PARTS.map((part) => [part.key, [makeRecruitmentQuestion()]]),
+        PARTS.map((part) => [
+          part.key,
+          initialDraft?.partQuestionDrafts[part.key] ?? [
+            makeRecruitmentQuestion(),
+          ],
+        ]),
       ) as Record<PartKey, RecruitmentQuestion[]>,
   )
   // 파트별로 현재 편집 중(카드가 펼쳐진 상태)인 문항 id.
@@ -523,24 +547,57 @@ export function RecruitmentQuestionForm({
   const [questionToggleState, setQuestionToggleState] = useState<
     Record<string, { enabled: boolean; required: boolean }>
   >(() =>
-    Object.fromEntries(
-      OPTIONAL_TOGGLE_QUESTION_INDEXES.map((index) => [
-        index,
-        { enabled: true, required: true },
-      ]),
-    ),
+    initialDraft
+      ? initialDraft.questionToggleState
+      : Object.fromEntries(
+          OPTIONAL_TOGGLE_QUESTION_INDEXES.map((index) => [
+            index,
+            { enabled: true, required: true },
+          ]),
+        ),
   )
+  // 공통 문항 섹션에 운영진이 자유롭게 추가하는 문항 목록. 파트별 섹션과 동일하게
+  // 문항 하나로 시작해 추가/삭제/유형 변경이 가능하다.
+  const [commonQuestionDrafts, setCommonQuestionDrafts] = useState<
+    RecruitmentQuestion[]
+  >(() => initialDraft?.commonQuestionDrafts ?? [makeRecruitmentQuestion()])
+  const [focusedCommonQuestionId, setFocusedCommonQuestionId] = useState<
+    string | null
+  >(() => commonQuestionDrafts[0]?.id ?? null)
   const [isSaving, setIsSaving] = useState(false)
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
 
+  // enabledParts/secondChoiceEnabled는 스토어 소유라 로컬 state로 못 seed한다 —
+  // 마운트 시 한 번만 prefill 값으로 덮어쓴다.
   const savedSnapshotRef = useRef(
     JSON.stringify({
       enabledParts,
       removedOptionsByQuestionIndex,
       questionToggleState,
       partQuestionDrafts,
+      commonQuestionDrafts,
     }),
   )
+
+  useEffect(() => {
+    if (!initialDraft) return
+    const nextEnabledParts = {
+      ...enabledParts,
+      ...initialDraft.enabledParts,
+    }
+    setEnabledParts(nextEnabledParts)
+    setSecondChoiceEnabled(initialDraft.secondChoiceEnabled)
+    // draft 프리필은 사용자 입력이 아니라 초기값 채움이므로, 스냅샷 캡처(마운트) 이후에
+    // 반영되더라도 기준선에 포함시켜 이탈 모달이 곧바로 뜨지 않게 한다.
+    savedSnapshotRef.current = JSON.stringify({
+      enabledParts: nextEnabledParts,
+      removedOptionsByQuestionIndex,
+      questionToggleState,
+      partQuestionDrafts,
+      commonQuestionDrafts,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const updatePartQuestionDraft = (
     part: PartKey,
@@ -578,6 +635,33 @@ export function RecruitmentQuestionForm({
 
   const focusPartQuestion = (part: PartKey, questionId: string) => {
     setFocusedQuestionIdByPart((prev) => ({ ...prev, [part]: questionId }))
+  }
+
+  const updateCommonQuestionDraft = (
+    questionId: string,
+    patch: Partial<RecruitmentQuestion>,
+  ) => {
+    setCommonQuestionDrafts((prev) =>
+      prev.map((question) =>
+        question.id === questionId ? { ...question, ...patch } : question,
+      ),
+    )
+  }
+
+  const addCommonQuestion = () => {
+    const newQuestion = makeRecruitmentQuestion()
+    setCommonQuestionDrafts((prev) => [...prev, newQuestion])
+    setFocusedCommonQuestionId(newQuestion.id)
+  }
+
+  const deleteCommonQuestion = (questionId: string) => {
+    const nextQuestions = commonQuestionDrafts.filter(
+      (q) => q.id !== questionId,
+    )
+    setCommonQuestionDrafts(nextQuestions)
+    setFocusedCommonQuestionId((prev) =>
+      prev === questionId ? (nextQuestions[0]?.id ?? null) : prev,
+    )
   }
 
   const removeOption = (questionIndex: string, option: string) => {
@@ -627,9 +711,11 @@ export function RecruitmentQuestionForm({
     removedOptionsByQuestionIndex,
     questionToggleState,
     partQuestionDrafts,
+    commonQuestionDrafts,
   })
   const hasUnsavedChanges = savedSnapshotRef.current !== currentSnapshot
-  const canTempSave = hasUnsavedChanges && !isSaving
+  const isSavingOrSubmitting = isSaving || isSubmitting
+  const canTempSave = hasUnsavedChanges && !isSavingOrSubmitting
 
   useEffect(() => {
     onDirtyChange?.(hasUnsavedChanges)
@@ -644,7 +730,10 @@ export function RecruitmentQuestionForm({
     }),
   )
   const hasBlankEnabledPart =
-    validateRecruitmentQuestionForm([], partSectionsForValidation).length > 0
+    validateRecruitmentQuestionForm(
+      commonQuestionDrafts,
+      partSectionsForValidation,
+    ).length > 0
 
   useEffect(() => {
     onBlankPartsChange?.(hasBlankEnabledPart)
@@ -701,6 +790,7 @@ export function RecruitmentQuestionForm({
             part.label,
             PART_KEY_TO_TRACK[part.key],
             partQuestionDrafts[part.key],
+            sectionIdByPart[part.key],
           ),
       )
       await upsertRecruitingApplicationForm(seasonId!, currentRoundId, {
@@ -708,6 +798,8 @@ export function RecruitmentQuestionForm({
           buildCommonSectionUpsertRequest(
             removedOptionsByQuestionIndex,
             questionToggleState,
+            commonQuestionDrafts,
+            commonSectionId,
           ),
           ...trackSections,
         ],
@@ -734,7 +826,7 @@ export function RecruitmentQuestionForm({
   }
 
   const handleTempSave = async () => {
-    if (isSaving) return
+    if (isSavingOrSubmitting) return
     const validationError = validateBeforeSave()
     if (validationError) {
       showErrorToast(validationError)
@@ -756,6 +848,7 @@ export function RecruitmentQuestionForm({
   }
 
   const handleNext = async () => {
+    if (isSavingOrSubmitting) return
     const validationError = validateBeforeSave()
     if (validationError) {
       showErrorToast(validationError)
@@ -765,7 +858,7 @@ export function RecruitmentQuestionForm({
     setIsSubmitting(true)
     try {
       await ensureRoundAndSaveForm()
-      onNext()
+      onNext?.()
     } catch (error) {
       showErrorToast(
         error instanceof Error
@@ -779,7 +872,7 @@ export function RecruitmentQuestionForm({
 
   return (
     <div className="border-teal-gray-150 mt-6 flex flex-col gap-8 rounded-2xl border bg-white px-8 py-8.5">
-      <RecruitmentSectionHeader index={3} title="모집 문항 작성" />
+      <RecruitmentSectionHeader index={sectionIndex} title="모집 문항 작성" />
       <div className="flex flex-col">
         <FormHeader variant="basic" />
         <div className="bg-teal-gray-50 flex flex-col gap-10 rounded-b-xl border-r border-b border-l border-teal-300 px-5 pt-8.5 pb-9.5">
@@ -844,29 +937,17 @@ export function RecruitmentQuestionForm({
           })}
         </div>
       </div>
-      {/* 공통 문항이 하나도 없으면(엣지 케이스) 지원자 화면에는 이 섹션 자체가 노출되지 않는다.
-          여기 보이는 빈 상태(01 질문을 작성하세요.)는 관리자 작성 화면 전용 placeholder다. */}
+      {/* 공통 문항이 하나도 없으면(엣지 케이스) 지원자 화면에는 이 섹션 자체가 노출되지 않는다. */}
       <div className="flex flex-col">
         <FormHeader variant="common" />
-        <div className="bg-teal-gray-50 flex flex-col gap-10 rounded-b-xl border-r border-b border-l border-teal-300 px-5 pt-8.5 pb-9.5">
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-start gap-1.5">
-              <span className="text-heading-7-semibold text-teal-gray-400 w-7 shrink-0">
-                01
-              </span>
-              <span className="text-heading-7-semibold text-teal-gray-400">
-                질문을 작성하세요.
-              </span>
-            </div>
-            <div className="pl-3">
-              <QuestionFieldBox>
-                <span className="text-body-1-regular text-teal-gray-400">
-                  답변을 작성하세요.
-                </span>
-              </QuestionFieldBox>
-            </div>
-          </div>
-        </div>
+        <PartSectionBody
+          questions={commonQuestionDrafts}
+          focusedQuestionId={focusedCommonQuestionId}
+          onFocus={setFocusedCommonQuestionId}
+          onUpdate={updateCommonQuestionDraft}
+          onAdd={addCommonQuestion}
+          onDelete={deleteCommonQuestion}
+        />
       </div>
       <div className="flex flex-col gap-4">
         {PARTS.map((part) => (
@@ -897,30 +978,41 @@ export function RecruitmentQuestionForm({
           * 지원자의 파트에 따라 해당하는 섹션의 질문만 노출됩니다.
         </span>
       </div>
-      <div className="flex items-center justify-between">
-        <Button type="button" variant="weak" color="neutral" onClick={onPrev}>
-          이전
-        </Button>
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end">
+        {mode === "create" && (
           <Button
             type="button"
             variant="weak"
+            color="neutral"
+            onClick={onPrev}
+            className="mr-auto"
+          >
+            이전
+          </Button>
+        )}
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant={mode === "edit" ? "fill" : "weak"}
             color="primary"
             disabled={!canTempSave}
             isLoading={isSaving}
             onClick={handleTempSave}
           >
-            임시 저장
+            {mode === "edit" ? "저장하기" : "임시 저장"}
           </Button>
-          <Button
-            type="button"
-            variant="fill"
-            color="primary"
-            isLoading={isSubmitting}
-            onClick={handleNext}
-          >
-            다음
-          </Button>
+          {mode === "create" && (
+            <Button
+              type="button"
+              variant="fill"
+              color="primary"
+              disabled={isSaving}
+              isLoading={isSubmitting}
+              onClick={handleNext}
+            >
+              다음
+            </Button>
+          )}
         </div>
       </div>
 
@@ -928,10 +1020,14 @@ export function RecruitmentQuestionForm({
         open={showTempSaveModal}
         onOpenChange={setShowTempSaveModal}
         variant="success"
-        title="임시 저장 완료"
-        content="임시저장이 완료되었습니다."
+        title={mode === "edit" ? "저장 완료" : "임시 저장 완료"}
+        content={
+          mode === "edit"
+            ? "모집 문항이 저장되었습니다."
+            : "임시저장이 완료되었습니다."
+        }
         confirmText="확인"
-        onConfirm={() => navigate({ to: "/recruiting/recruitments" })}
+        onConfirm={() => setShowTempSaveModal(false)}
       />
     </div>
   )

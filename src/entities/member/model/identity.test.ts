@@ -11,7 +11,9 @@ import {
   isCentralCore,
   isCurrentTermPm,
   isProjectRegistrationQuotaLimited,
+  isRecruitingEditor,
   isRecruitingOperator,
+  isSchoolEtcAdmin,
   isSchoolLeadership,
 } from "./identity"
 
@@ -113,24 +115,47 @@ describe("isRecruitingOperator", () => {
     expect(isRecruitingOperator(makeMe(["SCHOOL_VICE_PRESIDENT"]))).toBe(true)
   })
 
-  it("중앙 실무·교육팀원과 지부장은 false", () => {
+  it("중앙 실무·교육팀원은 false, 지부장은 true", () => {
     expect(
       isRecruitingOperator(makeMe(["CENTRAL_OPERATING_TEAM_MEMBER"])),
     ).toBe(false)
     expect(
       isRecruitingOperator(makeMe(["CENTRAL_EDUCATION_TEAM_MEMBER"])),
     ).toBe(false)
-    expect(isRecruitingOperator(makeMe(["CHAPTER_PRESIDENT"]))).toBe(false)
+    expect(isRecruitingOperator(makeMe(["CHAPTER_PRESIDENT"]))).toBe(true)
   })
 
-  it("학교 파트장·기타운영진은 false", () => {
-    expect(isRecruitingOperator(makeMe(["SCHOOL_PART_LEADER"]))).toBe(false)
-    expect(isRecruitingOperator(makeMe(["SCHOOL_ETC_ADMIN"]))).toBe(false)
+  // 서버는 모집 READ 를 학교 운영진 전체에 준다(파트장·기타 운영진 포함).
+  it("학교 파트장·기타운영진도 true", () => {
+    expect(isRecruitingOperator(makeMe(["SCHOOL_PART_LEADER"]))).toBe(true)
+    expect(isRecruitingOperator(makeMe(["SCHOOL_ETC_ADMIN"]))).toBe(true)
   })
 
   it("일반 챌린저와 비로그인은 false", () => {
     expect(isRecruitingOperator(makeMe(["CHALLENGER"]))).toBe(false)
     expect(isRecruitingOperator(undefined)).toBe(false)
+  })
+})
+
+// 고칠 수 있는 범위는 조회보다 좁다. 서버가 모집 WRITE·EDIT 를 학교 회장단까지만
+// 허용해서, 넓히면 편집 화면을 열어 놓고 저장에서 거부당한다
+describe("isRecruitingEditor", () => {
+  it("중앙 핵심·지부장·학교 회장단은 true", () => {
+    expect(isRecruitingEditor(makeMe(["SUPER_ADMIN"]))).toBe(true)
+    expect(isRecruitingEditor(makeMe(["CENTRAL_PRESIDENT"]))).toBe(true)
+    expect(isRecruitingEditor(makeMe(["CHAPTER_PRESIDENT"]))).toBe(true)
+    expect(isRecruitingEditor(makeMe(["SCHOOL_PRESIDENT"]))).toBe(true)
+    expect(isRecruitingEditor(makeMe(["SCHOOL_VICE_PRESIDENT"]))).toBe(true)
+  })
+
+  it("학교 파트장·기타운영진은 false", () => {
+    expect(isRecruitingEditor(makeMe(["SCHOOL_PART_LEADER"]))).toBe(false)
+    expect(isRecruitingEditor(makeMe(["SCHOOL_ETC_ADMIN"]))).toBe(false)
+  })
+
+  it("일반 챌린저와 비로그인은 false", () => {
+    expect(isRecruitingEditor(makeMe(["CHALLENGER"]))).toBe(false)
+    expect(isRecruitingEditor(undefined)).toBe(false)
   })
 })
 
@@ -159,6 +184,24 @@ describe("isSchoolLeadership", () => {
   })
   it("undefined는 false", () => {
     expect(isSchoolLeadership(undefined)).toBe(false)
+  })
+})
+
+describe("isSchoolEtcAdmin", () => {
+  it("학교 기타운영진은 true", () => {
+    expect(isSchoolEtcAdmin(makeMe(["SCHOOL_ETC_ADMIN"]))).toBe(true)
+  })
+  it("학교 회장·부회장·파트장은 false", () => {
+    expect(isSchoolEtcAdmin(makeMe(["SCHOOL_PRESIDENT"]))).toBe(false)
+    expect(isSchoolEtcAdmin(makeMe(["SCHOOL_VICE_PRESIDENT"]))).toBe(false)
+    expect(isSchoolEtcAdmin(makeMe(["SCHOOL_PART_LEADER"]))).toBe(false)
+  })
+  it("상위 운영진은 false", () => {
+    expect(isSchoolEtcAdmin(makeMe(["SUPER_ADMIN"]))).toBe(false)
+    expect(isSchoolEtcAdmin(makeMe(["CHAPTER_PRESIDENT"]))).toBe(false)
+  })
+  it("undefined는 false", () => {
+    expect(isSchoolEtcAdmin(undefined)).toBe(false)
   })
 })
 

@@ -47,6 +47,8 @@ export interface RecruitmentPost {
   startLabel?: string
   endLabel?: string
   dateLabel?: string
+  // 마감 여부는 status 가 아니라 이 시각으로 판단한다(isRecruitmentClosed).
+  documentEndAt?: string | null
   // 백엔드 응답에 작성자 정보가 없어 mock에서만 채워진다.
   authorLabel?: string
 }
@@ -102,6 +104,7 @@ function mapRoundToPost(
         )
       : undefined,
     dateLabel: start?.format("YYYY.MM.DD"),
+    documentEndAt: round.documentEndAt,
     authorLabel,
   }
 }
@@ -131,7 +134,9 @@ export function groupPostsBySchool(
   posts: RecruitmentPost[],
   chapter: Chapter,
 ): SchoolPostGroup[] {
-  return SCHOOLS_BY_BRANCH[chapter].map((school) => ({
+  const branchMap = SCHOOLS_BY_BRANCH as Record<string, readonly string[]>
+  const schools = branchMap[chapter] ?? []
+  return schools.map((school: string) => ({
     school,
     posts: posts.filter((post) => post.school === school),
   }))

@@ -80,8 +80,19 @@ export function isSchoolVicePresident(
   return hasAnyRoleType(me, ["SCHOOL_VICE_PRESIDENT"])
 }
 
+/**
+ * 학교 단위 역할 전부(회장·부회장·파트장·기타 운영진).
+ *
+ * 기획에서 쓰는 등급 이름 SCHOOL_STAFF 와 다르다. 그쪽은 기타 운영진 하나만
+ * 가리킨다. 그 범위가 필요하면 isSchoolEtcAdmin 을 쓴다.
+ */
 export function isSchoolStaff(me: MemberInfoResponse | undefined): boolean {
   return hasAnyRoleType(me, SCHOOL_ROLE_TYPES)
+}
+
+/** 학교 기타 운영진. 기획의 SCHOOL_STAFF 등급이 이것이다. */
+export function isSchoolEtcAdmin(me: MemberInfoResponse | undefined): boolean {
+  return hasAnyRoleType(me, ["SCHOOL_ETC_ADMIN"])
 }
 
 export function isOperator(me: MemberInfoResponse | undefined): boolean {
@@ -99,19 +110,27 @@ export function isAnyOperator(me: MemberInfoResponse | undefined): boolean {
 }
 
 /**
- * 리크루팅을 다룰 수 있는 역할.
+ * 리크루팅 화면에 들어올 수 있는 범위. 서버의 모집 READ 권한과 같다.
  *
- * 서버가 모집 시즌·차수·폼·평가자·합불을 허용하는 범위에 맞춘다. 학교 쪽은
- * 회장단만 통과하고 파트장·기타 운영진은 거부되므로, 메뉴를 열어 주면 들어가서
- * 막히기만 한다.
- *
- * `isAnyOperator` 와 따로 두는 이유는 그 함수가 사이드바·뷰 모드·프로젝트 관리 등
- * 열 곳에서 학교 역할 4종을 포함하는 의미로 쓰이고 있어서다.
+ * 학교 운영진은 회장단뿐 아니라 파트장·기타 운영진까지 조회할 수 있다. 회장단만
+ * 본다고 좁혀 두면 나머지는 헤더에 탭이 뜨지 않아 볼 수 있는 화면조차 못 찾는다.
  */
 export function isRecruitingOperator(
   me: MemberInfoResponse | undefined,
 ): boolean {
-  return isCentralCore(me) || isSchoolLeadership(me)
+  return isCentralCore(me) || isChapterPresident(me) || isSchoolStaff(me)
+}
+
+/**
+ * 리크루팅을 고칠 수 있는 범위. 서버의 모집 WRITE·EDIT 권한과 같다.
+ *
+ * 조회보다 좁다. 학교는 회장단까지만 고칠 수 있어, 파트장·기타 운영진에게
+ * 편집 화면을 열어 주면 눌러 놓고 저장에서 거부당한다.
+ */
+export function isRecruitingEditor(
+  me: MemberInfoResponse | undefined,
+): boolean {
+  return isCentralCore(me) || isChapterPresident(me) || isSchoolLeadership(me)
 }
 
 export function canAccessProjectSettings(

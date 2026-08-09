@@ -1,27 +1,39 @@
 import { useDroppable } from "@dnd-kit/core"
+import dayjs from "dayjs"
 
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 
 import { AssignedStaffChip } from "./AssignedStaffChip"
 
+import type { RecruitingRound } from "../../api/types"
 import type { Staff } from "../../model/evaluatorAllocation"
 
 interface DroppableRecruitmentBoxProps {
   id: string
+  round: RecruitingRound
   assignedEvaluators: Staff[]
   selectedChipId: string | null
   onSelectChip: (id: string | null) => void
   onClear: () => void
 }
 
+function formatDateTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return "-"
+  const d = dayjs(dateStr)
+  return d.isValid() ? d.format("YYYY-MM-DD HH:mm") : dateStr
+}
+
 export function DroppableRecruitmentBox({
   id,
+  round,
   assignedEvaluators,
   selectedChipId,
   onSelectChip,
   onClear,
 }: DroppableRecruitmentBoxProps) {
   const { setNodeRef } = useDroppable({ id })
+
+  const roundTypeLabel = round.type === "ADDITIONAL" ? "추가 모집" : "정규 모집"
 
   return (
     <div
@@ -32,7 +44,7 @@ export function DroppableRecruitmentBox({
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5">
             <span className="text-heading-6-semibold text-teal-700">
-              정규 모집
+              {roundTypeLabel}
             </span>
             <span className="text-heading-6-semibold text-teal-gray-800">
               평가 담당자
@@ -42,20 +54,23 @@ export function DroppableRecruitmentBox({
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
               <p className="text-body-2-regular text-teal-gray-400">
-                서류 모집 마감: 2026-07-07 12:00
+                서류 모집 마감: {formatDateTime(round.documentEndAt)}
               </p>
               <div className="bg-teal-gray-200 h-3 w-[1px] rounded-[0.5px]" />
               <p className="text-body-2-regular text-teal-gray-400">
-                결과 발표: 2026-07-07 12:00
+                결과 발표: {formatDateTime(round.documentResultPublishedAt)}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <p className="text-body-2-regular text-teal-gray-400">
-                면접 진행 기간: 2026-07-07 12:00 ~ 2026-07-07 12:00
+                면접 진행 기간:{" "}
+                {round.interviewRequired
+                  ? `${formatDateTime(round.interviewStartAt)} ~ ${formatDateTime(round.interviewEndAt)}`
+                  : "면접 없음"}
               </p>
               <div className="bg-teal-gray-200 h-3 w-[1px] rounded-[0.5px]" />
               <p className="text-body-2-regular text-teal-gray-400">
-                결과 발표: 2026-07-07 12:00
+                결과 발표: {formatDateTime(round.finalResultPublishedAt)}
               </p>
             </div>
           </div>

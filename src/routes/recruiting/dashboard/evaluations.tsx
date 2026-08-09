@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { isSchoolEtcAdmin } from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import { getServerErrorMessage } from "@/features/recruiting/api/errors"
 import { useEvaluationStatistics } from "@/features/recruiting/hooks/useEvaluationStatistics"
 import { useRecruitingProgress } from "@/features/recruiting/hooks/useRecruitingProgress"
@@ -39,6 +41,15 @@ function RouteComponent() {
   const { data, isLoading, isError, error, hasActiveGisu } =
     useEvaluationStatistics()
   const { isAdditionalRecruiting } = useRecruitingProgress()
+
+  // 학교 기타 운영진(기획 등급 SCHOOL_STAFF)은 자기 학교만 본다. 지부 순위와
+  // 학교별 비교는 다른 학교 수치가 드러나므로 감춘다. 상위 등급은 그대로 본다.
+  //
+  // me 를 모르는 동안에도 감춘다. 조회 중이거나, 미인증·조회 실패로 me 가 끝내
+  // 비는 경우가 모두 여기 걸린다. 집계 응답이 먼저 도착하면 카드가 잠깐 그려졌다
+  // 사라지면서 다른 학교 수치가 노출된다.
+  const { me } = useViewerIdentity()
+  const hidesCrossSchoolCards = !me || isSchoolEtcAdmin(me)
 
   const header = (
     <PageLabel
@@ -166,24 +177,28 @@ function RouteComponent() {
           />
         </div>
       </div>
-      <div className="mt-4">
-        <ChapterRankingCard
-          title="지부별 평가 현황"
-          chapters={toChapterEvaluationBars(data)}
-          compareLabels={{
-            primaryLabel: "평가 완료",
-            compareLabel: "지원자 수",
-          }}
-          footerStatus={isAdditionalRecruiting ? "추가 모집 중" : undefined}
-        />
-      </div>
-      <div className="mt-4">
-        <SchoolPartChartCard
-          title="학교별 평가 현황"
-          footerStatus={isAdditionalRecruiting ? "추가 모집 중" : undefined}
-          schools={chartSchools}
-        />
-      </div>
+      {!hidesCrossSchoolCards && (
+        <>
+          <div className="mt-4">
+            <ChapterRankingCard
+              title="지부별 평가 현황"
+              chapters={toChapterEvaluationBars(data)}
+              compareLabels={{
+                primaryLabel: "평가 완료",
+                compareLabel: "지원자 수",
+              }}
+              footerStatus={isAdditionalRecruiting ? "추가 모집 중" : undefined}
+            />
+          </div>
+          <div className="mt-4">
+            <SchoolPartChartCard
+              title="학교별 평가 현황"
+              footerStatus={isAdditionalRecruiting ? "추가 모집 중" : undefined}
+              schools={chartSchools}
+            />
+          </div>
+        </>
+      )}
     </div>
   )
 }

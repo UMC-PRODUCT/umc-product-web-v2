@@ -116,6 +116,32 @@ export function getConflictedSchoolQuotaRows(
     .map((edit) => edit.row)
 }
 
+/**
+ * 서버에서 온 행 목록의 내용 지문.
+ *
+ * 표는 서버 데이터가 바뀌면 편집 중이던 값을 버리고 다시 맞춘다. 그 판단을
+ * 배열 동일성으로 하면 안 된다. 상위에서 목록을 다시 만들기만 해도 내용이
+ * 그대로인데 새 배열이 되어, 방금 친 값이 지워진다.
+ */
+export function getSchoolQuotaRowsSignature(
+  rows: readonly SchoolQuotaRow[],
+): string {
+  return rows
+    .map((row) =>
+      [
+        getSchoolQuotaIdentity(row),
+        // 시즌이 새로 생기면 편집 가능 여부가 달라진다. 실제 변화다.
+        row.seasonId ?? "",
+        row.schoolName,
+        row.pm,
+        row.design,
+        row.webPe,
+        row.mobilePe,
+      ].join(":"),
+    )
+    .join("|")
+}
+
 export function getChangedSchoolQuotaRows(
   originalRows: SchoolQuotaRow[],
   currentRows: SchoolQuotaRow[],

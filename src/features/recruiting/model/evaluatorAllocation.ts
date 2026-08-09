@@ -1,7 +1,25 @@
+import type { RoleType } from "@/entities/member/model/challenger"
+
 export interface Staff {
   id: string
   nickname: string
   name: string
+}
+
+/**
+ * 평가 담당자로 배정할 수 있는 사람인지.
+ *
+ * 회원 검색은 학교의 모든 챌린저를 준다. 한 학교에 수백 명이라 그대로 두면
+ * 명단에서 운영진을 찾을 수 없다.
+ *
+ * 서버는 운영진 기록이 있는 사람에게만 roleTypes 를 채워 준다. 순수 챌린저는
+ * 빈 배열로 온다. 서버 역할 enum 에는 챌린저가 아예 없지만, 프론트 타입에는
+ * 있어서 혹시 섞여 와도 걸러지도록 함께 본다.
+ */
+export function isRecruitingStaffRole(
+  roleTypes: RoleType[] | undefined,
+): boolean {
+  return (roleTypes ?? []).some((roleType) => roleType !== "CHALLENGER")
 }
 
 export function isStaff(value: unknown): value is Staff {

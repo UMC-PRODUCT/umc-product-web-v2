@@ -30,7 +30,6 @@ const DEFAULT_BASIC_INFO: RecruitmentBasicInfo = {
   // 공통 디폴트: 정규 모집·1차가 항상 기본 선택되어 있어야 한다.
   recruitmentType: "REGULAR",
   roundNo: "1",
-  // availability form 빌더 미구현이라 체크박스 자체를 disabled로 막아둠
   interviewRequired: false,
   footer: "",
   periodForm: INITIAL_PERIOD_FORM,

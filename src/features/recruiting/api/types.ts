@@ -83,21 +83,18 @@ export type RawAdminRoundGroup = Omit<RecruitingRoundGroup, "rounds"> & {
 }
 
 // 백엔드(RecruitingRoundConfiguration.validateInterviewShape)는 interviewRequired=true일
-// 때 interviewStartAt/interviewEndAt만 필수로 본다. availabilityFormId는 생성 시점엔
-// 없어도 되고(OPEN 전환 전까지만 채우면 됨), 대신 availabilityFormId와
-// availabilityScheduleQuestionId는 둘 다 있거나 둘 다 없어야 한다.
+// 때 interviewStartAt/interviewEndAt만 필수로 본다. 면접 일정 Form(availabilityFormId,
+// availabilityScheduleQuestionId)은 서버가 자동으로 만들어 주므로 클라이언트가 보낼 필요가 없다.
 export type CreateRecruitingRoundInterviewFields =
   | {
       interviewRequired: true
       interviewStartAt: string
       interviewEndAt: string
-      availabilityFormId?: string
     }
   | {
       interviewRequired: false
       interviewStartAt?: never
       interviewEndAt?: never
-      availabilityFormId?: never
     }
 
 export type CreateRecruitingRoundRequest = {
@@ -536,6 +533,43 @@ export interface UpsertRecruitingSectionRequest {
 export interface UpsertRecruitingApplicationFormRequest {
   description?: string
   sections: UpsertRecruitingSectionRequest[]
+}
+
+// Form 전체 구조 조회(GET .../rounds/{roundId}/form, RECRUITING-ADMIN-022) 응답.
+// Form 상태·지망 트랙과 무관하게 전체 섹션/문항/옵션 트리를 반환하며, Upsert
+// 요청과 대칭되는 clientKey/nextSectionKey를 그대로 포함해 조회 결과를 편집
+// 화면 state로 로드했다가 그대로 PUT하는 왕복이 가능하다. 아직 Form이 없는
+// Round는 exists: false와 함께 빈 sections를 반환한다.
+export interface RecruitingAdminFormOptionResponse {
+  optionId?: number
+  content: string
+  other: boolean
+  nextSectionKey?: string | null
+}
+
+export interface RecruitingAdminFormQuestionResponse {
+  questionId?: number
+  type: RecruitingQuestionType
+  title: string
+  description?: string | null
+  required: boolean
+  options?: RecruitingAdminFormOptionResponse[]
+}
+
+export interface RecruitingAdminFormSectionResponse {
+  sectionId?: number
+  clientKey: string
+  title: string
+  description?: string | null
+  type: RecruitingSectionType
+  track?: RecruitingTrack
+  questions: RecruitingAdminFormQuestionResponse[]
+}
+
+export interface RecruitingAdminFormStructureResponse {
+  exists: boolean
+  description?: string | null
+  sections: RecruitingAdminFormSectionResponse[]
 }
 
 export interface RecruitingSelectedOption {

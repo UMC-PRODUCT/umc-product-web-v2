@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
@@ -13,10 +14,12 @@ import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
+import type { RecruitingListRole } from "../model/recruitingListRole"
 import type { RecruitmentPost } from "../model/recruitmentList"
 
 interface RecruitmentDraftArchiveCardProps {
   chapter: Chapter
+  role: RecruitingListRole
   posts: RecruitmentPost[]
   permittedSeasonIds: ReadonlySet<string>
   onPublish: (postId: string) => void
@@ -30,6 +33,8 @@ interface RecruitmentDraftArchiveCardProps {
 
 function DraftPostRow({
   post,
+  role,
+  chapter,
   permittedSeasonIds,
   onPublish,
   onDuplicate,
@@ -37,12 +42,16 @@ function DraftPostRow({
   onUndoDelete,
 }: {
   post: RecruitmentPost
+  role: RecruitingListRole
+  chapter: Chapter
   permittedSeasonIds: ReadonlySet<string>
   onPublish: (postId: string) => void
   onDuplicate: (postId: string) => void
   onDelete: (postId: string) => void
   onUndoDelete: () => void
 }) {
+  const navigate = useNavigate()
+
   return (
     <RecruitmentPostRow
       title={post.title}
@@ -55,14 +64,22 @@ function DraftPostRow({
       rightAction={
         <RecruitmentPostMoreMenu
           status={post.status}
+          role={role}
+          ownChapter={chapter}
           onPublish={() => onPublish(post.postId)}
           // 임시 보관함 안에서는 이미 DRAFT라 비공개 액션이 노출되지 않음
           onPrivatize={() => {}}
-          // TODO: DRAFT 수정은 생성 마법사 재사용 편집이 필요하다(문항 프리필용 조회
-          // API가 아직 없어 대기 중). /recruiting/recruitments/edit/$roundId는 OPEN
-          // 전용이라 DRAFT를 여기로 보내면 "공유 보관함에서 수정해달라"는 안내로
-          // 되돌아오는 순환이 생겨 연결하지 않는다.
-          onEdit={() => console.info("TODO: 모집 공고 수정", post.postId)}
+          // DRAFT는 아직 공개된 적이 없어 처음 쓰던 흐름 그대로 이어 쓰는 편이
+          // 자연스럽다. 문항만 고치는 수정 화면 대신 생성 마법사로 되돌린다.
+          onEdit={() =>
+            navigate({
+              to: "/recruiting/recruitments/new",
+              search: {
+                draftRoundId: post.postId,
+                draftSeasonId: post.seasonId,
+              },
+            })
+          }
           onDuplicate={() => onDuplicate(post.postId)}
           onDelete={() => onDelete(post.postId)}
           onUndoDelete={onUndoDelete}
@@ -74,6 +91,7 @@ function DraftPostRow({
 
 export function RecruitmentDraftArchiveCard({
   chapter,
+  role,
   posts,
   permittedSeasonIds,
   onPublish,
@@ -130,6 +148,8 @@ export function RecruitmentDraftArchiveCard({
                 <DraftPostRow
                   key={post.postId}
                   post={post}
+                  role={role}
+                  chapter={chapter}
                   permittedSeasonIds={permittedSeasonIds}
                   onPublish={onPublish}
                   onDuplicate={onDuplicate}
@@ -154,6 +174,8 @@ export function RecruitmentDraftArchiveCard({
                     <DraftPostRow
                       key={post.postId}
                       post={post}
+                      role={role}
+                      chapter={chapter}
                       permittedSeasonIds={permittedSeasonIds}
                       onPublish={onPublish}
                       onDuplicate={onDuplicate}
