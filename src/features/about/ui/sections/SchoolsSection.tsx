@@ -48,7 +48,9 @@ export function SchoolsSection() {
             ))}
           </p>
         </div>
-        <div className="flex w-[max(100vw,1440px)] flex-col gap-7.5 overflow-hidden">
+        {/* 학교줄은 콘텐츠 폭을 넘어 화면 끝까지 흐른다. 부모가 items-center 라
+            폭만 늘리면 가운데를 기준으로 양옆으로 똑같이 번져 나간다. */}
+        <div className="flex w-screen flex-col gap-7.5 overflow-hidden">
           <SchoolMarqueeRow direction="right" />
           <div aria-hidden>
             <SchoolMarqueeRow direction="left" />

@@ -9,6 +9,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* 디자인의 구간에 맞춘다. Mobile 360~767 은 프리픽스 없이, Pad 768 은 md,
+     Small PC 1024 는 lg, PC 1440 은 xl 이다.
+     xl 기본값은 1280 이라 PC 구간과 어긋나 1440 으로 바꿔 둔다. 브레이크포인트
+     프리픽스로서의 xl: 은 아직 쓰인 곳이 없어 기존 화면에 영향이 없다. */
+  --breakpoint-xl: 1440px;
+
   --font-heading: var(--font-sans);
   --font-sans:
     "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
