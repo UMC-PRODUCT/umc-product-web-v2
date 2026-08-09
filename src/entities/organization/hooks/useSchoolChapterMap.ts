@@ -13,7 +13,7 @@ export function useSchoolChapterMap(options: SchoolChapterMapOptions = {}) {
 
   const activeGisuId = gisuData?.gisuId ? Number(gisuData.gisuId) : undefined
 
-  const { data: chaptersData } = useQuery({
+  const { data: chaptersData, isLoading } = useQuery({
     queryKey: ["chaptersWithSchools", activeGisuId],
     queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
     enabled: activeGisuId != null,
@@ -22,6 +22,11 @@ export function useSchoolChapterMap(options: SchoolChapterMapOptions = {}) {
   })
 
   const chapters = useMemo(() => chaptersData?.chapters ?? [], [chaptersData])
+
+  const chapterNames = useMemo(
+    () => chapters.map((ch) => ch.chapterName).filter(Boolean),
+    [chapters],
+  )
 
   const schoolToChapterId = useMemo(() => {
     const map = new Map<string, number>()
@@ -53,6 +58,8 @@ export function useSchoolChapterMap(options: SchoolChapterMapOptions = {}) {
 
   return {
     chapters,
+    chapterNames,
+    isLoading,
     getChapterIdBySchool,
     getChapterIdByName,
   }
