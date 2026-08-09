@@ -22,6 +22,9 @@ import type {
 } from "../model/evaluationRules"
 import type { EvaluationStage } from "../model/evaluationStage"
 
+/** 다른 평가자가 낸 평가를 이 간격으로 다시 받아 온다. */
+const EVALUATION_REFETCH_INTERVAL = 30 * 1000
+
 const LOCK_REASON: Record<EvaluationBlockReason, string | undefined> = {
   stageHasNoEvaluation: undefined,
   permissionUnknown:
@@ -77,7 +80,12 @@ export function useStageEvaluations(
     ),
     queryFn: () => getStageEvaluations(roundId!, applicationId, apiStage!),
     enabled: evaluationsEnabled,
-    staleTime: 60 * 1000,
+    // 한 지원서를 여러 운영진이 같이 본다. 다른 평가자가 방금 낸 평가는 내 화면이
+    // 다시 물어봐야 보이는데, 갱신 장치가 없으면 새로고침하기 전까지 영영 안 뜬다.
+    // 내가 쓰고 있던 평가 초안은 내 평가 내용으로만 다시 맞춰지므로 지워지지 않는다.
+    staleTime: EVALUATION_REFETCH_INTERVAL,
+    refetchInterval: EVALUATION_REFETCH_INTERVAL,
+    refetchOnWindowFocus: true,
   })
 
   const memberIds = useMemo(() => {
