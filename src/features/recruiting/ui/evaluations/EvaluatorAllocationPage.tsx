@@ -71,20 +71,26 @@ export function EvaluatorAllocationPage({
     return groups[0] ?? null
   }, [groups, me?.schoolId, viewerSchool])
 
-  const activeRoundId = roundId ?? mySchoolGroup?.rounds[0]?.roundId ?? null
+  const requestedRoundId = roundId ?? mySchoolGroup?.rounds[0]?.roundId ?? null
 
-  const activeGroup = activeRoundId
+  const activeGroup = requestedRoundId
     ? (groups.find((group) =>
-        group.rounds.some((r) => String(r.roundId) === String(activeRoundId)),
+        group.rounds.some(
+          (r) => String(r.roundId) === String(requestedRoundId),
+        ),
       ) ?? mySchoolGroup)
     : mySchoolGroup
 
   const activeRound =
     activeGroup?.rounds.find(
-      (r) => String(r.roundId) === String(activeRoundId),
+      (r) => String(r.roundId) === String(requestedRoundId),
     ) ??
     activeGroup?.rounds[0] ??
     null
+
+  const resolvedRoundId = activeRound?.roundId
+    ? String(activeRound.roundId)
+    : null
 
   // 배정 권한은 시즌 단위다. 권한을 확인하기 전에는 잠가 둔다.
   const seasonIds = activeGroup?.seasonId ? [activeGroup.seasonId] : []
@@ -110,7 +116,7 @@ export function EvaluatorAllocationPage({
     data: serverEvaluators,
     isSuccess: isEvaluatorsSuccess,
     isFetching,
-  } = useRoundEvaluators(activeRoundId)
+  } = useRoundEvaluators(resolvedRoundId)
   const saveMutation = useSaveEvaluatorAllocation()
 
   const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
@@ -123,7 +129,7 @@ export function EvaluatorAllocationPage({
   const savedSnapshotRef = useRef<Staff[] | null>(null)
 
   const isInitialized = Boolean(
-    activeRoundId && initializedRoundId === activeRoundId,
+    resolvedRoundId && initializedRoundId === resolvedRoundId,
   )
 
   useEffect(() => {
@@ -132,7 +138,7 @@ export function EvaluatorAllocationPage({
     savedSnapshotRef.current = null
     editRevisionRef.current = 0
     sessionTokenRef.current += 1
-  }, [activeRoundId])
+  }, [resolvedRoundId])
 
   useEffect(() => {
     if (!serverEvaluators || isDirty) return
@@ -147,15 +153,15 @@ export function EvaluatorAllocationPage({
 
     savedSnapshotRef.current = null
     setAssignedEvaluators(serverStaff)
-    if (activeRoundId && isStaffSuccess && isEvaluatorsSuccess) {
-      setInitializedRoundId(activeRoundId)
+    if (resolvedRoundId && isStaffSuccess && isEvaluatorsSuccess) {
+      setInitializedRoundId(resolvedRoundId)
     }
   }, [
     serverEvaluators,
     staffList,
     isDirty,
     isFetching,
-    activeRoundId,
+    resolvedRoundId,
     isStaffSuccess,
     isEvaluatorsSuccess,
   ])
@@ -178,14 +184,14 @@ export function EvaluatorAllocationPage({
   })
 
   function handleSave() {
-    if (!activeRoundId || !isInitialized) return
+    if (!resolvedRoundId || !isInitialized) return
     const requestRevision = editRevisionRef.current
     const requestSnapshot = assignedEvaluators
     const requestToken = sessionTokenRef.current
 
     saveMutation.mutate(
       {
-        roundId: activeRoundId,
+        roundId: resolvedRoundId,
         assignedEvaluators: requestSnapshot,
       },
       {
