@@ -153,6 +153,22 @@ function ProjectMatchingAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
+  useEffect(() => {
+    if (serverChapterNames.length === 0) return
+    if (!chapter || !serverChapterNames.includes(chapter)) {
+      const defaultChapter =
+        userChapter && serverChapterNames.includes(userChapter)
+          ? userChapter
+          : (serverChapterNames[0] ?? "")
+      if (defaultChapter) {
+        navigate({
+          search: (prev) => ({ ...prev, chapter: defaultChapter }),
+          replace: true,
+        })
+      }
+    }
+  }, [chapter, serverChapterNames, userChapter, navigate])
+
   const { data: noticesData, isLoading: isNoticesLoading } = useQuery({
     queryKey: [
       "notices",
@@ -171,7 +187,7 @@ function ProjectMatchingAnnouncePage() {
         size: NOTICE_PAGE_SIZE,
         sort: "createdAt,DESC",
       }),
-    enabled: !!activeGisuId,
+    enabled: !!activeGisuId && !!selectedChapterId,
   })
 
   const firstNoticeId = noticesData?.content[0]?.id
