@@ -1,15 +1,34 @@
-// 소개 랜딩 카피 단일 소스. 시안(12836-123251)에 확정되지 않은 문구가 많아
-// 화면 코드에 섞지 않고 여기 모아 둔다. 카피가 확정되면 이 파일만 고치면 된다.
-//
-// TODO: (미확정) 표시가 붙은 값은 시안의 임시 문구다. 기획·디자이너 확정 후 교체.
+import anyang from "@/shared/assets/image/about/schools/anyang.svg"
+import catholic from "@/shared/assets/image/about/schools/catholic.svg"
+import chungang from "@/shared/assets/image/about/schools/chungang.svg"
+import dankook from "@/shared/assets/image/about/schools/dankook.svg"
+import dongduk from "@/shared/assets/image/about/schools/dongduk.svg"
+import dongguk from "@/shared/assets/image/about/schools/dongguk.svg"
+import dongyangMirae from "@/shared/assets/image/about/schools/dongyang-mirae.svg"
+import duksung from "@/shared/assets/image/about/schools/duksung.svg"
+import ewha from "@/shared/assets/image/about/schools/ewha.svg"
+import gachon from "@/shared/assets/image/about/schools/gachon.svg"
+import hansung from "@/shared/assets/image/about/schools/hansung.svg"
+import hongik from "@/shared/assets/image/about/schools/hongik.svg"
+import hufs from "@/shared/assets/image/about/schools/hufs.svg"
+import inha from "@/shared/assets/image/about/schools/inha.svg"
+import koreaAerospace from "@/shared/assets/image/about/schools/korea-aerospace.svg"
+import sejong from "@/shared/assets/image/about/schools/sejong.svg"
+import seokyeong from "@/shared/assets/image/about/schools/seokyeong.svg"
+import seoulWomens from "@/shared/assets/image/about/schools/seoul-womens.svg"
+import soongsil from "@/shared/assets/image/about/schools/soongsil.svg"
+import sungshin from "@/shared/assets/image/about/schools/sungshin.svg"
 
-// 모집 분야 카드와 "이런 분이면 좋아요" 탭이 같은 4개 파트를 쓴다. 두 곳이
-// 어긋나지 않도록 한 배열에서 뽑는다.
+// 소개 랜딩 카피 단일 소스.
+//
+// 기준 시안: 13114-127804 (1440 프레임). 이전 시안(12836-123251)의 주석에만 있던
+// 제안 문구들이 이 프레임에서 본문으로 확정됐다.
+//
+// TODO: (미확정) 표시가 붙은 값만 아직 임시 문구다.
 export const ABOUT_RECRUIT = {
   headline: "UMC 11기 모집 분야",
-  // 시안 주석의 디자이너 제안. 본문의 "(어필하는 설명 필요)" 임시 문구는 쓰지 않는다.
   description:
-    "하나의 프로덕트를 완성하는 4가지 핵심 분야. 당신의 역량을 가장 명확하게 보여줄 파트에 지원하세요.",
+    "하나의 프로덕트를 완성하는 4가지 핵심 분야. 당신의 역량을 가장 명확하게 보여줄 파트에 지원하세요!",
   traitsHeadline: "이런 분이면 좋아요 !",
   ctaLabel: "모집 안내 보러 가기 →",
   parts: [
@@ -115,41 +134,38 @@ export const ABOUT_HERO = {
 
 export const ABOUT_SCHOOLS = {
   headline: "UMC와 함께하는 학교",
-  // 시안 주석의 디자이너 제안. 본문의 "(어필하는 설명 필요)" 임시 문구는 쓰지 않는다.
-  description:
-    "전국 20여 개 이상의 대학이 함께 하고 있습니다. 지금 이 순간에도 지속적으로 확장되는 거대한 IT 네트워크를 경험하세요.",
+  descriptionLines: [
+    "전국 20여 개 이상의 대학이 함께 하고 있습니다.",
+    "지금 이 순간에도 지속적으로 확장되는 거대한 IT 네트워크를 경험하세요!",
+  ],
   ctaLabel: "챌린저들의 프로젝트 구경하기 →",
-  // TODO: 시안은 "한국대"·"한양대 ERICA" 를 반복한 자리표시자다. 실제 목록을
-  // 어디서 가져올지(상수 유지 vs 서버 조회) 정해지지 않아 우선 상수로 둔다.
-  // 아래는 2026-08-05 dev 응답에 실려 온 리크루팅 대상 학교다.
-  names: [
-    "가천대",
-    "가톨릭대",
-    "광운대",
-    "단국대",
-    "덕성여대",
-    "동국대",
-    "동덕여대",
-    "동아대",
-    "동양미래대",
-    "서경대",
-    "서울여대",
-    "성신여대",
-    "숙명여대",
-    "숭실대",
-    "안양대",
-    "영남대",
-    "이화여대",
-    "인제대",
-    "인하대",
-    "중앙대",
-    "한국공학대",
-    "한국외대",
-    "한국항공대",
-    "한성대",
-    "한양대 ERICA",
-    "홍익대 서울",
-    "홍익대 세종",
+  // 11기 참여 학교. 기수마다 바뀌지만 서버에 랜딩용 조회 API 가 없어 상수로 둔다.
+  // 홍익대는 서울·세종 캠퍼스가 같은 엠블럼을 쓴다(원본 파일 md5 동일).
+
+  // TODO: 기수 전환 때 목록·로고를 함께 갱신해야 한다. 서버에서 내려주게 되면
+  // 이 배열을 지우고 조회로 바꾼다.
+  schools: [
+    { name: "가천대", logo: gachon },
+    { name: "가톨릭대", logo: catholic },
+    { name: "단국대", logo: dankook },
+    { name: "덕성여대", logo: duksung },
+    { name: "동국대", logo: dongguk },
+    { name: "동덕여대", logo: dongduk },
+    { name: "동양미래대", logo: dongyangMirae },
+    { name: "서경대", logo: seokyeong },
+    { name: "서울여대", logo: seoulWomens },
+    { name: "성신여대", logo: sungshin },
+    { name: "숭실대", logo: soongsil },
+    { name: "세종대", logo: sejong },
+    { name: "안양대", logo: anyang },
+    { name: "이화여대", logo: ewha },
+    { name: "인하대", logo: inha },
+    { name: "중앙대", logo: chungang },
+    { name: "한국외대", logo: hufs },
+    { name: "한국항공대", logo: koreaAerospace },
+    { name: "한성대", logo: hansung },
+    { name: "홍익대(서울)", logo: hongik },
+    { name: "홍익대(세종)", logo: hongik },
   ],
 } as const
 

@@ -284,6 +284,25 @@
   }
 }
 
+/* 트랙에 같은 목록이 두 벌 깔려 있어 -50% 가 정확히 한 벌이다. */
+@keyframes school-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes school-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 ::view-transition-old(root) {
   animation: page-view-out 260ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
