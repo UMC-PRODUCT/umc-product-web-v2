@@ -133,7 +133,10 @@ export function RecruitmentListPage({
     isError: isRoundsError,
     isForbidden,
     refetch: refetchRounds,
-  } = useAdminRecruitingRounds(sort)
+    // 다른 운영진이 공고를 올리거나 마감 처리하는 목록이다. 5분 캐시로 두면 그
+    // 변화가 한참 뒤에 보인다. 주기적으로 캐묻는 대신 화면에 들어오거나 창으로
+    // 돌아온 순간에만 다시 받아 온다.
+  } = useAdminRecruitingRounds(sort, { fresh: true })
 
   // 편집 권한은 role이 아니라 시즌 단위 실제 EDIT 권한으로 판정한다(canEditRecruitmentPost 참고).
   const seasonIds = useMemo(

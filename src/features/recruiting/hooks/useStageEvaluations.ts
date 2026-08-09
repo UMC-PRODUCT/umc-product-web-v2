@@ -22,9 +22,6 @@ import type {
 } from "../model/evaluationRules"
 import type { EvaluationStage } from "../model/evaluationStage"
 
-/** 다른 평가자가 낸 평가를 이 간격으로 다시 받아 온다. */
-const EVALUATION_REFETCH_INTERVAL = 30 * 1000
-
 const LOCK_REASON: Record<EvaluationBlockReason, string | undefined> = {
   stageHasNoEvaluation: undefined,
   permissionUnknown:
@@ -80,11 +77,14 @@ export function useStageEvaluations(
     ),
     queryFn: () => getStageEvaluations(roundId!, applicationId, apiStage!),
     enabled: evaluationsEnabled,
-    // 한 지원서를 여러 운영진이 같이 본다. 다른 평가자가 방금 낸 평가는 내 화면이
-    // 다시 물어봐야 보이는데, 갱신 장치가 없으면 새로고침하기 전까지 영영 안 뜬다.
+    // 한 지원서를 여러 운영진이 같이 본다. 다른 평가자가 방금 낸 평가를 보려면
+    // 다시 물어봐야 하는데, 주기적으로 캐물으면 아무도 안 보는 동안에도 요청이
+    // 나간다. 대신 사용자가 화면으로 돌아온 순간에만 확인하고, 보고 있는 채로
+    // 확인하고 싶으면 새로고침 버튼을 쓰게 한다.
+    //
     // 내가 쓰고 있던 평가 초안은 내 평가 내용으로만 다시 맞춰지므로 지워지지 않는다.
-    staleTime: EVALUATION_REFETCH_INTERVAL,
-    refetchInterval: EVALUATION_REFETCH_INTERVAL,
+    staleTime: 0,
+    refetchOnMount: "always",
     refetchOnWindowFocus: true,
   })
 
@@ -188,5 +188,8 @@ export function useStageEvaluations(
     canSubmit: eligibility.canSubmit,
     isLoading: evaluationsQuery.isLoading,
     isError: evaluationsQuery.isError,
+    // 화면을 보고 있는 채로 다른 평가자의 평가를 확인하고 싶을 때 쓴다.
+    refetch: evaluationsQuery.refetch,
+    isRefetching: evaluationsQuery.isFetching,
   }
 }

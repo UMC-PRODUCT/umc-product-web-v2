@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { fireEvent, render, screen } from "@testing-library/react"
+import { describe, expect, it, vi } from "vitest"
 
 import { OperatorEvaluationList } from "./OperatorEvaluationList"
 
@@ -174,6 +174,55 @@ describe("OperatorEvaluationList", () => {
 
     const heading = screen.getByRole("heading", { name: /운영진 평가/ })
     expect(heading.textContent).toBe("운영진 평가 1/2")
+  })
+
+  // 주기적으로 캐묻지 않는 대신, 보고 있는 채로 확인할 수단을 준다
+  describe("새로고침", () => {
+    it("누르면 다시 조회한다", () => {
+      const onRefresh = vi.fn()
+      render(
+        <OperatorEvaluationList
+          onRefresh={onRefresh}
+          evaluation={buildEvaluation([
+            buildOperator({ evaluatorId: "me", progress: "done" }),
+          ])}
+        />,
+      )
+
+      fireEvent.click(screen.getByRole("button", { name: "평가 새로고침" }))
+      expect(onRefresh).toHaveBeenCalledTimes(1)
+    })
+
+    it("조회 중에는 다시 누르지 못한다", () => {
+      const onRefresh = vi.fn()
+      render(
+        <OperatorEvaluationList
+          onRefresh={onRefresh}
+          isRefreshing
+          evaluation={buildEvaluation([
+            buildOperator({ evaluatorId: "me", progress: "done" }),
+          ])}
+        />,
+      )
+
+      expect(
+        screen.getByRole("button", { name: "평가 새로고침" }),
+      ).toBeDisabled()
+    })
+
+    it("조회 수단이 없으면 버튼을 두지 않는다", () => {
+      render(
+        <OperatorEvaluationList
+          evaluation={buildEvaluation([
+            buildOperator({ evaluatorId: "me", progress: "done" }),
+          ])}
+        />,
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "평가 새로고침" }),
+      ).not.toBeInTheDocument()
+    })
   })
 
   it("평가자가 아닌 운영진에게 평가 등록 안내를 보여주지 않는다", () => {

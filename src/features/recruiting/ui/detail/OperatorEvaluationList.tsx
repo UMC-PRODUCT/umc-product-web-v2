@@ -1,3 +1,4 @@
+import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { cn } from "@/shared/lib/utils"
 import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
 
@@ -15,6 +16,9 @@ interface OperatorEvaluationListProps {
    * 서버도 다른 평가를 제한 없이 내려준다. 없으면 총원을 알 수 없다.
    */
   viewerIsAdmin?: boolean
+  /** 다시 조회. 화면을 보고 있는 채로 다른 평가자의 평가를 확인할 때 쓴다. */
+  onRefresh?: () => void
+  isRefreshing?: boolean
 }
 
 function OperatorStatusChip({ done }: { done: boolean }) {
@@ -64,6 +68,8 @@ function SortIcon() {
 export function OperatorEvaluationList({
   evaluation,
   viewerIsAdmin = false,
+  onRefresh,
+  isRefreshing = false,
 }: OperatorEvaluationListProps) {
   const { done, total } = countOperatorProgress(evaluation.operators)
   const myEvaluation = getMyEvaluation(evaluation)
@@ -86,7 +92,26 @@ export function OperatorEvaluationList({
             <span className="text-teal-gray-400">/{total}</span>
           )}
         </h3>
-        {revealed && <SortIcon />}
+        <div className="flex items-center gap-2">
+          {onRefresh && (
+            <button
+              type="button"
+              aria-label="평가 새로고침"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="border-teal-gray-400/15 text-body-3-medium text-teal-gray-600 flex h-8 items-center gap-1 rounded-[10px] border bg-white px-2.5 transition-colors hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ResetIcon
+                className={cn(
+                  "text-teal-gray-400 size-4",
+                  isRefreshing && "animate-spin",
+                )}
+              />
+              새로고침
+            </button>
+          )}
+          {revealed && <SortIcon />}
+        </div>
       </div>
 
       {!revealed ? (
