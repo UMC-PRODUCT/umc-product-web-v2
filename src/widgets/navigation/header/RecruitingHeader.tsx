@@ -9,8 +9,8 @@ import { useAuthStore } from "@/entities/member/store/authStore"
 import { useHeaderRecruitingStatus } from "@/features/recruiting/hooks/useHeaderRecruitingStatus"
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { getDisabledNavMessage } from "@/shared/config/headerNavPolicy"
-import { isWithinRecruitingPeriod } from "@/shared/config/recruitingPeriod"
 import { SETTINGS_ENTRY_PATH } from "@/shared/config/settingsNavigation"
+import { useIsRecruitingPeriod } from "@/shared/hooks/useIsRecruitingPeriod"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { GuestProfileButton } from "@/widgets/navigation/header/GuestProfileButton"
 import HeaderButton from "@/widgets/navigation/header/HeaderButton"
@@ -49,7 +49,7 @@ export default function RecruitingHeader({
   const showSettings = isCentralAdmin(me)
   // 탭 구성도 `지원하기` 와 같은 기준을 쓴다. 둘이 갈리면 모집 중이라며 지원
   // 버튼을 띄운 헤더에 데모데이 매칭 탭이 함께 남는다.
-  const isRecruitingPeriod = isWithinRecruitingPeriod()
+  const isRecruitingPeriod = useIsRecruitingPeriod()
 
   const addToast = useToastStore((s) => s.addToast)
 

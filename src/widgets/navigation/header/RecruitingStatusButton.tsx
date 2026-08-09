@@ -1,9 +1,7 @@
 import { Link } from "@tanstack/react-router"
 
-import {
-  APPLY_ENTRY_PATH,
-  isWithinRecruitingPeriod,
-} from "@/shared/config/recruitingPeriod"
+import { APPLY_ENTRY_PATH } from "@/shared/config/recruitingPeriod"
+import { useIsRecruitingPeriod } from "@/shared/hooks/useIsRecruitingPeriod"
 import { cn } from "@/shared/lib/utils"
 
 import type { RecruitingStatus } from "@/shared/model/recruitingStatus"
@@ -23,7 +21,9 @@ const BASE_CLASS =
  * 없다.
  */
 export function RecruitingStatusButton() {
-  if (!isWithinRecruitingPeriod()) return null
+  const isRecruitingPeriod = useIsRecruitingPeriod()
+
+  if (!isRecruitingPeriod) return null
 
   return (
     <Link

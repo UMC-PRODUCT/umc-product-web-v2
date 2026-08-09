@@ -26,3 +26,19 @@ export function isWithinRecruitingPeriod(now: Date = new Date()): boolean {
     at < Date.parse(RECRUITING_PERIOD_END)
   )
 }
+
+/**
+ * 표시가 바뀌는 다음 시각. 이미 끝났으면 없다.
+ *
+ * 헤더는 이동이 없으면 다시 그려지지 않아, 화면을 열어 둔 채 마감을 넘기면
+ * 지원하기가 그대로 남는다. 마감된 뒤에도 눌리는 지원 버튼이 가장 나쁘다.
+ */
+export function nextRecruitingPeriodBoundary(
+  now: number = Date.now(),
+): number | undefined {
+  const start = Date.parse(RECRUITING_PERIOD_START)
+  const end = Date.parse(RECRUITING_PERIOD_END)
+  if (now < start) return start
+  if (now < end) return end
+  return undefined
+}

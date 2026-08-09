@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   isWithinRecruitingPeriod,
+  nextRecruitingPeriodBoundary,
   RECRUITING_PERIOD_END,
   RECRUITING_PERIOD_START,
 } from "./recruitingPeriod"
@@ -45,5 +46,26 @@ describe("isWithinRecruitingPeriod", () => {
     expect(isWithinRecruitingPeriod(new Date("2026-08-08T14:59:59Z"))).toBe(
       false,
     )
+  })
+})
+
+describe("nextRecruitingPeriodBoundary", () => {
+  it("시작 전이면 시작 시각을 알려 준다", () => {
+    expect(nextRecruitingPeriodBoundary(start.getTime() - 1000)).toBe(
+      start.getTime(),
+    )
+  })
+
+  it("기간 안이면 끝나는 시각을 알려 준다", () => {
+    expect(nextRecruitingPeriodBoundary(start.getTime())).toBe(end.getTime())
+    expect(nextRecruitingPeriodBoundary(end.getTime() - 1000)).toBe(
+      end.getTime(),
+    )
+  })
+
+  // 더 바뀔 것이 없으면 타이머를 잡지 않도록 없다고 답해야 한다
+  it("끝난 뒤면 없다고 답한다", () => {
+    expect(nextRecruitingPeriodBoundary(end.getTime())).toBeUndefined()
+    expect(nextRecruitingPeriodBoundary(end.getTime() + 1000)).toBeUndefined()
   })
 })
