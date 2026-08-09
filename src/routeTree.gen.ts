@@ -9,9 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IntroRouteImport } from './routes/intro'
 import { Route as ChallengerVerificationRouteImport } from './routes/challenger-verification'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as TestRouteRouteImport } from './routes/test/route'
 import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as RecruitingRouteRouteImport } from './routes/recruiting/route'
@@ -117,11 +117,6 @@ import { Route as MatchingProjectsEditProjectIdRouteImport } from './routes/matc
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
-const IntroRoute = IntroRouteImport.update({
-  id: '/intro',
-  path: '/intro',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ChallengerVerificationRoute = ChallengerVerificationRouteImport.update({
   id: '/challenger-verification',
   path: '/challenger-verification',
@@ -130,6 +125,11 @@ const ChallengerVerificationRoute = ChallengerVerificationRouteImport.update({
 const AuthTestRoute = AuthTestRouteImport.update({
   id: '/auth-test',
   path: '/auth-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestRouteRoute = TestRouteRouteImport.update({
@@ -696,9 +696,9 @@ export interface FileRoutesByFullPath {
   '/recruiting': typeof RecruitingRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/test': typeof TestRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
-  '/intro': typeof IntroRoute
   '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
@@ -799,9 +799,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/recruiting': typeof RecruitingRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
-  '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
   '/matching/applications': typeof MatchingApplicationsRoute
@@ -907,9 +907,9 @@ export interface FileRoutesById {
   '/recruiting': typeof RecruitingRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/test': typeof TestRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
-  '/intro': typeof IntroRoute
   '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
@@ -1018,9 +1018,9 @@ export interface FileRouteTypes {
     | '/recruiting'
     | '/settings'
     | '/test'
+    | '/about'
     | '/auth-test'
     | '/challenger-verification'
-    | '/intro'
     | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
@@ -1121,9 +1121,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/recruiting'
+    | '/about'
     | '/auth-test'
     | '/challenger-verification'
-    | '/intro'
     | '/login/default'
     | '/manage/chapter'
     | '/matching/applications'
@@ -1228,9 +1228,9 @@ export interface FileRouteTypes {
     | '/recruiting'
     | '/settings'
     | '/test'
+    | '/about'
     | '/auth-test'
     | '/challenger-verification'
-    | '/intro'
     | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
@@ -1338,9 +1338,9 @@ export interface RootRouteChildren {
   RecruitingRouteRoute: typeof RecruitingRouteRouteWithChildren
   SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   TestRouteRoute: typeof TestRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
   AuthTestRoute: typeof AuthTestRoute
   ChallengerVerificationRoute: typeof ChallengerVerificationRoute
-  IntroRoute: typeof IntroRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   SignupOauthRoute: typeof SignupOauthRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -1350,13 +1350,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/intro': {
-      id: '/intro'
-      path: '/intro'
-      fullPath: '/intro'
-      preLoaderRoute: typeof IntroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/challenger-verification': {
       id: '/challenger-verification'
       path: '/challenger-verification'
@@ -1369,6 +1362,13 @@ declare module '@tanstack/react-router' {
       path: '/auth-test'
       fullPath: '/auth-test'
       preLoaderRoute: typeof AuthTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test': {
@@ -2457,9 +2457,9 @@ const rootRouteChildren: RootRouteChildren = {
   RecruitingRouteRoute: RecruitingRouteRouteWithChildren,
   SettingsRouteRoute: SettingsRouteRouteWithChildren,
   TestRouteRoute: TestRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
   AuthTestRoute: AuthTestRoute,
   ChallengerVerificationRoute: ChallengerVerificationRoute,
-  IntroRoute: IntroRoute,
   LoginDefaultRoute: LoginDefaultRoute,
   SignupOauthRoute: SignupOauthRoute,
   LoginIndexRoute: LoginIndexRoute,

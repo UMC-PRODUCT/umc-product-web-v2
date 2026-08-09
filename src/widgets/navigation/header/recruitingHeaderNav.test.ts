@@ -115,7 +115,7 @@ describe("경로별 활성 표시", () => {
 
   it("한 경로에서 두 탭이 동시에 켜지지 않는다", () => {
     for (const path of [
-      "/intro",
+      "/about",
       "/projects",
       "/projects/apply-guide",
       "/projects/apply/7",

@@ -1,0 +1,13 @@
+/* 소개 랜딩 본문에 쓰는 SUIT. 시안이 이 문단들만 SUIT Light 로 잡아 두었다.
+   나머지 화면과 제목·라벨은 그대로 Pretendard 를 쓴다.
+
+   가변 폰트 한 벌로 100~900 을 모두 덮는다. 파일이 하나뿐이라 굵기별로 나눠
+   받을 필요가 없다. */
+@font-face {
+  font-family: "SUIT Variable";
+  src: url("../shared/assets/font/SUIT-Variable.woff2")
+    format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}

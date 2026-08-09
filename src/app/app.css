@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "../styles/font.css";
 @import "../styles/color.css";
 @import "../styles/typography.css";
 @import "../styles/shadow.css";
@@ -9,6 +10,23 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* 디자인의 구간에 맞춘다. Mobile 360~767 은 프리픽스 없이, Pad 768 은 md,
+     Small PC 1024 는 lg, PC 1440 은 xl 이다.
+     xl 기본값은 1280 이라 PC 구간과 어긋나 1440 으로 바꿔 둔다. 브레이크포인트
+     프리픽스로서의 xl: 은 아직 쓰인 곳이 없어 기존 화면에 영향이 없다.
+     rem 으로 적는다. px 로 두면 Tailwind 가 rem 인 다른 구간보다 앞에 뽑아
+     내려 lg: 가 xl: 을 덮는다. */
+  --breakpoint-xl: 90rem;
+
+  /* 소개 랜딩 히어로 헤드라인만 쓰는 구간이다. 벡터라 글자를 접을 수 없어
+     390 을 기준으로 두 줄짜리와 세 줄짜리 파일이 갈린다. 390px = 24.375rem. */
+  --breakpoint-xs: 24.375rem;
+
+  /* 소개 랜딩 본문 전용. 시안이 이 문단들만 SUIT 로 잡았다. */
+  --font-suit:
+    "SUIT Variable", "Pretendard Variable", "Pretendard", -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+
   --font-heading: var(--font-sans);
   --font-sans:
     "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
@@ -281,6 +299,25 @@
     opacity: 1;
     transform: translateY(0) scale(1);
     filter: blur(0);
+  }
+}
+
+/* 트랙에 같은 목록이 두 벌 깔려 있어 -50% 가 정확히 한 벌이다. */
+@keyframes school-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes school-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
   }
 }
 

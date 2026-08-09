@@ -12,7 +12,7 @@ import SideBar from "@/widgets/navigation/sidebar/SideBar"
 import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 const PATHNAME_OPTIONS = [
-  { label: "소개", value: "/intro" },
+  { label: "소개", value: "/about" },
   { label: "데모데이 매칭 / 프로젝트 목록", value: "/matching/projects" },
   { label: "데모데이 매칭 / 관리", value: "/matching/projects/management" },
   { label: "데모데이 매칭 / 라운드", value: "/matching/rounds" },

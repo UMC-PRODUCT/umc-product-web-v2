@@ -8,7 +8,7 @@ const PORT = 4173
 const DIST = join(process.cwd(), "dist")
 
 const ROUTES = [
-  { path: "/intro", titleMatch: "사용 가이드" },
+  { path: "/about", titleMatch: "UMC 소개" },
   { path: "/login", titleMatch: "로그인" },
   { path: "/login/default", titleMatch: "UMC 계정 로그인" },
   { path: "/signup", titleMatch: "회원가입" },

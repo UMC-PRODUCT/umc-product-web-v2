@@ -34,6 +34,26 @@
   }
 }
 
+/* 소개 랜딩 학교 목록. 80s 는 한 벌(약 4000px)이 지나가는 시간이다. */
+@utility animate-school-marquee-left {
+  animation: school-marquee-left 80s linear infinite;
+  will-change: transform;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@utility animate-school-marquee-right {
+  /* 음수 delay 로 위상을 어긋내지 않으면 첫 화면에서 두 줄이 딱 겹친다. */
+  animation: school-marquee-right 80s linear -20s infinite;
+  will-change: transform;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 /* 스크롤은 되지만 스크롤바는 안 보이게. 카드 내부 리스트처럼 스크롤이
    콘텐츠임을 암시하지 않아도 되는 좁은 영역에 사용 */
 @utility scrollbar-hide {
