@@ -30,10 +30,12 @@ const BASE_CLASS =
 export function RecruitingStatusButton({
   tone = "light",
   alwaysVisible = false,
+  className: extraClass,
 }: {
   tone?: HeaderTone
   /** 소개 랜딩은 시안에서 모집 기간과 무관하게 지원하기를 둔다. */
   alwaysVisible?: boolean
+  className?: string
 }) {
   const showApplyCta = useIsWithinHeaderRecruitingWindow()
   const isGlass = tone === "glass"
@@ -44,6 +46,7 @@ export function RecruitingStatusButton({
     BASE_CLASS,
     "text-label-1-semibold relative transition-colors",
     isGlass ? GLASS_ENTRY_BUTTON : "bg-teal-600 text-white hover:bg-teal-700",
+    extraClass,
   )
   const content = (
     <>
