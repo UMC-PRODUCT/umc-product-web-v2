@@ -13,6 +13,7 @@ import {
   useCreateChaptersBulk,
   useDeleteChapter,
 } from "@/entities/organization/hooks/useChapter"
+import { useUpdateSchool } from "@/entities/organization/hooks/useSchool"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
@@ -57,6 +58,7 @@ export function ChapterManagePage() {
   const deleteChapterMutation = useDeleteChapter()
   const createChapterMutation = useCreateChapter()
   const createChaptersBulkMutation = useCreateChaptersBulk()
+  const updateSchoolMutation = useUpdateSchool()
   const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
   const { chapters: serverChapters } = useSchoolChapterMap()
 
@@ -320,7 +322,11 @@ export function ChapterManagePage() {
 
   async function handleSave() {
     const newChapters = chapters.filter((ch) => ch.id.startsWith("chapter-"))
-    if (newChapters.length === 0) return
+    const existingChapters = chapters.filter(
+      (ch) => !ch.id.startsWith("chapter-"),
+    )
+
+    if (newChapters.length === 0 && existingChapters.length === 0) return
 
     if (isGisuLoading || activeGisuId == null) {
       addToast({
@@ -333,51 +339,64 @@ export function ChapterManagePage() {
       return
     }
 
-    const bulkPayload = newChapters.map((ch) => ({
-      gisuId: activeGisuId,
-      name: ch.name,
-      schoolIds: ch.assignedSchools
-        .map((s) => Number(s.id))
-        .filter((id) => !Number.isNaN(id)),
-    }))
-
     try {
-      const createdIds =
-        await createChaptersBulkMutation.mutateAsync(bulkPayload)
-      if (
-        Array.isArray(createdIds) &&
-        createdIds.length === newChapters.length
-      ) {
-        const idMap = new Map<string, string>()
-        newChapters.forEach((ch, idx) => {
-          if (createdIds[idx] != null) {
-            idMap.set(ch.id, String(createdIds[idx]))
-          }
-        })
-        setChapters((prev) =>
-          prev.map((ch) => {
-            const serverId = idMap.get(ch.id)
-            return serverId ? { ...ch, id: serverId } : ch
-          }),
-        )
-        addToast({
-          message: "지부 정보가 저장되었습니다.",
-          color: "primary",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
-      } else {
-        queryClient.invalidateQueries({ queryKey: ["chapters"] })
-        queryClient.invalidateQueries({ queryKey: ["chaptersWithSchools"] })
-        addToast({
-          message: "지부 정보 저장에 실패했습니다.",
-          color: "red",
-          variant: "deep",
-          type: "default",
-          duration: 3000,
-        })
+      if (newChapters.length > 0) {
+        const bulkPayload = newChapters.map((ch) => ({
+          gisuId: activeGisuId,
+          name: ch.name,
+          schoolIds: ch.assignedSchools
+            .map((s) => Number(s.id))
+            .filter((id) => !Number.isNaN(id)),
+        }))
+
+        const createdIds =
+          await createChaptersBulkMutation.mutateAsync(bulkPayload)
+
+        if (
+          Array.isArray(createdIds) &&
+          createdIds.length === newChapters.length
+        ) {
+          const idMap = new Map<string, string>()
+          newChapters.forEach((ch, idx) => {
+            if (createdIds[idx] != null) {
+              idMap.set(ch.id, String(createdIds[idx]))
+            }
+          })
+          setChapters((prev) =>
+            prev.map((ch) => {
+              const serverId = idMap.get(ch.id)
+              return serverId ? { ...ch, id: serverId } : ch
+            }),
+          )
+        }
       }
+
+      if (existingChapters.length > 0) {
+        const updatePromises = existingChapters.flatMap((ch) => {
+          const chapterId = Number(ch.id)
+          if (Number.isNaN(chapterId)) return []
+          return ch.assignedSchools.map((s) => {
+            const schoolId = Number(s.id)
+            if (Number.isNaN(schoolId)) return Promise.resolve()
+            return updateSchoolMutation.mutateAsync({
+              schoolId,
+              body: { chapterId },
+            })
+          })
+        })
+        await Promise.all(updatePromises)
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["chapters"] })
+      queryClient.invalidateQueries({ queryKey: ["chaptersWithSchools"] })
+
+      addToast({
+        message: "지부 정보가 저장되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
     } catch {
       queryClient.invalidateQueries({ queryKey: ["chapters"] })
       queryClient.invalidateQueries({ queryKey: ["chaptersWithSchools"] })
