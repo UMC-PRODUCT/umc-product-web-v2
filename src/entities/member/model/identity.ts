@@ -80,8 +80,19 @@ export function isSchoolVicePresident(
   return hasAnyRoleType(me, ["SCHOOL_VICE_PRESIDENT"])
 }
 
+/**
+ * 학교 단위 역할 전부(회장·부회장·파트장·기타 운영진).
+ *
+ * 기획에서 쓰는 등급 이름 SCHOOL_STAFF 와 다르다. 그쪽은 기타 운영진 하나만
+ * 가리킨다. 그 범위가 필요하면 isSchoolEtcAdmin 을 쓴다.
+ */
 export function isSchoolStaff(me: MemberInfoResponse | undefined): boolean {
   return hasAnyRoleType(me, SCHOOL_ROLE_TYPES)
+}
+
+/** 학교 기타 운영진. 기획의 SCHOOL_STAFF 등급이 이것이다. */
+export function isSchoolEtcAdmin(me: MemberInfoResponse | undefined): boolean {
+  return hasAnyRoleType(me, ["SCHOOL_ETC_ADMIN"])
 }
 
 export function isOperator(me: MemberInfoResponse | undefined): boolean {
