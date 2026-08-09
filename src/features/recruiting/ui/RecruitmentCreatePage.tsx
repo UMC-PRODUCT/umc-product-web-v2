@@ -47,7 +47,11 @@ function DraftNotice({ message }: { message: string }) {
         description="임시 저장한 모집을 다시 작성합니다."
         className="pl-3"
       />
-      <div className="border-teal-gray-100 text-body-2-regular text-teal-gray-500 mt-8 flex min-h-50 w-full items-center justify-center rounded-[12px] border bg-white">
+      <div
+        role="status"
+        aria-live="polite"
+        className="border-teal-gray-100 text-body-2-regular text-teal-gray-500 mt-8 flex min-h-50 w-full items-center justify-center rounded-[12px] border bg-white"
+      >
         {message}
       </div>
     </div>
