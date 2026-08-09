@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { type KeyboardEvent, useRef, useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
 import { GlassRim } from "@/shared/ui/GlassRim"
@@ -19,6 +19,34 @@ export function RecruitPartsSection() {
   const activePart =
     ABOUT_RECRUIT.parts.find((part) => part.id === activePartId) ??
     ABOUT_RECRUIT.parts[0]
+
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
+
+  // 탭 위젯은 화살표로 옮겨 다니는 것이 기본 동작이다. role 만 붙이고 두면
+  // 화면 낭독기 사용자에게는 탭이라고 알려 놓고 실제로는 움직이지 않는다.
+  const moveTab = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const last = ABOUT_RECRUIT.parts.length - 1
+    const next =
+      event.key === "ArrowRight"
+        ? index === last
+          ? 0
+          : index + 1
+        : event.key === "ArrowLeft"
+          ? index === 0
+            ? last
+            : index - 1
+          : event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? last
+              : null
+    const target = next === null ? undefined : ABOUT_RECRUIT.parts[next]
+    if (!target) return
+
+    event.preventDefault()
+    setActivePartId(target.id)
+    tabRefs.current[next as number]?.focus()
+  }
 
   return (
     <section className="flex flex-col items-center gap-13.5 pt-37.5 md:pt-60 lg:pt-75">
@@ -72,15 +100,23 @@ export function RecruitPartsSection() {
                 role="tablist"
                 className="mx-auto flex w-max items-center gap-3"
               >
-                {ABOUT_RECRUIT.parts.map((part) => {
+                {ABOUT_RECRUIT.parts.map((part, index) => {
                   const isActive = part.id === activePart.id
                   return (
                     <button
                       key={part.id}
                       type="button"
                       role="tab"
+                      id={`about-recruit-tab-${part.id}`}
+                      ref={(node) => {
+                        tabRefs.current[index] = node
+                      }}
                       aria-selected={isActive}
                       aria-controls="about-recruit-traits"
+                      // 탭 묶음은 Tab 키 한 번에 통째로 지나간다. 안쪽 이동은
+                      // 화살표가 맡는다.
+                      tabIndex={isActive ? 0 : -1}
+                      onKeyDown={(event) => moveTab(event, index)}
                       onClick={() => setActivePartId(part.id)}
                       className={cn(
                         "shrink-0 cursor-pointer rounded-full px-4.5 py-1.75 text-xl leading-[1.4] tracking-[-0.2px] transition-colors",
@@ -99,6 +135,7 @@ export function RecruitPartsSection() {
             <div
               id="about-recruit-traits"
               role="tabpanel"
+              aria-labelledby={`about-recruit-tab-${activePart.id}`}
               className="relative flex w-full items-center rounded-[30px] px-7 py-8"
               style={TRAIT_PANEL_SURFACE}
             >
