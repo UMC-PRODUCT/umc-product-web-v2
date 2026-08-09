@@ -21,22 +21,22 @@ export function RecruitPartsSection() {
     ABOUT_RECRUIT.parts[0]
 
   return (
-    <section className="flex flex-col items-center gap-13.5 pt-60 lg:pt-75">
+    <section className="flex flex-col items-center gap-13.5 pt-37.5 md:pt-60 lg:pt-75">
       <div className="flex w-full flex-col items-start gap-25">
         <div className="flex w-full max-w-300 flex-col items-center gap-16 lg:gap-18">
           <div className="flex w-full flex-col items-center gap-6">
-            <h2 className="text-center text-[32px] leading-[1.2] font-bold tracking-[-0.64px] text-white lg:text-[38px] lg:tracking-[-0.76px] xl:text-5xl xl:tracking-[-1.44px]">
+            <h2 className="text-center text-[30px] leading-[1.2] font-bold tracking-[-0.6px] text-white md:text-[32px] md:tracking-[-0.64px] lg:text-[38px] lg:tracking-[-0.76px] xl:text-5xl xl:tracking-[-1.44px]">
               {ABOUT_RECRUIT.headline}
             </h2>
 
-            <p className="text-teal-gray-400 w-full text-center text-[22px] leading-normal font-light tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
+            <p className="text-teal-gray-400 w-full text-center text-base leading-normal font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
               {ABOUT_RECRUIT.description}
             </p>
           </div>
 
           {/* 1024 는 2x2, 1440 은 한 줄이다. 양쪽 다 그리드로 두면 칸이 균등하게
               나뉘고 카드 높이도 함께 맞는다. */}
-          <div className="grid w-full max-w-[586px] grid-cols-2 gap-7 lg:max-w-[780px] xl:max-w-none xl:grid-cols-4">
+          <div className="grid w-full max-w-[279px] grid-cols-1 gap-7 md:max-w-[586px] md:grid-cols-2 lg:max-w-[780px] xl:max-w-none xl:grid-cols-4">
             {ABOUT_RECRUIT.parts.map((part) => (
               <PartCard
                 key={part.id}
@@ -48,12 +48,15 @@ export function RecruitPartsSection() {
         </div>
 
         <div className="flex w-full flex-col items-center gap-7">
-          <h3 className="w-full max-w-[576px] text-center text-[32px] leading-[1.3] font-semibold text-white lg:max-w-[780px] lg:pl-1 xl:max-w-none">
+          <h3 className="w-full text-center text-[30px] leading-[1.2] font-semibold text-white md:max-w-[576px] md:text-[32px] md:leading-[1.3] lg:max-w-[780px] lg:pl-1 xl:max-w-none">
             {ABOUT_RECRUIT.traitsHeadline}
           </h3>
 
-          <div className="flex w-full max-w-[576px] flex-col items-center gap-6.5 lg:max-w-[780px] xl:max-w-none">
-            <div role="tablist" className="flex items-center gap-3">
+          <div className="flex w-full flex-col items-center gap-6.5 md:max-w-[576px] lg:max-w-[780px] xl:max-w-none">
+            <div
+              role="tablist"
+              className="flex flex-wrap items-center justify-center gap-3"
+            >
               {ABOUT_RECRUIT.parts.map((part) => {
                 const isActive = part.id === activePart.id
                 return (

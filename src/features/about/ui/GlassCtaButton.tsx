@@ -87,8 +87,8 @@ export function GlassCtaButton({
 }: GlassCtaButtonProps) {
   // rounded-2xl 은 이 레포에서 18px 이라 시안의 16px 과 다르다.
   const shared = cn(
-    "group relative flex shrink-0 cursor-pointer items-center justify-center rounded-[16px] px-12 py-4.5",
-    "text-2xl leading-[1.35] font-bold tracking-[-0.48px] whitespace-nowrap text-white",
+    "group relative flex shrink-0 cursor-pointer items-center justify-center rounded-[16px] px-6 py-2.5 md:px-12 md:py-4.5",
+    "text-xl leading-[1.5] font-bold tracking-[-0.4px] whitespace-nowrap text-white md:text-2xl md:leading-[1.35] md:tracking-[-0.48px]",
     className,
   )
 

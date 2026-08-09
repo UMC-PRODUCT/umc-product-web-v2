@@ -22,10 +22,12 @@ export function PartCard({ titleLines, descriptionLines }: PartCardProps) {
           같아 벌릴 이유가 없다. */}
       <div
         className={`relative flex w-full flex-col items-start ${
-          titleLines.length > 1 ? "gap-6.5" : "gap-6.5 xl:gap-15"
+          titleLines.length > 1
+            ? "gap-8 md:gap-6.5"
+            : "gap-8 md:gap-15 lg:gap-6.5 xl:gap-15"
         }`}
       >
-        <h3 className="w-full text-[26px] leading-[1.3] font-semibold text-white">
+        <h3 className="w-full text-2xl leading-[1.33] font-semibold text-white md:text-[26px] md:leading-[1.3]">
           {titleLines.map((line) => (
             <span key={line} className="block">
               {line}
