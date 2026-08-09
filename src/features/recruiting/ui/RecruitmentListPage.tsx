@@ -132,6 +132,7 @@ export function RecruitmentListPage({
     isLoading: isRoundsLoading,
     isError: isRoundsError,
     isForbidden,
+    refetch: refetchRounds,
   } = useAdminRecruitingRounds(sort)
 
   // 편집 권한은 role이 아니라 시즌 단위 실제 EDIT 권한으로 판정한다(canEditRecruitmentPost 참고).
@@ -269,22 +270,35 @@ export function RecruitmentListPage({
       })
       return
     }
+    if (cloneRound.isPending) return
     const post = basePosts.find((item) => item.postId === postId)
     if (!post) return
-    // 같은 글을 여러 번 복제해도 제목이 겹치지 않도록 사용 가능한 제목을 먼저 찾는다.
-    void resolveAvailableTitle(`${post.title} 복제본`, (title) =>
-      checkRecruitingRoundTitleAvailability(post.seasonId, title).catch(
-        () => true,
-      ),
-    ).then((title) => {
-      cloneRound.mutate({
-        seasonId: post.seasonId,
-        roundId: postId,
-        payload: {
-          targetSeasonId: post.seasonId,
-          title,
-          type: post.type,
-        },
+    // roundNo는 화면에 캐시된 groups(staleTime 5분)가 아니라 매번 새로 받아온
+    // 목록으로 계산해야 한다. 캐시가 갱신되기 전에 연달아 복제하면 직전 복제로
+    // 이미 쓰인 번호를 또 계산해 RECRUITING-0116("이전 차수 다음 번호") 충돌이 난다.
+    void refetchRounds().then(({ data: freshGroups }) => {
+      const sameSeasonRounds =
+        freshGroups?.find((group) => group.seasonId === post.seasonId)
+          ?.rounds ?? []
+      const nextRoundNo =
+        Math.max(0, ...sameSeasonRounds.map((round) => Number(round.roundNo))) +
+        1
+      // 같은 글을 여러 번 복제해도 제목이 겹치지 않도록 사용 가능한 제목을 먼저 찾는다.
+      void resolveAvailableTitle(`${post.title} 복제본`, (title) =>
+        checkRecruitingRoundTitleAvailability(post.seasonId, title).catch(
+          () => true,
+        ),
+      ).then((title) => {
+        cloneRound.mutate({
+          seasonId: post.seasonId,
+          roundId: postId,
+          payload: {
+            targetSeasonId: post.seasonId,
+            title,
+            type: "ADDITIONAL",
+            roundNo: nextRoundNo,
+          },
+        })
       })
     })
   }
@@ -432,6 +446,7 @@ export function RecruitmentListPage({
                     </div>
                     <RecruitmentPostListCard
                       chapter={chapter}
+                      role={role}
                       posts={scopedPosts}
                       permittedSeasonIds={permittedSeasonIds}
                       onPrivatize={handlePrivatize}
@@ -450,6 +465,7 @@ export function RecruitmentListPage({
                         </h2>
                         <RecruitmentDraftArchiveCard
                           chapter={chapter}
+                          role={role}
                           posts={scopedPosts}
                           permittedSeasonIds={permittedSeasonIds}
                           onPublish={handlePublish}
@@ -469,6 +485,7 @@ export function RecruitmentListPage({
           {!showChapterTabs && ownScopeChapter && (
             <RecruitmentOwnScopeSection
               chapter={ownScopeChapter}
+              role={role}
               posts={viewPosts}
               schoolTab={ownScopeSchoolTab}
               permittedSeasonIds={permittedSeasonIds}

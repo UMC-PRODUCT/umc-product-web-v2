@@ -28,6 +28,7 @@ import type {
   RawStatusCounts,
   RawStatusSummary,
   RawTrackCount,
+  RecruitingAdminFormStructureResponse,
   RecruitingApplicationCreated,
   RecruitingApplicationCredentialRequest,
   RecruitingApplicationDetail,
@@ -612,6 +613,16 @@ export async function updateRecruitingRound(
     `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}`,
     payload,
   )
+}
+
+export async function getRecruitingApplicationForm(
+  seasonId: string,
+  roundId: string,
+): Promise<RecruitingAdminFormStructureResponse> {
+  const { data } = await api.get<
+    ApiResponse<RecruitingAdminFormStructureResponse>
+  >(`/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/form`)
+  return data.result
 }
 
 // Round가 DRAFT일 때만 지원 Form 구조를 통째로 Upsert할 수 있다. Round 생성

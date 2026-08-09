@@ -4,10 +4,12 @@ import { RecruitmentPostListCard } from "./RecruitmentPostListCard"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
+import type { RecruitingListRole } from "../model/recruitingListRole"
 import type { RecruitmentPost } from "../model/recruitmentList"
 
 interface RecruitmentOwnScopeSectionProps {
   chapter: Chapter
+  role: RecruitingListRole
   posts: RecruitmentPost[]
   schoolTab: string
   permittedSeasonIds: ReadonlySet<string>
@@ -25,6 +27,7 @@ interface RecruitmentOwnScopeSectionProps {
 // chapterAdmin(본인 지부 전체)과 schoolStaff(본인 학교)가 공유하는 "내 스코프" 목록 + 공유 보관함 섹션
 export function RecruitmentOwnScopeSection({
   chapter,
+  role,
   posts,
   schoolTab,
   permittedSeasonIds,
@@ -53,6 +56,7 @@ export function RecruitmentOwnScopeSection({
       </div>
       <RecruitmentPostListCard
         chapter={chapter}
+        role={role}
         posts={posts}
         permittedSeasonIds={permittedSeasonIds}
         onPrivatize={onPrivatize}
@@ -71,6 +75,7 @@ export function RecruitmentOwnScopeSection({
           </h2>
           <RecruitmentDraftArchiveCard
             chapter={chapter}
+            role={role}
             posts={posts}
             permittedSeasonIds={permittedSeasonIds}
             onPublish={onPublish}

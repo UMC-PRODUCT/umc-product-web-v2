@@ -1,13 +1,15 @@
 import { useNavigate } from "@tanstack/react-router"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 
 import FilterIcon from "@/shared/assets/icon/filter/FilterIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { PART_TAG_LABEL } from "@/shared/model/domain"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Segment } from "@/shared/ui/segment/Segment"
 
 import { usePublicRecruitmentNotices } from "../hooks/usePublicRecruitmentNotices"
+import { TRACK_PART_TAG } from "../model/applicantMapper"
 import { formatNoticePeriod } from "../model/recruitmentNotice"
 import { RecruitmentApplyConfirmModal } from "./RecruitmentApplyConfirmModal"
 import { RecruitmentNoticeCard } from "./RecruitmentNoticeCard"
@@ -25,10 +27,20 @@ const NOTICE_TABS: { id: NoticeTab; label: string }[] = [
   { id: "past", label: "이미 지난 모집" },
 ]
 
-// 검색 자동완성은 지부 상관없이 전체 학교를 대상으로 한다.
+// 검색 자동완성과 학교 필터는 지부 상관없이 전체 학교를 대상으로 한다.
 const ALL_SCHOOLS = Object.values(SCHOOLS_BY_BRANCH).flat()
+const SCHOOL_FILTER_OPTIONS = ALL_SCHOOLS.map((school) => ({
+  value: school,
+  label: school,
+}))
 
-const NOTICE_FILTER_PARTS: PartTag[] = ["pm", "design", "web-pe", "mobile-pe"]
+const NOTICE_FILTER_PARTS = Array.from(
+  new Set(
+    Object.values(TRACK_PART_TAG).filter(
+      (part): part is PartTag => part != null,
+    ),
+  ),
+)
 const PART_FILTER_OPTIONS = NOTICE_FILTER_PARTS.map((part) => ({
   value: part,
   label: PART_TAG_LABEL[part],
@@ -50,19 +62,12 @@ export function RecruitmentNoticePage() {
 
   const { items: allItems, isLoading, isError } = usePublicRecruitmentNotices()
 
-  const schoolFilterOptions = useMemo(
-    () =>
-      Array.from(new Set(allItems.map((item) => item.schoolName))).map(
-        (school) => ({ value: school, label: school }),
-      ),
-    [allItems],
-  )
-
   const items = allItems.filter((item) => {
     if (tab === "recruiting" && item.isClosed) return false
     if (tab === "past" && !item.isClosed) return false
-    if (search && !item.schoolName.includes(search)) return false
-    if (schoolFilters.length > 0 && !schoolFilters.includes(item.schoolName))
+    const schoolName = formatSchoolName(item.schoolName)
+    if (search && !schoolName.includes(search)) return false
+    if (schoolFilters.length > 0 && !schoolFilters.includes(schoolName))
       return false
     if (
       partFilters.length > 0 &&
@@ -100,7 +105,7 @@ export function RecruitmentNoticePage() {
                 )
               }
               onRequestClose={() => setOpenFilterKey(null)}
-              options={schoolFilterOptions}
+              options={SCHOOL_FILTER_OPTIONS}
               selectedValues={schoolFilters}
               onSelectedValuesChange={(values) => {
                 setSchoolFilters(values)

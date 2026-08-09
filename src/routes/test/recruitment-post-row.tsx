@@ -26,6 +26,7 @@ function RecruitmentPostRowTestPage() {
           rightAction={
             <RecruitmentPostMoreMenu
               status="OPEN"
+              role="central"
               onPublish={() => {}}
               onPrivatize={() => {}}
               onEdit={() => console.info("TODO: 모집 공고 수정")}
@@ -61,6 +62,7 @@ function RecruitmentPostRowTestPage() {
           rightAction={
             <RecruitmentPostMoreMenu
               status="CLOSED"
+              role="central"
               onPublish={() => {}}
               onPrivatize={() => {}}
               onDuplicate={() => {}}
@@ -82,6 +84,7 @@ function RecruitmentPostRowTestPage() {
           rightAction={
             <RecruitmentPostMoreMenu
               status="DRAFT"
+              role="central"
               onPublish={() => {}}
               onPrivatize={() => {}}
               onEdit={() => console.info("TODO: 모집 공고 수정")}
@@ -113,6 +116,7 @@ function RecruitmentPostRowTestPage() {
               rightAction={
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
+                  role="central"
                   onPublish={() => {}}
                   onPrivatize={() => {}}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
@@ -129,6 +133,7 @@ function RecruitmentPostRowTestPage() {
               rightAction={
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
+                  role="central"
                   onPublish={() => {}}
                   onPrivatize={() => {}}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
@@ -145,6 +150,7 @@ function RecruitmentPostRowTestPage() {
               rightAction={
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
+                  role="central"
                   onPublish={() => {}}
                   onPrivatize={() => {}}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
@@ -164,6 +170,7 @@ function RecruitmentPostRowTestPage() {
               rightAction={
                 <RecruitmentPostMoreMenu
                   status="OPEN"
+                  role="central"
                   onPublish={() => {}}
                   onPrivatize={() => {}}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}

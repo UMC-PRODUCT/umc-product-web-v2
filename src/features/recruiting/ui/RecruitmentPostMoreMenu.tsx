@@ -7,10 +7,20 @@ import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
+import { RecruitmentDuplicateModal } from "./RecruitmentDuplicateModal"
+
+import type { Chapter } from "@/entities/organization/model/chapters"
+
+import type { RecruitingListRole } from "../model/recruitingListRole"
 import type { RecruitmentPostStatus } from "../model/recruitmentList"
 
 interface RecruitmentPostMoreMenuProps {
   status: RecruitmentPostStatus
+  // 복제하기 분기 기준: central(최고관리자/총괄·부총괄/중앙운영·교육국)은 전 지부
+  // 학교 선택 모달, chapterAdmin(지부장)은 본인 지부 학교 선택 모달(기본 전체
+  // 선택), schoolStaff(교내 회장단/운영진)는 모달 없이 본인 학교로 즉시 복제.
+  role: RecruitingListRole
+  ownChapter?: Chapter
   onPublish: () => void
   onPrivatize: () => void
   onEdit?: () => void
@@ -25,6 +35,8 @@ interface RecruitmentPostMoreMenuProps {
 
 export function RecruitmentPostMoreMenu({
   status,
+  role,
+  ownChapter,
   onPublish,
   onPrivatize,
   onEdit,
@@ -38,8 +50,20 @@ export function RecruitmentPostMoreMenu({
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [privatizeConfirmOpen, setPrivatizeConfirmOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [duplicateConfirmOpen, setDuplicateConfirmOpen] = useState(false)
+  const [duplicateModalOpen, setDuplicateModalOpen] = useState(false)
   const shouldPreventFocusRestoreRef = useRef(false)
+
+  const duplicateSuccessToast = () =>
+    addToast({
+      message: "모집 공고가 공유 보관함에 복제되었습니다.",
+      color: "primary",
+      variant: "deep",
+      type: "default",
+      duration: 3000,
+      action: showArchiveLink
+        ? { label: "바로가기", onClick: () => onNavigateToArchive?.() }
+        : undefined,
+    })
 
   const withClose = (action?: () => void) => () => {
     setPopoverOpen(false)
@@ -72,9 +96,16 @@ export function RecruitmentPostMoreMenu({
   }
 
   const handleDuplicateClick = () => {
-    shouldPreventFocusRestoreRef.current = true
     setPopoverOpen(false)
-    setDuplicateConfirmOpen(true)
+    // schoolStaff(교내 회장단/운영진)는 학교 선택지가 본인 학교뿐이라
+    // 모달 없이 바로 본인 학교로 복제한다.
+    if (role === "schoolStaff") {
+      onDuplicate()
+      duplicateSuccessToast()
+      return
+    }
+    shouldPreventFocusRestoreRef.current = true
+    setDuplicateModalOpen(true)
   }
 
   return (
@@ -189,30 +220,20 @@ export function RecruitmentPostMoreMenu({
         }}
       />
 
-      <CtaModal
-        open={duplicateConfirmOpen}
-        title="모집을 복제할까요?"
-        content="선택한 학교의 공유 보관함에 사본으로 저장됩니다."
-        cancelText="돌아가기"
-        confirmText="복제하기"
-        variant="success"
-        onOpenChange={setDuplicateConfirmOpen}
-        onCancel={() => setDuplicateConfirmOpen(false)}
-        onConfirm={() => {
-          setDuplicateConfirmOpen(false)
-          onDuplicate()
-          addToast({
-            message: "모집 공고가 공유 보관함에 복제되었습니다.",
-            color: "primary",
-            variant: "deep",
-            type: "default",
-            duration: 3000,
-            action: showArchiveLink
-              ? { label: "바로가기", onClick: () => onNavigateToArchive?.() }
-              : undefined,
-          })
-        }}
-      />
+      {role !== "schoolStaff" && (
+        <RecruitmentDuplicateModal
+          open={duplicateModalOpen}
+          role={role}
+          ownChapter={ownChapter}
+          onOpenChange={setDuplicateModalOpen}
+          onCancel={() => setDuplicateModalOpen(false)}
+          onConfirm={() => {
+            setDuplicateModalOpen(false)
+            onDuplicate()
+            duplicateSuccessToast()
+          }}
+        />
+      )}
     </>
   )
 }
