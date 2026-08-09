@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
+import { GlassRim } from "@/shared/ui/GlassRim"
 
 import { ABOUT_RECRUIT } from "../../constants"
 import { GlassCtaButton } from "../GlassCtaButton"
@@ -77,10 +78,16 @@ export function RecruitPartsSection() {
             <div
               id="about-recruit-traits"
               role="tabpanel"
-              className="flex w-full items-center rounded-[30px] px-7 py-8"
+              className="relative flex w-full items-center rounded-[30px] px-7 py-8"
               style={TRAIT_PANEL_SURFACE}
             >
-              <ul className="text-teal-gray-300 min-h-24 w-full list-disc ps-7.5 text-xl leading-[1.6] tracking-[-0.2px]">
+              <GlassRim
+                radius={30}
+                from={0.101}
+                to={0.174}
+                bottomRight={0.174}
+              />
+              <ul className="text-teal-gray-300 relative min-h-24 w-full list-disc ps-7.5 text-xl leading-[1.6] tracking-[-0.2px]">
                 {activePart.traits.map((trait) => (
                   <li key={trait}>{trait}</li>
                 ))}
