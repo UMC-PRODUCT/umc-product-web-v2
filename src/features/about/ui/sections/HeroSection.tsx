@@ -24,7 +24,9 @@ export function HeroSection() {
             {ABOUT_HERO.description}
           </p>
         </div>
-        <GlassCtaButton>{ABOUT_HERO.ctaLabel}</GlassCtaButton>
+        <GlassCtaButton to={ABOUT_HERO.ctaTo}>
+          {ABOUT_HERO.ctaLabel}
+        </GlassCtaButton>
       </div>
     </section>
   )

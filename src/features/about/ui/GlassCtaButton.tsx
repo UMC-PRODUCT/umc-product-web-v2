@@ -1,5 +1,8 @@
+import { Link } from "@tanstack/react-router"
+
 import { cn } from "@/shared/lib/utils"
 
+import type { ComponentProps } from "react"
 import type { ComponentPropsWithoutRef, CSSProperties } from "react"
 
 const TONE_OVERLAY = {
@@ -71,25 +74,26 @@ const FADE_BOTTOM_LEFT = cornerFade("0% 100%")
 
 interface GlassCtaButtonProps extends ComponentPropsWithoutRef<"button"> {
   tone?: keyof typeof TONE_OVERLAY
+  /** 주면 링크로 그린다. 없으면 버튼 그대로다. */
+  to?: ComponentProps<typeof Link>["to"]
 }
 
 export function GlassCtaButton({
   className,
   children,
   tone = "subtle",
+  to,
   ...props
 }: GlassCtaButtonProps) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        // rounded-2xl 은 이 레포에서 18px 이라 시안의 16px 과 다르다.
-        "group relative flex shrink-0 cursor-pointer items-center justify-center rounded-[16px] px-12 py-4.5",
-        "text-2xl leading-[1.35] font-bold tracking-[-0.48px] whitespace-nowrap text-white",
-        className,
-      )}
-      {...props}
-    >
+  // rounded-2xl 은 이 레포에서 18px 이라 시안의 16px 과 다르다.
+  const shared = cn(
+    "group relative flex shrink-0 cursor-pointer items-center justify-center rounded-[16px] px-12 py-4.5",
+    "text-2xl leading-[1.35] font-bold tracking-[-0.48px] whitespace-nowrap text-white",
+    className,
+  )
+
+  const body = (
+    <>
       {/* color-dodge 가 버튼 뒤 페이지 배경을 끌어올린다. 시안 캡처의 버튼
           안팎을 재보면 배경에 이 순서를 적용한 값과 일치한다. */}
       <span
@@ -113,6 +117,20 @@ export function GlassCtaButton({
         </span>
       </span>
       <span className="relative">{children}</span>
+    </>
+  )
+
+  if (to) {
+    return (
+      <Link to={to} className={shared}>
+        {body}
+      </Link>
+    )
+  }
+
+  return (
+    <button type="button" className={shared} {...props}>
+      {body}
     </button>
   )
 }

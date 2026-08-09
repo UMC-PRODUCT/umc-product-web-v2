@@ -18,6 +18,7 @@ import seokyeong from "@/shared/assets/image/about/schools/seokyeong.svg"
 import seoulWomens from "@/shared/assets/image/about/schools/seoul-womens.svg"
 import soongsil from "@/shared/assets/image/about/schools/soongsil.svg"
 import sungshin from "@/shared/assets/image/about/schools/sungshin.svg"
+import { APPLY_ENTRY_PATH } from "@/shared/config/headerRecruitingWindow"
 
 export const ABOUT_RECRUIT = {
   headline: "UMC 11기 모집 분야",
@@ -25,6 +26,7 @@ export const ABOUT_RECRUIT = {
     "하나의 프로덕트를 완성하는 4가지 핵심 분야. 당신의 역량을 가장 명확하게 보여줄 파트에 지원하세요!",
   traitsHeadline: "이런 분이면 좋아요 !",
   ctaLabel: "모집 안내 보러 가기 →",
+  ctaTo: "/projects/notice",
   parts: [
     {
       id: "pm",
@@ -150,6 +152,8 @@ export const ABOUT_HERO = {
   description:
     "기획부터 개발까지 가능한 대학생 IT 창업 연합 동아리, 새로운 가능성을 UMC에서",
   ctaLabel: "11기 지원하기",
+  // 헤더 지원하기와 같은 곳으로 보낸다. 진입로가 갈리면 한쪽만 바뀐다.
+  ctaTo: APPLY_ENTRY_PATH,
 } as const
 
 export const ABOUT_SCHOOLS = {
@@ -159,6 +163,7 @@ export const ABOUT_SCHOOLS = {
     "지금 이 순간에도 지속적으로 확장되는 거대한 IT 네트워크를 경험하세요!",
   ],
   ctaLabel: "챌린저들의 프로젝트 구경하기 →",
+  ctaTo: "/projects",
   // 11기 참여 학교. 기수마다 바뀌지만 서버에 랜딩용 조회 API 가 없어 상수로 둔다.
   // 홍익대는 서울·세종 캠퍼스가 같은 엠블럼을 쓴다(원본 파일 md5 동일).
 
@@ -196,4 +201,6 @@ export const ABOUT_CLOSING = {
   description:
     "기획부터 서비스 런칭까지 가능한 대학생 IT 창업 연합 동아리, 새로운 가능성을 UMC에서",
   ctaLabel: "11기 지원하기",
+  // 헤더 지원하기와 같은 곳으로 보낸다. 진입로가 갈리면 한쪽만 바뀐다.
+  ctaTo: APPLY_ENTRY_PATH,
 } as const

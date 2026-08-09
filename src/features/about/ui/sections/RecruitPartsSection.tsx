@@ -97,7 +97,9 @@ export function RecruitPartsSection() {
         </div>
       </div>
 
-      <GlassCtaButton>{ABOUT_RECRUIT.ctaLabel}</GlassCtaButton>
+      <GlassCtaButton to={ABOUT_RECRUIT.ctaTo}>
+        {ABOUT_RECRUIT.ctaLabel}
+      </GlassCtaButton>
     </section>
   )
 }

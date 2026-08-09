@@ -56,7 +56,9 @@ export function SchoolsSection() {
         </div>
       </div>
 
-      <GlassCtaButton>{ABOUT_SCHOOLS.ctaLabel}</GlassCtaButton>
+      <GlassCtaButton to={ABOUT_SCHOOLS.ctaTo}>
+        {ABOUT_SCHOOLS.ctaLabel}
+      </GlassCtaButton>
     </section>
   )
 }

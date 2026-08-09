@@ -25,7 +25,9 @@ export function ClosingSection() {
           {ABOUT_CLOSING.description}
         </p>
       </div>
-      <GlassCtaButton tone="primary">{ABOUT_CLOSING.ctaLabel}</GlassCtaButton>
+      <GlassCtaButton tone="primary" to={ABOUT_CLOSING.ctaTo}>
+        {ABOUT_CLOSING.ctaLabel}
+      </GlassCtaButton>
     </section>
   )
 }
