@@ -4,10 +4,12 @@ import {
   DragOverlay,
   type DragStartEvent,
 } from "@dnd-kit/core"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
+import { useMe } from "@/entities/member/hooks/useMe"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -26,6 +28,7 @@ import {
   SCHOOL_STAFF_PANEL_ID,
   type Staff,
 } from "../../model/evaluatorAllocation"
+import { resolveViewerSchool } from "../../model/recruitingRole"
 import { DroppableRecruitmentBox } from "./DroppableRecruitmentBox"
 import { EvaluatorSharedNote } from "./EvaluatorSharedNote"
 import { SchoolStaffPanel } from "./SchoolStaffPanel"
@@ -37,14 +40,37 @@ interface EvaluatorAllocationPageProps {
 export function EvaluatorAllocationPage({
   roundId,
 }: EvaluatorAllocationPageProps = {}) {
+  const { data: me } = useMe()
+  const viewerSchool = resolveViewerSchool(me)
   const { groups } = useAdminRecruitingRounds()
-  const activeRoundId = roundId ?? groups[0]?.rounds[0]?.roundId ?? null
+
+  const mySchoolGroup = useMemo(() => {
+    if (!groups.length) return null
+    if (me?.schoolId) {
+      const foundById = groups.find(
+        (group) => String(group.schoolId) === String(me.schoolId),
+      )
+      if (foundById) return foundById
+    }
+    if (viewerSchool) {
+      const formattedViewer = formatSchoolName(viewerSchool)
+      const foundByName = groups.find(
+        (group) =>
+          group.schoolName === viewerSchool ||
+          formatSchoolName(group.schoolName) === formattedViewer,
+      )
+      if (foundByName) return foundByName
+    }
+    return groups[0] ?? null
+  }, [groups, me?.schoolId, viewerSchool])
+
+  const activeRoundId = roundId ?? mySchoolGroup?.rounds[0]?.roundId ?? null
 
   const activeGroup = activeRoundId
     ? (groups.find((group) =>
         group.rounds.some((r) => String(r.roundId) === String(activeRoundId)),
-      ) ?? groups[0])
-    : groups[0]
+      ) ?? mySchoolGroup)
+    : mySchoolGroup
 
   // 배정 권한은 시즌 단위다. 권한을 확인하기 전에는 잠가 둔다.
   const seasonIds = activeGroup?.seasonId ? [activeGroup.seasonId] : []
@@ -58,7 +84,8 @@ export function EvaluatorAllocationPage({
   const schoolId = activeGroup?.schoolId
   const gisuId = activeGroup?.gisuId
   const chapterId = activeGroup?.chapterId
-  const schoolName = activeGroup?.schoolName ?? "교내"
+  const schoolName =
+    activeGroup?.schoolName ?? formatSchoolName(viewerSchool) ?? "교내"
 
   const { data: staffList = [], isSuccess: isStaffSuccess } = useSchoolStaff(
     schoolId,
