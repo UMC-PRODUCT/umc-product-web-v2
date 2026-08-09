@@ -21,7 +21,7 @@ export function ClosingSection() {
             />
           </div>
         </div>
-        <p className="text-teal-gray-400 w-full pt-0.5 pb-4.5 text-center text-2xl leading-7 font-light tracking-[-0.72px]">
+        <p className="text-teal-gray-400 w-full pt-0.5 pb-4.5 text-center text-[22px] leading-7 font-light tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
           {ABOUT_CLOSING.description}
         </p>
       </div>

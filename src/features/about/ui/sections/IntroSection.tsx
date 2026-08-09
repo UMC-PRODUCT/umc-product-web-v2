@@ -11,13 +11,13 @@ export function IntroSection() {
           <p className="w-full text-center text-[22px] leading-[20.8px] font-medium tracking-normal text-teal-400 uppercase">
             {ABOUT_INTRO.eyebrow}
           </p>
-          <h2 className="flex flex-col items-center text-center text-[46px] leading-[1.2] font-bold tracking-[-0.92px] text-white">
+          <h2 className="flex flex-col items-center text-center text-[38px] leading-[1.2] font-bold tracking-[-0.76px] text-white xl:text-[46px] xl:tracking-[-0.92px]">
             {ABOUT_INTRO.headlineLines.map((line) => (
               <span key={line}>{line}</span>
             ))}
           </h2>
         </div>
-        <p className="text-teal-gray-400 max-w-250 text-center text-2xl leading-[1.5] font-light tracking-[-0.72px]">
+        <p className="text-teal-gray-400 max-w-250 text-center text-[22px] leading-[1.5] font-light tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
           {ABOUT_INTRO.description}
         </p>
       </div>

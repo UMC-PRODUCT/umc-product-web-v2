@@ -17,11 +17,12 @@ export function PartCard({ titleLines, descriptionLines }: PartCardProps) {
     >
       <GlassRim radius={30} from={0.101} to={0.174} bottomRight={0.174} />
 
-      {/* 제목이 한 줄인 카드와 두 줄인 카드가 섞여 있다. 시안은 두 경우의 제목과
-          설명 사이 간격을 다르게 잡아 설명 시작선을 맞춘다. */}
+      {/* 1440 은 네 장이 한 줄이라 제목 줄 수가 섞인다. 한 줄짜리 카드의 간격을
+          벌려 설명 시작선을 맞춘다. 2x2 로 접히는 1024 이하는 같은 행끼리 줄 수가
+          같아 벌릴 이유가 없다. */}
       <div
-        className={`relative flex w-55.75 flex-col items-start ${
-          titleLines.length > 1 ? "gap-6.5" : "gap-15"
+        className={`relative flex w-full flex-col items-start ${
+          titleLines.length > 1 ? "gap-6.5" : "gap-6.5 xl:gap-15"
         }`}
       >
         <h3 className="w-full text-[26px] leading-[1.3] font-semibold text-white">

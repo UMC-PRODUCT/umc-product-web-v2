@@ -5,7 +5,7 @@ import { GlassCtaButton } from "../GlassCtaButton"
 
 export function HeroSection() {
   return (
-    <section className="flex items-center justify-center px-15 pt-85 pb-67.5">
+    <section className="flex items-center justify-center pt-85 pb-67.5">
       <div className="flex flex-col items-center gap-6.5">
         <div className="flex w-full flex-col items-start gap-6.5">
           <div className="flex flex-col items-start gap-6.25 text-center">
@@ -14,13 +14,13 @@ export function HeroSection() {
             </p>
             <div className="flex h-25 items-center">
               <BreakTheRules
-                className="h-19 w-243.75 text-white"
+                className="h-auto w-full max-w-243.75 text-white"
                 role="img"
                 aria-label={ABOUT_HERO.headlineAlt}
               />
             </div>
           </div>
-          <p className="text-teal-gray-400 w-full pt-0.5 pb-4.5 text-center text-2xl leading-7 font-light tracking-[-0.72px]">
+          <p className="text-teal-gray-400 w-full pt-0.5 pb-4.5 text-center text-[22px] leading-7 font-light tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
             {ABOUT_HERO.description}
           </p>
         </div>

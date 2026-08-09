@@ -41,7 +41,7 @@ export function AboutPage() {
         aria-hidden
         className="pointer-events-none absolute top-0 left-0 h-354 w-full min-w-[1440px] object-fill"
       />
-      <div className="relative mx-auto w-300">
+      <div className="relative mx-auto w-full max-w-[1440px] px-8 xl:px-30">
         <HeroSection />
         <IntroSection />
         <PossibilitySection />
