@@ -59,7 +59,7 @@ describe("mapRoundToDraftBasicInfo", () => {
   })
 
   it("기간을 날짜와 시간 칸으로 쪼갠다", () => {
-    const documentStartAt = new Date(2026, 7, 1, 9, 30).toISOString()
+    const documentStartAt = "2026-08-01T09:30:00.000Z"
     const result = mapRoundToDraftBasicInfo(
       group(),
       round({ documentStartAt }),

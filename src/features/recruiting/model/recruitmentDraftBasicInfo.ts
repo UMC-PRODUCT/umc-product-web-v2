@@ -19,8 +19,6 @@ export interface RecruitmentDraftBasicInfo {
   contactText: string
 }
 
-// 서버는 기간을 instant 로 주고 폼은 날짜·시간 칸을 따로 받는다. 사용자가 입력한
-// 시각 그대로 되돌려야 하므로 표시 기준(로컬)으로 쪼갠다.
 function toPeriodField(
   value: string | null | undefined,
   fallback: PeriodFieldValue,
@@ -32,8 +30,8 @@ function toPeriodField(
 
   const pad = (part: number) => String(part).padStart(2, "0")
   return {
-    date: `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}`,
-    time: `${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`,
+    date: `${parsed.getUTCFullYear()}-${pad(parsed.getUTCMonth() + 1)}-${pad(parsed.getUTCDate())}`,
+    time: `${pad(parsed.getUTCHours())}:${pad(parsed.getUTCMinutes())}`,
   }
 }
 
