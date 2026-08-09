@@ -5,11 +5,11 @@ export function PossibilitySection() {
   return (
     <section className="flex flex-col items-center gap-40 pt-75">
       <div className="flex w-full flex-col items-center gap-16">
-        <div className="flex w-270 flex-col items-center gap-6">
+        <div className="flex w-full flex-col items-center gap-6">
           <h2 className="text-center text-5xl leading-[1.2] font-bold tracking-[-1.44px] text-white">
             {ABOUT_POSSIBILITY.headline}
           </h2>
-          <p className="text-teal-gray-400 max-w-250 text-center text-2xl leading-[1.5] font-light tracking-[-0.72px]">
+          <p className="text-teal-gray-400 w-full text-center text-2xl leading-[1.5] font-light tracking-[-0.72px]">
             {ABOUT_POSSIBILITY.description}
           </p>
         </div>
