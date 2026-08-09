@@ -1,7 +1,5 @@
 import dayjs from "dayjs"
 
-import { CHAPTERS } from "@/entities/organization/model/chapters"
-
 import type {
   RecruitingRoundGroup,
   RecruitingSeasonConfigurationResponse,
@@ -65,7 +63,17 @@ export function mapGroupsToChapterQuotaData(
     : undefined
   const updatedTime = actualNow ? dayjs(actualNow).format("HH:mm") : undefined
 
-  const chapters = CHAPTERS.length > 0 ? CHAPTERS : Array.from(byChapter.keys())
+  const chapterNamesSet = new Set<string>()
+  if (serverChapters && serverChapters.length > 0) {
+    serverChapters.forEach((ch) => {
+      if (ch.chapterName) chapterNamesSet.add(ch.chapterName)
+    })
+  }
+  byChapter.forEach((_, chapterName) => {
+    if (chapterName) chapterNamesSet.add(chapterName)
+  })
+
+  const chapters = Array.from(chapterNamesSet)
 
   return chapters.map((chapterName) => {
     const chapterGroups = byChapter.get(chapterName) ?? []
@@ -90,9 +98,6 @@ export function mapGroupsToChapterQuotaData(
           ?.targetCount ?? 0
 
       return {
-        // 시즌이 있는지는 모집 목록이 이미 알려 준다. 설정 응답은 시즌마다
-        // 따로 오는데, 그것을 기다려 seasonId 를 비우면 편집 권한 판정이
-        // 로딩 상태에 끌려간다. 아직 안 온 시즌은 인원만 0으로 보인다.
         seasonId: group.seasonId,
         gisuId: group.gisuId || gisuId,
         schoolId: String(group.schoolId),

@@ -1,10 +1,7 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
-import {
-  type Chapter,
-  CHAPTERS,
-  isChapter,
-} from "@/entities/organization/model/chapters"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
+import { type Chapter, isChapter } from "@/entities/organization/model/chapters"
 import FilterIcon from "@/shared/assets/icon/filter/FilterIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 import { cn } from "@/shared/lib/utils"
@@ -22,11 +19,6 @@ import {
 
 const CHAPTER_ALL_VALUE = "all"
 
-const CHAPTER_OPTIONS = [
-  { value: CHAPTER_ALL_VALUE, label: "지부 전체" },
-  ...CHAPTERS.map((chapter) => ({ value: chapter, label: chapter })),
-]
-
 const PART_OPTIONS = (["pm", "design", "web-pe", "mobile-pe"] as const).map(
   (part) => ({ value: part, label: PART_TAG_LABEL[part] }),
 )
@@ -43,27 +35,54 @@ const RESULT_OPTIONS = [
 
 function buildSchoolOptions(
   filters: ApplicantListFilters,
+  serverChapters: Array<{
+    chapterName: string
+    schools: Array<{ schoolName: string }>
+  }>,
   chapterScope?: Chapter,
 ): FilterDropdownOption[] {
+  const branchMap = SCHOOLS_BY_BRANCH as Record<string, readonly string[]>
+
   if (chapterScope) {
-    return SCHOOLS_BY_BRANCH[chapterScope].map((school) => ({
-      value: school,
-      label: school,
-    }))
+    const chapterObj = serverChapters.find(
+      (c) => c.chapterName === chapterScope,
+    )
+    const schools =
+      chapterObj?.schools.map((s) => s.schoolName) ??
+      branchMap[chapterScope] ??
+      []
+    return schools.map((school: string) => ({ value: school, label: school }))
   }
 
   const selectedChapters =
     filters.chapterTab === CHAPTER_ALL_VALUE
       ? filters.chapters.filter(isChapter)
       : [filters.chapterTab].filter(isChapter)
-  const chapters = selectedChapters.length > 0 ? selectedChapters : CHAPTERS
 
-  return chapters.flatMap((chapter) =>
-    SCHOOLS_BY_BRANCH[chapter].map((school) => ({
-      value: school,
-      label: school,
-    })),
-  )
+  const activeChapters =
+    selectedChapters.length > 0
+      ? serverChapters.filter((c) => selectedChapters.includes(c.chapterName))
+      : serverChapters
+
+  const schoolSet = new Set<string>()
+  activeChapters.forEach((ch) => {
+    ch.schools.forEach((s) => {
+      if (s.schoolName) schoolSet.add(s.schoolName)
+    })
+  })
+
+  if (schoolSet.size === 0) {
+    const fallbackChapters =
+      selectedChapters.length > 0 ? selectedChapters : Object.keys(branchMap)
+    fallbackChapters.forEach((ch) => {
+      ;(branchMap[ch] ?? []).forEach((s: string) => schoolSet.add(s))
+    })
+  }
+
+  return Array.from(schoolSet).map((school: string) => ({
+    value: school,
+    label: school,
+  }))
 }
 
 interface ApplicantFilterBarProps {
@@ -84,7 +103,23 @@ export function ApplicantFilterBar({
   className,
 }: ApplicantFilterBarProps) {
   const [openKey, setOpenKey] = useState<string | null>(null)
-  const schoolOptions = buildSchoolOptions(filters, chapterScope)
+  const { chapters: serverChapters } = useSchoolChapterMap()
+
+  const chapterOptions = useMemo(
+    () => [
+      { value: CHAPTER_ALL_VALUE, label: "지부 전체" },
+      ...serverChapters.map((ch) => ({
+        value: ch.chapterName,
+        label: ch.chapterName,
+      })),
+    ],
+    [serverChapters],
+  )
+
+  const schoolOptions = useMemo(
+    () => buildSchoolOptions(filters, serverChapters, chapterScope),
+    [filters, serverChapters, chapterScope],
+  )
   const showChapterFilter =
     filters.chapterTab === CHAPTER_ALL_VALUE &&
     !chapterScope &&
@@ -136,7 +171,7 @@ export function ApplicantFilterBar({
               {...multiDropdownProps(
                 "chapters",
                 "지부",
-                CHAPTER_OPTIONS,
+                chapterOptions,
                 CHAPTER_ALL_VALUE,
               )}
             />

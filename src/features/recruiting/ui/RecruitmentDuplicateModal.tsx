@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
-import { CHAPTERS } from "@/entities/organization/model/chapters"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import CloseThinIcon from "@/shared/assets/icon/close/CloseThinIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
@@ -33,14 +33,30 @@ export function RecruitmentDuplicateModal({
   onCancel,
   onConfirm,
 }: RecruitmentDuplicateModalProps) {
+  const { chapters: serverChapters, chapterNames: serverChapterNames } =
+    useSchoolChapterMap()
+
   const chapters = useMemo(
-    () => (role === "central" ? [...CHAPTERS] : ownChapter ? [ownChapter] : []),
-    [role, ownChapter],
+    () =>
+      role === "central" ? serverChapterNames : ownChapter ? [ownChapter] : [],
+    [role, ownChapter, serverChapterNames],
   )
   const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(
     chapters[0],
   )
   const [selectedSchools, setSelectedSchools] = useState<Set<string>>(new Set())
+
+  const currentSchools = useMemo(() => {
+    if (!activeChapter) return []
+    const chapterObj = serverChapters.find(
+      (c) => c.chapterName === activeChapter,
+    )
+    return chapterObj
+      ? chapterObj.schools.map((s) => s.schoolName)
+      : ((SCHOOLS_BY_BRANCH as Record<string, readonly string[]>)[
+          activeChapter
+        ] ?? [])
+  }, [activeChapter, serverChapters])
 
   // 모달을 다시 열 때마다 role에 맞는 기본 선택 상태로 되돌린다.
   // chapterAdmin은 본인 지부 학교 전체가 기본 선택, central은 빈 선택으로 시작.
@@ -49,12 +65,11 @@ export function RecruitmentDuplicateModal({
     setActiveChapter(chapters[0])
     setSelectedSchools(
       role === "chapterAdmin" && ownChapter
-        ? new Set(SCHOOLS_BY_BRANCH[ownChapter])
+        ? new Set(currentSchools)
         : new Set(),
     )
-  }, [open, role, ownChapter, chapters])
+  }, [open, role, ownChapter, chapters, currentSchools])
 
-  const currentSchools = activeChapter ? SCHOOLS_BY_BRANCH[activeChapter] : []
   const selectedList = useMemo(() => [...selectedSchools], [selectedSchools])
   const hasSelection = selectedList.length > 0
 
