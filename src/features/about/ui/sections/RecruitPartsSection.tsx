@@ -63,31 +63,37 @@ export function RecruitPartsSection() {
           </h3>
 
           <div className="flex w-full flex-col items-center gap-6.5 md:max-w-[576px] lg:max-w-[780px] xl:max-w-none">
-            <div
-              role="tablist"
-              className="flex flex-wrap items-center justify-center gap-3"
-            >
-              {ABOUT_RECRUIT.parts.map((part) => {
-                const isActive = part.id === activePart.id
-                return (
-                  <button
-                    key={part.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-controls="about-recruit-traits"
-                    onClick={() => setActivePartId(part.id)}
-                    className={cn(
-                      "cursor-pointer rounded-full px-4.5 py-1.75 text-xl leading-[1.4] tracking-[-0.2px] transition-colors",
-                      isActive
-                        ? "bg-teal-900 text-white"
-                        : "text-teal-gray-500 bg-[rgba(6,43,41,0.3)] hover:text-white",
-                    )}
-                  >
-                    {part.tabLabel}
-                  </button>
-                )
-              })}
+            {/* 좁은 화면에서는 칩 네 개가 한 줄에 들어가지 않는다. 한 줄을
+                유지하고 넘치면 이 줄만 가로로 민다.
+                안쪽을 w-max + mx-auto 로 둔다. 바깥에 justify-center 를 주면
+                넘칠 때 왼쪽이 잘린 채 그쪽으로 스크롤되지 않는다. */}
+            <div className="scrollbar-hide w-full overflow-x-auto">
+              <div
+                role="tablist"
+                className="mx-auto flex w-max items-center gap-3"
+              >
+                {ABOUT_RECRUIT.parts.map((part) => {
+                  const isActive = part.id === activePart.id
+                  return (
+                    <button
+                      key={part.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-controls="about-recruit-traits"
+                      onClick={() => setActivePartId(part.id)}
+                      className={cn(
+                        "shrink-0 cursor-pointer rounded-full px-4.5 py-1.75 text-xl leading-[1.4] tracking-[-0.2px] transition-colors",
+                        isActive
+                          ? "bg-teal-900 text-white"
+                          : "text-teal-gray-500 bg-[rgba(6,43,41,0.3)] hover:text-white",
+                      )}
+                    >
+                      {part.tabLabel}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             <div
