@@ -1,5 +1,3 @@
-import DocumentIcon from "@/shared/assets/icon/document/DocumentIcon"
-import EditIcon from "@/shared/assets/icon/edit/EditIcon"
 import TeamIcon from "@/shared/assets/icon/people/TeamIcon"
 
 import type { FlatNavItem } from "@/shared/config/navigation"
@@ -7,17 +5,17 @@ import type { FlatNavItem } from "@/shared/config/navigation"
 /**
  * 지원자(게스트 포함)가 쓰는 평면 3항목.
  *
- * `지원 방법` 은 아직 단독 라우트가 없다. 지원 폼(`/projects/apply/{roundId}`)
- * 에서 활성으로 표시되어야 하므로 매칭 경로만 두고 이동은 막아 둔다.
- * 안내 페이지가 정해지면 disabled 를 떼고 to 를 그 경로로 바꾼다.
+ * 아이콘 셋이 같은 것은 시안을 따른 결과다. 뜻이 다른 메뉴가 같은 그림을 쓰고
+ * 있어 디자이너에게 확인을 요청해 둔 상태다.
  */
 export const APPLICANT_SIDEBAR_ITEMS: FlatNavItem[] = [
   {
     id: "applicant-guide",
     title: "지원 방법",
-    to: "/projects/apply",
-    icon: EditIcon,
-    disabled: true,
+    to: "/projects/apply-guide",
+    // 지원 폼은 안내를 읽고 들어가는 다음 걸음이라 같은 항목이 켜진 채로 둔다.
+    matchPaths: ["/projects/apply"],
+    icon: TeamIcon,
   },
   {
     id: "applicant-notice",
@@ -29,11 +27,12 @@ export const APPLICANT_SIDEBAR_ITEMS: FlatNavItem[] = [
     id: "applicant-application",
     title: "내 지원서",
     to: "/projects/application",
-    icon: DocumentIcon,
+    icon: TeamIcon,
   },
 ]
 
 const APPLICANT_FLOW_BASE_PATHS = [
+  "/projects/apply-guide",
   "/projects/notice",
   "/projects/apply",
   "/projects/application",
@@ -42,7 +41,7 @@ const APPLICANT_FLOW_BASE_PATHS = [
 /**
  * 지원자 사이드바를 붙일 경로. 프로젝트 목록에는 사이드바가 없다.
  *
- * 세그먼트 경계까지 봐야 한다. 접두사만 보면 `/projects/apply-guide` 처럼
+ * 세그먼트 경계까지 봐야 한다. 접두사만 보면 `/projects/applications` 처럼
  * 이름이 겹치는 다른 화면이 생기는 순간 지원 흐름으로 딸려 들어온다.
  */
 export function isApplicantFlowPath(pathname: string): boolean {

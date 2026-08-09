@@ -8,16 +8,19 @@ import {
   canEditRecruitmentPost,
   groupPostsBySchool,
 } from "../model/recruitmentList"
+import { isRecruitmentClosed } from "../model/recruitmentPostStatus"
 import { RecruitmentPostMoreMenu } from "./RecruitmentPostMoreMenu"
 import { RecruitmentPostRow } from "./RecruitmentPostRow"
 import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
+import type { RecruitingListRole } from "../model/recruitingListRole"
 import type { RecruitmentPost } from "../model/recruitmentList"
 
 interface RecruitmentPostListCardProps {
   chapter: Chapter
+  role: RecruitingListRole
   posts: RecruitmentPost[]
   permittedSeasonIds: ReadonlySet<string>
   onPrivatize: (postId: string) => void
@@ -32,6 +35,8 @@ interface RecruitmentPostListCardProps {
 
 function PostRow({
   post,
+  role,
+  chapter,
   permittedSeasonIds,
   onPrivatize,
   onDuplicate,
@@ -41,6 +46,8 @@ function PostRow({
   archiveVisibleOnPage,
 }: {
   post: RecruitmentPost
+  role: RecruitingListRole
+  chapter: Chapter
   permittedSeasonIds: ReadonlySet<string>
   onPrivatize: (postId: string) => void
   onDuplicate: (postId: string) => void
@@ -57,6 +64,7 @@ function PostRow({
       title={post.title}
       startLabel={post.startLabel}
       endLabel={post.endLabel}
+      documentEndAt={post.documentEndAt}
       dateLabel={post.dateLabel}
       authorLabel={post.authorLabel}
       status={post.status}
@@ -64,6 +72,8 @@ function PostRow({
       rightAction={
         <RecruitmentPostMoreMenu
           status={post.status}
+          role={role}
+          ownChapter={chapter}
           onPublish={() => {}}
           onPrivatize={() => onPrivatize(post.postId)}
           onEdit={() =>
@@ -86,6 +96,7 @@ function PostRow({
 
 export function RecruitmentPostListCard({
   chapter,
+  role,
   posts,
   permittedSeasonIds,
   onPrivatize,
@@ -103,8 +114,10 @@ export function RecruitmentPostListCard({
 
   // DRAFT(비공개) 글은 학교별 공유 보관함에서만 노출
   const publishedPosts = posts.filter((post) => post.status !== "DRAFT")
+  // 뱃지와 같은 기준으로 거른다. 공개 상태만 보면 기간이 끝난 공고까지
+  // `모집 중` 으로 남아 걸러지지 않는다.
   const visiblePosts = recruitingOnly
-    ? publishedPosts.filter((post) => post.status === "OPEN")
+    ? publishedPosts.filter((post) => !isRecruitmentClosed(post))
     : publishedPosts
   const filteredEmpty = publishedPosts.length > 0 && visiblePosts.length === 0
 
@@ -178,6 +191,8 @@ export function RecruitmentPostListCard({
                       <PostRow
                         key={post.postId}
                         post={post}
+                        role={role}
+                        chapter={chapter}
                         permittedSeasonIds={permittedSeasonIds}
                         onPrivatize={onPrivatize}
                         onDuplicate={onDuplicate}
@@ -199,6 +214,8 @@ export function RecruitmentPostListCard({
             <PostRow
               key={post.postId}
               post={post}
+              role={role}
+              chapter={chapter}
               permittedSeasonIds={permittedSeasonIds}
               onPrivatize={onPrivatize}
               onDuplicate={onDuplicate}

@@ -3,7 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useMe } from "@/entities/member/hooks/useMe"
 import {
   isCentralCore,
-  isSchoolLeadership,
+  isChapterPresident,
+  isRecruitingEditor,
+  isSchoolStaff,
 } from "@/entities/member/model/identity"
 import { getCurrentGisuChallengerRecords } from "@/entities/member/view-mode/currentGisuRecords"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
@@ -61,29 +63,33 @@ export function RecruitmentQuotaPage() {
   )
   const viewerChapterId = viewerChapterRecord?.chapterId
   const viewerChapterName = viewerChapterRecord?.chapterName
-  const isSchoolScoped = isSchoolLeadership(me) && !isCentralCore(me)
+  // 중앙 총괄이 아닌 리크루팅 운영진은 자기 지부만 본다. 지부장과 학교
+  // 운영진(회장단·파트장·기타)이 모두 여기 해당한다. 역할 타입 하나로만 보면
+  // 빠지는 역할이 생겨 전체 지부가 열린다.
+  const isChapterScoped =
+    !isCentralCore(me) && (isChapterPresident(me) || isSchoolStaff(me))
   const canLoadRounds =
     !isMeLoading &&
-    (!isSchoolScoped ||
+    (!isChapterScoped ||
       (Boolean(viewerChapterId) && Boolean(viewerChapterName)))
-  const isAll = !isSchoolScoped && chapterTab === "all"
-  const activeChapter = isSchoolScoped ? viewerChapterName : chapterTab
+  const isAll = !isChapterScoped && chapterTab === "all"
+  const activeChapter = isChapterScoped ? viewerChapterName : chapterTab
 
   const { groups } = useAdminRecruitingRounds(undefined, {
     fresh: true,
     refetchInterval: QUOTA_PAGE_REFETCH_INTERVAL,
-    chapterId: isSchoolScoped ? viewerChapterId : undefined,
+    chapterId: isChapterScoped ? viewerChapterId : undefined,
     enabled: canLoadRounds,
   })
   const { chapters: serverChapters } = useSchoolChapterMap({
     refetchInterval: QUOTA_PAGE_REFETCH_INTERVAL,
   })
   const visibleGroups = useMemo(() => {
-    if (!isSchoolScoped || !viewerChapterId) return groups
+    if (!isChapterScoped || !viewerChapterId) return groups
     return groups.filter(
       (group) => String(group.chapterId) === String(viewerChapterId),
     )
-  }, [groups, isSchoolScoped, viewerChapterId])
+  }, [groups, isChapterScoped, viewerChapterId])
   const { data: activeGisuData } = useActiveGisu()
   const activeGisuId = activeGisuData?.gisuId
     ? String(activeGisuData.gisuId)
@@ -127,6 +133,20 @@ export function RecruitmentQuotaPage() {
     !isPermissionLoading &&
     seasonIds.length > 0 &&
     seasonIds.every((id) => permittedSeasonIds.has(String(id)))
+  // 아직 모집이 없는 학교는 첫 TO 입력이 곧 시즌 생성이다. 만들 리소스가 아직
+  // 없어 시즌 단위 권한 조회로는 판정할 수 없으므로 역할로 가른다.
+  //
+  // 학교 회장단은 같은 지부의 다른 학교까지 보이지만 만들 수 있는 것은 자기
+  // 학교뿐이다. 지부 전체를 열어 두면 눌러서 입력은 되는데 저장에서 거부당한다.
+  const viewerSchoolId = me?.schoolId
+  const canCreateSeason = useCallback(
+    (schoolId: string | undefined) => {
+      if (isMeLoading || !isRecruitingEditor(me)) return false
+      if (isCentralCore(me) || isChapterPresident(me)) return true
+      return schoolId != null && String(schoolId) === String(viewerSchoolId)
+    },
+    [me, isMeLoading, viewerSchoolId],
+  )
 
   const allChaptersData = useMemo(() => {
     const mapped = mapGroupsToChapterQuotaData(
@@ -136,7 +156,7 @@ export function RecruitmentQuotaPage() {
       activeGisuId,
     )
 
-    if (!isSchoolScoped) return mapped
+    if (!isChapterScoped) return mapped
     if (!viewerChapterName) return []
     return mapped.filter(
       (chapterData) => chapterData.chapter === viewerChapterName,
@@ -144,7 +164,7 @@ export function RecruitmentQuotaPage() {
   }, [
     activeGisuId,
     visibleGroups,
-    isSchoolScoped,
+    isChapterScoped,
     seasonConfigsMap,
     serverChapters,
     viewerChapterName,
@@ -386,7 +406,11 @@ export function RecruitmentQuotaPage() {
               String(g.schoolId) === String(row.schoolId) &&
               String(g.gisuId) === String(row.gisuId),
           )
-          return canEditEverySeason || canEditSeason(targetGroup?.seasonId)
+          return (
+            canCreateSeason(row.schoolId) ||
+            canEditEverySeason ||
+            canEditSeason(targetGroup?.seasonId)
+          )
         }
         return false
       },
@@ -521,7 +545,16 @@ export function RecruitmentQuotaPage() {
     : selectedChapterData.totals
 
   const showAutoAllocateButton = !isAll && canEditEverySeason
-  const showSaveButton = canEditAny
+  // 모집이 하나도 없는 지부에서는 기존 시즌이 없어 canEditAny 가 거짓이다. 행은
+  // 열어 두고 저장 버튼만 감추면, 첫 인원을 넣어 놓고 저장할 방법이 없다.
+  const canCreateAnyVisibleSeason = chaptersDataWithEdits
+    .filter((chapterData) => isAll || chapterData.chapter === activeChapter)
+    .some((chapterData) =>
+      chapterData.schools.some(
+        (school) => !school.seasonId && canCreateSeason(school.schoolId),
+      ),
+    )
+  const showSaveButton = canEditAny || canCreateAnyVisibleSeason
 
   const pageTitle = isAll ? "UMC 11th" : (activeChapter ?? "")
   const statusCardTitle = isAll ? "전체 지원자 현황" : "지부 지원자 현황"
@@ -539,7 +572,7 @@ export function RecruitmentQuotaPage() {
         className="pl-3"
       />
 
-      {!isSchoolScoped && !isMeLoading && (
+      {!isChapterScoped && !isMeLoading && (
         <ChapterTabs value={chapterTab} onValueChange={handleTabChange} />
       )}
 
@@ -637,6 +670,7 @@ export function RecruitmentQuotaPage() {
                     onManualEdit={handleManualEdit}
                     onErrorExceeded={handleErrorExceeded}
                     canEditSeason={canEditSeason}
+                    canCreateSeason={canCreateSeason}
                     onSchoolDataChange={(school) =>
                       handleSchoolDataChange(chapterData.chapter, school)
                     }
@@ -657,6 +691,7 @@ export function RecruitmentQuotaPage() {
                   onManualEdit={handleManualEdit}
                   onErrorExceeded={handleErrorExceeded}
                   canEditSeason={canEditSeason}
+                  canCreateSeason={canCreateSeason}
                   onSchoolDataChange={(school) =>
                     handleSchoolDataChange(selectedChapterData.chapter, school)
                   }

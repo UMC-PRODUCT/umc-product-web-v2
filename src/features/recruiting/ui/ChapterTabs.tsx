@@ -1,7 +1,6 @@
 import { useMemo } from "react"
 
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
-import { CHAPTERS } from "@/entities/organization/model/chapters"
 import { cn } from "@/shared/lib/utils"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 
@@ -38,7 +37,7 @@ export function ChapterTabs({
         }),
       )
     }
-    return CHAPTERS.map((chapter) => ({ value: chapter, label: chapter }))
+    return []
   }, [customChapters, serverChapters])
 
   const items = useMemo(

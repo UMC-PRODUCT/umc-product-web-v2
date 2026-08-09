@@ -5,6 +5,7 @@ import {
   getChangedSchoolQuotaRows,
   getConflictedSchoolQuotaRows,
   getSchoolQuotaIdentity,
+  getSchoolQuotaRowsSignature,
   mergeSchoolQuotaRows,
   type SchoolQuotaEdits,
   type SchoolQuotaRow,
@@ -23,6 +24,48 @@ const createRow = (
   mobilePe: 4,
   total: 10,
   ...overrides,
+})
+
+describe("getSchoolQuotaRowsSignature", () => {
+  // 상위가 목록을 다시 만들기만 해도 새 배열이 된다. 그때마다 편집 중이던
+  // 값을 버리면 방금 친 숫자가 지워진다.
+  it("내용이 같으면 배열이 달라도 같은 지문을 낸다", () => {
+    const rows = [createRow(), createRow({ seasonId: "2", schoolId: "20" })]
+    const rebuilt = rows.map((row) => ({ ...row }))
+
+    expect(rows).not.toBe(rebuilt)
+    expect(getSchoolQuotaRowsSignature(rebuilt)).toBe(
+      getSchoolQuotaRowsSignature(rows),
+    )
+  })
+
+  it("인원이 바뀌면 지문이 달라진다", () => {
+    const rows = [createRow()]
+    const changed = [createRow({ pm: 9 })]
+
+    expect(getSchoolQuotaRowsSignature(changed)).not.toBe(
+      getSchoolQuotaRowsSignature(rows),
+    )
+  })
+
+  it("학교가 늘면 지문이 달라진다", () => {
+    const rows = [createRow()]
+    const added = [...rows, createRow({ seasonId: "2", schoolId: "20" })]
+
+    expect(getSchoolQuotaRowsSignature(added)).not.toBe(
+      getSchoolQuotaRowsSignature(rows),
+    )
+  })
+
+  // 설정이 뒤늦게 도착해 시즌이 붙는 것은 실제 변화다. 다시 맞춰야 한다.
+  it("시즌이 새로 붙으면 지문이 달라진다", () => {
+    const before = [createRow({ seasonId: undefined })]
+    const after = [createRow({ seasonId: "1" })]
+
+    expect(getSchoolQuotaRowsSignature(after)).not.toBe(
+      getSchoolQuotaRowsSignature(before),
+    )
+  })
 })
 
 describe("getChangedSchoolQuotaRows", () => {

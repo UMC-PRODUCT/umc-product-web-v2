@@ -53,7 +53,9 @@ export function TextQuestionField({
     const el = textareaRef.current
     if (!el) return
     el.style.height = "auto"
-    el.style.height = `${el.scrollHeight}px`
+    if (el.scrollHeight > 0) {
+      el.style.height = `${el.scrollHeight}px`
+    }
   }, [value, textareaRef])
 
   return (

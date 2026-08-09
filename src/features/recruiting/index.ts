@@ -45,6 +45,7 @@ export type {
   SchoolQuotaRow,
 } from "./model/recruitmentQuota"
 export { ApplicantListPage } from "./ui/ApplicantListPage"
+export { RecruitingApplyGuidePage } from "./ui/apply-guide/RecruitingApplyGuidePage"
 export { RecruitingApplyForm } from "./ui/apply/RecruitingApplyForm"
 export { RecruitingApplyPage } from "./ui/apply/RecruitingApplyPage"
 export { ChapterQuotaTableCard } from "./ui/ChapterQuotaTableCard"

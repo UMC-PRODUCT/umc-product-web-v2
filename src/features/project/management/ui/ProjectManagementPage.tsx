@@ -13,7 +13,6 @@ import {
 } from "@/entities/member/model/identity"
 import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
-import { CHAPTERS } from "@/entities/organization/model/chapters"
 import { projectKeys } from "@/features/project/new/api/queryKeys"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
@@ -128,7 +127,7 @@ function toValidProjectId(project: MatchingProject): number | null {
 export function ProjectManagementPage() {
   const navigate = useNavigate()
   const { me } = useViewerIdentity()
-  const [selectedChapter, setSelectedChapter] = useState<string>(CHAPTERS[0])
+  const [selectedChapter, setSelectedChapter] = useState<string>("")
 
   const isAdminScope = isAnyOperator(me)
   const isPm = isCurrentTermPm(me)
@@ -161,6 +160,12 @@ export function ProjectManagementPage() {
     enabled: useGroupedView && !!gisuId,
   })
 
+  const chapterNames = useMemo(
+    () => (chaptersQuery.data?.chapters ?? []).map((c) => c.chapterName),
+    [chaptersQuery.data],
+  )
+  const activeChapter = selectedChapter || (chapterNames[0] ?? "")
+
   const projects: MatchingProject[] = useMemo(() => {
     const hasFullAccess = isCentralCore(me)
     const list = managedQuery.data ?? []
@@ -175,9 +180,9 @@ export function ProjectManagementPage() {
   const selectedChapterInfo = useMemo(() => {
     if (!useGroupedView) return undefined
     return chaptersQuery.data?.chapters.find(
-      (chapter) => chapter.chapterName === selectedChapter,
+      (chapter) => chapter.chapterName === activeChapter,
     )
-  }, [useGroupedView, chaptersQuery.data, selectedChapter])
+  }, [useGroupedView, chaptersQuery.data, activeChapter])
 
   const selectedChapterId = selectedChapterInfo?.chapterId
     ? Number(selectedChapterInfo.chapterId)
@@ -295,8 +300,8 @@ export function ProjectManagementPage() {
           {useGroupedView && (
             <div className="min-w-0">
               <SegmentButton
-                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
-                value={selectedChapter}
+                items={chapterNames.map((ch) => ({ value: ch, label: ch }))}
+                value={activeChapter}
                 onValueChange={setSelectedChapter}
                 className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
                 itemClassName="min-w-0 flex-1 basis-0 shrink px-2"

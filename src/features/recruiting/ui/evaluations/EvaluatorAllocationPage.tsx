@@ -4,10 +4,12 @@ import {
   DragOverlay,
   type DragStartEvent,
 } from "@dnd-kit/core"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
+import { useMe } from "@/entities/member/hooks/useMe"
 import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -26,6 +28,7 @@ import {
   SCHOOL_STAFF_PANEL_ID,
   type Staff,
 } from "../../model/evaluatorAllocation"
+import { resolveViewerSchool } from "../../model/recruitingRole"
 import { DroppableRecruitmentBox } from "./DroppableRecruitmentBox"
 import { EvaluatorSharedNote } from "./EvaluatorSharedNote"
 import { SchoolStaffPanel } from "./SchoolStaffPanel"
@@ -37,14 +40,57 @@ interface EvaluatorAllocationPageProps {
 export function EvaluatorAllocationPage({
   roundId,
 }: EvaluatorAllocationPageProps = {}) {
+  const { data: me } = useMe()
+  const viewerSchool = resolveViewerSchool(me)
   const { groups } = useAdminRecruitingRounds()
-  const activeRoundId = roundId ?? groups[0]?.rounds[0]?.roundId ?? null
 
-  const activeGroup = activeRoundId
+  const mySchoolGroup = useMemo(() => {
+    if (!groups.length) return null
+    const hasSchoolIdentity = Boolean(me?.schoolId || viewerSchool)
+
+    if (me?.schoolId) {
+      const foundById = groups.find(
+        (group) => String(group.schoolId) === String(me.schoolId),
+      )
+      if (foundById) return foundById
+    }
+    if (viewerSchool) {
+      const formattedViewer = formatSchoolName(viewerSchool)
+      const foundByName = groups.find(
+        (group) =>
+          group.schoolName === viewerSchool ||
+          formatSchoolName(group.schoolName) === formattedViewer,
+      )
+      if (foundByName) return foundByName
+    }
+    if (hasSchoolIdentity) {
+      // 접속자 학교 정보가 존재하지만 groups에 해당 학교 모집이 없는 경우
+      // 타 학교(groups[0])로 폴백하지 않고 null을 반환합니다.
+      return null
+    }
+    return groups[0] ?? null
+  }, [groups, me?.schoolId, viewerSchool])
+
+  const requestedRoundId = roundId ?? mySchoolGroup?.rounds[0]?.roundId ?? null
+
+  const activeGroup = requestedRoundId
     ? (groups.find((group) =>
-        group.rounds.some((r) => String(r.roundId) === String(activeRoundId)),
-      ) ?? groups[0])
-    : groups[0]
+        group.rounds.some(
+          (r) => String(r.roundId) === String(requestedRoundId),
+        ),
+      ) ?? mySchoolGroup)
+    : mySchoolGroup
+
+  const activeRound =
+    activeGroup?.rounds.find(
+      (r) => String(r.roundId) === String(requestedRoundId),
+    ) ??
+    activeGroup?.rounds[0] ??
+    null
+
+  const resolvedRoundId = activeRound?.roundId
+    ? String(activeRound.roundId)
+    : null
 
   // 배정 권한은 시즌 단위다. 권한을 확인하기 전에는 잠가 둔다.
   const seasonIds = activeGroup?.seasonId ? [activeGroup.seasonId] : []
@@ -55,19 +101,22 @@ export function EvaluatorAllocationPage({
     activeGroup?.seasonId != null &&
     permittedSeasonIds.has(String(activeGroup.seasonId))
 
-  const schoolId = activeGroup?.schoolId
+  const schoolId = activeGroup?.schoolId ?? me?.schoolId
   const gisuId = activeGroup?.gisuId
-  const schoolName = activeGroup?.schoolName ?? "교내"
+  const chapterId = activeGroup?.chapterId
+  const schoolName =
+    activeGroup?.schoolName ?? formatSchoolName(viewerSchool) ?? "교내"
 
   const { data: staffList = [], isSuccess: isStaffSuccess } = useSchoolStaff(
     schoolId,
     gisuId,
+    chapterId,
   )
   const {
     data: serverEvaluators,
     isSuccess: isEvaluatorsSuccess,
     isFetching,
-  } = useRoundEvaluators(activeRoundId)
+  } = useRoundEvaluators(resolvedRoundId)
   const saveMutation = useSaveEvaluatorAllocation()
 
   const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
@@ -80,7 +129,7 @@ export function EvaluatorAllocationPage({
   const savedSnapshotRef = useRef<Staff[] | null>(null)
 
   const isInitialized = Boolean(
-    activeRoundId && initializedRoundId === activeRoundId,
+    resolvedRoundId && initializedRoundId === resolvedRoundId,
   )
 
   useEffect(() => {
@@ -89,7 +138,7 @@ export function EvaluatorAllocationPage({
     savedSnapshotRef.current = null
     editRevisionRef.current = 0
     sessionTokenRef.current += 1
-  }, [activeRoundId])
+  }, [resolvedRoundId])
 
   useEffect(() => {
     if (!serverEvaluators || isDirty) return
@@ -104,15 +153,15 @@ export function EvaluatorAllocationPage({
 
     savedSnapshotRef.current = null
     setAssignedEvaluators(serverStaff)
-    if (activeRoundId && isStaffSuccess && isEvaluatorsSuccess) {
-      setInitializedRoundId(activeRoundId)
+    if (resolvedRoundId && isStaffSuccess && isEvaluatorsSuccess) {
+      setInitializedRoundId(resolvedRoundId)
     }
   }, [
     serverEvaluators,
     staffList,
     isDirty,
     isFetching,
-    activeRoundId,
+    resolvedRoundId,
     isStaffSuccess,
     isEvaluatorsSuccess,
   ])
@@ -135,14 +184,14 @@ export function EvaluatorAllocationPage({
   })
 
   function handleSave() {
-    if (!activeRoundId || !isInitialized) return
+    if (!resolvedRoundId || !isInitialized) return
     const requestRevision = editRevisionRef.current
     const requestSnapshot = assignedEvaluators
     const requestToken = sessionTokenRef.current
 
     saveMutation.mutate(
       {
-        roundId: activeRoundId,
+        roundId: resolvedRoundId,
         assignedEvaluators: requestSnapshot,
       },
       {
@@ -178,19 +227,17 @@ export function EvaluatorAllocationPage({
     if (!isInitialized || !canEdit) return
     const { active, over } = event
 
-    if (!over) return
-
     const staff = active.data.current
     if (!isStaff(staff)) return
 
-    const targetId = resolveDropTargetId(
-      String(over.id),
-      assignedEvaluators,
-      staffList,
-    )
-    if (!targetId) return
+    const targetId = over
+      ? resolveDropTargetId(String(over.id), assignedEvaluators, staffList)
+      : null
 
-    if (targetId === SCHOOL_STAFF_PANEL_ID) {
+    // 담당자 영역 밖으로 끌어내면 배정을 푼다. 명단으로 되돌려 놓는 것과 같은
+    // 뜻이라, 정확히 명단 위에 떨어뜨렸는지까지 따지지 않는다. 빈 곳에 놓았을 때
+    // 아무 일도 일어나지 않으면 왜 안 풀리는지 알 길이 없다.
+    if (targetId === null || targetId === SCHOOL_STAFF_PANEL_ID) {
       const isAssigned = assignedEvaluators.some((item) => item.id === staff.id)
       if (!isAssigned) return
 
@@ -275,19 +322,26 @@ export function EvaluatorAllocationPage({
 
             {/* 공고 */}
             <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
-              <DroppableRecruitmentBox
-                id={RECRUITMENT_BOX_ID}
-                assignedEvaluators={assignedEvaluators}
-                selectedChipId={selectedChipId}
-                onSelectChip={setSelectedChipId}
-                onClear={() => {
-                  if (!isInitialized || !canEdit) return
-                  editRevisionRef.current += 1
-                  setAssignedEvaluators([])
-                  setIsDirty(true)
-                  setSelectedChipId(null)
-                }}
-              />
+              {activeRound ? (
+                <DroppableRecruitmentBox
+                  id={RECRUITMENT_BOX_ID}
+                  round={activeRound}
+                  assignedEvaluators={assignedEvaluators}
+                  selectedChipId={selectedChipId}
+                  onSelectChip={setSelectedChipId}
+                  onClear={() => {
+                    if (!isInitialized || !canEdit) return
+                    editRevisionRef.current += 1
+                    setAssignedEvaluators([])
+                    setIsDirty(true)
+                    setSelectedChipId(null)
+                  }}
+                />
+              ) : (
+                <div className="border-teal-gray-100 text-body-2-medium text-teal-gray-400 box-border flex h-68.5 w-full items-center justify-center rounded-[12px] border bg-white">
+                  배정할 모집 공고가 없습니다
+                </div>
+              )}
             </div>
           </div>
 

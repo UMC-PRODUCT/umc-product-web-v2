@@ -2,7 +2,8 @@ import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
-import { CHAPTERS, isChapter } from "@/entities/organization/model/chapters"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
+import { isChapter } from "@/entities/organization/model/chapters"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
@@ -51,19 +52,19 @@ import type { RecruitingScope } from "../model/recruitingScope"
 import type { RecruitmentPost, RecruitmentSort } from "../model/recruitmentList"
 
 interface RecruitmentListPageProps {
-  // 테스트 라우트(/test/recruiting-recruitments)에서 역할별 화면을 미리 보기 위한 override.
-  // 생략하면 로그인한 사용자의 실제 역할로 판정한다.
   role?: RecruitingListRole
   useMockData?: boolean
 }
 
-// 테스트 라우트 전용: 실 데이터 없이 role만으로 조회 스코프를 흉내낸다.
-// 실 데이터 경로는 resolveRecruitingScope(권한 조회 결과)를 그대로 쓴다.
-function buildMockScope(role: RecruitingListRole): RecruitingScope {
+function buildMockScope(
+  role: RecruitingListRole,
+  serverChapterNames: string[],
+): RecruitingScope {
+  const branchMap = SCHOOLS_BY_BRANCH as Record<string, readonly string[]>
   if (role === "central") {
     return {
       groups: [],
-      chapters: [...CHAPTERS],
+      chapters: serverChapterNames,
       schools: [],
       isFallback: false,
     }
@@ -72,7 +73,7 @@ function buildMockScope(role: RecruitingListRole): RecruitingScope {
     return {
       groups: [],
       chapters: [RECRUITING_MY_CHAPTER_MOCK],
-      schools: [...SCHOOLS_BY_BRANCH[RECRUITING_MY_CHAPTER_MOCK]],
+      schools: [...(branchMap[RECRUITING_MY_CHAPTER_MOCK] ?? [])],
       isFallback: false,
     }
   }
@@ -108,6 +109,7 @@ export function RecruitmentListPage({
 }: RecruitmentListPageProps) {
   const navigate = useNavigate()
   const { data: me } = useMe()
+  const { chapterNames: serverChapterNames } = useSchoolChapterMap()
   // RecruitmentCreatePage(BasicInfoForm)가 진입 지점별 필드 잠금에 쓰는 값이라
   // role 자체는 계속 넘긴다. 이 화면의 조회 범위는 더 이상 role로 가르지 않고
   // resolveRecruitingScope의 실제 EDIT 권한 결과를 따른다.
@@ -132,7 +134,11 @@ export function RecruitmentListPage({
     isLoading: isRoundsLoading,
     isError: isRoundsError,
     isForbidden,
-  } = useAdminRecruitingRounds(sort)
+    refetch: refetchRounds,
+    // 다른 운영진이 공고를 올리거나 마감 처리하는 목록이다. 5분 캐시로 두면 그
+    // 변화가 한참 뒤에 보인다. 주기적으로 캐묻는 대신 화면에 들어오거나 창으로
+    // 돌아온 순간에만 다시 받아 온다.
+  } = useAdminRecruitingRounds(sort, { fresh: true })
 
   // 편집 권한은 role이 아니라 시즌 단위 실제 EDIT 권한으로 판정한다(canEditRecruitmentPost 참고).
   const seasonIds = useMemo(
@@ -148,7 +154,10 @@ export function RecruitmentListPage({
     () => resolveRecruitingScope(groups, permittedSeasonIds, viewerSchool),
     [groups, permittedSeasonIds, viewerSchool],
   )
-  const mockScope = useMemo(() => buildMockScope(role), [role])
+  const mockScope = useMemo(
+    () => buildMockScope(role, serverChapterNames),
+    [role, serverChapterNames],
+  )
   const activeScope = useMockData ? mockScope : scope
   // 세그먼트(지부/학교 탭) 노출은 현재 조회된 데이터 양이 아니라 역할 자체로 정한다.
   // central=지부 세그먼트, chapterAdmin/schoolStaff=학교 세그먼트 — 게시글이
@@ -269,25 +278,40 @@ export function RecruitmentListPage({
       })
       return
     }
+    if (cloneRound.isPending) return
     const post = basePosts.find((item) => item.postId === postId)
     if (!post) return
-    // 같은 글을 여러 번 복제해도 제목이 겹치지 않도록 사용 가능한 제목을 먼저 찾는다.
-    void resolveAvailableTitle(`${post.title} 복제본`, (title) =>
-      checkRecruitingRoundTitleAvailability(post.seasonId, title).catch(
-        () => true,
-      ),
-    ).then((title) => {
-      cloneRound.mutate({
-        seasonId: post.seasonId,
-        roundId: postId,
-        payload: {
-          targetSeasonId: post.seasonId,
-          title,
-          type: post.type,
-        },
+    // roundNo는 화면에 캐시된 groups(staleTime 5분)가 아니라 매번 새로 받아온
+    // 목록으로 계산해야 한다. 캐시가 갱신되기 전에 연달아 복제하면 직전 복제로
+    // 이미 쓰인 번호를 또 계산해 RECRUITING-0116("이전 차수 다음 번호") 충돌이 난다.
+    void refetchRounds().then(({ data: freshGroups }) => {
+      const sameSeasonRounds =
+        freshGroups?.find((group) => group.seasonId === post.seasonId)
+          ?.rounds ?? []
+      const nextRoundNo =
+        Math.max(0, ...sameSeasonRounds.map((round) => Number(round.roundNo))) +
+        1
+      // 같은 글을 여러 번 복제해도 제목이 겹치지 않도록 사용 가능한 제목을 먼저 찾는다.
+      void resolveAvailableTitle(`${post.title} 복제본`, (title) =>
+        checkRecruitingRoundTitleAvailability(post.seasonId, title).catch(
+          () => true,
+        ),
+      ).then((title) => {
+        cloneRound.mutate({
+          seasonId: post.seasonId,
+          roundId: postId,
+          payload: {
+            targetSeasonId: post.seasonId,
+            title,
+            type: "ADDITIONAL",
+            roundNo: nextRoundNo,
+          },
+        })
       })
     })
   }
+
+  const branchMap = SCHOOLS_BY_BRANCH as Record<string, readonly string[]>
 
   // 공유 보관함이 보이는 뷰로 전환 (지부 탭이 없는 스코프는 학교 탭만 바꾸고,
   // 지부 탭이 있는 스코프는 해당 학교가 속한 지부 탭 + 학교 드릴다운으로 전환)
@@ -296,8 +320,8 @@ export function RecruitmentListPage({
       setSchoolTab(school)
       return
     }
-    const targetChapter = CHAPTERS.find((chapter) =>
-      (SCHOOLS_BY_BRANCH[chapter] as readonly string[]).includes(school),
+    const targetChapter = serverChapterNames.find((chapter: string) =>
+      (branchMap[chapter] ?? []).includes(school),
     )
     if (targetChapter) setChapterTab(targetChapter)
     setSelectedSchool(school)
@@ -306,14 +330,14 @@ export function RecruitmentListPage({
   // central 세그먼트는 데이터 유무와 무관하게 조직의 전체 지부를 보여준다.
   const centralChapters =
     chapterTab === "all"
-      ? [...CHAPTERS]
+      ? serverChapterNames
       : isChapter(chapterTab)
         ? [chapterTab]
         : []
   const chapterGroups = groupPostsByChapter(viewPosts, centralChapters)
 
   const ownScopeSchools = ownScopeChapter
-    ? SCHOOLS_BY_BRANCH[ownScopeChapter]
+    ? (branchMap[ownScopeChapter] ?? [])
     : []
   // 학교 탭이 없는 단일 학교 스코프에서는 schoolTab이 항상 "all"로 머무르므로,
   // 헤딩·보관함·생성 버튼 판단에는 실제 학교 이름을 대신 쓴다.
@@ -432,6 +456,7 @@ export function RecruitmentListPage({
                     </div>
                     <RecruitmentPostListCard
                       chapter={chapter}
+                      role={role}
                       posts={scopedPosts}
                       permittedSeasonIds={permittedSeasonIds}
                       onPrivatize={handlePrivatize}
@@ -450,6 +475,7 @@ export function RecruitmentListPage({
                         </h2>
                         <RecruitmentDraftArchiveCard
                           chapter={chapter}
+                          role={role}
                           posts={scopedPosts}
                           permittedSeasonIds={permittedSeasonIds}
                           onPublish={handlePublish}
@@ -469,6 +495,7 @@ export function RecruitmentListPage({
           {!showChapterTabs && ownScopeChapter && (
             <RecruitmentOwnScopeSection
               chapter={ownScopeChapter}
+              role={role}
               posts={viewPosts}
               schoolTab={ownScopeSchoolTab}
               permittedSeasonIds={permittedSeasonIds}

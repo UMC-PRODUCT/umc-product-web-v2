@@ -84,15 +84,15 @@ export function RecruitmentAnnouncementForm({
 
   // Round PUT은 완전 교체라 recruitableTracks/기간 등 필수 필드를 스토어의
   // 최신 값으로 매번 전부 채워 보내야 한다(announcement만 담아 보내면 400).
-  // interviewRequired는 2단계 진입 시점에 이미 false로 고정된 상태로만 Round가
-  // 만들어졌으므로(면접 있는 모집은 그 전에 막힘) 여기서도 동일하게 false로 보낸다.
+  // interviewRequired도 1단계에서 고른 값을 그대로 보내야 한다 — 여기서 false로
+  // 고정하면 1·2단계에서 설정한 면접 여부·기간이 게시 시점에 사라진다.
   const buildRoundUpdatePayload = () =>
     buildRoundConfigurationPayload({
       title: composeRecruitmentTitle(previewTitle, basicInfo.footer),
       recruitableTracks: getRecruitableTracks(enabledParts),
       secondChoiceEnabled,
       periodForm: basicInfo.periodForm,
-      interviewRequired: false,
+      interviewRequired: basicInfo.interviewRequired,
       announcement,
       contactText,
     })
@@ -251,7 +251,7 @@ export function RecruitmentAnnouncementForm({
         title="임시 저장 완료"
         content="임시저장이 완료되었습니다."
         confirmText="확인"
-        onConfirm={() => navigate({ to: "/recruiting/recruitments" })}
+        onConfirm={() => setShowTempSaveModal(false)}
       />
     </div>
   )

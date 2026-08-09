@@ -77,7 +77,15 @@ export function useStageEvaluations(
     ),
     queryFn: () => getStageEvaluations(roundId!, applicationId, apiStage!),
     enabled: evaluationsEnabled,
-    staleTime: 60 * 1000,
+    // 한 지원서를 여러 운영진이 같이 본다. 다른 평가자가 방금 낸 평가를 보려면
+    // 다시 물어봐야 하는데, 주기적으로 캐물으면 아무도 안 보는 동안에도 요청이
+    // 나간다. 대신 사용자가 화면으로 돌아온 순간에만 확인하고, 보고 있는 채로
+    // 확인하고 싶으면 새로고침 버튼을 쓰게 한다.
+    //
+    // 내가 쓰고 있던 평가 초안은 내 평가 내용으로만 다시 맞춰지므로 지워지지 않는다.
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   })
 
   const memberIds = useMemo(() => {
@@ -179,6 +187,11 @@ export function useStageEvaluations(
     hasManagePermission: hasManagePermission === true,
     canSubmit: eligibility.canSubmit,
     isLoading: evaluationsQuery.isLoading,
-    isError: evaluationsQuery.isError,
+    // 첫 조회 실패만 오류로 본다. 창으로 돌아올 때마다 다시 묻는데, 그 재조회가
+    // 한 번 실패했다고 이미 받아 둔 평가 목록을 오류 화면으로 바꾸면 안 된다.
+    isError: evaluationsQuery.isLoadingError,
+    // 화면을 보고 있는 채로 다른 평가자의 평가를 확인하고 싶을 때 쓴다.
+    refetch: evaluationsQuery.refetch,
+    isRefetching: evaluationsQuery.isFetching,
   }
 }
