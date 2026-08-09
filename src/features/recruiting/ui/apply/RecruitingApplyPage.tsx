@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import { getPublicTermByType } from "@/shared/api/terms"
+import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import { Button } from "@/shared/ui/Button"
+import { Modal } from "@/shared/ui/Modal"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
@@ -20,8 +22,7 @@ import {
 } from "../../hooks/useApplyMutations"
 import { clearApplyDraft, readApplyDraft } from "../../model/applyDraftStorage"
 import { buildApplyAnswerPayload } from "../../model/applyPayload"
-import { AnonymousPrivacyConsent } from "./AnonymousPrivacyConsent"
-import { ApplicantInfoFields } from "./ApplicantInfoFields"
+import { RecruitmentNoticePage } from "../RecruitmentNoticePage"
 import { RecruitingApplyForm } from "./RecruitingApplyForm"
 
 import type { ApplyAnswerValue } from "../../model/applyForm"
@@ -68,7 +69,7 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
   const addToast = useToastStore((state) => state.addToast)
   const isAuthed = useAuthStore((state) => state.isAuthed)
   const isAnonymous = !isAuthed
-  const { data: me, isLoading: isMeLoading } = useMe()
+  const { data: me } = useMe()
   const memberId = me?.id ?? ""
   const anonymousSessionId = useMemo(
     () => (isAnonymous ? getOrCreateAnonymousSessionId() : ""),
@@ -91,6 +92,13 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
   const [applicationKey, setApplicationKey] = useState<string | undefined>()
   const [resumeDecided, setResumeDecided] = useState(false)
   const [privacyAgreed, setPrivacyAgreed] = useState(false)
+
+  const handleApplicantInfoChange = useCallback(
+    (partial: Partial<ApplicantInfo>) => {
+      setApplicant((prev) => ({ ...prev, ...partial }))
+    },
+    [],
+  )
 
   // 로그인 정보로 한 번만 채운다. me 가 다시 조회될 때마다 채우면 사용자가
   // 일부러 비운 칸이 되살아난다(빈 문자열은 falsy 라 폴백에 걸린다).
@@ -255,85 +263,90 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      {savedDraft && !resumeDecided && (
-        <div className="flex items-center justify-between gap-4 rounded-[12px] border border-teal-300 bg-teal-50 px-6 py-5">
-          <p className="text-body-2-regular text-teal-gray-700 whitespace-pre-line">
-            {
-              "이 브라우저에 임시저장한 지원서가 있습니다.\n이어서 작성하면 같은 지원서에 저장되지만, 이전에 쓴 답변은 다시 불러오지 못합니다."
-            }
-          </p>
-          <div className="flex shrink-0 gap-2">
-            <Button
-              variant="weak"
-              color="neutral"
-              size="s"
-              onClick={() => {
-                clearApplyDraft(roundId, storageIdentity)
-                if (isAnonymous) clearAnonymousApplicationSession()
-                setApplicationKey(undefined)
-                setResumeDecided(true)
-              }}
-            >
-              새로 시작
-            </Button>
-            <Button size="s" onClick={() => setResumeDecided(true)}>
-              이어서 작성
-            </Button>
-          </div>
-        </div>
-      )}
+    <>
+      <RecruitmentNoticePage />
+      <Modal.Root
+        open
+        onOpenChange={(open) => {
+          if (!open) void navigate({ to: "/projects/notice" })
+        }}
+      >
+        <Modal.Portal>
+          <Modal.Overlay tone="deep" />
+          <Modal.Content className="max-h-[calc(100dvh-2rem)] w-[928px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[12px] bg-transparent p-0 shadow-[0px_4px_8px_rgba(239,240,240,0.3)] focus:outline-none">
+            <Modal.Close asChild>
+              <button
+                type="button"
+                aria-label="지원서 닫기"
+                className="text-teal-gray-600 absolute top-[95px] right-[10px] z-10 flex size-[26px] items-center justify-center"
+              >
+                <CloseIcon className="size-6" />
+              </button>
+            </Modal.Close>
+            <div className="flex w-full flex-col gap-6">
+              {savedDraft && !resumeDecided && (
+                <div className="flex items-center justify-between gap-4 rounded-[12px] border border-teal-300 bg-teal-50 px-6 py-5">
+                  <p className="text-body-2-regular text-teal-gray-700 whitespace-pre-line">
+                    {
+                      "이 브라우저에 임시저장한 지원서가 있습니다.\n이어서 작성하면 같은 지원서에 저장되지만, 이전에 쓴 답변은 다시 불러오지 못합니다."
+                    }
+                  </p>
+                  <div className="flex shrink-0 gap-2">
+                    <Button
+                      variant="weak"
+                      color="neutral"
+                      size="s"
+                      onClick={() => {
+                        clearApplyDraft(roundId, storageIdentity)
+                        if (isAnonymous) clearAnonymousApplicationSession()
+                        setApplicationKey(undefined)
+                        setResumeDecided(true)
+                      }}
+                    >
+                      새로 시작
+                    </Button>
+                    <Button size="s" onClick={() => setResumeDecided(true)}>
+                      이어서 작성
+                    </Button>
+                  </div>
+                </div>
+              )}
 
-      <ApplicantInfoFields
-        value={applicant}
-        onChange={(partial) =>
-          setApplicant((prev) => ({ ...prev, ...partial }))
-        }
-        recruitableTracks={round.recruitableTracks}
-        secondChoiceEnabled={round.secondChoiceEnabled}
-        disabled={
-          saveDraft.isPending || submit.isPending || (isAuthed && isMeLoading)
-        }
-      />
-
-      {isAnonymous && (
-        <AnonymousPrivacyConsent
-          term={privacyTermQuery.data}
-          checked={privacyAgreed}
-          disabled={saveDraft.isPending || submit.isPending}
-          onChange={setPrivacyAgreed}
-        />
-      )}
-
-      <p className="text-label-1-medium text-teal-gray-400 px-1">
-        임시저장한 지원서는 이 브라우저에서만 이어서 작성할 수 있습니다.
-      </p>
-
-      {applicant.firstChoice == null ? (
-        <Notice>지원할 파트를 먼저 선택해 주세요.</Notice>
-      ) : isStructureFetching && !config ? (
-        <Notice>지원 문항을 불러오는 중입니다.</Notice>
-      ) : config ? (
-        <RecruitingApplyForm
-          config={config}
-          applicantName={applicant.applicantName}
-          applicationKey={applicationKey}
-          onSaveDraft={handleSaveDraft}
-          onSubmit={handleSubmit}
-          canSubmit={() => {
-            const missing = missingApplicantInfo()
-            if (!missing) return true
-            showError(missing)
-            return false
-          }}
-          isSaving={saveDraft.isPending}
-          isSubmitting={submit.isPending}
-          onExit={() => void navigate({ to: LIST_PATH })}
-          onViewApplication={() => void navigate({ to: LIST_PATH })}
-        />
-      ) : (
-        <Notice>지원 문항을 불러오지 못했습니다.</Notice>
-      )}
-    </div>
+              {isStructureFetching && !config ? (
+                <Notice>지원 문항을 불러오는 중입니다.</Notice>
+              ) : config ? (
+                <RecruitingApplyForm
+                  config={config}
+                  applicantName={applicant.applicantName}
+                  applicantEmail={applicant.applicantEmail}
+                  firstChoice={applicant.firstChoice}
+                  secondChoice={applicant.secondChoice}
+                  onApplicantInfoChange={handleApplicantInfoChange}
+                  applicationKey={applicationKey}
+                  onSaveDraft={handleSaveDraft}
+                  onSubmit={handleSubmit}
+                  canSubmit={() => {
+                    const missing = missingApplicantInfo()
+                    if (!missing) return true
+                    showError(missing)
+                    return false
+                  }}
+                  isSaving={saveDraft.isPending}
+                  isSubmitting={submit.isPending}
+                  isAnonymous={isAnonymous}
+                  privacyTerm={privacyTermQuery.data}
+                  privacyAgreed={privacyAgreed}
+                  onPrivacyChange={setPrivacyAgreed}
+                  onExit={() => void navigate({ to: LIST_PATH })}
+                  onViewApplication={() => void navigate({ to: LIST_PATH })}
+                />
+              ) : (
+                <Notice>지원 문항을 불러오지 못했습니다.</Notice>
+              )}
+            </div>
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal.Root>
+    </>
   )
 }

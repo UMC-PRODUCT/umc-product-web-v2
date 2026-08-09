@@ -48,7 +48,6 @@ function ProjectsLayout() {
     normalizedPathname === "/projects/apply" ||
     normalizedPathname.startsWith("/projects/apply/")
   ) {
-    // 지원 폼은 모집 공고 위에 카드로 올라오는 구조라 타이틀이 공고 그대로다
     trail = ["리크루팅", "지원하기", "지원 방법"]
     title = "모집 공고"
     description = "학교별 모집 공고를 확인하고 지원할 수 있습니다."

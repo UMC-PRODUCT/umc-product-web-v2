@@ -20,20 +20,73 @@ import {
   resolveEnabledSectionIds,
   toDirtySnapshot,
 } from "../../model/applyForm"
+import { PART_KEY_TO_TRACK, PARTS } from "../../model/parts"
+import { AnonymousPrivacyConsent } from "./AnonymousPrivacyConsent"
 import { ApplyAnswerField } from "./ApplyAnswerField"
 
 import type { Resolver } from "react-hook-form"
 
+import type { PublicTermResponse } from "@/shared/api/terms"
+
+import type { RecruitingTrack } from "../../api/types"
 import type { ApplicationSection } from "../../model/applicationDetail"
 
 type ApplyModalKind = "draftSaved" | "leave" | "submitConfirm" | "complete"
 
+const BASIC_SECTION_TITLE = "기본 문항"
+
+type ApplicantInfoPatch = {
+  applicantName?: string
+  applicantEmail?: string
+  firstChoice?: RecruitingTrack
+  secondChoice?: RecruitingTrack
+}
+
+function normalizeLabel(value: string) {
+  return value.replace(/\s+/g, "").toLowerCase()
+}
+
+function trackFromOptionContent(content: string): RecruitingTrack | undefined {
+  const normalized = normalizeLabel(content)
+  const part = PARTS.find((candidate) => {
+    if (normalizeLabel(candidate.label) === normalized) return true
+    if (candidate.key === "webPe") {
+      return normalized === normalizeLabel("Web Product Engineering")
+    }
+    if (candidate.key === "mobilePe") {
+      return normalized === normalizeLabel("Mobile Product Engineering")
+    }
+    return false
+  })
+  return part ? PART_KEY_TO_TRACK[part.key] : undefined
+}
+
+function optionIdForTrack(
+  question: ApplicationSection["questions"][number],
+  track: RecruitingTrack | undefined,
+) {
+  if (!track) return undefined
+  const option = question.options.find(
+    (candidate) => trackFromOptionContent(candidate.content) === track,
+  )
+  return option?.optionId
+}
+
+function questionByKeyword(
+  section: ApplicationSection | undefined,
+  keyword: string,
+) {
+  return section?.questions.find((question) => question.title.includes(keyword))
+}
+
 interface RecruitingApplyFormProps {
   config: ApplyFormConfig
   initialValues?: Partial<Record<string, ApplyAnswerValue>>
-  // 지망·이름·이메일은 Form 문항이 아니라 지원서 필드다. 실제 연동 화면은
-  // 폼 밖에서 받아 내려 주고, 목업 화면은 이름 문항에서 뽑던 기존 방식을 쓴다.
   applicantName?: string
+  applicantEmail?: string
+  firstChoice?: RecruitingTrack
+  secondChoice?: RecruitingTrack
+  onApplicantInfoChange?: (patch: ApplicantInfoPatch) => void
   applicationKey?: string
   onSaveDraft?: (values: Record<string, ApplyAnswerValue>) => Promise<void>
   onSubmit?: (values: Record<string, ApplyAnswerValue>) => Promise<void>
@@ -44,32 +97,58 @@ interface RecruitingApplyFormProps {
   isSubmitting?: boolean
   onExit?: () => void
   onViewApplication?: () => void
+  isAnonymous?: boolean
+  privacyTerm?: PublicTermResponse
+  privacyAgreed?: boolean
+  onPrivacyChange?: (checked: boolean) => void
   className?: string
 }
 
-function FolderTabHeader({ title, school }: { title: string; school: string }) {
+function FolderTabHeader({
+  title,
+  school,
+  logoUrl,
+}: {
+  title: string
+  school: string
+  logoUrl: string | null
+}) {
   return (
     <div className="flex items-end">
       <div
-        className="flex h-21 w-113.5 shrink-0 items-center gap-5 bg-teal-100 pt-3 pb-2.5 pl-4"
+        className="relative mr-[-56.667px] flex h-[85px] w-[392px] shrink-0 items-start pt-4 pl-4"
         style={{
-          clipPath: "polygon(0 0, calc(100% - 62px) 0, 100% 100%, 0 100%)",
           borderTopLeftRadius: 17,
         }}
       >
-        <div className="text-heading-7-semibold flex size-12.5 shrink-0 items-center justify-center rounded-[8px] bg-white text-teal-600">
-          {school.slice(0, 1)}
-        </div>
-        <div className="flex min-w-0 flex-col gap-1">
-          <span className="text-heading-6-semibold text-teal-gray-800 truncate">
-            {title}
-          </span>
-          <span className="text-body-2-medium text-teal-gray-600 truncate">
-            {school}
-          </span>
+        <div
+          className="absolute top-0 left-0 h-[85px] w-[454px] bg-teal-100"
+          style={{
+            clipPath: "polygon(0 0, calc(100% - 53px) 0, 100% 100%, 0 100%)",
+            borderTopLeftRadius: 17,
+          }}
+        />
+        <div className="relative flex items-center gap-5">
+          <div className="flex size-12.5 shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-white text-teal-600">
+            {logoUrl ? (
+              <img src={logoUrl} alt="" className="size-full object-cover" />
+            ) : (
+              <span className="text-heading-7-semibold">
+                {school.slice(0, 1)}
+              </span>
+            )}
+          </div>
+          <div className="flex w-[286px] min-w-0 flex-col gap-1">
+            <span className="text-heading-6-semibold text-teal-gray-800 truncate">
+              {title}
+            </span>
+            <span className="text-body-2-medium text-teal-gray-600 truncate">
+              {school}
+            </span>
+          </div>
         </div>
       </div>
-      <div className="h-2.5 min-w-0 flex-1 rounded-tr-[17px] bg-teal-100" />
+      <div className="h-[9.917px] min-w-0 flex-1 rounded-tr-[17px] bg-teal-100" />
     </div>
   )
 }
@@ -89,7 +168,7 @@ function FormSection({
       <h3 className="text-heading-7-semibold rounded-t-[12px] border-x border-t border-teal-300 bg-teal-100 py-2 pr-5 pl-7.5 text-teal-600">
         {section.title}
       </h3>
-      <div className="flex flex-col gap-8 rounded-b-[12px] border-x border-b border-teal-300 bg-white px-5 py-8.5">
+      <div className="flex flex-col gap-10 rounded-b-[12px] border-x border-b border-teal-300 bg-white px-5 pt-[34px] pb-[38px]">
         {section.questions.map((question, index) =>
           renderQuestion(question, index),
         )}
@@ -102,6 +181,10 @@ export function RecruitingApplyForm({
   config,
   initialValues,
   applicantName: applicantNameProp,
+  applicantEmail: applicantEmailProp,
+  firstChoice: firstChoiceProp,
+  secondChoice: secondChoiceProp,
+  onApplicantInfoChange,
   applicationKey,
   onSaveDraft,
   onSubmit,
@@ -110,18 +193,55 @@ export function RecruitingApplyForm({
   isSubmitting = false,
   onExit,
   onViewApplication,
+  isAnonymous = false,
+  privacyTerm,
+  privacyAgreed = false,
+  onPrivacyChange,
   className,
 }: RecruitingApplyFormProps) {
   const addToast = useToastStore((state) => state.addToast)
   const [openModal, setOpenModal] = useState<ApplyModalKind | null>(null)
+  const [step, setStep] = useState<1 | 2>(1)
 
-  const defaultValues = useMemo(
-    () => ({
-      ...buildDefaultApplyValues(config.sections),
-      ...initialValues,
-    }),
-    [config.sections, initialValues],
-  )
+  const defaultValues = useMemo(() => {
+    const values = buildDefaultApplyValues(config.sections)
+    const basicSection = config.sections.find(
+      (section) => section.title === BASIC_SECTION_TITLE,
+    )
+    const nameQuestion = questionByKeyword(basicSection, "성함")
+    const emailQuestion = questionByKeyword(basicSection, "이메일")
+    const firstChoiceQuestion = questionByKeyword(basicSection, "1지망")
+    const secondChoiceQuestion = questionByKeyword(basicSection, "2지망")
+    const newApplicantQuestion = questionByKeyword(basicSection, "신규")
+
+    if (nameQuestion && applicantNameProp) {
+      values[nameQuestion.questionId] = applicantNameProp
+    }
+    if (emailQuestion && applicantEmailProp) {
+      values[emailQuestion.questionId] = applicantEmailProp
+    }
+    if (firstChoiceQuestion) {
+      values[firstChoiceQuestion.questionId] =
+        optionIdForTrack(firstChoiceQuestion, firstChoiceProp) ?? ""
+    }
+    if (secondChoiceQuestion) {
+      values[secondChoiceQuestion.questionId] =
+        optionIdForTrack(secondChoiceQuestion, secondChoiceProp) ?? ""
+    }
+    if (newApplicantQuestion && newApplicantQuestion.options.length > 1) {
+      values[newApplicantQuestion.questionId] =
+        newApplicantQuestion.options[1]?.optionId ?? ""
+    }
+
+    return { ...values, ...initialValues }
+  }, [
+    applicantEmailProp,
+    applicantNameProp,
+    config.sections,
+    firstChoiceProp,
+    initialValues,
+    secondChoiceProp,
+  ])
   const snapshotRef = useRef(toDirtySnapshot(defaultValues))
 
   const schemaRef = useRef(
@@ -163,15 +283,23 @@ export function RecruitingApplyForm({
     [config, defaultValues, watchedValues],
   )
 
-  const visibleSections = config.sections.filter((section) =>
-    enabledSectionIds.has(section.sectionId),
-  )
+  const visibleSections = config.sections.filter((section) => {
+    if (step === 1) return section.title === BASIC_SECTION_TITLE
+    return (
+      section.title !== BASIC_SECTION_TITLE &&
+      enabledSectionIds.has(section.sectionId)
+    )
+  })
 
   const isUploading = hasPendingUpload(watchedValues, config.sections)
 
   const schema = useMemo(
-    () => buildRecruitingAnswersSchema(config.sections, enabledSectionIds),
-    [config.sections, enabledSectionIds],
+    () =>
+      buildRecruitingAnswersSchema(
+        visibleSections,
+        new Set(visibleSections.map((section) => section.sectionId)),
+      ),
+    [visibleSections],
   )
 
   useEffect(() => {
@@ -197,6 +325,50 @@ export function RecruitingApplyForm({
     return typeof raw === "string" && raw.trim() ? raw.trim() : "지원자"
   })()
 
+  useEffect(() => {
+    if (!onApplicantInfoChange) return
+
+    const basicSection = config.sections.find(
+      (section) => section.title === BASIC_SECTION_TITLE,
+    )
+    const nameQuestion = questionByKeyword(basicSection, "성함")
+    const emailQuestion = questionByKeyword(basicSection, "이메일")
+    const firstChoiceQuestion = questionByKeyword(basicSection, "1지망")
+    const secondChoiceQuestion = questionByKeyword(basicSection, "2지망")
+    const getValue = (question: ApplicationSection["questions"][number]) =>
+      watchedValues[question.questionId]
+
+    const firstChoiceValue = firstChoiceQuestion
+      ? getValue(firstChoiceQuestion)
+      : undefined
+    const secondChoiceValue = secondChoiceQuestion
+      ? getValue(secondChoiceQuestion)
+      : undefined
+    const nameValue = nameQuestion ? getValue(nameQuestion) : undefined
+    const emailValue = emailQuestion ? getValue(emailQuestion) : undefined
+
+    onApplicantInfoChange({
+      applicantName: typeof nameValue === "string" ? nameValue : undefined,
+      applicantEmail: typeof emailValue === "string" ? emailValue : undefined,
+      firstChoice:
+        typeof firstChoiceValue === "string"
+          ? trackFromOptionContent(
+              firstChoiceQuestion?.options.find(
+                (option) => option.optionId === firstChoiceValue,
+              )?.content ?? "",
+            )
+          : undefined,
+      secondChoice:
+        typeof secondChoiceValue === "string"
+          ? trackFromOptionContent(
+              secondChoiceQuestion?.options.find(
+                (option) => option.optionId === secondChoiceValue,
+              )?.content ?? "",
+            )
+          : undefined,
+    })
+  }, [config.sections, onApplicantInfoChange, watchedValues])
+
   const submitWithValidation = (onValid: () => void) =>
     handleSubmit(
       () => onValid(),
@@ -206,8 +378,7 @@ export function RecruitingApplyForm({
   const handleInvalid = (
     errors: Record<string, { message?: string } | undefined>,
   ) => {
-    const firstQuestionId = config.sections
-      .filter((section) => enabledSectionIds.has(section.sectionId))
+    const firstQuestionId = visibleSections
       .flatMap((section) => section.questions)
       .find((question) => errors[question.questionId])?.questionId
     addToast({
@@ -222,6 +393,10 @@ export function RecruitingApplyForm({
         .querySelector(`[data-question-id="${firstQuestionId}"]`)
         ?.scrollIntoView({ behavior: "smooth", block: "center" })
     }
+  }
+
+  const handleNext = () => {
+    setStep(2)
   }
 
   // 저장이 실패하면 스냅샷을 갱신하지 않는다. 갱신해 버리면 서버에 없는 내용을
@@ -267,8 +442,9 @@ export function RecruitingApplyForm({
       <FolderTabHeader
         title={config.recruitment.title}
         school={config.recruitment.school}
+        logoUrl={config.recruitment.logoUrl}
       />
-      <div className="flex flex-col gap-9 rounded-b-[17px] border-x border-b border-teal-100 bg-white px-11.5 pt-9 pb-12">
+      <div className="flex flex-col gap-8 rounded-b-[12px] bg-white px-[46px] pt-[36px] pb-[44px] shadow-[0px_4px_8px_rgba(239,240,240,0.3)]">
         <div className="flex items-start justify-between gap-4">
           <p className="text-body-1-regular text-teal-gray-700 min-w-0 flex-1 whitespace-pre-wrap">
             {config.recruitment.notice}
@@ -294,7 +470,7 @@ export function RecruitingApplyForm({
                 <div
                   key={question.questionId}
                   data-question-id={question.questionId}
-                  className="flex flex-col gap-3 px-1"
+                  className="flex flex-col gap-[10px] px-[6px]"
                 >
                   <QuestionItemTitle
                     index={String(index + 1).padStart(2, "0")}
@@ -302,7 +478,7 @@ export function RecruitingApplyForm({
                     caption={question.description}
                     required={question.required}
                   />
-                  <div className="pl-8.5">
+                  <div className="pl-5">
                     <Controller
                       control={control}
                       name={question.questionId}
@@ -322,31 +498,53 @@ export function RecruitingApplyForm({
             />
           ))}
         </div>
-        <div className="mt-3 flex items-center justify-center gap-4">
-          <Button
-            type="button"
-            variant="weak"
-            color="neutral"
-            size="xl"
-            className="w-50"
-            disabled={isSaving || isSubmitting || isUploading}
-            onClick={() => void handleSaveDraft()}
-          >
-            {isSaving ? "저장 중..." : "임시저장 후 나가기"}
-          </Button>
-          <Button
-            type="button"
-            size="xl"
-            className="w-50"
-            disabled={isSaving || isSubmitting || isUploading}
-            onClick={submitWithValidation(() => {
-              if (canSubmit && !canSubmit()) return
-              setOpenModal("submitConfirm")
-            })}
-          >
-            제출하기
-          </Button>
-        </div>
+        {step === 2 && isAnonymous && (
+          <AnonymousPrivacyConsent
+            term={privacyTerm}
+            checked={privacyAgreed}
+            disabled={isSaving || isSubmitting}
+            onChange={(checked) => onPrivacyChange?.(checked)}
+          />
+        )}
+        {step === 1 ? (
+          <div className="mt-3 flex justify-end">
+            <Button
+              type="button"
+              size="xl"
+              className="text-heading-6-semibold w-[99px]"
+              disabled={isSaving || isSubmitting || isUploading}
+              onClick={submitWithValidation(handleNext)}
+            >
+              다음
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-3 flex items-center justify-center gap-4">
+            <Button
+              type="button"
+              variant="weak"
+              color="neutral"
+              size="xl"
+              className="w-50"
+              disabled={isSaving || isSubmitting || isUploading}
+              onClick={() => void handleSaveDraft()}
+            >
+              {isSaving ? "저장 중..." : "임시저장 후 나가기"}
+            </Button>
+            <Button
+              type="button"
+              size="xl"
+              className="w-50"
+              disabled={isSaving || isSubmitting || isUploading}
+              onClick={submitWithValidation(() => {
+                if (canSubmit && !canSubmit()) return
+                setOpenModal("submitConfirm")
+              })}
+            >
+              제출하기
+            </Button>
+          </div>
+        )}
       </div>
 
       <CtaModal
