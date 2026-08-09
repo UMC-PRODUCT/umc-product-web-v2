@@ -4,8 +4,8 @@ import { useMe } from "@/entities/member/hooks/useMe"
 import {
   isCentralCore,
   isChapterPresident,
-  isRecruitingOperator,
-  isSchoolLeadership,
+  isRecruitingEditor,
+  isSchoolStaff,
 } from "@/entities/member/model/identity"
 import { getCurrentGisuChallengerRecords } from "@/entities/member/view-mode/currentGisuRecords"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
@@ -64,10 +64,10 @@ export function RecruitmentQuotaPage() {
   const viewerChapterId = viewerChapterRecord?.chapterId
   const viewerChapterName = viewerChapterRecord?.chapterName
   // 중앙 총괄이 아닌 리크루팅 운영진은 자기 지부만 본다. 지부장과 학교
-  // 회장단이 모두 여기 해당한다. 역할 타입 하나로만 보면 지부장이 빠져
-  // 전체 지부가 열린다.
+  // 운영진(회장단·파트장·기타)이 모두 여기 해당한다. 역할 타입 하나로만 보면
+  // 빠지는 역할이 생겨 전체 지부가 열린다.
   const isChapterScoped =
-    !isCentralCore(me) && (isChapterPresident(me) || isSchoolLeadership(me))
+    !isCentralCore(me) && (isChapterPresident(me) || isSchoolStaff(me))
   const canLoadRounds =
     !isMeLoading &&
     (!isChapterScoped ||
@@ -141,7 +141,7 @@ export function RecruitmentQuotaPage() {
   const viewerSchoolId = me?.schoolId
   const canCreateSeason = useCallback(
     (schoolId: string | undefined) => {
-      if (isMeLoading || !isRecruitingOperator(me)) return false
+      if (isMeLoading || !isRecruitingEditor(me)) return false
       if (isCentralCore(me) || isChapterPresident(me)) return true
       return schoolId != null && String(schoolId) === String(viewerSchoolId)
     },

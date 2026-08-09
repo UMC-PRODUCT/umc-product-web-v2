@@ -78,6 +78,7 @@ import { Route as MatchingNoticePublishRouteImport } from './routes/matching/not
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
 import { Route as ManageChapterRouteImport } from './routes/manage/chapter'
 import { Route as LoginDefaultRouteImport } from './routes/login/default'
+import { Route as RecruitingEvaluationsRouteRouteImport } from './routes/recruiting/evaluations/route'
 import { Route as RecruitingRecruitmentsIndexRouteImport } from './routes/recruiting/recruitments/index'
 import { Route as RecruitingEvaluationsIndexRouteImport } from './routes/recruiting/evaluations/index'
 import { Route as ProjectsApplicationIndexRouteImport } from './routes/projects/application/index'
@@ -470,6 +471,12 @@ const LoginDefaultRoute = LoginDefaultRouteImport.update({
   path: '/login/default',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecruitingEvaluationsRouteRoute =
+  RecruitingEvaluationsRouteRouteImport.update({
+    id: '/evaluations',
+    path: '/evaluations',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
 const RecruitingRecruitmentsIndexRoute =
   RecruitingRecruitmentsIndexRouteImport.update({
     id: '/recruitments/',
@@ -478,9 +485,9 @@ const RecruitingRecruitmentsIndexRoute =
   } as any)
 const RecruitingEvaluationsIndexRoute =
   RecruitingEvaluationsIndexRouteImport.update({
-    id: '/evaluations/',
-    path: '/evaluations/',
-    getParentRoute: () => RecruitingRouteRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
   } as any)
 const ProjectsApplicationIndexRoute =
   ProjectsApplicationIndexRouteImport.update({
@@ -523,27 +530,27 @@ const RecruitingHistoryArchiveRoute =
   } as any)
 const RecruitingEvaluationsInterviewScheduleRoute =
   RecruitingEvaluationsInterviewScheduleRouteImport.update({
-    id: '/evaluations/interview-schedule',
-    path: '/evaluations/interview-schedule',
-    getParentRoute: () => RecruitingRouteRoute,
+    id: '/interview-schedule',
+    path: '/interview-schedule',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
   } as any)
 const RecruitingEvaluationsInterviewRoute =
   RecruitingEvaluationsInterviewRouteImport.update({
-    id: '/evaluations/interview',
-    path: '/evaluations/interview',
-    getParentRoute: () => RecruitingRouteRoute,
+    id: '/interview',
+    path: '/interview',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
   } as any)
 const RecruitingEvaluationsFinalRoute =
   RecruitingEvaluationsFinalRouteImport.update({
-    id: '/evaluations/final',
-    path: '/evaluations/final',
-    getParentRoute: () => RecruitingRouteRoute,
+    id: '/final',
+    path: '/final',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
   } as any)
 const RecruitingEvaluationsDocumentRoute =
   RecruitingEvaluationsDocumentRouteImport.update({
-    id: '/evaluations/document',
-    path: '/evaluations/document',
-    getParentRoute: () => RecruitingRouteRoute,
+    id: '/document',
+    path: '/document',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
   } as any)
 const RecruitingDashboardEvaluationsRoute =
   RecruitingDashboardEvaluationsRouteImport.update({
@@ -692,6 +699,7 @@ export interface FileRoutesByFullPath {
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
   '/intro': typeof IntroRoute
+  '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
   '/matching/applications': typeof MatchingApplicationsRoute
@@ -902,6 +910,7 @@ export interface FileRoutesById {
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
   '/intro': typeof IntroRoute
+  '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
   '/matching/applications': typeof MatchingApplicationsRoute
@@ -1012,6 +1021,7 @@ export interface FileRouteTypes {
     | '/auth-test'
     | '/challenger-verification'
     | '/intro'
+    | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
     | '/matching/applications'
@@ -1221,6 +1231,7 @@ export interface FileRouteTypes {
     | '/auth-test'
     | '/challenger-verification'
     | '/intro'
+    | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
     | '/matching/applications'
@@ -1822,6 +1833,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginDefaultRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recruiting/evaluations': {
+      id: '/recruiting/evaluations'
+      path: '/evaluations'
+      fullPath: '/recruiting/evaluations'
+      preLoaderRoute: typeof RecruitingEvaluationsRouteRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
     '/recruiting/recruitments/': {
       id: '/recruiting/recruitments/'
       path: '/recruitments'
@@ -1831,10 +1849,10 @@ declare module '@tanstack/react-router' {
     }
     '/recruiting/evaluations/': {
       id: '/recruiting/evaluations/'
-      path: '/evaluations'
+      path: '/'
       fullPath: '/recruiting/evaluations/'
       preLoaderRoute: typeof RecruitingEvaluationsIndexRouteImport
-      parentRoute: typeof RecruitingRouteRoute
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
     }
     '/projects/application/': {
       id: '/projects/application/'
@@ -1887,31 +1905,31 @@ declare module '@tanstack/react-router' {
     }
     '/recruiting/evaluations/interview-schedule': {
       id: '/recruiting/evaluations/interview-schedule'
-      path: '/evaluations/interview-schedule'
+      path: '/interview-schedule'
       fullPath: '/recruiting/evaluations/interview-schedule'
       preLoaderRoute: typeof RecruitingEvaluationsInterviewScheduleRouteImport
-      parentRoute: typeof RecruitingRouteRoute
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
     }
     '/recruiting/evaluations/interview': {
       id: '/recruiting/evaluations/interview'
-      path: '/evaluations/interview'
+      path: '/interview'
       fullPath: '/recruiting/evaluations/interview'
       preLoaderRoute: typeof RecruitingEvaluationsInterviewRouteImport
-      parentRoute: typeof RecruitingRouteRoute
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
     }
     '/recruiting/evaluations/final': {
       id: '/recruiting/evaluations/final'
-      path: '/evaluations/final'
+      path: '/final'
       fullPath: '/recruiting/evaluations/final'
       preLoaderRoute: typeof RecruitingEvaluationsFinalRouteImport
-      parentRoute: typeof RecruitingRouteRoute
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
     }
     '/recruiting/evaluations/document': {
       id: '/recruiting/evaluations/document'
-      path: '/evaluations/document'
+      path: '/document'
       fullPath: '/recruiting/evaluations/document'
       preLoaderRoute: typeof RecruitingEvaluationsDocumentRouteImport
-      parentRoute: typeof RecruitingRouteRoute
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
     }
     '/recruiting/dashboard/evaluations': {
       id: '/recruiting/dashboard/evaluations'
@@ -2271,35 +2289,49 @@ const RecruitingEvaluationsInterviewScheduleRouteWithChildren =
     RecruitingEvaluationsInterviewScheduleRouteChildren,
   )
 
-interface RecruitingRouteRouteChildren {
-  RecruitingDashboardApplicationsRoute: typeof RecruitingDashboardApplicationsRoute
-  RecruitingDashboardEvaluationsRoute: typeof RecruitingDashboardEvaluationsRoute
+interface RecruitingEvaluationsRouteRouteChildren {
   RecruitingEvaluationsDocumentRoute: typeof RecruitingEvaluationsDocumentRouteWithChildren
   RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
   RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRouteWithChildren
   RecruitingEvaluationsInterviewScheduleRoute: typeof RecruitingEvaluationsInterviewScheduleRouteWithChildren
+  RecruitingEvaluationsIndexRoute: typeof RecruitingEvaluationsIndexRoute
+}
+
+const RecruitingEvaluationsRouteRouteChildren: RecruitingEvaluationsRouteRouteChildren =
+  {
+    RecruitingEvaluationsDocumentRoute:
+      RecruitingEvaluationsDocumentRouteWithChildren,
+    RecruitingEvaluationsFinalRoute: RecruitingEvaluationsFinalRoute,
+    RecruitingEvaluationsInterviewRoute:
+      RecruitingEvaluationsInterviewRouteWithChildren,
+    RecruitingEvaluationsInterviewScheduleRoute:
+      RecruitingEvaluationsInterviewScheduleRouteWithChildren,
+    RecruitingEvaluationsIndexRoute: RecruitingEvaluationsIndexRoute,
+  }
+
+const RecruitingEvaluationsRouteRouteWithChildren =
+  RecruitingEvaluationsRouteRoute._addFileChildren(
+    RecruitingEvaluationsRouteRouteChildren,
+  )
+
+interface RecruitingRouteRouteChildren {
+  RecruitingEvaluationsRouteRoute: typeof RecruitingEvaluationsRouteRouteWithChildren
+  RecruitingDashboardApplicationsRoute: typeof RecruitingDashboardApplicationsRoute
+  RecruitingDashboardEvaluationsRoute: typeof RecruitingDashboardEvaluationsRoute
   RecruitingHistoryArchiveRoute: typeof RecruitingHistoryArchiveRoute
   RecruitingRecruitmentsNewRoute: typeof RecruitingRecruitmentsNewRoute
   RecruitingRecruitmentsQuotaRoute: typeof RecruitingRecruitmentsQuotaRoute
-  RecruitingEvaluationsIndexRoute: typeof RecruitingEvaluationsIndexRoute
   RecruitingRecruitmentsIndexRoute: typeof RecruitingRecruitmentsIndexRoute
   RecruitingRecruitmentsEditRoundIdRoute: typeof RecruitingRecruitmentsEditRoundIdRoute
 }
 
 const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
+  RecruitingEvaluationsRouteRoute: RecruitingEvaluationsRouteRouteWithChildren,
   RecruitingDashboardApplicationsRoute: RecruitingDashboardApplicationsRoute,
   RecruitingDashboardEvaluationsRoute: RecruitingDashboardEvaluationsRoute,
-  RecruitingEvaluationsDocumentRoute:
-    RecruitingEvaluationsDocumentRouteWithChildren,
-  RecruitingEvaluationsFinalRoute: RecruitingEvaluationsFinalRoute,
-  RecruitingEvaluationsInterviewRoute:
-    RecruitingEvaluationsInterviewRouteWithChildren,
-  RecruitingEvaluationsInterviewScheduleRoute:
-    RecruitingEvaluationsInterviewScheduleRouteWithChildren,
   RecruitingHistoryArchiveRoute: RecruitingHistoryArchiveRoute,
   RecruitingRecruitmentsNewRoute: RecruitingRecruitmentsNewRoute,
   RecruitingRecruitmentsQuotaRoute: RecruitingRecruitmentsQuotaRoute,
-  RecruitingEvaluationsIndexRoute: RecruitingEvaluationsIndexRoute,
   RecruitingRecruitmentsIndexRoute: RecruitingRecruitmentsIndexRoute,
   RecruitingRecruitmentsEditRoundIdRoute:
     RecruitingRecruitmentsEditRoundIdRoute,
