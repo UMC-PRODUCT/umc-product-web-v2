@@ -17,6 +17,10 @@
      내려 lg: 가 xl: 을 덮는다. */
   --breakpoint-xl: 90rem;
 
+  /* 소개 랜딩 히어로 헤드라인만 쓰는 구간이다. 벡터라 글자를 접을 수 없어
+     390 을 기준으로 두 줄짜리와 세 줄짜리 파일이 갈린다. 390px = 24.375rem. */
+  --breakpoint-xs: 24.375rem;
+
   --font-heading: var(--font-sans);
   --font-sans:
     "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
