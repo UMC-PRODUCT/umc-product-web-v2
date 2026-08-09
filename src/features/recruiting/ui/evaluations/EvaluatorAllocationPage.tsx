@@ -60,6 +60,9 @@ export function EvaluatorAllocationPage({
           formatSchoolName(group.schoolName) === formattedViewer,
       )
       if (foundByName) return foundByName
+      // 접속자 학교 정보가 존재하지만 groups에 해당 학교 모집이 없는 경우
+      // 타 학교(groups[0])로 폴백하지 않고 null을 반환합니다.
+      return null
     }
     return groups[0] ?? null
   }, [groups, me?.schoolId, viewerSchool])
@@ -72,6 +75,13 @@ export function EvaluatorAllocationPage({
       ) ?? mySchoolGroup)
     : mySchoolGroup
 
+  const activeRound =
+    activeGroup?.rounds.find(
+      (r) => String(r.roundId) === String(activeRoundId),
+    ) ??
+    activeGroup?.rounds[0] ??
+    null
+
   // 배정 권한은 시즌 단위다. 권한을 확인하기 전에는 잠가 둔다.
   const seasonIds = activeGroup?.seasonId ? [activeGroup.seasonId] : []
   const { permittedSeasonIds, isLoading: isPermissionLoading } =
@@ -81,7 +91,7 @@ export function EvaluatorAllocationPage({
     activeGroup?.seasonId != null &&
     permittedSeasonIds.has(String(activeGroup.seasonId))
 
-  const schoolId = activeGroup?.schoolId
+  const schoolId = activeGroup?.schoolId ?? me?.schoolId
   const gisuId = activeGroup?.gisuId
   const chapterId = activeGroup?.chapterId
   const schoolName =
@@ -302,19 +312,26 @@ export function EvaluatorAllocationPage({
 
             {/* 공고 */}
             <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
-              <DroppableRecruitmentBox
-                id={RECRUITMENT_BOX_ID}
-                assignedEvaluators={assignedEvaluators}
-                selectedChipId={selectedChipId}
-                onSelectChip={setSelectedChipId}
-                onClear={() => {
-                  if (!isInitialized || !canEdit) return
-                  editRevisionRef.current += 1
-                  setAssignedEvaluators([])
-                  setIsDirty(true)
-                  setSelectedChipId(null)
-                }}
-              />
+              {activeRound ? (
+                <DroppableRecruitmentBox
+                  id={RECRUITMENT_BOX_ID}
+                  round={activeRound}
+                  assignedEvaluators={assignedEvaluators}
+                  selectedChipId={selectedChipId}
+                  onSelectChip={setSelectedChipId}
+                  onClear={() => {
+                    if (!isInitialized || !canEdit) return
+                    editRevisionRef.current += 1
+                    setAssignedEvaluators([])
+                    setIsDirty(true)
+                    setSelectedChipId(null)
+                  }}
+                />
+              ) : (
+                <div className="border-teal-gray-100 text-body-2-medium text-teal-gray-400 box-border flex h-68.5 w-full items-center justify-center rounded-[12px] border bg-white">
+                  배정할 모집 공고가 없습니다
+                </div>
+              )}
             </div>
           </div>
 
