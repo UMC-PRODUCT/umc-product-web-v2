@@ -334,19 +334,29 @@ export function RecruitmentBasicInfoForm({
   // 판정되므로, 그 상태로 초기화하면 실제 role이 늦게 schoolStaff로 확정될 때 그 사이
   // 사용자가 고른 지부·학교를 되돌려버린다. 두 판단 근거 중 하나라도 확정될 때까지 보류한다.
   const isRoleResolved = !!roleProp || hasRoleTypeData || !isSeasonGroupsLoading
+  const isChaptersLoading = chaptersQuery.isLoading || gisuQuery.isLoading
+  const isChapterResolved =
+    !!initialChapter ||
+    (role === "central"
+      ? !isChaptersLoading && (gisuId == null || chaptersQuery.data != null)
+      : true)
+  const isInitResolved = isRoleResolved && isChapterResolved
 
   // 진입 지점(role·initialChapter·initialSchool)이 바뀌면 상위(RecruitmentCreatePage)가
   // key를 바꿔 이 컴포넌트를 통째로 리마운트시킨다. 그때마다 지부·학교 초기값을 새로 채운다.
   // role/viewerChapter/viewerSchool은 useMe 조회가 끝나야 채워지므로 의존성에 넣어
   // 로그인 정보가 늦게 도착해도 다시 채운다.
   useEffect(() => {
-    if (!isRoleResolved) return
+    if (!isInitResolved) return
+    const defaultChapter =
+      initialChapter ??
+      (chapter && isChapter(chapter) ? chapter : undefined) ??
+      (role === "central"
+        ? (chapterEntries[0]?.chapterName ?? "")
+        : viewerChapter)
+
     const prefill = {
-      chapter:
-        initialChapter ??
-        (role === "central"
-          ? (chapterEntries[0]?.chapterName ?? "")
-          : viewerChapter),
+      chapter: defaultChapter,
       school:
         initialSchool ?? (role === "schoolStaff" ? viewerSchool : undefined),
     }
@@ -363,7 +373,7 @@ export function RecruitmentBasicInfoForm({
       periodForm,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRoleResolved, role, viewerChapter, viewerSchool])
+  }, [isInitResolved, role, viewerChapter, viewerSchool, chapterEntries])
 
   // 지부는 central만 자유 선택. 학교는 central이거나(지부 선택 후),
   // chapterAdmin이 지부 페이지(학교 미고정)에서 들어왔을 때만 선택 가능.
