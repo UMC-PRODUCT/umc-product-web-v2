@@ -69,14 +69,15 @@ function DraftPostRow({
           onPublish={() => onPublish(post.postId)}
           // 임시 보관함 안에서는 이미 DRAFT라 비공개 액션이 노출되지 않음
           onPrivatize={() => {}}
-          // DRAFT는 문항 프리필용 조회 API가 아직 없어 생성 마법사 재사용 편집은
-          // 못 만든다. 우선 OPEN과 같은 수정 화면으로 보내고, 그 화면이 DRAFT
-          // 상태를 보고 "아직 지원하지 않음" 안내를 보여주도록 한다.
+          // DRAFT는 아직 공개된 적이 없어 처음 쓰던 흐름 그대로 이어 쓰는 편이
+          // 자연스럽다. 문항만 고치는 수정 화면 대신 생성 마법사로 되돌린다.
           onEdit={() =>
             navigate({
-              to: "/recruiting/recruitments/edit/$roundId",
-              params: { roundId: post.postId },
-              search: { seasonId: post.seasonId },
+              to: "/recruiting/recruitments/new",
+              search: {
+                draftRoundId: post.postId,
+                draftSeasonId: post.seasonId,
+              },
             })
           }
           onDuplicate={() => onDuplicate(post.postId)}

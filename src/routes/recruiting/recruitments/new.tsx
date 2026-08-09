@@ -16,6 +16,16 @@ interface RecruitmentCreateSearch {
   role?: RecruitingListRole
   chapter?: Chapter
   school?: string
+  draftRoundId?: string
+  draftSeasonId?: string
+}
+
+// 식별자가 숫자로만 되어 있으면 주소에서 따옴표 없이 실려 number 로 되돌아온다.
+// 문자열만 받으면 이어쓰기 진입이 조용히 무시된다.
+function toSearchId(value: unknown): string | undefined {
+  if (typeof value === "string") return value === "" ? undefined : value
+  if (typeof value === "number" && Number.isFinite(value)) return String(value)
+  return undefined
 }
 
 export const Route = createFileRoute("/recruiting/recruitments/new")({
@@ -43,18 +53,23 @@ export const Route = createFileRoute("/recruiting/recruitments/new")({
       role: isRecruitingListRole(search.role) ? search.role : undefined,
       chapter,
       school,
+      draftRoundId: toSearchId(search.draftRoundId),
+      draftSeasonId: toSearchId(search.draftSeasonId),
     }
   },
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { role, chapter, school } = Route.useSearch()
+  const { role, chapter, school, draftRoundId, draftSeasonId } =
+    Route.useSearch()
   return (
     <RecruitmentCreatePage
       role={role}
       initialChapter={chapter}
       initialSchool={school}
+      draftRoundId={draftRoundId}
+      draftSeasonId={draftSeasonId}
     />
   )
 }
