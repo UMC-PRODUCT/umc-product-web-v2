@@ -4,14 +4,16 @@ import {
   DragOverlay,
   type DragStartEvent,
 } from "@dnd-kit/core"
-import { useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useEffect, useRef, useState } from "react"
 
+import { getAllSchools } from "@/entities/organization/api/organization"
 import {
   useCreateChapter,
   useCreateChaptersBulk,
   useDeleteChapter,
 } from "@/entities/organization/hooks/useChapter"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
@@ -50,10 +52,48 @@ export function ChapterManagePage() {
     "waiting" | "assigned"
   >("waiting")
 
+  const isInitializedRef = useRef(false)
+
   const deleteChapterMutation = useDeleteChapter()
   const createChapterMutation = useCreateChapter()
   const createChaptersBulkMutation = useCreateChaptersBulk()
   const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
+  const { chapters: serverChapters } = useSchoolChapterMap()
+
+  const { data: allSchoolsData } = useQuery({
+    queryKey: ["allSchools"],
+    queryFn: getAllSchools,
+  })
+
+  useEffect(() => {
+    if (isInitializedRef.current || !serverChapters) return
+    if (serverChapters.length > 0) {
+      const mappedChapters: ChapterData[] = serverChapters.map((ch) => ({
+        id: String(ch.chapterId),
+        name: ch.chapterName,
+        assignedSchools: ch.schools.map((s) => ({
+          id: String(s.schoolId),
+          name: s.schoolName,
+        })),
+      }))
+      setChapters(mappedChapters)
+      isInitializedRef.current = true
+    }
+  }, [serverChapters])
+
+  useEffect(() => {
+    if (!allSchoolsData?.schools) return
+    const assignedSchoolIds = new Set(
+      chapters.flatMap((ch) => ch.assignedSchools.map((s) => s.id)),
+    )
+    const unassigned = allSchoolsData.schools
+      .filter((s) => !assignedSchoolIds.has(String(s.schoolId)))
+      .map((s) => ({
+        id: String(s.schoolId),
+        name: s.schoolName,
+      }))
+    setUnassignedSchools(unassigned)
+  }, [allSchoolsData, chapters])
 
   const assignedSchools = chapters.flatMap((ch) => ch.assignedSchools)
 
