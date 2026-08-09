@@ -69,24 +69,19 @@ function validatePeriodOrder(
   return null
 }
 
-// 면접 관련 값은 이 폼에서 편집하지 않는다(availability form 빌더 미구현이라
-// 앱 전역에서 interviewRequired=false로 강제 중). 기존 값을 그대로 되돌려 보낸다.
+// 면접 관련 값은 이 폼에서 편집하지 않는다. 기존 값을 그대로 되돌려 보낸다.
 // interviewRequired가 true인데 나머지 값이 비어있는 비정상 상태면, 그걸 조용히
 // false로 낮춰버리지 않고 null을 반환해 저장 자체를 막는다.
+// 면접 일정 Form(availabilityFormId)은 서버가 자동으로 만들어 주므로 여기서는 다루지 않는다.
 function resolveInterviewFields(
   round: RecruitingRound,
 ): CreateRecruitingRoundInterviewFields | null {
   if (!round.interviewRequired) return { interviewRequired: false }
-  if (
-    round.interviewStartAt &&
-    round.interviewEndAt &&
-    round.availabilityFormId
-  ) {
+  if (round.interviewStartAt && round.interviewEndAt) {
     return {
       interviewRequired: true,
       interviewStartAt: round.interviewStartAt,
       interviewEndAt: round.interviewEndAt,
-      availabilityFormId: round.availabilityFormId,
     }
   }
   return null
@@ -434,7 +429,11 @@ export function RecruitmentRoundSettingsEditForm({
         onOpenChange={setConfirmOpen}
         variant="success"
         title="변경 사항을 저장할까요?"
-        content="이미 공개된 모집 공고의 설정이 변경됩니다."
+        content={
+          round.status === "DRAFT"
+            ? "임시 저장된 모집 공고의 설정이 저장됩니다."
+            : "이미 공개된 모집 공고의 설정이 변경됩니다."
+        }
         cancelText="돌아가기"
         confirmText="저장하기"
         onCancel={() => setConfirmOpen(false)}
