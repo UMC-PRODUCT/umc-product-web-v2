@@ -7,6 +7,10 @@ import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { useRecruitmentDraft } from "../hooks/useRecruitmentDraft"
 import {
+  type RecruitmentDraft,
+  RecruitmentDraftError,
+} from "../hooks/useRecruitmentDraft"
+import {
   RecruitmentCreateStoreProvider,
   useRecruitmentCreateStore,
   useRecruitmentCreateStoreApi,
@@ -18,7 +22,6 @@ import { RecruitmentStepper } from "./RecruitmentStepper"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
-import type { RecruitmentDraft } from "../hooks/useRecruitmentDraft"
 import type { RecruitingListRole } from "../model/recruitingListRole"
 
 interface RecruitmentCreatePageProps {
@@ -51,6 +54,11 @@ function DraftNotice({ message }: { message: string }) {
   )
 }
 
+function getDraftErrorMessage(error: unknown) {
+  if (error instanceof RecruitmentDraftError) return error.message
+  return "임시 저장한 모집을 불러오지 못했습니다."
+}
+
 export function RecruitmentCreatePage({
   role,
   initialChapter,
@@ -58,7 +66,7 @@ export function RecruitmentCreatePage({
   draftRoundId,
   draftSeasonId,
 }: RecruitmentCreatePageProps = {}) {
-  const { draft, isLoading, isError } = useRecruitmentDraft(
+  const { draft, isLoading, isError, error } = useRecruitmentDraft(
     draftRoundId,
     draftSeasonId,
   )
@@ -71,7 +79,7 @@ export function RecruitmentCreatePage({
   }
 
   if (isDraftMode && (isError || !draft)) {
-    return <DraftNotice message="임시 저장한 모집을 불러오지 못했습니다." />
+    return <DraftNotice message={getDraftErrorMessage(error)} />
   }
 
   return (

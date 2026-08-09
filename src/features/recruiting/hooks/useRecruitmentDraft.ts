@@ -17,6 +17,22 @@ export interface RecruitmentDraft extends RecruitmentDraftBasicInfo {
   formStructure: RecruitingAdminFormStructureResponse
 }
 
+export type RecruitmentDraftErrorReason = "NOT_FOUND" | "NOT_DRAFT"
+
+export class RecruitmentDraftError extends Error {
+  readonly reason: RecruitmentDraftErrorReason
+
+  constructor(reason: RecruitmentDraftErrorReason) {
+    super(
+      reason === "NOT_DRAFT"
+        ? "임시 저장 상태가 아닌 모집입니다."
+        : "임시 저장한 모집을 찾을 수 없습니다.",
+    )
+    this.name = "RecruitmentDraftError"
+    this.reason = reason
+  }
+}
+
 // 임시저장한 모집을 생성 마법사에 되돌린다. 차수 자체(기간·파트·공지)는 관리자
 // 차수 목록에서, 문항은 Form 구조에서 각각 받아 온다. 공개 목록은 DRAFT 를
 // 내려주지 않아 관리자 목록을 써야 한다.
@@ -51,8 +67,11 @@ export function useRecruitmentDraft(
       )
 
       // 이미 공개된 차수를 이 화면으로 끌고 오면 생성 흐름이 기존 공고를 덮어쓴다.
-      if (!group || !round || round.status !== "DRAFT") {
-        throw new Error("임시저장한 모집을 찾을 수 없습니다.")
+      if (!group || !round) {
+        throw new RecruitmentDraftError("NOT_FOUND")
+      }
+      if (round.status !== "DRAFT") {
+        throw new RecruitmentDraftError("NOT_DRAFT")
       }
 
       const formStructure = await getRecruitingApplicationForm(
@@ -74,5 +93,6 @@ export function useRecruitmentDraft(
     draft: draftQuery.data ?? null,
     isLoading: gisuQuery.isLoading || draftQuery.isLoading,
     isError: gisuQuery.isError || draftQuery.isError,
+    error: draftQuery.error ?? gisuQuery.error ?? null,
   }
 }
