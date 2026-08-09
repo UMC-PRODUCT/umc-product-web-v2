@@ -8,6 +8,7 @@ import {
   canEditRecruitmentPost,
   groupPostsBySchool,
 } from "../model/recruitmentList"
+import { isRecruitmentClosed } from "../model/recruitmentPostStatus"
 import { RecruitmentPostMoreMenu } from "./RecruitmentPostMoreMenu"
 import { RecruitmentPostRow } from "./RecruitmentPostRow"
 import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
@@ -63,6 +64,7 @@ function PostRow({
       title={post.title}
       startLabel={post.startLabel}
       endLabel={post.endLabel}
+      documentEndAt={post.documentEndAt}
       dateLabel={post.dateLabel}
       authorLabel={post.authorLabel}
       status={post.status}
@@ -112,8 +114,10 @@ export function RecruitmentPostListCard({
 
   // DRAFT(비공개) 글은 학교별 공유 보관함에서만 노출
   const publishedPosts = posts.filter((post) => post.status !== "DRAFT")
+  // 뱃지와 같은 기준으로 거른다. 공개 상태만 보면 기간이 끝난 공고까지
+  // `모집 중` 으로 남아 걸러지지 않는다.
   const visiblePosts = recruitingOnly
-    ? publishedPosts.filter((post) => post.status === "OPEN")
+    ? publishedPosts.filter((post) => !isRecruitmentClosed(post))
     : publishedPosts
   const filteredEmpty = publishedPosts.length > 0 && visiblePosts.length === 0
 
