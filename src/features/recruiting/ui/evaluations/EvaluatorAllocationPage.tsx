@@ -46,6 +46,8 @@ export function EvaluatorAllocationPage({
 
   const mySchoolGroup = useMemo(() => {
     if (!groups.length) return null
+    const hasSchoolIdentity = Boolean(me?.schoolId || viewerSchool)
+
     if (me?.schoolId) {
       const foundById = groups.find(
         (group) => String(group.schoolId) === String(me.schoolId),
@@ -60,6 +62,8 @@ export function EvaluatorAllocationPage({
           formatSchoolName(group.schoolName) === formattedViewer,
       )
       if (foundByName) return foundByName
+    }
+    if (hasSchoolIdentity) {
       // 접속자 학교 정보가 존재하지만 groups에 해당 학교 모집이 없는 경우
       // 타 학교(groups[0])로 폴백하지 않고 null을 반환합니다.
       return null
