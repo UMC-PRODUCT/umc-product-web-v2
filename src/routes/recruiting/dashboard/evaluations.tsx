@@ -43,10 +43,12 @@ function RouteComponent() {
   const { isAdditionalRecruiting } = useRecruitingProgress()
 
   // 학교 기타 운영진(기획 등급 SCHOOL_STAFF)은 자기 학교만 본다. 지부 순위와
-  // 학교별 비교는 다른 학교 수치가 드러나므로 감춘다. 학교 회장·부회장·파트장은
-  // 그대로 본다.
-  const { me } = useViewerIdentity()
-  const hidesCrossSchoolCards = isSchoolEtcAdmin(me)
+  // 학교별 비교는 다른 학교 수치가 드러나므로 감춘다. 상위 등급은 그대로 본다.
+  //
+  // me 조회가 끝나기 전에도 감춘다. 집계 응답이 먼저 도착하면 카드가 잠깐
+  // 그려졌다 사라지면서 다른 학교 수치가 노출된다.
+  const { me, isLoading: isIdentityLoading } = useViewerIdentity()
+  const hidesCrossSchoolCards = isIdentityLoading || isSchoolEtcAdmin(me)
 
   const header = (
     <PageLabel

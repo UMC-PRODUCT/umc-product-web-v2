@@ -12,6 +12,7 @@ import {
   isCurrentTermPm,
   isProjectRegistrationQuotaLimited,
   isRecruitingOperator,
+  isSchoolEtcAdmin,
   isSchoolLeadership,
 } from "./identity"
 
@@ -159,6 +160,24 @@ describe("isSchoolLeadership", () => {
   })
   it("undefined는 false", () => {
     expect(isSchoolLeadership(undefined)).toBe(false)
+  })
+})
+
+describe("isSchoolEtcAdmin", () => {
+  it("학교 기타운영진은 true", () => {
+    expect(isSchoolEtcAdmin(makeMe(["SCHOOL_ETC_ADMIN"]))).toBe(true)
+  })
+  it("학교 회장·부회장·파트장은 false", () => {
+    expect(isSchoolEtcAdmin(makeMe(["SCHOOL_PRESIDENT"]))).toBe(false)
+    expect(isSchoolEtcAdmin(makeMe(["SCHOOL_VICE_PRESIDENT"]))).toBe(false)
+    expect(isSchoolEtcAdmin(makeMe(["SCHOOL_PART_LEADER"]))).toBe(false)
+  })
+  it("상위 운영진은 false", () => {
+    expect(isSchoolEtcAdmin(makeMe(["SUPER_ADMIN"]))).toBe(false)
+    expect(isSchoolEtcAdmin(makeMe(["CHAPTER_PRESIDENT"]))).toBe(false)
+  })
+  it("undefined는 false", () => {
+    expect(isSchoolEtcAdmin(undefined)).toBe(false)
   })
 })
 
