@@ -57,11 +57,13 @@ export function EvaluatorAllocationPage({
 
   const schoolId = activeGroup?.schoolId
   const gisuId = activeGroup?.gisuId
+  const chapterId = activeGroup?.chapterId
   const schoolName = activeGroup?.schoolName ?? "교내"
 
   const { data: staffList = [], isSuccess: isStaffSuccess } = useSchoolStaff(
     schoolId,
     gisuId,
+    chapterId,
   )
   const {
     data: serverEvaluators,
