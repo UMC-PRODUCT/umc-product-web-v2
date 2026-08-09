@@ -47,6 +47,7 @@ export function useRecruitmentDraft(
     gisuQuery.data?.generation != null
       ? Number(gisuQuery.data.generation)
       : null
+  const isActiveGisuMissing = gisuQuery.isSuccess && gisuId == null
 
   const draftQuery = useQuery({
     queryKey: recruitingKeys.adminDraftRound(
@@ -94,5 +95,6 @@ export function useRecruitmentDraft(
     isLoading: gisuQuery.isLoading || draftQuery.isLoading,
     isError: gisuQuery.isError || draftQuery.isError,
     error: draftQuery.error ?? gisuQuery.error ?? null,
+    isActiveGisuMissing,
   }
 }

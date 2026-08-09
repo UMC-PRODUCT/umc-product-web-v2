@@ -66,7 +66,8 @@ export function RecruitmentCreatePage({
   draftRoundId,
   draftSeasonId,
 }: RecruitmentCreatePageProps = {}) {
-  const { draft, isLoading, isError, error } = useRecruitmentDraft(
+  const { draft, isLoading, isError, error, isActiveGisuMissing } =
+    useRecruitmentDraft(
     draftRoundId,
     draftSeasonId,
   )
@@ -76,6 +77,10 @@ export function RecruitmentCreatePage({
   // 끝나기 전에 그리면 빈 문항으로 굳어 버리므로, 다 받은 뒤에 그린다.
   if (isDraftMode && isLoading) {
     return <DraftNotice message="임시 저장한 모집을 불러오는 중입니다..." />
+  }
+
+  if (isDraftMode && isActiveGisuMissing) {
+    return <DraftNotice message="활성 기수를 찾을 수 없습니다." />
   }
 
   if (isDraftMode && (isError || !draft)) {
