@@ -63,29 +63,33 @@ export function RecruitmentQuotaPage() {
   )
   const viewerChapterId = viewerChapterRecord?.chapterId
   const viewerChapterName = viewerChapterRecord?.chapterName
-  const isSchoolScoped = isSchoolLeadership(me) && !isCentralCore(me)
+  // 중앙 총괄이 아닌 리크루팅 운영진은 자기 지부만 본다. 지부장과 학교
+  // 회장단이 모두 여기 해당한다. 역할 타입 하나로만 보면 지부장이 빠져
+  // 전체 지부가 열린다.
+  const isChapterScoped =
+    !isCentralCore(me) && (isChapterPresident(me) || isSchoolLeadership(me))
   const canLoadRounds =
     !isMeLoading &&
-    (!isSchoolScoped ||
+    (!isChapterScoped ||
       (Boolean(viewerChapterId) && Boolean(viewerChapterName)))
-  const isAll = !isSchoolScoped && chapterTab === "all"
-  const activeChapter = isSchoolScoped ? viewerChapterName : chapterTab
+  const isAll = !isChapterScoped && chapterTab === "all"
+  const activeChapter = isChapterScoped ? viewerChapterName : chapterTab
 
   const { groups } = useAdminRecruitingRounds(undefined, {
     fresh: true,
     refetchInterval: QUOTA_PAGE_REFETCH_INTERVAL,
-    chapterId: isSchoolScoped ? viewerChapterId : undefined,
+    chapterId: isChapterScoped ? viewerChapterId : undefined,
     enabled: canLoadRounds,
   })
   const { chapters: serverChapters } = useSchoolChapterMap({
     refetchInterval: QUOTA_PAGE_REFETCH_INTERVAL,
   })
   const visibleGroups = useMemo(() => {
-    if (!isSchoolScoped || !viewerChapterId) return groups
+    if (!isChapterScoped || !viewerChapterId) return groups
     return groups.filter(
       (group) => String(group.chapterId) === String(viewerChapterId),
     )
-  }, [groups, isSchoolScoped, viewerChapterId])
+  }, [groups, isChapterScoped, viewerChapterId])
   const { data: activeGisuData } = useActiveGisu()
   const activeGisuId = activeGisuData?.gisuId
     ? String(activeGisuData.gisuId)
@@ -152,7 +156,7 @@ export function RecruitmentQuotaPage() {
       activeGisuId,
     )
 
-    if (!isSchoolScoped) return mapped
+    if (!isChapterScoped) return mapped
     if (!viewerChapterName) return []
     return mapped.filter(
       (chapterData) => chapterData.chapter === viewerChapterName,
@@ -160,7 +164,7 @@ export function RecruitmentQuotaPage() {
   }, [
     activeGisuId,
     visibleGroups,
-    isSchoolScoped,
+    isChapterScoped,
     seasonConfigsMap,
     serverChapters,
     viewerChapterName,
@@ -559,7 +563,7 @@ export function RecruitmentQuotaPage() {
         className="pl-3"
       />
 
-      {!isSchoolScoped && !isMeLoading && (
+      {!isChapterScoped && !isMeLoading && (
         <ChapterTabs value={chapterTab} onValueChange={handleTabChange} />
       )}
 
