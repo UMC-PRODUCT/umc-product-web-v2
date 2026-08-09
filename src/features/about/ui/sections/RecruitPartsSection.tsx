@@ -23,11 +23,12 @@ export function RecruitPartsSection() {
     <section className="flex flex-col items-center gap-13.5 pt-75">
       <div className="flex w-full flex-col items-start gap-25">
         <div className="flex w-full max-w-300 flex-col items-center gap-18">
-          <div className="flex w-270 flex-col items-center gap-6">
+          <div className="flex w-full flex-col items-center gap-6">
             <h2 className="text-center text-5xl leading-[1.2] font-bold tracking-[-1.44px] text-white">
               {ABOUT_RECRUIT.headline}
             </h2>
-            <p className="text-teal-gray-400 max-w-250 text-center text-2xl leading-[1.5] font-light tracking-[-0.72px]">
+
+            <p className="text-teal-gray-400 w-full text-center text-2xl leading-normal font-light tracking-[-0.72px]">
               {ABOUT_RECRUIT.description}
             </p>
           </div>
@@ -43,12 +44,12 @@ export function RecruitPartsSection() {
           </div>
         </div>
 
-        <div className="flex w-full flex-col items-start gap-7">
-          <h3 className="w-full pl-1 text-[32px] leading-[1.3] font-semibold text-white">
+        <div className="flex w-full flex-col items-center gap-7">
+          <h3 className="w-full pl-1 text-center text-[32px] leading-[1.3] font-semibold text-white">
             {ABOUT_RECRUIT.traitsHeadline}
           </h3>
 
-          <div className="flex w-full flex-col items-start gap-6.5">
+          <div className="flex w-full flex-col items-center gap-6.5">
             <div role="tablist" className="flex items-center gap-3">
               {ABOUT_RECRUIT.parts.map((part) => {
                 const isActive = part.id === activePart.id
@@ -61,7 +62,7 @@ export function RecruitPartsSection() {
                     aria-controls="about-recruit-traits"
                     onClick={() => setActivePartId(part.id)}
                     className={cn(
-                      "cursor-pointer rounded-full px-4 py-1.75 text-xl leading-[1.4] tracking-[-0.2px] transition-colors",
+                      "cursor-pointer rounded-full px-4.5 py-1.75 text-xl leading-[1.4] tracking-[-0.2px] transition-colors",
                       isActive
                         ? "bg-teal-900 text-white"
                         : "text-teal-gray-500 bg-[rgba(6,43,41,0.3)] hover:text-white",
