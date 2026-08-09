@@ -1,3 +1,5 @@
+import bgGraphic from "@/shared/assets/image/about/bg-graphic.svg"
+
 import { ClosingSection } from "./sections/ClosingSection"
 import { HeroSection } from "./sections/HeroSection"
 import { IntroSection } from "./sections/IntroSection"
@@ -8,36 +10,31 @@ import { SchoolsSection } from "./sections/SchoolsSection"
 // 앱 전체는 밝은 배경(__root 의 bg-teal-gray-50)인데 이 페이지만 다크다.
 // 라우트 안에서 자체 배경을 깐다.
 //
-// 시안 배경은 검정 위에 두 덩어리다. 히어로 구간을 가로지르는 큰 청록 호와,
-// 페이지 중간까지만 왼쪽 가장자리에 남는 은은한 글로우.
+// 시안 배경은 두 겹이다. 아래는 페이지 전체에 깔린 청록 글로우 두 덩어리(1440
+// 프레임 fill), 위는 첫 섹션을 가로지르는 BG Grapic 이다.
 //
-// TODO: 아래는 근사다. 블러가 깊게 걸린 유기적 형태라 CSS 그라디언트로는
-// 정확히 재현되지 않는다. 배경만 담은 1440x5985 프레임을 이미지로 받아
-// 이 두 레이어를 통째로 교체할 것.
-const HERO_GLOW =
-  "radial-gradient(120% 85% at 18% 62%, rgba(46, 209, 190, 0.30) 0%, rgba(46, 209, 190, 0.12) 38%, rgba(46, 209, 190, 0) 72%)"
+// 글로우는 시안 원본 해상도 렌더에서 콘텐츠 없는 구간의 픽셀을 뽑아 최소제곱으로
+// 맞췄다. 둘 다 x·y 에 대해 선형이라 linear-gradient 로 정확히 떨어진다.
+const LEFT_GLOW =
+  "linear-gradient(97.82deg, rgba(46, 209, 190, 0.189) 0%, rgba(46, 209, 190, 0) 48.3%)"
 
-const SIDE_GLOW =
-  "linear-gradient(90deg, rgba(46, 209, 190, 0.12) 0%, rgba(46, 209, 190, 0.04) 30%, rgba(46, 209, 190, 0) 60%)"
+const RIGHT_GLOW =
+  "linear-gradient(95.65deg, rgba(46, 209, 190, 0) 63.6%, rgba(46, 209, 190, 0.269) 100%)"
 
 export function AboutPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
-      {/* 상단 호. 히어로 구간에서 끝난다. */}
-      <div
+    <div
+      className="relative min-h-screen overflow-hidden bg-black"
+      style={{ backgroundImage: `${RIGHT_GLOW}, ${LEFT_GLOW}` }}
+    >
+      {/* 시안에서 이미 1440x1416 으로 잘려 나온 에셋이라 페이지 좌표에 그대로
+          얹는다. 가로만 화면을 따라 늘어난다. 세로를 같이 늘리면 호가 히어로
+          콘텐츠와 어긋나서 1416 로 고정한다. */}
+      <img
+        src={bgGraphic}
+        alt=""
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-233"
-        style={{ background: HERO_GLOW }}
-      />
-      {/* 왼쪽 글로우. 페이지 중간쯤에서 사라지도록 세로 마스크를 겹친다. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-675"
-        style={{
-          background: SIDE_GLOW,
-          maskImage:
-            "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 100%)",
-        }}
+        className="pointer-events-none absolute inset-x-0 top-0 h-354 w-full object-fill"
       />
       <div className="relative mx-auto w-300">
         <HeroSection />
