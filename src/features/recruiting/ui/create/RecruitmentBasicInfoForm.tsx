@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
 
@@ -202,7 +201,6 @@ export function RecruitmentBasicInfoForm({
   initialSchool,
 }: RecruitmentBasicInfoFormProps) {
   const addToast = useToastStore((state) => state.addToast)
-  const navigate = useNavigate()
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
   const [tempSaveMessage, setTempSaveMessage] =
     useState("임시저장이 완료되었습니다.")
@@ -272,9 +270,7 @@ export function RecruitmentBasicInfoForm({
     staleTime: 5 * 60 * 1000,
   })
   const chapterEntries = chaptersQuery.data?.chapters ?? []
-  const chapterOptions = chapterEntries
-    .map((entry) => entry.chapterName)
-    .filter(isChapter)
+  const chapterOptions = CHAPTERS
   const selectedChapterEntry = chapterEntries.find(
     (entry) => entry.chapterName === chapter,
   )
@@ -316,11 +312,23 @@ export function RecruitmentBasicInfoForm({
   // 로그인 정보가 늦게 도착해도 다시 채운다.
   useEffect(() => {
     if (!isRoleResolved) return
-    patchBasicInfo({
+    const prefill = {
       chapter:
         initialChapter ?? (role === "central" ? CHAPTERS[0] : viewerChapter),
       school:
         initialSchool ?? (role === "schoolStaff" ? viewerSchool : undefined),
+    }
+    patchBasicInfo(prefill)
+    // 이 프리필은 사용자 입력이 아니라 초기값 채움이므로, 스냅샷 캡처(마운트) 이후에
+    // 반영되더라도 기준선에 포함시켜 이탈 모달이 곧바로 뜨지 않게 한다.
+    savedSnapshotRef.current = JSON.stringify({
+      chapter: prefill.chapter,
+      school: prefill.school,
+      recruitmentType,
+      roundNo,
+      interviewRequired,
+      footer,
+      periodForm,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRoleResolved, role, viewerChapter, viewerSchool])
@@ -545,7 +553,15 @@ export function RecruitmentBasicInfoForm({
       return
     }
 
-    savedSnapshotRef.current = currentSnapshot
+    savedSnapshotRef.current = JSON.stringify({
+      chapter,
+      school,
+      recruitmentType,
+      roundNo,
+      interviewRequired,
+      footer: resolvedFooter,
+      periodForm,
+    })
     setIsSaving(false)
     setTempSaveMessage(
       roundId
@@ -687,10 +703,10 @@ export function RecruitmentBasicInfoForm({
     isPeriodFieldComplete(periodForm.documentStartAt) &&
     isPeriodFieldComplete(periodForm.documentEndAt) &&
     isPeriodFieldComplete(periodForm.documentResultPublishedAt) &&
+    isPeriodFieldComplete(periodForm.finalResultPublishedAt) &&
     (!interviewRequired ||
       (isPeriodFieldComplete(periodForm.interviewStartAt) &&
-        isPeriodFieldComplete(periodForm.interviewEndAt))) &&
-    isPeriodFieldComplete(periodForm.finalResultPublishedAt)
+        isPeriodFieldComplete(periodForm.interviewEndAt)))
 
   const handleNext = async () => {
     if (isAdvancing) return
@@ -981,11 +997,14 @@ export function RecruitmentBasicInfoForm({
                         ? `${periodForm.documentStartAt.date} ${periodForm.documentStartAt.time}`
                         : "2000-00-00 00:00"
                     }
-                    endLabel={
-                      periodForm.finalResultPublishedAt.date
-                        ? `${periodForm.finalResultPublishedAt.date.slice(5)} ${periodForm.finalResultPublishedAt.time}`
+                    endLabel={(() => {
+                      const endField = interviewRequired
+                        ? periodForm.finalResultPublishedAt
+                        : periodForm.documentResultPublishedAt
+                      return endField.date
+                        ? `${endField.date.slice(5)} ${endField.time}`
                         : "00-00 23:59"
-                    }
+                    })()}
                     className="flex-1"
                   />
                 </div>
@@ -1276,7 +1295,7 @@ export function RecruitmentBasicInfoForm({
         title="임시 저장 완료"
         content={tempSaveMessage}
         confirmText="확인"
-        onConfirm={() => navigate({ to: "/recruiting/recruitments" })}
+        onConfirm={() => setShowTempSaveModal(false)}
       />
     </>
   )
