@@ -6,24 +6,23 @@ import type { RecruitingRound } from "../api/types"
 
 const round = (
   overrides: Partial<RecruitingRound> & Pick<RecruitingRound, "roundId">,
-): RecruitingRound =>
-  ({
-    title: "",
-    type: "ADDITIONAL",
-    roundNo: 1,
-    recruitableTracks: [],
-    secondChoiceEnabled: false,
-    documentStartAt: null,
-    documentEndAt: null,
-    documentResultPublishedAt: null,
-    interviewRequired: false,
-    interviewStartAt: null,
-    interviewEndAt: null,
-    finalResultPublishedAt: null,
-    announcement: null,
-    status: "OPEN",
-    ...overrides,
-  }) as RecruitingRound
+): RecruitingRound => ({
+  title: "",
+  type: "ADDITIONAL",
+  roundNo: 1,
+  recruitableTracks: [],
+  secondChoiceEnabled: false,
+  documentStartAt: null,
+  documentEndAt: null,
+  documentResultPublishedAt: null,
+  interviewRequired: false,
+  interviewStartAt: null,
+  interviewEndAt: null,
+  finalResultPublishedAt: null,
+  announcement: null,
+  status: "OPEN",
+  ...overrides,
+})
 
 describe("resolveAdditionalRoundNoOptions", () => {
   it("추가 모집이 없으면 1차부터 시작한다", () => {
