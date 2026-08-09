@@ -21,7 +21,10 @@ export function ClosingSection() {
             />
           </div>
         </div>
-        <p className="text-teal-gray-400 w-full pt-0.5 pb-4.5 text-center text-base leading-6 font-light tracking-[-0.48px] md:text-[22px] md:leading-7 md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
+        {/* 390~767 만 14 로 줄인다. 이 문장은 히어로보다 세 글자 길어 시안의
+            16 으로는 326 폭에 한 줄로 들어가지 않는다(363). 줄 높이는 24 로
+            두어 시안의 두 줄 높이(48)를 지킨다. */}
+        <p className="text-teal-gray-400 xs:text-[14px] w-full pt-0.5 pb-4.5 text-center text-base leading-6 font-light tracking-[-0.48px] md:text-[22px] md:leading-7 md:tracking-[-0.66px] xl:text-2xl xl:tracking-[-0.72px]">
           {ABOUT_CLOSING.descriptionLines.map((line, index) => (
             <span key={line}>
               {/* 1024 부터는 한 줄로 흐른다. 시안이 768 이하에서만 끊는다. */}
