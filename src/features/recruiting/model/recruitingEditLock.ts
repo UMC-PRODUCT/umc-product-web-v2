@@ -38,6 +38,32 @@ export function resolveSeasonEditEligibility(
   return EDITABLE
 }
 
+export interface QuotaRowEditability {
+  /** 이 학교의 시즌. 아직 모집을 만들지 않은 학교면 없다. */
+  seasonId: string | undefined
+  /** 시즌 단위 편집 권한. 넘기지 않으면 판정하지 않는다(미리보기용). */
+  canEditSeason?: (seasonId: string | undefined) => boolean
+  /** 시즌을 새로 만들 수 있는지. 시즌 없는 학교 행을 열지 결정한다. */
+  canCreateSeason: boolean
+}
+
+/**
+ * 모집 인원 표의 한 행을 편집할 수 있는지.
+ *
+ * 시즌이 없는 학교도 값을 넣을 수 있어야 한다. 그 입력이 곧 시즌 생성 요청이
+ * 되기 때문이다. 시즌 단위 권한만 보면 아직 리소스가 없는 학교는 영원히 잠겨,
+ * 첫 TO 를 넣을 방법이 사라진다.
+ */
+export function canEditQuotaRow({
+  seasonId,
+  canEditSeason,
+  canCreateSeason,
+}: QuotaRowEditability): boolean {
+  if (!canEditSeason) return true
+  if (!seasonId) return canCreateSeason
+  return canEditSeason(seasonId)
+}
+
 /** 화면에 보이는 시즌 중 하나라도 편집 가능한지. 저장 버튼 노출에 쓴다. */
 export function hasAnyEditableSeason(
   seasonIds: readonly (string | null | undefined)[],

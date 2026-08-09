@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { cn } from "@/shared/lib/utils"
 
+import { canEditQuotaRow } from "../model/recruitingEditLock"
 import {
   type ChapterQuotaData,
   getSchoolQuotaRowsSignature,
@@ -23,6 +24,8 @@ interface ChapterQuotaTableCardProps {
   autoAllocateRequest?: { id: number; chapter: string } | null
   /** 시즌별 편집 가능 여부. 없으면 전부 편집 가능으로 본다. */
   canEditSeason?: (seasonId: string | undefined) => boolean
+  /** 아직 모집이 없는 학교에 TO 를 넣어 시즌을 만들 수 있는지. 학교마다 다르다. */
+  canCreateSeason?: (schoolId: string | undefined) => boolean
   conflictedSchoolNames?: ReadonlySet<string>
   className?: string
 }
@@ -37,6 +40,7 @@ export function ChapterQuotaTableCard({
   onSchoolDataChange,
   autoAllocateRequest,
   canEditSeason,
+  canCreateSeason,
   conflictedSchoolNames,
   className,
 }: ChapterQuotaTableCardProps) {
@@ -307,9 +311,11 @@ export function ChapterQuotaTableCard({
 
         {/* School rows */}
         {schoolsData.map((school) => {
-          const readOnly = canEditSeason
-            ? !canEditSeason(school.seasonId)
-            : false
+          const readOnly = !canEditQuotaRow({
+            seasonId: school.seasonId,
+            canEditSeason,
+            canCreateSeason: canCreateSeason?.(school.schoolId) ?? false,
+          })
           const isConflicted = conflictedSchoolNames?.has(school.schoolName)
           return (
             <div
