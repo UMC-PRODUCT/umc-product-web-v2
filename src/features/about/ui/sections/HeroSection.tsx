@@ -1,4 +1,5 @@
 import BreakTheRules from "@/shared/assets/image/about/BreakTheRules"
+import BreakTheRulesStacked from "@/shared/assets/image/about/BreakTheRulesStacked"
 
 import { ABOUT_HERO } from "../../constants"
 import { GlassCtaButton } from "../GlassCtaButton"
@@ -12,9 +13,16 @@ export function HeroSection() {
             <p className="w-full text-[22px] leading-[20.8px] font-medium tracking-[2px] text-teal-400 uppercase">
               {ABOUT_HERO.eyebrow}
             </p>
-            <div className="flex h-25 w-full items-center justify-center">
+            <div className="flex h-50 w-full items-center justify-center lg:h-25">
+              {/* 헤드라인은 글자를 접을 수 없는 벡터라 줄 수마다 파일이 다르다.
+                  1024 부터 한 줄, 그 아래는 두 줄이다. */}
+              <BreakTheRulesStacked
+                className="h-auto w-full max-w-[506px] text-white lg:hidden"
+                role="img"
+                aria-label={ABOUT_HERO.headlineAlt}
+              />
               <BreakTheRules
-                className="h-auto w-full max-w-243.75 text-white"
+                className="hidden h-auto w-full max-w-243.75 text-white lg:block"
                 role="img"
                 aria-label={ABOUT_HERO.headlineAlt}
               />
