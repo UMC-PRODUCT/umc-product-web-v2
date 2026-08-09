@@ -5,6 +5,7 @@ import { isChapter } from "@/entities/organization/model/chapters"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { RecruitmentCreatePage } from "@/features/recruiting"
 import { isRecruitingListRole } from "@/features/recruiting/model/recruitingListRole"
+import { RECRUITING_HOME_PATH } from "@/shared/config/landingPolicy"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
 import { notifyAccessDenied } from "@/shared/lib/accessDenied"
 
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/recruiting/recruitments/new")({
     const me = await ensureMe(context.queryClient, location.href)
     if (!isRecruitingEditor(me)) {
       notifyAccessDenied()
-      throw redirect({ to: "/recruiting/dashboard/applications" })
+      throw redirect({ to: RECRUITING_HOME_PATH })
     }
   },
   validateSearch: (

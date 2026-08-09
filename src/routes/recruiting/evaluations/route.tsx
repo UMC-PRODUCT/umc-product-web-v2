@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
 import { isRecruitingEditor } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { RECRUITING_HOME_PATH } from "@/shared/config/landingPolicy"
 import { notifyAccessDenied } from "@/shared/lib/accessDenied"
 
 // 평가 관리는 서버가 학교 회장단까지만 허용한다(평가자 배정·면접 세션 모두 403).
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/recruiting/evaluations")({
     const me = await ensureMe(context.queryClient, location.href)
     if (!isRecruitingEditor(me)) {
       notifyAccessDenied()
-      throw redirect({ to: "/recruiting/dashboard/applications" })
+      throw redirect({ to: RECRUITING_HOME_PATH })
     }
   },
   component: Outlet,
