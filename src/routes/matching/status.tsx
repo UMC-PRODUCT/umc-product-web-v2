@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
 import {
@@ -47,6 +47,19 @@ function MatchingStatusPage() {
 
   const [selectedChapter, setSelectedChapter] =
     useState<Chapter>(defaultChapter)
+
+  useEffect(() => {
+    if (chapterNames.length === 0) return
+    if (!selectedChapter || !chapterNames.includes(selectedChapter)) {
+      const nextChapter =
+        userChapter && chapterNames.includes(userChapter)
+          ? userChapter
+          : (chapterNames[0] ?? "")
+      if (nextChapter) {
+        setSelectedChapter(nextChapter as Chapter)
+      }
+    }
+  }, [chapterNames, userChapter, selectedChapter])
 
   // challenger records에 지부 정보가 없는 경우 chapters API로 폴백 (페인트 전 적용)
   const hasAutoSelected = useRef(false)

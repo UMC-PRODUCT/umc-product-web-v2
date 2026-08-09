@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
 import {
@@ -69,6 +69,19 @@ function MatchingApplicationsPage() {
       : (chapterNames[0] ?? "")
 
   const [selectedChapter, setSelectedChapter] = useState(defaultChapter)
+
+  useEffect(() => {
+    if (chapterNames.length === 0) return
+    if (!selectedChapter || !chapterNames.includes(selectedChapter)) {
+      const nextChapter =
+        userChapter && chapterNames.includes(userChapter)
+          ? userChapter
+          : (chapterNames[0] ?? "")
+      if (nextChapter) {
+        setSelectedChapter(nextChapter)
+      }
+    }
+  }, [chapterNames, userChapter, selectedChapter])
 
   // 지부장 본인 지부 추적 (auto-select 후 갱신)
   const ownChapter = useRef<string>(defaultChapter)
