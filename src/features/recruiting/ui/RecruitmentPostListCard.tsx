@@ -14,10 +14,12 @@ import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
+import type { RecruitingListRole } from "../model/recruitingListRole"
 import type { RecruitmentPost } from "../model/recruitmentList"
 
 interface RecruitmentPostListCardProps {
   chapter: Chapter
+  role: RecruitingListRole
   posts: RecruitmentPost[]
   permittedSeasonIds: ReadonlySet<string>
   onPrivatize: (postId: string) => void
@@ -32,6 +34,8 @@ interface RecruitmentPostListCardProps {
 
 function PostRow({
   post,
+  role,
+  chapter,
   permittedSeasonIds,
   onPrivatize,
   onDuplicate,
@@ -41,6 +45,8 @@ function PostRow({
   archiveVisibleOnPage,
 }: {
   post: RecruitmentPost
+  role: RecruitingListRole
+  chapter: Chapter
   permittedSeasonIds: ReadonlySet<string>
   onPrivatize: (postId: string) => void
   onDuplicate: (postId: string) => void
@@ -64,6 +70,8 @@ function PostRow({
       rightAction={
         <RecruitmentPostMoreMenu
           status={post.status}
+          role={role}
+          ownChapter={chapter}
           onPublish={() => {}}
           onPrivatize={() => onPrivatize(post.postId)}
           onEdit={() =>
@@ -86,6 +94,7 @@ function PostRow({
 
 export function RecruitmentPostListCard({
   chapter,
+  role,
   posts,
   permittedSeasonIds,
   onPrivatize,
@@ -178,6 +187,8 @@ export function RecruitmentPostListCard({
                       <PostRow
                         key={post.postId}
                         post={post}
+                        role={role}
+                        chapter={chapter}
                         permittedSeasonIds={permittedSeasonIds}
                         onPrivatize={onPrivatize}
                         onDuplicate={onDuplicate}
@@ -199,6 +210,8 @@ export function RecruitmentPostListCard({
             <PostRow
               key={post.postId}
               post={post}
+              role={role}
+              chapter={chapter}
               permittedSeasonIds={permittedSeasonIds}
               onPrivatize={onPrivatize}
               onDuplicate={onDuplicate}
