@@ -347,26 +347,27 @@ export function RecruitingApplyForm({
     const nameValue = nameQuestion ? getValue(nameQuestion) : undefined
     const emailValue = emailQuestion ? getValue(emailQuestion) : undefined
 
-    onApplicantInfoChange({
-      applicantName: typeof nameValue === "string" ? nameValue : undefined,
-      applicantEmail: typeof emailValue === "string" ? emailValue : undefined,
-      firstChoice:
-        typeof firstChoiceValue === "string"
-          ? trackFromOptionContent(
-              firstChoiceQuestion?.options.find(
-                (option) => option.optionId === firstChoiceValue,
-              )?.content ?? "",
-            )
-          : undefined,
-      secondChoice:
-        typeof secondChoiceValue === "string"
-          ? trackFromOptionContent(
-              secondChoiceQuestion?.options.find(
-                (option) => option.optionId === secondChoiceValue,
-              )?.content ?? "",
-            )
-          : undefined,
-    })
+    // 값을 못 찾은 항목은 아예 빼고 넘긴다. 상위가 이전 값 위에 덮어쓰는 방식이라
+    // undefined 를 실어 보내면 이미 받아 둔 이름·이메일이 지워진다.
+    const patch: ApplicantInfoPatch = {}
+    if (typeof nameValue === "string") patch.applicantName = nameValue
+    if (typeof emailValue === "string") patch.applicantEmail = emailValue
+    if (typeof firstChoiceValue === "string") {
+      patch.firstChoice = trackFromOptionContent(
+        firstChoiceQuestion?.options.find(
+          (option) => option.optionId === firstChoiceValue,
+        )?.content ?? "",
+      )
+    }
+    if (typeof secondChoiceValue === "string") {
+      patch.secondChoice = trackFromOptionContent(
+        secondChoiceQuestion?.options.find(
+          (option) => option.optionId === secondChoiceValue,
+        )?.content ?? "",
+      )
+    }
+
+    onApplicantInfoChange(patch)
   }, [config.sections, onApplicantInfoChange, watchedValues])
 
   const submitWithValidation = (onValid: () => void) =>
