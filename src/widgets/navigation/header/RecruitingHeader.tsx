@@ -10,6 +10,7 @@ import { useHeaderRecruitingStatus } from "@/features/recruiting/hooks/useHeader
 import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import { getDisabledNavMessage } from "@/shared/config/headerNavPolicy"
 import { SETTINGS_ENTRY_PATH } from "@/shared/config/settingsNavigation"
+import { useIsWithinHeaderRecruitingWindow } from "@/shared/hooks/useHeaderRecruitingWindow"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { GuestProfileButton } from "@/widgets/navigation/header/GuestProfileButton"
 import HeaderButton from "@/widgets/navigation/header/HeaderButton"
@@ -46,9 +47,9 @@ export default function RecruitingHeader({
 
   const showRecruiting = isRecruitingOperator(me)
   const showSettings = isCentralAdmin(me)
-  // 상태를 아직 못 받았으면 감추지 않는다. 있던 탭이 잠깐 사라지는 것보다
-  // 잠깐 더 보이는 편이 덜 어색하다.
-  const isRecruitingPeriod = status?.phase === "open"
+  // 탭 구성도 `지원하기` 와 같은 기준을 쓴다. 둘이 갈리면 모집 중이라며 지원
+  // 버튼을 띄운 헤더에 데모데이 매칭 탭이 함께 남는다.
+  const isRecruitingPeriod = useIsWithinHeaderRecruitingWindow()
 
   const addToast = useToastStore((s) => s.addToast)
 
@@ -96,9 +97,7 @@ export default function RecruitingHeader({
       {/* 비로그인은 `로그인` 버튼, 로그인 사용자는 프로필. 디자인이 권한별
           헤더 스펙에서 이 둘을 명시적으로 갈라 놓았다. */}
       <div className="flex items-center justify-end gap-4 pr-8.5">
-        {status && (
-          <RecruitingStatusButton status={status} isAuthed={isAuthed} />
-        )}
+        <RecruitingStatusButton />
         <HeaderButton
           label="문의사항"
           type="trailing-icon"
