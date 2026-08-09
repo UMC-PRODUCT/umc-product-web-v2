@@ -27,7 +27,7 @@ export function PossibilitySection() {
             key={value.keyword}
             className="flex flex-col items-start gap-2.5 md:gap-4 lg:flex-row lg:items-center lg:gap-8"
           >
-            <dt className="w-11 text-center text-[28px] leading-[34px] font-extrabold tracking-[-0.67px] text-teal-300 md:w-18 md:text-[42px] md:leading-[50px] md:tracking-[-1px]">
+            <dt className="w-11 text-center text-[26px] leading-[34px] font-extrabold tracking-[-1px] text-teal-300 md:w-18 md:text-[42px] md:leading-[50px]">
               {value.keyword}
             </dt>
             <dd className="text-teal-gray-300 flex flex-col text-base leading-[1.5] font-light tracking-[-0.48px] md:text-[22px] md:tracking-[-0.66px] lg:text-2xl lg:tracking-[-0.72px]">
