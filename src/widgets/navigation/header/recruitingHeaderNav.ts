@@ -45,7 +45,7 @@ export function buildRecruitingNavItems({
   isRecruitingPeriod,
 }: HeaderNavVisibility): NavItem[] {
   return [
-    { label: "소개", to: "/intro" },
+    { label: "소개", to: "/about" },
     {
       label: "모집 안내",
       to: "/projects/notice",

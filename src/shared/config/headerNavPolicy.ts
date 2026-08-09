@@ -22,7 +22,7 @@ export type HeaderNavItem = {
 export const HEADER_NAV_ITEMS: HeaderNavItem[] = [
   {
     label: "소개",
-    to: "/intro",
+    to: "/about",
   },
   {
     label: "모집 안내",
