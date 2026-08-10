@@ -14,12 +14,10 @@ export const Route = createFileRoute("/recruiting-guide")({
   component: RecruitingGuideRoute,
 })
 
-// 헤더가 자리를 차지하지 않고 히어로 위에 겹쳐 뜬다. 히어로의 위쪽 여백이 이미
-// 헤더 높이를 포함한 값이라 absolute 로 띄운다.
 function RecruitingGuideRoute() {
   return (
     <div className="relative">
-      <div className="absolute inset-x-0 top-0 z-50">
+      <div className="sticky top-0 z-50 -mb-20">
         <RecruitingHeader tone="glass" />
       </div>
       <RecruitingGuidePage />

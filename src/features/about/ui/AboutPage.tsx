@@ -1,5 +1,4 @@
-import bgGraphic from "@/shared/assets/image/about/bg-graphic.svg"
-
+import { LandingBackground } from "./LandingBackground"
 import { ClosingSection } from "./sections/ClosingSection"
 import { HeroSection } from "./sections/HeroSection"
 import { IntroSection } from "./sections/IntroSection"
@@ -27,21 +26,8 @@ export function AboutPage() {
       className="relative min-h-screen overflow-hidden bg-black"
       style={{ backgroundImage: `${RIGHT_GLOW}, ${LEFT_GLOW}` }}
     >
-      {/* 시안에서 이미 1440x1416 으로 잘려 나온 에셋이라 페이지 좌표에 그대로
-          얹는다.
-          시안은 화면 폭이 달라져도 이 그래픽의 크기·위치를 바꾸지 않는다. 390
-          프레임과 1440 프레임의 배치가 같고, 좁은 쪽은 왼쪽부터 잘라 보여 준다.
-          390 시안과 아크 밝기를 맞춰 보면 177 대 179, 235 대 235 로 겹친다.
-          그래서 1440 아래에서는 늘이지 않고 왼쪽에 붙인 채 잘라 낸다.
-          1440 위로는 대응 시안이 없고 잘린 에셋이라 오른쪽이 비므로 화면을 따라
-          늘인다. */}
-      <img
-        src={bgGraphic}
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute top-0 left-0 h-354 w-full min-w-[1440px] object-fill"
-      />
-      <div className="relative mx-auto w-full max-w-[1440px] px-8 xl:px-30">
+      <LandingBackground />
+      <div className="relative z-10 mx-auto w-full max-w-[1440px] px-8 xl:px-30">
         <HeroSection />
         <IntroSection />
         <PossibilitySection />
