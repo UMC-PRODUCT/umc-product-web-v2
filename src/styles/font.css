@@ -1,13 +1,26 @@
 /* 소개 랜딩 본문에 쓰는 SUIT. 시안이 이 문단들만 SUIT Light 로 잡아 두었다.
    나머지 화면과 제목·라벨은 그대로 Pretendard 를 쓴다.
 
-   가변 폰트 한 벌로 100~900 을 모두 덮는다. 파일이 하나뿐이라 굵기별로 나눠
-   받을 필요가 없다. */
+   원본 SUIT-Variable.woff2 는 2933 자 · 624KB 라 /about 한 페이지가 받기엔
+   너무 크다. font-suit 가 실제로 렌더하는 글자는 276 자뿐이고 굵기도 300 하나만
+   쓰므로, 그 글자만 남기고 가변축을 300 으로 고정해 17KB 로 줄였다.
+
+   TODO: 본문 문구에 새 글자가 들어가면 서브셋을 다시 떠야 한다. 빠진 글자는
+   두부(□)가 아니라 폴백인 Pretendard 로 렌더되므로 눈에 잘 안 띈다.
+   재생성 (fonttools 필요):
+     pyftsubset src/shared/assets/font/SUIT-Variable.woff2 \
+       --output-file=/tmp/suit.woff2 --flavor=woff2 \
+       --text-file=<글자목록> --layout-features='*' --no-hinting
+     python -m fontTools.varLib.instancer /tmp/suit.woff2 wght=300 \
+       --output /tmp/suit-300.ttf   # 이후 woff2 로 저장
+   글자목록은 프리렌더된 /about 을 390·768·1024·1440 폭에서 열고 모집 분야 탭을
+   모두 눌러 .font-suit 요소의 텍스트를 모은 집합이다. 반응형으로 문구가 갈리고
+   비활성 탭 내용은 DOM 에 없어서, 한 폭만 보고 뜨면 글자가 빠진다.
+   원본은 재생성용으로 남겨 둔다. import 하는 곳이 없어 번들에는 들어가지 않는다. */
 @font-face {
   font-family: "SUIT Variable";
-  src: url("../shared/assets/font/SUIT-Variable.woff2")
-    format("woff2-variations");
-  font-weight: 100 900;
+  src: url("../shared/assets/font/SUIT-Light-subset.woff2") format("woff2");
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
