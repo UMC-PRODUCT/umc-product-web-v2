@@ -96,3 +96,68 @@ describe("useRecruitingSeasonQuotas 요청 페이싱", () => {
     expect(seasonConfigurationRequests.at(-1)).toBe("1")
   })
 })
+
+describe("저장 실패가 같은 지부로 번지지 않는지", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  const variables = (seasonId: string, chapterKey: string) => ({
+    seasonId,
+    schoolName: `학교${seasonId}`,
+    chapterKey,
+    payload: { chapterTotalTargetCount: 0, quotas: [] },
+  })
+
+  // 지부 합계는 앞선 요청이 반영된 결과를 전제로 계산돼 있다. 하나가 실패하면
+  // 그 뒤 요청은 어차피 합계 불일치로 튕기므로 보내지 않는다.
+  it("같은 지부에서 하나가 실패하면 뒤 요청을 보내지 않는다", async () => {
+    vi.mocked(getRecruitingSeasonConfiguration).mockResolvedValue(
+      createConfiguration("1"),
+    )
+    vi.mocked(updateRecruitingSeasonQuotas)
+      .mockRejectedValueOnce(new Error("400"))
+      .mockResolvedValue(undefined)
+
+    const { result } = renderHook(() => useRecruitingSeasonQuotas(["1"]), {
+      wrapper: createWrapper(),
+    })
+
+    let outcome: Awaited<ReturnType<typeof result.current.updateQuotas>>
+    await act(async () => {
+      outcome = await result.current.updateQuotas([
+        variables("1", "Neon"),
+        variables("2", "Neon"),
+      ])
+    })
+
+    expect(vi.mocked(updateRecruitingSeasonQuotas)).toHaveBeenCalledTimes(1)
+    expect(outcome!.failedCount).toBe(2)
+    expect(outcome!.fulfilledCount).toBe(0)
+  })
+
+  it("다른 지부의 요청은 그대로 보낸다", async () => {
+    vi.mocked(getRecruitingSeasonConfiguration).mockResolvedValue(
+      createConfiguration("1"),
+    )
+    vi.mocked(updateRecruitingSeasonQuotas)
+      .mockRejectedValueOnce(new Error("400"))
+      .mockResolvedValue(undefined)
+
+    const { result } = renderHook(() => useRecruitingSeasonQuotas(["1"]), {
+      wrapper: createWrapper(),
+    })
+
+    let outcome: Awaited<ReturnType<typeof result.current.updateQuotas>>
+    await act(async () => {
+      outcome = await result.current.updateQuotas([
+        variables("1", "Neon"),
+        variables("2", "Xenon"),
+      ])
+    })
+
+    expect(vi.mocked(updateRecruitingSeasonQuotas)).toHaveBeenCalledTimes(2)
+    expect(outcome!.fulfilledCount).toBe(1)
+    expect(outcome!.failedCount).toBe(1)
+  })
+})
