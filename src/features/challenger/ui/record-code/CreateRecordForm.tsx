@@ -3,12 +3,11 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { createChallengerRecord } from "@/features/challenger/api/challengerRecord"
 import {
   getAllGisu,
   getChaptersWithSchools,
-} from "@/features/challenger/api/organization"
+} from "@/entities/organization/api/organization"
+import { createChallengerRecord } from "@/features/challenger/api/challengerRecord"
 import {
   type CreateRecordFormData,
   createRecordSchema,
@@ -18,14 +17,15 @@ import {
   ROLE_TYPE_OPTIONS,
   roleNeedsPart,
 } from "@/features/challenger/model/enums"
-import { Dropdown } from "@/features/challenger/ui/shared/Dropdown"
 import { FieldRow } from "@/features/challenger/ui/shared/FieldRow"
 import { Button } from "@/shared/ui/Button"
+import { Dropdown } from "@/shared/ui/Dropdown"
 import { InputBox } from "@/shared/ui/input/InputBox"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { GeneratedCodeCard } from "./GeneratedCodeCard"
 
-import type { DropdownOption } from "@/features/challenger/ui/shared/Dropdown"
+import type { DropdownOption } from "@/shared/ui/Dropdown"
 
 export function CreateRecordForm() {
   const addToast = useToastStore((state) => state.addToast)
@@ -155,7 +155,7 @@ export function CreateRecordForm() {
       onSubmit={handleSubmit(onSubmit)}
       className="flex w-full flex-col gap-5"
     >
-      <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2">
+      <div className="grid w-full grid-cols-2 gap-5">
         <Controller
           control={control}
           name="gisuId"

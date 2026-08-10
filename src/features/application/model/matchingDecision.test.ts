@@ -5,7 +5,7 @@ import {
   isRoundDecisionClosed,
 } from "./matchingDecision"
 
-import type { MatchingRoundResponse } from "./apiTypes"
+import type { MatchingRoundResponse } from "@/entities/application/model/apiTypes"
 
 function makeRound(
   phase: MatchingRoundResponse["phase"],

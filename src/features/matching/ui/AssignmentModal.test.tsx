@@ -2,15 +2,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { searchMembers } from "@/features/challenger/api/member"
+import { searchMembers } from "@/entities/member/api/member"
 
 import { AssignmentModal } from "./AssignmentModal"
 
-vi.mock("@/features/challenger/api/member", () => ({
+vi.mock("@/entities/member/api/member", () => ({
   searchMembers: vi.fn(),
 }))
 
-vi.mock("@/components/tooltip/Tooltip", () => ({
+vi.mock("@/shared/ui/tooltip/Tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => children,
 }))
 

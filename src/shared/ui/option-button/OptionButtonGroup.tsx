@@ -78,6 +78,9 @@ export function OptionButtonGroup(props: OptionButtonGroupProps) {
       ? resolveSegmentedChildren(children, currentValue)
       : children
 
+  const segmentedRadius =
+    variant === "segmented" ? getSegmentedContainerRadius(children) : ""
+
   return (
     <OptionButtonGroupContext.Provider
       value={{
@@ -96,7 +99,7 @@ export function OptionButtonGroup(props: OptionButtonGroupProps) {
                 "flex flex-wrap gap-2",
                 orientation === "vertical" && "flex-col",
               )
-            : "bg-teal-gray-50 shadow-drop-neutral-2 flex rounded-lg",
+            : cn("bg-teal-gray-150 flex w-fit items-center", segmentedRadius),
           className,
         )}
       >
@@ -104,6 +107,14 @@ export function OptionButtonGroup(props: OptionButtonGroupProps) {
       </div>
     </OptionButtonGroupContext.Provider>
   )
+}
+
+function getSegmentedContainerRadius(children: ReactNode): string {
+  const first = React.Children.toArray(children).find(React.isValidElement) as
+    | React.ReactElement<React.ComponentProps<typeof OptionButton>>
+    | undefined
+  const size = first?.props.size ?? "sm"
+  return size === "xs" ? "rounded-[6px]" : "rounded-[8px]"
 }
 
 function resolveSegmentedChildren(
@@ -118,29 +129,24 @@ function resolveSegmentedChildren(
   const total = validChildren.length
   const values = validChildren.map((c) => c.props.value ?? "")
 
-  // For multiple selection, treat borders differently - show all borders
   const isMultiple = Array.isArray(currentValue)
+
+  const selectedAt = (i: number) => {
+    const v = values[i] ?? ""
+    return isMultiple
+      ? (currentValue as string[]).includes(v)
+      : v === currentValue
+  }
 
   return validChildren.map((child, i) => {
     const isFirst = i === 0
     const isLast = i === total - 1
-
-    let showLeft = true
-    let showRight = true
-
-    if (!isMultiple) {
-      const selectedIdx =
-        currentValue !== undefined ? values.indexOf(currentValue as string) : -1
-      const s = selectedIdx
-      showLeft = s === -1 ? true : isFirst || i < s
-      showRight = s === -1 ? true : isLast || i > s
-    }
+    const gapLeft = i > 0 && !selectedAt(i) && !selectedAt(i - 1)
 
     const segmentedInfo: SegmentedPositionInfo = {
       isFirst,
       isLast,
-      showLeft,
-      showRight,
+      gapLeft,
     }
 
     return React.cloneElement(child, { _segmentedInfo: segmentedInfo })

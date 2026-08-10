@@ -1,21 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { useAuthStore } from "@/entities/member/store/authStore"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
+import { MOCK_MATCHING_PROJECTS } from "@/entities/project/model/matchingProject.mock"
 import { trackEvent } from "@/shared/analytics"
-import { useSchoolChapterMap } from "@/shared/hooks/useSchoolChapterMap"
+import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { cn } from "@/shared/lib/utils"
+import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { Modal } from "@/shared/ui/Modal"
 import { Pagination } from "@/shared/ui/Pagination"
 
-import { MOCK_MATCHING_PROJECTS } from "../model/matchingProject.mock"
 import { useMatchingProjectListFilters } from "../model/matchingProjectList"
-import { FilterDropdown } from "./FilterDropDown"
 import { MatchingProjectCard } from "./MatchingProjectCard"
+import { MatchingProjectCardSkeleton } from "./MatchingProjectCardSkeleton"
 import { ProjectDetailCard } from "./ProjectDetailCard"
 import { ProjectSearchField } from "./ProjectSearchField"
 
-import type { ProjectItem } from "../api/matchingProject"
-import type { MatchingProject } from "../model/matchingProject"
+import type { ProjectItem } from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 const PART_LABEL: Record<string, string> = {
   PLAN: "기획",
@@ -27,6 +30,9 @@ const PART_LABEL: Record<string, string> = {
   NODEJS: "Node.js",
 }
 const PART_ORDER = ["DESIGN", "WEB", "IOS", "ANDROID", "SPRINGBOOT", "NODEJS"]
+
+/** 로딩 중 자리를 채울 카드 수. 한 화면에 대략 두 줄이 찬다. */
+const SKELETON_CARD_COUNT = 6
 
 function toMatchingProject(project: ProjectItem): MatchingProject {
   const owner = project.productOwner
@@ -66,10 +72,19 @@ function toMatchingProject(project: ProjectItem): MatchingProject {
 
 interface MatchingProjectsListPageProps {
   useMockData?: boolean
+  /**
+   * 카드 그리드 열 수.
+   *
+   * 로그인 여부가 아니라 화면 폭이 정한다. 이 목록은 사이드바가 있는
+   * `/matching/projects` 와 사이드바가 없는 `/projects` 가 함께 쓰는데,
+   * 같은 열 수를 주면 한쪽 카드가 디자인보다 커진다.
+   */
+  columns?: 2 | 3
 }
 
 export function MatchingProjectsListPage({
   useMockData = false,
+  columns = 2,
 }: MatchingProjectsListPageProps) {
   const {
     openFilterId,
@@ -84,6 +99,12 @@ export function MatchingProjectsListPage({
     isError,
     filterDescriptors,
   } = useMatchingProjectListFilters()
+  // 비로그인 게스트. 공개 응답은 작성자 이름·학교를 지우고 오므로 카드도
+  // 디자인대로 작성자 줄과 모집 현황을 빼고 파트 이름만 보여준다.
+  //
+  // me 의 유무로 보면 안 된다. 회원 조회는 비동기라 로그인 사용자도 첫 렌더에는
+  // me 가 없어, 잠깐 게스트 카드가 스쳐 지나간다. 토큰 유무는 동기로 안다.
+  const isGuest = !useAuthStore((s) => s.isAuthed)
 
   const { getChapterIdBySchool } = useSchoolChapterMap()
 
@@ -126,19 +147,7 @@ export function MatchingProjectsListPage({
     })
   }, [useMockData, isLoading, isError, searchQuery, visibleProjects.length])
 
-  useEffect(() => {
-    if (!openFilterId) return
-
-    function handlePointerDown(event: PointerEvent) {
-      const target = event.target
-      if (!(target instanceof Node)) return
-      if (filterAreaRef.current?.contains(target)) return
-      setOpenFilterId(null)
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown)
-    return () => document.removeEventListener("pointerdown", handlePointerDown)
-  }, [openFilterId, setOpenFilterId])
+  useClickOutside(filterAreaRef, () => setOpenFilterId(null), !!openFilterId)
 
   return (
     <section className="relative isolate flex w-full min-w-0 flex-col items-stretch justify-start">
@@ -150,7 +159,7 @@ export function MatchingProjectsListPage({
           onClick={() => setOpenFilterId(null)}
         />
       )}
-      <div className="border-teal-gray-100 bp1:rounded-[12px] bp1:border bp1:px-6 bp1:pt-8 bp1:pb-10 bp2:max-w-288 bp2:px-8.5 relative z-30 flex h-full w-full min-w-0 flex-col gap-5 bg-white px-4 pt-6 pb-8">
+      <div className="border-teal-gray-100 relative z-30 flex h-full w-full min-w-0 flex-col gap-5 rounded-[12px] border bg-white px-6 pt-8 pb-10">
         <div className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 목록
@@ -160,25 +169,20 @@ export function MatchingProjectsListPage({
           </span>
         </div>
 
-        <div className="bp2:flex-row bp2:items-start bp2:justify-between relative z-30 mb-3 flex min-w-0 flex-col gap-3 self-stretch">
-          <ProjectSearchField
-            value={searchQuery}
-            onChange={setSearchQuery}
-            className="bp2:w-[28.5rem]"
-          />
+        <div className="relative z-30 mb-3 flex min-w-0 flex-col gap-3 self-stretch">
+          <ProjectSearchField value={searchQuery} onChange={setSearchQuery} />
           <div
             ref={filterAreaRef}
             className={cn(
-              "scrollbar-none bp2:w-auto bp2:overflow-visible bp2:pb-0 flex w-full min-w-0 items-center gap-2 pb-1",
+              "scrollbar-none flex w-full min-w-0 items-center gap-2 pb-1",
               openFilterId ? "overflow-visible" : "overflow-x-auto",
             )}
           >
-            {filterDescriptors.map((filter) => (
-              <FilterDropdown
-                key={filter.id}
-                label={filter.label}
-                open={openFilterId === filter.id}
-                onClick={() =>
+            {filterDescriptors.map((filter) => {
+              const commonProps = {
+                label: filter.label,
+                open: openFilterId === filter.id,
+                onClick: () =>
                   setOpenFilterId((prev) => {
                     const next = prev === filter.id ? null : filter.id
                     if (next) {
@@ -187,47 +191,68 @@ export function MatchingProjectsListPage({
                       })
                     }
                     return next
-                  })
-                }
-                options={filter.options}
-                onSelect={(value) => {
-                  filter.onSelect(value)
-                  trackEvent("project_filter_select", {
-                    filter_id: filter.id,
-                    selected_count:
-                      filter.multiSelect && filter.selectedValues
-                        ? filter.selectedValues.includes(value)
-                          ? Math.max(0, filter.selectedValues.length - 1)
-                          : filter.selectedValues.length + 1
-                        : filter.selectedValue === value
-                          ? 0
-                          : 1,
-                  })
-                }}
-                selectedLabel={filter.selectedLabel}
-                onRequestClose={() => setOpenFilterId(null)}
-                dropdownClassName={filter.dropdownClassName}
-                className={filter.className}
-                {...(filter.multiSelect
-                  ? {
-                      multiSelect: true,
-                      selectedValues: filter.selectedValues ?? [],
-                    }
-                  : {
-                      multiSelect: false,
-                      selectedValue: filter.selectedValue,
-                    })}
-              />
-            ))}
+                  }),
+                options: filter.options,
+                selectedLabel: filter.selectedLabel,
+                onRequestClose: () => setOpenFilterId(null),
+                dropdownClassName: filter.dropdownClassName,
+                className: filter.className,
+              }
+
+              if (filter.multiSelect) {
+                return (
+                  <FilterDropdown
+                    key={filter.id}
+                    {...commonProps}
+                    multiSelect
+                    selectedValues={filter.selectedValues}
+                    onSelectedValuesChange={(values) => {
+                      filter.onSelectedValuesChange(values)
+                      trackEvent("project_filter_select", {
+                        filter_id: filter.id,
+                        selected_count: values.length,
+                      })
+                    }}
+                  />
+                )
+              }
+
+              return (
+                <FilterDropdown
+                  key={filter.id}
+                  {...commonProps}
+                  selectedValue={filter.selectedValue}
+                  onSelect={(value) => {
+                    filter.onSelect(value)
+                    trackEvent("project_filter_select", {
+                      filter_id: filter.id,
+                      selected_count: filter.selectedValue === value ? 0 : 1,
+                    })
+                  }}
+                />
+              )
+            })}
           </div>
         </div>
 
         <div
           className={cn(
-            "bp1:grid-cols-2 bp2:grid-cols-3 grid min-w-0 grid-cols-1 gap-5",
+            "grid min-w-0 gap-5",
+            columns === 3 ? "grid-cols-3" : "grid-cols-2",
             openFilterId && "pointer-events-none",
           )}
         >
+          {/* 빈 그리드만 남으면 데이터가 없는 건지 로딩이 덜 된 건지 알 수 없다.
+              게스트는 활성 기수까지 기다려야 해서 이 구간이 특히 길다 */}
+          {!useMockData &&
+            isLoading &&
+            Array.from({ length: SKELETON_CARD_COUNT }).map((_, index) => (
+              <MatchingProjectCardSkeleton
+                key={index}
+                variant={isGuest ? "guest" : "default"}
+              />
+            ))}
+
           {visibleProjects.map((project, index) => {
             return (
               <div key={project.id} className="min-w-0">
@@ -252,12 +277,26 @@ export function MatchingProjectsListPage({
                     )
                   }}
                 >
-                  <MatchingProjectCard variant="default" data={project} />
+                  <MatchingProjectCard
+                    variant={isGuest ? "guest" : "default"}
+                    data={project}
+                  />
                 </button>
               </div>
             )
           })}
         </div>
+
+        {/* 빈 그리드만 남으면 데이터가 없는 건지 로딩이 덜 된 건지 알 수 없다.
+            게스트는 활성 기수까지 기다려야 해서 이 구간이 특히 길다 */}
+
+        {!useMockData && !isLoading && visibleProjects.length === 0 && (
+          <p className="text-body-2-regular text-teal-gray-500 py-20 text-center">
+            {isError
+              ? "프로젝트를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+              : "표시할 프로젝트가 없습니다."}
+          </p>
+        )}
 
         {!useMockData && projects.length > 0 && (
           <Pagination

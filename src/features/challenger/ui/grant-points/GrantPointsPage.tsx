@@ -6,10 +6,8 @@ import { MemberRecordList } from "@/features/challenger/ui/grant-points/MemberRe
 import { MemberSearchPanel } from "@/features/challenger/ui/grant-points/MemberSearchPanel"
 import { SectionCard } from "@/features/challenger/ui/shared/SectionCard"
 
-import type {
-  ChallengerInfoResponse,
-  SearchMemberItem,
-} from "@/features/challenger/model/types"
+import type { ChallengerInfoResponse } from "@/entities/member/model/challenger"
+import type { SearchMemberItem } from "@/entities/member/model/people"
 
 export function GrantPointsPage() {
   const [selectedMember, setSelectedMember] = useState<SearchMemberItem | null>(

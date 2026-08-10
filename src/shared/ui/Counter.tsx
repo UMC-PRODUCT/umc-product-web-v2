@@ -1,5 +1,3 @@
-import MinusIcon from "@/shared/assets/icon/minus/MinusIcon"
-import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import { cn } from "@/shared/lib/utils"
 
 import type { ComponentProps } from "react"
@@ -59,8 +57,19 @@ export function Counter({
         onClick={() => onChange(Math.max(min, value - step))}
         className={cn(btnClass, "rounded-l-[8px]")}
       >
-        {/* MinusIcon viewBox(36x38) 보정: size-7(28px)로 렌더해 선 길이를 PlusIcon과 맞춤 */}
-        <MinusIcon className="size-7" />
+        <svg
+          className="size-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M6 12h12"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+          />
+        </svg>
       </button>
       <span
         aria-live="polite"
@@ -75,7 +84,19 @@ export function Counter({
         onClick={() => onChange(Math.min(max, value + step))}
         className={cn(btnClass, "rounded-r-[8px]")}
       >
-        <PlusIcon className="size-5" />
+        <svg
+          className="size-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M5.25 12h13.5M12 5.25v13.5"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+          />
+        </svg>
       </button>
     </div>
   )

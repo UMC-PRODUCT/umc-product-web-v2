@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { RecruitQuestionsViewModal } from "./RecruitQuestionsViewModal"
 
-import type { MatchingProject } from "@/features/project/list/model/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 import type { Section } from "@/features/project/new/model/applicationQuestion"
 
 const project: MatchingProject = {

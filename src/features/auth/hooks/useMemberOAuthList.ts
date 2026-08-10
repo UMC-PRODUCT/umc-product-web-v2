@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 
+import { useAuthStore } from "@/entities/member/store/authStore"
+
 import { getMemberOAuthList } from "../api/memberOauth"
-import { useAuthStore } from "../store/authStore"
 
 export const MEMBER_OAUTH_QUERY_KEY = ["auth", "member-oauth"] as const
 

@@ -2,16 +2,25 @@ import { cn } from "@/shared/lib/utils"
 
 import type { ReactNode } from "react"
 
-export type QuestionFieldState = "default" | "focus" | "filled" | "error"
+export type QuestionFieldState =
+  | "default"
+  | "focus"
+  | "filled"
+  | "error"
+  | "disabled"
 
 interface QuestionFieldBoxProps {
   state?: QuestionFieldState
+  size?: "lg" | "md"
+  interactive?: boolean
   children: ReactNode
   className?: string
 }
 
 export function QuestionFieldBox({
   state = "default",
+  size = "lg",
+  interactive = false,
   children,
   className,
 }: QuestionFieldBoxProps) {
@@ -19,9 +28,13 @@ export function QuestionFieldBox({
     <div
       data-state={state}
       className={cn(
-        "border-teal-gray-150 flex w-full flex-col justify-center gap-1.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] px-5 py-4",
-        "data-[state=focus]:bg-[color-mix(in_srgb,var(--color-teal-50)_50%,white_50%)]",
+        "border-teal-gray-100 flex w-full flex-col justify-center gap-1.5 rounded-[12px] border bg-white",
+        size === "md" ? "px-4 py-3" : "px-5 py-4",
+        interactive &&
+          "data-[state=default]:hover:border-teal-400 data-[state=filled]:hover:border-teal-400",
+        "data-[state=focus]:border-teal-gray-150 data-[state=focus]:bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)]",
         "data-[state=error]:border-error-500",
+        "data-[state=disabled]:border-teal-gray-200",
         className,
       )}
     >

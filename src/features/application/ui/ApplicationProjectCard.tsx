@@ -1,7 +1,7 @@
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { cn } from "@/shared/lib/utils"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
-import MemberCount from "@/shared/ui/MemberCount"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 
 import type { ReactNode } from "react"
 
@@ -98,7 +98,7 @@ export function ApplicationProjectCard({
                 <span className="text-body-2-medium text-teal-gray-700">
                   {row.label}
                 </span>
-                <MemberCount
+                <CounterLabel
                   size="xs"
                   current={row.current}
                   total={row.total}

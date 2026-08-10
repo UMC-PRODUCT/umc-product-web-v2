@@ -1,22 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 
-import { useChapters } from "@/features/application/hooks/useApplicationPageData"
-import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { useMe } from "@/entities/member/hooks/useMe"
 import {
   getViewerBranch,
   isChapterPresident,
   isOperator,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
+import { type Chapter } from "@/entities/organization/model/chapters"
+import { useChapters } from "@/features/application/hooks/useApplicationPageData"
+import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { useMatchingStatusData } from "@/features/matching/hooks/useMatchingStatusData"
 import { MatchingPartSection } from "@/features/matching/ui/MatchingPartSection"
 import { MatchingResultRow } from "@/features/matching/ui/MatchingResultRow"
 import { MatchingTableHead } from "@/features/matching/ui/MatchingTableHead"
-import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
+import { SectionHeader } from "@/shared/ui/SectionHeader"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { type Chapter, CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
 
 export const Route = createFileRoute("/matching/status")({
   beforeLoad: async ({ context, location }) => {
@@ -33,29 +33,47 @@ function MatchingStatusPage() {
     () => chaptersQuery.data?.chapters ?? [],
     [chaptersQuery.data],
   )
+  const chapterNames = useMemo(
+    () => chapters.map((c) => c.name).filter(Boolean),
+    [chapters],
+  )
 
   // challenger records에서 지부명 추출 (어드민 포함 모든 역할)
   const userChapter = getViewerBranch(me)
-  const defaultChapter: Chapter = CHAPTERS.includes(userChapter as Chapter)
-    ? (userChapter as Chapter)
-    : CHAPTERS[0]
+  const defaultChapter: Chapter =
+    userChapter && chapterNames.includes(userChapter)
+      ? userChapter
+      : (chapterNames[0] ?? "")
 
   const [selectedChapter, setSelectedChapter] =
     useState<Chapter>(defaultChapter)
+
+  useEffect(() => {
+    if (chapterNames.length === 0) return
+    if (!selectedChapter || !chapterNames.includes(selectedChapter)) {
+      const nextChapter =
+        userChapter && chapterNames.includes(userChapter)
+          ? userChapter
+          : (chapterNames[0] ?? "")
+      if (nextChapter) {
+        setSelectedChapter(nextChapter as Chapter)
+      }
+    }
+  }, [chapterNames, userChapter, selectedChapter])
 
   // challenger records에 지부 정보가 없는 경우 chapters API로 폴백 (페인트 전 적용)
   const hasAutoSelected = useRef(false)
   useLayoutEffect(() => {
     if (hasAutoSelected.current || !me || chapters.length === 0) return
     if (!isChapterPresident(me)) return
-    if (CHAPTERS.includes(userChapter as Chapter)) return // 이미 records로 처리됨
+    if (userChapter && chapterNames.includes(userChapter)) return // 이미 records로 처리됨
     const myChapterId = me.roles?.find(
       (r) => r.roleType === "CHAPTER_PRESIDENT",
     )?.organizationId
     if (!myChapterId) return
     const myChapter = chapters.find((c) => c.id === myChapterId)
-    if (myChapter && CHAPTERS.includes(myChapter.name as Chapter)) {
-      setSelectedChapter(myChapter.name as Chapter)
+    if (myChapter && chapterNames.includes(myChapter.name)) {
+      setSelectedChapter(myChapter.name)
       hasAutoSelected.current = true
     }
   }, [me, chapters, userChapter])
@@ -95,7 +113,7 @@ function MatchingStatusPage() {
         {/* 지부 선택 + 콘텐츠 */}
         <div className="mt-6 flex w-263 flex-col gap-13">
           <SegmentButton
-            items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+            items={chapterNames.map((ch) => ({ value: ch, label: ch }))}
             value={selectedChapter}
             onValueChange={(v) => setSelectedChapter(v as Chapter)}
             className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"

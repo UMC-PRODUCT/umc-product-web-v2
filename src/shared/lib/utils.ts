@@ -27,6 +27,7 @@ const twMerge = extendTailwindMerge({
         "text-body-2-regular",
         "text-body-3-medium",
         "text-body-3-regular",
+        "text-body-4-regular",
         "text-label-1-semibold",
         "text-label-1-medium",
         "text-label-2-medium",

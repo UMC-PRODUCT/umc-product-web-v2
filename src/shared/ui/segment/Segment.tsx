@@ -17,7 +17,7 @@ export interface SegmentItem {
 }
 
 export interface SegmentProps {
-  title: string
+  title?: string
   items: SegmentItem[]
   value: string
   onValueChange?: (id: string) => void
@@ -33,7 +33,7 @@ export function Segment({
 }: SegmentProps) {
   return (
     <div className={cn(segmentListVariants(), className)}>
-      <div className={cn(segmentHeadingVariants())}>{title}</div>
+      {title && <div className={cn(segmentHeadingVariants())}>{title}</div>}
       <div role="tablist" className={cn(segmentTabRowVariants())}>
         {items.map((item) => {
           const selected = item.id === value

@@ -1,5 +1,4 @@
 import { genId } from "./applicationQuestion"
-import { useProjectRegisterStore } from "./useProjectRegisterStore"
 
 import type {
   ApplicationFormSection,
@@ -7,6 +6,7 @@ import type {
   GetApplicationFormResponse,
 } from "../api/types"
 import type { FieldType, Question, Section } from "./applicationQuestion"
+import type { ProjectRegisterStoreApi } from "./useProjectRegisterStore"
 
 const API_TYPE_TO_FIELD: Record<ApplicationQuestionItem["type"], FieldType> = {
   LONG_TEXT: "text",
@@ -55,6 +55,7 @@ function resolvePartSectionId(apiSection: ApplicationFormSection): string {
 
 export function hydrateApplicationFormIntoStore(
   response: GetApplicationFormResponse,
+  storeApi: ProjectRegisterStoreApi,
 ): void {
   if (!response.sections || response.sections.length === 0) return
 
@@ -90,7 +91,7 @@ export function hydrateApplicationFormIntoStore(
 
   const commonSectionId = commonApiSection?.sectionId ?? undefined
 
-  useProjectRegisterStore
+  storeApi
     .getState()
     .setApplication({ commonSectionId, commonQuestions, sections })
 }

@@ -4,7 +4,6 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useEffect, useReducer, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import {
   completeEmailVerification,
   getEmailAvailability,
@@ -27,6 +26,7 @@ import {
 import { Button } from "@/shared/ui/Button"
 import { TextButton } from "@/shared/ui/button/TextButton"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type {
   RegisterMemberRequest,
@@ -449,7 +449,7 @@ function OAuthSignupPage() {
       name,
       nickname,
       emailVerificationToken,
-      schoolId: selectedSchool.schoolId,
+      schoolId: Number(selectedSchool.schoolId),
       termsAgreements,
     }
 
@@ -582,7 +582,7 @@ function OAuthSignupPage() {
 
               <TextButton
                 onClick={() => navigate({ to: "/login" })}
-                className="text-body-1-regular text-teal-gray-500 hover:decoration-teal-gray-500 px-1 py-0.5 text-center"
+                color="neutral"
               >
                 {currentStep === "EMAIL" ? "이미 계정이 있어요" : "로그인으로"}
               </TextButton>

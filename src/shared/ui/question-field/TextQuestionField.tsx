@@ -11,8 +11,12 @@ interface TextQuestionFieldProps {
   placeholder?: string
   maxLength?: number
   showCounter?: boolean
+  size?: "lg" | "md"
   error?: string
+  disabled?: boolean
   className?: string
+  ariaLabel?: string
+  ariaRequired?: boolean
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
   textareaRef?: React.RefObject<HTMLTextAreaElement | null>
 }
@@ -23,33 +27,43 @@ export function TextQuestionField({
   placeholder = "답변을 작성하세요.",
   maxLength = 200,
   showCounter = true,
+  size = "lg",
   error,
+  disabled = false,
   className,
+  ariaLabel,
+  ariaRequired,
   onKeyDown,
   textareaRef: externalTextareaRef,
 }: TextQuestionFieldProps) {
   const [focused, setFocused] = useState(false)
   const internalTextareaRef = useRef<HTMLTextAreaElement>(null)
   const textareaRef = externalTextareaRef || internalTextareaRef
-  const state = error
-    ? "error"
-    : focused
-      ? "focus"
-      : value.length > 0
-        ? "filled"
-        : "default"
+  const state = disabled
+    ? "disabled"
+    : error
+      ? "error"
+      : focused
+        ? "focus"
+        : value.length > 0
+          ? "filled"
+          : "default"
 
   useLayoutEffect(() => {
     const el = textareaRef.current
     if (!el) return
     el.style.height = "auto"
-    el.style.height = `${el.scrollHeight}px`
+    if (el.scrollHeight > 0) {
+      el.style.height = `${el.scrollHeight}px`
+    }
   }, [value, textareaRef])
 
   return (
     <div className="flex w-full flex-col gap-1">
       <QuestionFieldBox
         state={state}
+        size={size}
+        interactive={!disabled}
         className={cn("w-full min-w-0", className)}
       >
         <textarea
@@ -58,16 +72,21 @@ export function TextQuestionField({
           value={value}
           maxLength={maxLength}
           placeholder={placeholder}
+          disabled={disabled}
+          aria-label={ariaLabel}
+          aria-required={ariaRequired || undefined}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onKeyDown={onKeyDown}
           className={cn(
-            "text-body-1-regular text-teal-gray-900 placeholder:text-teal-gray-400",
+            size === "md" ? "text-body-2-medium" : "text-body-1-regular",
+            "text-teal-gray-900 placeholder:text-teal-gray-400",
             "w-full resize-none overflow-hidden border-none bg-transparent outline-none",
+            "disabled:text-teal-gray-400 disabled:cursor-not-allowed",
           )}
         />
-        {showCounter && focused && (
+        {showCounter && focused && !disabled && (
           <CounterLabel
             current={value.length}
             total={maxLength}

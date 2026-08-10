@@ -5,7 +5,7 @@ import { cn } from "@/shared/lib/utils"
 import type { HTMLAttributes } from "react"
 
 const numberTagStyles = cva(
-  "flex items-center justify-center w-3.5 h-3.5 rounded bg-teal-gray-100 text-teal-gray-600 text-center text-caption-3-medium shadow-inner-neutral-3 shadow-inner-neutral-1 leading-none",
+  "flex h-3.5 w-3.5 items-center justify-center rounded bg-teal-gray-100 text-center text-caption-3-medium leading-none text-teal-gray-600 shadow-inner-neutral-3",
   {
     variants: {
       variant: {

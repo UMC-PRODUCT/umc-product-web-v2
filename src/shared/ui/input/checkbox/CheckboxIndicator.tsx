@@ -17,8 +17,11 @@ function getBoxClass(
   isDisabled: boolean,
 ): string {
   if (!checked) {
-    if (variant === "gray" || variant === "list") {
+    if (variant === "gray") {
       return "border-[1.5px] border-teal-gray-300 bg-white"
+    }
+    if (variant === "list") {
+      return "border-[1.5px] border-teal-gray-400 bg-white"
     }
     if (variant === "primary") {
       return cn(

@@ -9,6 +9,7 @@ interface DropdownItemProps {
   visuallyDisabled?: boolean
   className?: string
   size?: "xs" | "md"
+  role?: "option"
 }
 
 type Size = "xs" | "md"
@@ -36,11 +37,14 @@ export function DropdownItem({
   visuallyDisabled = false,
   className,
   size = "md",
+  role,
 }: DropdownItemProps) {
   const inactive = disabled || visuallyDisabled
   return (
     <button
       type="button"
+      role={role}
+      aria-selected={role === "option" ? isSelected : undefined}
       onClick={onClick}
       disabled={disabled}
       className={cn(

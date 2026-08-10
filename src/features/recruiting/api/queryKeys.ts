@@ -1,0 +1,141 @@
+import type { EvaluationStage } from "../model/evaluationStage"
+import type { ApiEvaluationStage } from "./types"
+
+export const recruitingKeys = {
+  all: ["recruiting"] as const,
+
+  rounds: () => [...recruitingKeys.all, "rounds"] as const,
+
+  roundList: (gisuId: string) => [...recruitingKeys.rounds(), gisuId] as const,
+
+  // roundList 는 OPEN + PAST 를 합친 목록이라 캐시를 공유할 수 없다. phase 를
+  // 키에 넣어 분리한다.
+  openRoundList: (gisuId: string) =>
+    [...recruitingKeys.rounds(), gisuId, "OPEN"] as const,
+  pastRoundList: (gisuId: string) =>
+    [...recruitingKeys.rounds(), gisuId, "PAST"] as const,
+  adminDraftRound: (gisuId: string, roundId: string, seasonId?: string) =>
+    [
+      ...recruitingKeys.rounds(),
+      "admin-draft",
+      gisuId,
+      roundId,
+      seasonId ?? "",
+    ] as const,
+  adminRoundList: (gisuId: string, sort?: string, chapterId?: string) =>
+    [
+      ...recruitingKeys.rounds(),
+      "admin",
+      gisuId,
+      sort ?? "NEWEST",
+      chapterId ?? "all",
+    ] as const,
+
+  round: (gisuId: string, roundId: string) =>
+    [...recruitingKeys.rounds(), gisuId, roundId] as const,
+
+  applications: () => [...recruitingKeys.all, "applications"] as const,
+
+  schoolApplications: (roundIds: string[], stage: EvaluationStage) =>
+    [...recruitingKeys.applications(), [...roundIds].sort(), stage] as const,
+
+  applicationDetail: (roundId: string, applicationId: string) =>
+    [
+      ...recruitingKeys.applications(),
+      "detail",
+      roundId,
+      applicationId,
+    ] as const,
+
+  // schoolIds 는 순서만 다른 같은 조회가 캐시를 나눠 쓰지 않도록 정렬해서 넣는다.
+  statusSummary: (gisuId: string, schoolIds?: string[]) =>
+    [
+      ...recruitingKeys.all,
+      "status-summary",
+      gisuId,
+      schoolIds ? [...schoolIds].sort() : null,
+    ] as const,
+
+  evaluationStatistics: (gisuId: string) =>
+    [...recruitingKeys.all, "evaluation-statistics", gisuId] as const,
+
+  forms: () => [...recruitingKeys.all, "forms"] as const,
+
+  adminFormStructure: (seasonId: string, roundId: string) =>
+    [...recruitingKeys.forms(), "admin", seasonId, roundId] as const,
+
+  formStructure: (
+    applicationFormId: string,
+    firstChoice: string,
+    secondChoice: string | null,
+  ) =>
+    [
+      ...recruitingKeys.forms(),
+      applicationFormId,
+      firstChoice,
+      secondChoice,
+    ] as const,
+
+  evaluations: () => [...recruitingKeys.all, "evaluations"] as const,
+
+  stageEvaluations: (
+    roundId: string,
+    applicationId: string,
+    stage: ApiEvaluationStage,
+  ) =>
+    [...recruitingKeys.evaluations(), roundId, applicationId, stage] as const,
+
+  evaluators: (roundId: string) =>
+    [...recruitingKeys.all, "evaluators", roundId] as const,
+
+  evaluatorProfiles: (memberIds: string[]) =>
+    [...recruitingKeys.all, "evaluator-profiles", memberIds] as const,
+
+  schoolStaff: (schoolId: string, gisuId?: string, chapterId?: string) =>
+    [
+      ...recruitingKeys.all,
+      "school-staff",
+      schoolId,
+      gisuId ?? "",
+      chapterId ?? "",
+    ] as const,
+
+  interviewQuestions: () =>
+    [...recruitingKeys.all, "interview-questions"] as const,
+
+  roundInterviewQuestions: (roundId: string) =>
+    [...recruitingKeys.interviewQuestions(), "round", roundId] as const,
+
+  applicationInterviewQuestions: (applicationId: string) =>
+    [
+      ...recruitingKeys.interviewQuestions(),
+      "application",
+      applicationId,
+    ] as const,
+
+  decisionHistories: (gisuId: string) =>
+    [...recruitingKeys.all, "decision-histories", gisuId] as const,
+
+  interviewSchedule: () =>
+    [...recruitingKeys.all, "interview-schedule"] as const,
+
+  // 면접 스케줄링 접두사 밖에 둔다. 세션·확정 변경이 접두사를 통째로 무효화해도
+  // 연락처는 다시 받지 않기 위해서다.
+  applicantContacts: (roundId: string) =>
+    [...recruitingKeys.all, "applicant-contacts", roundId] as const,
+
+  interviewSessions: (roundId: string) =>
+    [...recruitingKeys.interviewSchedule(), "sessions", roundId] as const,
+
+  // 보드는 KST 날짜 단위로 내려온다. 날짜를 키에 넣어야 탭을 옮길 때마다 다시 받는다.
+  interviewScheduleBoard: (roundId: string, date: string) =>
+    [...recruitingKeys.interviewSchedule(), "board", roundId, date] as const,
+
+  anonymousApplication: (sessionId: string) =>
+    [...recruitingKeys.all, "anonymous", sessionId] as const,
+
+  seasons: () => [...recruitingKeys.all, "seasons"] as const,
+
+  seasonConfiguration: (seasonId: string) =>
+    [...recruitingKeys.seasons(), seasonId] as const,
+}

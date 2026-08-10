@@ -1,19 +1,32 @@
-import { useLocation, useNavigate } from "@tanstack/react-router"
+import { Link, useLocation, useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 
+import { useAuthStore } from "@/entities/member/store/authStore"
+import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
 import {
   getDisabledNavMessage,
   HEADER_NAV_ITEMS,
   type HeaderNavItem,
   isHeaderNavItemActive,
-} from "@/components/header/headerNavPolicy"
-import { useToastStore } from "@/components/toast/useToastStore"
-import UmcLogo from "@/shared/assets/icon/logo/UmcLogo"
+} from "@/shared/config/headerNavPolicy"
+import { APPLY_ENTRY_PATH } from "@/shared/config/headerRecruitingWindow"
+import { useIsWithinHeaderRecruitingWindow } from "@/shared/hooks/useHeaderRecruitingWindow"
+import {
+  buildLoginRedirectSearch,
+  getCurrentReturnTo,
+} from "@/shared/lib/loginRedirect"
 import { cn } from "@/shared/lib/utils"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
+
+/** 어두운 히어로 위에 얹히는 헤더라 우측 버튼도 밝은 배경을 쓸 수 없다. */
+const SLOT_BUTTON_CLASS =
+  "flex h-10 min-w-16 items-center justify-center rounded-[10px] px-5 text-center text-[16px] font-semibold tracking-[-0.32px] whitespace-nowrap transition-colors"
 
 export function LandingHeader() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const isAuthed = useAuthStore((s) => s.isAuthed)
+  const showApplyCta = useIsWithinHeaderRecruitingWindow()
   const [isVisible, setIsVisible] = useState(true)
   const lastScrollY = useRef(0)
   const visibleRef = useRef(true)
@@ -142,7 +155,30 @@ export function LandingHeader() {
           })}
         </nav>
 
-        <div className="h-full w-55" />
+        {/* 랜딩에서 지원 흐름으로 들어가는 유일한 진입로다. 비로그인 방문자가
+            대부분이라 로그인 자리도 함께 둔다. */}
+        <div className="flex h-full w-55 items-center justify-end gap-4 pr-12.5">
+          {showApplyCta && (
+            <Link
+              to={APPLY_ENTRY_PATH}
+              className={cn(
+                SLOT_BUTTON_CLASS,
+                "border border-white/20 bg-white/15 text-white hover:bg-white/25",
+              )}
+            >
+              지원하기
+            </Link>
+          )}
+          {!isAuthed && (
+            <Link
+              to="/login"
+              search={buildLoginRedirectSearch(getCurrentReturnTo())}
+              className="text-[16px] font-semibold tracking-[-0.32px] whitespace-nowrap text-white transition-colors hover:text-white/70"
+            >
+              로그인
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   )

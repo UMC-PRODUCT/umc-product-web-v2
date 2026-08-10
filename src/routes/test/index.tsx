@@ -19,7 +19,7 @@ function TestIndexPage() {
       <p className="text-body-2-medium text-teal-gray-500 mb-8">
         총 {pages.length}개
       </p>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <ul className="grid grid-cols-4 gap-3">
         {pages.map((name) => (
           <li key={name}>
             <a

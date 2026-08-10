@@ -25,11 +25,6 @@ export type UpdatePartQuotasRequest =
 export type PartQuotaEntry = UpdatePartQuotasRequest["entries"][number]
 export type ApiPart = PartQuotaEntry["part"]
 
-export type PrepareUploadRequest = components["schemas"]["PrepareUploadRequest"]
-export type PrepareUploadResponse =
-  components["schemas"]["PrepareUploadResponse"]
-export type UploadCategory = PrepareUploadRequest["category"]
-
 export type AddProjectMemberRequest =
   components["schemas"]["AddProjectMemberRequest"]
 export type TransferProjectOwnershipRequest =

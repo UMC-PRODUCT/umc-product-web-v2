@@ -2,22 +2,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, redirect, useBlocker } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { Tooltip } from "@/components/tooltip/Tooltip"
 import {
   createMatchingRound,
   deleteMatchingRound,
   getMatchingRounds,
   updateMatchingRound,
-} from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
-import { useChapters } from "@/features/application/hooks/useApplicationPageData"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { ensureMe } from "@/features/auth/lib/ensureMe"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import { useMe } from "@/entities/member/hooks/useMe"
 import {
   canManageMatchingRounds,
   isChapterPresident,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
+import { useChapters } from "@/features/application/hooks/useApplicationPageData"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   type Branch,
   emptyRoundSchedules,
@@ -30,22 +28,27 @@ import {
   toServerMatchingType,
 } from "@/features/matching/model/matchingRoundMock"
 import { BranchSelector } from "@/features/matching/ui/BranchSelector"
-import { Calendar } from "@/features/matching/ui/Calendar"
 import { CalendarScheduleList } from "@/features/matching/ui/CalendarScheduleList"
 import { RoundForm } from "@/features/matching/ui/RoundForm"
-import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
-import { UsabilitySurvey } from "@/features/usability-survey"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
+import { notifyAccessDenied } from "@/shared/lib/accessDenied"
 import { Button } from "@/shared/ui/Button"
+import { Calendar } from "@/shared/ui/calendar/Calendar"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { SectionHeader } from "@/shared/ui/SectionHeader"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
+import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 import type { AxiosError } from "axios"
 
 export const Route = createFileRoute("/matching/rounds")({
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
-    if (!canManageMatchingRounds(me)) throw redirect({ to: "/" })
+    if (!canManageMatchingRounds(me)) {
+      notifyAccessDenied()
+      throw redirect({ to: "/" })
+    }
   },
   component: MatchingRoundsPage,
 })
@@ -92,7 +95,6 @@ function MatchingRoundsPage() {
     "idle",
   )
   const [showSaveModal, setShowSaveModal] = useState(false)
-  const [isSurveyActive, setIsSurveyActive] = useState(false)
   const [roundErrors, setRoundErrors] = useState(() =>
     PHASES.map(() => ({ startDate: false, endDate: false })),
   )
@@ -471,7 +473,7 @@ function MatchingRoundsPage() {
           ),
         )
         addToast({
-          message: "매칭 날짜를 한 번 더 확인해 주세요.",
+          message: "매칭 날짜를 다시 확인해 주세요.",
           color: "red",
           variant: "deep",
           type: "default",
@@ -602,21 +604,12 @@ function MatchingRoundsPage() {
 
                   {/* 툴팁: 매칭 차수 기간 설정 안내 */}
                   <Tooltip
-                    content={
-                      <div className="text-left">
-                        <p className="text-caption-2-medium font-bold text-teal-600">
-                          매칭 차수 기간 설정
-                        </p>
-                        <p className="text-caption-2-regular text-teal-gray-600">
-                          1차 매칭 시작 후에는 차수 기간을 변경할 수 없습니다.
-                        </p>
-                      </div>
-                    }
+                    label="매칭 차수 기간 설정"
+                    content="1차 매칭 시작 후에는 차수 기간을 변경할 수 없습니다."
                     size="big"
                     dark={false}
                     side="right"
                     sideOffset={8}
-                    className="h-13! w-69!"
                     triggerClassName="self-start -mt-6"
                   >
                     <button
@@ -666,13 +659,7 @@ function MatchingRoundsPage() {
         confirmText="확인"
         onConfirm={() => {
           setShowSaveModal(false)
-          setIsSurveyActive(true)
         }}
-      />
-
-      <UsabilitySurvey
-        context="APPLICATION_MONITORING"
-        active={isSurveyActive}
       />
 
       {/* 페이지 이탈 모달 */}

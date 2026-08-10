@@ -7,8 +7,14 @@ import { OptionButton } from "@/shared/ui/option-button/OptionButton"
 import { OptionButtonGroup } from "@/shared/ui/option-button/OptionButtonGroup"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 
-import type { ApplicantFormData, FormField } from "../../model/types"
-import type { ApplicantDetail, StatusValue } from "../../model/types"
+import type {
+  ApplicantFormData,
+  FormField,
+} from "@/entities/application/model/types"
+import type {
+  ApplicantDetail,
+  StatusValue,
+} from "@/entities/application/model/types"
 
 const ROLE_LABEL: Record<string, string> = {
   plan: "Plan",
@@ -183,6 +189,7 @@ export function ModalFormPanel({
                   <OptionButton
                     value="pass"
                     disabled={statusDisabled}
+                    size="xs"
                     className="h-7.5 w-20 gap-0.5 font-normal!"
                   >
                     합격
@@ -190,6 +197,7 @@ export function ModalFormPanel({
                   <OptionButton
                     value="fail"
                     disabled={statusDisabled}
+                    size="xs"
                     className="h-7.5 w-20 gap-0.5 font-normal!"
                   >
                     불합격
@@ -198,6 +206,7 @@ export function ModalFormPanel({
                     <OptionButton
                       value="pending"
                       disabled={statusDisabled}
+                      size="xs"
                       className="h-7.5 w-20 gap-0.5 font-normal!"
                     >
                       대기

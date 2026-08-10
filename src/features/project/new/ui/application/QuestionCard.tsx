@@ -3,11 +3,10 @@ import { CSS } from "@dnd-kit/utilities"
 import { useState } from "react"
 
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
-import { CheckboxFieldList } from "@/shared/ui/question-field/CheckboxFieldList"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
+import { OptionFieldList } from "@/shared/ui/question-field/OptionFieldList"
 import { PortfolioField } from "@/shared/ui/question-field/PortfolioField"
 import { QuestionForm } from "@/shared/ui/question-field/QuestionForm"
-import { RadioFieldList } from "@/shared/ui/question-field/RadioFieldList"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
 import type { Question } from "@/features/project/new/model/applicationQuestion"
@@ -30,14 +29,16 @@ function QuestionFieldRenderer({
       )
     case "radio":
       return (
-        <RadioFieldList
+        <OptionFieldList
+          type="radio"
           options={question.options}
           onOptionsChange={onOptionsChange}
         />
       )
     case "checkbox":
       return (
-        <CheckboxFieldList
+        <OptionFieldList
+          type="checkbox"
           options={question.options}
           onOptionsChange={onOptionsChange}
         />

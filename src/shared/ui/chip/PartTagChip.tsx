@@ -1,6 +1,9 @@
 import { cva } from "class-variance-authority"
 
 import { cn } from "@/shared/lib/utils"
+import { PART_TAG_LABEL } from "@/shared/model/domain"
+
+import type { PartTag } from "@/shared/model/domain"
 
 const partTagChipVariants = cva(
   "inline-flex h-6 px-2.5 items-center justify-center rounded-[6px] py-0.5 text-label-2-medium text-teal-gray-800 shadow-drop-neutral-2",
@@ -14,6 +17,9 @@ const partTagChipVariants = cva(
         android: "w-16.5",
         springboot: "w-22",
         nodejs: "w-16.5",
+        pm: "w-9",
+        "mobile-pe": "w-22",
+        "web-pe": "w-20",
       },
       type: {
         default: "",
@@ -43,6 +49,16 @@ const partTagChipVariants = cva(
         className: "bg-chip-springboot-100",
       },
       { role: "nodejs", type: "light", className: "bg-chip-nodejs-100" },
+      { role: "pm", type: "default", className: "bg-chip-pm-300" },
+      {
+        role: "mobile-pe",
+        type: "default",
+        className: "bg-chip-mobile-pe-300",
+      },
+      { role: "web-pe", type: "default", className: "bg-chip-web-pe-300" },
+      { role: "pm", type: "light", className: "bg-chip-pm-100" },
+      { role: "mobile-pe", type: "light", className: "bg-chip-mobile-pe-100" },
+      { role: "web-pe", type: "light", className: "bg-chip-web-pe-100" },
     ],
     defaultVariants: {
       type: "default",
@@ -50,20 +66,8 @@ const partTagChipVariants = cva(
   },
 )
 
-const ROLE_LABEL = {
-  plan: "PM",
-  design: "Design",
-  web: "Web",
-  ios: "iOS",
-  android: "Android",
-  springboot: "SpringBoot",
-  nodejs: "Node.js",
-} as const
-
-type Role = keyof typeof ROLE_LABEL
-
 interface PartTagChipProps {
-  role: Role
+  role: PartTag
   type?: "default" | "light"
   className?: string
 }
@@ -75,7 +79,7 @@ export function PartTagChip({
 }: PartTagChipProps) {
   return (
     <span className={cn(partTagChipVariants({ role, type }), className)}>
-      {ROLE_LABEL[role]}
+      {PART_TAG_LABEL[role]}
     </span>
   )
 }

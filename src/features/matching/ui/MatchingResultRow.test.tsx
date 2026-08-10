@@ -2,21 +2,21 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { addProjectMember } from "@/features/application/api/applicationApi"
-import { searchMembers } from "@/features/challenger/api/member"
+import { addProjectMember } from "@/entities/application/api/applicationApi"
+import { searchMembers } from "@/entities/member/api/member"
 
 import { MatchingResultRow } from "./MatchingResultRow"
 
-vi.mock("@/features/application/api/applicationApi", () => ({
+vi.mock("@/entities/application/api/applicationApi", () => ({
   addProjectMember: vi.fn(),
   removeProjectMember: vi.fn(),
 }))
 
-vi.mock("@/features/challenger/api/member", () => ({
+vi.mock("@/entities/member/api/member", () => ({
   searchMembers: vi.fn(),
 }))
 
-vi.mock("@/components/tooltip/Tooltip", () => ({
+vi.mock("@/shared/ui/tooltip/Tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => children,
 }))
 

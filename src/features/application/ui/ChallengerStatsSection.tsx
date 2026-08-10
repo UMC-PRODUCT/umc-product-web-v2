@@ -1,11 +1,11 @@
-import { SectionHeader } from "@/features/project/new/ui/shared/SectionHeader"
 import PersonGraphicIcon from "@/shared/assets/icon/people/PersonGraphicIcon"
 import { cn } from "@/shared/lib/utils"
+import { SectionHeader } from "@/shared/ui/SectionHeader"
 
 import { RankBar } from "./RankBar"
 import { RoundDonutChart } from "./RoundDonutChart"
 
-import type { ChallengerStats } from "../model/types"
+import type { ChallengerStats } from "@/entities/application/model/types"
 
 const ROUND_COLORS = [
   "#81D3C9",

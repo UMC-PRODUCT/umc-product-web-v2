@@ -2,13 +2,12 @@ import { describe, expect, it } from "vitest"
 
 import { canViewDefaultNotice } from "./defaultNotices"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 import type {
   ChallengerInfoResponse,
   ChallengerRoleResponse,
-  Part,
-  RoleType,
-} from "@/features/challenger/model/types"
+} from "@/entities/member/model/challenger"
+import type { Part, RoleType } from "@/shared/model/domain"
 
 function makeMe({
   part,

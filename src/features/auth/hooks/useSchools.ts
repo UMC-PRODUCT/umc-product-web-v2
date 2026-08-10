@@ -1,9 +1,7 @@
-import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
+import { useAllSchools } from "@/entities/organization/hooks/useAllSchools"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
-
-import { getAllSchools } from "../api/school"
 
 export interface UseSchoolsOptions {
   nameType?: "full" | "short"
@@ -12,10 +10,7 @@ export interface UseSchoolsOptions {
 export function useSchools(options: UseSchoolsOptions = {}) {
   const { nameType = "short" } = options
 
-  const query = useQuery({
-    queryKey: ["schools"],
-    queryFn: getAllSchools,
-  })
+  const query = useAllSchools()
 
   const schools = useMemo(() => {
     return (

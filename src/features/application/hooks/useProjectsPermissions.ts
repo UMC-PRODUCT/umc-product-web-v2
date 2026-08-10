@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { getProjectsPermissions } from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import { useAuthStore } from "@/entities/member/store/authStore"
 
-import { getProjectsPermissions } from "../api/applicationApi"
-import { applicationKeys } from "../api/applicationKeys"
-
-import type { ProjectPermissionResponse } from "../model/projectPermissionTypes"
+import type { ProjectPermissionResponse } from "@/entities/application/model/projectPermissionTypes"
 
 interface UseProjectsPermissionsOptions {
   enabled?: boolean

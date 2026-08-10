@@ -2,7 +2,7 @@ import type {
   MatchingPhase,
   MatchingRoundResponse,
   MatchingType as ServerMatchingType,
-} from "@/features/application/model/apiTypes"
+} from "@/entities/application/model/apiTypes"
 
 export const MATCHING_TYPES = ["Plan-Design 매칭", "Plan-Develop 매칭"] as const
 

@@ -4,18 +4,18 @@ import { useMemo } from "react"
 import {
   getAllProjects,
   getMatchingStatistics,
-} from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import { useViewModeStore } from "@/entities/member/view-mode"
+import { useAllSchools } from "@/entities/organization/hooks/useAllSchools"
+import { getProjectMembersBatch } from "@/entities/project/api/matchingProject"
 import { useChapters } from "@/features/application/hooks/useApplicationPageData"
-import { getAllSchools } from "@/features/challenger/api/organization"
-import { getProjectMembersBatch } from "@/features/project/list/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
-import { useViewModeStore } from "@/shared/view-mode"
 
 import { matchingResponseToStats } from "../model/matchingStatsMapper"
 import { toMatchingPartDataList } from "../model/matchingStatusMapper"
 
-import type { ApplicationStats } from "@/features/application/model/types"
+import type { ApplicationStats } from "@/entities/application/model/types"
 
 const emptyStats: ApplicationStats = {
   totalMembers: 0,
@@ -87,11 +87,7 @@ export function useMatchingStatusData(chapterName?: string) {
   )
 
   // 전체 학교 목록 조회 (schoolId -> schoolName 매핑용)
-  const schoolsQuery = useQuery({
-    queryKey: ["schools", "all"],
-    queryFn: getAllSchools,
-    staleTime: Infinity,
-  })
+  const schoolsQuery = useAllSchools()
   const schoolIdToName = useMemo(() => {
     const map = new Map<string, string>()
     for (const s of schoolsQuery.data?.schools ?? []) {

@@ -1,9 +1,9 @@
+import type { ApplicationAnswerItem } from "@/entities/project/api/matchingProject"
 import type {
   Question,
   Section,
 } from "@/features/project/new/model/applicationQuestion"
 
-import type { ApplicationAnswerItem } from "../api/matchingProject"
 import type { ApplyPortfolioValue, UploadedFileValue } from "./applyValidation"
 
 export type ApplyAnswerValue =

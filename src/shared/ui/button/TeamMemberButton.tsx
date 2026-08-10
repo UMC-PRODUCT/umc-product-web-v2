@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority"
 
 import PersonButtonIcon from "@/shared/assets/icon/people/PersonButtonIcon"
-import { Button } from "@/shared/ui/Button"
+import { IconButton } from "@/shared/ui/button/IconButton"
 
 import type { ButtonHTMLAttributes } from "react"
 
@@ -28,14 +28,13 @@ export function TeamMemberButton({
   ...props
 }: TeamMemberButtonProps) {
   return (
-    <Button
+    <IconButton
       variant={variant ?? "fill"}
-      color="neutral"
-      size="m"
-      className={`min-w-[3.25rem] rounded-xl ${className ?? ""}`}
+      aria-label="팀원 보기"
+      className={className}
       {...props}
     >
       <PersonButtonIcon className={iconVariants({ variant })} />
-    </Button>
+    </IconButton>
   )
 }

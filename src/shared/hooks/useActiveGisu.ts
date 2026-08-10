@@ -26,3 +26,12 @@ export function useActiveGisuId(options?: { enabled?: boolean }) {
     ...options,
   })
 }
+
+export function useActiveGeneration(options?: { enabled?: boolean }) {
+  return useQuery({
+    ...activeGisuQueryOptions,
+    select: (data) =>
+      data?.generation != null ? Number(data.generation) : null,
+    ...options,
+  })
+}

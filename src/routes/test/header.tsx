@@ -2,17 +2,17 @@ import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
-import Header from "@/components/header/Header"
-import { MatchingSegmentRegion } from "@/components/sidebar/MatchingSegmentRegion"
-import SideBar from "@/components/sidebar/SideBar"
-import { authKeys } from "@/features/auth/hooks/useMe"
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { authKeys } from "@/entities/member/hooks/useMe"
+import { useAuthStore } from "@/entities/member/store/authStore"
 import { cn } from "@/shared/lib/utils"
+import Header from "@/widgets/navigation/header/Header"
+import { MatchingSegmentRegion } from "@/widgets/navigation/sidebar/MatchingSegmentRegion"
+import SideBar from "@/widgets/navigation/sidebar/SideBar"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 const PATHNAME_OPTIONS = [
-  { label: "소개", value: "/intro" },
+  { label: "소개", value: "/about" },
   { label: "데모데이 매칭 / 프로젝트 목록", value: "/matching/projects" },
   { label: "데모데이 매칭 / 관리", value: "/matching/projects/management" },
   { label: "데모데이 매칭 / 라운드", value: "/matching/rounds" },
@@ -39,10 +39,10 @@ function HeaderTestPage() {
       <div className="flex w-full">
         <SideBar activePathname={activePathname} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="bp2:px-8.5 bp2:pt-14.5 px-4 pt-6">
+          <div className="px-4 pt-6">
             <MatchingSegmentRegion activePathname={activePathname} />
           </div>
-          <div className="bp2:px-8.5 bp2:pt-8 flex min-w-0 flex-1 flex-col px-4 pt-6">
+          <div className="flex min-w-0 flex-1 flex-col px-4 pt-6">
             <section className="border-teal-gray-100 flex flex-col gap-4 rounded-lg border bg-white p-6">
               <div>
                 <h1 className="text-heading-6-semibold text-teal-gray-900">

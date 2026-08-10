@@ -1,0 +1,70 @@
+/* 소개 랜딩 본문에 쓰는 SUIT. 시안이 이 문단들만 SUIT Light 로 잡아 두었다.
+   나머지 화면과 제목·라벨은 그대로 Pretendard 를 쓴다.
+
+   원본 SUIT-Variable.woff2 는 2933 자 · 624KB 라 /about 한 페이지가 받기엔
+   너무 크다. font-suit 가 실제로 렌더하는 글자는 276 자뿐이고 굵기도 300 하나만
+   쓰므로, 그 글자만 남기고 가변축을 300 으로 고정해 17KB 로 줄였다.
+
+   TODO: 본문 문구에 새 글자가 들어가면 서브셋을 다시 떠야 한다. 빠진 글자는
+   두부(□)가 아니라 폴백인 Pretendard 로 렌더되므로 눈에 잘 안 띈다.
+   재생성 (fonttools 필요):
+     pyftsubset src/shared/assets/font/SUIT-Variable.woff2 \
+       --output-file=/tmp/suit.woff2 --flavor=woff2 \
+       --text-file=<글자목록> --layout-features='*' --no-hinting
+     python -m fontTools.varLib.instancer /tmp/suit.woff2 wght=300 \
+       --output /tmp/suit-300.ttf   # 이후 woff2 로 저장
+   글자목록은 프리렌더된 /about 을 390·768·1024·1440 폭에서 열고 모집 분야 탭을
+   모두 눌러 .font-suit 요소의 텍스트를 모은 집합이다. 반응형으로 문구가 갈리고
+   비활성 탭 내용은 DOM 에 없어서, 한 폭만 보고 뜨면 글자가 빠진다.
+   원본은 재생성용으로 남겨 둔다. import 하는 곳이 없어 번들에는 들어가지 않는다. */
+@font-face {
+  font-family: "SUIT Variable";
+  src: url("../shared/assets/font/SUIT-Light-subset.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 소개 랜딩 전용 Pretendard 서브셋.
+
+   typography.css 가 불러오는 dynamic-subset 은 unicode-range 로 쪼개져 있어
+   페이지가 쓰는 블록만 받는다. 그런데 한글 음절이 범위 전체에 흩어져 있어
+   /about 한 페이지가 76~91 번 블록 13 개 333KB 를 받았다. 실제로 쓰는 글자는
+   345 자뿐이라 그것만 담은 파일 하나(78KB)로 대체한다.
+
+   굵기는 고정하지 않는다. 헤딩이 bold(700)·extrabold(800), 본문이 regular 라
+   가변축(wght 45~930)이 그대로 필요하다.
+
+   폰트 매칭은 글자 단위라, 이 서브셋에 없는 글자는 자동으로 다음 순위인
+   "Pretendard Variable"(dynamic-subset)로 넘어가 정상 렌더된다. 문구가 바뀌어도
+   깨지지 않고, 그 글자가 속한 블록만 추가로 받는다. SUIT 과 달리 폴백이 같은
+   서체라 시각적 차이도 없다.
+
+   TODO: 문구를 크게 고치면 서브셋을 다시 떠서 요청 수를 1 개로 되돌릴 것.
+   글자 수집 방법은 위 SUIT 주석과 같되, .font-suit 뿐 아니라 body 전체 텍스트를
+   모은다. */
+@font-face {
+  font-family: "Pretendard About";
+  src: url("../shared/assets/font/PretendardVariable-about-subset.woff2")
+    format("woff2-variations");
+  font-weight: 45 930;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* html 이 font-sans 를 상속시키므로, 상속값을 덮으려면 컨테이너에 직접 건다.
+   var(--font-sans) 를 재정의하는 방식은 html 에서 이미 확정된 상속값을
+   되돌리지 못한다. 전역 교체가 아니라 /about 로 범위를 좁힌 이유는, Pretendard
+   가 앱 기본 폰트라 다른 화면의 동적 텍스트(이름·학교명·프로젝트 제목)까지
+   서브셋에 없는 글자로 새어 나가기 때문이다. */
+.about-landing {
+  font-family:
+    "Pretendard About",
+    "Pretendard Variable",
+    "Pretendard",
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    Roboto,
+    sans-serif;
+}

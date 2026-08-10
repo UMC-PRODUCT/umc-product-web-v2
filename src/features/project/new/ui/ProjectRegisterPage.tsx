@@ -3,17 +3,16 @@ import { useBlocker, useNavigate } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { getMatchingRounds } from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
-import { getResourcePermission } from "@/features/auth/api/permissions"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { getMatchingRounds } from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
+import { getResourcePermission } from "@/entities/member/api/permissions"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   canManageProjectRecruitInfo,
   getLatestChallengerRecord,
-} from "@/features/auth/model/identity"
-import { hasGrantedPermission } from "@/features/auth/model/resourcePermission"
+} from "@/entities/member/model/identity"
+import { hasGrantedPermission } from "@/entities/member/model/resourcePermission"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import { getManagedProjects } from "@/features/project/management/api"
 import {
@@ -39,9 +38,14 @@ import { hydrateApplicationFormIntoStore } from "@/features/project/new/model/ap
 import { hydrateDraftIntoStore } from "@/features/project/new/model/draftHydrator"
 import { isWithinMatchingPeriod } from "@/features/project/new/model/matchingPeriod"
 import { hydrateProjectDetailIntoStore } from "@/features/project/new/model/projectDetailHydrator"
-import { useProjectRegisterStore } from "@/features/project/new/model/useProjectRegisterStore"
+import {
+  ProjectRegisterStoreProvider,
+  useProjectRegisterStore,
+  useProjectRegisterStoreApi,
+} from "@/features/project/new/model/useProjectRegisterStore"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import type { BasicInfoFormHandle } from "@/features/project/new/ui/basic-info/BasicInfoForm"
 
@@ -49,7 +53,7 @@ type ProjectRegisterPageProps =
   | { mode: "new" }
   | { mode: "edit"; editProjectId: number }
 
-export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
+function ProjectRegisterPageContent(props: ProjectRegisterPageProps) {
   const isEditMode = props.mode === "edit"
   const editProjectId = props.mode === "edit" ? props.editProjectId : undefined
   const [step, setStep] = useState(1)
@@ -83,6 +87,7 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
     if (!matchingRoundsQuery.isSuccess) return true
     return isWithinMatchingPeriod(matchingRoundsQuery.data, new Date())
   }, [isEditMode, matchingRoundsQuery.isSuccess, matchingRoundsQuery.data])
+  const storeApi = useProjectRegisterStoreApi()
   const projectId = useProjectRegisterStore((s) => s.projectId)
   const application = useProjectRegisterStore((s) => s.application)
   const pmInfo = useProjectRegisterStore((s) => s.pmInfo)
@@ -116,7 +121,7 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
   const resolveCanEditRecruitStep = async (): Promise<boolean> => {
     if (!isEditMode) return false
 
-    const pid = useProjectRegisterStore.getState().projectId
+    const pid = storeApi.getState().projectId
     if (pid === null) return false
     try {
       const permission = await queryClient.ensureQueryData({
@@ -225,9 +230,9 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
 
   useEffect(() => {
     if (detailQuery.data) {
-      hydrateProjectDetailIntoStore(detailQuery.data)
+      hydrateProjectDetailIntoStore(detailQuery.data, storeApi)
     }
-  }, [detailQuery.data])
+  }, [detailQuery.data, storeApi])
 
   useEffect(() => {
     if (!isEditMode || !detailQuery.isError) return
@@ -273,13 +278,13 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
   useEffect(() => {
     if (isEditMode) return
     if (draftQuery.data && !projectId) {
-      hydrateDraftIntoStore(draftQuery.data)
+      hydrateDraftIntoStore(draftQuery.data, storeApi)
     }
-  }, [isEditMode, draftQuery.data, projectId])
+  }, [isEditMode, draftQuery.data, projectId, storeApi])
 
   useEffect(() => {
     return () => {
-      const { gisuId: storedGisuId } = useProjectRegisterStore.getState()
+      const { gisuId: storedGisuId } = storeApi.getState()
 
       reset()
       if (storedGisuId) {
@@ -288,7 +293,7 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
         })
       }
     }
-  }, [queryClient, reset])
+  }, [queryClient, reset, storeApi])
 
   const applicationFormQuery = useQuery({
     queryKey: projectKeys.applicationForm(projectId ?? 0),
@@ -299,7 +304,7 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
   useEffect(() => {
     if (!isEditMode) return
     if (applicationFormQuery.data) {
-      hydrateApplicationFormIntoStore(applicationFormQuery.data)
+      hydrateApplicationFormIntoStore(applicationFormQuery.data, storeApi)
       setApplicationFormHydrated(true)
     } else if (applicationFormQuery.data === null) {
       setApplication({
@@ -309,7 +314,7 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
       })
       setApplicationFormHydrated(true)
     }
-  }, [isEditMode, applicationFormQuery.data, setApplication])
+  }, [isEditMode, applicationFormQuery.data, setApplication, storeApi])
 
   const submitMutation = useMutation({
     mutationFn: async () => {
@@ -524,7 +529,7 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
 
   return (
     <section className="flex w-full min-w-0 flex-col items-start justify-start">
-      <div className="border-teal-gray-100 bp1:px-6 bp2:px-8.5 bp2:pt-8 bp2:pb-10 flex h-full w-full max-w-242 min-w-0 flex-col gap-2.5 rounded-[12px] border bg-white px-4 pt-6 pb-8">
+      <div className="border-teal-gray-100 flex h-full w-full max-w-242 min-w-0 flex-col gap-2.5 rounded-[12px] border bg-white px-6 pt-6 pb-8">
         <div ref={formTopRef} className="flex flex-col items-start gap-1.5">
           <span className="text-heading-6-semibold text-teal-gray-900">
             프로젝트 등록
@@ -580,8 +585,12 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
               isEditMode ? undefined : canManageRecruitInfoByRole
             }
             isHydrated={isEditMode ? detailQuery.isSuccess : true}
-            onPrev={isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(1)}
-            onNext={isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(3)}
+            onPrev={
+              isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(1)
+            }
+            onNext={
+              isQuotaOnlyMode ? handleQuotaOnlyLeave : () => moveToStep(3)
+            }
           />
         )}
         {step === 3 && (
@@ -634,5 +643,13 @@ export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
         onConfirm={() => void handleSaveAndLeave()}
       />
     </section>
+  )
+}
+
+export function ProjectRegisterPage(props: ProjectRegisterPageProps) {
+  return (
+    <ProjectRegisterStoreProvider>
+      <ProjectRegisterPageContent {...props} />
+    </ProjectRegisterStoreProvider>
   )
 }

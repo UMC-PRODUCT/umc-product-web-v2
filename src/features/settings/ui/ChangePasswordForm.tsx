@@ -1,11 +1,11 @@
 import { AxiosError } from "axios"
 import { useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { changePassword } from "@/features/auth/api/credentials"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
 import { InputBox } from "@/shared/ui/input/InputBox"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 function isValidPassword(pw: string): boolean {
   if (pw.length < 8) return false

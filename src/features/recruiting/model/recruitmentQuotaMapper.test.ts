@@ -1,0 +1,167 @@
+import { describe, expect, it } from "vitest"
+
+import { mapGroupsToChapterQuotaData } from "./recruitmentQuotaMapper"
+
+import type {
+  RecruitingRoundGroup,
+  RecruitingSeasonConfigurationResponse,
+} from "../api/types"
+
+describe("mapGroupsToChapterQuotaData", () => {
+  const groups: RecruitingRoundGroup[] = [
+    {
+      seasonId: "100",
+      gisuId: "15",
+      chapterId: "1",
+      chapterName: "Chromium",
+      schoolId: "10",
+      schoolName: "서울대학교",
+      rounds: [],
+    },
+    {
+      seasonId: "200",
+      gisuId: "15",
+      chapterId: "1",
+      chapterName: "Chromium",
+      schoolId: "20",
+      schoolName: "연세대학교",
+      rounds: [],
+    },
+  ]
+
+  const seasonConfigsMap = new Map<
+    string,
+    RecruitingSeasonConfigurationResponse
+  >([
+    [
+      "100",
+      {
+        id: "100",
+        gisuId: "15",
+        schoolId: "10",
+        memo: null,
+        quotas: [
+          { track: "PLAN", targetCount: 2 },
+          { track: "DESIGN", targetCount: 3 },
+          { track: "WEB_PRODUCT_ENGINEER", targetCount: 5 },
+          { track: "MOBILE_PRODUCT_ENGINEER", targetCount: 4 },
+        ],
+        rounds: [],
+      },
+    ],
+    [
+      "200",
+      {
+        id: "200",
+        gisuId: "15",
+        schoolId: "20",
+        memo: null,
+        quotas: [
+          { track: "PLAN", targetCount: 1 },
+          { track: "DESIGN", targetCount: 1 },
+          { track: "WEB_PRODUCT_ENGINEER", targetCount: 2 },
+          { track: "MOBILE_PRODUCT_ENGINEER", targetCount: 2 },
+        ],
+        rounds: [],
+      },
+    ],
+  ])
+
+  it("그룹과 시즌 설정을 바탕으로 ChapterQuotaData 배열을 생성한다", () => {
+    const fixedNow = new Date("2026-08-02T09:00:00Z")
+    const result = mapGroupsToChapterQuotaData(
+      groups,
+      seasonConfigsMap,
+      fixedNow,
+    )
+
+    const chromium = result.find((item) => item.chapter === "Chromium")
+    expect(chromium).toBeDefined()
+    expect(chromium?.schoolCount).toBe(2)
+    expect(chromium?.schools).toHaveLength(2)
+
+    expect(chromium?.schools[0]).toEqual({
+      seasonId: "100",
+      gisuId: "15",
+      schoolId: "10",
+      schoolName: "서울대학교",
+      pm: 2,
+      design: 3,
+      webPe: 5,
+      mobilePe: 4,
+      total: 14,
+    })
+
+    expect(chromium?.totals).toEqual({
+      pm: 3,
+      design: 4,
+      webPe: 7,
+      mobilePe: 6,
+      total: 20,
+    })
+  })
+
+  // 설정 응답은 시즌마다 따로 온다. 아직 안 온 것을 시즌이 없는 것으로 접으면
+  // 그 행이 잠겨 버려, 화면을 열자마자는 입력이 안 된다.
+  it("시즌 설정이 아직 없어도 seasonId는 유지하고 인원만 0으로 둔다", () => {
+    const fixedNow = new Date("2026-08-02T09:00:00Z")
+    const result = mapGroupsToChapterQuotaData(groups, new Map(), fixedNow)
+
+    const chromium = result.find((item) => item.chapter === "Chromium")
+    expect(chromium?.schools[0]?.seasonId).toBe("100")
+    expect(chromium?.schools[0]?.total).toBe(0)
+    expect(chromium?.totals.total).toBe(0)
+  })
+
+  // 일부만 도착한 중간 상태에서도 도착하지 않은 쪽이 잠기면 안 된다.
+  it("설정이 일부만 도착해도 모든 그룹이 seasonId를 갖는다", () => {
+    const partialConfigs = new Map([["100", seasonConfigsMap.get("100")!]])
+
+    const result = mapGroupsToChapterQuotaData(groups, partialConfigs)
+    const chromium = result.find((item) => item.chapter === "Chromium")
+
+    expect(chromium?.schools[0]?.seasonId).toBe("100")
+    expect(chromium?.schools[0]?.total).toBe(14)
+    expect(chromium?.schools[1]?.seasonId).toBe("200")
+    expect(chromium?.schools[1]?.total).toBe(0)
+  })
+
+  it("now 인자가 없으면 updatedDate와 updatedTime을 undefined로 설정한다", () => {
+    const result = mapGroupsToChapterQuotaData(groups, seasonConfigsMap)
+    const chromium = result.find((item) => item.chapter === "Chromium")
+    expect(chromium?.updatedDate).toBeUndefined()
+    expect(chromium?.updatedTime).toBeUndefined()
+  })
+
+  it("serverChapters에 존재하지만 groups에 없는 대학교도 0명으로 목록에 항상 포함한다", () => {
+    const serverChapters = [
+      {
+        chapterId: "1",
+        chapterName: "Chromium",
+        schools: [
+          { schoolId: "10", schoolName: "서울대학교" },
+          { schoolId: "20", schoolName: "연세대학교" },
+          { schoolId: "30", schoolName: "고려대학교" },
+        ],
+      },
+    ]
+
+    const result = mapGroupsToChapterQuotaData(
+      [groups[0]!], // 서울대학교만 그룹에 존재
+      seasonConfigsMap,
+      serverChapters,
+      "15",
+    )
+
+    const chromium = result.find((item) => item.chapter === "Chromium")
+    expect(chromium?.schools).toHaveLength(3)
+    expect(chromium?.schools[0]?.schoolName).toBe("서울대학교")
+    expect(chromium?.schools[0]?.seasonId).toBe("100")
+    expect(chromium?.schools[1]?.schoolName).toBe("연세대학교")
+    expect(chromium?.schools[1]?.seasonId).toBeUndefined()
+    expect(chromium?.schools[1]?.total).toBe(0)
+    expect(chromium?.schools[2]?.schoolName).toBe("고려대학교")
+    expect(chromium?.schools[2]?.seasonId).toBeUndefined()
+    expect(chromium?.schools[2]?.total).toBe(0)
+  })
+})

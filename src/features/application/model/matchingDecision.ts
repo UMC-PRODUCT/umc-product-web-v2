@@ -1,6 +1,6 @@
-import { toRoundNumber } from "./mappers"
+import { toRoundNumber } from "@/entities/application/model/mappers"
 
-import type { MatchingRoundResponse } from "./apiTypes"
+import type { MatchingRoundResponse } from "@/entities/application/model/apiTypes"
 
 // 차수 번호 -> 합/불 결정 마감(decisionDeadline) epoch ms
 // 서버 규칙(APPLY-103): 합/불 결정은 지원 종료(endsAt) 후 ~ 결정 마감(decisionDeadline) 전까지 가능

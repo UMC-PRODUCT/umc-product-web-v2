@@ -1,13 +1,14 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 
-import { searchMembers } from "@/features/challenger/api/member"
+import { searchMembers } from "@/entities/member/api/member"
 import { PART_LABEL } from "@/features/challenger/model/enums"
 import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
+import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { cn } from "@/shared/lib/utils"
 import { InputBox } from "@/shared/ui/input/InputBox"
 
-import type { SearchMemberItem } from "@/features/challenger/model/types"
+import type { SearchMemberItem } from "@/entities/member/model/people"
 
 interface MemberSearchPanelProps {
   selectedMember: SearchMemberItem | null
@@ -45,15 +46,7 @@ export function MemberSearchPanel({
   const items = data?.page.content ?? []
   const showDropdown = focused && enabled
 
-  useEffect(() => {
-    const onMouseDown = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setFocused(false)
-      }
-    }
-    window.addEventListener("mousedown", onMouseDown)
-    return () => window.removeEventListener("mousedown", onMouseDown)
-  }, [])
+  useClickOutside(containerRef, () => setFocused(false), focused)
 
   return (
     <div ref={containerRef} className="relative w-full max-w-115">

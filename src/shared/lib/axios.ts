@@ -1,15 +1,11 @@
 import axios, { AxiosError } from "axios"
 
 import {
-  buildLoginRedirectSearch,
-  getCurrentReturnTo,
-} from "@/features/auth/lib/loginRedirect"
-import { useAuthStore } from "@/features/auth/store/authStore"
-import {
   getCurrentPagePath,
   trackApiRequest,
   trackEvent,
 } from "@/shared/analytics"
+import { authBridge } from "@/shared/lib/authBridge"
 
 import type { AxiosRequestConfig, InternalAxiosRequestConfig } from "axios"
 
@@ -54,7 +50,7 @@ api.interceptors.request.use((config) => {
     config.headers.delete("Authorization")
     return config
   }
-  const token = useAuthStore.getState().accessToken
+  const token = authBridge.getAccessToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -87,11 +83,8 @@ function terminateAuthentication(
     reason,
     page_path: getCurrentPagePath(),
   })
-  useAuthStore.getState().clear()
-  const search = new URLSearchParams(
-    buildLoginRedirectSearch(getCurrentReturnTo()),
-  )
-  window.location.href = search.size > 0 ? `/login?${search}` : "/login"
+  authBridge.clear()
+  authBridge.redirectToLogin()
 }
 
 api.interceptors.response.use(
@@ -134,7 +127,7 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    const refreshToken = useAuthStore.getState().refreshToken
+    const refreshToken = authBridge.getRefreshToken()
     if (!refreshToken) {
       terminateAuthentication("missing_refresh_token")
       return Promise.reject(error)
@@ -167,10 +160,7 @@ api.interceptors.response.use(
         }>
       >(TOKEN_RENEW_PATH, { refreshToken })
       const { accessToken, refreshToken: newRefreshToken } = data.result
-      useAuthStore.getState().setTokens({
-        accessToken,
-        refreshToken: newRefreshToken,
-      })
+      authBridge.setTokens({ accessToken, refreshToken: newRefreshToken })
       drainQueue(accessToken)
       originalRequest.headers = {
         ...originalRequest.headers,

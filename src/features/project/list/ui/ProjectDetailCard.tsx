@@ -3,43 +3,44 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   getCurrentChallengerPart,
   getLatestChallengerRecord,
   isCurrentTermPm,
   isOperator,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
+import { useAuthStore } from "@/entities/member/store/authStore"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
+import {
+  getActiveMatchingRound,
+  getMyApplications,
+  getProjectDetail,
+} from "@/entities/project/api/matchingProject"
+import { isRecruitDone } from "@/entities/project/model/matchingProject"
 import { useProjectPermissions } from "@/features/project/hooks/useProjectPermissions"
 import {
   getApplicationForm,
   mapApplicationFormToSections,
   projectKeys,
 } from "@/features/project/new/api"
-import { UsabilitySurvey } from "@/features/usability-survey"
 import { trackEvent } from "@/shared/analytics"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { ProjectLogo } from "@/shared/assets/icon/logo/ProjectLogo"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
+import { cn } from "@/shared/lib/utils"
 import { withImageCacheKey } from "@/shared/lib/withImageCacheKey"
 import { Button } from "@/shared/ui/Button"
 import { TeamMemberButton } from "@/shared/ui/button/TeamMemberButton"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
-import MemberCount from "@/shared/ui/MemberCount"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
+import { LoadingSpinner } from "@/shared/ui/LoadingSpinner"
 import { Modal } from "@/shared/ui/Modal"
 import { ProjectThumbnail } from "@/shared/ui/ProjectThumbnail"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
-import {
-  getActiveMatchingRound,
-  getMyApplications,
-  getProjectDetail,
-} from "../api/matchingProject"
 import { filterApplicationSectionsByPart } from "../model/applicationSectionFilter"
-import { isRecruitDone } from "../model/matchingProject"
-import { DEFAULT_MATCHING_PROJECT_MOCK } from "../model/matchingProject.mock"
 import {
   isApplyButtonDisabled,
   resolveProjectDetailCtaMode,
@@ -57,8 +58,11 @@ import {
 import { RecruitQuestionsViewModal } from "./apply-modal/RecruitQuestionsViewModal"
 import { TeamMemberModal } from "./team-member-modal/TeamMemberModal"
 
-import type { ActiveMatchingRound, ProjectDetail } from "../api/matchingProject"
-import type { MatchingProject } from "../model/matchingProject"
+import type {
+  ActiveMatchingRound,
+  ProjectDetail,
+} from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 
 type ProjectDetailCardLogo = "on" | "off"
 
@@ -79,35 +83,18 @@ interface ProjectDetailCardProps {
   canManageProject?: boolean
 }
 
-function ProjectDetailCardSkeleton() {
+/**
+ * 카드 자리를 미리 잡지 않는다. 흰 판을 띄웠다가 내용이 들어오면서 높이가
+ * 튀는 것보다, 어두운 배경 위에 스피너만 두는 편이 덜 흔들린다.
+ */
+function ProjectDetailCardLoading() {
   return (
-    <div className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-135 min-w-0 flex-col items-start overflow-x-hidden overflow-y-auto rounded-2xl bg-white">
-      <div className="bg-teal-gray-200 aspect-[540/286] w-full shrink-0 animate-pulse" />
-      <div className="bp1:p-5 flex w-full flex-col items-start p-4">
-        <div className="flex w-full flex-col items-start gap-6">
-          <div className="flex w-full flex-col items-start gap-2.5">
-            <div className="bp1:flex-row bp1:items-center bp1:justify-between bp1:gap-4 flex w-full flex-col items-start gap-2.5">
-              <div className="bg-teal-gray-150 h-6 w-full max-w-52 animate-pulse rounded-md" />
-              <div className="bg-teal-gray-150 h-4 w-32 animate-pulse rounded-md" />
-            </div>
-            <div className="bg-teal-gray-150 h-4 w-full animate-pulse rounded-md" />
-          </div>
-          <div className="flex w-full flex-col items-start gap-1.5">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="flex w-full items-center justify-between">
-                <div className="bg-teal-gray-150 h-4 w-28 animate-pulse rounded-md" />
-                <div className="bg-teal-gray-150 h-6 w-14 animate-pulse rounded-full" />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="bp1:mt-8.5 bp1:flex-row bp1:items-start mt-6 flex w-full flex-col items-stretch gap-2.5">
-          <div className="bg-teal-gray-150 bp1:w-11 h-11 w-full animate-pulse rounded-xl" />
-          <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
-          <div className="bg-teal-gray-150 h-11 flex-1 animate-pulse rounded-xl" />
-        </div>
-      </div>
-    </div>
+    <LoadingSpinner
+      size="lg"
+      label="프로젝트를 불러오는 중"
+      className="text-white"
+      trackClassName="border-white/30 border-t-white"
+    />
   )
 }
 
@@ -191,6 +178,13 @@ export function ProjectDetailCard({
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { me, viewContext } = useViewerIdentity()
+  // 비로그인 방문자. 팀원 조회는 아직 인증이 필요해서, 열어 두면 401 이 나고
+  // 토큰 갱신에 실패해 로그인 화면으로 튕긴다. 디자인에도 게스트 상세에는
+  // 작성자·모집 상태·액션 버튼이 없다.
+  //
+  // me 의 유무로 보면 안 된다. 회원 조회는 비동기라 로그인 사용자도 첫 렌더에는
+  // me 가 없어, 잠깐 게스트 화면이 스쳐 지나간다. 토큰 유무는 동기로 안다.
+  const isGuest = !useAuthStore((s) => s.isAuthed)
   const addToast = useToastStore((s) => s.addToast)
   const userIsOperator = isOperator(me)
   const userIsPm = isCurrentTermPm(me)
@@ -235,11 +229,11 @@ export function ProjectDetailCard({
     useState(false)
   const [isRecruitQuestionsModalOpen, setIsRecruitQuestionsModalOpen] =
     useState(false)
-  const [isSurveyActive, setIsSurveyActive] = useState(false)
   const {
     data: detail,
     dataUpdatedAt: detailDataUpdatedAt,
     isLoading: isDetailLoading,
+    isError: isDetailError,
   } = useQuery({
     queryKey: ["projectDetail", projectId],
     queryFn: () => getProjectDetail(projectId),
@@ -263,9 +257,7 @@ export function ProjectDetailCard({
 
   const isAlreadyApproved = selectIsAlreadyApproved(myApplications)
 
-  const data = detail
-    ? toMatchingProject(detail, detailDataUpdatedAt)
-    : DEFAULT_MATCHING_PROJECT_MOCK
+  const data = detail ? toMatchingProject(detail, detailDataUpdatedAt) : null
 
   const isShowingFormModal = isApplyModalOpen || isRecruitQuestionsModalOpen
   const {
@@ -411,6 +403,7 @@ export function ProjectDetailCard({
   const ctaMode =
     viewOnly && !isAdminView && !isPmView
       ? resolveProjectDetailCtaMode({
+          isGuest,
           isOperator: false,
           isPm: false,
           isSameBranch,
@@ -422,6 +415,7 @@ export function ProjectDetailCard({
           isPartRecruitClosed,
         })
       : resolveProjectDetailCtaMode({
+          isGuest,
           isOperator: isAdminView,
           isPm: isPmView,
           isSameBranch,
@@ -434,7 +428,7 @@ export function ProjectDetailCard({
           hasActiveRound: hasActiveRoundForCtaMode,
         })
 
-  const cover = data.coverImage
+  const cover = data?.coverImage
   const showLogo = logo === "on"
   const shouldShowEditCta =
     showEditCta && (resolvedEditPermissionLoading || resolvedCanEditProject)
@@ -451,7 +445,15 @@ export function ProjectDetailCard({
   }, [detail, projectId, ctaMode, viewOnly])
 
   if (isDetailLoading) {
-    return <ProjectDetailCardSkeleton />
+    return <ProjectDetailCardLoading />
+  }
+
+  if (isDetailError || !data) {
+    return (
+      <div className="text-body-2-regular text-teal-gray-500 flex min-h-50 items-center justify-center rounded-2xl bg-white px-6 text-center">
+        프로젝트를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+      </div>
+    )
   }
 
   return (
@@ -464,24 +466,24 @@ export function ProjectDetailCard({
           />
         </div>
 
-        <div className="bp1:p-5 flex w-full flex-col items-start p-4">
+        <div className="flex w-full flex-col items-start p-5">
           <div className="flex w-full flex-col items-start gap-6">
             <div className="flex w-full flex-col items-start gap-2.5">
-              <div className="bp1:flex-row bp1:items-center bp1:justify-between bp1:gap-4 flex w-full min-w-0 flex-col items-start gap-2.5">
+              <div className="flex w-full min-w-0 flex-row items-center justify-between gap-4">
                 {showLogo ? (
-                  <div className="bp1:w-auto flex w-full min-w-0 items-center gap-2">
+                  <div className="flex w-auto min-w-0 items-center gap-2">
                     <ProjectLogo src={data.logoImage?.src} />
-                    <h2 className="text-heading-6-semibold text-teal-gray-900 bp1:line-clamp-1 bp1:w-60 line-clamp-2 w-full min-w-0">
+                    <h2 className="text-heading-6-semibold text-teal-gray-900 line-clamp-1 w-60 min-w-0">
                       {data.title}
                     </h2>
                   </div>
                 ) : (
-                  <h2 className="text-heading-6-semibold text-teal-gray-900 bp1:line-clamp-1 bp1:w-60 line-clamp-2 w-full min-w-0">
+                  <h2 className="text-heading-6-semibold text-teal-gray-900 line-clamp-1 w-60 min-w-0">
                     {data.title}
                   </h2>
                 )}
 
-                <p className="text-body-2-regular text-teal-gray-500 bp1:w-auto bp1:shrink-0 bp1:text-right line-clamp-1 w-full text-left">
+                <p className="text-body-2-regular text-teal-gray-500 line-clamp-1 w-auto shrink-0 text-right">
                   {data.authorSchoolLine}
                 </p>
               </div>
@@ -491,37 +493,55 @@ export function ProjectDetailCard({
               </p>
             </div>
 
-            <div className="flex w-full flex-col items-start gap-1.5">
-              {data.recruitRows.map((row) => {
-                const done = isRecruitDone(row)
-                return (
-                  <div
-                    key={row.part}
-                    className="flex w-full min-w-0 items-center justify-between gap-3"
-                  >
-                    <div className="flex w-30.5 min-w-0 shrink-0 items-center justify-between gap-2">
-                      <span className="text-body-2-medium text-teal-gray-700 truncate">
-                        {row.part}
-                      </span>
-                      <MemberCount
-                        size="sm"
-                        current={row.current}
-                        total={row.total}
-                      />
+            {/* 게스트에게는 모집 현황 대신 파트와 모집 인원만 한 줄로 준다 */}
+            {isGuest ? (
+              <p className="text-body-2-medium text-teal-gray-600 w-full">
+                {data.recruitRows
+                  .map((row) => `${row.part} ${row.total}`)
+                  .join(" · ")}
+              </p>
+            ) : (
+              <div className="flex w-full flex-col items-start gap-1.5">
+                {data.recruitRows.map((row) => {
+                  const done = isRecruitDone(row)
+                  return (
+                    <div
+                      key={row.part}
+                      className="flex w-full min-w-0 items-center justify-between gap-3"
+                    >
+                      <div className="flex w-30.5 min-w-0 shrink-0 items-center justify-between gap-2">
+                        <span className="text-body-2-medium text-teal-gray-700 truncate">
+                          {row.part}
+                        </span>
+                        <CounterLabel
+                          size="sm"
+                          current={row.current}
+                          total={row.total}
+                        />
+                      </div>
+                      <RecruitStatusChip done={done} />
                     </div>
-                    <RecruitStatusChip done={done} />
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
-          <div className="bp1:mt-8.5 scrollbar-none mt-6 flex w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1">
-            <TeamMemberButton
-              variant="weak"
-              className="w-auto"
-              onClick={() => setIsTeamModalOpen(true)}
-            />
+          {/* 게스트 상세에는 액션이 없다. 팀원·기획안·지원 모두 로그인이 필요해
+              눌러도 로그인으로 튕기므로 디자인대로 영역째 두지 않는다. */}
+          <div
+            className={cn(
+              "scrollbar-none mt-8.5 w-full flex-nowrap items-start gap-2.5 overflow-x-auto pb-1",
+              isGuest ? "hidden" : "flex",
+            )}
+          >
+            {!isGuest && (
+              <TeamMemberButton
+                variant="weak"
+                className="w-auto"
+                onClick={() => setIsTeamModalOpen(true)}
+              />
+            )}
             <Button
               variant="weak"
               color="primary"
@@ -786,7 +806,10 @@ export function ProjectDetailCard({
         </div>
       </div>
 
-      <Modal.Root open={isTeamModalOpen} onOpenChange={setIsTeamModalOpen}>
+      <Modal.Root
+        open={!isGuest && isTeamModalOpen}
+        onOpenChange={setIsTeamModalOpen}
+      >
         <Modal.Portal>
           <Modal.Overlay tone="light" />
           <Modal.Content aria-describedby={undefined}>
@@ -873,7 +896,6 @@ export function ProjectDetailCard({
                   void queryClient.invalidateQueries({
                     queryKey: ["myApplications", activeGisuId],
                   })
-                  setIsSurveyActive(true)
                 }}
               />
             )}
@@ -916,11 +938,6 @@ export function ProjectDetailCard({
           </Modal.Content>
         </Modal.Portal>
       </Modal.Root>
-
-      <UsabilitySurvey
-        context="APPLICATION_SUBMITTED"
-        active={isSurveyActive}
-      />
     </>
   )
 }

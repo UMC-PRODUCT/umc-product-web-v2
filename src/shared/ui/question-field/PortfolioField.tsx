@@ -24,6 +24,8 @@ interface PortfolioFieldProps {
   onChange?: (value: PortfolioValue | null) => void
   error?: string
   className?: string
+  ariaLabel?: string
+  ariaRequired?: boolean
 }
 
 export function PortfolioField({
@@ -31,6 +33,8 @@ export function PortfolioField({
   onChange,
   error: errorProp,
   className,
+  ariaLabel,
+  ariaRequired,
 }: PortfolioFieldProps) {
   const [link, setLink] = useState(value?.kind === "link" ? value.url : "")
   const [linkError, setLinkError] = useState("")
@@ -44,7 +48,11 @@ export function PortfolioField({
     const val = e.target.value
     setLink(val)
     setLinkError("")
-    if (!val) onChange?.(null)
+    if (val && isValidUrl(val)) {
+      onChange?.({ kind: "link", url: val })
+    } else {
+      onChange?.(null)
+    }
   }
 
   function handleLinkBlur() {
@@ -113,6 +121,8 @@ export function PortfolioField({
               value={link}
               onChange={handleLinkChange}
               onBlur={handleLinkBlur}
+              aria-label={ariaLabel}
+              aria-required={ariaRequired || undefined}
               placeholder="링크를 입력하거나 파일을 첨부해 주세요. 150MB 이하의 PDF 파일만 업로드 가능합니다."
               className={cn(
                 "text-body-1-medium placeholder:text-body-1-regular placeholder:text-teal-gray-400 min-w-0 flex-1 bg-transparent outline-none",

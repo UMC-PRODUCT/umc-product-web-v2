@@ -6,10 +6,10 @@ import {
   getMatchingRounds,
   getProjectApplications,
   updateApplicationDecision,
-} from "../api/applicationApi"
-import { applicationKeys } from "../api/applicationKeys"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
 
-import type { DecisionRequest } from "../model/apiTypes"
+import type { DecisionRequest } from "@/entities/application/model/apiTypes"
 
 // 프로젝트별 지원자 목록
 export function useProjectApplications(

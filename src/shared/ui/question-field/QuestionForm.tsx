@@ -31,7 +31,9 @@ interface QuestionFormProps {
 function autoResize(el: HTMLTextAreaElement | null) {
   if (!el) return
   el.style.height = "auto"
-  el.style.height = `${el.scrollHeight}px`
+  if (el.scrollHeight > 0) {
+    el.style.height = `${el.scrollHeight}px`
+  }
 }
 
 export function QuestionForm({
@@ -69,7 +71,7 @@ export function QuestionForm({
   return (
     <article
       className={cn(
-        "bp1:px-6 bp1:pb-6 relative flex w-full flex-col items-center gap-2.5 px-4 pb-5",
+        "relative flex w-full flex-col items-center gap-2.5 px-6 py-6",
         focused ? "" : "mt-4 pt-4",
         className,
       )}
@@ -97,13 +99,13 @@ export function QuestionForm({
         </button>
       )}
 
-      <div className="flex w-full flex-col items-end gap-4">
+      <div className="flex w-full flex-col items-end gap-2.5">
         {focused ? (
-          <div className="flex w-full items-start gap-2">
-            <span className="text-heading-7-semibold bp1:w-7 w-6 shrink-0 text-teal-600">
+          <div className="flex w-full items-start gap-1.5">
+            <span className="text-heading-7-semibold w-7 shrink-0 text-teal-600">
               {index}
             </span>
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <div className="relative">
                 <div
                   aria-hidden
@@ -140,8 +142,8 @@ export function QuestionForm({
                   onCaptionChange?.(e.target.value)
                   autoResize(e.target)
                 }}
-                placeholder="설명 (선택 사항)"
-                className="text-body-2-regular text-teal-gray-400 placeholder:text-teal-gray-300 w-full resize-none overflow-hidden bg-transparent outline-none"
+                placeholder="설명을 입력하세요"
+                className="text-body-2-regular text-teal-gray-600 placeholder:text-teal-gray-300 w-full resize-none overflow-hidden bg-transparent outline-none"
               />
             </div>
           </div>
@@ -155,7 +157,7 @@ export function QuestionForm({
           />
         )}
 
-        <div className="bp1:px-1.5 flex w-full min-w-0 flex-col items-start gap-2.5 px-0">
+        <div className="flex w-full min-w-0 flex-col items-start gap-2.5 px-1.5">
           {children}
         </div>
 

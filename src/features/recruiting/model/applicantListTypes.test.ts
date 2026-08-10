@@ -1,0 +1,123 @@
+import { describe, expect, it } from "vitest"
+
+import {
+  type ApplicantRow,
+  applyApplicantFilters,
+  applyCardFilters,
+  DEFAULT_APPLICANT_CARD_FILTERS,
+  DEFAULT_APPLICANT_LIST_FILTERS,
+  formatAppliedAtParts,
+} from "./applicantListTypes"
+
+function createApplicant(
+  applicationId: string,
+  appliedAt: string,
+  school: string,
+): ApplicantRow {
+  return {
+    applicationId,
+    roundId: "9001",
+    appliedAt,
+    applicantName: applicationId,
+    chapter: "Chromium",
+    school,
+    recruitmentType: "regular",
+    parts: ["web-pe"],
+    evaluations: {
+      document: {
+        progress: "before",
+        result: null,
+        myProgress: "before",
+      },
+      interview: null,
+      final: null,
+    },
+  }
+}
+
+describe("applyCardFilters 정렬", () => {
+  it("등록 순을 학교순보다 우선 적용한다", () => {
+    const older = createApplicant("older", "2026-04-21T09:00:00", "한성대")
+    const newer = createApplicant("newer", "2026-04-22T09:00:00", "가천대")
+
+    const result = applyCardFilters(
+      [newer, older],
+      {
+        ...DEFAULT_APPLICANT_CARD_FILTERS,
+        sort: "registered",
+        order: "school",
+      },
+      "document",
+    )
+
+    expect(result.map(({ applicationId }) => applicationId)).toEqual([
+      "older",
+      "newer",
+    ])
+  })
+
+  it("지원 일시가 같으면 학교순을 보조 기준으로 적용한다", () => {
+    const second = createApplicant("second", "2026-04-22T09:00:00", "한성대")
+    const first = createApplicant("first", "2026-04-22T09:00:00", "가천대")
+
+    const result = applyCardFilters(
+      [second, first],
+      {
+        ...DEFAULT_APPLICANT_CARD_FILTERS,
+        order: "school",
+      },
+      "document",
+    )
+
+    expect(result.map(({ applicationId }) => applicationId)).toEqual([
+      "first",
+      "second",
+    ])
+  })
+})
+
+describe("applyApplicantFilters 결과 필터", () => {
+  it("합격 결과 필터는 합격자만 포함한다", () => {
+    const passed = createApplicant("passed", "2026-04-22T09:00:00", "가천대")
+    passed.evaluations.document.progress = "done"
+    passed.evaluations.document.result = "pass"
+
+    const failed = createApplicant("failed", "2026-04-22T09:00:00", "건국대")
+    failed.evaluations.document.progress = "done"
+    failed.evaluations.document.result = "fail"
+
+    const result = applyApplicantFilters(
+      [passed, failed],
+      { ...DEFAULT_APPLICANT_LIST_FILTERS, results: ["pass"] },
+      "document",
+    )
+
+    expect(result.map(({ applicationId }) => applicationId)).toEqual(["passed"])
+  })
+
+  it("결과가 미확정인 지원자는 결과 필터에 포함되지 않는다", () => {
+    const doneNoResult = createApplicant(
+      "done-no-result",
+      "2026-04-22T09:00:00",
+      "가천대",
+    )
+    doneNoResult.evaluations.document.progress = "done"
+
+    const result = applyApplicantFilters(
+      [doneNoResult],
+      { ...DEFAULT_APPLICANT_LIST_FILTERS, results: ["pass", "fail"] },
+      "document",
+    )
+
+    expect(result).toHaveLength(0)
+  })
+})
+
+describe("formatAppliedAtParts", () => {
+  it("지원 일시를 날짜와 시간으로 분리한다", () => {
+    expect(formatAppliedAtParts("2026-04-22T03:33:00")).toEqual({
+      date: "04/22",
+      time: "03:33",
+    })
+  })
+})

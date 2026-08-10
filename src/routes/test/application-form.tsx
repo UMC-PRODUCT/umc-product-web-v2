@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { getFieldTypePatch } from "@/features/project/new/model/applicationQuestion"
 import { useApplicationForm } from "@/features/project/new/model/useApplicationForm"
+import { ProjectRegisterStoreProvider } from "@/features/project/new/model/useProjectRegisterStore"
 import { QuestionCard } from "@/features/project/new/ui/application/QuestionCard"
 import { QuestionListContainer } from "@/features/project/new/ui/application/QuestionListContainer"
 import { QuestionTypeToolbar } from "@/features/project/new/ui/application/QuestionTypeToolbar"
@@ -10,8 +11,16 @@ import { FloatingActionButton } from "@/shared/ui/button/FloatingActionButton"
 import { FormHeader } from "@/shared/ui/FormHeader"
 
 export const Route = createFileRoute("/test/application-form")({
-  component: ApplicationFormTestPage,
+  component: ApplicationFormTestRoute,
 })
+
+function ApplicationFormTestRoute() {
+  return (
+    <ProjectRegisterStoreProvider>
+      <ApplicationFormTestPage />
+    </ProjectRegisterStoreProvider>
+  )
+}
 
 function ApplicationFormTestPage() {
   const form = useApplicationForm()

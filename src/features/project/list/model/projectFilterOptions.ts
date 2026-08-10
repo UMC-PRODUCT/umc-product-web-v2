@@ -1,4 +1,7 @@
-import type { PartQuotaStatus, ProjectPart } from "../api/matchingProject"
+import type {
+  PartQuotaStatus,
+  ProjectPart,
+} from "@/entities/project/api/matchingProject"
 
 export type ProjectFilterOption = {
   value: string

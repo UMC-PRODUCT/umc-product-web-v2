@@ -1,8 +1,12 @@
 import { memberBriefToItem } from "../api/memberAdapter"
-import { useProjectRegisterStore } from "./useProjectRegisterStore"
 
 import type { ApiPart, ProjectDetailResponse } from "../api/types"
-import type { RoleKey, RoleStack } from "./useProjectRegisterStore"
+import type {
+  ProjectRegisterStoreApi,
+  RoleKey,
+  RoleStack,
+  RoleState,
+} from "./useProjectRegisterStore"
 
 type PartMapping = { role: RoleKey; stack?: RoleStack } | null
 
@@ -19,8 +23,9 @@ const PART_TO_ROLE: Record<ApiPart, PartMapping> = {
 
 export function hydrateProjectDetailIntoStore(
   detail: ProjectDetailResponse,
+  storeApi: ProjectRegisterStoreApi,
 ): void {
-  const store = useProjectRegisterStore.getState()
+  const store = storeApi.getState()
 
   if (detail.id) store.setProjectId(detail.id)
 
@@ -48,7 +53,7 @@ export function hydrateProjectDetailIntoStore(
     design: { count: 0, stack: undefined },
     frontend: { count: 0, stack: undefined },
     backend: { count: 0, stack: undefined },
-  } as ReturnType<typeof useProjectRegisterStore.getState>["recruitInfo"]
+  } as Record<RoleKey, RoleState>
 
   for (const quota of detail.partQuotas ?? []) {
     if (!quota.part) continue

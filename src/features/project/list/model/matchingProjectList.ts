@@ -2,21 +2,27 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { isOperator } from "@/features/auth/model/identity"
-import { getChaptersWithSchools } from "@/features/challenger/api/organization"
+import { isOperator } from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
+import { getChaptersWithSchools } from "@/entities/organization/api/organization"
+import {
+  getMatchingProjects,
+  type ProjectItem,
+} from "@/entities/project/api/matchingProject"
 import { projectKeys } from "@/features/project/new/api"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { formatSchoolName } from "@/shared/lib/formatSchoolName"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
 
-import { getMatchingProjects, type ProjectItem } from "../api/matchingProject"
 import {
   PART_OPTIONS,
   type ProjectFilterOption,
   RECRUIT_STATUS_OPTIONS,
 } from "./projectFilterOptions"
 
-import type { PartQuotaStatus, ProjectPart } from "../api/matchingProject"
+import type {
+  PartQuotaStatus,
+  ProjectPart,
+} from "@/entities/project/api/matchingProject"
 
 export const MATCHING_PROJECT_PAGE_SIZE = 15
 
@@ -26,21 +32,35 @@ export type MatchingProjectListFilterId =
   | "part"
   | "status"
 
-export type MatchingProjectListFilterDescriptor = {
+type MatchingProjectListFilterDescriptorBase = {
   id: MatchingProjectListFilterId
   label: string
-  options: ProjectFilterOption[]
+  options: readonly ProjectFilterOption[]
   className: string
   dropdownClassName?: string
-  selectedValue?: string
-  selectedValues?: string[]
   selectedLabel?: string
-  onSelect: (value: string) => void
-  multiSelect?: boolean
 }
 
+export type MatchingProjectListFilterDescriptor =
+  MatchingProjectListFilterDescriptorBase &
+    (
+      | {
+          multiSelect?: false
+          selectedValue?: string
+          onSelect: (value: string) => void
+          selectedValues?: never
+          onSelectedValuesChange?: never
+        }
+      | {
+          multiSelect: true
+          selectedValues: readonly string[]
+          onSelectedValuesChange: (values: string[]) => void
+          selectedValue?: never
+          onSelect?: never
+        }
+    )
+
 export type ProjectListSearch = {
-  mock?: "projects"
   branch?: string
   school?: string
   parts?: ProjectPart[]
@@ -108,7 +128,11 @@ export function useMatchingProjectListFilters() {
   const { me, viewContext } = useViewerIdentity()
   const userIsOperator = isOperator(me)
 
-  const { data: gisuData } = useActiveGisu()
+  const {
+    data: gisuData,
+    isLoading: isGisuLoading,
+    isError: isGisuError,
+  } = useActiveGisu()
 
   const activeGisuId = gisuData?.gisuId ? Number(gisuData.gisuId) : undefined
 
@@ -121,13 +145,20 @@ export function useMatchingProjectListFilters() {
     return latest ? Number(latest.gisuId) : undefined
   }, [me])
 
+  // 챌린저 기록이 없으면(비로그인 게스트) 활성 기수로 떨어뜨린다. 그렇지 않으면
+  // 기수가 undefined 라 목록 쿼리가 통째로 실행되지 않고 빈 화면이 남는다.
   const effectiveGisuId =
-    viewContext.isAdminView && userIsOperator ? activeGisuId : userGisuId
+    viewContext.isAdminView && userIsOperator
+      ? activeGisuId
+      : (userGisuId ?? activeGisuId)
 
   const { data: chaptersData } = useQuery({
-    queryKey: ["chaptersWithSchools", activeGisuId],
-    queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
-    enabled: activeGisuId != null,
+    // 필터 옵션은 목록과 같은 기수를 봐야 한다. 기수마다 지부 구성이 달라서
+    // (10기 6개 / 9기 7개) 기준이 어긋나면 목록에 없는 지부가 필터에 뜨거나
+    // 목록에만 있는 지부가 필터에서 빠진다.
+    queryKey: ["chaptersWithSchools", effectiveGisuId],
+    queryFn: () => getChaptersWithSchools(String(effectiveGisuId!)),
+    enabled: effectiveGisuId != null,
     staleTime: Infinity,
   })
 
@@ -190,13 +221,6 @@ export function useMatchingProjectListFilters() {
     [schoolOptions, selectedSchool],
   )
 
-  const selectedPartLabel = useMemo(() => {
-    if (selectedParts.length === 0) return undefined
-    if (selectedParts.length === 1)
-      return PART_OPTIONS.find((o) => o.value === selectedParts[0])?.label
-    return `${PART_OPTIONS.find((o) => o.value === selectedParts[0])?.label} 외 ${selectedParts.length - 1}`
-  }, [selectedParts])
-
   const selectedRecruitStatusLabel = useMemo(
     () =>
       RECRUIT_STATUS_OPTIONS.find(
@@ -205,21 +229,20 @@ export function useMatchingProjectListFilters() {
     [selectedRecruitStatus],
   )
 
-  const handlePartSelect = useCallback(
-    (value: string) => {
-      const part = value as ProjectPart
+  const handlePartsChange = useCallback(
+    (values: string[]) => {
+      const parts = values.flatMap((value) => {
+        const option = PART_OPTIONS.find(
+          (candidate) => candidate.value === value,
+        )
+        return option ? [option.value] : []
+      })
       void navigate({
-        search: (prev) => {
-          const currentParts = prev.parts ?? EMPTY_PARTS
-          const newParts = currentParts.includes(part)
-            ? currentParts.filter((selected) => selected !== part)
-            : [...currentParts, part]
-          return {
-            ...prev,
-            parts: newParts.length > 0 ? newParts : undefined,
-            page: 1,
-          }
-        },
+        search: (prev) => ({
+          ...prev,
+          parts: parts.length > 0 ? parts : undefined,
+          page: 1,
+        }),
       })
     },
     [navigate],
@@ -297,8 +320,7 @@ export function useMatchingProjectListFilters() {
       label: "파트",
       options: PART_OPTIONS,
       selectedValues: selectedParts,
-      selectedLabel: selectedPartLabel,
-      onSelect: handlePartSelect,
+      onSelectedValuesChange: handlePartsChange,
       multiSelect: true,
       ...FILTER_LAYOUT.part,
     },
@@ -320,8 +342,11 @@ export function useMatchingProjectListFilters() {
     totalPages: Math.max(1, Number(data?.totalPages ?? 1)),
     page,
     setPage,
-    isLoading,
-    isError,
+    // 게스트는 활성 기수를 받아야 목록 쿼리가 열린다. 그 조회 상태를 합치지
+    // 않으면 기수를 기다리는 동안 "프로젝트 없음"으로 보이고, 조회가 실패하면
+    // 불러오지 못한 것을 없는 것으로 안내하게 된다.
+    isLoading: isLoading || (effectiveGisuId == null && isGisuLoading),
+    isError: isError || (effectiveGisuId == null && isGisuError),
     searchQuery,
     setSearchQuery,
     filterDescriptors,

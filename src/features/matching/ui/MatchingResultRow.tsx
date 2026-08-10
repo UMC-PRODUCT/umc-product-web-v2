@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react"
 import {
   addProjectMember,
   removeProjectMember,
-} from "@/features/application/api/applicationApi"
-import { applicationKeys } from "@/features/application/api/applicationKeys"
+} from "@/entities/application/api/applicationApi"
+import { applicationKeys } from "@/entities/application/api/applicationKeys"
 import { ProjectDetailCard } from "@/features/project/list/ui/ProjectDetailCard"
 import { cn } from "@/shared/lib/utils"
 import { ProjectLinkButton } from "@/shared/ui/button/ProjectLinkButton"
@@ -16,8 +16,9 @@ import { CtaModal } from "@/shared/ui/modal/CtaModal"
 import { AssignmentModal } from "./AssignmentModal"
 import { MatchingBlock } from "./MatchingBlock"
 
-import type { Part } from "@/features/challenger/model/types"
-import type { NumberTagVariant } from "@/shared/ui/NumberTag"
+import type { Part } from "@/shared/model/domain"
+
+import type { RoundNumberTagVariant } from "./RoundNumberTag"
 
 // 역할 행 라벨 -> 서버 Part enum 변환
 function roleToPart(
@@ -35,7 +36,7 @@ type BlockType = "round1" | "filled" | "none" | "blocked"
 export interface MatchingBlockData {
   type: BlockType
   name?: string
-  tagVariant?: NumberTagVariant
+  tagVariant?: RoundNumberTagVariant
   memberId?: string
   part?: Part
 }
@@ -435,7 +436,7 @@ export function MatchingResultRow({
             const optimisticBlock: MatchingBlockData = {
               type: "filled" as const,
               name: challenger.nickname,
-              tagVariant: "random" as NumberTagVariant,
+              tagVariant: "random",
               memberId: String(challenger.id),
               part: assignTarget.part,
             }

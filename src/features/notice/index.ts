@@ -6,8 +6,3 @@ export { NoticeDetailContent } from "./ui/NoticeDetailContent"
 export { NoticeDetailSkeleton } from "./ui/NoticeDetailSkeleton"
 export { NoticePublishForm } from "./ui/NoticePublishForm"
 export { NoticeSubmitButton } from "./ui/NoticeSubmitButton"
-export {
-  type Chapter,
-  CHAPTERS,
-  ChapterSelector,
-} from "@/shared/ui/segment/ChapterSelector"

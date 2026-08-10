@@ -28,5 +28,8 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: FSD 경계 위반 래칫 체크
+        run: pnpm lint:boundaries
+
       - name: Build
         run: pnpm build

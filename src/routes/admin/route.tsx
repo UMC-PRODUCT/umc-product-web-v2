@@ -6,10 +6,11 @@ import {
   useLocation,
 } from "@tanstack/react-router"
 
-import Header from "@/components/header/Header"
+import { isOperator } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { isOperator } from "@/features/auth/model/identity"
+import { notifyAccessDenied } from "@/shared/lib/accessDenied"
 import { cn } from "@/shared/lib/utils"
+import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -17,7 +18,10 @@ export const Route = createFileRoute("/admin")({
   }),
   beforeLoad: async ({ context }) => {
     const me = await ensureMe(context.queryClient)
-    if (!isOperator(me)) throw redirect({ to: "/" })
+    if (!isOperator(me)) {
+      notifyAccessDenied()
+      throw redirect({ to: "/" })
+    }
   },
   component: AdminLayout,
 })
@@ -37,7 +41,7 @@ function AdminLayout() {
 
   return (
     <main className="h-full min-h-screen w-full">
-      <Header />
+      <RecruitingHeader />
       <nav className="border-teal-gray-100 border-b bg-white">
         <ul className="mx-auto flex w-full max-w-300 items-center gap-2 px-8.5">
           {ADMIN_NAV.map((item) => {

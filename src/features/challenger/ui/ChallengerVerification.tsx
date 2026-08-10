@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { Info } from "lucide-react"
 import { useState } from "react"
 
-import { authKeys } from "@/features/auth/hooks/useMe"
+import { authKeys } from "@/entities/member/hooks/useMe"
 import { addChallengerRecordToMember } from "@/features/challenger/api/challengerRecord"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import { Button } from "@/shared/ui/Button"
@@ -69,7 +69,6 @@ export function ChallengerVerification() {
             onChange={handleChange}
             state={hasError ? "error" : "default"}
             shakeSignal={errorShakeKey}
-            className="max-[419px]:justify-between"
             autoFocus
           />
 
@@ -112,8 +111,7 @@ export function ChallengerVerification() {
         descriptionClassName="w-full"
         content={
           <span className="block w-full break-keep">
-            개별 인증코드는 OT에서 안내된 챌린저 전용 인증번호입니다.{" "}
-            <br className="hidden md:block" />
+            개별 인증코드는 OT에서 안내된 챌린저 전용 인증번호입니다. <br />
             확인이 어려운 경우, 소속 학교 회장단에 문의해 주세요.
           </span>
         }

@@ -47,7 +47,7 @@ function ProjectImageCropTestPage() {
         </p>
       </header>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,540px)_minmax(0,1fr)]">
+      <section className="grid grid-cols-[minmax(0,540px)_minmax(0,1fr)] gap-6">
         <div className="flex flex-col gap-3">
           <h2 className="text-body-1-semibold text-teal-gray-900">
             썸네일 업로드
@@ -65,7 +65,7 @@ function ProjectImageCropTestPage() {
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,540px)_minmax(0,1fr)]">
+      <section className="grid grid-cols-[minmax(0,540px)_minmax(0,1fr)] gap-6">
         <div className="flex flex-col gap-3">
           <h2 className="text-body-1-semibold text-teal-gray-900">
             로고 업로드
@@ -104,7 +104,7 @@ function PreviewPanel({ title, preview, expected }: PreviewPanelProps) {
             alt={title}
             className="border-teal-gray-100 max-h-72 max-w-full self-start rounded-lg border object-contain"
           />
-          <dl className="text-body-2-medium text-teal-gray-700 grid gap-2 sm:grid-cols-3">
+          <dl className="text-body-2-medium text-teal-gray-700 grid grid-cols-3 gap-2">
             <div>
               <dt className="text-teal-gray-400">파일명</dt>
               <dd className="break-all">{preview.file.name}</dd>

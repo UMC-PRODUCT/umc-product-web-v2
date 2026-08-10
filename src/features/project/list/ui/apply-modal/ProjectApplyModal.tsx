@@ -11,19 +11,27 @@ import {
 } from "react"
 import { Controller, useForm } from "react-hook-form"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
-import { uploadFileFlow } from "@/features/project/new/api/storage"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
+import {
+  createApplicationDraft,
+  getApplicationDetail,
+  getMyApplications,
+  saveApplicationDraft,
+  submitApplication,
+} from "@/entities/project/api/matchingProject"
+import { isRecruitDone } from "@/entities/project/model/matchingProject"
 import { trackEvent } from "@/shared/analytics"
+import { uploadFileFlow } from "@/shared/api/storage"
 import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import WarningTriangleIcon from "@/shared/assets/icon/infomation/WarningTriangleIcon"
 import { activeGisuQueryOptions } from "@/shared/hooks/useActiveGisu"
 import { Button } from "@/shared/ui/Button"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { FormHeader } from "@/shared/ui/FormHeader"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
+import { OPTION_LIST_CLASS } from "@/shared/ui/input/optionList"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
-import MemberCount from "@/shared/ui/MemberCount"
 import { Modal } from "@/shared/ui/Modal"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import {
@@ -32,14 +40,8 @@ import {
 } from "@/shared/ui/question-field/PortfolioField"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
-import {
-  createApplicationDraft,
-  getApplicationDetail,
-  getMyApplications,
-  saveApplicationDraft,
-  submitApplication,
-} from "../../api/matchingProject"
 import {
   type ApplyAnswerValue,
   buildAnswerPayload,
@@ -53,20 +55,18 @@ import {
   defaultByFieldType,
   type UploadedFileValue,
 } from "../../model/applyValidation"
-import { isRecruitDone } from "../../model/matchingProject"
 import { selectCurrentApplicationForProject } from "../../model/projectDetailCta"
 import { ApplyFormSkeleton } from "./ApplyFormSkeleton"
 import { ApplyProjectTitleCard } from "./ApplyProjectTitleCard"
 
 import type { FieldErrors, Resolver } from "react-hook-form"
 
+import type { MyProjectApplicationResponse } from "@/entities/project/api/matchingProject"
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 import type {
   Question,
   Section,
 } from "@/features/project/new/model/applicationQuestion"
-
-import type { MyProjectApplicationResponse } from "../../api/matchingProject"
-import type { MatchingProject } from "../../model/matchingProject"
 
 const FILE_UPLOAD_CATEGORY = "POST_ATTACHMENT" as const
 const PORTFOLIO_UPLOAD_CATEGORY = "PORTFOLIO" as const
@@ -75,8 +75,6 @@ const FILE_ACCEPT = ".pdf,.docx,.zip"
 const FILE_ALLOWED_LABEL = "PDF, DOCX, ZIP"
 const PORTFOLIO_ALLOWED_LABEL = "PDF"
 
-const OPTION_LIST_CLASS =
-  "border-teal-gray-150 flex flex-col gap-0.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] p-1"
 const COMMON_SECTION_ID = "common"
 
 function extractUploadErrorMessage(
@@ -605,6 +603,7 @@ export const ProjectApplyModal = forwardRef<
                   <RadioList
                     key={`${optionValue}-${index}`}
                     checked={value === optionValue}
+                    allowDeselect
                     onChange={(checked) => {
                       onChange(checked ? optionValue : "")
                     }}
@@ -733,7 +732,7 @@ export const ProjectApplyModal = forwardRef<
                         <span className="text-body-2-medium text-teal-gray-700">
                           {row.part}
                         </span>
-                        <MemberCount
+                        <CounterLabel
                           size="sm"
                           current={row.current}
                           total={row.total}

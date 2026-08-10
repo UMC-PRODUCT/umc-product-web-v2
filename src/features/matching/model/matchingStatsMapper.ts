@@ -1,15 +1,18 @@
 // 매칭 현황 집계(PROJECT-STAT-003) 응답 -> ApplicationStats 변환
 // summaryToStats(지원 현황과 공유)와 완전히 독립. ProjectMember 기준 매칭 집계만 사용.
 
-import { shortenSchoolName, toRoundNumber } from "@/features/application/model/mappers"
+import {
+  shortenSchoolName,
+  toRoundNumber,
+} from "@/entities/application/model/mappers"
 
-import type { ChapterMatchingStatisticsResponse } from "@/features/application/model/apiTypes"
+import type { ChapterMatchingStatisticsResponse } from "@/entities/application/model/apiTypes"
 import type {
   ApplicationStats,
   ProjectRoundData,
   TopProject,
   UniversityCount,
-} from "@/features/application/model/types"
+} from "@/entities/application/model/types"
 
 const PHASE_BY_ROUND: Record<number, "FIRST" | "SECOND" | "THIRD"> = {
   1: "FIRST",
@@ -54,7 +57,11 @@ export function matchingResponseToStats(
 
   // Top 4 (3차 이후에는 1차 기준 유지)
   const topRound =
-    currentRound === undefined ? undefined : currentRound >= 3 ? 1 : currentRound
+    currentRound === undefined
+      ? undefined
+      : currentRound >= 3
+        ? 1
+        : currentRound
   const topPhase = topRound === undefined ? undefined : PHASE_BY_ROUND[topRound]
   const topRoundStat = topPhase
     ? response.roundMatchingStatistics.find(

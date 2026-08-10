@@ -1,4 +1,4 @@
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 
 interface UseProjectPermissionsOptions {
   enabled?: boolean

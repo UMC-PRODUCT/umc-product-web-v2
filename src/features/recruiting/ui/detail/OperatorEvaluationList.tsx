@@ -1,0 +1,157 @@
+import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { cn } from "@/shared/lib/utils"
+import { StatusChipTag } from "@/shared/ui/chip/StatusChipTag"
+
+import {
+  countOperatorProgress,
+  getMyEvaluation,
+  type StageEvaluationDetail,
+} from "../../model/applicationDetail"
+import { EVALUATION_STAGE_LABEL } from "../../model/evaluationStage"
+
+interface OperatorEvaluationListProps {
+  evaluation: StageEvaluationDetail
+  /**
+   * 모집 관리 권한 보유 여부. 있으면 평가자 명단을 받아 총원을 셀 수 있고,
+   * 서버도 다른 평가를 제한 없이 내려준다. 없으면 총원을 알 수 없다.
+   */
+  viewerIsAdmin?: boolean
+  /** 다시 조회. 화면을 보고 있는 채로 다른 평가자의 평가를 확인할 때 쓴다. */
+  onRefresh?: () => void
+  isRefreshing?: boolean
+}
+
+function OperatorStatusChip({ done }: { done: boolean }) {
+  return (
+    <span
+      className={cn(
+        "text-label-2-medium inline-flex h-6 items-center justify-center rounded-[6px] px-2 py-0.5 whitespace-nowrap",
+        done
+          ? "bg-teal-100 text-teal-600"
+          : "bg-teal-gray-150 text-teal-gray-600",
+      )}
+    >
+      {done ? "평가 완료" : "평가 전"}
+    </span>
+  )
+}
+
+function EmptyMessage({ children }: { children: string }) {
+  return (
+    <div className="flex min-h-24 items-center justify-center">
+      <p className="text-body-2-regular text-teal-gray-400">{children}</p>
+    </div>
+  )
+}
+
+function SortIcon() {
+  return (
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 18 18"
+      fill="none"
+      aria-hidden="true"
+      className="text-teal-gray-400"
+    >
+      <path
+        d="M6 3.5v11M6 14.5 3.5 12M12 14.5v-11M12 3.5 14.5 6"
+        stroke="currentColor"
+        strokeWidth={1.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function OperatorEvaluationList({
+  evaluation,
+  viewerIsAdmin = false,
+  onRefresh,
+  isRefreshing = false,
+}: OperatorEvaluationListProps) {
+  const { done, total } = countOperatorProgress(evaluation.operators)
+  const myEvaluation = getMyEvaluation(evaluation)
+  const othersDone = evaluation.operators.filter(
+    (operator) =>
+      operator.evaluatorId !== evaluation.myEvaluatorId &&
+      operator.progress === "done",
+  ).length
+  // 서버가 열람 가능한 평가만 내려준다. 운영진에게는 제한 없이 주고, 평가자에게는
+  // 본인이 제출한 뒤에만 준다. 받은 것이 있으면 그대로 보여준다.
+  const revealed =
+    viewerIsAdmin || myEvaluation?.progress === "done" || othersDone > 0
+
+  return (
+    <section className="border-teal-gray-100 flex flex-col gap-4 rounded-[16px] border bg-white p-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-heading-6-semibold text-teal-gray-800">
+          운영진 평가 <span className="text-teal-500">{done}</span>
+          {viewerIsAdmin && (
+            <span className="text-teal-gray-400">/{total}</span>
+          )}
+        </h3>
+        <div className="flex items-center gap-2">
+          {onRefresh && (
+            <button
+              type="button"
+              aria-label="평가 새로고침"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="border-teal-gray-400/15 text-body-3-medium text-teal-gray-600 flex h-8 items-center gap-1 rounded-[10px] border bg-white px-2.5 transition-colors hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ResetIcon
+                className={cn(
+                  "text-teal-gray-400 size-4",
+                  isRefreshing && "animate-spin",
+                )}
+              />
+              새로고침
+            </button>
+          )}
+          {revealed && <SortIcon />}
+        </div>
+      </div>
+
+      {!revealed ? (
+        <EmptyMessage>나의 평가를 등록 후에 확인할 수 있습니다.</EmptyMessage>
+      ) : /* 헤더는 본인까지 세는데 목록에서 본인을 빼면, 내가 방금 낸 평가가
+             `1/2` 로만 잡히고 아래는 비어 보인다. 같은 기준으로 센다. */
+      done === 0 ? (
+        <EmptyMessage>현재 완료된 평가가 없습니다.</EmptyMessage>
+      ) : (
+        <ul className="flex flex-col">
+          {evaluation.operators.map((operator) => {
+            const operatorDone = operator.progress === "done"
+            return (
+              <li
+                key={operator.evaluatorId}
+                className="border-teal-gray-100/60 flex flex-col gap-2 border-b py-4 first:pt-0 last:border-b-0 last:pb-0"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-body-2-medium text-teal-gray-900 w-28 shrink-0 truncate">
+                    {operator.evaluatorName}
+                  </span>
+                  <span className="text-body-2-regular text-teal-gray-500 w-20 shrink-0">
+                    {EVALUATION_STAGE_LABEL[operator.stage]}
+                  </span>
+                  <OperatorStatusChip done={operatorDone} />
+                  <span className="flex-1" />
+                  {operator.result && (
+                    <StatusChipTag type="tag" value={operator.result} />
+                  )}
+                </div>
+                {operatorDone && (
+                  <p className="text-body-2-regular text-teal-gray-600 pl-28 whitespace-pre-wrap">
+                    {operator.comment || "작성된 코멘트가 없습니다"}
+                  </p>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </section>
+  )
+}

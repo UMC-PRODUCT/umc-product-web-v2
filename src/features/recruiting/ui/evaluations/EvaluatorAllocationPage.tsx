@@ -1,0 +1,373 @@
+import {
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
+} from "@dnd-kit/core"
+import { useEffect, useMemo, useRef, useState } from "react"
+
+import { useMe } from "@/entities/member/hooks/useMe"
+import HamburgerIcon from "@/shared/assets/icon/hamburger/HamburgerIcon"
+import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
+import { useChipAssignment } from "@/shared/lib/useChipAssignment"
+import { Button } from "@/shared/ui/Button"
+import { PageLabel } from "@/shared/ui/page-label/PageLabel"
+
+import { useAdminRecruitingRounds } from "../../hooks/useAdminRecruitingRounds"
+import {
+  useRoundEvaluators,
+  useSaveEvaluatorAllocation,
+  useSchoolStaff,
+} from "../../hooks/useEvaluatorAllocation"
+import { useRecruitingPermissions } from "../../hooks/useRecruitingPermissions"
+import {
+  isStaff,
+  RECRUITMENT_BOX_ID,
+  resolveDropTargetId,
+  SCHOOL_STAFF_PANEL_ID,
+  type Staff,
+} from "../../model/evaluatorAllocation"
+import { resolveViewerSchool } from "../../model/recruitingRole"
+import { DroppableRecruitmentBox } from "./DroppableRecruitmentBox"
+import { EvaluatorSharedNote } from "./EvaluatorSharedNote"
+import { SchoolStaffPanel } from "./SchoolStaffPanel"
+
+interface EvaluatorAllocationPageProps {
+  roundId?: string
+}
+
+export function EvaluatorAllocationPage({
+  roundId,
+}: EvaluatorAllocationPageProps = {}) {
+  const { data: me } = useMe()
+  const viewerSchool = resolveViewerSchool(me)
+  const { groups } = useAdminRecruitingRounds()
+
+  const mySchoolGroup = useMemo(() => {
+    if (!groups.length) return null
+    const hasSchoolIdentity = Boolean(me?.schoolId || viewerSchool)
+
+    if (me?.schoolId) {
+      const foundById = groups.find(
+        (group) => String(group.schoolId) === String(me.schoolId),
+      )
+      if (foundById) return foundById
+    }
+    if (viewerSchool) {
+      const formattedViewer = formatSchoolName(viewerSchool)
+      const foundByName = groups.find(
+        (group) =>
+          group.schoolName === viewerSchool ||
+          formatSchoolName(group.schoolName) === formattedViewer,
+      )
+      if (foundByName) return foundByName
+    }
+    if (hasSchoolIdentity) {
+      // 접속자 학교 정보가 존재하지만 groups에 해당 학교 모집이 없는 경우
+      // 타 학교(groups[0])로 폴백하지 않고 null을 반환합니다.
+      return null
+    }
+    return groups[0] ?? null
+  }, [groups, me?.schoolId, viewerSchool])
+
+  const requestedRoundId = roundId ?? mySchoolGroup?.rounds[0]?.roundId ?? null
+
+  const activeGroup = requestedRoundId
+    ? (groups.find((group) =>
+        group.rounds.some(
+          (r) => String(r.roundId) === String(requestedRoundId),
+        ),
+      ) ?? mySchoolGroup)
+    : mySchoolGroup
+
+  const activeRound =
+    activeGroup?.rounds.find(
+      (r) => String(r.roundId) === String(requestedRoundId),
+    ) ??
+    activeGroup?.rounds[0] ??
+    null
+
+  const resolvedRoundId = activeRound?.roundId
+    ? String(activeRound.roundId)
+    : null
+
+  // 배정 권한은 시즌 단위다. 권한을 확인하기 전에는 잠가 둔다.
+  const seasonIds = activeGroup?.seasonId ? [activeGroup.seasonId] : []
+  const { permittedSeasonIds, isLoading: isPermissionLoading } =
+    useRecruitingPermissions(seasonIds)
+  const canEdit =
+    !isPermissionLoading &&
+    activeGroup?.seasonId != null &&
+    permittedSeasonIds.has(String(activeGroup.seasonId))
+
+  const schoolId = activeGroup?.schoolId ?? me?.schoolId
+  const gisuId = activeGroup?.gisuId
+  const chapterId = activeGroup?.chapterId
+  const schoolName =
+    activeGroup?.schoolName ?? formatSchoolName(viewerSchool) ?? "교내"
+
+  const { data: staffList = [], isSuccess: isStaffSuccess } = useSchoolStaff(
+    schoolId,
+    gisuId,
+    chapterId,
+  )
+  const {
+    data: serverEvaluators,
+    isSuccess: isEvaluatorsSuccess,
+    isFetching,
+  } = useRoundEvaluators(resolvedRoundId)
+  const saveMutation = useSaveEvaluatorAllocation()
+
+  const [assignedEvaluators, setAssignedEvaluators] = useState<Staff[]>([])
+  const [initializedRoundId, setInitializedRoundId] = useState<string | null>(
+    null,
+  )
+  const [isDirty, setIsDirty] = useState(false)
+  const editRevisionRef = useRef(0)
+  const sessionTokenRef = useRef(0)
+  const savedSnapshotRef = useRef<Staff[] | null>(null)
+
+  const isInitialized = Boolean(
+    resolvedRoundId && initializedRoundId === resolvedRoundId,
+  )
+
+  useEffect(() => {
+    setIsDirty(false)
+    setInitializedRoundId(null)
+    savedSnapshotRef.current = null
+    editRevisionRef.current = 0
+    sessionTokenRef.current += 1
+  }, [resolvedRoundId])
+
+  useEffect(() => {
+    if (!serverEvaluators || isDirty) return
+    if (savedSnapshotRef.current && isFetching) return
+
+    const serverMemberIds = new Set(
+      serverEvaluators.map((item) => String(item.memberId)),
+    )
+    const serverStaff = staffList.filter((staff) =>
+      serverMemberIds.has(String(staff.id)),
+    )
+
+    savedSnapshotRef.current = null
+    setAssignedEvaluators(serverStaff)
+    if (resolvedRoundId && isStaffSuccess && isEvaluatorsSuccess) {
+      setInitializedRoundId(resolvedRoundId)
+    }
+  }, [
+    serverEvaluators,
+    staffList,
+    isDirty,
+    isFetching,
+    resolvedRoundId,
+    isStaffSuccess,
+    isEvaluatorsSuccess,
+  ])
+
+  const {
+    sensors,
+    selectedChipId,
+    setSelectedChipId,
+    activeItem: activeStaff,
+    setActiveItem: setActiveStaff,
+  } = useChipAssignment<Staff>({
+    onRemoveSelected: (chipId) => {
+      if (!isInitialized || !canEdit) return
+      setAssignedEvaluators((prev) =>
+        prev.filter((staff) => staff.id !== chipId),
+      )
+      setIsDirty(true)
+      editRevisionRef.current += 1
+    },
+  })
+
+  function handleSave() {
+    if (!resolvedRoundId || !isInitialized) return
+    const requestRevision = editRevisionRef.current
+    const requestSnapshot = assignedEvaluators
+    const requestToken = sessionTokenRef.current
+
+    saveMutation.mutate(
+      {
+        roundId: resolvedRoundId,
+        assignedEvaluators: requestSnapshot,
+      },
+      {
+        onSuccess: () => {
+          if (
+            sessionTokenRef.current === requestToken &&
+            editRevisionRef.current === requestRevision
+          ) {
+            savedSnapshotRef.current = requestSnapshot
+            setIsDirty(false)
+            setAssignedEvaluators(requestSnapshot)
+          }
+        },
+      },
+    )
+  }
+
+  function handleDragStart(event: DragStartEvent) {
+    if (!isInitialized || !canEdit) return
+    const staff = event.active.data.current
+    if (!isStaff(staff)) return
+    setActiveStaff(staff)
+  }
+
+  function handleDragCancel() {
+    setActiveStaff(null)
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    // 잡고 있던 카드를 먼저 내려놓는다. 드래그 도중 권한 조회가 끝나거나
+    // 시즌이 바뀌면 아래 guard 에 걸려, 오버레이가 붙은 채 남는다.
+    setActiveStaff(null)
+    if (!isInitialized || !canEdit) return
+    const { active, over } = event
+
+    const staff = active.data.current
+    if (!isStaff(staff)) return
+
+    const targetId = over
+      ? resolveDropTargetId(String(over.id), assignedEvaluators, staffList)
+      : null
+
+    // 담당자 영역 밖으로 끌어내면 배정을 푼다. 명단으로 되돌려 놓는 것과 같은
+    // 뜻이라, 정확히 명단 위에 떨어뜨렸는지까지 따지지 않는다. 빈 곳에 놓았을 때
+    // 아무 일도 일어나지 않으면 왜 안 풀리는지 알 길이 없다.
+    if (targetId === null || targetId === SCHOOL_STAFF_PANEL_ID) {
+      const isAssigned = assignedEvaluators.some((item) => item.id === staff.id)
+      if (!isAssigned) return
+
+      setAssignedEvaluators((prev) =>
+        prev.filter((item) => item.id !== staff.id),
+      )
+      setIsDirty(true)
+      editRevisionRef.current += 1
+      return
+    }
+
+    if (targetId === RECRUITMENT_BOX_ID) {
+      const isAlreadyAssigned = assignedEvaluators.some(
+        (item) => item.id === staff.id,
+      )
+      if (isAlreadyAssigned) return
+
+      setAssignedEvaluators((prev) => [...prev, staff])
+      setIsDirty(true)
+      editRevisionRef.current += 1
+    }
+  }
+
+  return (
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <div
+        className="flex w-full max-w-286.5 flex-col gap-8"
+        onClick={() => setSelectedChipId(null)}
+      >
+        <PageLabel
+          breadcrumb={[
+            { id: "recruiting", label: "리크루팅" },
+            { id: "evaluation-management", label: "평가 관리" },
+            { id: "evaluator-assignment", label: "평가 담당자 배정" },
+          ]}
+          title="평가 담당자 배정"
+          description="교내 운영진을 각 모집의 평가 담당자로 배정합니다."
+          className="pl-3"
+        />
+
+        <div className="relative flex w-full flex-col gap-4">
+          <div className="absolute -top-10.5 right-0.5 flex gap-2">
+            <button
+              onClick={(e) => {
+                if (!isInitialized || !canEdit) return
+                e.stopPropagation()
+                // 저장 요청 중에 비우면, 앞선 요청의 성공 콜백이 이전 스냅샷을
+                // 되살린다. 다른 편집 경로처럼 새 편집으로 표시한다.
+                editRevisionRef.current += 1
+                setAssignedEvaluators([])
+                setIsDirty(true)
+                setSelectedChipId(null)
+              }}
+              disabled={!isInitialized || !canEdit}
+              className="border-teal-gray-400/15 box-border flex h-8.5 items-center gap-1 rounded-[10px] border bg-white px-3 py-1 pl-2.5 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ResetIcon className="h-4 w-4" />
+              <span className="text-label-1-medium text-teal-gray-700">
+                전체 비우기
+              </span>
+            </button>
+
+            <Button
+              size="xs"
+              color="primary"
+              variant="fill"
+              disabled={saveMutation.isPending || !isInitialized || !canEdit}
+              onClick={handleSave}
+              className="w-fit rounded-[8px] px-3 py-1.5"
+            >
+              저장하기
+            </Button>
+          </div>
+
+          <div className="flex h-197.5 w-full gap-4">
+            <SchoolStaffPanel schoolName={schoolName} staffList={staffList} />
+
+            {/* 공고 */}
+            <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
+              {activeRound ? (
+                <DroppableRecruitmentBox
+                  id={RECRUITMENT_BOX_ID}
+                  round={activeRound}
+                  assignedEvaluators={assignedEvaluators}
+                  selectedChipId={selectedChipId}
+                  onSelectChip={setSelectedChipId}
+                  onClear={() => {
+                    if (!isInitialized || !canEdit) return
+                    editRevisionRef.current += 1
+                    setAssignedEvaluators([])
+                    setIsDirty(true)
+                    setSelectedChipId(null)
+                  }}
+                />
+              ) : (
+                <div className="border-teal-gray-100 text-body-2-medium text-teal-gray-400 box-border flex h-68.5 w-full items-center justify-center rounded-[12px] border bg-white">
+                  배정할 모집 공고가 없습니다
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 공유 메모 */}
+          <EvaluatorSharedNote />
+        </div>
+      </div>
+
+      {activeStaff && (
+        <DragOverlay>
+          <div className="bg-role-product-200 flex w-fit items-center gap-[7px] rounded-[8px] px-[9px] py-[2.5px] shadow-md select-none">
+            <HamburgerIcon className="text-teal-gray-400 h-4 w-4" />
+            <div className="flex items-center gap-0.5">
+              <span className="text-subtitle-2-medium text-teal-gray-400">
+                {activeStaff.nickname}
+              </span>
+              <span className="text-subtitle-2-medium text-teal-gray-400">
+                /
+              </span>
+              <span className="text-subtitle-2-medium text-teal-gray-400">
+                {activeStaff.name}
+              </span>
+            </div>
+          </div>
+        </DragOverlay>
+      )}
+    </DndContext>
+  )
+}

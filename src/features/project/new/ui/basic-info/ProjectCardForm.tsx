@@ -62,7 +62,7 @@ export function ProjectCardForm({
   }, [logo])
 
   return (
-    <div className="border-teal-gray-100 shadow-drop-neutral-2 flex h-fit w-full max-w-135 min-w-0 flex-col rounded-[12px] border bg-white xl:max-w-none xl:flex-1">
+    <div className="border-teal-gray-100 shadow-drop-neutral-2 flex h-fit w-full max-w-none min-w-0 flex-1 flex-col rounded-[12px] border bg-white">
       <ImageUploader
         ref={thumbnailRef}
         focusTarget="thumbnail"
@@ -78,7 +78,7 @@ export function ProjectCardForm({
         }}
       />
       <div className="h-fit w-full rounded-[12px] p-5">
-        <div className="bp1:items-center mb-2.5 flex flex-wrap items-start gap-2">
+        <div className="mb-2.5 flex flex-wrap items-center gap-2">
           <label htmlFor="service-title" className="sr-only">
             서비스 제목
           </label>
@@ -100,7 +100,7 @@ export function ProjectCardForm({
             maxLength={16}
             className="text-heading-6-semibold text-teal-gray-900 placeholder:text-teal-gray-400 aria-invalid:focus:ring-error-500 min-w-0 flex-1 bg-transparent px-1 outline-none aria-invalid:focus:rounded-sm aria-invalid:focus:ring-2"
           />
-          <div className="text-body-2-regular text-teal-gray-500 bp1:w-auto bp1:items-end flex w-full min-w-0 flex-col items-start gap-0.5">
+          <div className="text-body-2-regular text-teal-gray-500 flex w-auto min-w-0 flex-col items-end gap-0.5">
             <div className="flex max-w-full flex-wrap items-center gap-x-2 gap-y-0.5">
               <span>
                 {nickname}/{name}

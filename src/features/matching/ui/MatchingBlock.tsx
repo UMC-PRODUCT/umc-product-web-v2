@@ -1,14 +1,15 @@
 import { cn } from "@/shared/lib/utils"
-import { NumberTag } from "@/shared/ui/NumberTag"
 
-import type { NumberTagVariant } from "@/shared/ui/NumberTag"
+import { RoundNumberTag } from "./RoundNumberTag"
+
+import type { RoundNumberTagVariant } from "./RoundNumberTag"
 
 type BlockType = "round1" | "filled" | "none" | "blocked"
 
 interface MatchingBlockProps {
   type?: BlockType
   name?: string
-  tagVariant?: NumberTagVariant
+  tagVariant?: RoundNumberTagVariant
   onNameClick?: () => void
   onAssignClick?: () => void
   className?: string
@@ -80,7 +81,7 @@ export function MatchingBlock({
           className,
         )}
       >
-        <NumberTag variant="round1" />
+        <RoundNumberTag variant="round1" />
         {onNameClick ? (
           <button
             type="button"
@@ -106,7 +107,7 @@ export function MatchingBlock({
         className,
       )}
     >
-      <NumberTag variant={tagVariant} />
+      <RoundNumberTag variant={tagVariant} />
       {onNameClick ? (
         <button
           type="button"

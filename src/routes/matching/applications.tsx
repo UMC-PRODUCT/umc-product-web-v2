@@ -1,8 +1,19 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
+import { useMe } from "@/entities/member/hooks/useMe"
+import {
+  getViewerBranch,
+  isAnyOperator,
+  isCentralCore,
+  isChapterPresident,
+  isCurrentTermPm,
+  isOperator,
+  isSchoolLeadership,
+} from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
+import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import {
   useAdminPageData,
   useChallengerPageData,
@@ -14,24 +25,12 @@ import { ApplicationStatsSection } from "@/features/application/ui/ApplicationSt
 import { ApplicationTableSection } from "@/features/application/ui/ApplicationTableSection"
 import { ChallengerApplicationView } from "@/features/application/ui/ChallengerApplicationView"
 import { MyApplicationView } from "@/features/application/ui/MyApplicationView"
-import { useMe } from "@/features/auth/hooks/useMe"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import {
-  getViewerBranch,
-  isAnyOperator,
-  isCentralCore,
-  isChapterPresident,
-  isCurrentTermPm,
-  isOperator,
-  isSchoolLeadership,
-} from "@/features/auth/model/identity"
-import { getChaptersWithSchools } from "@/features/challenger/api/organization"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { CHAPTERS } from "@/shared/ui/segment/ChapterSelector"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 export const Route = createFileRoute("/matching/applications")({
   beforeLoad: async ({ context }) => {
@@ -50,6 +49,10 @@ function MatchingApplicationsPage() {
     () => chaptersQuery.data?.chapters ?? [],
     [chaptersQuery.data],
   )
+  const chapterNames = useMemo(
+    () => chapters.map((c) => c.name).filter(Boolean),
+    [chapters],
+  )
 
   const gisuId = useActiveGisuId().data ?? 0
   const chaptersWithSchoolsQuery = useQuery({
@@ -60,13 +63,25 @@ function MatchingApplicationsPage() {
 
   // challenger records에서 지부명 추출 (어드민 포함 모든 역할)
   const userChapter = getViewerBranch(me)
-  const defaultChapter = CHAPTERS.includes(
-    userChapter as (typeof CHAPTERS)[number],
-  )
-    ? userChapter!
-    : "Chromium"
+  const defaultChapter =
+    userChapter && chapterNames.includes(userChapter)
+      ? userChapter
+      : (chapterNames[0] ?? "")
 
   const [selectedChapter, setSelectedChapter] = useState(defaultChapter)
+
+  useEffect(() => {
+    if (chapterNames.length === 0) return
+    if (!selectedChapter || !chapterNames.includes(selectedChapter)) {
+      const nextChapter =
+        userChapter && chapterNames.includes(userChapter)
+          ? userChapter
+          : (chapterNames[0] ?? "")
+      if (nextChapter) {
+        setSelectedChapter(nextChapter)
+      }
+    }
+  }, [chapterNames, userChapter, selectedChapter])
 
   // 지부장 본인 지부 추적 (auto-select 후 갱신)
   const ownChapter = useRef<string>(defaultChapter)
@@ -95,7 +110,7 @@ function MatchingApplicationsPage() {
     if (hasAutoSelected.current || !me) return
     if (isChapterPresident(me)) {
       if (chapters.length === 0) return
-      if (CHAPTERS.includes(userChapter as (typeof CHAPTERS)[number])) return // 이미 records로 처리됨
+      if (userChapter && chapterNames.includes(userChapter)) return // 이미 records로 처리됨
       const myChapterId = me.roles?.find(
         (r) => r.roleType === "CHAPTER_PRESIDENT",
       )?.organizationId
@@ -112,10 +127,7 @@ function MatchingApplicationsPage() {
       const myChapter = chaptersWithSchoolsQuery.data?.chapters.find((c) =>
         c.schools.some((s) => s.schoolId === String(me.schoolId)),
       )
-      if (
-        myChapter &&
-        CHAPTERS.includes(myChapter.chapterName as (typeof CHAPTERS)[number])
-      ) {
+      if (myChapter && chapterNames.includes(myChapter.chapterName)) {
         setSelectedChapter(myChapter.chapterName)
         ownChapter.current = myChapter.chapterName
         hasAutoSelected.current = true
@@ -169,7 +181,7 @@ function MatchingApplicationsPage() {
           {showAdminSection && (
             <div className="flex w-263 flex-col gap-13">
               <SegmentButton
-                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+                items={chapterNames.map((ch) => ({ value: ch, label: ch }))}
                 value={selectedChapter}
                 onValueChange={(v) => {
                   if (isRestrictedToChapter && v !== ownChapter.current) {

@@ -1,18 +1,18 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 
-import { Tooltip } from "@/components/tooltip/Tooltip"
-import { searchMembers } from "@/features/challenger/api/member"
+import { searchMembers } from "@/entities/member/api/member"
 import CloseIcon from "@/shared/assets/icon/close/CloseIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
-import SearchIcon from "@/shared/assets/icon/search/SearchIcon"
 import { Button } from "@/shared/ui/Button"
 import { Modal } from "@/shared/ui/Modal"
 import { CtaModal } from "@/shared/ui/modal/CtaModal"
+import { SearchField } from "@/shared/ui/search-field/SearchField"
+import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 import { AssignmentChallengerRow } from "./AssignmentChallengerRow"
 
-import type { Part } from "@/features/challenger/model/types"
+import type { Part } from "@/shared/model/domain"
 
 import type { AssignableChallenger } from "../model/matchingStatusTypes"
 
@@ -147,18 +147,14 @@ export function AssignmentModal({
             </div>
             <div className="flex items-center gap-2.5">
               <Tooltip
+                label="팀원 수동 배정"
                 content={
-                  <div className="text-left">
-                    <p className="text-caption-2-bold text-teal-500">
-                      팀원 수동 배정
-                    </p>
-                    <p className="text-caption-2-regular text-teal-gray-600">
-                      매칭 차수나 마감 기한과 관계없이 팀원을 언제든 추가하거나
-                      해제할 수 있습니다.
-                      <br />
-                      변경 사항은 즉시 반영됩니다.
-                    </p>
-                  </div>
+                  <>
+                    매칭 차수나 마감 기한과 관계없이 팀원을 언제든 추가하거나
+                    해제할 수 있습니다.
+                    <br />
+                    변경 사항은 즉시 반영됩니다.
+                  </>
                 }
                 size="big"
                 dark={false}
@@ -186,19 +182,15 @@ export function AssignmentModal({
 
           {/* 검색바 */}
           <div className="mt-8">
-            <div className="shadow-inner-neutral-2 bg-teal-gray-100 flex h-11 items-center justify-between rounded-xl px-4">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value)
-                  setSelectedId(null)
-                }}
-                placeholder="닉네임 또는 이름으로 검색하세요"
-                className="text-body-2-regular text-teal-gray-900 placeholder:text-teal-gray-400 w-full bg-transparent focus:outline-none"
-              />
-              <SearchIcon className="text-teal-gray-400 h-6 w-6 shrink-0" />
-            </div>
+            <SearchField
+              aria-label="배정할 팀원 검색"
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value)
+                setSelectedId(null)
+              }}
+              placeholder="닉네임 또는 이름으로 검색하세요"
+            />
           </div>
 
           {/* 검색 결과 */}

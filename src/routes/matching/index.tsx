@@ -3,24 +3,24 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
-import { useMe } from "@/features/auth/hooks/useMe"
-import { useResourcePermission } from "@/features/auth/hooks/useResourcePermission"
-import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { useMe } from "@/entities/member/hooks/useMe"
+import { useResourcePermission } from "@/entities/member/hooks/useResourcePermission"
 import {
   getViewerBranch,
   isCentralStaff,
   isChapterPresident,
   isCurrentTermPm,
   isSuperAdmin,
-} from "@/features/auth/model/identity"
+} from "@/entities/member/model/identity"
+import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
 import {
   getAllChapters,
   getAllGisu,
-} from "@/features/challenger/api/organization"
+} from "@/entities/organization/api/organization"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
+import { type Chapter, isChapter } from "@/entities/organization/model/chapters"
+import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
-  type Chapter,
-  CHAPTERS,
   NoticeCardList,
   NoticeDetailContent,
   type NoticeItem,
@@ -36,7 +36,7 @@ import { Button } from "@/shared/ui/Button"
 import { MarkdownRenderer } from "@/shared/ui/MarkdownRenderer"
 import { Pagination } from "@/shared/ui/Pagination"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
-import { useViewerIdentity } from "@/shared/view-mode/useViewerIdentity"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 interface AnnounceSearch {
   chapter: Chapter
@@ -52,12 +52,6 @@ type PendingNotice = {
   title: string
   chip?: string
   mode: "publish" | "edit"
-}
-
-function isChapter(value: unknown): value is Chapter {
-  return (
-    typeof value === "string" && CHAPTERS.some((chapter) => chapter === value)
-  )
 }
 
 function parsePage(value: unknown): number {
@@ -100,7 +94,7 @@ function readHashNoticeId() {
 export const Route = createFileRoute("/matching/")({
   validateSearch: (search: Record<string, unknown>): AnnounceSearch => {
     return {
-      chapter: isChapter(search.chapter) ? search.chapter : CHAPTERS[0],
+      chapter: isChapter(search.chapter) ? (search.chapter as Chapter) : "",
       page: parsePage(search.page),
     }
   },
@@ -126,6 +120,8 @@ function TeamMatchingAnnouncePage() {
   const addToast = useToastStore((state) => state.addToast)
   const [pendingNotice] = useState(readPendingNotice)
   const [hashNoticeId] = useState(readHashNoticeId)
+
+  const { chapterNames: serverChapterNames } = useSchoolChapterMap()
 
   const { data: me } = useMe()
   const { me: identity } = useViewerIdentity()
@@ -159,6 +155,22 @@ function TeamMatchingAnnouncePage() {
     return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
   }, [chaptersData, chapter])
 
+  useEffect(() => {
+    if (serverChapterNames.length === 0) return
+    if (!chapter || !serverChapterNames.includes(chapter)) {
+      const defaultChapter =
+        userChapter && serverChapterNames.includes(userChapter)
+          ? userChapter
+          : (serverChapterNames[0] ?? "")
+      if (defaultChapter) {
+        navigate({
+          search: (prev) => ({ ...prev, chapter: defaultChapter }),
+          replace: true,
+        })
+      }
+    }
+  }, [chapter, serverChapterNames, userChapter, navigate])
+
   const { data: noticesData, isLoading: isNoticesLoading } = useQuery({
     queryKey: [
       "notices",
@@ -176,7 +188,7 @@ function TeamMatchingAnnouncePage() {
         size: NOTICE_PAGE_SIZE,
         sort: "createdAt,DESC",
       }),
-    enabled: !!activeGisuId,
+    enabled: !!activeGisuId && !!selectedChapterId,
   })
 
   const firstNoticeId = noticesData?.content[0]?.id
@@ -304,7 +316,7 @@ function TeamMatchingAnnouncePage() {
 
   return (
     <section className="w-full">
-      <div className="border-teal-gray-100 bp1:min-h-213 bp1:px-6 bp1:pt-6 bp1:pb-8 bp2:px-8.5 bp2:pt-8 bp2:pb-10 flex w-full max-w-242 min-w-0 flex-col items-center justify-between rounded-[12px] border bg-white px-4 pt-5 pb-6">
+      <div className="border-teal-gray-100 flex min-h-213 w-full max-w-242 min-w-0 flex-col items-center justify-between rounded-[12px] border bg-white px-6 pt-6 pb-8">
         <div className="flex w-full flex-col gap-6 pb-10">
           <div className="flex w-full flex-col items-start gap-1.5">
             <span className="text-heading-6-semibold text-teal-gray-900">
@@ -320,9 +332,12 @@ function TeamMatchingAnnouncePage() {
           </div>
 
           <div className="flex w-full flex-col items-center gap-2.5">
-            <div className="bp1:flex-row bp1:items-center flex w-full flex-col gap-2.5">
+            <div className="flex w-full flex-row items-center gap-2.5">
               <SegmentButton
-                items={CHAPTERS.map((ch) => ({ value: ch, label: ch }))}
+                items={serverChapterNames.map((ch: string) => ({
+                  value: ch,
+                  label: ch,
+                }))}
                 value={chapter}
                 onValueChange={(v) => handleChapterChange(v as Chapter)}
                 className="w-full min-w-0 [&>button>span:last-child]:min-w-0 [&>button>span:last-child]:truncate"
@@ -336,7 +351,7 @@ function TeamMatchingAnnouncePage() {
                   color="primary"
                   size="m"
                   onClick={handleNoticePublishClick}
-                  className="bp1:w-26.5 w-full items-center justify-center gap-1 py-3 pr-4 pl-3"
+                  className="w-26.5 items-center justify-center gap-1 py-3 pr-4 pl-3"
                 >
                   <PlusIcon className="h-4 w-4" />
                   <span className="text-label-1-medium text-white">

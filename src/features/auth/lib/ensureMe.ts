@@ -1,12 +1,12 @@
 import { redirect } from "@tanstack/react-router"
 
-import { meQueryOptions } from "@/features/auth/hooks/useMe"
-import { buildLoginRedirectSearch } from "@/features/auth/lib/loginRedirect"
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { meQueryOptions } from "@/entities/member/hooks/useMe"
+import { useAuthStore } from "@/entities/member/store/authStore"
+import { buildLoginRedirectSearch } from "@/shared/lib/loginRedirect"
 
 import type { QueryClient } from "@tanstack/react-query"
 
-import type { MemberInfoResponse } from "@/features/auth/api/me"
+import type { MemberInfoResponse } from "@/entities/member/api/me"
 
 export async function ensureMe(
   queryClient: QueryClient,

@@ -9,25 +9,45 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IntroRouteImport } from './routes/intro'
 import { Route as ChallengerVerificationRouteImport } from './routes/challenger-verification'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as TestRouteRouteImport } from './routes/test/route'
 import { Route as SettingsRouteRouteImport } from './routes/settings/route'
+import { Route as RecruitingRouteRouteImport } from './routes/recruiting/route'
+import { Route as ProjectsRouteRouteImport } from './routes/projects/route'
 import { Route as MatchingRouteRouteImport } from './routes/matching/route'
+import { Route as ManageRouteRouteImport } from './routes/manage/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestIndexRouteImport } from './routes/test/index'
 import { Route as SignupIndexRouteImport } from './routes/signup/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
 import { Route as MatchingIndexRouteImport } from './routes/matching/index'
+import { Route as ManageIndexRouteImport } from './routes/manage/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as TestUsabilitySurveyRouteImport } from './routes/test/usability-survey'
+import { Route as TestTypographyRouteImport } from './routes/test/typography'
 import { Route as TestTooltipRouteImport } from './routes/test/tooltip'
 import { Route as TestToggleInputsRouteImport } from './routes/test/toggle-inputs'
 import { Route as TestToggleRouteImport } from './routes/test/toggle'
 import { Route as TestToastRouteImport } from './routes/test/toast'
+import { Route as TestTextFieldRouteImport } from './routes/test/text-field'
+import { Route as TestTextButtonRouteImport } from './routes/test/text-button'
 import { Route as TestSocialButtonRouteImport } from './routes/test/social-button'
+import { Route as TestRecruitmentStepperRouteImport } from './routes/test/recruitment-stepper'
+import { Route as TestRecruitmentSectionHeaderRouteImport } from './routes/test/recruitment-section-header'
+import { Route as TestRecruitmentPreviewCardRouteImport } from './routes/test/recruitment-preview-card'
+import { Route as TestRecruitmentPostRowRouteImport } from './routes/test/recruitment-post-row'
+import { Route as TestRecruitmentNoticePreviewModalRouteImport } from './routes/test/recruitment-notice-preview-modal'
+import { Route as TestRecruitmentNoticeCardRouteImport } from './routes/test/recruitment-notice-card'
+import { Route as TestRecruitmentApplyConfirmModalRouteImport } from './routes/test/recruitment-apply-confirm-modal'
+import { Route as TestRecruitingRecruitmentsRouteImport } from './routes/test/recruiting-recruitments'
+import { Route as TestRecruitingHeaderRouteImport } from './routes/test/recruiting-header'
+import { Route as TestRecruitingApplyRouteImport } from './routes/test/recruiting-apply'
+import { Route as TestRecruitingApplicationDetailRouteImport } from './routes/test/recruiting-application-detail'
 import { Route as TestRatingFaceRouteImport } from './routes/test/rating-face'
 import { Route as TestQuestionFormRouteImport } from './routes/test/question-form'
 import { Route as TestProjectImageCropRouteImport } from './routes/test/project-image-crop'
@@ -40,6 +60,7 @@ import { Route as TestFormHeaderRouteImport } from './routes/test/form-header'
 import { Route as TestFooterRouteImport } from './routes/test/footer'
 import { Route as TestFloatingActionButtonRouteImport } from './routes/test/floating-action-button'
 import { Route as TestFieldTypeButtonRouteImport } from './routes/test/field-type-button'
+import { Route as TestCurriculumSkeletonRouteImport } from './routes/test/curriculum-skeleton'
 import { Route as TestCounterLabelRouteImport } from './routes/test/counter-label'
 import { Route as TestCounterRouteImport } from './routes/test/counter'
 import { Route as TestCodeInputRouteImport } from './routes/test/code-input'
@@ -49,29 +70,53 @@ import { Route as TestChallengerVerificationRouteImport } from './routes/test/ch
 import { Route as TestButtonRouteImport } from './routes/test/button'
 import { Route as TestApplicationFormRouteImport } from './routes/test/application-form'
 import { Route as SignupOauthRouteImport } from './routes/signup/oauth'
+import { Route as ProjectsNoticeRouteImport } from './routes/projects/notice'
+import { Route as ProjectsApplyGuideRouteImport } from './routes/projects/apply-guide'
 import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
+import { Route as ManageChapterRouteImport } from './routes/manage/chapter'
 import { Route as LoginDefaultRouteImport } from './routes/login/default'
+import { Route as RecruitingEvaluationsRouteRouteImport } from './routes/recruiting/evaluations/route'
+import { Route as RecruitingRecruitmentsIndexRouteImport } from './routes/recruiting/recruitments/index'
+import { Route as RecruitingEvaluationsIndexRouteImport } from './routes/recruiting/evaluations/index'
+import { Route as ProjectsApplicationIndexRouteImport } from './routes/projects/application/index'
 import { Route as MatchingProjectsIndexRouteImport } from './routes/matching/projects/index'
+import { Route as ManageSchoolIndexRouteImport } from './routes/manage/school/index'
+import { Route as ManageCurriculumIndexRouteImport } from './routes/manage/curriculum/index'
+import { Route as RecruitingRecruitmentsQuotaRouteImport } from './routes/recruiting/recruitments/quota'
+import { Route as RecruitingRecruitmentsNewRouteImport } from './routes/recruiting/recruitments/new'
+import { Route as RecruitingHistoryArchiveRouteImport } from './routes/recruiting/history/archive'
+import { Route as RecruitingEvaluationsInterviewScheduleRouteImport } from './routes/recruiting/evaluations/interview-schedule'
+import { Route as RecruitingEvaluationsInterviewRouteImport } from './routes/recruiting/evaluations/interview'
+import { Route as RecruitingEvaluationsFinalRouteImport } from './routes/recruiting/evaluations/final'
+import { Route as RecruitingEvaluationsDocumentRouteImport } from './routes/recruiting/evaluations/document'
+import { Route as RecruitingDashboardEvaluationsRouteImport } from './routes/recruiting/dashboard/evaluations'
+import { Route as RecruitingDashboardApplicationsRouteImport } from './routes/recruiting/dashboard/applications'
+import { Route as ProjectsApplyRoundIdRouteImport } from './routes/projects/apply/$roundId'
+import { Route as ProjectsApplicationListRouteImport } from './routes/projects/application/list'
+import { Route as ProjectsApplicationApplicationIdRouteImport } from './routes/projects/application/$applicationId'
 import { Route as OauthKakaoCallbackRouteImport } from './routes/oauth/kakao/callback'
 import { Route as MatchingProjectsNewRouteImport } from './routes/matching/projects/new'
 import { Route as MatchingProjectsManagementRouteImport } from './routes/matching/projects/management'
 import { Route as MatchingNoticePublishNoticeIdRouteImport } from './routes/matching/notice-publish.$noticeId'
+import { Route as ManageSchoolRegisterRouteImport } from './routes/manage/school/register'
+import { Route as ManageSchoolSchoolIdRouteImport } from './routes/manage/school/$schoolId'
+import { Route as ManageCurriculumEditRouteImport } from './routes/manage/curriculum/edit'
+import { Route as ManageCurriculumCreateRouteImport } from './routes/manage/curriculum/create'
 import { Route as AdminChallengerRecordsRouteImport } from './routes/admin/challenger/records'
 import { Route as AdminChallengerPointsRouteImport } from './routes/admin/challenger/points'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
 import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matching/projects/announce/index'
+import { Route as RecruitingRecruitmentsEditRoundIdRouteImport } from './routes/recruiting/recruitments/edit.$roundId'
+import { Route as RecruitingEvaluationsInterviewApplicationIdRouteImport } from './routes/recruiting/evaluations/interview.$applicationId'
+import { Route as RecruitingEvaluationsInterviewScheduleRoundIdRouteImport } from './routes/recruiting/evaluations/interview-schedule.$roundId'
+import { Route as RecruitingEvaluationsDocumentApplicationIdRouteImport } from './routes/recruiting/evaluations/document.$applicationId'
 import { Route as MatchingProjectsEditProjectIdRouteImport } from './routes/matching/projects/edit.$projectId'
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
-const IntroRoute = IntroRouteImport.update({
-  id: '/intro',
-  path: '/intro',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ChallengerVerificationRoute = ChallengerVerificationRouteImport.update({
   id: '/challenger-verification',
   path: '/challenger-verification',
@@ -82,14 +127,39 @@ const AuthTestRoute = AuthTestRouteImport.update({
   path: '/auth-test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestRouteRoute = TestRouteRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRouteRoute = SettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecruitingRouteRoute = RecruitingRouteRouteImport.update({
+  id: '/recruiting',
+  path: '/recruiting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRouteRoute = ProjectsRouteRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchingRouteRoute = MatchingRouteRouteImport.update({
   id: '/matching',
   path: '/matching',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManageRouteRoute = ManageRouteRouteImport.update({
+  id: '/manage',
+  path: '/manage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -103,9 +173,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestIndexRoute = TestIndexRouteImport.update({
-  id: '/test/',
-  path: '/test/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const SignupIndexRoute = SignupIndexRouteImport.update({
   id: '/signup/',
@@ -117,10 +187,20 @@ const SettingsIndexRoute = SettingsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => SettingsRouteRoute,
 } as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProjectsRouteRoute,
+} as any)
 const MatchingIndexRoute = MatchingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MatchingRouteRoute,
+} as any)
+const ManageIndexRoute = ManageIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ManageRouteRoute,
 } as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
   id: '/login/',
@@ -133,141 +213,233 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const TestUsabilitySurveyRoute = TestUsabilitySurveyRouteImport.update({
-  id: '/test/usability-survey',
-  path: '/test/usability-survey',
-  getParentRoute: () => rootRouteImport,
+  id: '/usability-survey',
+  path: '/usability-survey',
+  getParentRoute: () => TestRouteRoute,
+} as any)
+const TestTypographyRoute = TestTypographyRouteImport.update({
+  id: '/typography',
+  path: '/typography',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestTooltipRoute = TestTooltipRouteImport.update({
-  id: '/test/tooltip',
-  path: '/test/tooltip',
-  getParentRoute: () => rootRouteImport,
+  id: '/tooltip',
+  path: '/tooltip',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestToggleInputsRoute = TestToggleInputsRouteImport.update({
-  id: '/test/toggle-inputs',
-  path: '/test/toggle-inputs',
-  getParentRoute: () => rootRouteImport,
+  id: '/toggle-inputs',
+  path: '/toggle-inputs',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestToggleRoute = TestToggleRouteImport.update({
-  id: '/test/toggle',
-  path: '/test/toggle',
-  getParentRoute: () => rootRouteImport,
+  id: '/toggle',
+  path: '/toggle',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestToastRoute = TestToastRouteImport.update({
-  id: '/test/toast',
-  path: '/test/toast',
-  getParentRoute: () => rootRouteImport,
+  id: '/toast',
+  path: '/toast',
+  getParentRoute: () => TestRouteRoute,
+} as any)
+const TestTextFieldRoute = TestTextFieldRouteImport.update({
+  id: '/text-field',
+  path: '/text-field',
+  getParentRoute: () => TestRouteRoute,
+} as any)
+const TestTextButtonRoute = TestTextButtonRouteImport.update({
+  id: '/text-button',
+  path: '/text-button',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestSocialButtonRoute = TestSocialButtonRouteImport.update({
-  id: '/test/social-button',
-  path: '/test/social-button',
-  getParentRoute: () => rootRouteImport,
+  id: '/social-button',
+  path: '/social-button',
+  getParentRoute: () => TestRouteRoute,
 } as any)
+const TestRecruitmentStepperRoute = TestRecruitmentStepperRouteImport.update({
+  id: '/recruitment-stepper',
+  path: '/recruitment-stepper',
+  getParentRoute: () => TestRouteRoute,
+} as any)
+const TestRecruitmentSectionHeaderRoute =
+  TestRecruitmentSectionHeaderRouteImport.update({
+    id: '/recruitment-section-header',
+    path: '/recruitment-section-header',
+    getParentRoute: () => TestRouteRoute,
+  } as any)
+const TestRecruitmentPreviewCardRoute =
+  TestRecruitmentPreviewCardRouteImport.update({
+    id: '/recruitment-preview-card',
+    path: '/recruitment-preview-card',
+    getParentRoute: () => TestRouteRoute,
+  } as any)
+const TestRecruitmentPostRowRoute = TestRecruitmentPostRowRouteImport.update({
+  id: '/recruitment-post-row',
+  path: '/recruitment-post-row',
+  getParentRoute: () => TestRouteRoute,
+} as any)
+const TestRecruitmentNoticePreviewModalRoute =
+  TestRecruitmentNoticePreviewModalRouteImport.update({
+    id: '/recruitment-notice-preview-modal',
+    path: '/recruitment-notice-preview-modal',
+    getParentRoute: () => TestRouteRoute,
+  } as any)
+const TestRecruitmentNoticeCardRoute =
+  TestRecruitmentNoticeCardRouteImport.update({
+    id: '/recruitment-notice-card',
+    path: '/recruitment-notice-card',
+    getParentRoute: () => TestRouteRoute,
+  } as any)
+const TestRecruitmentApplyConfirmModalRoute =
+  TestRecruitmentApplyConfirmModalRouteImport.update({
+    id: '/recruitment-apply-confirm-modal',
+    path: '/recruitment-apply-confirm-modal',
+    getParentRoute: () => TestRouteRoute,
+  } as any)
+const TestRecruitingRecruitmentsRoute =
+  TestRecruitingRecruitmentsRouteImport.update({
+    id: '/recruiting-recruitments',
+    path: '/recruiting-recruitments',
+    getParentRoute: () => TestRouteRoute,
+  } as any)
+const TestRecruitingHeaderRoute = TestRecruitingHeaderRouteImport.update({
+  id: '/recruiting-header',
+  path: '/recruiting-header',
+  getParentRoute: () => TestRouteRoute,
+} as any)
+const TestRecruitingApplyRoute = TestRecruitingApplyRouteImport.update({
+  id: '/recruiting-apply',
+  path: '/recruiting-apply',
+  getParentRoute: () => TestRouteRoute,
+} as any)
+const TestRecruitingApplicationDetailRoute =
+  TestRecruitingApplicationDetailRouteImport.update({
+    id: '/recruiting-application-detail',
+    path: '/recruiting-application-detail',
+    getParentRoute: () => TestRouteRoute,
+  } as any)
 const TestRatingFaceRoute = TestRatingFaceRouteImport.update({
-  id: '/test/rating-face',
-  path: '/test/rating-face',
-  getParentRoute: () => rootRouteImport,
+  id: '/rating-face',
+  path: '/rating-face',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestQuestionFormRoute = TestQuestionFormRouteImport.update({
-  id: '/test/question-form',
-  path: '/test/question-form',
-  getParentRoute: () => rootRouteImport,
+  id: '/question-form',
+  path: '/question-form',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestProjectImageCropRoute = TestProjectImageCropRouteImport.update({
-  id: '/test/project-image-crop',
-  path: '/test/project-image-crop',
-  getParentRoute: () => rootRouteImport,
+  id: '/project-image-crop',
+  path: '/project-image-crop',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestOptionButtonRoute = TestOptionButtonRouteImport.update({
-  id: '/test/option-button',
-  path: '/test/option-button',
-  getParentRoute: () => rootRouteImport,
+  id: '/option-button',
+  path: '/option-button',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestMatchingProjectsRoute = TestMatchingProjectsRouteImport.update({
-  id: '/test/matching-projects',
-  path: '/test/matching-projects',
-  getParentRoute: () => rootRouteImport,
+  id: '/matching-projects',
+  path: '/matching-projects',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestInputBoxRoute = TestInputBoxRouteImport.update({
-  id: '/test/input-box',
-  path: '/test/input-box',
-  getParentRoute: () => rootRouteImport,
+  id: '/input-box',
+  path: '/input-box',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestIconRoute = TestIconRouteImport.update({
-  id: '/test/icon',
-  path: '/test/icon',
-  getParentRoute: () => rootRouteImport,
+  id: '/icon',
+  path: '/icon',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestHeaderRoute = TestHeaderRouteImport.update({
-  id: '/test/header',
-  path: '/test/header',
-  getParentRoute: () => rootRouteImport,
+  id: '/header',
+  path: '/header',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestFormHeaderRoute = TestFormHeaderRouteImport.update({
-  id: '/test/form-header',
-  path: '/test/form-header',
-  getParentRoute: () => rootRouteImport,
+  id: '/form-header',
+  path: '/form-header',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestFooterRoute = TestFooterRouteImport.update({
-  id: '/test/footer',
-  path: '/test/footer',
-  getParentRoute: () => rootRouteImport,
+  id: '/footer',
+  path: '/footer',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestFloatingActionButtonRoute =
   TestFloatingActionButtonRouteImport.update({
-    id: '/test/floating-action-button',
-    path: '/test/floating-action-button',
-    getParentRoute: () => rootRouteImport,
+    id: '/floating-action-button',
+    path: '/floating-action-button',
+    getParentRoute: () => TestRouteRoute,
   } as any)
 const TestFieldTypeButtonRoute = TestFieldTypeButtonRouteImport.update({
-  id: '/test/field-type-button',
-  path: '/test/field-type-button',
-  getParentRoute: () => rootRouteImport,
+  id: '/field-type-button',
+  path: '/field-type-button',
+  getParentRoute: () => TestRouteRoute,
+} as any)
+const TestCurriculumSkeletonRoute = TestCurriculumSkeletonRouteImport.update({
+  id: '/curriculum-skeleton',
+  path: '/curriculum-skeleton',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestCounterLabelRoute = TestCounterLabelRouteImport.update({
-  id: '/test/counter-label',
-  path: '/test/counter-label',
-  getParentRoute: () => rootRouteImport,
+  id: '/counter-label',
+  path: '/counter-label',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestCounterRoute = TestCounterRouteImport.update({
-  id: '/test/counter',
-  path: '/test/counter',
-  getParentRoute: () => rootRouteImport,
+  id: '/counter',
+  path: '/counter',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestCodeInputRoute = TestCodeInputRouteImport.update({
-  id: '/test/code-input',
-  path: '/test/code-input',
-  getParentRoute: () => rootRouteImport,
+  id: '/code-input',
+  path: '/code-input',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestChipRoute = TestChipRouteImport.update({
-  id: '/test/chip',
-  path: '/test/chip',
-  getParentRoute: () => rootRouteImport,
+  id: '/chip',
+  path: '/chip',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestCheckboxRoute = TestCheckboxRouteImport.update({
-  id: '/test/checkbox',
-  path: '/test/checkbox',
-  getParentRoute: () => rootRouteImport,
+  id: '/checkbox',
+  path: '/checkbox',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestChallengerVerificationRoute =
   TestChallengerVerificationRouteImport.update({
-    id: '/test/challenger-verification',
-    path: '/test/challenger-verification',
-    getParentRoute: () => rootRouteImport,
+    id: '/challenger-verification',
+    path: '/challenger-verification',
+    getParentRoute: () => TestRouteRoute,
   } as any)
 const TestButtonRoute = TestButtonRouteImport.update({
-  id: '/test/button',
-  path: '/test/button',
-  getParentRoute: () => rootRouteImport,
+  id: '/button',
+  path: '/button',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const TestApplicationFormRoute = TestApplicationFormRouteImport.update({
-  id: '/test/application-form',
-  path: '/test/application-form',
-  getParentRoute: () => rootRouteImport,
+  id: '/application-form',
+  path: '/application-form',
+  getParentRoute: () => TestRouteRoute,
 } as any)
 const SignupOauthRoute = SignupOauthRouteImport.update({
   id: '/signup/oauth',
   path: '/signup/oauth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsNoticeRoute = ProjectsNoticeRouteImport.update({
+  id: '/notice',
+  path: '/notice',
+  getParentRoute: () => ProjectsRouteRoute,
+} as any)
+const ProjectsApplyGuideRoute = ProjectsApplyGuideRouteImport.update({
+  id: '/apply-guide',
+  path: '/apply-guide',
+  getParentRoute: () => ProjectsRouteRoute,
 } as any)
 const MatchingStatusRoute = MatchingStatusRouteImport.update({
   id: '/status',
@@ -289,16 +461,125 @@ const MatchingApplicationsRoute = MatchingApplicationsRouteImport.update({
   path: '/applications',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const ManageChapterRoute = ManageChapterRouteImport.update({
+  id: '/chapter',
+  path: '/chapter',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
 const LoginDefaultRoute = LoginDefaultRouteImport.update({
   id: '/login/default',
   path: '/login/default',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecruitingEvaluationsRouteRoute =
+  RecruitingEvaluationsRouteRouteImport.update({
+    id: '/evaluations',
+    path: '/evaluations',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const RecruitingRecruitmentsIndexRoute =
+  RecruitingRecruitmentsIndexRouteImport.update({
+    id: '/recruitments/',
+    path: '/recruitments/',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const RecruitingEvaluationsIndexRoute =
+  RecruitingEvaluationsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
+  } as any)
+const ProjectsApplicationIndexRoute =
+  ProjectsApplicationIndexRouteImport.update({
+    id: '/application/',
+    path: '/application/',
+    getParentRoute: () => ProjectsRouteRoute,
+  } as any)
 const MatchingProjectsIndexRoute = MatchingProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const ManageSchoolIndexRoute = ManageSchoolIndexRouteImport.update({
+  id: '/school/',
+  path: '/school/',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
+const ManageCurriculumIndexRoute = ManageCurriculumIndexRouteImport.update({
+  id: '/curriculum/',
+  path: '/curriculum/',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
+const RecruitingRecruitmentsQuotaRoute =
+  RecruitingRecruitmentsQuotaRouteImport.update({
+    id: '/recruitments/quota',
+    path: '/recruitments/quota',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const RecruitingRecruitmentsNewRoute =
+  RecruitingRecruitmentsNewRouteImport.update({
+    id: '/recruitments/new',
+    path: '/recruitments/new',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const RecruitingHistoryArchiveRoute =
+  RecruitingHistoryArchiveRouteImport.update({
+    id: '/history/archive',
+    path: '/history/archive',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const RecruitingEvaluationsInterviewScheduleRoute =
+  RecruitingEvaluationsInterviewScheduleRouteImport.update({
+    id: '/interview-schedule',
+    path: '/interview-schedule',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
+  } as any)
+const RecruitingEvaluationsInterviewRoute =
+  RecruitingEvaluationsInterviewRouteImport.update({
+    id: '/interview',
+    path: '/interview',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
+  } as any)
+const RecruitingEvaluationsFinalRoute =
+  RecruitingEvaluationsFinalRouteImport.update({
+    id: '/final',
+    path: '/final',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
+  } as any)
+const RecruitingEvaluationsDocumentRoute =
+  RecruitingEvaluationsDocumentRouteImport.update({
+    id: '/document',
+    path: '/document',
+    getParentRoute: () => RecruitingEvaluationsRouteRoute,
+  } as any)
+const RecruitingDashboardEvaluationsRoute =
+  RecruitingDashboardEvaluationsRouteImport.update({
+    id: '/dashboard/evaluations',
+    path: '/dashboard/evaluations',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const RecruitingDashboardApplicationsRoute =
+  RecruitingDashboardApplicationsRouteImport.update({
+    id: '/dashboard/applications',
+    path: '/dashboard/applications',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const ProjectsApplyRoundIdRoute = ProjectsApplyRoundIdRouteImport.update({
+  id: '/apply/$roundId',
+  path: '/apply/$roundId',
+  getParentRoute: () => ProjectsRouteRoute,
+} as any)
+const ProjectsApplicationListRoute = ProjectsApplicationListRouteImport.update({
+  id: '/application/list',
+  path: '/application/list',
+  getParentRoute: () => ProjectsRouteRoute,
+} as any)
+const ProjectsApplicationApplicationIdRoute =
+  ProjectsApplicationApplicationIdRouteImport.update({
+    id: '/application/$applicationId',
+    path: '/application/$applicationId',
+    getParentRoute: () => ProjectsRouteRoute,
+  } as any)
 const OauthKakaoCallbackRoute = OauthKakaoCallbackRouteImport.update({
   id: '/oauth/kakao/callback',
   path: '/oauth/kakao/callback',
@@ -321,6 +602,26 @@ const MatchingNoticePublishNoticeIdRoute =
     path: '/$noticeId',
     getParentRoute: () => MatchingNoticePublishRoute,
   } as any)
+const ManageSchoolRegisterRoute = ManageSchoolRegisterRouteImport.update({
+  id: '/school/register',
+  path: '/school/register',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
+const ManageSchoolSchoolIdRoute = ManageSchoolSchoolIdRouteImport.update({
+  id: '/school/$schoolId',
+  path: '/school/$schoolId',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
+const ManageCurriculumEditRoute = ManageCurriculumEditRouteImport.update({
+  id: '/curriculum/edit',
+  path: '/curriculum/edit',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
+const ManageCurriculumCreateRoute = ManageCurriculumCreateRouteImport.update({
+  id: '/curriculum/create',
+  path: '/curriculum/create',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
 const AdminChallengerRecordsRoute = AdminChallengerRecordsRouteImport.update({
   id: '/challenger/records',
   path: '/challenger/records',
@@ -342,6 +643,30 @@ const MatchingProjectsAnnounceIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => MatchingProjectsAnnounceRouteRoute,
+  } as any)
+const RecruitingRecruitmentsEditRoundIdRoute =
+  RecruitingRecruitmentsEditRoundIdRouteImport.update({
+    id: '/recruitments/edit/$roundId',
+    path: '/recruitments/edit/$roundId',
+    getParentRoute: () => RecruitingRouteRoute,
+  } as any)
+const RecruitingEvaluationsInterviewApplicationIdRoute =
+  RecruitingEvaluationsInterviewApplicationIdRouteImport.update({
+    id: '/$applicationId',
+    path: '/$applicationId',
+    getParentRoute: () => RecruitingEvaluationsInterviewRoute,
+  } as any)
+const RecruitingEvaluationsInterviewScheduleRoundIdRoute =
+  RecruitingEvaluationsInterviewScheduleRoundIdRouteImport.update({
+    id: '/$roundId',
+    path: '/$roundId',
+    getParentRoute: () => RecruitingEvaluationsInterviewScheduleRoute,
+  } as any)
+const RecruitingEvaluationsDocumentApplicationIdRoute =
+  RecruitingEvaluationsDocumentApplicationIdRouteImport.update({
+    id: '/$applicationId',
+    path: '/$applicationId',
+    getParentRoute: () => RecruitingEvaluationsDocumentRoute,
   } as any)
 const MatchingProjectsEditProjectIdRoute =
   MatchingProjectsEditProjectIdRouteImport.update({
@@ -365,16 +690,24 @@ const MatchingProjectsAnnounceNoticePublishNoticeIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/manage': typeof ManageRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
+  '/projects': typeof ProjectsRouteRouteWithChildren
+  '/recruiting': typeof RecruitingRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
+  '/test': typeof TestRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
-  '/intro': typeof IntroRoute
+  '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
+  '/manage/chapter': typeof ManageChapterRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
+  '/projects/apply-guide': typeof ProjectsApplyGuideRoute
+  '/projects/notice': typeof ProjectsNoticeRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -384,6 +717,7 @@ export interface FileRoutesByFullPath {
   '/test/code-input': typeof TestCodeInputRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
+  '/test/curriculum-skeleton': typeof TestCurriculumSkeletonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/footer': typeof TestFooterRoute
@@ -396,41 +730,86 @@ export interface FileRoutesByFullPath {
   '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
+  '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
+  '/test/recruiting-apply': typeof TestRecruitingApplyRoute
+  '/test/recruiting-header': typeof TestRecruitingHeaderRoute
+  '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
+  '/test/recruitment-apply-confirm-modal': typeof TestRecruitmentApplyConfirmModalRoute
+  '/test/recruitment-notice-card': typeof TestRecruitmentNoticeCardRoute
+  '/test/recruitment-notice-preview-modal': typeof TestRecruitmentNoticePreviewModalRoute
+  '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
+  '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
+  '/test/recruitment-section-header': typeof TestRecruitmentSectionHeaderRoute
+  '/test/recruitment-stepper': typeof TestRecruitmentStepperRoute
   '/test/social-button': typeof TestSocialButtonRoute
+  '/test/text-button': typeof TestTextButtonRoute
+  '/test/text-field': typeof TestTextFieldRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/typography': typeof TestTypographyRoute
   '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/manage/': typeof ManageIndexRoute
   '/matching/': typeof MatchingIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
   '/test/': typeof TestIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
+  '/manage/curriculum/create': typeof ManageCurriculumCreateRoute
+  '/manage/curriculum/edit': typeof ManageCurriculumEditRoute
+  '/manage/school/$schoolId': typeof ManageSchoolSchoolIdRoute
+  '/manage/school/register': typeof ManageSchoolRegisterRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
+  '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
+  '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/projects/apply/$roundId': typeof ProjectsApplyRoundIdRoute
+  '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
+  '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
+  '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
+  '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
+  '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/evaluations/interview-schedule': typeof RecruitingEvaluationsInterviewScheduleRouteWithChildren
+  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
+  '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
+  '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
+  '/manage/curriculum/': typeof ManageCurriculumIndexRoute
+  '/manage/school/': typeof ManageSchoolIndexRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
+  '/projects/application/': typeof ProjectsApplicationIndexRoute
+  '/recruiting/evaluations/': typeof RecruitingEvaluationsIndexRoute
+  '/recruiting/recruitments/': typeof RecruitingRecruitmentsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
+  '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
+  '/recruiting/evaluations/interview-schedule/$roundId': typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
+  '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
+  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/recruiting': typeof RecruitingRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
-  '/intro': typeof IntroRoute
   '/login/default': typeof LoginDefaultRoute
+  '/manage/chapter': typeof ManageChapterRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
+  '/projects/apply-guide': typeof ProjectsApplyGuideRoute
+  '/projects/notice': typeof ProjectsNoticeRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -440,6 +819,7 @@ export interface FileRoutesByTo {
   '/test/code-input': typeof TestCodeInputRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
+  '/test/curriculum-skeleton': typeof TestCurriculumSkeletonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/footer': typeof TestFooterRoute
@@ -452,27 +832,68 @@ export interface FileRoutesByTo {
   '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
+  '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
+  '/test/recruiting-apply': typeof TestRecruitingApplyRoute
+  '/test/recruiting-header': typeof TestRecruitingHeaderRoute
+  '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
+  '/test/recruitment-apply-confirm-modal': typeof TestRecruitmentApplyConfirmModalRoute
+  '/test/recruitment-notice-card': typeof TestRecruitmentNoticeCardRoute
+  '/test/recruitment-notice-preview-modal': typeof TestRecruitmentNoticePreviewModalRoute
+  '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
+  '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
+  '/test/recruitment-section-header': typeof TestRecruitmentSectionHeaderRoute
+  '/test/recruitment-stepper': typeof TestRecruitmentStepperRoute
   '/test/social-button': typeof TestSocialButtonRoute
+  '/test/text-button': typeof TestTextButtonRoute
+  '/test/text-field': typeof TestTextFieldRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/typography': typeof TestTypographyRoute
   '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin': typeof AdminIndexRoute
   '/login': typeof LoginIndexRoute
+  '/manage': typeof ManageIndexRoute
   '/matching': typeof MatchingIndexRoute
+  '/projects': typeof ProjectsIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/signup': typeof SignupIndexRoute
   '/test': typeof TestIndexRoute
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
+  '/manage/curriculum/create': typeof ManageCurriculumCreateRoute
+  '/manage/curriculum/edit': typeof ManageCurriculumEditRoute
+  '/manage/school/$schoolId': typeof ManageSchoolSchoolIdRoute
+  '/manage/school/register': typeof ManageSchoolRegisterRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
+  '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
+  '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/projects/apply/$roundId': typeof ProjectsApplyRoundIdRoute
+  '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
+  '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
+  '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
+  '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
+  '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/evaluations/interview-schedule': typeof RecruitingEvaluationsInterviewScheduleRouteWithChildren
+  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
+  '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
+  '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
+  '/manage/curriculum': typeof ManageCurriculumIndexRoute
+  '/manage/school': typeof ManageSchoolIndexRoute
   '/matching/projects': typeof MatchingProjectsIndexRoute
+  '/projects/application': typeof ProjectsApplicationIndexRoute
+  '/recruiting/evaluations': typeof RecruitingEvaluationsIndexRoute
+  '/recruiting/recruitments': typeof RecruitingRecruitmentsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
+  '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
+  '/recruiting/evaluations/interview-schedule/$roundId': typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
+  '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
+  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -480,16 +901,24 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/manage': typeof ManageRouteRouteWithChildren
   '/matching': typeof MatchingRouteRouteWithChildren
+  '/projects': typeof ProjectsRouteRouteWithChildren
+  '/recruiting': typeof RecruitingRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
+  '/test': typeof TestRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
-  '/intro': typeof IntroRoute
+  '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
+  '/manage/chapter': typeof ManageChapterRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
   '/matching/status': typeof MatchingStatusRoute
+  '/projects/apply-guide': typeof ProjectsApplyGuideRoute
+  '/projects/notice': typeof ProjectsNoticeRoute
   '/signup/oauth': typeof SignupOauthRoute
   '/test/application-form': typeof TestApplicationFormRoute
   '/test/button': typeof TestButtonRoute
@@ -499,6 +928,7 @@ export interface FileRoutesById {
   '/test/code-input': typeof TestCodeInputRoute
   '/test/counter': typeof TestCounterRoute
   '/test/counter-label': typeof TestCounterLabelRoute
+  '/test/curriculum-skeleton': typeof TestCurriculumSkeletonRoute
   '/test/field-type-button': typeof TestFieldTypeButtonRoute
   '/test/floating-action-button': typeof TestFloatingActionButtonRoute
   '/test/footer': typeof TestFooterRoute
@@ -511,28 +941,69 @@ export interface FileRoutesById {
   '/test/project-image-crop': typeof TestProjectImageCropRoute
   '/test/question-form': typeof TestQuestionFormRoute
   '/test/rating-face': typeof TestRatingFaceRoute
+  '/test/recruiting-application-detail': typeof TestRecruitingApplicationDetailRoute
+  '/test/recruiting-apply': typeof TestRecruitingApplyRoute
+  '/test/recruiting-header': typeof TestRecruitingHeaderRoute
+  '/test/recruiting-recruitments': typeof TestRecruitingRecruitmentsRoute
+  '/test/recruitment-apply-confirm-modal': typeof TestRecruitmentApplyConfirmModalRoute
+  '/test/recruitment-notice-card': typeof TestRecruitmentNoticeCardRoute
+  '/test/recruitment-notice-preview-modal': typeof TestRecruitmentNoticePreviewModalRoute
+  '/test/recruitment-post-row': typeof TestRecruitmentPostRowRoute
+  '/test/recruitment-preview-card': typeof TestRecruitmentPreviewCardRoute
+  '/test/recruitment-section-header': typeof TestRecruitmentSectionHeaderRoute
+  '/test/recruitment-stepper': typeof TestRecruitmentStepperRoute
   '/test/social-button': typeof TestSocialButtonRoute
+  '/test/text-button': typeof TestTextButtonRoute
+  '/test/text-field': typeof TestTextFieldRoute
   '/test/toast': typeof TestToastRoute
   '/test/toggle': typeof TestToggleRoute
   '/test/toggle-inputs': typeof TestToggleInputsRoute
   '/test/tooltip': typeof TestTooltipRoute
+  '/test/typography': typeof TestTypographyRoute
   '/test/usability-survey': typeof TestUsabilitySurveyRoute
   '/admin/': typeof AdminIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/manage/': typeof ManageIndexRoute
   '/matching/': typeof MatchingIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/signup/': typeof SignupIndexRoute
   '/test/': typeof TestIndexRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceRouteRouteWithChildren
   '/admin/challenger/points': typeof AdminChallengerPointsRoute
   '/admin/challenger/records': typeof AdminChallengerRecordsRoute
+  '/manage/curriculum/create': typeof ManageCurriculumCreateRoute
+  '/manage/curriculum/edit': typeof ManageCurriculumEditRoute
+  '/manage/school/$schoolId': typeof ManageSchoolSchoolIdRoute
+  '/manage/school/register': typeof ManageSchoolRegisterRoute
   '/matching/notice-publish/$noticeId': typeof MatchingNoticePublishNoticeIdRoute
   '/matching/projects/management': typeof MatchingProjectsManagementRoute
   '/matching/projects/new': typeof MatchingProjectsNewRoute
   '/oauth/kakao/callback': typeof OauthKakaoCallbackRoute
+  '/projects/application/$applicationId': typeof ProjectsApplicationApplicationIdRoute
+  '/projects/application/list': typeof ProjectsApplicationListRoute
+  '/projects/apply/$roundId': typeof ProjectsApplyRoundIdRoute
+  '/recruiting/dashboard/applications': typeof RecruitingDashboardApplicationsRoute
+  '/recruiting/dashboard/evaluations': typeof RecruitingDashboardEvaluationsRoute
+  '/recruiting/evaluations/document': typeof RecruitingEvaluationsDocumentRouteWithChildren
+  '/recruiting/evaluations/final': typeof RecruitingEvaluationsFinalRoute
+  '/recruiting/evaluations/interview': typeof RecruitingEvaluationsInterviewRouteWithChildren
+  '/recruiting/evaluations/interview-schedule': typeof RecruitingEvaluationsInterviewScheduleRouteWithChildren
+  '/recruiting/history/archive': typeof RecruitingHistoryArchiveRoute
+  '/recruiting/recruitments/new': typeof RecruitingRecruitmentsNewRoute
+  '/recruiting/recruitments/quota': typeof RecruitingRecruitmentsQuotaRoute
+  '/manage/curriculum/': typeof ManageCurriculumIndexRoute
+  '/manage/school/': typeof ManageSchoolIndexRoute
   '/matching/projects/': typeof MatchingProjectsIndexRoute
+  '/projects/application/': typeof ProjectsApplicationIndexRoute
+  '/recruiting/evaluations/': typeof RecruitingEvaluationsIndexRoute
+  '/recruiting/recruitments/': typeof RecruitingRecruitmentsIndexRoute
   '/matching/projects/announce/notice-publish': typeof MatchingProjectsAnnounceNoticePublishRouteWithChildren
   '/matching/projects/edit/$projectId': typeof MatchingProjectsEditProjectIdRoute
+  '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
+  '/recruiting/evaluations/interview-schedule/$roundId': typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
+  '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
+  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -541,16 +1012,24 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/manage'
     | '/matching'
+    | '/projects'
+    | '/recruiting'
     | '/settings'
+    | '/test'
+    | '/about'
     | '/auth-test'
     | '/challenger-verification'
-    | '/intro'
+    | '/recruiting/evaluations'
     | '/login/default'
+    | '/manage/chapter'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
+    | '/projects/apply-guide'
+    | '/projects/notice'
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
@@ -560,6 +1039,7 @@ export interface FileRouteTypes {
     | '/test/code-input'
     | '/test/counter'
     | '/test/counter-label'
+    | '/test/curriculum-skeleton'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/footer'
@@ -572,41 +1052,86 @@ export interface FileRouteTypes {
     | '/test/project-image-crop'
     | '/test/question-form'
     | '/test/rating-face'
+    | '/test/recruiting-application-detail'
+    | '/test/recruiting-apply'
+    | '/test/recruiting-header'
+    | '/test/recruiting-recruitments'
+    | '/test/recruitment-apply-confirm-modal'
+    | '/test/recruitment-notice-card'
+    | '/test/recruitment-notice-preview-modal'
+    | '/test/recruitment-post-row'
+    | '/test/recruitment-preview-card'
+    | '/test/recruitment-section-header'
+    | '/test/recruitment-stepper'
     | '/test/social-button'
+    | '/test/text-button'
+    | '/test/text-field'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/typography'
     | '/test/usability-survey'
     | '/admin/'
     | '/login/'
+    | '/manage/'
     | '/matching/'
+    | '/projects/'
     | '/settings/'
     | '/signup/'
     | '/test/'
     | '/matching/projects/announce'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
+    | '/manage/curriculum/create'
+    | '/manage/curriculum/edit'
+    | '/manage/school/$schoolId'
+    | '/manage/school/register'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/management'
     | '/matching/projects/new'
     | '/oauth/kakao/callback'
+    | '/projects/application/$applicationId'
+    | '/projects/application/list'
+    | '/projects/apply/$roundId'
+    | '/recruiting/dashboard/applications'
+    | '/recruiting/dashboard/evaluations'
+    | '/recruiting/evaluations/document'
+    | '/recruiting/evaluations/final'
+    | '/recruiting/evaluations/interview'
+    | '/recruiting/evaluations/interview-schedule'
+    | '/recruiting/history/archive'
+    | '/recruiting/recruitments/new'
+    | '/recruiting/recruitments/quota'
+    | '/manage/curriculum/'
+    | '/manage/school/'
     | '/matching/projects/'
+    | '/projects/application/'
+    | '/recruiting/evaluations/'
+    | '/recruiting/recruitments/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
+    | '/recruiting/evaluations/document/$applicationId'
+    | '/recruiting/evaluations/interview-schedule/$roundId'
+    | '/recruiting/evaluations/interview/$applicationId'
+    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/recruiting'
+    | '/about'
     | '/auth-test'
     | '/challenger-verification'
-    | '/intro'
     | '/login/default'
+    | '/manage/chapter'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
+    | '/projects/apply-guide'
+    | '/projects/notice'
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
@@ -616,6 +1141,7 @@ export interface FileRouteTypes {
     | '/test/code-input'
     | '/test/counter'
     | '/test/counter-label'
+    | '/test/curriculum-skeleton'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/footer'
@@ -628,43 +1154,92 @@ export interface FileRouteTypes {
     | '/test/project-image-crop'
     | '/test/question-form'
     | '/test/rating-face'
+    | '/test/recruiting-application-detail'
+    | '/test/recruiting-apply'
+    | '/test/recruiting-header'
+    | '/test/recruiting-recruitments'
+    | '/test/recruitment-apply-confirm-modal'
+    | '/test/recruitment-notice-card'
+    | '/test/recruitment-notice-preview-modal'
+    | '/test/recruitment-post-row'
+    | '/test/recruitment-preview-card'
+    | '/test/recruitment-section-header'
+    | '/test/recruitment-stepper'
     | '/test/social-button'
+    | '/test/text-button'
+    | '/test/text-field'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/typography'
     | '/test/usability-survey'
     | '/admin'
     | '/login'
+    | '/manage'
     | '/matching'
+    | '/projects'
     | '/settings'
     | '/signup'
     | '/test'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
+    | '/manage/curriculum/create'
+    | '/manage/curriculum/edit'
+    | '/manage/school/$schoolId'
+    | '/manage/school/register'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/management'
     | '/matching/projects/new'
     | '/oauth/kakao/callback'
+    | '/projects/application/$applicationId'
+    | '/projects/application/list'
+    | '/projects/apply/$roundId'
+    | '/recruiting/dashboard/applications'
+    | '/recruiting/dashboard/evaluations'
+    | '/recruiting/evaluations/document'
+    | '/recruiting/evaluations/final'
+    | '/recruiting/evaluations/interview'
+    | '/recruiting/evaluations/interview-schedule'
+    | '/recruiting/history/archive'
+    | '/recruiting/recruitments/new'
+    | '/recruiting/recruitments/quota'
+    | '/manage/curriculum'
+    | '/manage/school'
     | '/matching/projects'
+    | '/projects/application'
+    | '/recruiting/evaluations'
+    | '/recruiting/recruitments'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
+    | '/recruiting/evaluations/document/$applicationId'
+    | '/recruiting/evaluations/interview-schedule/$roundId'
+    | '/recruiting/evaluations/interview/$applicationId'
+    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce'
     | '/matching/projects/announce/notice-publish/$noticeId'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/manage'
     | '/matching'
+    | '/projects'
+    | '/recruiting'
     | '/settings'
+    | '/test'
+    | '/about'
     | '/auth-test'
     | '/challenger-verification'
-    | '/intro'
+    | '/recruiting/evaluations'
     | '/login/default'
+    | '/manage/chapter'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
     | '/matching/status'
+    | '/projects/apply-guide'
+    | '/projects/notice'
     | '/signup/oauth'
     | '/test/application-form'
     | '/test/button'
@@ -674,6 +1249,7 @@ export interface FileRouteTypes {
     | '/test/code-input'
     | '/test/counter'
     | '/test/counter-label'
+    | '/test/curriculum-skeleton'
     | '/test/field-type-button'
     | '/test/floating-action-button'
     | '/test/footer'
@@ -686,28 +1262,69 @@ export interface FileRouteTypes {
     | '/test/project-image-crop'
     | '/test/question-form'
     | '/test/rating-face'
+    | '/test/recruiting-application-detail'
+    | '/test/recruiting-apply'
+    | '/test/recruiting-header'
+    | '/test/recruiting-recruitments'
+    | '/test/recruitment-apply-confirm-modal'
+    | '/test/recruitment-notice-card'
+    | '/test/recruitment-notice-preview-modal'
+    | '/test/recruitment-post-row'
+    | '/test/recruitment-preview-card'
+    | '/test/recruitment-section-header'
+    | '/test/recruitment-stepper'
     | '/test/social-button'
+    | '/test/text-button'
+    | '/test/text-field'
     | '/test/toast'
     | '/test/toggle'
     | '/test/toggle-inputs'
     | '/test/tooltip'
+    | '/test/typography'
     | '/test/usability-survey'
     | '/admin/'
     | '/login/'
+    | '/manage/'
     | '/matching/'
+    | '/projects/'
     | '/settings/'
     | '/signup/'
     | '/test/'
     | '/matching/projects/announce'
     | '/admin/challenger/points'
     | '/admin/challenger/records'
+    | '/manage/curriculum/create'
+    | '/manage/curriculum/edit'
+    | '/manage/school/$schoolId'
+    | '/manage/school/register'
     | '/matching/notice-publish/$noticeId'
     | '/matching/projects/management'
     | '/matching/projects/new'
     | '/oauth/kakao/callback'
+    | '/projects/application/$applicationId'
+    | '/projects/application/list'
+    | '/projects/apply/$roundId'
+    | '/recruiting/dashboard/applications'
+    | '/recruiting/dashboard/evaluations'
+    | '/recruiting/evaluations/document'
+    | '/recruiting/evaluations/final'
+    | '/recruiting/evaluations/interview'
+    | '/recruiting/evaluations/interview-schedule'
+    | '/recruiting/history/archive'
+    | '/recruiting/recruitments/new'
+    | '/recruiting/recruitments/quota'
+    | '/manage/curriculum/'
+    | '/manage/school/'
     | '/matching/projects/'
+    | '/projects/application/'
+    | '/recruiting/evaluations/'
+    | '/recruiting/recruitments/'
     | '/matching/projects/announce/notice-publish'
     | '/matching/projects/edit/$projectId'
+    | '/recruiting/evaluations/document/$applicationId'
+    | '/recruiting/evaluations/interview-schedule/$roundId'
+    | '/recruiting/evaluations/interview/$applicationId'
+    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesById: FileRoutesById
@@ -715,54 +1332,24 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  ManageRouteRoute: typeof ManageRouteRouteWithChildren
   MatchingRouteRoute: typeof MatchingRouteRouteWithChildren
+  ProjectsRouteRoute: typeof ProjectsRouteRouteWithChildren
+  RecruitingRouteRoute: typeof RecruitingRouteRouteWithChildren
   SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
+  TestRouteRoute: typeof TestRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
   AuthTestRoute: typeof AuthTestRoute
   ChallengerVerificationRoute: typeof ChallengerVerificationRoute
-  IntroRoute: typeof IntroRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   SignupOauthRoute: typeof SignupOauthRoute
-  TestApplicationFormRoute: typeof TestApplicationFormRoute
-  TestButtonRoute: typeof TestButtonRoute
-  TestChallengerVerificationRoute: typeof TestChallengerVerificationRoute
-  TestCheckboxRoute: typeof TestCheckboxRoute
-  TestChipRoute: typeof TestChipRoute
-  TestCodeInputRoute: typeof TestCodeInputRoute
-  TestCounterRoute: typeof TestCounterRoute
-  TestCounterLabelRoute: typeof TestCounterLabelRoute
-  TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
-  TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
-  TestFooterRoute: typeof TestFooterRoute
-  TestFormHeaderRoute: typeof TestFormHeaderRoute
-  TestHeaderRoute: typeof TestHeaderRoute
-  TestIconRoute: typeof TestIconRoute
-  TestInputBoxRoute: typeof TestInputBoxRoute
-  TestMatchingProjectsRoute: typeof TestMatchingProjectsRoute
-  TestOptionButtonRoute: typeof TestOptionButtonRoute
-  TestProjectImageCropRoute: typeof TestProjectImageCropRoute
-  TestQuestionFormRoute: typeof TestQuestionFormRoute
-  TestRatingFaceRoute: typeof TestRatingFaceRoute
-  TestSocialButtonRoute: typeof TestSocialButtonRoute
-  TestToastRoute: typeof TestToastRoute
-  TestToggleRoute: typeof TestToggleRoute
-  TestToggleInputsRoute: typeof TestToggleInputsRoute
-  TestTooltipRoute: typeof TestTooltipRoute
-  TestUsabilitySurveyRoute: typeof TestUsabilitySurveyRoute
   LoginIndexRoute: typeof LoginIndexRoute
   SignupIndexRoute: typeof SignupIndexRoute
-  TestIndexRoute: typeof TestIndexRoute
   OauthKakaoCallbackRoute: typeof OauthKakaoCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/intro': {
-      id: '/intro'
-      path: '/intro'
-      fullPath: '/intro'
-      preLoaderRoute: typeof IntroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/challenger-verification': {
       id: '/challenger-verification'
       path: '/challenger-verification'
@@ -777,6 +1364,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -784,11 +1385,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recruiting': {
+      id: '/recruiting'
+      path: '/recruiting'
+      fullPath: '/recruiting'
+      preLoaderRoute: typeof RecruitingRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/matching': {
       id: '/matching'
       path: '/matching'
       fullPath: '/matching'
       preLoaderRoute: typeof MatchingRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manage': {
+      id: '/manage'
+      path: '/manage'
+      fullPath: '/manage'
+      preLoaderRoute: typeof ManageRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -807,10 +1429,10 @@ declare module '@tanstack/react-router' {
     }
     '/test/': {
       id: '/test/'
-      path: '/test'
+      path: '/'
       fullPath: '/test/'
       preLoaderRoute: typeof TestIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/signup/': {
       id: '/signup/'
@@ -826,12 +1448,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof SettingsRouteRoute
     }
+    '/projects/': {
+      id: '/projects/'
+      path: '/'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
     '/matching/': {
       id: '/matching/'
       path: '/'
       fullPath: '/matching/'
       preLoaderRoute: typeof MatchingIndexRouteImport
       parentRoute: typeof MatchingRouteRoute
+    }
+    '/manage/': {
+      id: '/manage/'
+      path: '/'
+      fullPath: '/manage/'
+      preLoaderRoute: typeof ManageIndexRouteImport
+      parentRoute: typeof ManageRouteRoute
     }
     '/login/': {
       id: '/login/'
@@ -849,185 +1485,290 @@ declare module '@tanstack/react-router' {
     }
     '/test/usability-survey': {
       id: '/test/usability-survey'
-      path: '/test/usability-survey'
+      path: '/usability-survey'
       fullPath: '/test/usability-survey'
       preLoaderRoute: typeof TestUsabilitySurveyRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/typography': {
+      id: '/test/typography'
+      path: '/typography'
+      fullPath: '/test/typography'
+      preLoaderRoute: typeof TestTypographyRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/tooltip': {
       id: '/test/tooltip'
-      path: '/test/tooltip'
+      path: '/tooltip'
       fullPath: '/test/tooltip'
       preLoaderRoute: typeof TestTooltipRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/toggle-inputs': {
       id: '/test/toggle-inputs'
-      path: '/test/toggle-inputs'
+      path: '/toggle-inputs'
       fullPath: '/test/toggle-inputs'
       preLoaderRoute: typeof TestToggleInputsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/toggle': {
       id: '/test/toggle'
-      path: '/test/toggle'
+      path: '/toggle'
       fullPath: '/test/toggle'
       preLoaderRoute: typeof TestToggleRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/toast': {
       id: '/test/toast'
-      path: '/test/toast'
+      path: '/toast'
       fullPath: '/test/toast'
       preLoaderRoute: typeof TestToastRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/text-field': {
+      id: '/test/text-field'
+      path: '/text-field'
+      fullPath: '/test/text-field'
+      preLoaderRoute: typeof TestTextFieldRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/text-button': {
+      id: '/test/text-button'
+      path: '/text-button'
+      fullPath: '/test/text-button'
+      preLoaderRoute: typeof TestTextButtonRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/social-button': {
       id: '/test/social-button'
-      path: '/test/social-button'
+      path: '/social-button'
       fullPath: '/test/social-button'
       preLoaderRoute: typeof TestSocialButtonRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruitment-stepper': {
+      id: '/test/recruitment-stepper'
+      path: '/recruitment-stepper'
+      fullPath: '/test/recruitment-stepper'
+      preLoaderRoute: typeof TestRecruitmentStepperRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruitment-section-header': {
+      id: '/test/recruitment-section-header'
+      path: '/recruitment-section-header'
+      fullPath: '/test/recruitment-section-header'
+      preLoaderRoute: typeof TestRecruitmentSectionHeaderRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruitment-preview-card': {
+      id: '/test/recruitment-preview-card'
+      path: '/recruitment-preview-card'
+      fullPath: '/test/recruitment-preview-card'
+      preLoaderRoute: typeof TestRecruitmentPreviewCardRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruitment-post-row': {
+      id: '/test/recruitment-post-row'
+      path: '/recruitment-post-row'
+      fullPath: '/test/recruitment-post-row'
+      preLoaderRoute: typeof TestRecruitmentPostRowRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruitment-notice-preview-modal': {
+      id: '/test/recruitment-notice-preview-modal'
+      path: '/recruitment-notice-preview-modal'
+      fullPath: '/test/recruitment-notice-preview-modal'
+      preLoaderRoute: typeof TestRecruitmentNoticePreviewModalRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruitment-notice-card': {
+      id: '/test/recruitment-notice-card'
+      path: '/recruitment-notice-card'
+      fullPath: '/test/recruitment-notice-card'
+      preLoaderRoute: typeof TestRecruitmentNoticeCardRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruitment-apply-confirm-modal': {
+      id: '/test/recruitment-apply-confirm-modal'
+      path: '/recruitment-apply-confirm-modal'
+      fullPath: '/test/recruitment-apply-confirm-modal'
+      preLoaderRoute: typeof TestRecruitmentApplyConfirmModalRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruiting-recruitments': {
+      id: '/test/recruiting-recruitments'
+      path: '/recruiting-recruitments'
+      fullPath: '/test/recruiting-recruitments'
+      preLoaderRoute: typeof TestRecruitingRecruitmentsRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruiting-header': {
+      id: '/test/recruiting-header'
+      path: '/recruiting-header'
+      fullPath: '/test/recruiting-header'
+      preLoaderRoute: typeof TestRecruitingHeaderRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruiting-apply': {
+      id: '/test/recruiting-apply'
+      path: '/recruiting-apply'
+      fullPath: '/test/recruiting-apply'
+      preLoaderRoute: typeof TestRecruitingApplyRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/recruiting-application-detail': {
+      id: '/test/recruiting-application-detail'
+      path: '/recruiting-application-detail'
+      fullPath: '/test/recruiting-application-detail'
+      preLoaderRoute: typeof TestRecruitingApplicationDetailRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/rating-face': {
       id: '/test/rating-face'
-      path: '/test/rating-face'
+      path: '/rating-face'
       fullPath: '/test/rating-face'
       preLoaderRoute: typeof TestRatingFaceRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/question-form': {
       id: '/test/question-form'
-      path: '/test/question-form'
+      path: '/question-form'
       fullPath: '/test/question-form'
       preLoaderRoute: typeof TestQuestionFormRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/project-image-crop': {
       id: '/test/project-image-crop'
-      path: '/test/project-image-crop'
+      path: '/project-image-crop'
       fullPath: '/test/project-image-crop'
       preLoaderRoute: typeof TestProjectImageCropRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/option-button': {
       id: '/test/option-button'
-      path: '/test/option-button'
+      path: '/option-button'
       fullPath: '/test/option-button'
       preLoaderRoute: typeof TestOptionButtonRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/matching-projects': {
       id: '/test/matching-projects'
-      path: '/test/matching-projects'
+      path: '/matching-projects'
       fullPath: '/test/matching-projects'
       preLoaderRoute: typeof TestMatchingProjectsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/input-box': {
       id: '/test/input-box'
-      path: '/test/input-box'
+      path: '/input-box'
       fullPath: '/test/input-box'
       preLoaderRoute: typeof TestInputBoxRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/icon': {
       id: '/test/icon'
-      path: '/test/icon'
+      path: '/icon'
       fullPath: '/test/icon'
       preLoaderRoute: typeof TestIconRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/header': {
       id: '/test/header'
-      path: '/test/header'
+      path: '/header'
       fullPath: '/test/header'
       preLoaderRoute: typeof TestHeaderRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/form-header': {
       id: '/test/form-header'
-      path: '/test/form-header'
+      path: '/form-header'
       fullPath: '/test/form-header'
       preLoaderRoute: typeof TestFormHeaderRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/footer': {
       id: '/test/footer'
-      path: '/test/footer'
+      path: '/footer'
       fullPath: '/test/footer'
       preLoaderRoute: typeof TestFooterRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/floating-action-button': {
       id: '/test/floating-action-button'
-      path: '/test/floating-action-button'
+      path: '/floating-action-button'
       fullPath: '/test/floating-action-button'
       preLoaderRoute: typeof TestFloatingActionButtonRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/field-type-button': {
       id: '/test/field-type-button'
-      path: '/test/field-type-button'
+      path: '/field-type-button'
       fullPath: '/test/field-type-button'
       preLoaderRoute: typeof TestFieldTypeButtonRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
+    }
+    '/test/curriculum-skeleton': {
+      id: '/test/curriculum-skeleton'
+      path: '/curriculum-skeleton'
+      fullPath: '/test/curriculum-skeleton'
+      preLoaderRoute: typeof TestCurriculumSkeletonRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/counter-label': {
       id: '/test/counter-label'
-      path: '/test/counter-label'
+      path: '/counter-label'
       fullPath: '/test/counter-label'
       preLoaderRoute: typeof TestCounterLabelRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/counter': {
       id: '/test/counter'
-      path: '/test/counter'
+      path: '/counter'
       fullPath: '/test/counter'
       preLoaderRoute: typeof TestCounterRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/code-input': {
       id: '/test/code-input'
-      path: '/test/code-input'
+      path: '/code-input'
       fullPath: '/test/code-input'
       preLoaderRoute: typeof TestCodeInputRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/chip': {
       id: '/test/chip'
-      path: '/test/chip'
+      path: '/chip'
       fullPath: '/test/chip'
       preLoaderRoute: typeof TestChipRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/checkbox': {
       id: '/test/checkbox'
-      path: '/test/checkbox'
+      path: '/checkbox'
       fullPath: '/test/checkbox'
       preLoaderRoute: typeof TestCheckboxRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/challenger-verification': {
       id: '/test/challenger-verification'
-      path: '/test/challenger-verification'
+      path: '/challenger-verification'
       fullPath: '/test/challenger-verification'
       preLoaderRoute: typeof TestChallengerVerificationRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/button': {
       id: '/test/button'
-      path: '/test/button'
+      path: '/button'
       fullPath: '/test/button'
       preLoaderRoute: typeof TestButtonRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/test/application-form': {
       id: '/test/application-form'
-      path: '/test/application-form'
+      path: '/application-form'
       fullPath: '/test/application-form'
       preLoaderRoute: typeof TestApplicationFormRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof TestRouteRoute
     }
     '/signup/oauth': {
       id: '/signup/oauth'
@@ -1035,6 +1776,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/signup/oauth'
       preLoaderRoute: typeof SignupOauthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/projects/notice': {
+      id: '/projects/notice'
+      path: '/notice'
+      fullPath: '/projects/notice'
+      preLoaderRoute: typeof ProjectsNoticeRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
+    '/projects/apply-guide': {
+      id: '/projects/apply-guide'
+      path: '/apply-guide'
+      fullPath: '/projects/apply-guide'
+      preLoaderRoute: typeof ProjectsApplyGuideRouteImport
+      parentRoute: typeof ProjectsRouteRoute
     }
     '/matching/status': {
       id: '/matching/status'
@@ -1064,6 +1819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingApplicationsRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/manage/chapter': {
+      id: '/manage/chapter'
+      path: '/chapter'
+      fullPath: '/manage/chapter'
+      preLoaderRoute: typeof ManageChapterRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
     '/login/default': {
       id: '/login/default'
       path: '/login/default'
@@ -1071,12 +1833,138 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginDefaultRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recruiting/evaluations': {
+      id: '/recruiting/evaluations'
+      path: '/evaluations'
+      fullPath: '/recruiting/evaluations'
+      preLoaderRoute: typeof RecruitingEvaluationsRouteRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/recruitments/': {
+      id: '/recruiting/recruitments/'
+      path: '/recruitments'
+      fullPath: '/recruiting/recruitments/'
+      preLoaderRoute: typeof RecruitingRecruitmentsIndexRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/evaluations/': {
+      id: '/recruiting/evaluations/'
+      path: '/'
+      fullPath: '/recruiting/evaluations/'
+      preLoaderRoute: typeof RecruitingEvaluationsIndexRouteImport
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
+    }
+    '/projects/application/': {
+      id: '/projects/application/'
+      path: '/application'
+      fullPath: '/projects/application/'
+      preLoaderRoute: typeof ProjectsApplicationIndexRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
     '/matching/projects/': {
       id: '/matching/projects/'
       path: '/projects'
       fullPath: '/matching/projects/'
       preLoaderRoute: typeof MatchingProjectsIndexRouteImport
       parentRoute: typeof MatchingRouteRoute
+    }
+    '/manage/school/': {
+      id: '/manage/school/'
+      path: '/school'
+      fullPath: '/manage/school/'
+      preLoaderRoute: typeof ManageSchoolIndexRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
+    '/manage/curriculum/': {
+      id: '/manage/curriculum/'
+      path: '/curriculum'
+      fullPath: '/manage/curriculum/'
+      preLoaderRoute: typeof ManageCurriculumIndexRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
+    '/recruiting/recruitments/quota': {
+      id: '/recruiting/recruitments/quota'
+      path: '/recruitments/quota'
+      fullPath: '/recruiting/recruitments/quota'
+      preLoaderRoute: typeof RecruitingRecruitmentsQuotaRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/recruitments/new': {
+      id: '/recruiting/recruitments/new'
+      path: '/recruitments/new'
+      fullPath: '/recruiting/recruitments/new'
+      preLoaderRoute: typeof RecruitingRecruitmentsNewRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/history/archive': {
+      id: '/recruiting/history/archive'
+      path: '/history/archive'
+      fullPath: '/recruiting/history/archive'
+      preLoaderRoute: typeof RecruitingHistoryArchiveRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/evaluations/interview-schedule': {
+      id: '/recruiting/evaluations/interview-schedule'
+      path: '/interview-schedule'
+      fullPath: '/recruiting/evaluations/interview-schedule'
+      preLoaderRoute: typeof RecruitingEvaluationsInterviewScheduleRouteImport
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
+    }
+    '/recruiting/evaluations/interview': {
+      id: '/recruiting/evaluations/interview'
+      path: '/interview'
+      fullPath: '/recruiting/evaluations/interview'
+      preLoaderRoute: typeof RecruitingEvaluationsInterviewRouteImport
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
+    }
+    '/recruiting/evaluations/final': {
+      id: '/recruiting/evaluations/final'
+      path: '/final'
+      fullPath: '/recruiting/evaluations/final'
+      preLoaderRoute: typeof RecruitingEvaluationsFinalRouteImport
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
+    }
+    '/recruiting/evaluations/document': {
+      id: '/recruiting/evaluations/document'
+      path: '/document'
+      fullPath: '/recruiting/evaluations/document'
+      preLoaderRoute: typeof RecruitingEvaluationsDocumentRouteImport
+      parentRoute: typeof RecruitingEvaluationsRouteRoute
+    }
+    '/recruiting/dashboard/evaluations': {
+      id: '/recruiting/dashboard/evaluations'
+      path: '/dashboard/evaluations'
+      fullPath: '/recruiting/dashboard/evaluations'
+      preLoaderRoute: typeof RecruitingDashboardEvaluationsRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/dashboard/applications': {
+      id: '/recruiting/dashboard/applications'
+      path: '/dashboard/applications'
+      fullPath: '/recruiting/dashboard/applications'
+      preLoaderRoute: typeof RecruitingDashboardApplicationsRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/projects/apply/$roundId': {
+      id: '/projects/apply/$roundId'
+      path: '/apply/$roundId'
+      fullPath: '/projects/apply/$roundId'
+      preLoaderRoute: typeof ProjectsApplyRoundIdRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
+    '/projects/application/list': {
+      id: '/projects/application/list'
+      path: '/application/list'
+      fullPath: '/projects/application/list'
+      preLoaderRoute: typeof ProjectsApplicationListRouteImport
+      parentRoute: typeof ProjectsRouteRoute
+    }
+    '/projects/application/$applicationId': {
+      id: '/projects/application/$applicationId'
+      path: '/application/$applicationId'
+      fullPath: '/projects/application/$applicationId'
+      preLoaderRoute: typeof ProjectsApplicationApplicationIdRouteImport
+      parentRoute: typeof ProjectsRouteRoute
     }
     '/oauth/kakao/callback': {
       id: '/oauth/kakao/callback'
@@ -1106,6 +1994,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingNoticePublishNoticeIdRouteImport
       parentRoute: typeof MatchingNoticePublishRoute
     }
+    '/manage/school/register': {
+      id: '/manage/school/register'
+      path: '/school/register'
+      fullPath: '/manage/school/register'
+      preLoaderRoute: typeof ManageSchoolRegisterRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
+    '/manage/school/$schoolId': {
+      id: '/manage/school/$schoolId'
+      path: '/school/$schoolId'
+      fullPath: '/manage/school/$schoolId'
+      preLoaderRoute: typeof ManageSchoolSchoolIdRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
+    '/manage/curriculum/edit': {
+      id: '/manage/curriculum/edit'
+      path: '/curriculum/edit'
+      fullPath: '/manage/curriculum/edit'
+      preLoaderRoute: typeof ManageCurriculumEditRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
+    '/manage/curriculum/create': {
+      id: '/manage/curriculum/create'
+      path: '/curriculum/create'
+      fullPath: '/manage/curriculum/create'
+      preLoaderRoute: typeof ManageCurriculumCreateRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
     '/admin/challenger/records': {
       id: '/admin/challenger/records'
       path: '/challenger/records'
@@ -1133,6 +2049,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/matching/projects/announce/'
       preLoaderRoute: typeof MatchingProjectsAnnounceIndexRouteImport
       parentRoute: typeof MatchingProjectsAnnounceRouteRoute
+    }
+    '/recruiting/recruitments/edit/$roundId': {
+      id: '/recruiting/recruitments/edit/$roundId'
+      path: '/recruitments/edit/$roundId'
+      fullPath: '/recruiting/recruitments/edit/$roundId'
+      preLoaderRoute: typeof RecruitingRecruitmentsEditRoundIdRouteImport
+      parentRoute: typeof RecruitingRouteRoute
+    }
+    '/recruiting/evaluations/interview/$applicationId': {
+      id: '/recruiting/evaluations/interview/$applicationId'
+      path: '/$applicationId'
+      fullPath: '/recruiting/evaluations/interview/$applicationId'
+      preLoaderRoute: typeof RecruitingEvaluationsInterviewApplicationIdRouteImport
+      parentRoute: typeof RecruitingEvaluationsInterviewRoute
+    }
+    '/recruiting/evaluations/interview-schedule/$roundId': {
+      id: '/recruiting/evaluations/interview-schedule/$roundId'
+      path: '/$roundId'
+      fullPath: '/recruiting/evaluations/interview-schedule/$roundId'
+      preLoaderRoute: typeof RecruitingEvaluationsInterviewScheduleRoundIdRouteImport
+      parentRoute: typeof RecruitingEvaluationsInterviewScheduleRoute
+    }
+    '/recruiting/evaluations/document/$applicationId': {
+      id: '/recruiting/evaluations/document/$applicationId'
+      path: '/$applicationId'
+      fullPath: '/recruiting/evaluations/document/$applicationId'
+      preLoaderRoute: typeof RecruitingEvaluationsDocumentApplicationIdRouteImport
+      parentRoute: typeof RecruitingEvaluationsDocumentRoute
     }
     '/matching/projects/edit/$projectId': {
       id: '/matching/projects/edit/$projectId'
@@ -1172,6 +2116,32 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
+)
+
+interface ManageRouteRouteChildren {
+  ManageChapterRoute: typeof ManageChapterRoute
+  ManageIndexRoute: typeof ManageIndexRoute
+  ManageCurriculumCreateRoute: typeof ManageCurriculumCreateRoute
+  ManageCurriculumEditRoute: typeof ManageCurriculumEditRoute
+  ManageSchoolSchoolIdRoute: typeof ManageSchoolSchoolIdRoute
+  ManageSchoolRegisterRoute: typeof ManageSchoolRegisterRoute
+  ManageCurriculumIndexRoute: typeof ManageCurriculumIndexRoute
+  ManageSchoolIndexRoute: typeof ManageSchoolIndexRoute
+}
+
+const ManageRouteRouteChildren: ManageRouteRouteChildren = {
+  ManageChapterRoute: ManageChapterRoute,
+  ManageIndexRoute: ManageIndexRoute,
+  ManageCurriculumCreateRoute: ManageCurriculumCreateRoute,
+  ManageCurriculumEditRoute: ManageCurriculumEditRoute,
+  ManageSchoolSchoolIdRoute: ManageSchoolSchoolIdRoute,
+  ManageSchoolRegisterRoute: ManageSchoolRegisterRoute,
+  ManageCurriculumIndexRoute: ManageCurriculumIndexRoute,
+  ManageSchoolIndexRoute: ManageSchoolIndexRoute,
+}
+
+const ManageRouteRouteWithChildren = ManageRouteRoute._addFileChildren(
+  ManageRouteRouteChildren,
 )
 
 interface MatchingNoticePublishRouteChildren {
@@ -1250,6 +2220,127 @@ const MatchingRouteRouteWithChildren = MatchingRouteRoute._addFileChildren(
   MatchingRouteRouteChildren,
 )
 
+interface ProjectsRouteRouteChildren {
+  ProjectsApplyGuideRoute: typeof ProjectsApplyGuideRoute
+  ProjectsNoticeRoute: typeof ProjectsNoticeRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
+  ProjectsApplicationApplicationIdRoute: typeof ProjectsApplicationApplicationIdRoute
+  ProjectsApplicationListRoute: typeof ProjectsApplicationListRoute
+  ProjectsApplyRoundIdRoute: typeof ProjectsApplyRoundIdRoute
+  ProjectsApplicationIndexRoute: typeof ProjectsApplicationIndexRoute
+}
+
+const ProjectsRouteRouteChildren: ProjectsRouteRouteChildren = {
+  ProjectsApplyGuideRoute: ProjectsApplyGuideRoute,
+  ProjectsNoticeRoute: ProjectsNoticeRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
+  ProjectsApplicationApplicationIdRoute: ProjectsApplicationApplicationIdRoute,
+  ProjectsApplicationListRoute: ProjectsApplicationListRoute,
+  ProjectsApplyRoundIdRoute: ProjectsApplyRoundIdRoute,
+  ProjectsApplicationIndexRoute: ProjectsApplicationIndexRoute,
+}
+
+const ProjectsRouteRouteWithChildren = ProjectsRouteRoute._addFileChildren(
+  ProjectsRouteRouteChildren,
+)
+
+interface RecruitingEvaluationsDocumentRouteChildren {
+  RecruitingEvaluationsDocumentApplicationIdRoute: typeof RecruitingEvaluationsDocumentApplicationIdRoute
+}
+
+const RecruitingEvaluationsDocumentRouteChildren: RecruitingEvaluationsDocumentRouteChildren =
+  {
+    RecruitingEvaluationsDocumentApplicationIdRoute:
+      RecruitingEvaluationsDocumentApplicationIdRoute,
+  }
+
+const RecruitingEvaluationsDocumentRouteWithChildren =
+  RecruitingEvaluationsDocumentRoute._addFileChildren(
+    RecruitingEvaluationsDocumentRouteChildren,
+  )
+
+interface RecruitingEvaluationsInterviewRouteChildren {
+  RecruitingEvaluationsInterviewApplicationIdRoute: typeof RecruitingEvaluationsInterviewApplicationIdRoute
+}
+
+const RecruitingEvaluationsInterviewRouteChildren: RecruitingEvaluationsInterviewRouteChildren =
+  {
+    RecruitingEvaluationsInterviewApplicationIdRoute:
+      RecruitingEvaluationsInterviewApplicationIdRoute,
+  }
+
+const RecruitingEvaluationsInterviewRouteWithChildren =
+  RecruitingEvaluationsInterviewRoute._addFileChildren(
+    RecruitingEvaluationsInterviewRouteChildren,
+  )
+
+interface RecruitingEvaluationsInterviewScheduleRouteChildren {
+  RecruitingEvaluationsInterviewScheduleRoundIdRoute: typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
+}
+
+const RecruitingEvaluationsInterviewScheduleRouteChildren: RecruitingEvaluationsInterviewScheduleRouteChildren =
+  {
+    RecruitingEvaluationsInterviewScheduleRoundIdRoute:
+      RecruitingEvaluationsInterviewScheduleRoundIdRoute,
+  }
+
+const RecruitingEvaluationsInterviewScheduleRouteWithChildren =
+  RecruitingEvaluationsInterviewScheduleRoute._addFileChildren(
+    RecruitingEvaluationsInterviewScheduleRouteChildren,
+  )
+
+interface RecruitingEvaluationsRouteRouteChildren {
+  RecruitingEvaluationsDocumentRoute: typeof RecruitingEvaluationsDocumentRouteWithChildren
+  RecruitingEvaluationsFinalRoute: typeof RecruitingEvaluationsFinalRoute
+  RecruitingEvaluationsInterviewRoute: typeof RecruitingEvaluationsInterviewRouteWithChildren
+  RecruitingEvaluationsInterviewScheduleRoute: typeof RecruitingEvaluationsInterviewScheduleRouteWithChildren
+  RecruitingEvaluationsIndexRoute: typeof RecruitingEvaluationsIndexRoute
+}
+
+const RecruitingEvaluationsRouteRouteChildren: RecruitingEvaluationsRouteRouteChildren =
+  {
+    RecruitingEvaluationsDocumentRoute:
+      RecruitingEvaluationsDocumentRouteWithChildren,
+    RecruitingEvaluationsFinalRoute: RecruitingEvaluationsFinalRoute,
+    RecruitingEvaluationsInterviewRoute:
+      RecruitingEvaluationsInterviewRouteWithChildren,
+    RecruitingEvaluationsInterviewScheduleRoute:
+      RecruitingEvaluationsInterviewScheduleRouteWithChildren,
+    RecruitingEvaluationsIndexRoute: RecruitingEvaluationsIndexRoute,
+  }
+
+const RecruitingEvaluationsRouteRouteWithChildren =
+  RecruitingEvaluationsRouteRoute._addFileChildren(
+    RecruitingEvaluationsRouteRouteChildren,
+  )
+
+interface RecruitingRouteRouteChildren {
+  RecruitingEvaluationsRouteRoute: typeof RecruitingEvaluationsRouteRouteWithChildren
+  RecruitingDashboardApplicationsRoute: typeof RecruitingDashboardApplicationsRoute
+  RecruitingDashboardEvaluationsRoute: typeof RecruitingDashboardEvaluationsRoute
+  RecruitingHistoryArchiveRoute: typeof RecruitingHistoryArchiveRoute
+  RecruitingRecruitmentsNewRoute: typeof RecruitingRecruitmentsNewRoute
+  RecruitingRecruitmentsQuotaRoute: typeof RecruitingRecruitmentsQuotaRoute
+  RecruitingRecruitmentsIndexRoute: typeof RecruitingRecruitmentsIndexRoute
+  RecruitingRecruitmentsEditRoundIdRoute: typeof RecruitingRecruitmentsEditRoundIdRoute
+}
+
+const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
+  RecruitingEvaluationsRouteRoute: RecruitingEvaluationsRouteRouteWithChildren,
+  RecruitingDashboardApplicationsRoute: RecruitingDashboardApplicationsRoute,
+  RecruitingDashboardEvaluationsRoute: RecruitingDashboardEvaluationsRoute,
+  RecruitingHistoryArchiveRoute: RecruitingHistoryArchiveRoute,
+  RecruitingRecruitmentsNewRoute: RecruitingRecruitmentsNewRoute,
+  RecruitingRecruitmentsQuotaRoute: RecruitingRecruitmentsQuotaRoute,
+  RecruitingRecruitmentsIndexRoute: RecruitingRecruitmentsIndexRoute,
+  RecruitingRecruitmentsEditRoundIdRoute:
+    RecruitingRecruitmentsEditRoundIdRoute,
+}
+
+const RecruitingRouteRouteWithChildren = RecruitingRouteRoute._addFileChildren(
+  RecruitingRouteRouteChildren,
+)
+
 interface SettingsRouteRouteChildren {
   SettingsIndexRoute: typeof SettingsIndexRoute
 }
@@ -1262,16 +2353,52 @@ const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
   SettingsRouteRouteChildren,
 )
 
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AdminRouteRoute: AdminRouteRouteWithChildren,
-  MatchingRouteRoute: MatchingRouteRouteWithChildren,
-  SettingsRouteRoute: SettingsRouteRouteWithChildren,
-  AuthTestRoute: AuthTestRoute,
-  ChallengerVerificationRoute: ChallengerVerificationRoute,
-  IntroRoute: IntroRoute,
-  LoginDefaultRoute: LoginDefaultRoute,
-  SignupOauthRoute: SignupOauthRoute,
+interface TestRouteRouteChildren {
+  TestApplicationFormRoute: typeof TestApplicationFormRoute
+  TestButtonRoute: typeof TestButtonRoute
+  TestChallengerVerificationRoute: typeof TestChallengerVerificationRoute
+  TestCheckboxRoute: typeof TestCheckboxRoute
+  TestChipRoute: typeof TestChipRoute
+  TestCodeInputRoute: typeof TestCodeInputRoute
+  TestCounterRoute: typeof TestCounterRoute
+  TestCounterLabelRoute: typeof TestCounterLabelRoute
+  TestCurriculumSkeletonRoute: typeof TestCurriculumSkeletonRoute
+  TestFieldTypeButtonRoute: typeof TestFieldTypeButtonRoute
+  TestFloatingActionButtonRoute: typeof TestFloatingActionButtonRoute
+  TestFooterRoute: typeof TestFooterRoute
+  TestFormHeaderRoute: typeof TestFormHeaderRoute
+  TestHeaderRoute: typeof TestHeaderRoute
+  TestIconRoute: typeof TestIconRoute
+  TestInputBoxRoute: typeof TestInputBoxRoute
+  TestMatchingProjectsRoute: typeof TestMatchingProjectsRoute
+  TestOptionButtonRoute: typeof TestOptionButtonRoute
+  TestProjectImageCropRoute: typeof TestProjectImageCropRoute
+  TestQuestionFormRoute: typeof TestQuestionFormRoute
+  TestRatingFaceRoute: typeof TestRatingFaceRoute
+  TestRecruitingApplicationDetailRoute: typeof TestRecruitingApplicationDetailRoute
+  TestRecruitingApplyRoute: typeof TestRecruitingApplyRoute
+  TestRecruitingHeaderRoute: typeof TestRecruitingHeaderRoute
+  TestRecruitingRecruitmentsRoute: typeof TestRecruitingRecruitmentsRoute
+  TestRecruitmentApplyConfirmModalRoute: typeof TestRecruitmentApplyConfirmModalRoute
+  TestRecruitmentNoticeCardRoute: typeof TestRecruitmentNoticeCardRoute
+  TestRecruitmentNoticePreviewModalRoute: typeof TestRecruitmentNoticePreviewModalRoute
+  TestRecruitmentPostRowRoute: typeof TestRecruitmentPostRowRoute
+  TestRecruitmentPreviewCardRoute: typeof TestRecruitmentPreviewCardRoute
+  TestRecruitmentSectionHeaderRoute: typeof TestRecruitmentSectionHeaderRoute
+  TestRecruitmentStepperRoute: typeof TestRecruitmentStepperRoute
+  TestSocialButtonRoute: typeof TestSocialButtonRoute
+  TestTextButtonRoute: typeof TestTextButtonRoute
+  TestTextFieldRoute: typeof TestTextFieldRoute
+  TestToastRoute: typeof TestToastRoute
+  TestToggleRoute: typeof TestToggleRoute
+  TestToggleInputsRoute: typeof TestToggleInputsRoute
+  TestTooltipRoute: typeof TestTooltipRoute
+  TestTypographyRoute: typeof TestTypographyRoute
+  TestUsabilitySurveyRoute: typeof TestUsabilitySurveyRoute
+  TestIndexRoute: typeof TestIndexRoute
+}
+
+const TestRouteRouteChildren: TestRouteRouteChildren = {
   TestApplicationFormRoute: TestApplicationFormRoute,
   TestButtonRoute: TestButtonRoute,
   TestChallengerVerificationRoute: TestChallengerVerificationRoute,
@@ -1280,6 +2407,7 @@ const rootRouteChildren: RootRouteChildren = {
   TestCodeInputRoute: TestCodeInputRoute,
   TestCounterRoute: TestCounterRoute,
   TestCounterLabelRoute: TestCounterLabelRoute,
+  TestCurriculumSkeletonRoute: TestCurriculumSkeletonRoute,
   TestFieldTypeButtonRoute: TestFieldTypeButtonRoute,
   TestFloatingActionButtonRoute: TestFloatingActionButtonRoute,
   TestFooterRoute: TestFooterRoute,
@@ -1292,15 +2420,50 @@ const rootRouteChildren: RootRouteChildren = {
   TestProjectImageCropRoute: TestProjectImageCropRoute,
   TestQuestionFormRoute: TestQuestionFormRoute,
   TestRatingFaceRoute: TestRatingFaceRoute,
+  TestRecruitingApplicationDetailRoute: TestRecruitingApplicationDetailRoute,
+  TestRecruitingApplyRoute: TestRecruitingApplyRoute,
+  TestRecruitingHeaderRoute: TestRecruitingHeaderRoute,
+  TestRecruitingRecruitmentsRoute: TestRecruitingRecruitmentsRoute,
+  TestRecruitmentApplyConfirmModalRoute: TestRecruitmentApplyConfirmModalRoute,
+  TestRecruitmentNoticeCardRoute: TestRecruitmentNoticeCardRoute,
+  TestRecruitmentNoticePreviewModalRoute:
+    TestRecruitmentNoticePreviewModalRoute,
+  TestRecruitmentPostRowRoute: TestRecruitmentPostRowRoute,
+  TestRecruitmentPreviewCardRoute: TestRecruitmentPreviewCardRoute,
+  TestRecruitmentSectionHeaderRoute: TestRecruitmentSectionHeaderRoute,
+  TestRecruitmentStepperRoute: TestRecruitmentStepperRoute,
   TestSocialButtonRoute: TestSocialButtonRoute,
+  TestTextButtonRoute: TestTextButtonRoute,
+  TestTextFieldRoute: TestTextFieldRoute,
   TestToastRoute: TestToastRoute,
   TestToggleRoute: TestToggleRoute,
   TestToggleInputsRoute: TestToggleInputsRoute,
   TestTooltipRoute: TestTooltipRoute,
+  TestTypographyRoute: TestTypographyRoute,
   TestUsabilitySurveyRoute: TestUsabilitySurveyRoute,
+  TestIndexRoute: TestIndexRoute,
+}
+
+const TestRouteRouteWithChildren = TestRouteRoute._addFileChildren(
+  TestRouteRouteChildren,
+)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
+  ManageRouteRoute: ManageRouteRouteWithChildren,
+  MatchingRouteRoute: MatchingRouteRouteWithChildren,
+  ProjectsRouteRoute: ProjectsRouteRouteWithChildren,
+  RecruitingRouteRoute: RecruitingRouteRouteWithChildren,
+  SettingsRouteRoute: SettingsRouteRouteWithChildren,
+  TestRouteRoute: TestRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
+  AuthTestRoute: AuthTestRoute,
+  ChallengerVerificationRoute: ChallengerVerificationRoute,
+  LoginDefaultRoute: LoginDefaultRoute,
+  SignupOauthRoute: SignupOauthRoute,
   LoginIndexRoute: LoginIndexRoute,
   SignupIndexRoute: SignupIndexRoute,
-  TestIndexRoute: TestIndexRoute,
   OauthKakaoCallbackRoute: OauthKakaoCallbackRoute,
 }
 export const routeTree = rootRouteImport

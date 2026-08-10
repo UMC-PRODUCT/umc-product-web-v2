@@ -1,10 +1,13 @@
 import { memberBriefToItem } from "../api/memberAdapter"
-import { useProjectRegisterStore } from "./useProjectRegisterStore"
 
 import type { DraftProjectResponse } from "../api/types"
+import type { ProjectRegisterStoreApi } from "./useProjectRegisterStore"
 
-export function hydrateDraftIntoStore(draft: DraftProjectResponse): void {
-  const store = useProjectRegisterStore.getState()
+export function hydrateDraftIntoStore(
+  draft: DraftProjectResponse,
+  storeApi: ProjectRegisterStoreApi,
+): void {
+  const store = storeApi.getState()
 
   if (draft.id) store.setProjectId(draft.id)
 

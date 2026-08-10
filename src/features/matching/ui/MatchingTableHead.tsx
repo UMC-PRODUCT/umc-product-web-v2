@@ -1,4 +1,4 @@
-import { NumberTag } from "@/shared/ui/NumberTag"
+import { RoundNumberTag } from "./RoundNumberTag"
 
 const LEGEND_ITEMS = [
   { variant: "round1", label: "1차 매칭" },
@@ -32,7 +32,7 @@ export function MatchingTableHead() {
         <div className="flex items-center gap-2.5">
           {LEGEND_ITEMS.map((item) => (
             <div key={item.variant} className="flex items-center gap-1">
-              <NumberTag variant={item.variant} />
+              <RoundNumberTag variant={item.variant} />
               <span className="text-caption-2-regular text-teal-gray-500">
                 {item.label}
               </span>

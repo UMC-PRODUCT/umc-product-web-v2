@@ -1,27 +1,25 @@
 import { useMemo } from "react"
 
+import { isRecruitDone } from "@/entities/project/model/matchingProject"
 import { RecruitStatusChip } from "@/shared/ui/chip/RecruitStatusChip"
+import { CounterLabel } from "@/shared/ui/CounterLabel"
 import { FormHeader } from "@/shared/ui/FormHeader"
 import { CheckboxList } from "@/shared/ui/input/checkbox/CheckboxList"
+import { OPTION_LIST_CLASS } from "@/shared/ui/input/optionList"
 import { RadioList } from "@/shared/ui/input/radio/RadioList"
-import MemberCount from "@/shared/ui/MemberCount"
 import { FileUploadField } from "@/shared/ui/question-field/FileUploadField"
 import { PortfolioField } from "@/shared/ui/question-field/PortfolioField"
 import { QuestionItemTitle } from "@/shared/ui/question-field/QuestionItemTitle"
 import { TextQuestionField } from "@/shared/ui/question-field/TextQuestionField"
 
-import { isRecruitDone } from "../../model/matchingProject"
 import { ApplyProjectTitleCard } from "./ApplyProjectTitleCard"
 
+import type { MatchingProject } from "@/entities/project/model/matchingProject"
 import type {
   Question,
   Section,
 } from "@/features/project/new/model/applicationQuestion"
 
-import type { MatchingProject } from "../../model/matchingProject"
-
-const OPTION_LIST_CLASS =
-  "border-teal-gray-150 flex flex-col gap-0.5 rounded-[12px] border bg-[color-mix(in_srgb,var(--color-teal-50)_40%,white)] p-1"
 const COMMON_SECTION_ID = "common"
 
 interface RecruitQuestionsViewModalProps {
@@ -72,7 +70,7 @@ export function RecruitQuestionsViewModal({
                       <span className="text-body-2-medium text-teal-gray-700">
                         {row.part}
                       </span>
-                      <MemberCount
+                      <CounterLabel
                         size="sm"
                         current={row.current}
                         total={row.total}

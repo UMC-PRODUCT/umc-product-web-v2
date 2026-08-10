@@ -90,7 +90,7 @@ export interface RegisterResponse {
   refreshToken: string
 }
 
-export type TermType = "SERVICE" | "PRIVACY" | "MARKETING" | "LOCATION"
+export type { TermType } from "@/shared/model/domain"
 
 export interface TermResponse {
   id: number
@@ -98,28 +98,17 @@ export interface TermResponse {
   isMandatory: boolean
 }
 
-export interface Term {
-  id: number
-  type: TermType
-  typeDescription: string
-  link: string
-  isMandatory: boolean
-  version: number
-  createdAt: string
-  updatedAt: string
-}
+import type { Term } from "@/shared/model/domain"
+
+export type { Term }
 
 export interface Terms {
   terms: Term[]
 }
 
 export interface SchoolNameItem {
-  schoolId: number
+  schoolId: string
   schoolName: string
-}
-
-export interface SchoolNameListResponse {
-  schools: SchoolNameItem[]
 }
 
 export interface EmailLoginRequest {

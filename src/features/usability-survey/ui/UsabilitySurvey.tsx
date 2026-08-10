@@ -1,8 +1,8 @@
 import { AxiosError } from "axios"
 import { useEffect, useRef, useState } from "react"
 
-import { useToastStore } from "@/components/toast/useToastStore"
 import { trackEvent } from "@/shared/analytics"
+import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
   useFeedbackTemplate,

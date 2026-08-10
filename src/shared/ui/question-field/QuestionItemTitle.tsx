@@ -16,21 +16,25 @@ export function QuestionItemTitle({
   className,
 }: QuestionItemTitleProps) {
   return (
-    <div className={cn("flex w-full items-start gap-2", className)}>
+    <div className={cn("flex w-full items-start gap-1.5", className)}>
       <span className="text-heading-7-semibold w-7 shrink-0 text-teal-600">
         {index}
       </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <span className="text-heading-7-semibold break-keep whitespace-pre-wrap">
           {title ? (
             <span className="text-teal-gray-900">{title}</span>
           ) : (
             <span className="text-teal-gray-400">질문을 작성하세요</span>
           )}
-          {required && <span className="text-error-600 ml-1">*</span>}
+          {required && (
+            <span aria-hidden="true" className="text-error-600 ml-1">
+              *
+            </span>
+          )}
         </span>
         {caption !== undefined && caption !== "" && (
-          <span className="text-body-2-regular text-teal-gray-400 break-keep whitespace-pre-wrap">
+          <span className="text-body-2-regular text-teal-gray-600 break-keep whitespace-pre-wrap">
             {caption}
           </span>
         )}
