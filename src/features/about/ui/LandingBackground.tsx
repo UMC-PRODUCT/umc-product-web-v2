@@ -41,7 +41,7 @@ export function LandingArtifact() {
       <img
         src={bgGraphic}
         alt=""
-        className="absolute top-[clamp(0px,calc(686px_-_47.6vw),500px)] left-1/2 h-auto w-full origin-top -translate-x-1/2 -translate-y-[23%] scale-100 blur-[10px]"
+        className="absolute top-[clamp(0px,calc(548px_-_38vw),400px)] left-1/2 h-auto w-full origin-top -translate-x-1/2 -translate-y-[23%] scale-100 blur-[10px]"
       />
     </div>
   )
