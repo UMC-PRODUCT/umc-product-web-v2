@@ -23,7 +23,10 @@ export function RecruitingGuidePage() {
     >
       <div className="relative mx-auto w-full max-w-[1440px] px-8 xl:px-30">
         <RecruitingGuideHeroSection />
-        <RecruitPartsSection ctaTo={RECRUITING_GUIDE_PARTS_CTA.to} />
+        <RecruitPartsSection
+          ctaLabel={RECRUITING_GUIDE_PARTS_CTA.label}
+          ctaTo={RECRUITING_GUIDE_PARTS_CTA.to}
+        />
         <RecruitingGuideScheduleSection />
         {/* 지원할 학교를 찾는 자리라 학교줄을 멈춰 세운다. 시안에도 CTA 가 없다. */}
         <SchoolsSection
