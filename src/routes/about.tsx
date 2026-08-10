@@ -18,7 +18,7 @@ export const Route = createFileRoute("/about")({
 // 위쪽 여백이 이미 헤더 높이를 포함한 값이라 absolute 로 띄운다.
 function AboutRoute() {
   return (
-    <div className="relative">
+    <div className="about-landing relative">
       <div className="absolute inset-x-0 top-0 z-50">
         <RecruitingHeader tone="glass" />
       </div>
