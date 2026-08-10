@@ -5,7 +5,7 @@ import { GlassCtaButton } from "../GlassCtaButton"
 
 export function RecruitingGuideHeroSection() {
   return (
-    <section className="flex flex-col items-center gap-6.5 pt-70 pb-45 md:pt-90 md:pb-50 lg:pb-67.5">
+    <section className="flex min-h-svh flex-col items-center justify-center gap-6.5">
       <div className="flex w-full flex-col items-center gap-3 md:gap-6.5">
         <div className="flex flex-col items-start gap-3.5 text-center md:gap-4 lg:gap-6.25">
           <p className="w-full text-base leading-[20.8px] font-medium tracking-[1px] text-teal-400 uppercase md:text-[22px] md:tracking-[2px]">
@@ -13,7 +13,7 @@ export function RecruitingGuideHeroSection() {
           </p>
           {/* 헤드라인은 글자를 접을 수 없는 벡터다. 마무리 섹션과 같은 칸 높이를
               써서 두 화면의 UMC 11th 가 같은 크기로 보이게 한다. */}
-          <div className="flex h-16 w-full items-center justify-center md:h-25 lg:h-25.5">
+          <div className="animate-hero-title flex h-16 w-full items-center justify-center transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] md:h-25 lg:h-25.5">
             <UmcEleventh
               className="h-auto w-full max-w-112.5 text-white"
               role="img"
