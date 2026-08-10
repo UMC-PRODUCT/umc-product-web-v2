@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RecruitingGuideRouteImport } from './routes/recruiting-guide'
 import { Route as ChallengerVerificationRouteImport } from './routes/challenger-verification'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as AboutRouteImport } from './routes/about'
@@ -117,6 +118,11 @@ import { Route as MatchingProjectsEditProjectIdRouteImport } from './routes/matc
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
+const RecruitingGuideRoute = RecruitingGuideRouteImport.update({
+  id: '/recruiting-guide',
+  path: '/recruiting-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChallengerVerificationRoute = ChallengerVerificationRouteImport.update({
   id: '/challenger-verification',
   path: '/challenger-verification',
@@ -699,6 +705,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
+  '/recruiting-guide': typeof RecruitingGuideRoute
   '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
@@ -802,6 +809,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
+  '/recruiting-guide': typeof RecruitingGuideRoute
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
   '/matching/applications': typeof MatchingApplicationsRoute
@@ -910,6 +918,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
+  '/recruiting-guide': typeof RecruitingGuideRoute
   '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
@@ -1021,6 +1030,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth-test'
     | '/challenger-verification'
+    | '/recruiting-guide'
     | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
@@ -1124,6 +1134,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth-test'
     | '/challenger-verification'
+    | '/recruiting-guide'
     | '/login/default'
     | '/manage/chapter'
     | '/matching/applications'
@@ -1231,6 +1242,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth-test'
     | '/challenger-verification'
+    | '/recruiting-guide'
     | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
@@ -1341,6 +1353,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthTestRoute: typeof AuthTestRoute
   ChallengerVerificationRoute: typeof ChallengerVerificationRoute
+  RecruitingGuideRoute: typeof RecruitingGuideRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   SignupOauthRoute: typeof SignupOauthRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -1350,6 +1363,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/recruiting-guide': {
+      id: '/recruiting-guide'
+      path: '/recruiting-guide'
+      fullPath: '/recruiting-guide'
+      preLoaderRoute: typeof RecruitingGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/challenger-verification': {
       id: '/challenger-verification'
       path: '/challenger-verification'
@@ -2460,6 +2480,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthTestRoute: AuthTestRoute,
   ChallengerVerificationRoute: ChallengerVerificationRoute,
+  RecruitingGuideRoute: RecruitingGuideRoute,
   LoginDefaultRoute: LoginDefaultRoute,
   SignupOauthRoute: SignupOauthRoute,
   LoginIndexRoute: LoginIndexRoute,
