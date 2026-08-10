@@ -28,6 +28,7 @@ function createConfiguration(
     gisuId: "15",
     schoolId: id,
     memo: null,
+    chapterTotalTargetCount: null,
     quotas: [],
     rounds: [],
   }
@@ -82,7 +83,7 @@ describe("useRecruitingSeasonQuotas 요청 페이싱", () => {
         {
           seasonId: "1",
           schoolName: "서울대학교",
-          payload: { quotas: [] },
+          payload: { chapterTotalTargetCount: 0, quotas: [] },
         },
       ])
     })

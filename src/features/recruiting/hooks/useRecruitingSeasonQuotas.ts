@@ -175,12 +175,18 @@ export function useRecruitingSeasonQuotas(
     mutationFn: async (
       variablesList: UpdateSeasonQuotaVariables[],
     ): Promise<UpdateSeasonQuotasResult> => {
-      const results = await Promise.allSettled(
-        variablesList.map(async (v) => {
+      // 한 지부 안에서는 순서가 결과를 가른다. 서버가 매 요청을 "그 시점에
+      // 저장된 다른 학교 값" 과 대조하기 때문에, 동시에 던지면 처리 순서에 따라
+      // 통과 여부가 달라진다. 호출부가 정해 준 차례대로 하나씩 보낸다.
+      const results: PromiseSettledResult<UpdateSeasonQuotaVariables>[] = []
+      for (const v of variablesList) {
+        try {
           await updateRecruitingSeasonQuotas(v.seasonId, v.payload)
-          return v
-        }),
-      )
+          results.push({ status: "fulfilled", value: v })
+        } catch (reason) {
+          results.push({ status: "rejected", reason })
+        }
+      }
 
       const successfulVariables: UpdateSeasonQuotaVariables[] = []
       const failedVariables: UpdateSeasonQuotaVariables[] = []
