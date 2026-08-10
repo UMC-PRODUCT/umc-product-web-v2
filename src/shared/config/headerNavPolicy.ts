@@ -26,9 +26,11 @@ export const HEADER_NAV_ITEMS: HeaderNavItem[] = [
   },
   {
     label: "모집 안내",
-    to: "/projects/notice",
-    // 지원 방법·지원 폼도 모집 안내에서 이어지는 화면이라 같은 탭이 켜져야 한다.
+    to: "/recruiting-guide",
+    // 학교별 공고·지원 방법·지원 폼도 모집 안내에서 이어지는 화면이라 같은 탭이
+    // 켜져야 한다.
     activeBasePaths: [
+      "/recruiting-guide",
       "/projects/notice",
       "/projects/apply",
       "/projects/apply-guide",
