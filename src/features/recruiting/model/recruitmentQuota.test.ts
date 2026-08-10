@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  buildChapterTotalSteps,
   findMatchingSchoolQuotaRow,
   getChangedSchoolQuotaRows,
+  getChapterStoredTotals,
   getConflictedSchoolQuotaRows,
   getSchoolQuotaIdentity,
   getSchoolQuotaRowsSignature,
+  getSchoolQuotaRowTotal,
   mergeSchoolQuotaRows,
   type SchoolQuotaEdits,
   type SchoolQuotaRow,
@@ -169,5 +172,102 @@ describe("편집 중인 모집 인원 동기화", () => {
     ])
 
     expect(getConflictedSchoolQuotaRows([originalRow], edits)).toEqual([])
+  })
+})
+
+describe("getChapterStoredTotals", () => {
+  it("시즌이 있는 학교만 담는다", () => {
+    const withSeason = createRow({ seasonId: "1", schoolId: "10" })
+    const withoutSeason = createRow({
+      seasonId: undefined,
+      schoolId: "11",
+      schoolName: "연세대학교",
+    })
+
+    const totals = getChapterStoredTotals([withSeason, withoutSeason])
+
+    expect([...totals.keys()]).toEqual(["1"])
+    expect(totals.get("1")).toBe(10)
+  })
+
+  it("합은 total 필드가 아니라 파트 값에서 다시 센다", () => {
+    // total 이 낡은 값으로 남아 있어도 파트 합이 정답이다
+    const row = createRow({
+      seasonId: "1",
+      pm: 2,
+      design: 0,
+      webPe: 0,
+      mobilePe: 0,
+      total: 999,
+    })
+
+    expect(getChapterStoredTotals([row]).get("1")).toBe(2)
+    expect(getSchoolQuotaRowTotal(row)).toBe(2)
+  })
+})
+
+describe("buildChapterTotalSteps", () => {
+  it("한 학교만 고치면 그 학교 변화분만 반영한다", () => {
+    const stored = new Map([
+      ["1", 10],
+      ["2", 5],
+    ])
+
+    expect(
+      buildChapterTotalSteps(stored, [{ seasonId: "1", nextTotal: 13 }]),
+    ).toEqual([{ seasonId: "1", chapterTotalTargetCount: 18 }])
+  })
+
+  // 서버가 요청 시점의 저장값으로 검산하므로 두 요청의 값이 달라야 한다
+  it("같은 지부 두 학교를 고치면 요청마다 합계가 다르다", () => {
+    const stored = new Map([
+      ["1", 10],
+      ["2", 5],
+    ])
+
+    expect(
+      buildChapterTotalSteps(stored, [
+        { seasonId: "1", nextTotal: 13 },
+        { seasonId: "2", nextTotal: 7 },
+      ]),
+    ).toEqual([
+      { seasonId: "1", chapterTotalTargetCount: 18 },
+      { seasonId: "2", chapterTotalTargetCount: 20 },
+    ])
+  })
+
+  it("마지막 값은 모든 변경이 반영된 지부 합계다", () => {
+    const stored = new Map([
+      ["1", 10],
+      ["2", 5],
+      ["3", 1],
+    ])
+
+    const steps = buildChapterTotalSteps(stored, [
+      { seasonId: "1", nextTotal: 0 },
+      { seasonId: "2", nextTotal: 0 },
+    ])
+
+    expect(steps.at(-1)?.chapterTotalTargetCount).toBe(1)
+  })
+
+  it("저장된 적 없는 시즌은 0 에서 더한다", () => {
+    const stored = new Map([["1", 10]])
+
+    expect(
+      buildChapterTotalSteps(stored, [{ seasonId: "9", nextTotal: 4 }]),
+    ).toEqual([{ seasonId: "9", chapterTotalTargetCount: 14 }])
+  })
+
+  it("넘겨받은 Map 을 건드리지 않는다", () => {
+    const stored = new Map([["1", 10]])
+
+    buildChapterTotalSteps(stored, [{ seasonId: "1", nextTotal: 99 }])
+
+    expect(stored.get("1")).toBe(10)
+  })
+
+  it("고칠 학교가 없으면 빈 배열이다", () => {
+    expect(buildChapterTotalSteps(new Map([["1", 10]]), [])).toEqual([])
   })
 })

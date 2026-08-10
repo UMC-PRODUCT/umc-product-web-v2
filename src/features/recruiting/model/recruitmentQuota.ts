@@ -154,6 +154,58 @@ export function getChangedSchoolQuotaRows(
   })
 }
 
+export function getSchoolQuotaRowTotal(row: SchoolQuotaRow): number {
+  return QUOTA_FIELDS.reduce((sum, field) => sum + (row[field] || 0), 0)
+}
+
+/**
+ * 지부에 시즌이 있는 학교들의 현재 목표 인원 합.
+ *
+ * 시즌이 없는 학교는 뺀다. 서버도 시즌이 있는 학교만 세기 때문에, 여기서 0 이라도
+ * 더해 놓으면 학교 수와 무관하게 값은 같지만 시즌이 생기는 순간 기준이 어긋난다.
+ */
+export function getChapterStoredTotals(
+  rows: SchoolQuotaRow[],
+): Map<string, number> {
+  const totals = new Map<string, number>()
+  rows.forEach((row) => {
+    if (!row.seasonId) return
+    totals.set(String(row.seasonId), getSchoolQuotaRowTotal(row))
+  })
+  return totals
+}
+
+export interface ChapterTotalStep {
+  seasonId: string
+  /** 이 요청과 함께 보낼 지부 전체 목표 인원 */
+  chapterTotalTargetCount: number
+}
+
+/**
+ * 학교를 하나씩 저장할 때 요청마다 실어 보낼 지부 합계를 미리 계산한다.
+ *
+ * 서버는 매 요청을 "이번 요청의 트랙 합 + 같은 지부 다른 학교들의 **그 시점 저장값**"
+ * 과 대조한다. 그래서 마지막 합계를 모든 요청에 똑같이 보내면 첫 요청부터 어긋난다.
+ * 앞선 요청이 반영된 결과를 누적해 가며 요청마다 다른 값을 만든다.
+ *
+ * 이 규칙 때문에 한 지부 안에서는 요청을 순서대로 보내야 한다. 병렬로 던지면
+ * 서버가 어떤 순서로 처리하느냐에 따라 통과 여부가 갈린다.
+ */
+export function buildChapterTotalSteps(
+  storedTotals: ReadonlyMap<string, number>,
+  updates: readonly { seasonId: string; nextTotal: number }[],
+): ChapterTotalStep[] {
+  const current = new Map(storedTotals)
+  let runningTotal = [...current.values()].reduce((sum, n) => sum + n, 0)
+
+  return updates.map(({ seasonId, nextTotal }) => {
+    const key = String(seasonId)
+    runningTotal = runningTotal - (current.get(key) ?? 0) + nextTotal
+    current.set(key, nextTotal)
+    return { seasonId: key, chapterTotalTargetCount: runningTotal }
+  })
+}
+
 export interface PartCounts {
   pm: number
   design: number
