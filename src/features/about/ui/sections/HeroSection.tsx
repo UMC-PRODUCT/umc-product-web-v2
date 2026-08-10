@@ -7,7 +7,7 @@ import { GlassCtaButton } from "../GlassCtaButton"
 
 export function HeroSection() {
   return (
-    <section className="flex items-center justify-center pt-70 pb-45 md:pt-90 md:pb-50 lg:px-12 lg:pb-67.5">
+    <section className="flex min-h-svh items-center justify-center lg:px-12">
       <div className="flex w-full flex-col items-center gap-6.5">
         <div className="flex w-full flex-col items-start gap-3 md:gap-6.5">
           <div className="flex w-full flex-col items-start gap-3.5 text-center md:gap-6.25">
@@ -17,7 +17,7 @@ export function HeroSection() {
             {/* 390~767 은 폭에 따라 벡터가 커져 칸을 고정하면 넘친다. 최소
                 높이만 잡고 벡터가 칸을 정하게 둔다. 나머지 구간은 벡터 최대
                 크기가 칸 안에 들어가 시안대로 고정해도 된다. */}
-            <div className="xs:h-auto xs:min-h-32 flex h-48 w-full items-center justify-center md:h-50 lg:h-25 lg:min-h-0">
+            <div className="animate-hero-title xs:h-auto xs:min-h-32 flex h-48 w-full items-center justify-center transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] md:h-50 lg:h-25 lg:min-h-0">
               {/* 헤드라인은 글자를 접을 수 없는 벡터라 줄 수마다 파일이 다르다.
                   1024 부터 한 줄, 그 아래는 두 줄이다. */}
               <BreakTheRulesTriple
