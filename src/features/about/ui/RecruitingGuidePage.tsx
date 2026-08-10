@@ -2,6 +2,7 @@ import {
   RECRUITING_GUIDE_PARTS_CTA,
   RECRUITING_GUIDE_SCHOOLS,
 } from "../recruitingGuideConstants"
+import { LandingBackground } from "./LandingBackground"
 import { RecruitingGuideFaqSection } from "./sections/RecruitingGuideFaqSection"
 import { RecruitingGuideHeroSection } from "./sections/RecruitingGuideHeroSection"
 import { RecruitingGuideScheduleSection } from "./sections/RecruitingGuideScheduleSection"
@@ -21,7 +22,8 @@ export function RecruitingGuidePage() {
       className="relative min-h-screen overflow-hidden bg-black"
       style={{ backgroundImage: `${RIGHT_GLOW}, ${LEFT_GLOW}` }}
     >
-      <div className="relative mx-auto w-full max-w-[1440px] px-8 xl:px-30">
+      <LandingBackground />
+      <div className="relative z-10 mx-auto w-full max-w-[1440px] px-8 xl:px-30">
         <RecruitingGuideHeroSection />
         <RecruitPartsSection
           ctaLabel={RECRUITING_GUIDE_PARTS_CTA.label}
