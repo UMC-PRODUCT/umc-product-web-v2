@@ -64,7 +64,7 @@ export function RecruitPartsSection({
 
   return (
     <section className="flex flex-col items-center gap-13.5 pt-37.5 md:pt-60 lg:pt-75">
-      <div className="flex w-full flex-col items-start gap-25">
+      <div className="flex w-full max-w-300 flex-col items-center gap-25">
         <div className="flex w-full max-w-300 flex-col items-center gap-16 lg:gap-18">
           <div className="flex w-full flex-col items-center gap-6">
             <h2 className="text-center text-[30px] leading-[1.2] font-bold tracking-[-0.6px] text-white md:text-[32px] md:tracking-[-0.64px] lg:text-[38px] lg:tracking-[-0.76px] xl:text-5xl xl:tracking-[-1.44px]">
