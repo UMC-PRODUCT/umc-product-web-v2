@@ -48,8 +48,9 @@ export function buildRecruitingNavItems({
     { label: "소개", to: "/about" },
     {
       label: "모집 안내",
-      to: "/projects/notice",
+      to: "/recruiting-guide",
       activeBasePaths: [
+        "/recruiting-guide",
         "/projects/notice",
         "/projects/apply",
         "/projects/apply-guide",

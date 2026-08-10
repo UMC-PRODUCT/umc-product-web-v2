@@ -1,18 +1,14 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  CHALLENGER_LANDING_PATH,
-  GUEST_LANDING_PATH,
-  RECRUITING_HOME_PATH,
-} from "./landingPolicy"
+import { RECRUITING_HOME_PATH, ROOT_LANDING_PATH } from "./landingPolicy"
 
 // 목적지는 시즌 성격에 따라 바뀐다. 바꿀 때 여기가 같이 깨져서, 무엇이
 // 달라졌는지 눈에 보이게 한다.
 describe("루트 진입 목적지", () => {
-  // 운영진도 로그인하면 먼저 프로젝트를 본다. 리크루팅은 헤더 탭으로 들어간다.
-  it("누구든 프로젝트로 간다", () => {
-    expect(CHALLENGER_LANDING_PATH).toBe("/projects")
-    expect(GUEST_LANDING_PATH).toBe("/projects")
+  // 로그인 여부와 역할을 가리지 않는다. 갈래가 없어야 게스트와 운영진이 같은
+  // 첫 화면을 본다.
+  it("누구든 소개 랜딩으로 간다", () => {
+    expect(ROOT_LANDING_PATH).toBe("/about")
   })
 })
 

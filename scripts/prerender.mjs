@@ -9,6 +9,7 @@ const DIST = join(process.cwd(), "dist")
 
 const ROUTES = [
   { path: "/about", titleMatch: "UMC 소개" },
+  { path: "/recruiting-guide", titleMatch: "모집 안내" },
   { path: "/login", titleMatch: "로그인" },
   { path: "/login/default", titleMatch: "UMC 계정 로그인" },
   { path: "/signup", titleMatch: "회원가입" },

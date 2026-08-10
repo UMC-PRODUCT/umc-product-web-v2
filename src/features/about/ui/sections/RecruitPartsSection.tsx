@@ -12,7 +12,21 @@ const TRAIT_PANEL_SURFACE = glassSurface(166.7392, -18.091)
 
 type PartId = (typeof ABOUT_RECRUIT.parts)[number]["id"]
 
-export function RecruitPartsSection() {
+interface RecruitPartsSectionProps {
+  /**
+   * 하단 CTA. 페이지마다 다음에 볼 화면이 달라 문구와 목적지를 함께 받는다.
+   *
+   * 목적지만 열어 두면 문구는 소개 랜딩 것이 남아, 두 화면이 다른 곳으로
+   * 보내면서 같은 말을 하게 된다.
+   */
+  ctaLabel?: string
+  ctaTo?: string
+}
+
+export function RecruitPartsSection({
+  ctaLabel = ABOUT_RECRUIT.ctaLabel,
+  ctaTo = ABOUT_RECRUIT.ctaTo,
+}: RecruitPartsSectionProps = {}) {
   const [activePartId, setActivePartId] = useState<PartId>(
     ABOUT_RECRUIT.parts[0].id,
   )
@@ -155,9 +169,7 @@ export function RecruitPartsSection() {
         </div>
       </div>
 
-      <GlassCtaButton to={ABOUT_RECRUIT.ctaTo}>
-        {ABOUT_RECRUIT.ctaLabel}
-      </GlassCtaButton>
+      <GlassCtaButton to={ctaTo}>{ctaLabel}</GlassCtaButton>
     </section>
   )
 }
