@@ -146,18 +146,28 @@ export interface RecruitingSeasonConfigurationResponse {
   gisuId: string
   schoolId: string
   memo: string | null
+  // 이 학교가 속한 지부 전체의 목표 인원. 지부 단위로 한 번도 저장된 적이
+  // 없으면 null 이다.
+  chapterTotalTargetCount: number | null
   quotas: RecruitingSeasonTrackQuota[]
   rounds: RecruitingRound[]
 }
 
 export type RawRecruitingSeasonConfigurationResponse = Omit<
   RecruitingSeasonConfigurationResponse,
-  "id" | "gisuId" | "schoolId" | "memo" | "quotas" | "rounds"
+  | "id"
+  | "gisuId"
+  | "schoolId"
+  | "memo"
+  | "chapterTotalTargetCount"
+  | "quotas"
+  | "rounds"
 > & {
   id?: RawId
   gisuId?: RawId
   schoolId?: RawId
   memo?: string | null
+  chapterTotalTargetCount?: RawCount | null
   quotas?: {
     track?: RecruitingTrack
     targetCount?: RawCount
@@ -172,6 +182,14 @@ export interface RecruitingSeasonTrackQuotaRequest {
 }
 
 export interface ReplaceRecruitingSeasonTrackQuotasRequest {
+  /**
+   * 이 학교가 속한 지부 전체의 목표 인원. 필수다.
+   *
+   * 사용자가 정하는 값이 아니라 검산값이다. 서버는 "이번 요청의 트랙 합 + 같은
+   * 지부 다른 학교들의 현재 저장값" 과 같은지 보고, 다르면 RECRUITING-0330 을
+   * 던진다. 그래서 여러 학교를 잇달아 저장할 때는 요청마다 값이 달라진다.
+   */
+  chapterTotalTargetCount: number
   quotas: RecruitingSeasonTrackQuotaRequest[]
 }
 

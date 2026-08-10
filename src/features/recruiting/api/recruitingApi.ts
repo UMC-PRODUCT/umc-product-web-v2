@@ -542,6 +542,12 @@ export function normalizeRecruitingSeasonConfigurationResponse(
     gisuId: String(raw.gisuId ?? ""),
     schoolId: String(raw.schoolId ?? ""),
     memo: raw.memo ?? null,
+    // 한 번도 저장된 적 없으면 서버가 null 을 준다. 0 과 구분해야 해서 toCount
+    // 로 접지 않는다.
+    chapterTotalTargetCount:
+      raw.chapterTotalTargetCount == null
+        ? null
+        : toCount(raw.chapterTotalTargetCount),
     quotas: (raw.quotas ?? [])
       .filter((quota) => Boolean(quota.track))
       .map((quota) => ({
