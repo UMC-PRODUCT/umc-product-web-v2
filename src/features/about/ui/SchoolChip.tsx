@@ -10,7 +10,10 @@ export function SchoolChip({ name, logo }: SchoolChipProps) {
         <img
           src={logo}
           alt=""
+          loading="lazy"
           decoding="async"
+          width={40}
+          height={40}
           className="size-full object-contain"
         />
       </span>
