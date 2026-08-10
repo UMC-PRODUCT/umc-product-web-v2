@@ -21,10 +21,13 @@ import { useRecruitingPermissions } from "../hooks/useRecruitingPermissions"
 import { useRecruitingSeasonQuotas } from "../hooks/useRecruitingSeasonQuotas"
 import { hasAnyEditableSeason } from "../model/recruitingEditLock"
 import {
+  buildChapterTotalSteps,
   findMatchingSchoolQuotaRow,
   getChangedSchoolQuotaRows,
+  getChapterStoredTotals,
   getConflictedSchoolQuotaRows,
   getSchoolQuotaIdentity,
+  getSchoolQuotaRowTotal,
   mergeSchoolQuotaRows,
   type SchoolQuotaEdits,
   type SchoolQuotaRow,
@@ -416,23 +419,74 @@ export function RecruitmentQuotaPage() {
       },
     )
 
-    const payloadList = existingSeasonRows.map((row) => ({
-      seasonId: row.seasonId,
-      schoolName: row.schoolName,
-      payload: {
-        quotas: [
-          { track: "PLAN" as const, targetCount: row.pm },
-          { track: "DESIGN" as const, targetCount: row.design },
-          { track: "WEB_PRODUCT_ENGINEER" as const, targetCount: row.webPe },
-          {
-            track: "MOBILE_PRODUCT_ENGINEER" as const,
-            targetCount: row.mobilePe,
-          },
-        ],
-      },
-    }))
+    // 서버는 학교 TO 를 저장할 때마다 지부 전체 합계를 함께 받아 검산한다. 그
+    // 기준이 "요청 시점에 저장돼 있는 다른 학교 값" 이라, 한 지부에서 여러 학교를
+    // 고치면 요청마다 실어야 할 합계가 달라진다. 방금 만든 시즌도 그 시점에는
+    // 이미 저장된 값이므로, 생성이 끝난 뒤에 계산해야 기준이 맞는다.
+    const buildPayloadList = (createdRows: SchoolQuotaRow[]) => {
+      const chapterTotalBySeasonId = new Map<string, number>()
 
-    if (payloadList.length === 0 && newSeasonRows.length === 0) {
+      targetChapters.forEach((chapterData) => {
+        const rowsToUpdate = existingSeasonRows.filter((row) =>
+          chapterData.schools.some(
+            (school) => String(school.seasonId) === String(row.seasonId),
+          ),
+        )
+        if (rowsToUpdate.length === 0) return
+
+        const storedTotals = getChapterStoredTotals(chapterData.schools)
+        // 이번에 만들어진 학교는 시즌이 없던 자리라 기준값에 빠져 있다.
+        // 식별자가 없어 자리만 채우면 되므로 임시 키로 더한다.
+        createdRows
+          .filter((created) =>
+            chapterData.schools.some(
+              (school) =>
+                String(school.schoolId) === String(created.schoolId) &&
+                !school.seasonId,
+            ),
+          )
+          .forEach((created) => {
+            storedTotals.set(
+              `created:${created.schoolId}`,
+              getSchoolQuotaRowTotal(created),
+            )
+          })
+
+        buildChapterTotalSteps(
+          storedTotals,
+          rowsToUpdate.map((row) => ({
+            seasonId: row.seasonId,
+            nextTotal: getSchoolQuotaRowTotal(row),
+          })),
+        ).forEach((step) => {
+          chapterTotalBySeasonId.set(
+            step.seasonId,
+            step.chapterTotalTargetCount,
+          )
+        })
+      })
+
+      return existingSeasonRows.map((row) => ({
+        seasonId: row.seasonId,
+        schoolName: row.schoolName,
+        payload: {
+          chapterTotalTargetCount:
+            chapterTotalBySeasonId.get(String(row.seasonId)) ??
+            getSchoolQuotaRowTotal(row),
+          quotas: [
+            { track: "PLAN" as const, targetCount: row.pm },
+            { track: "DESIGN" as const, targetCount: row.design },
+            { track: "WEB_PRODUCT_ENGINEER" as const, targetCount: row.webPe },
+            {
+              track: "MOBILE_PRODUCT_ENGINEER" as const,
+              targetCount: row.mobilePe,
+            },
+          ],
+        },
+      }))
+    }
+
+    if (existingSeasonRows.length === 0 && newSeasonRows.length === 0) {
       setIsDirty(false)
       return
     }
@@ -440,6 +494,7 @@ export function RecruitmentQuotaPage() {
     try {
       let hasSuccessfulWrite = false
       let hasWriteFailure = false
+      const createdRows: SchoolQuotaRow[] = []
 
       if (newSeasonRows.length > 0) {
         const createResults = await Promise.allSettled(
@@ -467,6 +522,7 @@ export function RecruitmentQuotaPage() {
 
           if (result.status === "fulfilled") {
             hasSuccessfulWrite = true
+            createdRows.push(row)
           } else {
             hasWriteFailure = true
             failedCreateSchoolNames.push(row.schoolName)
@@ -501,6 +557,8 @@ export function RecruitmentQuotaPage() {
           })
         }
       }
+
+      const payloadList = buildPayloadList(createdRows)
 
       if (payloadList.length > 0) {
         const updateResult = await updateQuotas(payloadList)
