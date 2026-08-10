@@ -47,10 +47,21 @@ describe("mapRoundToDraftBasicInfo", () => {
     expect(result.basicInfo.roundNo).toBe("1")
   })
 
-  // 지부 이름이 우리가 아는 목록에 없으면 폼 선택지에 없는 값이라 비워 둔다
-  it("알 수 없는 지부는 비운다", () => {
+  // 지부 목록이 서버 조회로 바뀌어 이름을 미리 알 수 없다. 그래서 모르는
+  // 이름도 그대로 싣고, 값이 없는 것만 비운다.
+  it("처음 보는 지부 이름도 그대로 싣는다", () => {
     const result = mapRoundToDraftBasicInfo(
-      group({ chapterName: "없는지부" }),
+      group({ chapterName: "새로생긴지부" }),
+      round(),
+      10,
+    )
+
+    expect(result.basicInfo.chapter).toBe("새로생긴지부")
+  })
+
+  it("지부 이름이 비어 있으면 비운다", () => {
+    const result = mapRoundToDraftBasicInfo(
+      group({ chapterName: "   " }),
       round(),
       10,
     )
