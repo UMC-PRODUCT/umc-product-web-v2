@@ -162,6 +162,7 @@ describe("RecruitmentQuotaPage 저장 경로 분류", () => {
           gisuId: "15",
           schoolId: "10",
           memo: null,
+          chapterTotalTargetCount: null,
           quotas: [
             { track: "PLAN", targetCount: 1 },
             { track: "DESIGN", targetCount: 1 },
@@ -215,6 +216,7 @@ describe("RecruitmentQuotaPage 저장 경로 분류", () => {
       gisuId: "15",
       schoolId: "10",
       memo: null,
+      chapterTotalTargetCount: null,
       quotas: [
         { track: "PLAN", targetCount: 3 },
         { track: "DESIGN", targetCount: 1 },
@@ -349,6 +351,7 @@ describe("RecruitmentQuotaPage 저장 경로 분류", () => {
             gisuId: "15",
             schoolId: "10",
             memo: null,
+            chapterTotalTargetCount: null,
             quotas: [
               { track: "PLAN", targetCount: 1 },
               { track: "DESIGN", targetCount: 1 },
@@ -365,6 +368,7 @@ describe("RecruitmentQuotaPage 저장 경로 분류", () => {
             gisuId: "15",
             schoolId: "20",
             memo: null,
+            chapterTotalTargetCount: null,
             quotas: [
               { track: "PLAN", targetCount: 2 },
               { track: "DESIGN", targetCount: 2 },

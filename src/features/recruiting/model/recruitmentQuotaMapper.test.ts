@@ -40,6 +40,7 @@ describe("mapGroupsToChapterQuotaData", () => {
         gisuId: "15",
         schoolId: "10",
         memo: null,
+        chapterTotalTargetCount: null,
         quotas: [
           { track: "PLAN", targetCount: 2 },
           { track: "DESIGN", targetCount: 3 },
@@ -56,6 +57,7 @@ describe("mapGroupsToChapterQuotaData", () => {
         gisuId: "15",
         schoolId: "20",
         memo: null,
+        chapterTotalTargetCount: null,
         quotas: [
           { track: "PLAN", targetCount: 1 },
           { track: "DESIGN", targetCount: 1 },
