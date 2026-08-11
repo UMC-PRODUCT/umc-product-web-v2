@@ -64,6 +64,11 @@ export function PreviewSection() {
   // 흉내 내는 환경마다 pointerType 이 갈려서, 정작 확인하는 화면에서 안 먹는다.
   const startDrag = (event: PointerEvent<HTMLDivElement>) => {
     if (!window.matchMedia("(max-width: 767px)").matches) return
+
+    // 포인터를 이 요소에 묶어 둔다. 손가락은 브라우저가 알아서 묶어 주지만 마우스는
+    // 아니라, 끌다가 패널 밖에서 손을 떼면 pointerup 이 다른 요소로 가 넘김이
+    // 통째로 사라진다. 패널이 390 에서 294px 뿐이라 조금만 크게 끌어도 벗어난다.
+    event.currentTarget.setPointerCapture(event.pointerId)
     dragStart.current = { x: event.clientX, y: event.clientY }
   }
 
