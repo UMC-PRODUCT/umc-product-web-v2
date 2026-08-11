@@ -8,7 +8,7 @@ function SchoolTrack() {
   return (
     <ul className="flex">
       {ABOUT_SCHOOLS.schools.map((school) => (
-        <li key={school.name} className="pr-5">
+        <li key={school.name} className="pr-2 md:pr-5">
           <SchoolChip name={school.name} logo={school.logo} />
         </li>
       ))}
@@ -68,7 +68,7 @@ export function SchoolsSection({
           </p>
         </div>
         {variant === "static" ? (
-          <ul className="flex flex-wrap justify-center gap-x-5 gap-y-7.5">
+          <ul className="flex flex-wrap justify-center gap-x-2 gap-y-6 md:gap-x-5 md:gap-y-7.5">
             {ABOUT_SCHOOLS.schools.map((school) => (
               <li key={school.name}>
                 <SchoolChip name={school.name} logo={school.logo} />
@@ -78,7 +78,7 @@ export function SchoolsSection({
         ) : (
           // 학교줄은 콘텐츠 폭을 넘어 화면 끝까지 흐른다. 부모가 items-center 라
           // 폭만 늘리면 가운데를 기준으로 양옆으로 똑같이 번져 나간다.
-          <div className="flex w-screen flex-col gap-7.5 overflow-hidden">
+          <div className="flex w-screen flex-col gap-6 overflow-hidden md:gap-7.5">
             <SchoolMarqueeRow direction="right" />
             <div aria-hidden>
               <SchoolMarqueeRow direction="left" />
