@@ -1,3 +1,10 @@
+import coreDay from "@/shared/assets/image/about/preview/core-day.webp"
+import demoDay from "@/shared/assets/image/about/preview/demo-day.webp"
+import fsDay from "@/shared/assets/image/about/preview/fs-day.webp"
+import neordinaryHackathon from "@/shared/assets/image/about/preview/neordinary-hackathon.webp"
+import networkingDay from "@/shared/assets/image/about/preview/networking-day.webp"
+import schoolOt from "@/shared/assets/image/about/preview/school-ot.webp"
+import umcHackathon from "@/shared/assets/image/about/preview/umc-hackathon.webp"
 import anyang from "@/shared/assets/image/about/schools/anyang.webp"
 import catholic from "@/shared/assets/image/about/schools/catholic.webp"
 import chungang from "@/shared/assets/image/about/schools/chungang.webp"
@@ -163,6 +170,79 @@ export const ABOUT_HERO = {
   ctaLabel: "11기 지원하기",
   // 헤더 지원하기와 같은 곳으로 보낸다. 진입로가 갈리면 한쪽만 바뀐다.
   ctaTo: APPLY_ENTRY_PATH,
+} as const
+
+export const ABOUT_PREVIEW = {
+  headline: "UMC Preview",
+  description: "다양한 IT 네트워킹을, 여기 UMC에서 경험하세요",
+
+  // TODO: 중앙 MT 는 사진 초상권 처리가 끝나면 마지막에 추가한다. 탭만 먼저 두면
+  // 사진 자리가 비어 카드가 무너져서 항목째로 뺀다.
+  items: [
+    {
+      id: "school-ot",
+      label: "학교 OT · 연합 OT",
+      image: schoolOt,
+      descriptionLines: [
+        "UMC의 첫걸음을 시작하는 챌린저들을 위한 자리예요.",
+        "UMC의 문화와 활동 방향부터 커리큘럼, 스터디 진행 방식까지 앞으로의 활동에 필요한 내용을 함께 알아가요.",
+      ],
+    },
+    {
+      id: "core-day",
+      label: "Core Day",
+      image: coreDay,
+      descriptionLines: [
+        "운영진들이 한자리에 모여 서로 교류하고 결속을 다지는 시간이에요.",
+        "각 지부의 행사를 준비하기에 앞서 자유롭게 소통하며, 함께 활동할 운영진들과 가까워지는 기회를 만들어요.",
+      ],
+    },
+    {
+      id: "networking-day",
+      label: "연합 네트워킹 데이",
+      image: networkingDay,
+      descriptionLines: [
+        "UMC의 다양한 학교와 기수의 부원들이 한자리에 모이는 네트워킹 행사예요.",
+        "현직 부원부터 OB까지 서로의 경험과 이야기를 나누며 새로운 사람들과 관계를 만들어가요.",
+      ],
+    },
+    {
+      id: "neordinary-hackathon",
+      label: "너디너리 해커톤",
+      image: neordinaryHackathon,
+      descriptionLines: [
+        "UMC와 CMC가 함께하는 대규모 해커톤이에요.",
+        "서로 다른 학교와 파트의 참가자들이 팀을 이루어 아이디어를 구체화하고, 기획부터 개발까지 하나의 서비스를 완성해요.",
+      ],
+    },
+    {
+      id: "umc-hackathon",
+      label: "UMC 해커톤",
+      image: umcHackathon,
+      descriptionLines: [
+        "UMC 부원들이 함께하는 해커톤이에요.",
+        "짧은 시간 동안 아이디어를 구체화하고 팀원들과 협업하며, 직접 결과물을 만들어보는 경험을 할 수 있어요.",
+      ],
+    },
+    {
+      id: "demo-day",
+      label: "DEMO Day",
+      image: demoDay,
+      descriptionLines: [
+        "8주간 함께 만든 프로젝트를 선보이는 자리예요.",
+        "기획부터 디자인, 개발까지 완성한 서비스를 직접 공유하고, 다른 팀의 프로젝트를 만나며 서로의 경험과 결과를 돌아봐요.",
+      ],
+    },
+    {
+      id: "fs-day",
+      label: "FS Day",
+      image: fsDay,
+      descriptionLines: [
+        "Focus Sprint Day를 뜻하며, 다양한 학교와 기수의 UMC 부원들이 모여 아이디어를 공유하고 프로젝트에 집중하는 날이에요.",
+        "팀별로 아이디어를 빠르게 구체화하고 결과물을 만들어보며, 서로의 작업을 공유하고 피드백을 나눠요.",
+      ],
+    },
+  ],
 } as const
 
 export const ABOUT_SCHOOLS = {
