@@ -72,9 +72,12 @@ export function PreviewSection() {
     dragStart.current = { x: event.clientX, y: event.clientY }
   }
 
-  const endDrag = (event: PointerEvent<HTMLDivElement>) => {
+  // 손을 뗄 때가 아니라 끄는 도중에 판정한다. 브라우저가 제스처를 세로 스크롤로
+  // 가져가기로 하면 pointercancel 을 보내고 pointerup 은 오지 않는데, 뗄 때까지
+  // 기다리면 그 판정이 통째로 사라진다. 문턱을 넘은 순간 넘겨 버리면 그 뒤에 무슨
+  // 이벤트가 오든 상관이 없다.
+  const moveDrag = (event: PointerEvent<HTMLDivElement>) => {
     const start = dragStart.current
-    dragStart.current = null
     if (!start) return
 
     const dx = event.clientX - start.x
@@ -82,7 +85,13 @@ export function PreviewSection() {
     // 세로로 더 많이 움직였으면 넘기려던 것이 아니라 스크롤이다.
     if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) <= Math.abs(dy)) return
 
+    // 한 번 끌 때 한 칸만 넘어가게 시작점을 비운다.
+    dragStart.current = null
     setIndex((current) => clamp(dx < 0 ? current + 1 : current - 1))
+  }
+
+  const endDrag = () => {
+    dragStart.current = null
   }
 
   // 세로로 늘어선 탭이라 화살표도 위아래가 기본이다. role 만 붙이고 두면 화면
@@ -169,8 +178,9 @@ export function PreviewSection() {
             role="tabpanel"
             aria-labelledby={`preview-tab-${active.id}`}
             onPointerDown={startDrag}
+            onPointerMove={moveDrag}
             onPointerUp={endDrag}
-            onPointerCancel={() => (dragStart.current = null)}
+            onPointerCancel={endDrag}
             // 가로 제스처는 우리가 처리하고 세로 스크롤은 브라우저에 넘긴다.
             className="flex min-w-px touch-pan-y flex-col gap-2.5 md:min-w-px md:flex-1 md:gap-4 md:px-6.5"
           >
