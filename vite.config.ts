@@ -19,11 +19,11 @@ export default defineConfig({
     tailwindcss(),
   ],
   build: {
-    /* 학교 로고는 소개 랜딩 하단 마퀴에서 loading="lazy" 로 받는다. WebP 로 바꾸며
-       대부분 4KB 아래가 됐는데, 그러면 기본 assetsInlineLimit 에 걸려 JS 에
+    /* 학교·후원사 로고는 소개 랜딩 아래쪽에서 loading="lazy" 로 받는다. WebP 로
+       바꾸며 대부분 4KB 아래가 됐는데, 그러면 기본 assetsInlineLimit 에 걸려 JS 에
        base64 로 박힌다. lazy 가 무력화되고 엔트리 청크만 커지므로 제외한다. */
     assetsInlineLimit: (filePath) =>
-      filePath.includes("/image/about/schools/") ? false : undefined,
+      /\/image\/about\/(schools|sponsors)\//.test(filePath) ? false : undefined,
   },
   resolve: {
     alias: {
