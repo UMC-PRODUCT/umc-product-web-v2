@@ -5,6 +5,7 @@ import { IntroSection } from "./sections/IntroSection"
 import { PossibilitySection } from "./sections/PossibilitySection"
 import { RecruitPartsSection } from "./sections/RecruitPartsSection"
 import { SchoolsSection } from "./sections/SchoolsSection"
+import { SponsorsSection } from "./sections/SponsorsSection"
 
 export function AboutPage() {
   return (
@@ -17,6 +18,7 @@ export function AboutPage() {
         <PossibilitySection />
         <RecruitPartsSection />
         <SchoolsSection />
+        <SponsorsSection />
         <ClosingSection />
       </div>
     </div>

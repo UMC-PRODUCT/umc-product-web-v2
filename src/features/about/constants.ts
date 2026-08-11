@@ -18,6 +18,12 @@ import seokyeong from "@/shared/assets/image/about/schools/seokyeong.webp"
 import seoulWomens from "@/shared/assets/image/about/schools/seoul-womens.webp"
 import soongsil from "@/shared/assets/image/about/schools/soongsil.webp"
 import sungshin from "@/shared/assets/image/about/schools/sungshin.webp"
+import comgongSunbae from "@/shared/assets/image/about/sponsors/comgong-sunbae.webp"
+import gridge from "@/shared/assets/image/about/sponsors/gridge.webp"
+import jober from "@/shared/assets/image/about/sponsors/jober.webp"
+import neordinary from "@/shared/assets/image/about/sponsors/neordinary.webp"
+import softSquared from "@/shared/assets/image/about/sponsors/soft-squared.webp"
+import vieworks from "@/shared/assets/image/about/sponsors/vieworks.webp"
 import { APPLY_ENTRY_PATH } from "@/shared/config/headerRecruitingWindow"
 
 export const ABOUT_RECRUIT = {
@@ -194,6 +200,46 @@ export const ABOUT_SCHOOLS = {
     { name: "한성대", logo: hansung },
     { name: "홍익대(서울)", logo: hongik },
     { name: "홍익대(세종)", logo: hongik },
+  ],
+} as const
+
+export const ABOUT_SPONSORS = {
+  headline: "후원사",
+  descriptionLines: [
+    "UMC의 성장을 함께 만들어주시는 후원사와 함께",
+    "더 많은 배움과 도전의 기회를 이어가고 있습니다.",
+  ],
+  ctaLabel: "후원 문의하기 →",
+  ctaHref: "mailto:university@makeus.in",
+  lead: [
+    {
+      name: "컴공선배",
+      logo: comgongSunbae,
+      width: "w-[53px] md:w-[94px] lg:w-[150px]",
+    },
+    {
+      name: "너디너리",
+      logo: neordinary,
+      width: "w-[113px] md:w-[200px] lg:w-[321px]",
+    },
+  ],
+  partners: [
+    {
+      name: "소프트스퀘어드",
+      logo: softSquared,
+      width: "w-[113px] md:w-[139px] lg:w-[222px]",
+    },
+    {
+      name: "그릿지",
+      logo: gridge,
+      width: "w-[98px] md:w-[120px] lg:w-[193px]",
+    },
+    { name: "jober", logo: jober, width: "w-[90px] md:w-[110px] lg:w-[177px]" },
+    {
+      name: "vieworks",
+      logo: vieworks,
+      width: "w-[114px] md:w-[140px] lg:w-[225px]",
+    },
   ],
 } as const
 
