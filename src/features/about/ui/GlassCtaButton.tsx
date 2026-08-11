@@ -76,6 +76,13 @@ interface GlassCtaButtonProps extends ComponentPropsWithoutRef<"button"> {
   tone?: keyof typeof TONE_OVERLAY
   /** 주면 링크로 그린다. 없으면 버튼 그대로다. */
   to?: ComponentProps<typeof Link>["to"]
+  /**
+   * 라우터가 다루지 않는 주소. mailto: 나 외부 링크에 쓴다.
+   *
+   * `to` 는 라우트 트리에 있는 경로만 받아서 mailto 를 넘길 수 없다. 넘겨도
+   * 라우터가 내부 경로로 해석해 이동에 실패한다.
+   */
+  href?: string
 }
 
 export function GlassCtaButton({
@@ -83,6 +90,7 @@ export function GlassCtaButton({
   children,
   tone = "subtle",
   to,
+  href,
   ...props
 }: GlassCtaButtonProps) {
   // rounded-2xl 은 이 레포에서 18px 이라 시안의 16px 과 다르다.
@@ -119,6 +127,14 @@ export function GlassCtaButton({
       <span className="relative">{children}</span>
     </>
   )
+
+  if (href) {
+    return (
+      <a href={href} className={shared}>
+        {body}
+      </a>
+    )
+  }
 
   if (to) {
     return (
