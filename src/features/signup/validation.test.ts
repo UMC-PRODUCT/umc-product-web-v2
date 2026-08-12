@@ -15,7 +15,7 @@ describe("nameSchema", () => {
     const result = nameSchema.safeParse("   ")
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe("이름을 입력해 주세요.")
+      expect(result.error.issues[0]?.message).toBe("이름을 입력해 주세요.")
     }
   })
 
@@ -23,7 +23,7 @@ describe("nameSchema", () => {
     const result = nameSchema.safeParse("가나다라마바사아자차카타파하")
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe(
+      expect(result.error.issues[0]?.message).toBe(
         "이름은 10자 이하로 입력해 주세요.",
       )
     }
@@ -33,7 +33,7 @@ describe("nameSchema", () => {
     const result = nameSchema.safeParse("  가나다라마바사아자차카타파하  ")
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe(
+      expect(result.error.issues[0]?.message).toBe(
         "이름은 10자 이하로 입력해 주세요.",
       )
     }
