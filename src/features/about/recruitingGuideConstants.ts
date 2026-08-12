@@ -60,8 +60,7 @@ export interface RecruitingGuideFaqItem {
   question: string
   answer: string
   /**
-   * 이 문답이 걸리는 파트. 비어 있으면 파트를 가리지 않는 공통 문답이라
-   * 어떤 필터에서도 보인다. 시안이 문답별 파트를 정해 두지 않아 전부 공통이다.
+   * 이 문답이 표시되는 파트. 비어 있으면 전체 필터에서만 보이는 공통 문답이다.
    */
   parts: readonly Exclude<RecruitingGuideFaqFilterId, "all">[]
 }
