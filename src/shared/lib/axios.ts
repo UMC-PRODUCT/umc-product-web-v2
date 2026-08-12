@@ -19,6 +19,7 @@ declare module "axios" {
 
 const AUTH_LOGIN_PATH = "/v1/auth/login"
 const TOKEN_RENEW_PATH = "/v1/auth/token/renew"
+const AUTH_EMAIL_VERIFICATION_PATH = "/v1/auth/email-verification"
 
 function getRequestPathname(url: string | undefined) {
   if (!url) return null
@@ -34,6 +35,14 @@ function isLoginRequest(url: string | undefined) {
 
 function isTokenRenewRequest(url: string | undefined) {
   return getRequestPathname(url) === TOKEN_RENEW_PATH
+}
+
+function isEmailVerificationRequest(url: string | undefined) {
+  const pathname = getRequestPathname(url)
+  return (
+    pathname === AUTH_EMAIL_VERIFICATION_PATH ||
+    pathname?.startsWith(`${AUTH_EMAIL_VERIFICATION_PATH}/`)
+  )
 }
 
 export const api = axios.create({
@@ -117,7 +126,8 @@ api.interceptors.response.use(
     if (
       error.response?.status !== 401 ||
       isLoginRequest(originalRequest.url) ||
-      isTokenRenewRequest(originalRequest.url)
+      isTokenRenewRequest(originalRequest.url) ||
+      isEmailVerificationRequest(originalRequest.url)
     ) {
       return Promise.reject(error)
     }
