@@ -59,8 +59,15 @@ export function ProfileInfoStep() {
           {...register("name")}
           type="default"
           value={name}
+          state={name !== "" && !!errors.name ? "error" : "default"}
           className="w-full"
         />
+
+        {errors.name?.message && (
+          <p className="text-body-2-medium text-error-500">
+            {errors.name.message}
+          </p>
+        )}
       </div>
 
       <div className="flex w-full flex-col gap-1.5">
