@@ -71,7 +71,7 @@ function FaqItem({ item }: { item: RecruitingGuideFaqItem }) {
         )}
       >
         <div className="overflow-hidden">
-          <div className="text-teal-gray-300 pt-4 pl-7 text-base leading-[1.6] tracking-[-0.32px] md:pl-9">
+          <div className="text-teal-gray-300 pt-4 pl-7 text-base leading-[1.6] tracking-[-0.32px] whitespace-pre-line md:pl-9">
             {item.answer}
           </div>
         </div>
@@ -112,11 +112,9 @@ export function RecruitingGuideFaqSection() {
     tabRefs.current[next as number]?.focus()
   }
 
-  // 파트를 비워 둔 문답은 공통이라 어느 필터에서도 남는다.
   const visibleItems = RECRUITING_GUIDE_FAQ.items.filter(
     (item) =>
       activeFilterId === "all" ||
-      item.parts.length === 0 ||
       item.parts.some((part) => part === activeFilterId),
   )
 
