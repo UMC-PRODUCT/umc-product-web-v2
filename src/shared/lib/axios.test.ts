@@ -154,20 +154,24 @@ describe("토큰 갱신 실패", () => {
     expect(redirectToLogin).not.toHaveBeenCalled()
   })
 
-  it("이메일 인증 하위 경로의 401은 토큰 갱신 및 리다이렉트 대상에서 제외한다", async () => {
-    const adapter = vi.fn<AxiosAdapter>(async (config) => {
-      return rejectUnauthorized(config)
-    })
-    const { api, clear, redirectToLogin } = await createSubject(adapter)
+  it.each([
+    { path: "/v1/auth/email-verification", label: "이메일 인증" },
+    { path: "/v1/auth/email-verification/code", label: "이메일 인증 하위" },
+  ])(
+    "$label 경로의 401은 토큰 갱신 및 리다이렉트 대상에서 제외한다",
+    async ({ path }) => {
+      const adapter = vi.fn<AxiosAdapter>(async (config) => {
+        return rejectUnauthorized(config)
+      })
+      const { api, clear, redirectToLogin } = await createSubject(adapter)
 
-    await expect(
-      api.post("/v1/auth/email-verification/code"),
-    ).rejects.toBeInstanceOf(AxiosError)
+      await expect(api.post(path)).rejects.toBeInstanceOf(AxiosError)
 
-    expect(adapter).toHaveBeenCalledOnce()
-    expect(clear).not.toHaveBeenCalled()
-    expect(redirectToLogin).not.toHaveBeenCalled()
-  })
+      expect(adapter).toHaveBeenCalledOnce()
+      expect(clear).not.toHaveBeenCalled()
+      expect(redirectToLogin).not.toHaveBeenCalled()
+    },
+  )
 
   it("동시 요청 중 갱신이 실패하면 대기열의 요청도 모두 reject한다", async () => {
     let releaseRenew: () => void = () => undefined
