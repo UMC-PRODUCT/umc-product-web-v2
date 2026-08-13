@@ -23,6 +23,7 @@ import koreaAerospace from "@/shared/assets/image/about/schools/korea-aerospace.
 import sejong from "@/shared/assets/image/about/schools/sejong.webp"
 import seokyeong from "@/shared/assets/image/about/schools/seokyeong.webp"
 import seoulWomens from "@/shared/assets/image/about/schools/seoul-womens.webp"
+import sookmyung from "@/shared/assets/image/about/schools/sookmyung.webp"
 import soongsil from "@/shared/assets/image/about/schools/soongsil.webp"
 import sungshin from "@/shared/assets/image/about/schools/sungshin.webp"
 import comgongSunbae from "@/shared/assets/image/about/sponsors/comgong-sunbae.webp"
@@ -269,6 +270,7 @@ export const ABOUT_SCHOOLS = {
     { name: "서경대", logo: seokyeong },
     { name: "서울여대", logo: seoulWomens },
     { name: "성신여대", logo: sungshin },
+    { name: "숙명여대", logo: sookmyung },
     { name: "숭실대", logo: soongsil },
     { name: "세종대", logo: sejong },
     { name: "안양대", logo: anyang },
