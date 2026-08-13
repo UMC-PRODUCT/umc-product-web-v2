@@ -8,8 +8,8 @@ import {
 import { applicationKeys } from "@/entities/application/api/applicationKeys"
 import { useViewModeStore } from "@/entities/member/view-mode"
 import { useAllSchools } from "@/entities/organization/hooks/useAllSchools"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { getProjectMembersBatch } from "@/entities/project/api/matchingProject"
-import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
 import { matchingResponseToStats } from "../model/matchingStatsMapper"
@@ -35,18 +35,17 @@ export function useMatchingStatusData(chapterName?: string) {
   const gisuQuery = useActiveGisuId()
   const gisuId = gisuQuery.data ?? 0
 
-  const chaptersQuery = useChapters()
-  const chapters = useMemo(
-    () => chaptersQuery.data?.chapters ?? [],
-    [chaptersQuery.data],
+  // 챕터 필터링. 활성 기수의 지부로만 매핑한다. 기수 구분이 없는 목록으로 찾으면
+  // 같은 이름의 지난 기수 지부 ID 가 잡혀 엉뚱한 데이터를 조회하게 된다.
+  const {
+    getChapterIdByName,
+    isLoading: chaptersLoading,
+    isError: chaptersError,
+  } = useSchoolChapterMap()
+  const chapterId = useMemo(
+    () => (chapterName ? getChapterIdByName(chapterName) : undefined),
+    [chapterName, getChapterIdByName],
   )
-
-  // 챕터 필터링
-  const chapterId = useMemo(() => {
-    if (!chapterName || chapters.length === 0) return undefined
-    const found = chapters.find((c) => c.name === chapterName)
-    return found ? Number(found.id) : undefined
-  }, [chapterName, chapters])
 
   // 전체 프로젝트 조회 (매칭 결과 시트용)
   const projectsQuery = useQuery({
@@ -170,7 +169,7 @@ export function useMatchingStatusData(chapterName?: string) {
     isAdmin,
     isLoading:
       gisuQuery.isLoading ||
-      chaptersQuery.isLoading ||
+      chaptersLoading ||
       projectsQuery.isLoading ||
       schoolsQuery.isLoading ||
       (projects.length > 0 &&
@@ -179,12 +178,7 @@ export function useMatchingStatusData(chapterName?: string) {
       (!!chapterId &&
         matchingStatsQuery.data === undefined &&
         !matchingStatsQuery.isError),
-    isError:
-      gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError,
-    error:
-      gisuQuery.error ??
-      chaptersQuery.error ??
-      projectsQuery.error ??
-      matchingStatsQuery.error,
+    isError: gisuQuery.isError || chaptersError || projectsQuery.isError,
+    error: gisuQuery.error ?? projectsQuery.error ?? matchingStatsQuery.error,
   }
 }
