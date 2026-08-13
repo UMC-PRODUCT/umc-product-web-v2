@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
 import {
@@ -7,8 +7,8 @@ import {
   isChapterPresident,
   isOperator,
 } from "@/entities/member/model/identity"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { type Chapter } from "@/entities/organization/model/chapters"
-import { useChapters } from "@/features/application/hooks/useApplicationPageData"
 import { ApplicationStatsSection } from "@/features/application/ui/ApplicationStatsSection"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { useMatchingStatusData } from "@/features/matching/hooks/useMatchingStatusData"
@@ -28,15 +28,9 @@ export const Route = createFileRoute("/matching/status")({
 function MatchingStatusPage() {
   const { data: me } = useMe()
   const isAdmin = isOperator(me)
-  const chaptersQuery = useChapters()
-  const chapters = useMemo(
-    () => chaptersQuery.data?.chapters ?? [],
-    [chaptersQuery.data],
-  )
-  const chapterNames = useMemo(
-    () => chapters.map((c) => c.name).filter(Boolean),
-    [chapters],
-  )
+  // 활성 기수의 지부만 받는다. 기수 구분이 없는 /v1/chapters 를 쓰면 지난 기수
+  // 지부까지 탭에 깔린다.
+  const { chapters, chapterNames } = useSchoolChapterMap()
 
   // challenger records에서 지부명 추출 (어드민 포함 모든 역할)
   const userChapter = getViewerBranch(me)
@@ -71,9 +65,9 @@ function MatchingStatusPage() {
       (r) => r.roleType === "CHAPTER_PRESIDENT",
     )?.organizationId
     if (!myChapterId) return
-    const myChapter = chapters.find((c) => c.id === myChapterId)
-    if (myChapter && chapterNames.includes(myChapter.name)) {
-      setSelectedChapter(myChapter.name)
+    const myChapter = chapters.find((c) => c.chapterId === myChapterId)
+    if (myChapter && chapterNames.includes(myChapter.chapterName)) {
+      setSelectedChapter(myChapter.chapterName)
       hasAutoSelected.current = true
     }
   }, [me, chapters, userChapter])

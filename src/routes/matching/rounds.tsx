@@ -14,7 +14,7 @@ import {
   canManageMatchingRounds,
   isChapterPresident,
 } from "@/entities/member/model/identity"
-import { useChapters } from "@/features/application/hooks/useApplicationPageData"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import {
   type Branch,
@@ -105,12 +105,10 @@ function MatchingRoundsPage() {
   const addToast = useToastStore((s) => s.addToast)
   const { data: me } = useMe()
 
-  // 지부 목록 조회 -> branch name -> chapterId 매핑
-  const chaptersQuery = useChapters()
-  const chapters = useMemo(
-    () => chaptersQuery.data?.chapters ?? [],
-    [chaptersQuery.data],
-  )
+  // 지부 목록 조회 -> branch name -> chapterId 매핑.
+  // 활성 기수의 지부만 받는다. 기수 구분이 없는 /v1/chapters 를 쓰면 지난 기수
+  // 지부까지 섞여 잘못된 chapterId 로 해석될 수 있다.
+  const { chapters } = useSchoolChapterMap()
 
   // 로그인한 계정의 지부 정보가 있으면 최초 1회 자동 선택
   useEffect(() => {
@@ -119,16 +117,16 @@ function MatchingRoundsPage() {
       (r) => r.roleType === "CHAPTER_PRESIDENT",
     )?.organizationId
     if (!myChapterId) return
-    const myChapter = chapters.find((c) => c.id === myChapterId)
+    const myChapter = chapters.find((c) => c.chapterId === myChapterId)
     if (myChapter) {
-      setSelectedBranch(myChapter.name as Branch)
+      setSelectedBranch(myChapter.chapterName as Branch)
       hasAutoSelectedBranch.current = true
     }
   }, [me, chapters])
 
   const chapterId = useMemo(() => {
-    const found = chapters.find((c) => c.name === selectedBranch)
-    return found ? Number(found.id) : undefined
+    const found = chapters.find((c) => c.chapterName === selectedBranch)
+    return found ? Number(found.chapterId) : undefined
   }, [selectedBranch, chapters])
 
   // 매칭 차수 목록 조회
@@ -199,8 +197,8 @@ function MatchingRoundsPage() {
       const myChapterId = me?.roles?.find(
         (r) => r.roleType === "CHAPTER_PRESIDENT",
       )?.organizationId
-      const targetChapter = chapters.find((c) => c.name === branch)
-      if (!targetChapter || String(targetChapter.id) !== myChapterId) {
+      const targetChapter = chapters.find((c) => c.chapterName === branch)
+      if (!targetChapter || targetChapter.chapterId !== myChapterId) {
         addToast({
           message: "소속된 지부의 매칭 기간만 설정할 수 있습니다.",
           color: "red",
