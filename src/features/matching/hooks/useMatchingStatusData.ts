@@ -76,7 +76,11 @@ export function useMatchingStatusData(chapterName?: string) {
 
       return { ...firstPage, content: projects }
     },
-    enabled: gisuId > 0,
+    // 지부를 고른 상태라면 그 ID 가 확정된 뒤에만 조회한다. chapterId 를 파라미터로
+    // 넘기면서 여기서 안 막으면, 매핑 전에는 필터가 빠진 채 전체 기수 프로젝트를
+    // 받아 잠깐 다른 지부 데이터까지 보인다. 지난 기수 지부명이 남아 매핑이 아예
+    // 실패하면 그 화면이 계속 유지된다.
+    enabled: gisuId > 0 && (!chapterName || chapterId !== undefined),
     staleTime: 1000 * 60 * 5,
   })
 

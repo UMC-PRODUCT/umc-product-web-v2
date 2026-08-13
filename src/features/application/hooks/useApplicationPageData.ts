@@ -302,7 +302,11 @@ export function useAdminPageData(
   const projectsQuery = useQuery({
     queryKey: applicationKeys.allProjects(gisuId, chapterId),
     queryFn: () => getAllProjects(gisuId, { chapterId, size: 100 }),
-    enabled: enabled && gisuId > 0,
+    // 지부를 고른 상태라면 그 ID 가 확정된 뒤에만 조회한다. chapterId 를 파라미터로
+    // 넘기면서 여기서 안 막으면, 매핑 전에는 필터가 빠진 채 전체 기수 프로젝트를
+    // 받아 잠깐 다른 지부 데이터까지 보인다. 같은 파일의 다른 조회들은 이미
+    // chapterId 를 확인하고 있어 여기만 빠져 있었다.
+    enabled: enabled && gisuId > 0 && (!chapterName || chapterId !== undefined),
   })
 
   const projects = useMemo(
