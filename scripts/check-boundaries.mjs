@@ -16,9 +16,10 @@
 
 import { execSync } from "node:child_process"
 
-// 2026-07-10 기준 lateral 위반 13건(features 슬라이스 간 수평 결합).
+// 2026-08-13 기준 lateral 위반 12건(features 슬라이스 간 수평 결합).
+// matching 이 지부 목록을 application 슬라이스에서 받아 오던 결합을 걷어내며 1건 줄었다.
 // upward(역방향) 위반은 0이며 baseline 없이 무조건 차단한다.
-const LATERAL_BASELINE = 13
+const LATERAL_BASELINE = 12
 const RULE = "boundaries/dependencies"
 
 // 레이어 상하 순서(위->아래). 숫자가 클수록 하위 레이어다.
