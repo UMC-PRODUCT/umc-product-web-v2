@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 
@@ -13,11 +12,10 @@ import {
   isSchoolLeadership,
 } from "@/entities/member/model/identity"
 import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
-import { getChaptersWithSchools } from "@/entities/organization/api/organization"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import {
   useAdminPageData,
   useChallengerPageData,
-  useChapters,
 } from "@/features/application/hooks/useApplicationPageData"
 import { useProjectsPermissions } from "@/features/application/hooks/useProjectsPermissions"
 import { resolveMatchingApplicationView } from "@/features/application/model/applicationViewMode"
@@ -27,7 +25,6 @@ import { ChallengerApplicationView } from "@/features/application/ui/ChallengerA
 import { MyApplicationView } from "@/features/application/ui/MyApplicationView"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { useIsMatchingPeriod } from "@/features/project/new/hooks/useIsMatchingPeriod"
-import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 import { ProjectTitleCard } from "@/shared/ui/ProjectTitleCard"
 import { SegmentButton } from "@/shared/ui/segment-button/SegmentButton"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
@@ -44,22 +41,9 @@ function MatchingApplicationsPage() {
   const { me: identity, viewContext } = useViewerIdentity()
   const schoolLeadership = isSchoolLeadership(identity)
   const addToast = useToastStore((s) => s.addToast)
-  const chaptersQuery = useChapters()
-  const chapters = useMemo(
-    () => chaptersQuery.data?.chapters ?? [],
-    [chaptersQuery.data],
-  )
-  const chapterNames = useMemo(
-    () => chapters.map((c) => c.name).filter(Boolean),
-    [chapters],
-  )
-
-  const gisuId = useActiveGisuId().data ?? 0
-  const chaptersWithSchoolsQuery = useQuery({
-    queryKey: ["chapters-with-schools", gisuId],
-    queryFn: () => getChaptersWithSchools(String(gisuId)),
-    enabled: gisuId > 0 && schoolLeadership,
-  })
+  // 활성 기수의 지부만 받는다. 기수 구분이 없는 /v1/chapters 를 쓰면 지난 기수
+  // 지부까지 탭에 깔린다. 학교 목록도 같이 오므로 학교 회장 폴백까지 이 하나로 덮는다.
+  const { chapters, chapterNames } = useSchoolChapterMap()
 
   // challenger records에서 지부명 추출 (어드민 포함 모든 역할)
   const userChapter = getViewerBranch(me)
@@ -115,16 +99,16 @@ function MatchingApplicationsPage() {
         (r) => r.roleType === "CHAPTER_PRESIDENT",
       )?.organizationId
       if (!myChapterId) return
-      const myChapter = chapters.find((c) => c.id === myChapterId)
+      const myChapter = chapters.find((c) => c.chapterId === myChapterId)
       if (myChapter) {
-        setSelectedChapter(myChapter.name)
-        ownChapter.current = myChapter.name
+        setSelectedChapter(myChapter.chapterName)
+        ownChapter.current = myChapter.chapterName
         hasAutoSelected.current = true
       }
       return
     }
     if (isSchoolLeadership(me)) {
-      const myChapter = chaptersWithSchoolsQuery.data?.chapters.find((c) =>
+      const myChapter = chapters.find((c) =>
         c.schools.some((s) => s.schoolId === String(me.schoolId)),
       )
       if (myChapter && chapterNames.includes(myChapter.chapterName)) {
@@ -133,7 +117,7 @@ function MatchingApplicationsPage() {
         hasAutoSelected.current = true
       }
     }
-  }, [me, chapters, userChapter, chaptersWithSchoolsQuery.data])
+  }, [me, chapters, userChapter])
 
   // 차수 제한 대상: 지부장·교내 회장/부회장·Plan 챌린저 (최고관리자·중앙 총괄단 제외)
   const isRoundRestrictedRole =

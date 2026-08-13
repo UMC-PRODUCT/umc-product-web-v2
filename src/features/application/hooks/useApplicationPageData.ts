@@ -18,11 +18,9 @@ import {
 } from "@/entities/application/model/mappers"
 import { useMe } from "@/entities/member/hooks/useMe"
 import { getLatestChallengerRecord } from "@/entities/member/model/identity"
-import {
-  getAllChapters,
-  getChaptersWithSchools,
-} from "@/entities/organization/api/organization"
+import { getAllChapters } from "@/entities/organization/api/organization"
 import { useAllSchools } from "@/entities/organization/hooks/useAllSchools"
+import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { getProjectDetail } from "@/entities/project/api/matchingProject"
 import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
 
@@ -277,40 +275,38 @@ export function useAdminPageData(
   const gisuQuery = useActiveGisuId({ enabled })
   const gisuId = gisuQuery.data ?? 0
 
-  const chaptersQuery = useChapters({ enabled })
-  const chapters = useMemo(
-    () => chaptersQuery.data?.chapters ?? [],
-    [chaptersQuery.data],
-  )
+  // 지부 목록과 지부별 학교 ID 를 한 곳에서 받는다. 예전에는 기수 구분이 없는
+  // 목록으로 이름->ID 를 찾고, 학교 ID 는 따로 with-schools 를 받아 같은 데이터를
+  // 두 번 조회했다.
+  const {
+    chapters,
+    getChapterIdByName,
+    isLoading: chaptersLoading,
+    isError: chaptersError,
+  } = useSchoolChapterMap()
 
-  // 지부별 학교 ID 조회 (schoolMatchingStatistics 필터링용)
-  const chaptersWithSchoolsQuery = useQuery({
-    queryKey: ["chapters-with-schools", gisuId],
-    queryFn: () => getChaptersWithSchools(String(gisuId)),
-    enabled: enabled && gisuId > 0,
-    staleTime: Infinity,
-  })
   const chapterSchoolIds = useMemo(() => {
-    if (!chapterName || !chaptersWithSchoolsQuery.data) return null
-    const chapter = chaptersWithSchoolsQuery.data.chapters.find(
-      (c) => c.chapterName === chapterName,
-    )
+    if (!chapterName) return null
+    const chapter = chapters.find((c) => c.chapterName === chapterName)
     if (!chapter) return null
     return new Set(chapter.schools.map((s) => String(s.schoolId)))
-  }, [chapterName, chaptersWithSchoolsQuery.data])
+  }, [chapterName, chapters])
 
   // 선택된 챕터 이름 -> chapterId 매핑
-  const chapterId = useMemo(() => {
-    if (!chapterName || chapters.length === 0) return undefined
-    const found = chapters.find((c) => c.name === chapterName)
-    return found ? Number(found.id) : undefined
-  }, [chapterName, chapters])
+  const chapterId = useMemo(
+    () => (chapterName ? getChapterIdByName(chapterName) : undefined),
+    [chapterName, getChapterIdByName],
+  )
 
   // 전체 프로젝트 목록 조회 (지원자 테이블용)
   const projectsQuery = useQuery({
     queryKey: applicationKeys.allProjects(gisuId, chapterId),
     queryFn: () => getAllProjects(gisuId, { chapterId, size: 100 }),
-    enabled: enabled && gisuId > 0,
+    // 지부를 고른 상태라면 그 ID 가 확정된 뒤에만 조회한다. chapterId 를 파라미터로
+    // 넘기면서 여기서 안 막으면, 매핑 전에는 필터가 빠진 채 전체 기수 프로젝트를
+    // 받아 잠깐 다른 지부 데이터까지 보인다. 같은 파일의 다른 조회들은 이미
+    // chapterId 를 확인하고 있어 여기만 빠져 있었다.
+    enabled: enabled && gisuId > 0 && (!chapterName || chapterId !== undefined),
   })
 
   const projects = useMemo(
@@ -519,14 +515,13 @@ export function useAdminPageData(
     isLoading:
       enabled &&
       (gisuQuery.isLoading ||
-        chaptersQuery.isLoading ||
+        chaptersLoading ||
         roundsQuery.isLoading ||
         projectsQuery.isLoading ||
         chapterStatsQuery.isLoading ||
-        chaptersWithSchoolsQuery.isLoading),
+        false),
     isError:
-      enabled &&
-      (gisuQuery.isError || chaptersQuery.isError || projectsQuery.isError),
-    error: gisuQuery.error ?? chaptersQuery.error ?? projectsQuery.error,
+      enabled && (gisuQuery.isError || chaptersError || projectsQuery.isError),
+    error: gisuQuery.error ?? projectsQuery.error,
   }
 }

@@ -13,10 +13,7 @@ import {
   isSuperAdmin,
 } from "@/entities/member/model/identity"
 import { useViewerIdentity } from "@/entities/member/view-mode/useViewerIdentity"
-import {
-  getAllChapters,
-  getAllGisu,
-} from "@/entities/organization/api/organization"
+import { getAllGisu } from "@/entities/organization/api/organization"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import { type Chapter, isChapter } from "@/entities/organization/model/chapters"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
@@ -121,7 +118,8 @@ function TeamMatchingAnnouncePage() {
   const [pendingNotice] = useState(readPendingNotice)
   const [hashNoticeId] = useState(readHashNoticeId)
 
-  const { chapterNames: serverChapterNames } = useSchoolChapterMap()
+  const { chapterNames: serverChapterNames, getChapterIdByName } =
+    useSchoolChapterMap()
 
   const { data: me } = useMe()
   const { me: identity } = useViewerIdentity()
@@ -138,22 +136,18 @@ function TeamMatchingAnnouncePage() {
     queryFn: getAllGisu,
   })
 
-  // 지부 정보 조회
-  const { data: chaptersData } = useQuery({
-    queryKey: ["chapters", "all"],
-    queryFn: getAllChapters,
-  })
-
   const activeGisuId = useMemo(() => {
     if (!gisuData) return null
     const active = gisuData.gisuList.find((g) => g.isActive)
     return active ? active.gisuId : gisuData.gisuList[0]?.gisuId || null
   }, [gisuData])
 
-  const selectedChapterId = useMemo(() => {
-    if (!chaptersData) return null
-    return chaptersData.chapters.find((c) => c.name === chapter)?.id || null
-  }, [chaptersData, chapter])
+  // 이름->ID 매핑도 활성 기수 목록으로 한다. 기수 구분이 없는 목록으로 찾으면
+  // 같은 이름의 지난 기수 지부 ID 가 잡힐 수 있다.
+  const selectedChapterId = useMemo(
+    () => (chapter ? (getChapterIdByName(chapter) ?? null) : null),
+    [chapter, getChapterIdByName],
+  )
 
   useEffect(() => {
     if (serverChapterNames.length === 0) return
