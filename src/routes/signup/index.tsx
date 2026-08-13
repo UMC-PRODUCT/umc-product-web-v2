@@ -449,7 +449,7 @@ function SignUpPage() {
 
     const payload: EmailRegisterMemberRequest = {
       rawPassword: password,
-      name,
+      name: name.trim(),
       nickname,
       emailVerificationToken,
       schoolId: Number(selectedSchool.schoolId),
@@ -500,6 +500,7 @@ function SignUpPage() {
   const isPasswordValid = password !== "" && !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
 
+  const isNameValid = name.trim() !== "" && !errors.name
   const isNicknameValid = nickname !== "" && !errors.nickname
 
   const currentStep = resolveEmailSignupStep({
@@ -516,7 +517,7 @@ function SignUpPage() {
       : currentStep === "PASSWORD"
         ? !isPasswordValid || !isPasswordMatch
         : currentStep === "PROFILE"
-          ? !school || !name || !isNicknameValid
+          ? !school || !isNameValid || !isNicknameValid
           : currentStep === "TERMS"
             ? terms
                 .filter((t) => t.isMandatory)

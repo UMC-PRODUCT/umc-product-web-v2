@@ -4,12 +4,20 @@ import {
   codeSchema,
   emailSchema,
   idSchema,
+  nameSchema,
   nicknameSchema,
   passwordSchema,
 } from "@/shared/lib/validationSchemas"
 
 // 하위 호환: 기존 소비자(routes 등)가 signup/validation 경유로 참조하던 primitive re-export
-export { codeSchema, emailSchema, idSchema, nicknameSchema, passwordSchema }
+export {
+  codeSchema,
+  emailSchema,
+  idSchema,
+  nameSchema,
+  nicknameSchema,
+  passwordSchema,
+}
 
 export const signUpSchemaObject = z.object({
   email: emailSchema,
@@ -18,7 +26,7 @@ export const signUpSchemaObject = z.object({
   password: passwordSchema,
   confirmPassword: z.string(),
   school: z.string().min(1, "학교를 선택해주세요."),
-  name: z.string().min(1, "이름을 입력해 주세요."),
+  name: nameSchema,
   nickname: nicknameSchema,
   termsAgreements: z.record(z.coerce.number(), z.boolean()),
 })
@@ -35,7 +43,7 @@ export const oauthSignUpSchema = z.object({
   email: emailSchema,
   code: codeSchema,
   school: z.string().min(1, "학교를 선택해주세요."),
-  name: z.string().min(1, "이름을 입력해 주세요."),
+  name: nameSchema,
   nickname: nicknameSchema,
   termsAgreements: z.record(z.coerce.number(), z.boolean()),
 })
