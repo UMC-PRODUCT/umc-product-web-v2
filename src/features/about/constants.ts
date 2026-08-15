@@ -1,6 +1,7 @@
 import coreDay from "@/shared/assets/image/about/preview/core-day.webp"
 import demoDay from "@/shared/assets/image/about/preview/demo-day.webp"
 import fsDay from "@/shared/assets/image/about/preview/fs-day.webp"
+import mt from "@/shared/assets/image/about/preview/mt.webp"
 import neordinaryHackathon from "@/shared/assets/image/about/preview/neordinary-hackathon.webp"
 import networkingDay from "@/shared/assets/image/about/preview/networking-day.webp"
 import schoolOt from "@/shared/assets/image/about/preview/school-ot.webp"
@@ -177,8 +178,6 @@ export const ABOUT_PREVIEW = {
   headline: "UMC Preview",
   description: "다양한 IT 네트워킹을, 여기 UMC에서 경험하세요",
 
-  // TODO: 중앙 MT 는 사진 초상권 처리가 끝나면 마지막에 추가한다. 탭만 먼저 두면
-  // 사진 자리가 비어 카드가 무너져서 항목째로 뺀다.
   items: [
     {
       id: "school-ot",
@@ -241,6 +240,15 @@ export const ABOUT_PREVIEW = {
       descriptionLines: [
         "Focus Sprint Day를 뜻하며, 다양한 학교와 기수의 UMC 부원들이 모여 아이디어를 공유하고 프로젝트에 집중하는 날이에요.",
         "팀별로 아이디어를 빠르게 구체화하고 결과물을 만들어보며, 서로의 작업을 공유하고 피드백을 나눠요.",
+      ],
+    },
+    {
+      id: "mt",
+      label: "중앙 MT",
+      image: mt,
+      descriptionLines: [
+        "UMC의 다양한 학교와 크루가 함께 모여 교류하는 자리예요.",
+        "미니게임과 친목 활동을 통해 서로 가까워지고, 학교와 지부를 넘어 UMC의 다양한 사람들과 함께하는 시간을 가져요.",
       ],
     },
   ],
