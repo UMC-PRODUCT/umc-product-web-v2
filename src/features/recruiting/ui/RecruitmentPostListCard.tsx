@@ -179,8 +179,8 @@ export function RecruitmentPostListCard({
               return (
                 <RecruitmentSchoolSection key={school} schoolName={school}>
                   {schoolPosts.length === 0 ? (
-                    <div className="flex w-full items-center justify-center bg-white py-10">
-                      <p className="text-body-2-regular text-teal-gray-400">
+                    <div className="flex w-full items-center bg-white px-5 py-4.5">
+                      <p className="text-body-2-medium text-teal-gray-400">
                         {schoolHasPosts && recruitingOnly
                           ? "현재 모집 중인 공고가 없습니다."
                           : "등록된 모집 공고가 없습니다."}
