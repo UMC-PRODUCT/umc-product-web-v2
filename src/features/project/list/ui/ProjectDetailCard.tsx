@@ -193,6 +193,13 @@ export function ProjectDetailCard({
   // me 의 유무로 보면 안 된다. 회원 조회는 비동기라 로그인 사용자도 첫 렌더에는
   // me 가 없어, 잠깐 게스트 화면이 스쳐 지나간다. 토큰 유무는 동기로 안다.
   const isGuest = !useAuthStore((s) => s.isAuthed)
+  // 게스트는 애초에 작성자·모집 현황 데이터를 못 받는다. 공개 목록은 데이터가
+  // 있어도 시안대로 같은 모양으로 접는다.
+  //
+  // 렌더뿐 아니라 아래 쿼리의 enabled 도 이 값이 정한다. 액션이 없는 화면인데
+  // 지원 권한·내 지원서·활성 차수를 받아 오면 쓰지도 않을 요청만 나간다.
+  // 게스트는 me 가 없어 자연히 막히지만 로그인 상태에서는 걸러지지 않는다.
+  const isSimpleCard = isGuest || publicView
   const addToast = useToastStore((s) => s.addToast)
   const userIsOperator = isOperator(me)
   const userIsPm = isCurrentTermPm(me)
@@ -207,6 +214,7 @@ export function ProjectDetailCard({
   })
   const shouldQueryApplicationWritePermission =
     !showEditCta &&
+    !isSimpleCard &&
     Number.isFinite(projectId) &&
     me !== undefined &&
     isApplicantView
@@ -254,7 +262,8 @@ export function ProjectDetailCard({
   const { data: myApplications, isError: isMyApplicationsError } = useQuery({
     queryKey: ["myApplications", activeGisuId],
     queryFn: () => getMyApplications(activeGisuId!),
-    enabled: activeGisuId != null && isApplicantView && me != null,
+    enabled:
+      activeGisuId != null && !isSimpleCard && isApplicantView && me != null,
   })
 
   const myChapterId = useMemo(() => {
@@ -363,7 +372,9 @@ export function ProjectDetailCard({
         return getActiveMatchingRound(myChapterId!)
       },
       enabled:
-        isApplicantView && (myChapterId != null || devMatchingRoundId != null),
+        !isSimpleCard &&
+        isApplicantView &&
+        (myChapterId != null || devMatchingRoundId != null),
       staleTime: 60 * 1000,
     })
 
@@ -438,9 +449,6 @@ export function ProjectDetailCard({
 
   const cover = data?.coverImage
   const showLogo = logo === "on"
-  // 게스트는 애초에 작성자·모집 현황 데이터를 못 받는다. 공개 목록은 데이터가
-  // 있어도 시안대로 같은 모양으로 접는다.
-  const isSimpleCard = isGuest || publicView
   // 시안 카드는 파트별 인원에서 끝난다. 액션도 그 아래 안내 문구도 두지 않는다.
   const showCtaNotice = !isSimpleCard && !viewOnly
   const shouldShowEditCta =
@@ -450,12 +458,14 @@ export function ProjectDetailCard({
     if (!detail) return
     trackEvent("project_detail_view", {
       project_id: projectId,
-      cta_mode: ctaMode,
+      // 액션이 없는 화면에서는 CTA 판정에 쓰는 쿼리를 아예 열지 않는다. 그
+      // 상태로 계산한 ctaMode 는 실제 사용자 상태와 다르므로 보내지 않는다.
+      cta_mode: isSimpleCard ? undefined : ctaMode,
       view_only: viewOnly,
       has_external_link: Boolean(detail.externalLink),
       has_application_form: Boolean(detail.applicationFormId),
     })
-  }, [detail, projectId, ctaMode, viewOnly])
+  }, [detail, projectId, ctaMode, viewOnly, isSimpleCard])
 
   if (isDetailLoading) {
     return <ProjectDetailCardLoading />
