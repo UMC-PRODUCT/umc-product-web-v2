@@ -79,9 +79,9 @@ export function DesktopOnlyOverlay() {
               데스크톱에서 확인해 주세요
             </h1>
             <p className="text-body-1-regular text-teal-gray-600">
-              이 화면은 아직 모바일을 지원하지 않습니다.
+              현재 이 화면은 모바일 환경을 지원하지 않습니다.
               <br />
-              아래 주소를 데스크톱 브라우저에서 열어 주세요.
+              아래 주소를 데스크톱 브라우저에서 열어주세요.
             </p>
           </div>
 
