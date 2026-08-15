@@ -20,5 +20,5 @@ export const Route = createFileRoute("/projects/")({
 
 function ProjectsListRoute() {
   // 이 화면은 사이드바 없이 전폭이라 로그인 여부와 상관없이 3열이다.
-  return <MatchingProjectsListPage columns={3} />
+  return <MatchingProjectsListPage columns={3} publicView />
 }

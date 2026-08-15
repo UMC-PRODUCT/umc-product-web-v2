@@ -7,6 +7,7 @@ import {
 } from "@/shared/config/applicantNavigation"
 import { useActiveGeneration } from "@/shared/hooks/useActiveGisu"
 import { toUmcGisuLabel } from "@/shared/lib/gisuLabel"
+import { cn } from "@/shared/lib/utils"
 import Footer from "@/widgets/footer/Footer"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 import { FlatSideBar } from "@/widgets/navigation/sidebar/FlatSideBar"
@@ -24,6 +25,7 @@ function ProjectsLayout() {
   const { data: generation } = useActiveGeneration()
   // 프로젝트 목록은 사이드바 없이 전폭으로 보여준다
   const showApplicantSideBar = isApplicantFlowPath(normalizedPathname)
+  const isProjectList = normalizedPathname === "/projects"
 
   // 프로젝트 목록은 지원하기 흐름이 아니라 독립 화면이라 상위 경로가 다르다.
   let trail: string[] = []
@@ -73,7 +75,14 @@ function ProjectsLayout() {
           />
         )}
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="min-h-200 px-8 pt-10">
+          <div
+            className={cn(
+              "min-h-200 px-8 pt-10",
+              // 프로젝트 목록은 시안이 1440 기준 고정 폭이다. 폭을 안 잡으면
+              // 넓은 화면에서 카드가 늘어나 348 카드 시안과 어긋난다.
+              isProjectList && "mx-auto w-full max-w-[1220px]",
+            )}
+          >
             <div className="flex flex-col gap-6.5 pl-3">
               <div className="flex h-5.5 items-center gap-1">
                 {trail.map((crumb, index) => (
