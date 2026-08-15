@@ -8,7 +8,9 @@ import {
 import { NotFoundPage } from "@/features/error/ui/NotFoundPage"
 import { RootErrorComponent } from "@/features/error/ui/RootErrorComponent"
 import { AnalyticsProvider } from "@/shared/analytics"
+import { useIsDesktopWidth } from "@/shared/hooks/useIsDesktopWidth"
 import { cn } from "@/shared/lib/utils"
+import { DesktopOnlyOverlay } from "@/shared/ui/DesktopOnlyOverlay"
 import { ToastProvider } from "@/shared/ui/toast/ToastProvider"
 
 import type { QueryClient } from "@tanstack/react-query"
@@ -38,21 +40,41 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 // 쿼리는 걸려도 화면이 잘린다.
 const RESPONSIVE_PATHS = ["/about", "/recruiting-guide"]
 
+// 화면이 없는 경유 라우트다. 토큰 교환 후 곧바로 리다이렉트하므로 여기에 안내를
+// 덮으면 로그인이 콜백 단계에서 멈춘 것처럼 보인다.
+const OVERLAY_EXEMPT_PREFIXES = ["/oauth"]
+
 function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
-  const isResponsive = RESPONSIVE_PATHS.includes(pathname.replace(/\/$/, ""))
+  const normalized = pathname.replace(/\/$/, "")
+  const isResponsive = RESPONSIVE_PATHS.includes(normalized)
+  const isOverlayExempt = OVERLAY_EXEMPT_PREFIXES.some(
+    (prefix) => normalized === prefix || normalized.startsWith(`${prefix}/`),
+  )
+  const isDesktop = useIsDesktopWidth()
+  const showOverlay = !isResponsive && !isOverlayExempt && !isDesktop
 
   return (
-    <div
-      className={cn(
-        "bg-teal-gray-50 h-full min-h-screen",
-        !isResponsive && "min-w-[1440px]",
-      )}
-    >
+    <>
       <HeadContent />
       <AnalyticsProvider />
-      <Outlet />
+      {/*
+        안내가 뜰 때 본문을 숨긴다. 남겨두면 min-w-[1440px] 때문에 문서 폭이
+        1440 으로 유지되고, 모바일 브라우저가 거기에 맞춰 레이아웃 뷰포트를
+        넓혀 position:fixed 인 안내까지 1440 으로 그려진다.
+      */}
+      <div
+        className={cn(
+          "bg-teal-gray-50 h-full min-h-screen",
+          !isResponsive && "min-w-[1440px]",
+          showOverlay && "hidden",
+        )}
+      >
+        <Outlet />
+      </div>
+      {showOverlay && <DesktopOnlyOverlay />}
+      {/* 안내 위에서도 토스트가 떠야 하므로 숨김 대상 밖에 둔다. */}
       <ToastProvider />
-    </div>
+    </>
   )
 }
