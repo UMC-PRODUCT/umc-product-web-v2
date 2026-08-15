@@ -155,9 +155,8 @@ export const ABOUT_INTRO = {
     "기획자, 디자이너, 개발자가",
     "함께 아이디어를 현실로 만드는 대학생 IT 연합 동아리입니다",
   ],
-  // TODO: (미확정) 시안 주석 "요거 중앙측에 문의 후 답신 드리겠습니다".
   description:
-    "n주간 워크북으로 ~를 하고 마지막 n개월 동안 매칭된 팀원과 하나의 서비스 개발를 목표로 ~ (내용 필요)",
+    "AI를 활용해 기획하고, 디자인하고, 직접 서비스를 만드는 11기 UMC",
 } as const
 
 const EYEBROW = "UNIVERSITY MAKEUS CHALLENGE"
