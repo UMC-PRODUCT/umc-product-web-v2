@@ -45,6 +45,7 @@ import type {
   RecruitingInterviewScheduleBoard,
   RecruitingInterviewSession,
   RecruitingInterviewSessionRequest,
+  RecruitingMyApplicationResponse,
   RecruitingPublicApplicationResponse,
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
@@ -480,6 +481,16 @@ export async function submitApplication(
 
 export async function cancelApplication(applicationId: string): Promise<void> {
   await api.patch(`/v1/recruiting/applications/${applicationId}/cancel`)
+}
+
+// 로그인 회원 지원 내역 목록 조회
+export async function getMyApplications(): Promise<
+  RecruitingMyApplicationResponse[]
+> {
+  const { data } = await api.get<
+    ApiResponse<RecruitingMyApplicationResponse[]>
+  >("/v1/recruiting/applications")
+  return data.result
 }
 
 // 익명 지원서 조회 (RECRUITING-PUBLIC-004)

@@ -773,6 +773,13 @@ export interface RecruitingPublicApplicationResponse {
   formStructure?: RecruitingFormStructure
 }
 
+// 로그인 회원 지원 내역 목록 조회 응답 DTO (GET /v1/recruiting/applications)
+// 익명 조회 응답과 필드가 같고 gisuId/roundId 만 추가된다.
+export interface RecruitingMyApplicationResponse extends RecruitingPublicApplicationResponse {
+  gisuId?: number
+  roundId?: number
+}
+
 export type RecruitingDecision = "PASS" | "FAIL"
 
 // 합격에는 확정 트랙이 필수이고 지원자의 1·2지망 중 하나여야 한다. 불합격에는

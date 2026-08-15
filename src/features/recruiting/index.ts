@@ -10,6 +10,7 @@ export type {
   RecruitingFormQuestion,
   RecruitingFormSection,
   RecruitingFormStructure,
+  RecruitingMyApplicationResponse,
   RecruitingPublicApplicationAnswer,
   RecruitingPublicApplicationResponse,
   RecruitingTrack,
@@ -27,6 +28,10 @@ export {
   useSubmitAnonymousApplication,
   useUpdateAnonymousApplication,
 } from "./hooks/useAnonymousApplication"
+export {
+  useCancelMyApplication,
+  useMyRecruitingApplicationsQuery,
+} from "./hooks/useMyApplications"
 export { toApplicationSections } from "./model/applicationDetailMapper"
 export { validateEvaluationDetailSearch } from "./model/evaluationDetailSearch"
 export {
