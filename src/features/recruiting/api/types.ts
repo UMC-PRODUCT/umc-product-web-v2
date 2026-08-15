@@ -62,20 +62,37 @@ export interface RecruitingRound {
   status?: RecruitingRoundStatus
   availabilityFormId?: string | null
   contactText?: string | null
+  // 이 라운드를 만든 실제 작성자(RoundResponse.author). 임시 보관함의 "작성자" 표시에 쓴다.
+  author?: RecruitingRoundAuthor
   // public 전용
   applicationFormId?: string | null
   formId?: string | null
   applicationOpen?: boolean
 }
 
+export interface RecruitingRoundAuthor {
+  memberId: string
+  name: string
+  nickname: string
+  schoolName: string
+}
+
+export type RawRecruitingRoundAuthor = Omit<
+  RecruitingRoundAuthor,
+  "memberId"
+> & {
+  memberId: RawId
+}
+
 // admin 응답의 차수. 식별자가 id 로 오고, 공개 응답에만 있는 필드는 빠져 있다.
 // 공개 전용 필드를 빼 두어야 관리자 응답에서 그 값을 읽는 코드가 타입 검사에서 걸린다.
 export type RawAdminRound = Omit<
   RecruitingRound,
-  "roundId" | "applicationFormId" | "formId" | "applicationOpen"
+  "roundId" | "applicationFormId" | "formId" | "applicationOpen" | "author"
 > & {
   id: RawId
   roundId?: RawId
+  author?: RawRecruitingRoundAuthor
 }
 
 export type RawAdminRoundGroup = Omit<RecruitingRoundGroup, "rounds"> & {

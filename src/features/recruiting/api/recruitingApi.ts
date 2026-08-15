@@ -137,9 +137,18 @@ export function normalizeAdminRoundGroups(
 ): RecruitingRoundGroup[] {
   return (groups ?? []).map((group) => ({
     ...group,
-    rounds: (group.rounds ?? []).flatMap(({ id, ...round }) => {
+    rounds: (group.rounds ?? []).flatMap(({ id, author, ...round }) => {
       const roundId = String(round.roundId ?? id ?? "")
-      return roundId === "" ? [] : [{ ...round, roundId }]
+      if (roundId === "") return []
+      return [
+        {
+          ...round,
+          roundId,
+          author: author
+            ? { ...author, memberId: String(author.memberId) }
+            : undefined,
+        },
+      ]
     }),
   }))
 }
