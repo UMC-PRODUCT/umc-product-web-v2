@@ -8,11 +8,54 @@ import {
   RecruitingApplicationCard,
   useAnonymousApplicationQuery,
   useCancelAnonymousApplication,
+  useCancelMyApplication,
+  useMyRecruitingApplicationsQuery,
 } from "@/features/recruiting"
 import { Button } from "@/shared/ui/Button"
 
-import type { RecruitingApplication } from "@/features/recruiting"
+import type {
+  RecruitingApplication,
+  RecruitingMyApplicationResponse,
+} from "@/features/recruiting"
 import type { PartTag } from "@/shared/model/domain"
+
+function toRecruitingApplication(
+  data: RecruitingMyApplicationResponse,
+  fallbackName: string,
+): RecruitingApplication | null {
+  if (data.cancelled || data.applicationId == null) return null
+  const roles = [
+    mapTrackToPartTag(data.firstChoice),
+    mapTrackToPartTag(data.secondChoice),
+  ].filter((role): role is PartTag => role !== null)
+
+  const result =
+    data.finalResult === "APPROVED"
+      ? "pass"
+      : data.finalResult === "REJECTED"
+        ? "fail"
+        : null
+
+  const rawData = data as {
+    submittedAt?: string
+    updatedAt?: string
+    period?: string
+  }
+
+  return {
+    id: data.applicationId,
+    name: data.applicantName
+      ? `${data.applicantName}님의 지원서`
+      : fallbackName,
+    isSubmitted: data.submitted,
+    submittedAt: data.submitted ? (rawData.submittedAt ?? null) : null,
+    updatedAt: !data.submitted ? (rawData.updatedAt ?? null) : null,
+    result,
+    roles,
+    isClosed: !data.editable,
+    period: rawData.period ?? null,
+  }
+}
 
 export const Route = createFileRoute("/projects/application/list")({
   // 개인 지원 정보라 색인시키지 않는다.
@@ -44,56 +87,44 @@ function ApplicationListPage() {
       ? sessionStorage.getItem("anonymousApplicationKey")
       : null
 
-  const { data, isLoading } = useAnonymousApplicationQuery(
-    email,
-    applicationKey,
-  )
-  const cancelMutation = useCancelAnonymousApplication()
+  const { data: anonymousData, isLoading: isAnonymousLoading } =
+    useAnonymousApplicationQuery(email, applicationKey)
+  const cancelAnonymousMutation = useCancelAnonymousApplication()
 
-  const application = useMemo<RecruitingApplication | null>(() => {
-    if (!data || data.cancelled || data.applicationId == null) return null
-    const roles = [
-      mapTrackToPartTag(data.firstChoice),
-      mapTrackToPartTag(data.secondChoice),
-    ].filter((role): role is PartTag => role !== null)
+  const myApplicationsQuery = useMyRecruitingApplicationsQuery()
+  const cancelMyApplicationMutation = useCancelMyApplication()
 
-    const result =
-      data.finalResult === "APPROVED"
-        ? "pass"
-        : data.finalResult === "REJECTED"
-          ? "fail"
-          : null
+  const myApplications = useMemo<RecruitingApplication[]>(() => {
+    if (!isAuthed) return []
+    return (myApplicationsQuery.data ?? [])
+      .map((data) => toRecruitingApplication(data, "지원서"))
+      .filter((application): application is RecruitingApplication =>
+        Boolean(application),
+      )
+  }, [isAuthed, myApplicationsQuery.data])
 
-    const rawData = data as {
-      submittedAt?: string
-      updatedAt?: string
-      period?: string
-    }
+  const anonymousApplication = useMemo<RecruitingApplication | null>(() => {
+    if (isAuthed) return null
+    return toRecruitingApplication(anonymousData ?? {}, "익명 지원서")
+  }, [isAuthed, anonymousData])
 
-    return {
-      id: data.applicationId,
-      name: data.applicantName
-        ? `${data.applicantName}님의 지원서`
-        : "익명 지원서",
-      isSubmitted: data.submitted,
-      submittedAt: data.submitted ? (rawData.submittedAt ?? null) : null,
-      updatedAt: !data.submitted ? (rawData.updatedAt ?? null) : null,
-      result,
-      roles,
-      isClosed: !data.editable,
-      period: rawData.period ?? null,
-    }
-  }, [data])
+  const handleDeleteMyApplication = (id: number) => {
+    cancelMyApplicationMutation.mutate(String(id))
+  }
 
-  const handleDelete = () => {
+  const handleDeleteAnonymous = () => {
     if (!email || !applicationKey) return
-    cancelMutation.mutate({ email, applicationKey })
+    cancelAnonymousMutation.mutate({ email, applicationKey })
   }
 
   const handleResetVerification = () => {
     clearAnonymousApplicationSession()
     void navigate({ to: "/projects/application" })
   }
+
+  const isLoading = isAuthed
+    ? myApplicationsQuery.isLoading
+    : isAnonymousLoading
 
   if (isLoading) {
     return (
@@ -105,7 +136,31 @@ function ApplicationListPage() {
     )
   }
 
-  if (!application) {
+  if (isAuthed) {
+    if (myApplications.length === 0) {
+      return (
+        <div className="flex w-full flex-col items-center justify-center gap-4 py-20">
+          <p className="text-body-1-medium text-teal-gray-500">
+            아직 지원한 내역이 없어요.
+          </p>
+        </div>
+      )
+    }
+
+    return (
+      <div className="flex w-full flex-col gap-8">
+        {myApplications.map((application) => (
+          <RecruitingApplicationCard
+            key={application.id}
+            application={application}
+            onDelete={handleDeleteMyApplication}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  if (!anonymousApplication) {
     return (
       <div className="flex w-full flex-col items-center justify-center gap-4 py-20">
         <p className="text-body-1-medium text-teal-gray-500">
@@ -126,9 +181,9 @@ function ApplicationListPage() {
   return (
     <div className="flex w-full flex-col gap-8">
       <RecruitingApplicationCard
-        key={application.id}
-        application={application}
-        onDelete={handleDelete}
+        key={anonymousApplication.id}
+        application={anonymousApplication}
+        onDelete={handleDeleteAnonymous}
       />
     </div>
   )
