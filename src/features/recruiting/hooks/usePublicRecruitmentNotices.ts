@@ -5,7 +5,11 @@ import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 
 import { recruitingKeys } from "../api/queryKeys"
 import { getAllPublicRounds } from "../api/recruitingApi"
-import { toRecruitmentNoticeItems } from "../model/recruitmentNoticeMapper"
+import {
+  toMyApplicationsByRoundId,
+  toRecruitmentNoticeItems,
+} from "../model/recruitmentNoticeMapper"
+import { useMyRecruitingApplicationsQuery } from "./useMyApplications"
 
 export function usePublicRecruitmentNotices() {
   const gisuQuery = useActiveGisu()
@@ -21,9 +25,22 @@ export function usePublicRecruitmentNotices() {
     staleTime: 5 * 60 * 1000,
   })
 
+  // 로그인 사용자만 조회된다(비로그인은 enabled: false 라 항상 빈 목록).
+  const myApplicationsQuery = useMyRecruitingApplicationsQuery()
+
+  const myApplicationsByRoundId = useMemo(
+    () => toMyApplicationsByRoundId(myApplicationsQuery.data ?? []),
+    [myApplicationsQuery.data],
+  )
+
   const items = useMemo(
-    () => toRecruitmentNoticeItems(query.data ?? []),
-    [query.data],
+    () =>
+      toRecruitmentNoticeItems(
+        query.data ?? [],
+        undefined,
+        myApplicationsByRoundId,
+      ),
+    [query.data, myApplicationsByRoundId],
   )
 
   return {
