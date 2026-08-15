@@ -26,6 +26,7 @@ interface ApplyAnswerFieldProps {
   value: ApplyAnswerValue
   onChange: (value: ApplyAnswerValue) => void
   error?: string
+  disabledOptionIds?: Set<string>
 }
 
 function OptionError({ error }: { error?: string }) {
@@ -235,6 +236,7 @@ export function ApplyAnswerField({
   value,
   onChange,
   error,
+  disabledOptionIds,
 }: ApplyAnswerFieldProps) {
   switch (question.type) {
     case "shortText":
@@ -274,6 +276,7 @@ export function ApplyAnswerField({
               <RadioList
                 key={option.optionId}
                 checked={value === option.optionId}
+                disabled={disabledOptionIds?.has(option.optionId)}
                 allowDeselect
                 onChange={(checked) => {
                   onChange(checked ? option.optionId : "")
