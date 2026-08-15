@@ -26,7 +26,10 @@ import {
   updateRecruitingRound,
 } from "../../api/recruitingApi"
 import { useAdminRecruitingRounds } from "../../hooks/useAdminRecruitingRounds"
-import { resolveAdditionalRoundNoOptions } from "../../model/additionalRoundNo"
+import {
+  MAX_ADDITIONAL_ROUND_NO,
+  resolveAdditionalRoundNoOptions,
+} from "../../model/additionalRoundNo"
 import { getRecruitableTracks } from "../../model/parts"
 import {
   resolveRecruitingListRole,
@@ -52,6 +55,8 @@ import { RecruitmentPreviewCard } from "../RecruitmentPreviewCard"
 import { RecruitmentSchoolSearchDropdown } from "../RecruitmentSchoolSearchDropdown"
 import { RecruitmentSectionHeader } from "../RecruitmentSectionHeader"
 
+import type { ReactNode } from "react"
+
 import type {
   PeriodFieldKey,
   PeriodFieldValue,
@@ -70,8 +75,6 @@ const RECRUITMENT_ROUNDS = [
   { value: "4", label: "4차" },
   { value: "5", label: "5차" },
 ] as const
-
-const MAX_ADDITIONAL_ROUND_NO = RECRUITMENT_ROUNDS.length
 
 function parsePeriodDate(value: PeriodFieldValue): Date | null {
   const parts = value.date.split("-")
@@ -204,7 +207,7 @@ export function RecruitmentBasicInfoForm({
   const addToast = useToastStore((state) => state.addToast)
   const [showTempSaveModal, setShowTempSaveModal] = useState(false)
   const [tempSaveMessage, setTempSaveMessage] =
-    useState("임시저장이 완료되었습니다.")
+    useState<ReactNode>("임시저장이 완료되었습니다.")
   const [schoolSearchOpen, setSchoolSearchOpen] = useState(false)
   const chapter = useRecruitmentCreateStore((s) => s.basicInfo.chapter)
   const school = useRecruitmentCreateStore((s) => s.basicInfo.school)
@@ -276,11 +279,15 @@ export function RecruitmentBasicInfoForm({
   // seasonId는 URL param(목록 화면에서 넘어온 값)에 의존하지 않고, 학교가
   // 정해질 때마다 여기서 직접 조회해 스토어에 반영한다. 사이드바에서 이
   // 화면으로 바로 들어와 seasonId가 아예 없이 시작해도 동작하게 하기 위함.
+  // roundId가 이미 있으면(이어쓰기로 들어와 draft가 seasonId를 채워준 경우)
+  // 이 조회로 덮어쓰지 않는다 — 조회가 학교명 표기 차이 등으로 실패하면
+  // 이미 맞게 로드된 seasonId를 지워 "시즌 생성 전"으로 잘못 보이게 된다.
   useEffect(() => {
+    if (roundId) return
     setSeasonId(
       findSeasonIdBySchool(seasonGroups, school, selectedSchoolId) ?? null,
     )
-  }, [school, selectedSchoolId, seasonGroups, setSeasonId])
+  }, [school, selectedSchoolId, seasonGroups, setSeasonId, roundId])
 
   // 모집 제목("UMC N기 ...")에 쓰는 기수 번호도 다른 단계(2·3단계)에서 재조회
   // 없이 쓸 수 있도록 여기서 한 번만 스토어에 반영해둔다.
@@ -538,10 +545,16 @@ export function RecruitmentBasicInfoForm({
   // seasonId가 아직 없으면(시즌 없는 학교) 중복 체크를 할 대상 자체가 없으니
   // 통과시킨다 — 실제 생성 시점엔 시즌 가드가 별도로 막는다. 조회 실패도
   // 마찬가지로 진행을 막지 않는다: 최종 중복은 생성 시 DB unique index/409가 방어한다.
+  // roundId가 있으면(수정 중) 이 Round 자신을 중복 체크에서 제외해야 한다 —
+  // 안 그러면 제목을 안 바꿔도 "자기 자신과 중복"으로 잡혀 꼬릿말에 숫자가 붙는다.
   const checkTitleAvailable = async (title: string): Promise<boolean> => {
     if (!seasonId) return true
     try {
-      return await checkRecruitingRoundTitleAvailability(seasonId, title)
+      return await checkRecruitingRoundTitleAvailability(
+        seasonId,
+        title,
+        roundId ?? undefined,
+      )
     } catch {
       return true
     }
@@ -609,9 +622,15 @@ export function RecruitmentBasicInfoForm({
     })
     setIsSaving(false)
     setTempSaveMessage(
-      roundId
-        ? "임시저장이 완료되었습니다."
-        : "이 브라우저에 임시 저장되었습니다. 서버 저장은 다음 단계까지 진행해야 완료됩니다.",
+      roundId ? (
+        "임시저장이 완료되었습니다."
+      ) : (
+        <>
+          이 브라우저에 임시 저장되었습니다.
+          <br />
+          서버 저장은 다음 단계까지 진행해야 완료됩니다.
+        </>
+      ),
     )
     setShowTempSaveModal(true)
   }
@@ -845,6 +864,18 @@ export function RecruitmentBasicInfoForm({
       return
     }
 
+    // "임시 저장"과 마찬가지로 스냅샷을 갱신해야 한다. 안 그러면 여기서 저장된
+    // 값인데도 hasUnsavedChanges가 계속 true로 남아, 3단계까지 다 마치고
+    // 게시까지 끝낸 뒤에도 페이지 이탈 모달이 계속 뜬다.
+    savedSnapshotRef.current = JSON.stringify({
+      chapter,
+      school,
+      recruitmentType,
+      roundNo,
+      interviewRequired,
+      footer: resolvedFooter,
+      periodForm,
+    })
     setIsAdvancing(false)
     onNext()
   }
