@@ -111,14 +111,16 @@ function ApplicationListPage() {
         <p className="text-body-2-medium text-teal-gray-400">
           조회된 지원서가 없습니다.
         </p>
-        <Button
-          variant="weak"
-          color="neutral"
-          size="s"
-          onClick={handleResetVerification}
-        >
-          다른 지원서 확인하기
-        </Button>
+        {!isAuthed && (
+          <Button
+            variant="weak"
+            color="neutral"
+            size="s"
+            onClick={handleResetVerification}
+          >
+            다른 지원서 확인하기
+          </Button>
+        )}
       </div>
     )
   }
