@@ -35,7 +35,7 @@ function ProjectsLayout() {
   if (normalizedPathname === "/projects") {
     trail = ["홈", "프로젝트"]
     title = "프로젝트"
-    description = "UMC 에서 진행 중인 프로젝트를 확인할 수 있습니다."
+    description = "지금까지 UMC에서 만들어진 프로젝트를 소개하겠습니다!"
   } else if (normalizedPathname === "/projects/notice") {
     trail = ["리크루팅", "지원하기", "모집 공고"]
     title = "모집 공고"
