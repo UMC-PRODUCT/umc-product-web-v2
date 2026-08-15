@@ -112,10 +112,10 @@ export function RecruitingGuideFaqSection() {
     tabRefs.current[next as number]?.focus()
   }
 
-  const visibleItems = RECRUITING_GUIDE_FAQ.items.filter(
-    (item) =>
-      activeFilterId === "all" ||
-      item.parts.some((part) => part === activeFilterId),
+  const visibleItems = RECRUITING_GUIDE_FAQ.items.filter((item) =>
+    activeFilterId === "all"
+      ? item.parts.length === 0
+      : item.parts.some((part) => part === activeFilterId),
   )
 
   return (
