@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useMe } from "@/entities/member/hooks/useMe"
 import { getChaptersWithSchools } from "@/entities/organization/api/organization"
 import { type Chapter, isChapter } from "@/entities/organization/model/chapters"
+import CheckIcon from "@/shared/assets/icon/check/CheckIcon"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import InfoCircleIcon from "@/shared/assets/icon/infomation/InfoCircleIcon"
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
@@ -881,10 +882,10 @@ export function RecruitmentBasicInfoForm({
                 </div>
               ) : (
                 <div className="flex items-center gap-6">
-                  <span className="text-body-1-medium text-teal-gray-600 w-16 shrink-0">
+                  <span className="text-body-1-regular text-teal-gray-700 w-16 shrink-0">
                     지부 정보
                   </span>
-                  <span className="text-body-1-medium text-teal-500">
+                  <span className="text-body-1-medium text-teal-600">
                     {chapter}
                   </span>
                 </div>
@@ -892,14 +893,7 @@ export function RecruitmentBasicInfoForm({
 
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-6">
-                  <span
-                    className={cn(
-                      "w-16 shrink-0",
-                      isSchoolEditable
-                        ? "text-body-1-regular text-teal-gray-700"
-                        : "text-body-1-medium text-teal-gray-600",
-                    )}
-                  >
+                  <span className="text-body-1-regular text-teal-gray-700 w-16 shrink-0">
                     모집 학교
                   </span>
                   {isSchoolEditable ? (
@@ -940,16 +934,19 @@ export function RecruitmentBasicInfoForm({
                       />
                     </div>
                   ) : (
-                    <span className="text-body-1-medium text-teal-500">
+                    <span className="text-body-1-medium text-teal-600">
                       {school}
                     </span>
                   )}
                 </div>
                 {/* 임시 메시지(시즌 미생성시)*/}
                 {isSeasonMissing && (
-                  <p className="text-body-2-medium pl-22 text-red-500">
-                    모집 시즌 생성 전입니다.
-                  </p>
+                  <div className="flex items-center gap-1 pl-22">
+                    <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                    <p className="text-body-2-medium text-error-500">
+                      모집 시즌 생성 전입니다.
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -1084,10 +1081,13 @@ export function RecruitmentBasicInfoForm({
                   * 꼬릿말 예시: 사본 1, 테스트 1, 디자인 파트
                 </p>
                 {isTitleTooLong && (
-                  <p className="text-body-2-medium pl-22 text-red-500">
-                    공고 제목은 {MAX_TITLE_LENGTH}자를 넘을 수 없습니다.
-                    꼬릿말을 줄여주세요.
-                  </p>
+                  <div className="flex items-center gap-1 pl-22">
+                    <CheckIcon className="text-error-500 h-4 w-4 shrink-0" />
+                    <p className="text-body-2-medium text-error-500">
+                      공고 제목은 {MAX_TITLE_LENGTH}자를 넘을 수 없습니다.
+                      꼬릿말을 줄여주세요.
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
