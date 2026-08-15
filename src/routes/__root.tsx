@@ -59,19 +59,25 @@ function RootComponent() {
       <HeadContent />
       <AnalyticsProvider />
       {/*
-        안내가 뜰 때 본문을 숨긴다. 남겨두면 min-w-[1440px] 때문에 문서 폭이
-        1440 으로 유지되고, 모바일 브라우저가 거기에 맞춰 레이아웃 뷰포트를
-        넓혀 position:fixed 인 안내까지 1440 으로 그려진다.
+        안내가 뜰 때 본문을 통째로 걷어낸다. display:none 으로 감추기만 하면
+        라우트는 마운트된 채라 안내만 보이는 동안에도 그 아래 화면의 요청이
+        그대로 나간다. 인증이 필요한 화면이면 401 갱신까지 따라붙는다.
+
+        Outlet 만 빼도 안 된다. min-w-[1440px] 을 건 이 div 가 남아 문서 폭이
+        1440 으로 굳고, 모바일 브라우저가 거기에 맞춰 레이아웃 뷰포트를 넓혀
+        position:fixed 인 안내까지 1440 으로 그려진다. 폭을 만드는 주체가
+        사라져야 한다.
       */}
-      <div
-        className={cn(
-          "bg-teal-gray-50 h-full min-h-screen",
-          !isResponsive && "min-w-[1440px]",
-          showOverlay && "hidden",
-        )}
-      >
-        <Outlet />
-      </div>
+      {!showOverlay && (
+        <div
+          className={cn(
+            "bg-teal-gray-50 h-full min-h-screen",
+            !isResponsive && "min-w-[1440px]",
+          )}
+        >
+          <Outlet />
+        </div>
+      )}
       {showOverlay && <DesktopOnlyOverlay />}
       {/* 안내 위에서도 토스트가 떠야 하므로 숨김 대상 밖에 둔다. */}
       <ToastProvider />
