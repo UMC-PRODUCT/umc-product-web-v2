@@ -34,8 +34,8 @@ export function RecruitmentStepper({
             aria-current={isSelected ? "step" : undefined}
             onClick={() => onStepChange(idx)}
             className={cn(
-              "flex h-9.5 flex-1 items-center gap-2 rounded-xl py-1 pr-5 pl-3",
-              isSelected && "bg-white",
+              "flex h-9.5 flex-1 items-center gap-2 rounded-xl py-1 pr-5 pl-3 transition-colors",
+              isSelected ? "bg-white" : "hover:bg-teal-gray-50",
             )}
           >
             <span
