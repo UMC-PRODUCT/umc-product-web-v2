@@ -5,14 +5,12 @@ import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { recruitingKeys } from "../api/queryKeys"
 import {
-  cloneRecruitingRound,
   deleteRecruitingRound,
   updateRecruitingRound,
   updateRecruitingRoundStatus,
 } from "../api/recruitingApi"
 
 import type {
-  CloneRecruitingRoundRequest,
   RecruitingRoundStatus,
   UpdateRecruitingRoundRequest,
 } from "../api/types"
@@ -21,12 +19,6 @@ interface UpdateRoundStatusVariables {
   seasonId: string
   roundId: string
   status: RecruitingRoundStatus
-}
-
-interface CloneRoundVariables {
-  seasonId: string
-  roundId: string
-  payload: CloneRecruitingRoundRequest
 }
 
 interface DeleteRoundVariables {
@@ -105,35 +97,10 @@ export function useUpdateRecruitingRound() {
   })
 }
 
-// 원본 Round의 설정·지원 Form·활성 공통 질문을 대상 시즌의 새 DRAFT Round로
-// 복제한다(RECRUITING-ADMIN-016).
-export function useCloneRecruitingRound() {
-  const queryClient = useQueryClient()
-  const addToast = useToastStore((state) => state.addToast)
-
-  return useMutation({
-    mutationFn: ({ seasonId, roundId, payload }: CloneRoundVariables) =>
-      cloneRecruitingRound(seasonId, roundId, payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: recruitingKeys.rounds() })
-    },
-    onError: (error) => {
-      addToast({
-        message: extractApiErrorMessage(
-          error,
-          "복제에 실패했습니다. 잠시 후 다시 시도해주세요.",
-        ),
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    },
-  })
-}
-
-// 지원서·Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 복구 불가능한
-// 삭제라 낙관적 업데이트나 실행취소는 지원하지 않는다.
+// 지원서·Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 이 mutation 자체는
+// 낙관적 업데이트도, 실행취소도 모르는 단순 DELETE 호출이다 — 삭제는 서버에서
+// 되돌릴 수 없으므로, "실행취소 가능한 삭제"는 RecruitmentListPage가 그레이스
+// 타임 동안 이 mutation 호출 자체를 미뤄서 흉내 낸다(handleDelete 참고).
 export function useDeleteRecruitingRound() {
   const queryClient = useQueryClient()
   const addToast = useToastStore((state) => state.addToast)

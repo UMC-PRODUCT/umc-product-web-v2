@@ -12,13 +12,10 @@ import type {
   RecruitingRoundGroup,
   RecruitingRoundStatus,
   RecruitingRoundType,
+  RecruitingSeasonConfigurationResponse,
+  RecruitingTrack,
 } from "../api/types"
 
-// 모집 생성(013)에 필요한 seasonId는 화면에서 새로 만드는 게 아니라, 이미
-// 존재하는 시즌 목록(관리자용 차수 목록 응답에 포함됨)에서 찾아 쓴다.
-// schoolId가 있으면 그걸 우선 쓴다 — schoolName은 조직 서비스(학교 드롭다운)와
-// 모집 서비스(시즌 목록)가 각자 따로 관리하는 문자열이라, 표기가 살짝만
-// 달라도(공백·축약 등) 일치 비교가 깨져 시즌이 있는데도 못 찾는 경우 대비
 export function findSeasonIdBySchool(
   groups: RecruitingRoundGroup[],
   school: string | null | undefined,
@@ -28,7 +25,42 @@ export function findSeasonIdBySchool(
     const bySchoolId = groups.find((group) => group.schoolId === schoolId)
     if (bySchoolId) return bySchoolId.seasonId
   }
-  return groups.find((group) => group.schoolName === school)?.seasonId
+  return groups.find((group) => formatSchoolName(group.schoolName) === school)
+    ?.seasonId
+}
+
+// 복제 모달(RecruitmentDuplicateModal)이 보여주는 "복제 대상 학교" 후보. 실제로는
+// 학교가 아니라 그 학교의 이번 기수 시즌을 고르는 것이다(POST .../clone이 받는
+// targetSeasonId가 시즌 단위라서). RecruitmentListPage가 scope.groups(=EDIT 권한이
+// 있는 시즌만 남은 목록)로 만들어 넘긴다 — 시즌이 아직 없거나 EDIT 권한이 없는
+// 학교는 애초에 후보에 없다.
+export interface DuplicateTargetSeason {
+  seasonId: string
+  chapter: Chapter
+  school: string
+}
+
+export function buildDuplicateTargetSeasons(
+  groups: RecruitingRoundGroup[],
+): DuplicateTargetSeason[] {
+  return groups.flatMap((group) =>
+    isChapter(group.chapterName)
+      ? [
+          {
+            seasonId: group.seasonId,
+            chapter: group.chapterName,
+            school: formatSchoolName(group.schoolName),
+          },
+        ]
+      : [],
+  )
+}
+
+// 여러 학교(시즌)로 한 번에 복제할 때, 학교별로 토스트를 따로 띄우는 대신
+// 하나의 집계 토스트(RecruitmentPostMoreMenu)로 보여주기 위한 결과.
+export interface DuplicateOutcome {
+  succeededCount: number
+  failedCount: number
 }
 
 export type RecruitmentPostStatus = RecruitingRoundStatus
@@ -49,8 +81,10 @@ export interface RecruitmentPost {
   dateLabel?: string
   // 마감 여부는 status 가 아니라 이 시각으로 판단한다(isRecruitmentClosed).
   documentEndAt?: string | null
-  // 백엔드 응답에 작성자 정보가 없어 mock에서만 채워진다.
   authorLabel?: string
+  // "내가 쓴 글" 필터(RecruitmentDraftArchiveCard)가 useMe()의 me.id와 비교하는 값.
+  authorMemberId?: string
+  recruitableTracks: RecruitingTrack[]
 }
 
 // GET /admin/rounds(RecruitingRoundGroup[])는 OPEN/CLOSED/DRAFT가 한 배열에
@@ -61,7 +95,6 @@ export interface RecruitmentPost {
 // 이 목록 자체를 받지 못한다(useAdminRecruitingRounds의 isForbidden 참고).
 export function mapRoundGroupsToPosts(
   groups: RecruitingRoundGroup[],
-  authorLabel?: string,
 ): RecruitmentPost[] {
   return groups.flatMap((group) => {
     if (!isChapter(group.chapterName)) return []
@@ -71,15 +104,24 @@ export function mapRoundGroupsToPosts(
         (round): round is RecruitingRound & { status: RecruitingRoundStatus } =>
           round.status != null,
       )
-      .map((round) => mapRoundToPost(group, chapter, round, authorLabel))
+      .map((round) => mapRoundToPost(group, chapter, round))
   })
+}
+
+// 라운드별 실제 작성자(round.author)가 있는 표시용 라벨로 조립한다.
+// "닉네임/이름 · 학교명" 형태는 RecruitmentListPage가 예전에 로그인한 나로
+// 채우던 형태와 동일하게 맞췄다.
+function buildAuthorLabel(
+  author: RecruitingRound["author"],
+): string | undefined {
+  if (!author) return undefined
+  return `${author.nickname}/${author.name} · ${formatSchoolName(author.schoolName)}`
 }
 
 function mapRoundToPost(
   group: RecruitingRoundGroup,
   chapter: Chapter,
   round: RecruitingRound & { status: RecruitingRoundStatus },
-  authorLabel?: string,
 ): RecruitmentPost {
   const start = round.documentStartAt ? dayjs(round.documentStartAt) : null
   const end = round.documentEndAt ? dayjs(round.documentEndAt) : null
@@ -105,8 +147,22 @@ function mapRoundToPost(
       : undefined,
     dateLabel: start?.format("YYYY.MM.DD"),
     documentEndAt: round.documentEndAt,
-    authorLabel,
+    authorLabel: buildAuthorLabel(round.author),
+    authorMemberId: round.author?.memberId,
+    recruitableTracks: round.recruitableTracks,
   }
+}
+
+export function isSeasonTrackCompatible(
+  config: RecruitingSeasonConfigurationResponse | undefined,
+  requiredTracks: readonly RecruitingTrack[],
+): boolean {
+  if (!config) return false
+  return requiredTracks.every(
+    (track) =>
+      (config.quotas.find((quota) => quota.track === track)?.targetCount ?? 0) >
+      0,
+  )
 }
 
 export interface ChapterPostGroup {

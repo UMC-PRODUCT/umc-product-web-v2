@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useRef, useState } from "react"
 
@@ -6,19 +7,25 @@ import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChap
 import { isChapter } from "@/entities/organization/model/chapters"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
-import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { IconButton } from "@/shared/ui/button/IconButton"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
-import { checkRecruitingRoundTitleAvailability } from "../api/recruitingApi"
+import { recruitingKeys } from "../api/queryKeys"
+import {
+  checkRecruitingRoundTitleAvailability,
+  cloneRecruitingRound,
+} from "../api/recruitingApi"
 import { useAdminRecruitingRounds } from "../hooks/useAdminRecruitingRounds"
 import { useRecruitingPermissions } from "../hooks/useRecruitingPermissions"
 import {
-  useCloneRecruitingRound,
   useDeleteRecruitingRound,
   useUpdateRecruitingRoundStatus,
 } from "../hooks/useRecruitmentListMutations"
+import {
+  MAX_ADDITIONAL_ROUND_NO,
+  resolveAdditionalRoundNoOptions,
+} from "../model/additionalRoundNo"
 import {
   resolveRecruitingListRole,
   resolveViewerChapter,
@@ -30,6 +37,7 @@ import {
 } from "../model/recruitingScope"
 import { resolveAvailableTitle } from "../model/recruitmentCreate"
 import {
+  buildDuplicateTargetSeasons,
   groupPostsByChapter,
   mapRoundGroupsToPosts,
   RECRUITMENT_SORT_OPTIONS,
@@ -49,7 +57,11 @@ import { SchoolTabs } from "./SchoolTabs"
 
 import type { RecruitingListRole } from "../model/recruitingListRole"
 import type { RecruitingScope } from "../model/recruitingScope"
-import type { RecruitmentPost, RecruitmentSort } from "../model/recruitmentList"
+import type {
+  DuplicateOutcome,
+  RecruitmentPost,
+  RecruitmentSort,
+} from "../model/recruitmentList"
 
 interface RecruitmentListPageProps {
   role?: RecruitingListRole
@@ -108,6 +120,7 @@ export function RecruitmentListPage({
   useMockData = false,
 }: RecruitmentListPageProps) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { data: me } = useMe()
   const { chapterNames: serverChapterNames } = useSchoolChapterMap()
   // RecruitmentCreatePage(BasicInfoForm)가 진입 지점별 필드 잠금에 쓰는 값이라
@@ -154,6 +167,12 @@ export function RecruitmentListPage({
     () => resolveRecruitingScope(groups, permittedSeasonIds, viewerSchool),
     [groups, permittedSeasonIds, viewerSchool],
   )
+  // 복제 모달의 "다른 학교로 복제" 후보. scope.groups가 이미 EDIT 권한이 있는
+  // 시즌만 남긴 목록이라 별도 권한 필터링이 필요 없다.
+  const duplicateCandidateSeasons = useMemo(
+    () => buildDuplicateTargetSeasons(scope.groups),
+    [scope.groups],
+  )
   const mockScope = useMemo(
     () => buildMockScope(role, serverChapterNames),
     [role, serverChapterNames],
@@ -169,10 +188,10 @@ export function RecruitmentListPage({
   const showSchoolTabs =
     (role === "chapterAdmin" || role === "schoolStaff") && !!ownScopeChapter
 
-  const authorLabel = me
-    ? `${me.nickname}/${me.name} · ${formatSchoolName(me.schoolName)}`
-    : undefined
-
+  // 작성자 표시(RecruitmentPost.authorLabel)는 라운드별 실제 작성자(round.author,
+  // mapRoundGroupsToPosts 참고)로 채워진다. 예전에는 여기서 "현재 로그인한 나"를
+  // 대신 채워 넣어서 다른 운영진이 만든 임시저장 글도 전부 "작성자: 나"로 잘못
+  // 보였다.
   const fetchedPosts = useMemo(() => {
     const scopedGroups = applyScopeFilters(
       scope,
@@ -180,69 +199,92 @@ export function RecruitmentListPage({
       schoolTab,
       scope.chapters,
     )
-    return mapRoundGroupsToPosts(scopedGroups, authorLabel)
-  }, [scope, chapterTab, schoolTab, authorLabel])
+    return mapRoundGroupsToPosts(scopedGroups)
+  }, [scope, chapterTab, schoolTab])
 
   // mock 모드(테스트 라우트 전용)만 낙관적 업데이트를 위한 로컬 state가 필요하다.
   // 실제 모드는 mutation 성공 후 재조회된 fetchedPosts를 그대로 파생값으로 쓴다.
   const [mockPosts, setMockPosts] = useState<RecruitmentPost[]>(
     RECRUITMENT_LIST_MOCK,
   )
-  const viewPosts = useMockData
-    ? filterMockPosts(
-        mockPosts,
-        showChapterTabs,
-        showSchoolTabs,
-        chapterTab,
-        schoolTab,
-      )
-    : fetchedPosts
+  // 실제 삭제는 되돌릴 수 없다(백엔드 명세). 그래서 삭제 클릭 시 DELETE를 바로
+  // 보내지 않고, 그레이스 타임 동안은 목록에서만 숨긴다(handleDelete 참고).
+  // mock 모드는 이 state를 안 쓰므로(즉시 mockPosts에서 제거) 필터는 항상 no-op.
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(
+    new Set(),
+  )
+  const viewPosts = (
+    useMockData
+      ? filterMockPosts(
+          mockPosts,
+          showChapterTabs,
+          showSchoolTabs,
+          chapterTab,
+          schoolTab,
+        )
+      : fetchedPosts
+  ).filter((post) => !pendingDeleteIds.has(post.postId))
   // 탭 필터와 무관하게 스코프 전체에서 postId로 찾아야 하는 액션(발행/삭제 등)에 쓴다.
   const basePosts = useMockData
     ? mockPosts
     : mapRoundGroupsToPosts(scope.groups)
   const setPosts = setMockPosts
   const lastDeletedPostRef = useRef<RecruitmentPost | null>(null)
+  // 실제 모드의 그레이스 삭제용. postId → 만료 시 실제 DELETE를 쏘는 타이머.
+  const deleteTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  )
+  // "실행취소"는 postId를 안 받는 단일 액션이라(onUndoDelete: () => void),
+  // 가장 최근에 숨긴 것 하나만 되돌릴 수 있다 — mock 모드의 lastDeletedPostRef와 같은 제약.
+  const lastPendingDeleteIdRef = useRef<string | null>(null)
 
   const updateRoundStatus = useUpdateRecruitingRoundStatus()
-  const cloneRound = useCloneRecruitingRound()
   const deleteRound = useDeleteRecruitingRound()
+  const isDuplicatingRef = useRef(false)
 
-  const handlePrivatize = (postId: string) => {
+  // mutateAsync를 써서 실제 API 응답을 기다린 뒤에만 호출부(RecruitmentPostMoreMenu)가
+  // "성공" 토스트를 띄우게 한다. 실패 토스트는 updateRoundStatus 훅의 onError가 전담한다.
+  const handlePrivatize = (postId: string): Promise<void> => {
     if (useMockData) {
       setPosts((prev) =>
         prev.map((post) =>
           post.postId === postId ? { ...post, status: "DRAFT" } : post,
         ),
       )
-      return
+      return Promise.resolve()
     }
     const post = basePosts.find((item) => item.postId === postId)
-    if (!post) return
-    updateRoundStatus.mutate({
-      seasonId: post.seasonId,
-      roundId: postId,
-      status: "DRAFT",
-    })
+    if (!post) return Promise.reject(new Error("post not found"))
+    return updateRoundStatus
+      .mutateAsync({
+        seasonId: post.seasonId,
+        roundId: postId,
+        status: "DRAFT",
+      })
+      .then(() => undefined)
   }
 
-  const handlePublish = (postId: string) => {
+  const handlePublish = (postId: string): Promise<void> => {
     if (useMockData) {
       setPosts((prev) =>
         prev.map((post) =>
           post.postId === postId ? { ...post, status: "OPEN" } : post,
         ),
       )
-      return
+      return Promise.resolve()
     }
     const post = basePosts.find((item) => item.postId === postId)
-    if (!post) return
-    updateRoundStatus.mutate({
-      seasonId: post.seasonId,
-      roundId: postId,
-      status: "OPEN",
-    })
+    if (!post) return Promise.reject(new Error("post not found"))
+    return updateRoundStatus
+      .mutateAsync({
+        seasonId: post.seasonId,
+        roundId: postId,
+        status: "OPEN",
+      })
+      .then(() => undefined)
   }
+
+  const DELETE_GRACE_MS = 7000
 
   const handleDelete = (postId: string) => {
     if (useMockData) {
@@ -253,20 +295,55 @@ export function RecruitmentListPage({
     }
     const post = basePosts.find((item) => item.postId === postId)
     if (!post) return
-    deleteRound.mutate({ seasonId: post.seasonId, roundId: postId })
+
+    lastPendingDeleteIdRef.current = postId
+    setPendingDeleteIds((prev) => new Set(prev).add(postId))
+
+    const timer = setTimeout(() => {
+      deleteTimersRef.current.delete(postId)
+      deleteRound.mutate(
+        { seasonId: post.seasonId, roundId: postId },
+        {
+          onError: () => {
+            setPendingDeleteIds((prev) => {
+              const next = new Set(prev)
+              next.delete(postId)
+              return next
+            })
+          },
+        },
+      )
+    }, DELETE_GRACE_MS)
+    deleteTimersRef.current.set(postId, timer)
   }
 
-  // 실제 DELETE는 복구 불가(백엔드 명세)라 mock 모드에서만 되돌릴 수 있다.
   const handleUndoDelete = () => {
-    if (!useMockData) return
-    const restored = lastDeletedPostRef.current
-    if (!restored) return
-    setPosts((prev) => [...prev, restored])
-    lastDeletedPostRef.current = null
+    if (useMockData) {
+      const restored = lastDeletedPostRef.current
+      if (!restored) return
+      setPosts((prev) => [...prev, restored])
+      lastDeletedPostRef.current = null
+      return
+    }
+    const postId = lastPendingDeleteIdRef.current
+    if (!postId) return
+    const timer = deleteTimersRef.current.get(postId)
+    if (timer) {
+      clearTimeout(timer)
+      deleteTimersRef.current.delete(postId)
+    }
+    setPendingDeleteIds((prev) => {
+      const next = new Set(prev)
+      next.delete(postId)
+      return next
+    })
+    lastPendingDeleteIdRef.current = null
   }
 
-  // 복제본은 항상 원본 학교의 같은 시즌에 새 DRAFT로 저장됨
-  const handleDuplicate = (postId: string) => {
+  const handleDuplicate = (
+    postId: string,
+    targetSeasonIds?: string[],
+  ): Promise<DuplicateOutcome> => {
     if (useMockData) {
       setPosts((prev) => {
         const source = prev.find((post) => post.postId === postId)
@@ -276,39 +353,74 @@ export function RecruitmentListPage({
           { ...source, postId: crypto.randomUUID(), status: "DRAFT" },
         ]
       })
-      return
+      return Promise.resolve({ succeededCount: 1, failedCount: 0 })
     }
-    if (cloneRound.isPending) return
+    if (isDuplicatingRef.current) {
+      return Promise.reject(new Error("clone pending"))
+    }
     const post = basePosts.find((item) => item.postId === postId)
-    if (!post) return
-    // roundNo는 화면에 캐시된 groups(staleTime 5분)가 아니라 매번 새로 받아온
-    // 목록으로 계산해야 한다. 캐시가 갱신되기 전에 연달아 복제하면 직전 복제로
-    // 이미 쓰인 번호를 또 계산해 RECRUITING-0116("이전 차수 다음 번호") 충돌이 난다.
-    void refetchRounds().then(({ data: freshGroups }) => {
-      const sameSeasonRounds =
-        freshGroups?.find((group) => group.seasonId === post.seasonId)
-          ?.rounds ?? []
-      const nextRoundNo =
-        Math.max(0, ...sameSeasonRounds.map((round) => Number(round.roundNo))) +
-        1
-      // 같은 글을 여러 번 복제해도 제목이 겹치지 않도록 사용 가능한 제목을 먼저 찾는다.
-      void resolveAvailableTitle(`${post.title} 복제본`, (title) =>
-        checkRecruitingRoundTitleAvailability(post.seasonId, title).catch(
-          () => true,
-        ),
-      ).then((title) => {
-        cloneRound.mutate({
-          seasonId: post.seasonId,
-          roundId: postId,
-          payload: {
-            targetSeasonId: post.seasonId,
-            title,
-            type: "ADDITIONAL",
-            roundNo: nextRoundNo,
-          },
-        })
+    if (!post) return Promise.reject(new Error("post not found"))
+
+    const targets = targetSeasonIds?.length ? targetSeasonIds : [post.seasonId]
+
+    isDuplicatingRef.current = true
+    // roundNo/제목 중복은 화면에 캐시된 groups(staleTime 5분)가 아니라 매번 새로
+    // 받아온 목록으로 계산해야 한다. 캐시가 갱신되기 전에 연달아 복제하면 직전
+    // 복제로 이미 쓰인 번호를 또 계산해 RECRUITING-0116("이전 차수 다음 번호")
+    // 충돌이 난다.
+    return refetchRounds()
+      .then(({ data: freshGroups }) => {
+        const cloneToSeason = (targetSeasonId: string) => {
+          const targetRounds =
+            freshGroups?.find((group) => group.seasonId === targetSeasonId)
+              ?.rounds ?? []
+          // 추가모집(ADDITIONAL) 차수 번호는 REGULAR와 별개의 독립된 시퀀스다
+          // (resolveAdditionalRoundNoOptions 참고, "정규 모집은 추가 모집
+          // 번호와 무관하다"). 시즌 전체 라운드를 섞어서 최댓값+1을 구하면
+          // REGULAR의 roundNo(항상 1)가 끼어들어, ADDITIONAL 라운드가 아직
+          // 하나도 없는 시즌(다른 학교로 처음 복제하는 경우 흔하다)에서 실제
+          // 다음 번호(1)보다 하나 큰 값(2)을 보내 RECRUITING-0116으로 거절된다.
+          const { nextRoundNo } = resolveAdditionalRoundNoOptions(
+            targetRounds,
+            MAX_ADDITIONAL_ROUND_NO,
+          )
+          if (nextRoundNo === undefined) {
+            return Promise.reject(
+              new Error("추가 모집 차수를 더 만들 수 없습니다."),
+            )
+          }
+          // 같은 글을 여러 학교에 복제해도 제목이 겹치지 않도록 대상 학교(시즌)
+          // 별로 사용 가능한 제목을 먼저 찾는다. "복제본" 문구 대신 꼬릿말
+          // 숫자를 붙인다 — 원본 제목은 이미 사용 중이라 항상 2부터 시작해서
+          // 복제할 때마다 +1씩 늘어난다.
+          return resolveAvailableTitle(post.title, (title) =>
+            checkRecruitingRoundTitleAvailability(targetSeasonId, title).catch(
+              () => true,
+            ),
+          ).then((title) =>
+            cloneRecruitingRound(post.seasonId, postId, {
+              targetSeasonId,
+              title,
+              type: "ADDITIONAL",
+              roundNo: nextRoundNo,
+            }),
+          )
+        }
+
+        return Promise.allSettled(targets.map(cloneToSeason))
       })
-    })
+      .then((results) => {
+        void queryClient.invalidateQueries({
+          queryKey: recruitingKeys.rounds(),
+        })
+        const failedCount = results.filter(
+          (result) => result.status === "rejected",
+        ).length
+        return { succeededCount: results.length - failedCount, failedCount }
+      })
+      .finally(() => {
+        isDuplicatingRef.current = false
+      })
   }
 
   const branchMap = SCHOOLS_BY_BRANCH as Record<string, readonly string[]>
@@ -459,6 +571,7 @@ export function RecruitmentListPage({
                       role={role}
                       posts={scopedPosts}
                       permittedSeasonIds={permittedSeasonIds}
+                      duplicateCandidateSeasons={duplicateCandidateSeasons}
                       onPrivatize={handlePrivatize}
                       onDuplicate={handleDuplicate}
                       onDelete={handleDelete}
@@ -478,6 +591,7 @@ export function RecruitmentListPage({
                           role={role}
                           posts={scopedPosts}
                           permittedSeasonIds={permittedSeasonIds}
+                          duplicateCandidateSeasons={duplicateCandidateSeasons}
                           onPublish={handlePublish}
                           onDuplicate={handleDuplicate}
                           onDelete={handleDelete}
@@ -499,6 +613,7 @@ export function RecruitmentListPage({
               posts={viewPosts}
               schoolTab={ownScopeSchoolTab}
               permittedSeasonIds={permittedSeasonIds}
+              duplicateCandidateSeasons={duplicateCandidateSeasons}
               onPrivatize={handlePrivatize}
               onPublish={handlePublish}
               onDuplicate={handleDuplicate}

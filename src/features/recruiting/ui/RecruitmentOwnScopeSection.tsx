@@ -5,7 +5,11 @@ import { RecruitmentPostListCard } from "./RecruitmentPostListCard"
 import type { Chapter } from "@/entities/organization/model/chapters"
 
 import type { RecruitingListRole } from "../model/recruitingListRole"
-import type { RecruitmentPost } from "../model/recruitmentList"
+import type {
+  DuplicateOutcome,
+  DuplicateTargetSeason,
+  RecruitmentPost,
+} from "../model/recruitmentList"
 
 interface RecruitmentOwnScopeSectionProps {
   chapter: Chapter
@@ -13,9 +17,13 @@ interface RecruitmentOwnScopeSectionProps {
   posts: RecruitmentPost[]
   schoolTab: string
   permittedSeasonIds: ReadonlySet<string>
-  onPrivatize: (postId: string) => void
-  onPublish: (postId: string) => void
-  onDuplicate: (postId: string) => void
+  duplicateCandidateSeasons: DuplicateTargetSeason[]
+  onPrivatize: (postId: string) => Promise<void>
+  onPublish: (postId: string) => Promise<void>
+  onDuplicate: (
+    postId: string,
+    targetSeasonIds?: string[],
+  ) => Promise<DuplicateOutcome>
   onDelete: (postId: string) => void
   onUndoDelete: () => void
   onNavigateToArchive: (school: string) => void
@@ -31,6 +39,7 @@ export function RecruitmentOwnScopeSection({
   posts,
   schoolTab,
   permittedSeasonIds,
+  duplicateCandidateSeasons,
   onPrivatize,
   onPublish,
   onDuplicate,
@@ -59,6 +68,7 @@ export function RecruitmentOwnScopeSection({
         role={role}
         posts={posts}
         permittedSeasonIds={permittedSeasonIds}
+        duplicateCandidateSeasons={duplicateCandidateSeasons}
         onPrivatize={onPrivatize}
         onDuplicate={onDuplicate}
         onDelete={onDelete}
@@ -78,6 +88,7 @@ export function RecruitmentOwnScopeSection({
             role={role}
             posts={posts}
             permittedSeasonIds={permittedSeasonIds}
+            duplicateCandidateSeasons={duplicateCandidateSeasons}
             onPublish={onPublish}
             onDuplicate={onDuplicate}
             onDelete={onDelete}

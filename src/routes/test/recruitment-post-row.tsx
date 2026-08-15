@@ -27,10 +27,12 @@ function RecruitmentPostRowTestPage() {
             <RecruitmentPostMoreMenu
               status="OPEN"
               role="central"
-              onPublish={() => {}}
-              onPrivatize={() => {}}
+              onPublish={() => Promise.resolve()}
+              onPrivatize={() => Promise.resolve()}
               onEdit={() => console.info("TODO: 모집 공고 수정")}
-              onDuplicate={() => {}}
+              onDuplicate={() =>
+                Promise.resolve({ succeededCount: 1, failedCount: 0 })
+              }
               onDelete={() => {}}
             />
           }
@@ -63,9 +65,11 @@ function RecruitmentPostRowTestPage() {
             <RecruitmentPostMoreMenu
               status="CLOSED"
               role="central"
-              onPublish={() => {}}
-              onPrivatize={() => {}}
-              onDuplicate={() => {}}
+              onPublish={() => Promise.resolve()}
+              onPrivatize={() => Promise.resolve()}
+              onDuplicate={() =>
+                Promise.resolve({ succeededCount: 1, failedCount: 0 })
+              }
               onDelete={() => {}}
             />
           }
@@ -85,10 +89,12 @@ function RecruitmentPostRowTestPage() {
             <RecruitmentPostMoreMenu
               status="DRAFT"
               role="central"
-              onPublish={() => {}}
-              onPrivatize={() => {}}
+              onPublish={() => Promise.resolve()}
+              onPrivatize={() => Promise.resolve()}
               onEdit={() => console.info("TODO: 모집 공고 수정")}
-              onDuplicate={() => {}}
+              onDuplicate={() =>
+                Promise.resolve({ succeededCount: 1, failedCount: 0 })
+              }
               onDelete={() => {}}
             />
           }
@@ -117,10 +123,12 @@ function RecruitmentPostRowTestPage() {
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
                   role="central"
-                  onPublish={() => {}}
-                  onPrivatize={() => {}}
+                  onPublish={() => Promise.resolve()}
+                  onPrivatize={() => Promise.resolve()}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
-                  onDuplicate={() => {}}
+                  onDuplicate={() =>
+                    Promise.resolve({ succeededCount: 1, failedCount: 0 })
+                  }
                   onDelete={() => {}}
                 />
               }
@@ -134,10 +142,12 @@ function RecruitmentPostRowTestPage() {
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
                   role="central"
-                  onPublish={() => {}}
-                  onPrivatize={() => {}}
+                  onPublish={() => Promise.resolve()}
+                  onPrivatize={() => Promise.resolve()}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
-                  onDuplicate={() => {}}
+                  onDuplicate={() =>
+                    Promise.resolve({ succeededCount: 1, failedCount: 0 })
+                  }
                   onDelete={() => {}}
                 />
               }
@@ -151,10 +161,12 @@ function RecruitmentPostRowTestPage() {
                 <RecruitmentPostMoreMenu
                   status="DRAFT"
                   role="central"
-                  onPublish={() => {}}
-                  onPrivatize={() => {}}
+                  onPublish={() => Promise.resolve()}
+                  onPrivatize={() => Promise.resolve()}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
-                  onDuplicate={() => {}}
+                  onDuplicate={() =>
+                    Promise.resolve({ succeededCount: 1, failedCount: 0 })
+                  }
                   onDelete={() => {}}
                 />
               }
@@ -171,10 +183,12 @@ function RecruitmentPostRowTestPage() {
                 <RecruitmentPostMoreMenu
                   status="OPEN"
                   role="central"
-                  onPublish={() => {}}
-                  onPrivatize={() => {}}
+                  onPublish={() => Promise.resolve()}
+                  onPrivatize={() => Promise.resolve()}
                   onEdit={() => console.info("TODO: 모집 공고 수정")}
-                  onDuplicate={() => {}}
+                  onDuplicate={() =>
+                    Promise.resolve({ succeededCount: 1, failedCount: 0 })
+                  }
                   onDelete={() => {}}
                 />
               }
