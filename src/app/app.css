@@ -360,4 +360,7 @@
   button:not(:disabled) {
     cursor: pointer;
   }
+  button {
+    appearance: none;
+  }
 }

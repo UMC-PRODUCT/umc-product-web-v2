@@ -139,7 +139,7 @@ export function RecruitmentDraftArchiveCard({
   return (
     <section
       className={cn(
-        "border-teal-gray-200 flex w-full flex-col rounded-xl border bg-white px-3 pt-5 pb-8",
+        "border-teal-gray-100 flex w-full flex-col rounded-xl border bg-white px-3 pt-5 pb-8",
         className,
       )}
     >
@@ -163,8 +163,8 @@ export function RecruitmentDraftArchiveCard({
         {selectedSchool ? (
           <RecruitmentSchoolSection schoolName={selectedSchool}>
             {selectedSchoolPosts.length === 0 ? (
-              <div className="flex w-full items-center justify-center bg-white py-10">
-                <p className="text-body-2-regular text-teal-gray-400">
+              <div className="flex w-full items-center bg-white px-5 py-4.5">
+                <p className="text-body-2-medium text-teal-gray-400">
                   등록된 임시 보관글이 없습니다.
                 </p>
               </div>
@@ -190,8 +190,8 @@ export function RecruitmentDraftArchiveCard({
             ({ school, posts: schoolPosts }) => (
               <RecruitmentSchoolSection key={school} schoolName={school}>
                 {schoolPosts.length === 0 ? (
-                  <div className="flex w-full items-center justify-center bg-white py-10">
-                    <p className="text-body-2-regular text-teal-gray-400">
+                  <div className="flex w-full items-center bg-white px-5 py-4.5">
+                    <p className="text-body-2-medium text-teal-gray-400">
                       등록된 임시 보관글이 없습니다.
                     </p>
                   </div>
