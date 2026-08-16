@@ -107,18 +107,20 @@ function ApplicationListPage() {
 
   if (!application) {
     return (
-      <div className="flex w-full flex-col items-center justify-center gap-4 py-20">
-        <p className="text-body-1-medium text-teal-gray-500">
+      <div className="border-teal-gray-150 flex w-full flex-col items-center justify-center gap-2.5 rounded-[14px] border bg-white px-8 py-35">
+        <p className="text-body-2-medium text-teal-gray-400">
           조회된 지원서가 없습니다.
         </p>
-        <Button
-          variant="fill"
-          color="neutral"
-          size="m"
-          onClick={handleResetVerification}
-        >
-          다른 지원서 조회하기
-        </Button>
+        {!isAuthed && (
+          <Button
+            variant="weak"
+            color="neutral"
+            size="s"
+            onClick={handleResetVerification}
+          >
+            다른 지원서 확인하기
+          </Button>
+        )}
       </div>
     )
   }

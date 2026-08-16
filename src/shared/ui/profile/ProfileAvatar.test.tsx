@@ -49,13 +49,9 @@ describe("ProfileAvatar", () => {
     expect(screen.queryByAltText("사용자 프로필")).not.toBeInTheDocument()
   })
 
-  it("기본 상태에서 크기에 맞춰 프로필 아이콘을 배치한다", () => {
+  it("기본 상태에서 프로필 아이콘을 영역에 맞춰 표시한다", () => {
     const { container } = render(<ProfileAvatar size={100} />)
 
-    expect(container.querySelector("svg")).toHaveStyle({
-      width: "87px",
-      height: "87px",
-      top: "17.39px",
-    })
+    expect(container.querySelector("svg")).toHaveClass("size-full")
   })
 })

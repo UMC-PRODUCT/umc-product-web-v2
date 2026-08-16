@@ -22,8 +22,6 @@ export function ProfileAvatar({
   const isDefault = state === "default"
   const isFilled = state === "filled"
   const isHoverUpload = state === "hover-upload"
-  const profileIconSize = size === 100 ? 87 : size === 46 ? 40 : 36
-  const profileIconTop = size === 100 ? 17.39 : size === 46 ? 8 : 7
 
   return (
     <span
@@ -39,15 +37,7 @@ export function ProfileAvatar({
       {isFilled && src ? (
         <img src={src} alt={alt} className="size-full object-cover" />
       ) : isDefault ? (
-        <ProfileIcon
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{
-            width: profileIconSize,
-            height: profileIconSize,
-            top: profileIconTop,
-          }}
-          aria-hidden="true"
-        />
+        <ProfileIcon className="size-full" aria-hidden="true" />
       ) : null}
     </span>
   )
