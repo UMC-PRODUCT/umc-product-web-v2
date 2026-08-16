@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { isAxiosError } from "axios"
 import { useMemo, useState } from "react"
 
 import { useAdminSchoolsSummary } from "@/entities/organization/hooks/useSchool"
@@ -8,11 +9,15 @@ import { SchoolCard } from "@/features/settings/ui/SchoolCard"
 import { SchoolPagination } from "@/features/settings/ui/SchoolPagination"
 import { SchoolSearchInput } from "@/features/settings/ui/SchoolSearchInput"
 import {
+  SCHOOL_SORT_SERVER_VALUES,
   SchoolSortDropdown,
   type SchoolSortOption,
 } from "@/features/settings/ui/SchoolSortDropdown"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
-import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
+import {
+  useSelectedGeneration,
+  useSelectedGisuId,
+} from "@/shared/hooks/useSelectedGisu"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 
@@ -34,15 +39,13 @@ function SchoolManagePage() {
     setCurrentPage(1)
   }
 
-  const { data: activeGisuData } = useActiveGisu()
-  const activeGisuId = activeGisuData?.gisuId
-    ? Number(activeGisuData.gisuId)
-    : undefined
-  const activeGisuText = activeGisuData?.gisu
-    ? `${activeGisuData.gisu}기`
-    : "11기"
+  const { data: selectedGisuIdData } = useSelectedGisuId()
+  const selectedGisuId = selectedGisuIdData ?? undefined
+  const { data: selectedGeneration } = useSelectedGeneration()
 
-  const { getChapterIdBySchool, getChapterIdByName } = useSchoolChapterMap()
+  const { getChapterIdBySchool, getChapterIdByName } = useSchoolChapterMap({
+    gisuId: selectedGisuId,
+  })
 
   const chapterIdParam = useMemo(() => {
     if (selectedChapter === "all") return undefined
@@ -54,18 +57,25 @@ function SchoolManagePage() {
   const isChapterUnresolved =
     selectedChapter !== "all" && chapterIdParam === undefined
 
-  const { data: summaryData, isLoading: isSummaryLoading } =
-    useAdminSchoolsSummary({
-      gisuId: activeGisuId,
-      chapterId: chapterIdParam,
-      search: submittedSearchQuery.trim() || undefined,
-      page: currentPage - 1,
-      size: PAGE_SIZE,
-      sort: sortOption,
-      enabled: activeGisuId != null && !isChapterUnresolved,
-    })
+  const {
+    data: summaryData,
+    isLoading: isSummaryLoading,
+    isError: isSummaryError,
+    error: summaryError,
+  } = useAdminSchoolsSummary({
+    gisuId: selectedGisuId,
+    chapterId: chapterIdParam,
+    search: submittedSearchQuery.trim() || undefined,
+    page: currentPage - 1,
+    size: PAGE_SIZE,
+    sort: SCHOOL_SORT_SERVER_VALUES[sortOption],
+    enabled: selectedGisuId != null && !isChapterUnresolved,
+  })
 
   const isLoading = isSummaryLoading
+  const summaryErrorStatus = isAxiosError(summaryError)
+    ? summaryError.response?.status
+    : undefined
 
   const paginatedSchools = useMemo(() => {
     if (!summaryData?.content) return []
@@ -98,12 +108,17 @@ function SchoolManagePage() {
           { id: "school", label: "학교 관리" },
         ]}
         title="학교 관리"
-        description={`UMC ${activeGisuText} 소속의 학교 정보를 관리합니다.`}
+        description={
+          selectedGeneration != null
+            ? `UMC ${selectedGeneration}기 소속의 학교 정보를 관리합니다.`
+            : "소속 학교 정보를 관리합니다."
+        }
         className="pl-3"
       />
 
       <div className="flex w-full flex-col gap-6">
         <ChapterTabs
+          gisuId={selectedGisuId}
           value={selectedChapter}
           onValueChange={(val) => {
             setSelectedChapter(val)
@@ -148,6 +163,12 @@ function SchoolManagePage() {
         ) : isLoading ? (
           <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
             학교 정보를 불러오는 중입니다...
+          </div>
+        ) : isSummaryError ? (
+          <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
+            {summaryErrorStatus === 403
+              ? "선택한 기수의 학교 정보를 볼 권한이 없습니다. 해당 기수의 운영진만 조회할 수 있습니다."
+              : "학교 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."}
           </div>
         ) : paginatedSchools.length === 0 ? (
           <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
