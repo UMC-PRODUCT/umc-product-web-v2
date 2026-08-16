@@ -17,7 +17,7 @@ import { useUpdateSchool } from "@/entities/organization/hooks/useSchool"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
-import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
+import { useSelectedGisuId } from "@/shared/hooks/useSelectedGisu"
 import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -59,8 +59,10 @@ export function ChapterManagePage() {
   const createChapterMutation = useCreateChapter()
   const createChaptersBulkMutation = useCreateChaptersBulk()
   const updateSchoolMutation = useUpdateSchool()
-  const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
-  const { chapters: serverChapters } = useSchoolChapterMap()
+  const { data: activeGisuId, isLoading: isGisuLoading } = useSelectedGisuId()
+  const { chapters: serverChapters } = useSchoolChapterMap({
+    gisuId: activeGisuId ?? undefined,
+  })
 
   const { data: allSchoolsData } = useQuery({
     queryKey: ["allSchools"],

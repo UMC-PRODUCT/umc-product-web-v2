@@ -1,14 +1,16 @@
 import { useNavigate } from "@tanstack/react-router"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import { useMe } from "@/entities/member/hooks/useMe"
 import { isCentralStaff, isSuperAdmin } from "@/entities/member/model/identity"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import { logout as apiLogout } from "@/features/auth/api/credentials"
 import { logout as localLogout } from "@/features/auth/lib/logout"
+import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 import { useClickOutside } from "@/shared/hooks/useClickOutside"
 import { toRoleTag } from "@/shared/lib/roleTagMapper"
 import { cn } from "@/shared/lib/utils"
+import { useSelectedGisuStore } from "@/shared/model/useSelectedGisuStore"
 import { TextButton } from "@/shared/ui/button/TextButton"
 import { RoleTagChip } from "@/shared/ui/chip/RoleTagChip"
 import { ProfileAvatar } from "@/shared/ui/profile/ProfileAvatar"
@@ -37,17 +39,11 @@ export function ProfileDropdown({
   const { data: me } = useMe()
   const canManageMembers = isSuperAdmin(me) || isCentralStaff(me)
 
-  // TODO: 기수 변경이 다른 화면에서도 쓰게 되면 URL 쿼리(?gisuId=)로 전환
-  const [selectedGisuId, setSelectedGisuId] = useState<string | null>(null)
+  const selectedGisu = useSelectedGisuStore((s) => s.selected)
+  const setSelectedGisu = useSelectedGisuStore((s) => s.setSelected)
+  const { data: activeGisu } = useActiveGisu()
 
-  // TODO: GET /api/v2/member/me 연동 후 challengerRecords → challengerHistory, record.gisu → record.generation 으로 교체
-  useEffect(() => {
-    if (selectedGisuId || !me?.challengerRecords?.length) return
-    const latest = [...me.challengerRecords].sort(
-      (a, b) => Number(b.gisuId) - Number(a.gisuId),
-    )[0]
-    if (latest) setSelectedGisuId(latest.gisuId)
-  }, [me, selectedGisuId, setSelectedGisuId])
+  const currentGisuId = selectedGisu?.gisuId ?? activeGisu?.gisuId ?? null
 
   useClickOutside(
     containerRef,
@@ -153,10 +149,14 @@ export function ProfileDropdown({
                       <GenerationListItem
                         key={record.challengerId}
                         generation={Number(record.gisu)}
-                        active={record.gisuId === selectedGisuId}
-                        // TODO: 클릭 시 기수 상태 변경
-                        // onClick={() => setSelectedGisuId(record.gisuId)}
-                        className="w-full cursor-default"
+                        active={String(record.gisuId) === String(currentGisuId)}
+                        onClick={() =>
+                          setSelectedGisu({
+                            gisuId: String(record.gisuId),
+                            generation: Number(record.gisu),
+                          })
+                        }
+                        className="w-full"
                       />
                     ))
                 ) : (

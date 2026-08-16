@@ -9,7 +9,7 @@ import {
 } from "@/entities/curriculum"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import SettingIcon from "@/shared/assets/icon/setting/SettingIcon"
-import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
+import { useSelectedGisuId } from "@/shared/hooks/useSelectedGisu"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
@@ -31,7 +31,7 @@ export function CurriculumManagePage() {
   const [curriculumData, setCurriculumData] = useState(INITIAL_CURRICULUM_DATA)
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
   const addToast = useToastStore((state) => state.addToast)
-  const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
+  const { data: activeGisuId, isLoading: isGisuLoading } = useSelectedGisuId()
 
   // Default expand card 01 (design-1)
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({

@@ -5,22 +5,24 @@ import { getChaptersWithSchools } from "@/entities/organization/api/organization
 import { useActiveGisu } from "@/shared/hooks/useActiveGisu"
 
 export interface SchoolChapterMapOptions {
+  gisuId?: number
   refetchInterval?: number | false
 }
 
 export function useSchoolChapterMap(options: SchoolChapterMapOptions = {}) {
-  const { data: gisuData } = useActiveGisu()
+  const { data: gisuData } = useActiveGisu({ enabled: options.gisuId == null })
 
-  const activeGisuId = gisuData?.gisuId ? Number(gisuData.gisuId) : undefined
+  const resolvedGisuId =
+    options.gisuId ?? (gisuData?.gisuId ? Number(gisuData.gisuId) : undefined)
 
   const {
     data: chaptersData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["chaptersWithSchools", activeGisuId],
-    queryFn: () => getChaptersWithSchools(String(activeGisuId!)),
-    enabled: activeGisuId != null,
+    queryKey: ["chaptersWithSchools", resolvedGisuId],
+    queryFn: () => getChaptersWithSchools(String(resolvedGisuId!)),
+    enabled: resolvedGisuId != null,
     staleTime: 5 * 60 * 1000,
     refetchInterval: options.refetchInterval ?? false,
   })

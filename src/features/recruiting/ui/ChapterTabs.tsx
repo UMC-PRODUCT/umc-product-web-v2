@@ -10,6 +10,7 @@ interface ChapterTabsProps {
   chapters?: Array<{ chapterId: string | number; chapterName: string } | string>
   allLabel?: string
   className?: string
+  gisuId?: number
 }
 
 export function ChapterTabs({
@@ -18,8 +19,9 @@ export function ChapterTabs({
   chapters: customChapters,
   allLabel = "전체",
   className,
+  gisuId,
 }: ChapterTabsProps) {
-  const { chapters: serverChapters } = useSchoolChapterMap()
+  const { chapters: serverChapters } = useSchoolChapterMap({ gisuId })
 
   const chapterOptions = useMemo(() => {
     if (customChapters && customChapters.length > 0) {
