@@ -22,6 +22,36 @@ function isDraftRef(value: unknown): value is ApplyDraftRef {
   )
 }
 
+function memberStorageKey(memberId: string) {
+  return `umc:recruiting:member:${memberId}`
+}
+
+export function readMemberApplicationRef(
+  memberId: string,
+): ApplyDraftRef | null {
+  if (!memberId) return null
+  try {
+    const raw = localStorage.getItem(memberStorageKey(memberId))
+    if (!raw) return null
+    const parsed: unknown = JSON.parse(raw)
+    return isDraftRef(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+export function writeMemberApplicationRef(
+  memberId: string,
+  draft: ApplyDraftRef,
+): void {
+  if (!memberId) return
+  try {
+    localStorage.setItem(memberStorageKey(memberId), JSON.stringify(draft))
+  } catch {
+    // 사생활 보호 모드처럼 저장이 막힌 환경에서도 작성 자체는 이어갈 수 있어야 한다.
+  }
+}
+
 export function readApplyDraft(
   roundId: string,
   memberId: string,
@@ -43,6 +73,9 @@ export function writeApplyDraft(
 ): void {
   try {
     localStorage.setItem(storageKey(roundId, memberId), JSON.stringify(draft))
+    if (memberId) {
+      writeMemberApplicationRef(memberId, draft)
+    }
   } catch {
     // 사생활 보호 모드처럼 저장이 막힌 환경에서도 작성 자체는 이어갈 수 있어야 한다.
   }

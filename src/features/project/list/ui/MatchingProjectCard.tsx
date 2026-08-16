@@ -57,15 +57,15 @@ function GuestCardBody({ data }: { data: MatchingProject }) {
         />
       </div>
 
-      <div className="flex w-full min-w-0 flex-col items-start gap-3 p-5">
+      <div className="flex w-full min-w-0 flex-col items-start gap-1.5 p-5">
         <h3 className="text-heading-7-semibold text-teal-gray-900 w-full min-w-0 truncate">
           {data.title}
         </h3>
         {/* 로그인 카드는 한 줄이지만 게스트 카드는 두 줄까지 보여준다 */}
-        <p className="text-body-2-medium text-teal-gray-600 line-clamp-2 h-10.5 w-full min-w-0">
+        <p className="text-body-2-regular text-teal-gray-600 line-clamp-2 h-10.5 w-full min-w-0">
           {data.description}
         </p>
-        <p className="text-caption-2-regular text-teal-gray-500 line-clamp-1 w-full min-w-0">
+        <p className="text-body-3-regular text-teal-gray-500 line-clamp-1 w-full min-w-0">
           {partNames.join(" · ")}
         </p>
       </div>

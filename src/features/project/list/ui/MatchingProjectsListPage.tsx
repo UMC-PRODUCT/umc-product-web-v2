@@ -80,11 +80,19 @@ interface MatchingProjectsListPageProps {
    * 같은 열 수를 주면 한쪽 카드가 디자인보다 커진다.
    */
   columns?: 2 | 3
+  /**
+   * 공개 목록(/projects) 여부.
+   *
+   * 시안에는 흰 판·검색·필터가 없고 카드도 제목·소개·파트만 보여준다. 매칭
+   * 화면은 같은 목록을 쓰지만 필터와 모집 현황이 있어야 하므로 갈라 둔다.
+   */
+  publicView?: boolean
 }
 
 export function MatchingProjectsListPage({
   useMockData = false,
   columns = 2,
+  publicView = false,
 }: MatchingProjectsListPageProps) {
   const {
     openFilterId,
@@ -151,7 +159,7 @@ export function MatchingProjectsListPage({
 
   return (
     <section className="relative isolate flex w-full min-w-0 flex-col items-stretch justify-start">
-      {openFilterId && (
+      {!publicView && openFilterId && (
         <button
           type="button"
           aria-label="필터 드롭다운 닫기"
@@ -159,17 +167,31 @@ export function MatchingProjectsListPage({
           onClick={() => setOpenFilterId(null)}
         />
       )}
-      <div className="border-teal-gray-100 relative z-30 flex h-full w-full min-w-0 flex-col gap-5 rounded-[12px] border bg-white px-6 pt-8 pb-10">
-        <div className="flex flex-col items-start gap-1.5">
-          <span className="text-heading-6-semibold text-teal-gray-900">
-            프로젝트 목록
-          </span>
-          <span className="text-body-2-regular text-teal-gray-600">
-            모든 프로젝트를 한눈에 조회합니다.
-          </span>
-        </div>
+      {/* 공개 목록은 시안에 흰 판이 없다. 배경 위에 카드가 바로 놓인다. */}
+      <div
+        className={cn(
+          "relative z-30 flex h-full w-full min-w-0 flex-col gap-5",
+          !publicView &&
+            "border-teal-gray-100 rounded-[12px] border bg-white px-6 pt-8 pb-10",
+        )}
+      >
+        {!publicView && (
+          <div className="flex flex-col items-start gap-1.5">
+            <span className="text-heading-6-semibold text-teal-gray-900">
+              프로젝트 목록
+            </span>
+            <span className="text-body-2-regular text-teal-gray-600">
+              모든 프로젝트를 한눈에 조회합니다.
+            </span>
+          </div>
+        )}
 
-        <div className="relative z-30 mb-3 flex min-w-0 flex-col gap-3 self-stretch">
+        <div
+          className={cn(
+            "relative z-30 mb-3 flex min-w-0 flex-col gap-3 self-stretch",
+            publicView && "hidden",
+          )}
+        >
           <ProjectSearchField value={searchQuery} onChange={setSearchQuery} />
           <div
             ref={filterAreaRef}
@@ -238,7 +260,11 @@ export function MatchingProjectsListPage({
         <div
           className={cn(
             "grid min-w-0 gap-5",
-            columns === 3 ? "grid-cols-3" : "grid-cols-2",
+            // 사이드바 없는 /projects 는 시안이 348 고정 카드다. fr 로 두면
+            // 넓은 화면에서 카드만 늘어나 썸네일 비율이 시안과 어긋난다.
+            columns === 3
+              ? "grid-cols-[repeat(3,348px)] justify-center"
+              : "grid-cols-2",
             openFilterId && "pointer-events-none",
           )}
         >
@@ -249,7 +275,7 @@ export function MatchingProjectsListPage({
             Array.from({ length: SKELETON_CARD_COUNT }).map((_, index) => (
               <MatchingProjectCardSkeleton
                 key={index}
-                variant={isGuest ? "guest" : "default"}
+                variant={isGuest || publicView ? "guest" : "default"}
               />
             ))}
 
@@ -278,7 +304,7 @@ export function MatchingProjectsListPage({
                   }}
                 >
                   <MatchingProjectCard
-                    variant={isGuest ? "guest" : "default"}
+                    variant={isGuest || publicView ? "guest" : "default"}
                     data={project}
                   />
                 </button>
@@ -320,7 +346,7 @@ export function MatchingProjectsListPage({
         <Modal.Portal>
           <Modal.Overlay tone="deep" />
           <Modal.Content
-            className="shadow-drop-neutral-3 rounded-2xl"
+            className="shadow-drop-neutral-3 rounded-[20px]"
             aria-describedby={undefined}
           >
             <Modal.Title className="sr-only">프로젝트 상세</Modal.Title>
@@ -328,6 +354,7 @@ export function MatchingProjectsListPage({
               <ProjectDetailCard
                 projectId={selectedProjectId}
                 projectChapterId={selectedProjectChapterId}
+                publicView={publicView}
               />
             )}
           </Modal.Content>

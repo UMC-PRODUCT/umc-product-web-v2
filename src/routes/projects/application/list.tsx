@@ -1,10 +1,12 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useMemo } from "react"
 
+import { useMe } from "@/entities/member/hooks/useMe"
 import { useAuthStore } from "@/entities/member/store/authStore"
 import {
   clearAnonymousApplicationSession,
   mapTrackToPartTag,
+  readMemberApplicationRef,
   RecruitingApplicationCard,
   useAnonymousApplicationQuery,
   useCancelAnonymousApplication,
@@ -77,13 +79,26 @@ export const Route = createFileRoute("/projects/application/list")({
 function ApplicationListPage() {
   const navigate = useNavigate()
   const isAuthed = useAuthStore((s) => s.isAuthed)
+  const { data: me } = useMe()
+  const memberId = me?.id ?? ""
+  const memberEmail = me?.email ?? null
 
-  const email =
-    !isAuthed && typeof window !== "undefined"
+  const memberAppRef = useMemo(
+    () => (isAuthed && memberId ? readMemberApplicationRef(memberId) : null),
+    [isAuthed, memberId],
+  )
+
+  const email = isAuthed
+    ? memberEmail
+    : typeof window !== "undefined"
       ? sessionStorage.getItem("anonymousEmail")
       : null
-  const applicationKey =
-    !isAuthed && typeof window !== "undefined"
+  const applicationKey = isAuthed
+    ? (memberAppRef?.applicationKey ??
+      (typeof window !== "undefined"
+        ? sessionStorage.getItem("anonymousApplicationKey")
+        : null))
+    : typeof window !== "undefined"
       ? sessionStorage.getItem("anonymousApplicationKey")
       : null
 
@@ -162,17 +177,17 @@ function ApplicationListPage() {
 
   if (!anonymousApplication) {
     return (
-      <div className="flex w-full flex-col items-center justify-center gap-4 py-20">
-        <p className="text-body-1-medium text-teal-gray-500">
+      <div className="border-teal-gray-150 flex w-full flex-col items-center justify-center gap-2.5 rounded-[14px] border bg-white px-8 py-35">
+        <p className="text-body-2-medium text-teal-gray-400">
           조회된 지원서가 없습니다.
         </p>
         <Button
-          variant="fill"
+          variant="weak"
           color="neutral"
-          size="m"
+          size="s"
           onClick={handleResetVerification}
         >
-          다른 지원서 조회하기
+          다른 지원서 확인하기
         </Button>
       </div>
     )
