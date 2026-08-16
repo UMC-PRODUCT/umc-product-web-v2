@@ -692,12 +692,24 @@ export async function cloneRecruitingRound(
   return String(data.result.id)
 }
 
-// 지원서와 Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 복구 불가.
+// 지원서와 Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 실제로는
+// soft delete라 restoreRecruitingRound로 복구할 수 있다.
 export async function deleteRecruitingRound(
   seasonId: string,
   roundId: string,
 ): Promise<void> {
   await api.delete(`/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}`)
+}
+
+// deleteRecruitingRound로 삭제(soft delete)한 Round를 되돌린다. 삭제 이후 같은
+// 슬롯으로 새 Round가 만들어졌다면 슬롯 충돌로 실패할 수 있다(백엔드 검증).
+export async function restoreRecruitingRound(
+  seasonId: string,
+  roundId: string,
+): Promise<void> {
+  await api.post(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/restore`,
+  )
 }
 
 export async function getRoundEvaluators(

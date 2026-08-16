@@ -7,6 +7,7 @@ import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChap
 import { isChapter } from "@/entities/organization/model/chapters"
 import DownChevronIcon from "@/shared/assets/icon/chevron/sidebar/DownChevronIcon"
 import { SCHOOLS_BY_BRANCH } from "@/shared/config/schools"
+import { formatSchoolName } from "@/shared/lib/formatSchoolName"
 import { IconButton } from "@/shared/ui/button/IconButton"
 import { FilterDropdown } from "@/shared/ui/FilterDropDown"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -20,6 +21,7 @@ import { useAdminRecruitingRounds } from "../hooks/useAdminRecruitingRounds"
 import { useRecruitingPermissions } from "../hooks/useRecruitingPermissions"
 import {
   useDeleteRecruitingRound,
+  useRestoreRecruitingRound,
   useUpdateRecruitingRoundStatus,
 } from "../hooks/useRecruitmentListMutations"
 import {
@@ -207,9 +209,10 @@ export function RecruitmentListPage({
   const [mockPosts, setMockPosts] = useState<RecruitmentPost[]>(
     RECRUITMENT_LIST_MOCK,
   )
-  // 실제 삭제는 되돌릴 수 없다(백엔드 명세). 그래서 삭제 클릭 시 DELETE를 바로
-  // 보내지 않고, 그레이스 타임 동안은 목록에서만 숨긴다(handleDelete 참고).
-  // mock 모드는 이 state를 안 쓰므로(즉시 mockPosts에서 제거) 필터는 항상 no-op.
+  // 삭제(soft delete)는 서버에서 복구 가능하지만, 목록 API가 삭제된 Round를
+  // 자동 제외하는 시점(재조회 완료)까지는 시차가 있다. 그동안 목록에서만
+  // 낙관적으로 숨긴다(handleDelete 참고). mock 모드는 이 state를 안 쓰므로
+  // (즉시 mockPosts에서 제거) 필터는 항상 no-op.
   const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(
     new Set(),
   )
@@ -230,16 +233,17 @@ export function RecruitmentListPage({
     : mapRoundGroupsToPosts(scope.groups)
   const setPosts = setMockPosts
   const lastDeletedPostRef = useRef<RecruitmentPost | null>(null)
-  // 실제 모드의 그레이스 삭제용. postId → 만료 시 실제 DELETE를 쏘는 타이머.
-  const deleteTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map(),
-  )
   // "실행취소"는 postId를 안 받는 단일 액션이라(onUndoDelete: () => void),
-  // 가장 최근에 숨긴 것 하나만 되돌릴 수 있다 — mock 모드의 lastDeletedPostRef와 같은 제약.
-  const lastPendingDeleteIdRef = useRef<string | null>(null)
+  // 가장 최근에 삭제한 것 하나만 복구할 수 있다 — mock 모드의 lastDeletedPostRef와
+  // 같은 제약. 복구 API(restoreRecruitingRound)는 seasonId도 필요해 함께 담아둔다.
+  const lastPendingDeletePostRef = useRef<{
+    seasonId: string
+    roundId: string
+  } | null>(null)
 
   const updateRoundStatus = useUpdateRecruitingRoundStatus()
   const deleteRound = useDeleteRecruitingRound()
+  const restoreRound = useRestoreRecruitingRound()
   const isDuplicatingRef = useRef(false)
 
   // mutateAsync를 써서 실제 API 응답을 기다린 뒤에만 호출부(RecruitmentPostMoreMenu)가
@@ -284,8 +288,6 @@ export function RecruitmentListPage({
       .then(() => undefined)
   }
 
-  const DELETE_GRACE_MS = 7000
-
   const handleDelete = (postId: string) => {
     if (useMockData) {
       lastDeletedPostRef.current =
@@ -296,27 +298,30 @@ export function RecruitmentListPage({
     const post = basePosts.find((item) => item.postId === postId)
     if (!post) return
 
-    lastPendingDeleteIdRef.current = postId
+    lastPendingDeletePostRef.current = {
+      seasonId: post.seasonId,
+      roundId: postId,
+    }
     setPendingDeleteIds((prev) => new Set(prev).add(postId))
 
-    const timer = setTimeout(() => {
-      deleteTimersRef.current.delete(postId)
-      deleteRound.mutate(
-        { seasonId: post.seasonId, roundId: postId },
-        {
-          onError: () => {
-            setPendingDeleteIds((prev) => {
-              const next = new Set(prev)
-              next.delete(postId)
-              return next
-            })
-          },
+    deleteRound.mutate(
+      { seasonId: post.seasonId, roundId: postId },
+      {
+        onError: () => {
+          setPendingDeleteIds((prev) => {
+            const next = new Set(prev)
+            next.delete(postId)
+            return next
+          })
         },
-      )
-    }, DELETE_GRACE_MS)
-    deleteTimersRef.current.set(postId, timer)
+      },
+    )
   }
 
+  // 삭제 토스트의 "취소하기" 액션. 서버가 삭제를 soft delete로 처리해두므로
+  // 실제 복구 API(restoreRecruitingRound)를 호출한다 — 실패하면(예: 삭제 후
+  // 같은 슬롯에 새 Round가 생겨 충돌) useRestoreRecruitingRound가 에러 토스트를
+  // 띄우고, 목록은 삭제된 채로 유지된다.
   const handleUndoDelete = () => {
     if (useMockData) {
       const restored = lastDeletedPostRef.current
@@ -325,19 +330,19 @@ export function RecruitmentListPage({
       lastDeletedPostRef.current = null
       return
     }
-    const postId = lastPendingDeleteIdRef.current
-    if (!postId) return
-    const timer = deleteTimersRef.current.get(postId)
-    if (timer) {
-      clearTimeout(timer)
-      deleteTimersRef.current.delete(postId)
-    }
-    setPendingDeleteIds((prev) => {
-      const next = new Set(prev)
-      next.delete(postId)
-      return next
+    const target = lastPendingDeletePostRef.current
+    if (!target) return
+    lastPendingDeletePostRef.current = null
+
+    restoreRound.mutate(target, {
+      onSuccess: () => {
+        setPendingDeleteIds((prev) => {
+          const next = new Set(prev)
+          next.delete(target.roundId)
+          return next
+        })
+      },
     })
-    lastPendingDeleteIdRef.current = null
   }
 
   const handleDuplicate = (
@@ -456,6 +461,17 @@ export function RecruitmentListPage({
   const ownScopeSchoolTab = showSchoolTabs
     ? schoolTab
     : ((useMockData ? RECRUITING_MY_SCHOOL_MOCK : viewerSchool) ?? schoolTab)
+  // 학교 회장단은 같은 지부의 다른 학교 탭도 조회할 수 있지만(공유 보관함),
+  // 생성 권한은 본인 소속 학교뿐이다 — 서버도 schoolId 불일치면 403으로 막는다.
+  // viewerSchool은 백엔드 정식 명칭("한국항공대학교")이라 축약형 탭 값과
+  // 그대로 비교하면 본인 학교 탭에서도 항상 어긋난다(recruitingScope.ts 참고).
+  const viewerSchoolAbbr = useMockData
+    ? RECRUITING_MY_SCHOOL_MOCK
+    : formatSchoolName(viewerSchool)
+  const isOtherSchoolTab =
+    role === "schoolStaff" &&
+    !!viewerSchoolAbbr &&
+    ownScopeSchoolTab !== viewerSchoolAbbr
 
   return (
     <div className="flex w-full max-w-286.5 flex-col">
@@ -623,7 +639,7 @@ export function RecruitmentListPage({
               archiveVisible
               archiveTitle={activeScope.isFallback ? "공유 보관함" : undefined}
               onCreate={
-                activeScope.isFallback
+                activeScope.isFallback || isOtherSchoolTab
                   ? undefined
                   : () =>
                       navigate({

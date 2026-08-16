@@ -6,6 +6,7 @@ import { useToastStore } from "@/shared/ui/toast/useToastStore"
 import { recruitingKeys } from "../api/queryKeys"
 import {
   deleteRecruitingRound,
+  restoreRecruitingRound,
   updateRecruitingRound,
   updateRecruitingRoundStatus,
 } from "../api/recruitingApi"
@@ -22,6 +23,11 @@ interface UpdateRoundStatusVariables {
 }
 
 interface DeleteRoundVariables {
+  seasonId: string
+  roundId: string
+}
+
+interface RestoreRoundVariables {
   seasonId: string
   roundId: string
 }
@@ -97,10 +103,9 @@ export function useUpdateRecruitingRound() {
   })
 }
 
-// 지원서·Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 이 mutation 자체는
-// 낙관적 업데이트도, 실행취소도 모르는 단순 DELETE 호출이다 — 삭제는 서버에서
-// 되돌릴 수 없으므로, "실행취소 가능한 삭제"는 RecruitmentListPage가 그레이스
-// 타임 동안 이 mutation 호출 자체를 미뤄서 흉내 낸다(handleDelete 참고).
+// 지원서·Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 서버가 soft
+// delete로 처리해 restoreRecruitingRound로 되돌릴 수 있다 — "실행취소" 토스트
+// 액션(handleUndoDelete 참고)이 이 복구를 실제로 호출한다.
 export function useDeleteRecruitingRound() {
   const queryClient = useQueryClient()
   const addToast = useToastStore((state) => state.addToast)
@@ -116,6 +121,33 @@ export function useDeleteRecruitingRound() {
         message: extractApiErrorMessage(
           error,
           "삭제에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        ),
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+  })
+}
+
+// 삭제 토스트의 "취소하기" 액션에 쓰인다. 삭제 이후 같은 슬롯으로 새 Round가
+// 만들어졌다면 슬롯 충돌로 실패할 수 있어(recruitingApi 참고) 실패 토스트를 둔다.
+export function useRestoreRecruitingRound() {
+  const queryClient = useQueryClient()
+  const addToast = useToastStore((state) => state.addToast)
+
+  return useMutation({
+    mutationFn: ({ seasonId, roundId }: RestoreRoundVariables) =>
+      restoreRecruitingRound(seasonId, roundId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: recruitingKeys.rounds() })
+    },
+    onError: (error) => {
+      addToast({
+        message: extractApiErrorMessage(
+          error,
+          "복구에 실패했습니다. 잠시 후 다시 시도해주세요.",
         ),
         color: "red",
         variant: "deep",
