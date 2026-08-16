@@ -127,18 +127,22 @@ export async function resolveAvailableFooter(
 }
 
 // 복제(clone) 등 base/footer 구분 없이 제목 하나만 다루는 곳에서 쓴다.
-// 이미 사용 중이면 뒤에 숫자를 2부터 붙여 사용 가능한 제목을 찾는다.
+// 이미 사용 중이면 뒤에 숫자를 붙여 사용 가능한 제목을 찾는다. baseTitle이 이미
+// "... 2" 처럼 숫자 꼬릿말로 끝나 있으면 그 숫자에서 이어서 +1 하고("... 3"),
+// 아니면 2부터 새로 붙인다 — 그래야 "음 2"를 복제할 때 "음 2 2"가 아니라 "음 3"이 된다.
 export async function resolveAvailableTitle(
   baseTitle: string,
   checkAvailable: (title: string) => Promise<boolean>,
 ): Promise<string> {
   if (await checkAvailable(baseTitle)) return baseTitle
 
-  let n = 2
-  while (!(await checkAvailable(`${baseTitle} ${n}`))) {
+  const trailingNumber = baseTitle.match(/^(.*?)\s+(\d+)$/)
+  const root = trailingNumber ? trailingNumber[1] : baseTitle
+  let n = trailingNumber ? Number(trailingNumber[2]) + 1 : 2
+  while (!(await checkAvailable(`${root} ${n}`))) {
     n++
   }
-  return `${baseTitle} ${n}`
+  return `${root} ${n}`
 }
 
 // 전체 진행 기간(서류 모집 시작 ~ 면접 결과 발표) 최대 일수

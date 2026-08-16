@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
+import { useMe } from "@/entities/member/hooks/useMe"
 import { cn } from "@/shared/lib/utils"
 import { Checkbox } from "@/shared/ui/input/checkbox/Checkbox"
 
@@ -15,15 +16,23 @@ import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
 import type { Chapter } from "@/entities/organization/model/chapters"
 
 import type { RecruitingListRole } from "../model/recruitingListRole"
-import type { RecruitmentPost } from "../model/recruitmentList"
+import type {
+  DuplicateOutcome,
+  DuplicateTargetSeason,
+  RecruitmentPost,
+} from "../model/recruitmentList"
 
 interface RecruitmentDraftArchiveCardProps {
   chapter: Chapter
   role: RecruitingListRole
   posts: RecruitmentPost[]
   permittedSeasonIds: ReadonlySet<string>
-  onPublish: (postId: string) => void
-  onDuplicate: (postId: string) => void
+  duplicateCandidateSeasons: DuplicateTargetSeason[]
+  onPublish: (postId: string) => Promise<void>
+  onDuplicate: (
+    postId: string,
+    targetSeasonIds?: string[],
+  ) => Promise<DuplicateOutcome>
   onDelete: (postId: string) => void
   onUndoDelete: () => void
   selectedSchool?: string | null
@@ -36,6 +45,7 @@ function DraftPostRow({
   role,
   chapter,
   permittedSeasonIds,
+  duplicateCandidateSeasons,
   onPublish,
   onDuplicate,
   onDelete,
@@ -45,8 +55,12 @@ function DraftPostRow({
   role: RecruitingListRole
   chapter: Chapter
   permittedSeasonIds: ReadonlySet<string>
-  onPublish: (postId: string) => void
-  onDuplicate: (postId: string) => void
+  duplicateCandidateSeasons: DuplicateTargetSeason[]
+  onPublish: (postId: string) => Promise<void>
+  onDuplicate: (
+    postId: string,
+    targetSeasonIds?: string[],
+  ) => Promise<DuplicateOutcome>
   onDelete: (postId: string) => void
   onUndoDelete: () => void
 }) {
@@ -66,9 +80,11 @@ function DraftPostRow({
           status={post.status}
           role={role}
           ownChapter={chapter}
+          duplicateCandidateSeasons={duplicateCandidateSeasons}
+          sourceRecruitableTracks={post.recruitableTracks}
           onPublish={() => onPublish(post.postId)}
           // 임시 보관함 안에서는 이미 DRAFT라 비공개 액션이 노출되지 않음
-          onPrivatize={() => {}}
+          onPrivatize={() => Promise.resolve()}
           // DRAFT는 아직 공개된 적이 없어 처음 쓰던 흐름 그대로 이어 쓰는 편이
           // 자연스럽다. 문항만 고치는 수정 화면 대신 생성 마법사로 되돌린다.
           onEdit={() =>
@@ -80,7 +96,9 @@ function DraftPostRow({
               },
             })
           }
-          onDuplicate={() => onDuplicate(post.postId)}
+          onDuplicate={(targetSeasonIds) =>
+            onDuplicate(post.postId, targetSeasonIds)
+          }
           onDelete={() => onDelete(post.postId)}
           onUndoDelete={onUndoDelete}
         />
@@ -94,6 +112,7 @@ export function RecruitmentDraftArchiveCard({
   role,
   posts,
   permittedSeasonIds,
+  duplicateCandidateSeasons,
   onPublish,
   onDuplicate,
   onDelete,
@@ -102,14 +121,20 @@ export function RecruitmentDraftArchiveCard({
   title = "학교별 공유 보관함",
   className,
 }: RecruitmentDraftArchiveCardProps) {
-  // TODO: API 연동 시 "내가 쓴 글"을 작성자 기준으로 실제 필터링
+  const { data: me } = useMe()
   const [myPostsOnly, setMyPostsOnly] = useState(false)
 
   // 임시 보관함(공유 보관함)에는 비공개 처리된 DRAFT 상태 글만 노출
   const draftPosts = posts.filter((post) => post.status === "DRAFT")
+  // round.author.memberId(authorMemberId)와 내 memberId(me.id)를 비교한다.
+  // mock 데이터 등 authorMemberId가 없는 글은 "내가 쓴 글"에 걸리지 않는다.
+  const myPosts =
+    myPostsOnly && me
+      ? draftPosts.filter((post) => post.authorMemberId === me.id)
+      : draftPosts
   const selectedSchoolPosts = selectedSchool
-    ? draftPosts.filter((post) => post.school === selectedSchool)
-    : draftPosts
+    ? myPosts.filter((post) => post.school === selectedSchool)
+    : myPosts
 
   return (
     <section
@@ -151,6 +176,7 @@ export function RecruitmentDraftArchiveCard({
                   role={role}
                   chapter={chapter}
                   permittedSeasonIds={permittedSeasonIds}
+                  duplicateCandidateSeasons={duplicateCandidateSeasons}
                   onPublish={onPublish}
                   onDuplicate={onDuplicate}
                   onDelete={onDelete}
@@ -160,7 +186,7 @@ export function RecruitmentDraftArchiveCard({
             )}
           </RecruitmentSchoolSection>
         ) : (
-          groupPostsBySchool(draftPosts, chapter).map(
+          groupPostsBySchool(myPosts, chapter).map(
             ({ school, posts: schoolPosts }) => (
               <RecruitmentSchoolSection key={school} schoolName={school}>
                 {schoolPosts.length === 0 ? (
@@ -177,6 +203,7 @@ export function RecruitmentDraftArchiveCard({
                       role={role}
                       chapter={chapter}
                       permittedSeasonIds={permittedSeasonIds}
+                      duplicateCandidateSeasons={duplicateCandidateSeasons}
                       onPublish={onPublish}
                       onDuplicate={onDuplicate}
                       onDelete={onDelete}

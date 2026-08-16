@@ -106,6 +106,22 @@ export interface RecruitmentQuestionValidationError {
   questionId: string
 }
 
+// 공통 문항은 파트와 달리 "사용" 토글이 없다 — 운영진이 "+"로 추가해 놓고
+// 제목·옵션 어느 것도 손대지 않은 초안은 "추가 안 함"으로 본다. 그래야 쓰지도
+// 않을 빈 칸 하나 때문에 저장 자체가 막히지 않는다.
+// questionId가 있는(=이미 서버에 저장된) 문항은 절대 여기 해당하지 않는다 —
+// 그걸 "안 씀"으로 보고 저장 요청에서 빼면, 서버가 들고 있는 섹션의 질문 ID
+// 셋과 어긋나 FORM-0025("재배치 요청의 질문 ID 셋이 일치하지 않습니다")가 난다.
+export function isUntouchedCommonQuestion(
+  question: RecruitmentQuestion,
+): boolean {
+  return (
+    question.questionId == null &&
+    question.title.trim() === "" &&
+    question.options.length === 0
+  )
+}
+
 export function validateRecruitmentQuestion(
   question: RecruitmentQuestion,
 ): RecruitmentQuestionValidationError | null {
@@ -138,6 +154,7 @@ export function validateRecruitmentQuestionForm(
 ): RecruitmentQuestionValidationError[] {
   const errors: RecruitmentQuestionValidationError[] = []
   for (const q of commonQuestions) {
+    if (isUntouchedCommonQuestion(q)) continue
     const err = validateRecruitmentQuestion(q)
     if (err) errors.push(err)
   }
@@ -200,6 +217,42 @@ function toRecruitingQuestionType(
   return type === "radio" ? "RADIO" : "SHORT_TEXT"
 }
 
+// 고정 문항(01~05)이 서버에 이미 저장돼 있을 때, 그 questionId·optionId를
+// 기억해두는 용도. buildCommonSectionUpsertRequest가 이걸 안 받으면 고정
+// 문항을 매번 id 없이 보내게 되어, 이미 있는 섹션의 질문 ID 셋과 어긋나
+// FORM-0025("재배치 요청의 질문 ID 셋이 일치하지 않습니다")가 난다 — 사용자가
+// 아무것도 바꾸지 않고 그냥 저장만 다시 눌러도 재현된다.
+export interface DefaultQuestionMeta {
+  questionId?: number
+  optionIdByContent?: Record<string, number>
+}
+
+// COMMON 섹션의 서버 응답 문항들에서 고정 문항(01~05)의 id를 title로 찾아 모은다.
+// mapAdminFormToQuestionDraft(최초 로드)와 저장 직후 재조회(FORM-0025 방지) 양쪽에서 쓴다.
+function buildDefaultQuestionMeta(
+  responseQuestions: RecruitingAdminFormQuestionResponse[],
+): Record<string, DefaultQuestionMeta> {
+  const meta: Record<string, DefaultQuestionMeta> = {}
+  for (const defaultQuestion of RECRUITMENT_DEFAULT_QUESTIONS) {
+    const matched = responseQuestions.find(
+      (q) => q.title === defaultQuestion.title,
+    )
+    if (!matched) continue
+    meta[defaultQuestion.index] = {
+      questionId: matched.questionId,
+      optionIdByContent:
+        matched.options && matched.options.length > 0
+          ? Object.fromEntries(
+              matched.options
+                .filter((o) => o.optionId != null)
+                .map((o) => [o.content, o.optionId!]),
+            )
+          : undefined,
+    }
+  }
+  return meta
+}
+
 // 공통 문항(01~05 고정 문항 + 운영진이 추가한 자유 문항) 섹션을 Form Upsert 요청
 // payload로 직렬화한다. 파트별(TRACK) 섹션 직렬화는 buildTrackSectionUpsertRequest가
 // 별도로 담당한다.
@@ -208,6 +261,7 @@ export function buildCommonSectionUpsertRequest(
   questionToggleState: Record<string, { enabled: boolean; required: boolean }>,
   additionalQuestions: RecruitmentQuestion[] = [],
   sectionId?: number,
+  defaultQuestionMeta: Record<string, DefaultQuestionMeta> = {},
 ): UpsertRecruitingSectionRequest {
   const defaultQuestions = RECRUITMENT_DEFAULT_QUESTIONS.filter(
     (question) => questionToggleState[question.index]?.enabled ?? true,
@@ -216,30 +270,38 @@ export function buildCommonSectionUpsertRequest(
     const activeOptions = question.options?.filter(
       (option) => !removed.includes(option),
     )
+    const meta = defaultQuestionMeta[question.index]
     return {
+      questionId: meta?.questionId,
       type: toRecruitingQuestionType(question.type),
       title: question.title,
       description: question.caption,
       required: questionToggleState[question.index]?.required ?? true,
-      options: activeOptions?.map((content) => ({ content, other: false })),
+      options: activeOptions?.map((content) => ({
+        optionId: meta?.optionIdByContent?.[content],
+        content,
+        other: false,
+      })),
     }
   })
 
-  const extraQuestions = additionalQuestions.map((question) => ({
-    questionId: question.questionId,
-    type: toRecruitingQuestionTypeFromField(question.fieldType),
-    title: question.title,
-    description: question.caption || undefined,
-    required: question.required,
-    options:
-      question.fieldType === "radio" || question.fieldType === "checkbox"
-        ? question.options.map((option) => ({
-            optionId: option.optionId,
-            content: option.content,
-            other: false,
-          }))
-        : undefined,
-  }))
+  const extraQuestions = additionalQuestions
+    .filter((question) => !isUntouchedCommonQuestion(question))
+    .map((question) => ({
+      questionId: question.questionId,
+      type: toRecruitingQuestionTypeFromField(question.fieldType),
+      title: question.title,
+      description: question.caption || undefined,
+      required: question.required,
+      options:
+        question.fieldType === "radio" || question.fieldType === "checkbox"
+          ? question.options.map((option) => ({
+              optionId: option.optionId,
+              content: option.content,
+              other: false,
+            }))
+          : undefined,
+    }))
 
   return {
     sectionId,
@@ -355,6 +417,120 @@ export interface RecruitmentQuestionDraftState {
   // GET 응답의 sectionId를 그대로 들고 있다가 Upsert 요청에 되돌려 보낸다.
   commonSectionId?: number
   sectionIdByPart: Partial<Record<PartKey, number>>
+  // 고정 문항(01~05)의 questionId·optionId. buildCommonSectionUpsertRequest가
+  // FORM-0025 없이 고정 문항을 갱신하려면 반드시 필요하다.
+  defaultQuestionMeta: Record<string, DefaultQuestionMeta>
+}
+
+// upsert 응답은 폼 id만 돌려주고 서버가 새로 배정한 섹션/문항 id는 알려주지
+// 않는다. 저장 직후 이 함수로 구조를 다시 조회해 섹션 id·고정 문항 id를 갱신해야,
+// 같은 화면에서 두 번째로 저장할 때 id 없는 섹션·문항을 "새로 만드는 것"으로
+// 보내 기존 것과 어긋나는 것(FORM-0025)을 막을 수 있다.
+export function extractSectionIds(
+  structure: RecruitingAdminFormStructureResponse | undefined,
+): {
+  commonSectionId?: number
+  sectionIdByPart: Partial<Record<PartKey, number>>
+  defaultQuestionMeta: Record<string, DefaultQuestionMeta>
+} {
+  const sectionIdByPart: Partial<Record<PartKey, number>> = {}
+  if (!structure) return { sectionIdByPart, defaultQuestionMeta: {} }
+
+  const commonSection = structure.sections.find((s) => s.type === "COMMON")
+  for (const section of structure.sections) {
+    if (section.type !== "TRACK") continue
+    const partKey = section.track && TRACK_TO_PART_KEY[section.track]
+    if (!partKey || section.sectionId == null) continue
+    sectionIdByPart[partKey] = section.sectionId
+  }
+
+  return {
+    commonSectionId: commonSection?.sectionId,
+    sectionIdByPart,
+    defaultQuestionMeta: buildDefaultQuestionMeta(
+      commonSection?.questions ?? [],
+    ),
+  }
+}
+
+// COMMON 섹션 응답 문항 중 고정 문항(01~05)에 매칭되지 않은 것만 추린다 —
+// 운영진이 "+"로 추가한 자유 문항. mapAdminFormToQuestionDraft와 같은 매칭
+// 규칙(제목 완전 일치)을 쓴다.
+function findExtraCommonResponseQuestions(
+  responseQuestions: RecruitingAdminFormQuestionResponse[],
+): RecruitingAdminFormQuestionResponse[] {
+  const matched = new Set<RecruitingAdminFormQuestionResponse>()
+  for (const defaultQuestion of RECRUITMENT_DEFAULT_QUESTIONS) {
+    const found = responseQuestions.find(
+      (q) => q.title === defaultQuestion.title,
+    )
+    if (found) matched.add(found)
+  }
+  return responseQuestions.filter((q) => !matched.has(q))
+}
+
+// 저장 직후 재조회한 응답을 로컬 draft 배열과 순서로 1:1 짝지어 questionId·
+// optionId만 채워 넣는다. 로컬 id(genId)는 그대로 둬서 포커스·리스트 key가
+// 안 흔들리게 한다 — 방금 보낸 배열 그대로의 순서로 응답이 오는 걸 전제한다.
+function syncQuestionIds(
+  drafts: RecruitmentQuestion[],
+  responseQuestions: RecruitingAdminFormQuestionResponse[],
+): RecruitmentQuestion[] {
+  return drafts.map((draft, index) => {
+    const matched = responseQuestions[index]
+    if (!matched) return draft
+    return {
+      ...draft,
+      questionId: matched.questionId,
+      options: draft.options.map((option, optionIndex) => ({
+        ...option,
+        optionId: matched.options?.[optionIndex]?.optionId ?? option.optionId,
+      })),
+    }
+  })
+}
+
+// upsert 저장 직후 이 함수로 다시 조회한 구조에서, 서버가 새로 배정한
+// questionId를 공통 자유 문항·파트 문항 draft에 되돌려 준다. 안 하면 다음
+// 저장 때도 이미 만들어진 문항을 다시 "새 문항"으로 보내 FORM-0025
+// ("재배치 요청의 질문 ID 셋이 일치하지 않습니다")가 난다 — extractSectionIds가
+// 섹션·고정문항 id에 대해 막는 것과 같은 문제를 자유 문항·파트 문항에 대해서도 막는다.
+export function syncQuestionIdsAfterSave(
+  structure: RecruitingAdminFormStructureResponse | undefined,
+  commonQuestionDrafts: RecruitmentQuestion[],
+  partQuestionDrafts: Partial<Record<PartKey, RecruitmentQuestion[]>>,
+): {
+  commonQuestionDrafts: RecruitmentQuestion[]
+  partQuestionDrafts: Partial<Record<PartKey, RecruitmentQuestion[]>>
+} {
+  if (!structure) return { commonQuestionDrafts, partQuestionDrafts }
+
+  const commonSection = structure.sections.find((s) => s.type === "COMMON")
+  const extraResponseQuestions = findExtraCommonResponseQuestions(
+    commonSection?.questions ?? [],
+  )
+
+  const nextPartQuestionDrafts: Partial<
+    Record<PartKey, RecruitmentQuestion[]>
+  > = { ...partQuestionDrafts }
+  for (const section of structure.sections) {
+    if (section.type !== "TRACK") continue
+    const partKey = section.track && TRACK_TO_PART_KEY[section.track]
+    const existing = partKey ? partQuestionDrafts[partKey] : undefined
+    if (!partKey || !existing) continue
+    nextPartQuestionDrafts[partKey] = syncQuestionIds(
+      existing,
+      section.questions,
+    )
+  }
+
+  return {
+    commonQuestionDrafts: syncQuestionIds(
+      commonQuestionDrafts,
+      extraResponseQuestions,
+    ),
+    partQuestionDrafts: nextPartQuestionDrafts,
+  }
 }
 
 // GET .../rounds/{roundId}/form(RecruitingAdminFormStructureResponse) 응답을
@@ -445,5 +621,6 @@ export function mapAdminFormToQuestionDraft(
     secondChoiceEnabled: questionToggleState["04"]?.enabled ?? true,
     commonSectionId: commonSection?.sectionId,
     sectionIdByPart,
+    defaultQuestionMeta: buildDefaultQuestionMeta(responseQuestions),
   }
 }

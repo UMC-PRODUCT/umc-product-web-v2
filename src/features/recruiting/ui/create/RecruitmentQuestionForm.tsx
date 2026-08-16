@@ -29,8 +29,14 @@ import { Toggle } from "@/shared/ui/Toggle"
 
 import {
   createRecruitingRound,
+  getRecruitingApplicationForm,
   upsertRecruitingApplicationForm,
 } from "../../api/recruitingApi"
+import { useAdminRecruitingRounds } from "../../hooks/useAdminRecruitingRounds"
+import {
+  MAX_ADDITIONAL_ROUND_NO,
+  resolveAdditionalRoundNoOptions,
+} from "../../model/additionalRoundNo"
 import {
   getRecruitableTracks,
   PART_KEY_TO_TRACK,
@@ -44,10 +50,12 @@ import {
 import {
   buildCommonSectionUpsertRequest,
   buildTrackSectionUpsertRequest,
+  extractSectionIds,
   getRecruitmentFieldTypePatch,
   makeRecruitmentQuestion,
   mapAdminFormToQuestionDraft,
   RECRUITMENT_DEFAULT_QUESTIONS,
+  syncQuestionIdsAfterSave,
   validateRecruitmentQuestionForm,
 } from "../../model/recruitmentQuestion"
 import { getRecruitingRoundCreateErrorMessage } from "../../model/recruitmentRoundErrors"
@@ -477,11 +485,13 @@ interface RecruitmentQuestionFormProps {
   onNext?: () => void
   onDirtyChange?: (dirty: boolean) => void
   onBlankPartsChange?: (hasBlankEnabledPart: boolean) => void
-  // "edit"는 모집 공고 수정 화면 전용. 생성 마법사의 이전/다음 이동 없이
-  // 문항만 불러와 고치고 그 자리에서 저장한다.
-  mode?: "create" | "edit"
   initialFormStructure?: RecruitingAdminFormStructureResponse
   sectionIndex?: number
+  // 이미 게시된(OPEN) 라운드를 수정하는 경우 true. 백엔드가 지원 폼 구조
+  // upsert를 라운드/폼 둘 다 DRAFT 상태일 때만 허용하고, OPEN으로 전환되는
+  // 순간 폼도 함께 PUBLISHED로 잠겨(RECRUITING-0201) 편집 자체가 불가능하다.
+  // 그래서 저장을 시도하는 대신 화면을 읽기 전용으로 막는다.
+  readOnly?: boolean
 }
 
 export function RecruitmentQuestionForm({
@@ -489,19 +499,34 @@ export function RecruitmentQuestionForm({
   onNext,
   onDirtyChange,
   onBlankPartsChange,
-  mode = "create",
   initialFormStructure,
   sectionIndex = 3,
+  readOnly = false,
 }: RecruitmentQuestionFormProps) {
   const addToast = useToastStore((state) => state.addToast)
+  // 1단계에서 고른 추가모집 차수는 그 시점 기준 "다음 차수"일 뿐이다. 문항을
+  // 채우는 동안 시간이 걸려 다른 라운드가 먼저 만들어지면 그 값이 낡아 서버가
+  // RECRUITING-0116으로 거부한다. 그래서 라운드를 실제로 만드는 이 시점에
+  // refetchSeasonGroups로 다시 계산해 검증한다(RecruitmentListPage 복제 로직과 동일 패턴).
+  const { refetch: refetchSeasonGroups } = useAdminRecruitingRounds()
   const initialDraft = useState(() =>
     mapAdminFormToQuestionDraft(initialFormStructure),
   )[0]
   // 기존 섹션을 저장 시 새 섹션처럼 보내면 백엔드가 지우고 다시 만들어버리므로,
   // GET 응답에서 받은 sectionId를 그대로 들고 있다가 Upsert 요청에 되돌려 보낸다.
-  const commonSectionId = initialDraft?.commonSectionId
-  const [sectionIdByPart] = useState<Partial<Record<PartKey, number>>>(
-    () => initialDraft?.sectionIdByPart ?? {},
+  // Upsert 응답은 폼 id만 줄 뿐 새로 배정된 섹션 id는 안 알려주므로, 저장이
+  // 성공할 때마다 refetchSectionIds로 직접 갱신해야 한다(그러지 않으면 이
+  // 화면을 벗어나지 않고 다시 저장할 때 낡은 id로 FORM-0025가 난다).
+  const [commonSectionId, setCommonSectionId] = useState(
+    initialDraft?.commonSectionId,
+  )
+  const [sectionIdByPart, setSectionIdByPart] = useState<
+    Partial<Record<PartKey, number>>
+  >(() => initialDraft?.sectionIdByPart ?? {})
+  // 고정 문항(01~05)의 questionId·optionId. 없이 보내면 매번 새 문항처럼
+  // 취급돼 FORM-0025가 난다 — sectionId와 같은 이유로 저장 직후 갱신한다.
+  const [defaultQuestionMeta, setDefaultQuestionMeta] = useState(
+    () => initialDraft?.defaultQuestionMeta ?? {},
   )
   const enabledParts = useRecruitmentCreateStore((s) => s.enabledParts)
   const setEnabledParts = useRecruitmentCreateStore((s) => s.setEnabledParts)
@@ -759,6 +784,17 @@ export function RecruitmentQuestionForm({
     try {
       // roundId가 이미 있으면(직전 시도에서 Round 생성은 성공하고 Form 저장만
       // 실패한 경우) 재시도 시 Round를 또 만들지 않고 같은 roundId로 Form만 다시 저장한다.
+      let freshAdditionalRoundNo: number | undefined
+      if (!roundId && basicInfo.recruitmentType === "ADDITIONAL") {
+        const { data: freshGroups } = await refetchSeasonGroups()
+        const sameSeasonRounds =
+          freshGroups?.find((group) => group.seasonId === seasonId)?.rounds ??
+          []
+        freshAdditionalRoundNo = resolveAdditionalRoundNoOptions(
+          sameSeasonRounds,
+          MAX_ADDITIONAL_ROUND_NO,
+        ).nextRoundNo
+      }
       currentRoundId =
         roundId ??
         (await createRecruitingRound(seasonId!, {
@@ -773,10 +809,7 @@ export function RecruitmentQuestionForm({
             interviewRequired: basicInfo.interviewRequired,
           }),
           type: basicInfo.recruitmentType!,
-          roundNo:
-            basicInfo.recruitmentType === "ADDITIONAL" && basicInfo.roundNo
-              ? Number(basicInfo.roundNo)
-              : undefined,
+          roundNo: freshAdditionalRoundNo,
         }))
     } catch (error) {
       throw new Error(getRecruitingRoundCreateErrorMessage(error))
@@ -800,10 +833,32 @@ export function RecruitmentQuestionForm({
             questionToggleState,
             commonQuestionDrafts,
             commonSectionId,
+            defaultQuestionMeta,
           ),
           ...trackSections,
         ],
       })
+      const savedStructure = await getRecruitingApplicationForm(
+        seasonId!,
+        currentRoundId,
+      )
+      const savedSectionIds = extractSectionIds(savedStructure)
+      setCommonSectionId(savedSectionIds.commonSectionId)
+      setSectionIdByPart(savedSectionIds.sectionIdByPart)
+      setDefaultQuestionMeta(savedSectionIds.defaultQuestionMeta)
+      // 자유 문항(공통 "+", 파트별)도 서버가 새로 배정한 questionId를 안
+      // 돌려받으면, 다음 저장 때 이미 만들어진 문항을 또 "새 문항"으로 보내
+      // FORM-0025가 난다 — 위 섹션/고정문항 id 갱신과 같은 이유.
+      const syncedIds = syncQuestionIdsAfterSave(
+        savedStructure,
+        commonQuestionDrafts,
+        partQuestionDrafts,
+      )
+      setCommonQuestionDrafts(syncedIds.commonQuestionDrafts)
+      setPartQuestionDrafts((prev) => ({
+        ...prev,
+        ...syncedIds.partQuestionDrafts,
+      }))
     } catch (formError) {
       const message = isAxiosError(formError)
         ? (formError.response?.data as { message?: string } | undefined)
@@ -848,6 +903,12 @@ export function RecruitmentQuestionForm({
   }
 
   const handleNext = async () => {
+    // 읽기 전용(게시된 라운드)은 고칠 것도, 저장할 것도 없다 — 저장을 시도하면
+    // 백엔드가 RECRUITING-0201로 거부하므로 바로 다음 단계로 넘어간다.
+    if (readOnly) {
+      onNext?.()
+      return
+    }
     if (isSavingOrSubmitting) return
     const validationError = validateBeforeSave()
     if (validationError) {
@@ -858,6 +919,10 @@ export function RecruitmentQuestionForm({
     setIsSubmitting(true)
     try {
       await ensureRoundAndSaveForm()
+      // "임시 저장"과 마찬가지로 스냅샷을 갱신해야 한다. 안 그러면 여기서
+      // 저장된 값인데도 hasUnsavedChanges가 계속 true로 남아, 3단계까지 다
+      // 마치고 게시까지 끝낸 뒤에도 페이지 이탈 모달이 계속 뜬다.
+      savedSnapshotRef.current = currentSnapshot
       onNext?.()
     } catch (error) {
       showErrorToast(
@@ -873,146 +938,160 @@ export function RecruitmentQuestionForm({
   return (
     <div className="border-teal-gray-150 mt-6 flex flex-col gap-8 rounded-2xl border bg-white px-8 py-8.5">
       <RecruitmentSectionHeader index={sectionIndex} title="모집 문항 작성" />
-      <div className="flex flex-col">
-        <FormHeader variant="basic" />
-        <div className="bg-teal-gray-50 flex flex-col gap-10 rounded-b-xl border-r border-b border-l border-teal-300 px-5 pt-8.5 pb-9.5">
-          {RECRUITMENT_DEFAULT_QUESTIONS.map((question) => {
-            const removedOptions =
-              removedOptionsByQuestionIndex[question.index] ?? []
+      {readOnly && (
+        <p className="text-body-2-regular text-teal-gray-400 border-teal-gray-100 bg-teal-gray-50 rounded-xl border px-4 py-3">
+          게시된 모집 공고는 문항을 수정할 수 없습니다.
+        </p>
+      )}
+      <div
+        className={cn(
+          "flex flex-col gap-8",
+          readOnly && "pointer-events-none opacity-60",
+        )}
+      >
+        <div className="flex flex-col">
+          <FormHeader variant="basic" />
+          <div className="bg-teal-gray-50 flex flex-col gap-10 rounded-b-xl border-r border-b border-l border-teal-300 px-5 pt-8.5 pb-9.5">
+            {RECRUITMENT_DEFAULT_QUESTIONS.map((question) => {
+              const removedOptions =
+                removedOptionsByQuestionIndex[question.index] ?? []
 
-            // 1지망(03)·2지망(04): 옵션 사용/해제가 가능한 전용 컴포넌트로 위임.
-            // 2지망만 질문 자체도 껐다 켤 수 있다(allowDisable).
-            if (OPTIONAL_TOGGLE_QUESTION_INDEXES.includes(question.index)) {
+              // 1지망(03)·2지망(04): 옵션 사용/해제가 가능한 전용 컴포넌트로 위임.
+              // 2지망만 질문 자체도 껐다 켤 수 있다(allowDisable).
+              if (OPTIONAL_TOGGLE_QUESTION_INDEXES.includes(question.index)) {
+                return (
+                  <DefaultRadioQuestion
+                    key={question.index}
+                    question={question}
+                    removedOptions={removedOptions}
+                    onRemoveOption={(option) =>
+                      removeOption(question.index, option)
+                    }
+                    onRestoreOption={(option) =>
+                      restoreOption(question.index, option)
+                    }
+                    allowDisable={QUESTION_DISABLE_TOGGLE_INDEXES.includes(
+                      question.index,
+                    )}
+                    enabled={
+                      questionToggleState[question.index]?.enabled ?? true
+                    }
+                    required={
+                      questionToggleState[question.index]?.required ?? true
+                    }
+                    onEnabledChange={(enabled) =>
+                      setQuestionEnabled(question.index, enabled)
+                    }
+                    onRequiredChange={(required) =>
+                      setQuestionRequired(question.index, required)
+                    }
+                  />
+                )
+              }
+
               return (
-                <DefaultRadioQuestion
-                  key={question.index}
-                  question={question}
-                  removedOptions={removedOptions}
-                  onRemoveOption={(option) =>
-                    removeOption(question.index, option)
-                  }
-                  onRestoreOption={(option) =>
-                    restoreOption(question.index, option)
-                  }
-                  allowDisable={QUESTION_DISABLE_TOGGLE_INDEXES.includes(
-                    question.index,
-                  )}
-                  enabled={questionToggleState[question.index]?.enabled ?? true}
-                  required={
-                    questionToggleState[question.index]?.required ?? true
-                  }
-                  onEnabledChange={(enabled) =>
-                    setQuestionEnabled(question.index, enabled)
-                  }
-                  onRequiredChange={(required) =>
-                    setQuestionRequired(question.index, required)
-                  }
-                />
-              )
-            }
+                <div key={question.index} className="flex flex-col gap-2.5">
+                  <QuestionItemTitle
+                    index={question.index}
+                    title={question.title}
+                    caption={question.caption}
+                    required
+                  />
+                  <div className="pl-3">
+                    {question.type === "radio" && (
+                      <StaticRadioOptionsList
+                        options={question.options ?? []}
+                      />
+                    )}
 
-            return (
-              <div key={question.index} className="flex flex-col gap-2.5">
-                <QuestionItemTitle
-                  index={question.index}
-                  title={question.title}
-                  caption={question.caption}
-                  required
-                />
-                <div className="pl-3">
-                  {question.type === "radio" && (
-                    <StaticRadioOptionsList options={question.options ?? []} />
-                  )}
-
-                  {question.type === "text" && (
-                    <QuestionFieldBox>
-                      <span className="text-body-1-regular text-teal-gray-400">
-                        답변을 작성하세요.
-                      </span>
-                    </QuestionFieldBox>
-                  )}
+                    {question.type === "text" && (
+                      <QuestionFieldBox>
+                        <span className="text-body-1-regular text-teal-gray-400">
+                          답변을 작성하세요.
+                        </span>
+                      </QuestionFieldBox>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
+        </div>
+        {/* 공통 문항이 하나도 없으면(엣지 케이스) 지원자 화면에는 이 섹션 자체가 노출되지 않는다. */}
+        <div className="flex flex-col">
+          <FormHeader variant="common" />
+          <PartSectionBody
+            questions={commonQuestionDrafts}
+            focusedQuestionId={focusedCommonQuestionId}
+            onFocus={setFocusedCommonQuestionId}
+            onUpdate={updateCommonQuestionDraft}
+            onAdd={addCommonQuestion}
+            onDelete={deleteCommonQuestion}
+          />
+        </div>
+        <div className="flex flex-col gap-4">
+          {PARTS.map((part) => (
+            <div key={part.key} className="flex flex-col">
+              <FormHeader
+                variant="part"
+                partName={part.label}
+                toggleChecked={enabledParts[part.key]}
+                onToggleChange={(next) =>
+                  setEnabledParts({ ...enabledParts, [part.key]: next })
+                }
+              />
+              {enabledParts[part.key] && (
+                <PartSectionBody
+                  questions={partQuestionDrafts[part.key]}
+                  focusedQuestionId={focusedQuestionIdByPart[part.key]}
+                  onFocus={(id) => focusPartQuestion(part.key, id)}
+                  onUpdate={(id, patch) =>
+                    updatePartQuestionDraft(part.key, id, patch)
+                  }
+                  onAdd={() => addPartQuestion(part.key)}
+                  onDelete={(id) => deletePartQuestion(part.key, id)}
+                />
+              )}
+            </div>
+          ))}
+          <span className="text-label-2-medium text-teal-gray-400">
+            * 지원자의 파트에 따라 해당하는 섹션의 질문만 노출됩니다.
+          </span>
         </div>
       </div>
-      {/* 공통 문항이 하나도 없으면(엣지 케이스) 지원자 화면에는 이 섹션 자체가 노출되지 않는다. */}
-      <div className="flex flex-col">
-        <FormHeader variant="common" />
-        <PartSectionBody
-          questions={commonQuestionDrafts}
-          focusedQuestionId={focusedCommonQuestionId}
-          onFocus={setFocusedCommonQuestionId}
-          onUpdate={updateCommonQuestionDraft}
-          onAdd={addCommonQuestion}
-          onDelete={deleteCommonQuestion}
-        />
-      </div>
-      <div className="flex flex-col gap-4">
-        {PARTS.map((part) => (
-          <div key={part.key} className="flex flex-col">
-            <FormHeader
-              variant="part"
-              partName={part.label}
-              toggleChecked={enabledParts[part.key]}
-              onToggleChange={(next) =>
-                setEnabledParts({ ...enabledParts, [part.key]: next })
-              }
-            />
-            {enabledParts[part.key] && (
-              <PartSectionBody
-                questions={partQuestionDrafts[part.key]}
-                focusedQuestionId={focusedQuestionIdByPart[part.key]}
-                onFocus={(id) => focusPartQuestion(part.key, id)}
-                onUpdate={(id, patch) =>
-                  updatePartQuestionDraft(part.key, id, patch)
-                }
-                onAdd={() => addPartQuestion(part.key)}
-                onDelete={(id) => deletePartQuestion(part.key, id)}
-              />
-            )}
-          </div>
-        ))}
-        <span className="text-label-2-medium text-teal-gray-400">
-          * 지원자의 파트에 따라 해당하는 섹션의 질문만 노출됩니다.
-        </span>
-      </div>
       <div className="flex items-center justify-end">
-        {mode === "create" && (
-          <Button
-            type="button"
-            variant="weak"
-            color="neutral"
-            onClick={onPrev}
-            className="mr-auto"
-          >
-            이전
-          </Button>
-        )}
+        <Button
+          type="button"
+          variant="weak"
+          color="neutral"
+          onClick={onPrev}
+          className="mr-auto"
+        >
+          이전
+        </Button>
         <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant={mode === "edit" ? "fill" : "weak"}
-            color="primary"
-            disabled={!canTempSave}
-            isLoading={isSaving}
-            onClick={handleTempSave}
-          >
-            {mode === "edit" ? "저장하기" : "임시 저장"}
-          </Button>
-          {mode === "create" && (
+          {!readOnly && (
             <Button
               type="button"
-              variant="fill"
+              variant="weak"
               color="primary"
-              disabled={isSaving}
-              isLoading={isSubmitting}
-              onClick={handleNext}
+              disabled={!canTempSave}
+              isLoading={isSaving}
+              onClick={handleTempSave}
             >
-              다음
+              임시 저장
             </Button>
           )}
+          <Button
+            type="button"
+            variant="fill"
+            color="primary"
+            disabled={isSaving}
+            isLoading={isSubmitting}
+            onClick={handleNext}
+          >
+            다음
+          </Button>
         </div>
       </div>
 
@@ -1020,12 +1099,8 @@ export function RecruitmentQuestionForm({
         open={showTempSaveModal}
         onOpenChange={setShowTempSaveModal}
         variant="success"
-        title={mode === "edit" ? "저장 완료" : "임시 저장 완료"}
-        content={
-          mode === "edit"
-            ? "모집 문항이 저장되었습니다."
-            : "임시저장이 완료되었습니다."
-        }
+        title="임시 저장 완료"
+        content="임시저장이 완료되었습니다."
         confirmText="확인"
         onConfirm={() => setShowTempSaveModal(false)}
       />

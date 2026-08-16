@@ -76,12 +76,16 @@ export function RecruitmentPostRow({
           ) : (
             <div className="flex items-start gap-2">
               <Timestamp className="text-teal-gray-400">{dateLabel}</Timestamp>
-              <span className="flex items-center gap-1">
-                <Timestamp className="text-teal-gray-400">작성자:</Timestamp>
-                <Timestamp className="text-teal-gray-400">
-                  {authorLabel}
-                </Timestamp>
-              </span>
+              {/* author가 없는(탈퇴 등) 라운드도 있을 수 있다. 모르는 값을 함부로
+                  채워 보여주지 않고 줄 자체를 생략한다. */}
+              {authorLabel && (
+                <span className="flex items-center gap-1">
+                  <Timestamp className="text-teal-gray-400">작성자:</Timestamp>
+                  <Timestamp className="text-teal-gray-400">
+                    {authorLabel}
+                  </Timestamp>
+                </span>
+              )}
             </div>
           )}
         </div>

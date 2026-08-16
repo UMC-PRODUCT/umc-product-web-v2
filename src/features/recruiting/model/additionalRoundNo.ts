@@ -1,5 +1,8 @@
 import type { RecruitingRound } from "../api/types"
 
+/** 추가 모집 차수의 상한. 화면 선택지("1차"~"5차")와 맞춘다. */
+export const MAX_ADDITIONAL_ROUND_NO = 5
+
 export interface AdditionalRoundNoOptions {
   /** 새로 만들 수 있는 차수. 더 만들 수 없으면 없다. */
   nextRoundNo: number | undefined

@@ -11,8 +11,13 @@ import { RecruitmentDuplicateModal } from "./RecruitmentDuplicateModal"
 
 import type { Chapter } from "@/entities/organization/model/chapters"
 
+import type { RecruitingTrack } from "../api/types"
 import type { RecruitingListRole } from "../model/recruitingListRole"
-import type { RecruitmentPostStatus } from "../model/recruitmentList"
+import type {
+  DuplicateOutcome,
+  DuplicateTargetSeason,
+  RecruitmentPostStatus,
+} from "../model/recruitmentList"
 
 interface RecruitmentPostMoreMenuProps {
   status: RecruitmentPostStatus
@@ -21,10 +26,18 @@ interface RecruitmentPostMoreMenuProps {
   // 선택), schoolStaff(교내 회장단/운영진)는 모달 없이 본인 학교로 즉시 복제.
   role: RecruitingListRole
   ownChapter?: Chapter
-  onPublish: () => void
-  onPrivatize: () => void
+  // 복제 모달이 보여줄 대상 후보(EDIT 권한이 있는 시즌만). schoolStaff는 모달을
+  // 안 띄우니 안 넘겨도 된다.
+  duplicateCandidateSeasons?: DuplicateTargetSeason[]
+  // 원본 라운드의 트랙 구성. 복제는 이 트랙을 그대로 복사해서 새 라운드를
+  // 만들기 때문에, 모달이 대상 학교의 시즌 트랙과 미리 비교해 호환 안 되는
+  // 학교를 걸러낼 때 쓴다(RECRUITING-0110).
+  sourceRecruitableTracks?: RecruitingTrack[]
+  onPublish: () => Promise<void>
+  onPrivatize: () => Promise<void>
   onEdit?: () => void
-  onDuplicate: () => void
+  // targetSeasonIds를 안 넘기면(schoolStaff 즉시복제) 원본과 같은 학교로 복제한다.
+  onDuplicate: (targetSeasonIds?: string[]) => Promise<DuplicateOutcome>
   onDelete: () => void
   onUndoDelete?: () => void
   // 이 글이 속한 학교의 공유 보관함이 현재 페이지에 이미 보이는 중이면
@@ -37,6 +50,8 @@ export function RecruitmentPostMoreMenu({
   status,
   role,
   ownChapter,
+  duplicateCandidateSeasons = [],
+  sourceRecruitableTracks = [],
   onPublish,
   onPrivatize,
   onEdit,
@@ -53,17 +68,37 @@ export function RecruitmentPostMoreMenu({
   const [duplicateModalOpen, setDuplicateModalOpen] = useState(false)
   const shouldPreventFocusRestoreRef = useRef(false)
 
-  const duplicateSuccessToast = () =>
+  // TODO: 복제한 공고의 수정하기 페이지로 보내는 "바로가기" 액션은 central
+  // 역할의 다중 학교 복제 시 어느 학교로 보낼지가 정해지면 다시 추가한다.
+  // 학교를 여러 개 골랐을 수 있어 학교별 토스트 대신 결과를 집계해 하나로 보여준다.
+  const duplicateOutcomeToast = ({
+    succeededCount,
+    failedCount,
+  }: DuplicateOutcome) => {
+    if (failedCount === 0) {
+      addToast({
+        message:
+          succeededCount > 1
+            ? `${succeededCount}개 학교의 공유 보관함에 복제되었습니다.`
+            : "모집 공고가 공유 보관함에 복제되었습니다.",
+        color: "primary",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
     addToast({
-      message: "모집 공고가 공유 보관함에 복제되었습니다.",
-      color: "primary",
+      message:
+        succeededCount === 0
+          ? "복제에 실패했습니다. 잠시 후 다시 시도해주세요."
+          : `${succeededCount}개 학교 복제 완료, ${failedCount}개 실패했습니다.`,
+      color: "red",
       variant: "deep",
       type: "default",
       duration: 3000,
-      action: showArchiveLink
-        ? { label: "바로가기", onClick: () => onNavigateToArchive?.() }
-        : undefined,
     })
+  }
 
   const withClose = (action?: () => void) => () => {
     setPopoverOpen(false)
@@ -73,14 +108,17 @@ export function RecruitmentPostMoreMenu({
   const handlePublishClick = () => {
     setPopoverOpen(false)
     onPublish()
-    // 공개된 글은 같은 페이지의 "모집 공고 목록"에 바로 보이므로 이동 액션은 불필요
-    addToast({
-      message: "모집이 공개되었습니다.",
-      color: "primary",
-      variant: "deep",
-      type: "default",
-      duration: 3000,
-    })
+      .then(() => {
+        // 공개된 글은 같은 페이지의 "모집 공고 목록"에 바로 보이므로 이동 액션은 불필요
+        addToast({
+          message: "모집이 공개되었습니다.",
+          color: "primary",
+          variant: "deep",
+          type: "default",
+          duration: 3000,
+        })
+      })
+      .catch(() => {})
   }
 
   const handlePrivatizeClick = () => {
@@ -101,7 +139,8 @@ export function RecruitmentPostMoreMenu({
     // 모달 없이 바로 본인 학교로 복제한다.
     if (role === "schoolStaff") {
       onDuplicate()
-      duplicateSuccessToast()
+        .then((outcome) => duplicateOutcomeToast(outcome))
+        .catch(() => {})
       return
     }
     shouldPreventFocusRestoreRef.current = true
@@ -183,16 +222,22 @@ export function RecruitmentPostMoreMenu({
         onConfirm={() => {
           setPrivatizeConfirmOpen(false)
           onPrivatize()
-          addToast({
-            message: "모집 공고가 비공개되었습니다.",
-            color: "primary",
-            variant: "deep",
-            type: "default",
-            duration: 3000,
-            action: showArchiveLink
-              ? { label: "보관함으로", onClick: () => onNavigateToArchive?.() }
-              : undefined,
-          })
+            .then(() => {
+              addToast({
+                message: "모집 공고가 비공개되었습니다.",
+                color: "primary",
+                variant: "deep",
+                type: "default",
+                duration: 3000,
+                action: showArchiveLink
+                  ? {
+                      label: "보관함으로",
+                      onClick: () => onNavigateToArchive?.(),
+                    }
+                  : undefined,
+              })
+            })
+            .catch(() => {})
         }}
       />
 
@@ -225,12 +270,15 @@ export function RecruitmentPostMoreMenu({
           open={duplicateModalOpen}
           role={role}
           ownChapter={ownChapter}
+          candidateSeasons={duplicateCandidateSeasons}
+          sourceRecruitableTracks={sourceRecruitableTracks}
           onOpenChange={setDuplicateModalOpen}
           onCancel={() => setDuplicateModalOpen(false)}
-          onConfirm={() => {
+          onConfirm={(targetSeasonIds) => {
             setDuplicateModalOpen(false)
-            onDuplicate()
-            duplicateSuccessToast()
+            onDuplicate(targetSeasonIds)
+              .then((outcome) => duplicateOutcomeToast(outcome))
+              .catch(() => {})
           }}
         />
       )}
