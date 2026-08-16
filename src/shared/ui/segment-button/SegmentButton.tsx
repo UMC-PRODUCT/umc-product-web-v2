@@ -1,6 +1,7 @@
 import { cva } from "class-variance-authority"
 
 import { cn } from "@/shared/lib/utils"
+import { Tooltip } from "@/shared/ui/tooltip/Tooltip"
 
 const buttonVariants = cva(
   "inline-flex h-9.5 shrink-0 cursor-pointer items-center overflow-clip rounded-xl transition-all",
@@ -50,6 +51,7 @@ export interface SegmentButtonItem {
   value: string
   label: string
   disabled?: boolean
+  tooltipContent?: string
 }
 
 interface SegmentButtonProps {
@@ -97,9 +99,29 @@ export function SegmentButton({
                 {index + 1}
               </span>
             )}
-            <span className={textVariants({ selected: isSelected })}>
-              {item.label}
-            </span>
+            {item.tooltipContent ? (
+              <Tooltip
+                content={item.tooltipContent}
+                size="small"
+                dark={true}
+                side="bottom"
+                hoverOnly
+                triggerClassName="block min-w-0 max-w-full"
+              >
+                <span
+                  className={cn(
+                    textVariants({ selected: isSelected }),
+                    "block max-w-full truncate",
+                  )}
+                >
+                  {item.label}
+                </span>
+              </Tooltip>
+            ) : (
+              <span className={textVariants({ selected: isSelected })}>
+                {item.label}
+              </span>
+            )}
           </button>
         )
       })}
