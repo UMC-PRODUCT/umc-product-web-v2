@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RecruitingGuideRouteImport } from './routes/recruiting-guide'
 import { Route as ChallengerVerificationRouteImport } from './routes/challenger-verification'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as AboutRouteImport } from './routes/about'
@@ -109,7 +110,6 @@ import { Route as AdminChallengerRecordsRouteImport } from './routes/admin/chall
 import { Route as AdminChallengerPointsRouteImport } from './routes/admin/challenger/points'
 import { Route as MatchingProjectsAnnounceRouteRouteImport } from './routes/matching/projects/announce/route'
 import { Route as MatchingProjectsAnnounceIndexRouteImport } from './routes/matching/projects/announce/index'
-import { Route as RecruitingRecruitmentsEditRoundIdRouteImport } from './routes/recruiting/recruitments/edit.$roundId'
 import { Route as RecruitingEvaluationsInterviewApplicationIdRouteImport } from './routes/recruiting/evaluations/interview.$applicationId'
 import { Route as RecruitingEvaluationsInterviewScheduleRoundIdRouteImport } from './routes/recruiting/evaluations/interview-schedule.$roundId'
 import { Route as RecruitingEvaluationsDocumentApplicationIdRouteImport } from './routes/recruiting/evaluations/document.$applicationId'
@@ -117,6 +117,11 @@ import { Route as MatchingProjectsEditProjectIdRouteImport } from './routes/matc
 import { Route as MatchingProjectsAnnounceNoticePublishRouteImport } from './routes/matching/projects/announce/notice-publish'
 import { Route as MatchingProjectsAnnounceNoticePublishNoticeIdRouteImport } from './routes/matching/projects/announce/notice-publish.$noticeId'
 
+const RecruitingGuideRoute = RecruitingGuideRouteImport.update({
+  id: '/recruiting-guide',
+  path: '/recruiting-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChallengerVerificationRoute = ChallengerVerificationRouteImport.update({
   id: '/challenger-verification',
   path: '/challenger-verification',
@@ -644,12 +649,6 @@ const MatchingProjectsAnnounceIndexRoute =
     path: '/',
     getParentRoute: () => MatchingProjectsAnnounceRouteRoute,
   } as any)
-const RecruitingRecruitmentsEditRoundIdRoute =
-  RecruitingRecruitmentsEditRoundIdRouteImport.update({
-    id: '/recruitments/edit/$roundId',
-    path: '/recruitments/edit/$roundId',
-    getParentRoute: () => RecruitingRouteRoute,
-  } as any)
 const RecruitingEvaluationsInterviewApplicationIdRoute =
   RecruitingEvaluationsInterviewApplicationIdRouteImport.update({
     id: '/$applicationId',
@@ -699,6 +698,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
+  '/recruiting-guide': typeof RecruitingGuideRoute
   '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
@@ -792,7 +792,6 @@ export interface FileRoutesByFullPath {
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
   '/recruiting/evaluations/interview-schedule/$roundId': typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
   '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
-  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -802,6 +801,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
+  '/recruiting-guide': typeof RecruitingGuideRoute
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
   '/matching/applications': typeof MatchingApplicationsRoute
@@ -893,7 +893,6 @@ export interface FileRoutesByTo {
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
   '/recruiting/evaluations/interview-schedule/$roundId': typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
   '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
-  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -910,6 +909,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth-test': typeof AuthTestRoute
   '/challenger-verification': typeof ChallengerVerificationRoute
+  '/recruiting-guide': typeof RecruitingGuideRoute
   '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
@@ -1003,7 +1003,6 @@ export interface FileRoutesById {
   '/recruiting/evaluations/document/$applicationId': typeof RecruitingEvaluationsDocumentApplicationIdRoute
   '/recruiting/evaluations/interview-schedule/$roundId': typeof RecruitingEvaluationsInterviewScheduleRoundIdRoute
   '/recruiting/evaluations/interview/$applicationId': typeof RecruitingEvaluationsInterviewApplicationIdRoute
-  '/recruiting/recruitments/edit/$roundId': typeof RecruitingRecruitmentsEditRoundIdRoute
   '/matching/projects/announce/': typeof MatchingProjectsAnnounceIndexRoute
   '/matching/projects/announce/notice-publish/$noticeId': typeof MatchingProjectsAnnounceNoticePublishNoticeIdRoute
 }
@@ -1021,6 +1020,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth-test'
     | '/challenger-verification'
+    | '/recruiting-guide'
     | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
@@ -1114,7 +1114,6 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document/$applicationId'
     | '/recruiting/evaluations/interview-schedule/$roundId'
     | '/recruiting/evaluations/interview/$applicationId'
-    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesByTo: FileRoutesByTo
@@ -1124,6 +1123,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth-test'
     | '/challenger-verification'
+    | '/recruiting-guide'
     | '/login/default'
     | '/manage/chapter'
     | '/matching/applications'
@@ -1215,7 +1215,6 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document/$applicationId'
     | '/recruiting/evaluations/interview-schedule/$roundId'
     | '/recruiting/evaluations/interview/$applicationId'
-    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce'
     | '/matching/projects/announce/notice-publish/$noticeId'
   id:
@@ -1231,6 +1230,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth-test'
     | '/challenger-verification'
+    | '/recruiting-guide'
     | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
@@ -1324,7 +1324,6 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations/document/$applicationId'
     | '/recruiting/evaluations/interview-schedule/$roundId'
     | '/recruiting/evaluations/interview/$applicationId'
-    | '/recruiting/recruitments/edit/$roundId'
     | '/matching/projects/announce/'
     | '/matching/projects/announce/notice-publish/$noticeId'
   fileRoutesById: FileRoutesById
@@ -1341,6 +1340,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthTestRoute: typeof AuthTestRoute
   ChallengerVerificationRoute: typeof ChallengerVerificationRoute
+  RecruitingGuideRoute: typeof RecruitingGuideRoute
   LoginDefaultRoute: typeof LoginDefaultRoute
   SignupOauthRoute: typeof SignupOauthRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -1350,6 +1350,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/recruiting-guide': {
+      id: '/recruiting-guide'
+      path: '/recruiting-guide'
+      fullPath: '/recruiting-guide'
+      preLoaderRoute: typeof RecruitingGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/challenger-verification': {
       id: '/challenger-verification'
       path: '/challenger-verification'
@@ -2050,13 +2057,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingProjectsAnnounceIndexRouteImport
       parentRoute: typeof MatchingProjectsAnnounceRouteRoute
     }
-    '/recruiting/recruitments/edit/$roundId': {
-      id: '/recruiting/recruitments/edit/$roundId'
-      path: '/recruitments/edit/$roundId'
-      fullPath: '/recruiting/recruitments/edit/$roundId'
-      preLoaderRoute: typeof RecruitingRecruitmentsEditRoundIdRouteImport
-      parentRoute: typeof RecruitingRouteRoute
-    }
     '/recruiting/evaluations/interview/$applicationId': {
       id: '/recruiting/evaluations/interview/$applicationId'
       path: '/$applicationId'
@@ -2322,7 +2322,6 @@ interface RecruitingRouteRouteChildren {
   RecruitingRecruitmentsNewRoute: typeof RecruitingRecruitmentsNewRoute
   RecruitingRecruitmentsQuotaRoute: typeof RecruitingRecruitmentsQuotaRoute
   RecruitingRecruitmentsIndexRoute: typeof RecruitingRecruitmentsIndexRoute
-  RecruitingRecruitmentsEditRoundIdRoute: typeof RecruitingRecruitmentsEditRoundIdRoute
 }
 
 const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
@@ -2333,8 +2332,6 @@ const RecruitingRouteRouteChildren: RecruitingRouteRouteChildren = {
   RecruitingRecruitmentsNewRoute: RecruitingRecruitmentsNewRoute,
   RecruitingRecruitmentsQuotaRoute: RecruitingRecruitmentsQuotaRoute,
   RecruitingRecruitmentsIndexRoute: RecruitingRecruitmentsIndexRoute,
-  RecruitingRecruitmentsEditRoundIdRoute:
-    RecruitingRecruitmentsEditRoundIdRoute,
 }
 
 const RecruitingRouteRouteWithChildren = RecruitingRouteRoute._addFileChildren(
@@ -2460,6 +2457,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthTestRoute: AuthTestRoute,
   ChallengerVerificationRoute: ChallengerVerificationRoute,
+  RecruitingGuideRoute: RecruitingGuideRoute,
   LoginDefaultRoute: LoginDefaultRoute,
   SignupOauthRoute: SignupOauthRoute,
   LoginIndexRoute: LoginIndexRoute,

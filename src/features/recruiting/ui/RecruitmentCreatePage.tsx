@@ -43,8 +43,8 @@ function DraftNotice({ message }: { message: string }) {
     <div className="flex w-full max-w-286.5 flex-col">
       <PageLabel
         breadcrumb={CREATE_BREADCRUMB}
-        title="임시 저장 모집 이어쓰기"
-        description="임시 저장한 모집을 다시 작성합니다."
+        title="모집 공고 수정"
+        description="모집 정보를 불러오는 중입니다."
         className="pl-3"
       />
       <div
@@ -71,10 +71,7 @@ export function RecruitmentCreatePage({
   draftSeasonId,
 }: RecruitmentCreatePageProps = {}) {
   const { draft, isLoading, isError, error, isActiveGisuMissing } =
-    useRecruitmentDraft(
-    draftRoundId,
-    draftSeasonId,
-  )
+    useRecruitmentDraft(draftRoundId, draftSeasonId)
   const isDraftMode = draftRoundId != null
 
   // 2단계 폼은 마운트 시점의 문항 구조로 편집 상태를 한 번만 세운다. 조회가
@@ -117,11 +114,15 @@ function RecruitmentCreatePageInner({
   draftRoundId?: string
   draft: RecruitmentDraft | null
 }) {
+  // 이미 게시된(OPEN) 라운드를 이 마법사로 불러와 수정하는 경우 — DRAFT
+  // 이어쓰기와 달리 3단계에서 "게시"할 게 없으니 안내 문구·버튼이 달라진다.
+  const isAlreadyPublished = draft?.status === "OPEN"
   const [step, setStep] = useState(1)
   const [isStep1Dirty, setIsStep1Dirty] = useState(false)
   const [isStep2Dirty, setIsStep2Dirty] = useState(false)
   const [isStep3Dirty, setIsStep3Dirty] = useState(false)
   const isDirty = isStep1Dirty || isStep2Dirty || isStep3Dirty
+  const isPublishedRef = useRef(false)
 
   const [step2HasBlankPart, setStep2HasBlankPart] = useState(false)
   const stepperRef = useRef<HTMLDivElement>(null)
@@ -200,9 +201,9 @@ function RecruitmentCreatePageInner({
     reset: resetLeave,
     status: leaveBlockStatus,
   } = useBlocker({
-    shouldBlockFn: () => isDirty,
+    shouldBlockFn: () => !isPublishedRef.current && isDirty,
     withResolver: true,
-    enableBeforeUnload: isDirty,
+    enableBeforeUnload: () => !isPublishedRef.current && isDirty,
   })
 
   const isLeaveModalOpen = leaveBlockStatus === "blocked"
@@ -216,11 +217,19 @@ function RecruitmentCreatePageInner({
     <div className="flex w-full max-w-286.5 flex-col">
       <PageLabel
         breadcrumb={CREATE_BREADCRUMB}
-        title={draft ? "임시 저장 모집 이어쓰기" : "모집 생성"}
+        title={
+          !draft
+            ? "모집 생성"
+            : isAlreadyPublished
+              ? "모집 공고 수정"
+              : "임시 저장 모집 이어쓰기"
+        }
         description={
-          draft
-            ? "임시 저장한 모집을 다시 작성합니다."
-            : "모집 공고를 만들고 공개할 준비를 합니다."
+          !draft
+            ? "모집 공고를 만들고 공개할 준비를 합니다."
+            : isAlreadyPublished
+              ? "게시된 모집 공고를 수정합니다."
+              : "임시 저장한 모집을 다시 작성합니다."
         }
         className="pl-3"
       />
@@ -252,12 +261,17 @@ function RecruitmentCreatePageInner({
           onDirtyChange={setIsStep2Dirty}
           onBlankPartsChange={setStep2HasBlankPart}
           initialFormStructure={draft?.formStructure}
+          readOnly={isAlreadyPublished}
         />
       </div>
       <div className={step === 3 ? undefined : "hidden"}>
         <RecruitmentAnnouncementForm
           onPrev={() => moveToStep(2)}
           onDirtyChange={setIsStep3Dirty}
+          onPublished={() => {
+            isPublishedRef.current = true
+          }}
+          isAlreadyPublished={isAlreadyPublished}
         />
       </div>
 

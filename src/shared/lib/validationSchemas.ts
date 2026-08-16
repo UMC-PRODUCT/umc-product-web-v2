@@ -33,3 +33,9 @@ export const nicknameSchema = z
   .min(1)
   .max(5)
   .regex(/^[가-힣]*$/, "공백 없이 한글 1-5자")
+
+export const nameSchema = z
+  .string()
+  .trim()
+  .min(1, "이름을 입력해 주세요.")
+  .max(10, "이름은 10자 이하로 입력해 주세요.")

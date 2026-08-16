@@ -5,6 +5,7 @@ import { useAuthStore } from "@/entities/member/store/authStore"
 import {
   toApplicationSections,
   useAnonymousApplicationQuery,
+  useMyRecruitingApplicationsQuery,
 } from "@/features/recruiting"
 import { ReadonlyAnswerField } from "@/features/recruiting/ui/detail/ReadonlyAnswerField"
 import { Button } from "@/shared/ui/Button"
@@ -12,6 +13,7 @@ import { Button } from "@/shared/ui/Button"
 import type {
   RecruitingApplicationAnswer,
   RecruitingFormStructure,
+  RecruitingMyApplicationResponse,
   RecruitingPublicApplicationAnswer,
   RecruitingTrack,
 } from "@/features/recruiting"
@@ -156,21 +158,31 @@ function ApplicationDetailPage() {
       ? sessionStorage.getItem("anonymousApplicationKey")
       : null
 
-  const { data, isLoading } = useAnonymousApplicationQuery(
-    email,
-    applicationKey,
-  )
+  const { data: anonymousData, isLoading: isAnonymousLoading } =
+    useAnonymousApplicationQuery(email, applicationKey)
+  const myApplicationsQuery = useMyRecruitingApplicationsQuery()
+
+  const data: RecruitingMyApplicationResponse | undefined = isAuthed
+    ? myApplicationsQuery.data?.find(
+        (app) => String(app.applicationId) === applicationId,
+      )
+    : anonymousData
+  const isLoading = isAuthed
+    ? myApplicationsQuery.isLoading
+    : isAnonymousLoading
 
   const appInfo = useMemo(() => {
     if (!data || data.cancelled) return null
     return {
       name: data.applicantName
         ? `${data.applicantName}님의 지원서`
-        : "익명 지원서",
+        : isAuthed
+          ? "지원서"
+          : "익명 지원서",
       submittedAt: data.submitted ? "제출 완료" : null,
       isClosed: !data.editable,
     }
-  }, [data])
+  }, [data, isAuthed])
 
   const applicationDetail = useMemo(() => {
     if (!data) return null

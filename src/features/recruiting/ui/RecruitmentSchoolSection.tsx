@@ -18,7 +18,7 @@ export function RecruitmentSchoolSection({
   return (
     <div className={cn("flex w-full flex-col items-start", className)}>
       <RecruitmentSchoolSectionLabel schoolName={schoolName} />
-      <div className="bg-teal-gray-150 flex w-full flex-col items-start overflow-hidden rounded-b-lg border-r border-b border-l border-teal-200 p-px [&>*:last-child]:rounded-b-[7px]">
+      <div className="bg-teal-gray-150 flex w-full flex-col items-start overflow-hidden rounded-b-lg border-r border-b border-l border-teal-200 pt-px [&>*:last-child]:rounded-b-[7px]">
         {children}
       </div>
     </div>

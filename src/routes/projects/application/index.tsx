@@ -23,8 +23,7 @@ export const Route = createFileRoute("/projects/application/")({
   beforeLoad: () => {
     if (typeof window !== "undefined") {
       const isAuthed = useAuthStore.getState().isAuthed
-      const isVerified = sessionStorage.getItem("isApplicationVerified")
-      if (isAuthed || isVerified === "true") {
+      if (isAuthed) {
         throw redirect({ to: "/projects/application/list" })
       }
     }

@@ -14,6 +14,7 @@ import { registerMemberByEmail } from "@/features/auth/api/register"
 import { getTerms } from "@/features/auth/api/terms"
 import { useSchools } from "@/features/auth/hooks/useSchools"
 import { OAUTH_VERIFICATION_TOKEN_KEY } from "@/features/auth/lib/handleLoginResponse"
+import { resolveEmailSignupStep } from "@/features/auth/model/signupStep"
 import {
   AccountCreationStep,
   ProfileInfoStep,
@@ -51,13 +52,11 @@ type SignUpState = {
     verificationId: number | null
   }
 
-  oAuthVerificationToken: string | null
   schoolList: SchoolNameItem[]
   isSignupLoading: boolean
 }
 
 type SignUpAction =
-  | { type: "SET_OAUTH_TOKEN"; payload: string | null }
   | { type: "SET_SCHOOL_LIST"; payload: SchoolNameItem[] }
   | { type: "EMAIL_REQUEST_START" }
   | { type: "EMAIL_REQUEST_SUCCESS"; payload: { id: number; value: string } }
@@ -91,15 +90,12 @@ const initialState: SignUpState = {
     verificationId: null,
   },
 
-  oAuthVerificationToken: null,
   schoolList: [],
   isSignupLoading: false,
 }
 
 function signUpReducer(state: SignUpState, action: SignUpAction): SignUpState {
   switch (action.type) {
-    case "SET_OAUTH_TOKEN":
-      return { ...state, oAuthVerificationToken: action.payload }
     case "SET_SCHOOL_LIST":
       return { ...state, schoolList: action.payload }
     case "EMAIL_REQUEST_START":
@@ -252,12 +248,6 @@ function SignUpPage() {
   const { schools: hookSchools, isError: isSchoolsError } = useSchools({
     nameType: "short",
   })
-
-  // 초기 로드: OAuth 토큰
-  useEffect(() => {
-    const token = sessionStorage.getItem(OAUTH_VERIFICATION_TOKEN_KEY)
-    dispatch({ type: "SET_OAUTH_TOKEN", payload: token })
-  }, [])
 
   useEffect(() => {
     if (hookSchools.length > 0) {
@@ -424,6 +414,19 @@ function SignUpPage() {
       return
     }
 
+    if (!password) {
+      addToast({
+        message: "비밀번호를 먼저 설정해 주세요.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      dispatch({ type: "SET_PASSWORD", payload: "" })
+      setShowTerms(false)
+      return
+    }
+
     const selectedSchool = state.schoolList.find((s) => s.schoolName === school)
     if (!selectedSchool) {
       addToast({
@@ -446,7 +449,7 @@ function SignUpPage() {
 
     const payload: EmailRegisterMemberRequest = {
       rawPassword: password,
-      name,
+      name: name.trim(),
       nickname,
       emailVerificationToken,
       schoolId: Number(selectedSchool.schoolId),
@@ -456,6 +459,7 @@ function SignUpPage() {
     dispatch({ type: "SIGNUP_START" })
     try {
       await registerMemberByEmail(payload)
+      sessionStorage.removeItem(OAUTH_VERIFICATION_TOKEN_KEY)
       setIsSuccessModalOpen(true)
     } catch (err) {
       const message =
@@ -496,20 +500,14 @@ function SignUpPage() {
   const isPasswordValid = password !== "" && !errors.password
   const isPasswordMatch = password !== "" && password === confirmPassword
 
+  const isNameValid = name.trim() !== "" && !errors.name
   const isNicknameValid = nickname !== "" && !errors.nickname
 
-  // 단계별 완료 여부 (상태 A에서 유도)
-  const isAccountCreated =
-    !!state.oAuthVerificationToken || !!state.signupData.rawPassword
-
-  // 현재 활성 단계 결정
-  const currentStep = !isEmailVerified
-    ? "EMAIL"
-    : !isAccountCreated
-      ? "PASSWORD"
-      : showTerms
-        ? "TERMS"
-        : "PROFILE"
+  const currentStep = resolveEmailSignupStep({
+    emailVerificationToken: state.signupData.emailVerificationToken,
+    rawPassword: state.signupData.rawPassword,
+    isTermsOpen: showTerms,
+  })
 
   const nextButtonDisabled =
     currentStep === "EMAIL"
@@ -519,7 +517,7 @@ function SignUpPage() {
       : currentStep === "PASSWORD"
         ? !isPasswordValid || !isPasswordMatch
         : currentStep === "PROFILE"
-          ? !school || !name || !isNicknameValid
+          ? !school || !isNameValid || !isNicknameValid
           : currentStep === "TERMS"
             ? terms
                 .filter((t) => t.isMandatory)

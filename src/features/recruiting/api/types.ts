@@ -62,20 +62,37 @@ export interface RecruitingRound {
   status?: RecruitingRoundStatus
   availabilityFormId?: string | null
   contactText?: string | null
+  // 이 라운드를 만든 실제 작성자(RoundResponse.author). 임시 보관함의 "작성자" 표시에 쓴다.
+  author?: RecruitingRoundAuthor
   // public 전용
   applicationFormId?: string | null
   formId?: string | null
   applicationOpen?: boolean
 }
 
+export interface RecruitingRoundAuthor {
+  memberId: string
+  name: string
+  nickname: string
+  schoolName: string
+}
+
+export type RawRecruitingRoundAuthor = Omit<
+  RecruitingRoundAuthor,
+  "memberId"
+> & {
+  memberId: RawId
+}
+
 // admin 응답의 차수. 식별자가 id 로 오고, 공개 응답에만 있는 필드는 빠져 있다.
 // 공개 전용 필드를 빼 두어야 관리자 응답에서 그 값을 읽는 코드가 타입 검사에서 걸린다.
 export type RawAdminRound = Omit<
   RecruitingRound,
-  "roundId" | "applicationFormId" | "formId" | "applicationOpen"
+  "roundId" | "applicationFormId" | "formId" | "applicationOpen" | "author"
 > & {
   id: RawId
   roundId?: RawId
+  author?: RawRecruitingRoundAuthor
 }
 
 export type RawAdminRoundGroup = Omit<RecruitingRoundGroup, "rounds"> & {
@@ -146,18 +163,28 @@ export interface RecruitingSeasonConfigurationResponse {
   gisuId: string
   schoolId: string
   memo: string | null
+  // 이 학교가 속한 지부 전체의 목표 인원. 지부 단위로 한 번도 저장된 적이
+  // 없으면 null 이다.
+  chapterTotalTargetCount: number | null
   quotas: RecruitingSeasonTrackQuota[]
   rounds: RecruitingRound[]
 }
 
 export type RawRecruitingSeasonConfigurationResponse = Omit<
   RecruitingSeasonConfigurationResponse,
-  "id" | "gisuId" | "schoolId" | "memo" | "quotas" | "rounds"
+  | "id"
+  | "gisuId"
+  | "schoolId"
+  | "memo"
+  | "chapterTotalTargetCount"
+  | "quotas"
+  | "rounds"
 > & {
   id?: RawId
   gisuId?: RawId
   schoolId?: RawId
   memo?: string | null
+  chapterTotalTargetCount?: RawCount | null
   quotas?: {
     track?: RecruitingTrack
     targetCount?: RawCount
@@ -172,6 +199,14 @@ export interface RecruitingSeasonTrackQuotaRequest {
 }
 
 export interface ReplaceRecruitingSeasonTrackQuotasRequest {
+  /**
+   * 이 학교가 속한 지부 전체의 목표 인원. 필수다.
+   *
+   * 사용자가 정하는 값이 아니라 검산값이다. 서버는 "이번 요청의 트랙 합 + 같은
+   * 지부 다른 학교들의 현재 저장값" 과 같은지 보고, 다르면 RECRUITING-0330 을
+   * 던진다. 그래서 여러 학교를 잇달아 저장할 때는 요청마다 값이 달라진다.
+   */
+  chapterTotalTargetCount: number
   quotas: RecruitingSeasonTrackQuotaRequest[]
 }
 
@@ -736,6 +771,13 @@ export interface RecruitingPublicApplicationResponse {
   acceptedTrack?: RecruitingTrack
   answers?: AnswerResponse[]
   formStructure?: RecruitingFormStructure
+}
+
+// 로그인 회원 지원 내역 목록 조회 응답 DTO (GET /v1/recruiting/applications)
+// 익명 조회 응답과 필드가 같고 gisuId/roundId 만 추가된다.
+export interface RecruitingMyApplicationResponse extends RecruitingPublicApplicationResponse {
+  gisuId?: number
+  roundId?: number
 }
 
 export type RecruitingDecision = "PASS" | "FAIL"

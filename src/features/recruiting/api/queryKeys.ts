@@ -36,6 +36,8 @@ export const recruitingKeys = {
 
   applications: () => [...recruitingKeys.all, "applications"] as const,
 
+  myApplications: () => [...recruitingKeys.applications(), "me"] as const,
+
   schoolApplications: (roundIds: string[], stage: EvaluationStage) =>
     [...recruitingKeys.applications(), [...roundIds].sort(), stage] as const,
 

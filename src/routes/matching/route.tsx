@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 import { ensureMe } from "@/features/auth/lib/ensureMe"
+import { ensureMatchingAllowed } from "@/features/recruiting/lib/ensureMatchingAllowed"
 import Footer from "@/widgets/footer/Footer"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 import { MatchingSegmentRegion } from "@/widgets/navigation/sidebar/MatchingSegmentRegion"
@@ -12,6 +13,9 @@ export const Route = createFileRoute("/matching")({
   }),
   beforeLoad: async ({ context, location }) => {
     await ensureMe(context.queryClient, location.href)
+    // 인증 확인이 먼저다. 로그인하지 않은 사람에게 모집 기간 안내를 띄우면
+    // 로그인하면 들어갈 수 있는 곳처럼 읽힌다.
+    ensureMatchingAllowed()
   },
   component: MatchingLayout,
 })

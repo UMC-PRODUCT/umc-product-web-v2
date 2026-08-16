@@ -21,6 +21,13 @@ import type {
 export interface UpdateSeasonQuotaVariables {
   seasonId: string
   schoolName?: string
+  /**
+   * 같은 지부끼리 묶는 열쇠.
+   *
+   * 지부 합계는 앞선 요청이 반영된 결과를 전제로 계산돼 있다. 하나가 실패하면
+   * 그 뒤 요청들은 전제가 깨진 값을 들고 있어, 같은 지부인지 알아야 멈출 수 있다.
+   */
+  chapterKey?: string
   payload: ReplaceRecruitingSeasonTrackQuotasRequest
 }
 
@@ -175,12 +182,36 @@ export function useRecruitingSeasonQuotas(
     mutationFn: async (
       variablesList: UpdateSeasonQuotaVariables[],
     ): Promise<UpdateSeasonQuotasResult> => {
-      const results = await Promise.allSettled(
-        variablesList.map(async (v) => {
+      // 한 지부 안에서는 순서가 결과를 가른다. 서버가 매 요청을 "그 시점에
+      // 저장된 다른 학교 값" 과 대조하기 때문에, 동시에 던지면 처리 순서에 따라
+      // 통과 여부가 달라진다. 호출부가 정해 준 차례대로 하나씩 보낸다.
+      //
+      // 그래서 하나가 실패하면 같은 지부의 남은 요청은 보내지 않는다. 그 값들은
+      // 실패한 요청이 반영됐다고 치고 계산돼 있어, 보내 봐야 합계 불일치로 다시
+      // 튕긴다. 실패 하나가 지부 전체의 실패로 번지는 것만 늘어난다.
+      const results: PromiseSettledResult<UpdateSeasonQuotaVariables>[] = []
+      const failedChapterKeys = new Set<string>()
+
+      for (const v of variablesList) {
+        const chapterKey = v.chapterKey
+        if (chapterKey !== undefined && failedChapterKeys.has(chapterKey)) {
+          results.push({
+            status: "rejected",
+            reason: new Error(
+              "같은 지부의 앞선 저장이 실패해 보내지 않았습니다.",
+            ),
+          })
+          continue
+        }
+
+        try {
           await updateRecruitingSeasonQuotas(v.seasonId, v.payload)
-          return v
-        }),
-      )
+          results.push({ status: "fulfilled", value: v })
+        } catch (reason) {
+          results.push({ status: "rejected", reason })
+          if (chapterKey !== undefined) failedChapterKeys.add(chapterKey)
+        }
+      }
 
       const successfulVariables: UpdateSeasonQuotaVariables[] = []
       const failedVariables: UpdateSeasonQuotaVariables[] = []

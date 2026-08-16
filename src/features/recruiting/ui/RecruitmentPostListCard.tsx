@@ -16,15 +16,23 @@ import { RecruitmentSchoolSection } from "./RecruitmentSchoolSection"
 import type { Chapter } from "@/entities/organization/model/chapters"
 
 import type { RecruitingListRole } from "../model/recruitingListRole"
-import type { RecruitmentPost } from "../model/recruitmentList"
+import type {
+  DuplicateOutcome,
+  DuplicateTargetSeason,
+  RecruitmentPost,
+} from "../model/recruitmentList"
 
 interface RecruitmentPostListCardProps {
   chapter: Chapter
   role: RecruitingListRole
   posts: RecruitmentPost[]
   permittedSeasonIds: ReadonlySet<string>
-  onPrivatize: (postId: string) => void
-  onDuplicate: (postId: string) => void
+  duplicateCandidateSeasons: DuplicateTargetSeason[]
+  onPrivatize: (postId: string) => Promise<void>
+  onDuplicate: (
+    postId: string,
+    targetSeasonIds?: string[],
+  ) => Promise<DuplicateOutcome>
   onDelete: (postId: string) => void
   onUndoDelete: () => void
   onNavigateToArchive: (school: string) => void
@@ -38,6 +46,7 @@ function PostRow({
   role,
   chapter,
   permittedSeasonIds,
+  duplicateCandidateSeasons,
   onPrivatize,
   onDuplicate,
   onDelete,
@@ -49,8 +58,12 @@ function PostRow({
   role: RecruitingListRole
   chapter: Chapter
   permittedSeasonIds: ReadonlySet<string>
-  onPrivatize: (postId: string) => void
-  onDuplicate: (postId: string) => void
+  duplicateCandidateSeasons: DuplicateTargetSeason[]
+  onPrivatize: (postId: string) => Promise<void>
+  onDuplicate: (
+    postId: string,
+    targetSeasonIds?: string[],
+  ) => Promise<DuplicateOutcome>
   onDelete: (postId: string) => void
   onUndoDelete: () => void
   onNavigateToArchive: (school: string) => void
@@ -74,16 +87,22 @@ function PostRow({
           status={post.status}
           role={role}
           ownChapter={chapter}
-          onPublish={() => {}}
+          duplicateCandidateSeasons={duplicateCandidateSeasons}
+          sourceRecruitableTracks={post.recruitableTracks}
+          onPublish={() => Promise.resolve()}
           onPrivatize={() => onPrivatize(post.postId)}
           onEdit={() =>
             navigate({
-              to: "/recruiting/recruitments/edit/$roundId",
-              params: { roundId: post.postId },
-              search: { seasonId: post.seasonId },
+              to: "/recruiting/recruitments/new",
+              search: {
+                draftRoundId: post.postId,
+                draftSeasonId: post.seasonId,
+              },
             })
           }
-          onDuplicate={() => onDuplicate(post.postId)}
+          onDuplicate={(targetSeasonIds) =>
+            onDuplicate(post.postId, targetSeasonIds)
+          }
           onDelete={() => onDelete(post.postId)}
           onUndoDelete={onUndoDelete}
           showArchiveLink={!archiveVisibleOnPage}
@@ -99,6 +118,7 @@ export function RecruitmentPostListCard({
   role,
   posts,
   permittedSeasonIds,
+  duplicateCandidateSeasons,
   onPrivatize,
   onDuplicate,
   onDelete,
@@ -179,8 +199,8 @@ export function RecruitmentPostListCard({
               return (
                 <RecruitmentSchoolSection key={school} schoolName={school}>
                   {schoolPosts.length === 0 ? (
-                    <div className="flex w-full items-center justify-center bg-white py-10">
-                      <p className="text-body-2-regular text-teal-gray-400">
+                    <div className="flex w-full items-center bg-white px-5 py-4.5">
+                      <p className="text-body-2-medium text-teal-gray-400">
                         {schoolHasPosts && recruitingOnly
                           ? "현재 모집 중인 공고가 없습니다."
                           : "등록된 모집 공고가 없습니다."}
@@ -194,6 +214,7 @@ export function RecruitmentPostListCard({
                         role={role}
                         chapter={chapter}
                         permittedSeasonIds={permittedSeasonIds}
+                        duplicateCandidateSeasons={duplicateCandidateSeasons}
                         onPrivatize={onPrivatize}
                         onDuplicate={onDuplicate}
                         onDelete={onDelete}
@@ -217,6 +238,7 @@ export function RecruitmentPostListCard({
               role={role}
               chapter={chapter}
               permittedSeasonIds={permittedSeasonIds}
+              duplicateCandidateSeasons={duplicateCandidateSeasons}
               onPrivatize={onPrivatize}
               onDuplicate={onDuplicate}
               onDelete={onDelete}

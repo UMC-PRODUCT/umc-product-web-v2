@@ -8,12 +8,19 @@ import {
   type PeriodFieldValue,
 } from "./recruitmentCreate"
 
-import type { RecruitingRound, RecruitingRoundGroup } from "../api/types"
+import type {
+  RecruitingRound,
+  RecruitingRoundGroup,
+  RecruitingRoundStatus,
+} from "../api/types"
 import type { RecruitmentBasicInfo } from "./useRecruitmentCreateStore"
 
 export interface RecruitmentDraftBasicInfo {
   roundId: string
   seasonId: string
+  // 관리자 응답에만 실리는 필드라 타입상 optional이다 — 못 받으면 아직
+  // 공개 안 된 것으로 보고 이어쓰기(DRAFT) 취급으로 폴백한다.
+  status?: RecruitingRoundStatus
   basicInfo: RecruitmentBasicInfo
   announcement: string
   contactText: string
@@ -94,6 +101,7 @@ export function mapRoundToDraftBasicInfo(
   return {
     roundId: round.roundId,
     seasonId: group.seasonId,
+    status: round.status,
     basicInfo: {
       chapter: isChapter(group.chapterName) ? group.chapterName : undefined,
       school,

@@ -5,14 +5,13 @@ import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { recruitingKeys } from "../api/queryKeys"
 import {
-  cloneRecruitingRound,
   deleteRecruitingRound,
+  restoreRecruitingRound,
   updateRecruitingRound,
   updateRecruitingRoundStatus,
 } from "../api/recruitingApi"
 
 import type {
-  CloneRecruitingRoundRequest,
   RecruitingRoundStatus,
   UpdateRecruitingRoundRequest,
 } from "../api/types"
@@ -23,13 +22,12 @@ interface UpdateRoundStatusVariables {
   status: RecruitingRoundStatus
 }
 
-interface CloneRoundVariables {
+interface DeleteRoundVariables {
   seasonId: string
   roundId: string
-  payload: CloneRecruitingRoundRequest
 }
 
-interface DeleteRoundVariables {
+interface RestoreRoundVariables {
   seasonId: string
   roundId: string
 }
@@ -105,35 +103,9 @@ export function useUpdateRecruitingRound() {
   })
 }
 
-// 원본 Round의 설정·지원 Form·활성 공통 질문을 대상 시즌의 새 DRAFT Round로
-// 복제한다(RECRUITING-ADMIN-016).
-export function useCloneRecruitingRound() {
-  const queryClient = useQueryClient()
-  const addToast = useToastStore((state) => state.addToast)
-
-  return useMutation({
-    mutationFn: ({ seasonId, roundId, payload }: CloneRoundVariables) =>
-      cloneRecruitingRound(seasonId, roundId, payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: recruitingKeys.rounds() })
-    },
-    onError: (error) => {
-      addToast({
-        message: extractApiErrorMessage(
-          error,
-          "복제에 실패했습니다. 잠시 후 다시 시도해주세요.",
-        ),
-        color: "red",
-        variant: "deep",
-        type: "default",
-        duration: 3000,
-      })
-    },
-  })
-}
-
-// 지원서·Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 복구 불가능한
-// 삭제라 낙관적 업데이트나 실행취소는 지원하지 않는다.
+// 지원서·Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 서버가 soft
+// delete로 처리해 restoreRecruitingRound로 되돌릴 수 있다 — "실행취소" 토스트
+// 액션(handleUndoDelete 참고)이 이 복구를 실제로 호출한다.
 export function useDeleteRecruitingRound() {
   const queryClient = useQueryClient()
   const addToast = useToastStore((state) => state.addToast)
@@ -149,6 +121,33 @@ export function useDeleteRecruitingRound() {
         message: extractApiErrorMessage(
           error,
           "삭제에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        ),
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+    },
+  })
+}
+
+// 삭제 토스트의 "취소하기" 액션에 쓰인다. 삭제 이후 같은 슬롯으로 새 Round가
+// 만들어졌다면 슬롯 충돌로 실패할 수 있어(recruitingApi 참고) 실패 토스트를 둔다.
+export function useRestoreRecruitingRound() {
+  const queryClient = useQueryClient()
+  const addToast = useToastStore((state) => state.addToast)
+
+  return useMutation({
+    mutationFn: ({ seasonId, roundId }: RestoreRoundVariables) =>
+      restoreRecruitingRound(seasonId, roundId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: recruitingKeys.rounds() })
+    },
+    onError: (error) => {
+      addToast({
+        message: extractApiErrorMessage(
+          error,
+          "복구에 실패했습니다. 잠시 후 다시 시도해주세요.",
         ),
         color: "red",
         variant: "deep",

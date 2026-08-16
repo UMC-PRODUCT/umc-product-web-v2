@@ -1,3 +1,11 @@
+import coreDay from "@/shared/assets/image/about/preview/core-day.webp"
+import demoDay from "@/shared/assets/image/about/preview/demo-day.webp"
+import fsDay from "@/shared/assets/image/about/preview/fs-day.webp"
+import mt from "@/shared/assets/image/about/preview/mt.webp"
+import neordinaryHackathon from "@/shared/assets/image/about/preview/neordinary-hackathon.webp"
+import networkingDay from "@/shared/assets/image/about/preview/networking-day.webp"
+import schoolOt from "@/shared/assets/image/about/preview/school-ot.webp"
+import umcHackathon from "@/shared/assets/image/about/preview/umc-hackathon.webp"
 import anyang from "@/shared/assets/image/about/schools/anyang.webp"
 import catholic from "@/shared/assets/image/about/schools/catholic.webp"
 import chungang from "@/shared/assets/image/about/schools/chungang.webp"
@@ -16,8 +24,15 @@ import koreaAerospace from "@/shared/assets/image/about/schools/korea-aerospace.
 import sejong from "@/shared/assets/image/about/schools/sejong.webp"
 import seokyeong from "@/shared/assets/image/about/schools/seokyeong.webp"
 import seoulWomens from "@/shared/assets/image/about/schools/seoul-womens.webp"
+import sookmyung from "@/shared/assets/image/about/schools/sookmyung.webp"
 import soongsil from "@/shared/assets/image/about/schools/soongsil.webp"
 import sungshin from "@/shared/assets/image/about/schools/sungshin.webp"
+import comgongSunbae from "@/shared/assets/image/about/sponsors/comgong-sunbae.webp"
+import gridge from "@/shared/assets/image/about/sponsors/gridge.webp"
+import jober from "@/shared/assets/image/about/sponsors/jober.webp"
+import neordinary from "@/shared/assets/image/about/sponsors/neordinary.webp"
+import softSquared from "@/shared/assets/image/about/sponsors/soft-squared.webp"
+import vieworks from "@/shared/assets/image/about/sponsors/vieworks.webp"
 import { APPLY_ENTRY_PATH } from "@/shared/config/headerRecruitingWindow"
 
 export const ABOUT_RECRUIT = {
@@ -39,9 +54,9 @@ export const ABOUT_RECRUIT = {
         "만들어가는 역할입니다.",
       ],
       traits: [
-        "아이디어를 직접 서비스로 만들어보고 싶은 분",
-        "사용자 관점에서 문제를 발견하고 해결책을 고민하는 것을 좋아하는 분",
-        "팀원들과 소통하며 하나의 목표를 향해 프로젝트를 이끌어보고 싶은 분",
+        "아이디어를 실제 제품으로 만들어보고 싶은 분",
+        "사용자와 서비스의 문제를 발견하고 해결하는 과정을 즐기는 분",
+        "다양한 직군과 협업하며 프로젝트를 끝까지 이끌어보고 싶은 분",
       ],
     },
     {
@@ -54,9 +69,9 @@ export const ABOUT_RECRUIT = {
         "인터랙션으로 구현하는 역할입니다.",
       ],
       traits: [
-        "사용자가 어떻게 서비스를 사용할지 고민하는 것이 재미있는 분",
-        "UX/UI 디자인을 실제 서비스에 적용해보고 싶은 분",
-        "디자인을 혼자 완성하는 것보다 기획·개발자와 함께 제품을 만들어보고 싶은 분",
+        "사용자가 더 쉽고 편리하게 사용할 수 있는 경험을 고민하는 것이 재미있는 분",
+        "UX/UI를 통해 아이디어를 실제 제품 경험으로 만들어보고 싶은 분",
+        "기획·개발과 함께 협업하며 제품을 완성해보고 싶은 분",
       ],
     },
     {
@@ -73,9 +88,9 @@ export const ABOUT_RECRUIT = {
         "제품 개발의 전 과정을 경험합니다.",
       ],
       traits: [
-        "웹 서비스를 처음부터 끝까지 직접 만들어보고 싶은 분",
-        "프론트엔드와 백엔드를 함께 경험하며 개발의 시야를 넓히고 싶은 분",
-        "AI를 활용해 더 빠르고 효율적으로 제품을 개발하는 방법을 경험하고 싶은 분",
+        "기획된 아이디어를 실제 웹 서비스로 구현해보고 싶은 분",
+        "Frontend와 Backend를 함께 경험하며 제품 개발의 전 과정을 배우고 싶은 분",
+        "AI를 적극 활용해 더 빠르고 효율적으로 개발하는 방식을 경험해보고 싶은 분",
       ],
     },
     {
@@ -92,9 +107,9 @@ export const ABOUT_RECRUIT = {
         "제품 개발의 전 과정을 경험합니다.",
       ],
       traits: [
-        "직접 사용할 수 있는 모바일 앱을 만들어보고 싶은 분",
-        "앱 개발을 배우고 실제 서비스까지 구현해보고 싶은 분",
-        "기획·디자인·개발이 협업하는 하나의 제품팀을 경험해보고 싶은 분",
+        "사용자가 직접 사용하는 모바일 앱을 만들어보고 싶은 분",
+        "기획된 아이디어를 실제 앱 서비스로 구현해보고 싶은 분",
+        "하나의 제품팀에서 협업하며 서비스를 완성해보고 싶은 분",
       ],
     },
   ],
@@ -140,9 +155,8 @@ export const ABOUT_INTRO = {
     "기획자, 디자이너, 개발자가",
     "함께 아이디어를 현실로 만드는 대학생 IT 연합 동아리입니다",
   ],
-  // TODO: (미확정) 시안 주석 "요거 중앙측에 문의 후 답신 드리겠습니다".
   description:
-    "n주간 워크북으로 ~를 하고 마지막 n개월 동안 매칭된 팀원과 하나의 서비스 개발를 목표로 ~ (내용 필요)",
+    "AI를 활용해 기획하고, 디자인하고, 직접 서비스를 만드는 11기 UMC",
 } as const
 
 const EYEBROW = "UNIVERSITY MAKEUS CHALLENGE"
@@ -157,6 +171,86 @@ export const ABOUT_HERO = {
   ctaLabel: "11기 지원하기",
   // 헤더 지원하기와 같은 곳으로 보낸다. 진입로가 갈리면 한쪽만 바뀐다.
   ctaTo: APPLY_ENTRY_PATH,
+} as const
+
+export const ABOUT_PREVIEW = {
+  headline: "UMC Preview",
+  description: "다양한 IT 네트워킹을, 여기 UMC에서 경험하세요",
+
+  items: [
+    {
+      id: "school-ot",
+      label: "학교 OT · 연합 OT",
+      image: schoolOt,
+      descriptionLines: [
+        "UMC의 첫걸음을 시작하는 챌린저들을 위한 자리예요.",
+        "UMC의 문화와 활동 방향부터 커리큘럼, 스터디 진행 방식까지 앞으로의 활동에 필요한 내용을 함께 알아가요.",
+      ],
+    },
+    {
+      id: "core-day",
+      label: "Core Day",
+      image: coreDay,
+      descriptionLines: [
+        "운영진들이 한자리에 모여 서로 교류하고 결속을 다지는 시간이에요.",
+        "각 지부의 행사를 준비하기에 앞서 자유롭게 소통하며, 함께 활동할 운영진들과 가까워지는 기회를 만들어요.",
+      ],
+    },
+    {
+      id: "networking-day",
+      label: "연합 네트워킹 데이",
+      image: networkingDay,
+      descriptionLines: [
+        "UMC의 다양한 학교와 기수의 부원들이 한자리에 모이는 네트워킹 행사예요.",
+        "현직 부원부터 OB까지 서로의 경험과 이야기를 나누며 새로운 사람들과 관계를 만들어가요.",
+      ],
+    },
+    {
+      id: "neordinary-hackathon",
+      label: "너디너리 해커톤",
+      image: neordinaryHackathon,
+      descriptionLines: [
+        "UMC와 CMC가 함께하는 대규모 해커톤이에요.",
+        "서로 다른 학교와 파트의 참가자들이 팀을 이루어 아이디어를 구체화하고, 기획부터 개발까지 하나의 서비스를 완성해요.",
+      ],
+    },
+    {
+      id: "umc-hackathon",
+      label: "UMC 해커톤",
+      image: umcHackathon,
+      descriptionLines: [
+        "UMC 부원들이 함께하는 해커톤이에요.",
+        "짧은 시간 동안 아이디어를 구체화하고 팀원들과 협업하며, 직접 결과물을 만들어보는 경험을 할 수 있어요.",
+      ],
+    },
+    {
+      id: "demo-day",
+      label: "DEMO Day",
+      image: demoDay,
+      descriptionLines: [
+        "8주간 함께 만든 프로젝트를 선보이는 자리예요.",
+        "기획부터 디자인, 개발까지 완성한 서비스를 직접 공유하고, 다른 팀의 프로젝트를 만나며 서로의 경험과 결과를 돌아봐요.",
+      ],
+    },
+    {
+      id: "fs-day",
+      label: "FS Day",
+      image: fsDay,
+      descriptionLines: [
+        "Focus Sprint Day를 뜻하며, 다양한 학교와 기수의 UMC 부원들이 모여 아이디어를 공유하고 프로젝트에 집중하는 날이에요.",
+        "팀별로 아이디어를 빠르게 구체화하고 결과물을 만들어보며, 서로의 작업을 공유하고 피드백을 나눠요.",
+      ],
+    },
+    {
+      id: "mt",
+      label: "중앙 MT",
+      image: mt,
+      descriptionLines: [
+        "UMC의 다양한 학교와 크루가 함께 모여 교류하는 자리예요.",
+        "미니게임과 친목 활동을 통해 서로 가까워지고, 학교와 지부를 넘어 UMC의 다양한 사람들과 함께하는 시간을 가져요.",
+      ],
+    },
+  ],
 } as const
 
 export const ABOUT_SCHOOLS = {
@@ -183,6 +277,7 @@ export const ABOUT_SCHOOLS = {
     { name: "서경대", logo: seokyeong },
     { name: "서울여대", logo: seoulWomens },
     { name: "성신여대", logo: sungshin },
+    { name: "숙명여대", logo: sookmyung },
     { name: "숭실대", logo: soongsil },
     { name: "세종대", logo: sejong },
     { name: "안양대", logo: anyang },
@@ -194,6 +289,46 @@ export const ABOUT_SCHOOLS = {
     { name: "한성대", logo: hansung },
     { name: "홍익대(서울)", logo: hongik },
     { name: "홍익대(세종)", logo: hongik },
+  ],
+} as const
+
+export const ABOUT_SPONSORS = {
+  headline: "후원사",
+  descriptionLines: [
+    "UMC의 성장을 함께 만들어주시는 후원사와 함께",
+    "더 많은 배움과 도전의 기회를 이어가고 있습니다.",
+  ],
+  ctaLabel: "후원 문의하기 →",
+  ctaHref: "mailto:university@makeus.in",
+  lead: [
+    {
+      name: "컴공선배",
+      logo: comgongSunbae,
+      width: "w-[53px] md:w-[94px] lg:w-[150px]",
+    },
+    {
+      name: "너디너리",
+      logo: neordinary,
+      width: "w-[113px] md:w-[200px] lg:w-[321px]",
+    },
+  ],
+  partners: [
+    {
+      name: "소프트스퀘어드",
+      logo: softSquared,
+      width: "w-[113px] md:w-[139px] lg:w-[222px]",
+    },
+    {
+      name: "그릿지",
+      logo: gridge,
+      width: "w-[98px] md:w-[120px] lg:w-[193px]",
+    },
+    { name: "jober", logo: jober, width: "w-[90px] md:w-[110px] lg:w-[177px]" },
+    {
+      name: "vieworks",
+      logo: vieworks,
+      width: "w-[114px] md:w-[140px] lg:w-[225px]",
+    },
   ],
 } as const
 

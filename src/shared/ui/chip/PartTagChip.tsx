@@ -6,20 +6,20 @@ import { PART_TAG_LABEL } from "@/shared/model/domain"
 import type { PartTag } from "@/shared/model/domain"
 
 const partTagChipVariants = cva(
-  "inline-flex h-6 px-2.5 items-center justify-center rounded-[6px] py-0.5 text-label-2-medium text-teal-gray-800 shadow-drop-neutral-2",
+  "inline-flex h-6.5 px-2 items-center justify-center rounded-[6px] py-0.5 text-label-2-medium text-teal-gray-800 shadow-drop-neutral-2",
   {
     variants: {
       role: {
-        plan: "w-9",
-        design: "w-15",
-        web: "w-11.5",
-        ios: "w-10",
-        android: "w-16.5",
-        springboot: "w-22",
-        nodejs: "w-16.5",
-        pm: "w-9",
-        "mobile-pe": "w-22",
-        "web-pe": "w-20",
+        plan: "",
+        design: "",
+        web: "",
+        ios: "",
+        android: "",
+        springboot: "",
+        nodejs: "",
+        pm: "",
+        "mobile-pe": "",
+        "web-pe": "",
       },
       type: {
         default: "",

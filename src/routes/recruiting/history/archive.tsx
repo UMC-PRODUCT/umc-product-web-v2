@@ -125,6 +125,7 @@ function RouteComponent() {
         ]}
         title="평가 이력"
         description="교내 회장단의 최종 평가 이력을 확인합니다."
+        className="pl-3"
       />
 
       <ChapterTabs

@@ -12,7 +12,21 @@ const TRAIT_PANEL_SURFACE = glassSurface(166.7392, -18.091)
 
 type PartId = (typeof ABOUT_RECRUIT.parts)[number]["id"]
 
-export function RecruitPartsSection() {
+interface RecruitPartsSectionProps {
+  /**
+   * 하단 CTA. 페이지마다 다음에 볼 화면이 달라 문구와 목적지를 함께 받는다.
+   *
+   * 목적지만 열어 두면 문구는 소개 랜딩 것이 남아, 두 화면이 다른 곳으로
+   * 보내면서 같은 말을 하게 된다.
+   */
+  ctaLabel?: string
+  ctaTo?: string
+}
+
+export function RecruitPartsSection({
+  ctaLabel = ABOUT_RECRUIT.ctaLabel,
+  ctaTo = ABOUT_RECRUIT.ctaTo,
+}: RecruitPartsSectionProps = {}) {
   const [activePartId, setActivePartId] = useState<PartId>(
     ABOUT_RECRUIT.parts[0].id,
   )
@@ -50,7 +64,7 @@ export function RecruitPartsSection() {
 
   return (
     <section className="flex flex-col items-center gap-13.5 pt-37.5 md:pt-60 lg:pt-75">
-      <div className="flex w-full flex-col items-start gap-25">
+      <div className="flex w-full max-w-300 flex-col items-center gap-25">
         <div className="flex w-full max-w-300 flex-col items-center gap-16 lg:gap-18">
           <div className="flex w-full flex-col items-center gap-6">
             <h2 className="text-center text-[30px] leading-[1.2] font-bold tracking-[-0.6px] text-white md:text-[32px] md:tracking-[-0.64px] lg:text-[38px] lg:tracking-[-0.76px] xl:text-5xl xl:tracking-[-1.44px]">
@@ -155,9 +169,7 @@ export function RecruitPartsSection() {
         </div>
       </div>
 
-      <GlassCtaButton to={ABOUT_RECRUIT.ctaTo}>
-        {ABOUT_RECRUIT.ctaLabel}
-      </GlassCtaButton>
+      <GlassCtaButton to={ctaTo}>{ctaLabel}</GlassCtaButton>
     </section>
   )
 }

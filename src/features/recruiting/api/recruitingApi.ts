@@ -45,6 +45,7 @@ import type {
   RecruitingInterviewScheduleBoard,
   RecruitingInterviewSession,
   RecruitingInterviewSessionRequest,
+  RecruitingMyApplicationResponse,
   RecruitingPublicApplicationResponse,
   RecruitingRoundEvaluator,
   RecruitingRoundGroup,
@@ -137,9 +138,18 @@ export function normalizeAdminRoundGroups(
 ): RecruitingRoundGroup[] {
   return (groups ?? []).map((group) => ({
     ...group,
-    rounds: (group.rounds ?? []).flatMap(({ id, ...round }) => {
+    rounds: (group.rounds ?? []).flatMap(({ id, author, ...round }) => {
       const roundId = String(round.roundId ?? id ?? "")
-      return roundId === "" ? [] : [{ ...round, roundId }]
+      if (roundId === "") return []
+      return [
+        {
+          ...round,
+          roundId,
+          author: author
+            ? { ...author, memberId: String(author.memberId) }
+            : undefined,
+        },
+      ]
     }),
   }))
 }
@@ -473,6 +483,16 @@ export async function cancelApplication(applicationId: string): Promise<void> {
   await api.patch(`/v1/recruiting/applications/${applicationId}/cancel`)
 }
 
+// 로그인 회원 지원 내역 목록 조회
+export async function getMyApplications(): Promise<
+  RecruitingMyApplicationResponse[]
+> {
+  const { data } = await api.get<
+    ApiResponse<RecruitingMyApplicationResponse[]>
+  >("/v1/recruiting/applications")
+  return data.result
+}
+
 // 익명 지원서 조회 (RECRUITING-PUBLIC-004)
 export async function lookupAnonymousApplication(
   body: RecruitingApplicationCredentialRequest,
@@ -542,6 +562,12 @@ export function normalizeRecruitingSeasonConfigurationResponse(
     gisuId: String(raw.gisuId ?? ""),
     schoolId: String(raw.schoolId ?? ""),
     memo: raw.memo ?? null,
+    // 한 번도 저장된 적 없으면 서버가 null 을 준다. 0 과 구분해야 해서 toCount
+    // 로 접지 않는다.
+    chapterTotalTargetCount:
+      raw.chapterTotalTargetCount == null
+        ? null
+        : toCount(raw.chapterTotalTargetCount),
     quotas: (raw.quotas ?? [])
       .filter((quota) => Boolean(quota.track))
       .map((quota) => ({
@@ -666,12 +692,24 @@ export async function cloneRecruitingRound(
   return String(data.result.id)
 }
 
-// 지원서와 Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 복구 불가.
+// 지원서와 Form 응답이 없는 DRAFT Round만 삭제 가능(백엔드 검증). 실제로는
+// soft delete라 restoreRecruitingRound로 복구할 수 있다.
 export async function deleteRecruitingRound(
   seasonId: string,
   roundId: string,
 ): Promise<void> {
   await api.delete(`/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}`)
+}
+
+// deleteRecruitingRound로 삭제(soft delete)한 Round를 되돌린다. 삭제 이후 같은
+// 슬롯으로 새 Round가 만들어졌다면 슬롯 충돌로 실패할 수 있다(백엔드 검증).
+export async function restoreRecruitingRound(
+  seasonId: string,
+  roundId: string,
+): Promise<void> {
+  await api.post(
+    `/v1/recruiting/admin/seasons/${seasonId}/rounds/${roundId}/restore`,
+  )
 }
 
 export async function getRoundEvaluators(

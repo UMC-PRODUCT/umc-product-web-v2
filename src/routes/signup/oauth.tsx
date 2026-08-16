@@ -446,7 +446,7 @@ function OAuthSignupPage() {
 
     const payload: RegisterMemberRequest = {
       oAuthVerificationToken,
-      name,
+      name: name.trim(),
       nickname,
       emailVerificationToken,
       schoolId: Number(selectedSchool.schoolId),
@@ -494,6 +494,7 @@ function OAuthSignupPage() {
       ? "다시 받기"
       : "인증하기"
 
+  const isNameValid = name.trim() !== "" && !errors.name
   const isNicknameValid = nickname !== "" && !errors.nickname
 
   // 단계별 완료 여부 (상태 A에서 유도)
@@ -511,7 +512,7 @@ function OAuthSignupPage() {
         state.email.isCodeInvalid ||
         state.email.isCodeExpired
       : currentStep === "PROFILE"
-        ? !school || !name || !isNicknameValid
+        ? !school || !isNameValid || !isNicknameValid
         : currentStep === "TERMS"
           ? terms
               .filter((t) => t.isMandatory)

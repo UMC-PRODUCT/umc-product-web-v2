@@ -80,6 +80,7 @@ function RouteComponent() {
       ]}
       title="지원 현황"
       description="지부별, 학교별, 파트별 지원 현황을 실시간으로 확인합니다."
+      className="pl-3"
     />
   )
 

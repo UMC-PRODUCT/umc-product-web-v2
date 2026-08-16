@@ -21,6 +21,7 @@ import {
   toDirtySnapshot,
 } from "../../model/applyForm"
 import { PART_KEY_TO_TRACK, PARTS } from "../../model/parts"
+import { RECRUITMENT_DEFAULT_QUESTIONS } from "../../model/recruitmentQuestion"
 import { AnonymousPrivacyConsent } from "./AnonymousPrivacyConsent"
 import { ApplyAnswerField } from "./ApplyAnswerField"
 
@@ -34,6 +35,10 @@ import type { ApplicationSection } from "../../model/applicationDetail"
 type ApplyModalKind = "draftSaved" | "leave" | "submitConfirm" | "complete"
 
 const BASIC_SECTION_TITLE = "기본 문항"
+const COMMON_SECTION_TITLE = "공통 문항"
+const DEFAULT_QUESTION_TITLES = new Set(
+  RECRUITMENT_DEFAULT_QUESTIONS.map((question) => question.title),
+)
 
 type ApplicantInfoPatch = {
   applicantName?: string
@@ -77,6 +82,10 @@ function questionByKeyword(
   keyword: string,
 ) {
   return section?.questions.find((question) => question.title.includes(keyword))
+}
+
+function optionIdSet(value: unknown): Set<string> | undefined {
+  return typeof value === "string" && value ? new Set([value]) : undefined
 }
 
 interface RecruitingApplyFormProps {
@@ -201,7 +210,7 @@ export function RecruitingApplyForm({
 }: RecruitingApplyFormProps) {
   const addToast = useToastStore((state) => state.addToast)
   const [openModal, setOpenModal] = useState<ApplyModalKind | null>(null)
-  const [step, setStep] = useState<1 | 2>(1)
+  const [step, setStep] = useState<1 | 2 | 3>(1)
 
   const defaultValues = useMemo(() => {
     const values = buildDefaultApplyValues(config.sections)
@@ -283,13 +292,51 @@ export function RecruitingApplyForm({
     [config, defaultValues, watchedValues],
   )
 
-  const visibleSections = config.sections.filter((section) => {
-    if (step === 1) return section.title === BASIC_SECTION_TITLE
-    return (
-      section.title !== BASIC_SECTION_TITLE &&
-      enabledSectionIds.has(section.sectionId)
+  const basicSection = config.sections.find(
+    (section) => section.title === BASIC_SECTION_TITLE,
+  )
+  const defaultQuestions =
+    basicSection?.questions.filter((question) =>
+      DEFAULT_QUESTION_TITLES.has(question.title),
+    ) ?? []
+  const commonQuestions =
+    basicSection?.questions.filter(
+      (question) => !DEFAULT_QUESTION_TITLES.has(question.title),
+    ) ?? []
+  const hasCommonQuestionsStep = commonQuestions.length > 0
+
+  const visibleSections = (() => {
+    if (step === 1) {
+      return basicSection
+        ? [{ ...basicSection, questions: defaultQuestions }]
+        : []
+    }
+    if (step === 2) {
+      return basicSection
+        ? [
+            {
+              ...basicSection,
+              title: COMMON_SECTION_TITLE,
+              questions: commonQuestions,
+            },
+          ]
+        : []
+    }
+    return config.sections.filter(
+      (section) =>
+        section.title !== BASIC_SECTION_TITLE &&
+        enabledSectionIds.has(section.sectionId),
     )
-  })
+  })()
+
+  const firstChoiceQuestion = questionByKeyword(basicSection, "1지망")
+  const secondChoiceQuestion = questionByKeyword(basicSection, "2지망")
+  const firstChoiceValue = firstChoiceQuestion
+    ? watchedValues[firstChoiceQuestion.questionId]
+    : undefined
+  const secondChoiceValue = secondChoiceQuestion
+    ? watchedValues[secondChoiceQuestion.questionId]
+    : undefined
 
   const isUploading = hasPendingUpload(watchedValues, config.sections)
 
@@ -397,7 +444,10 @@ export function RecruitingApplyForm({
   }
 
   const handleNext = () => {
-    setStep(2)
+    setStep((current) => {
+      if (current === 1) return hasCommonQuestionsStep ? 2 : 3
+      return 3
+    })
   }
 
   // 저장이 실패하면 스냅샷을 갱신하지 않는다. 갱신해 버리면 서버에 없는 내용을
@@ -490,6 +540,15 @@ export function RecruitingApplyForm({
                           value={field.value ?? null}
                           onChange={field.onChange}
                           error={fieldState.error?.message}
+                          disabledOptionIds={
+                            question.questionId ===
+                            firstChoiceQuestion?.questionId
+                              ? optionIdSet(secondChoiceValue)
+                              : question.questionId ===
+                                  secondChoiceQuestion?.questionId
+                                ? optionIdSet(firstChoiceValue)
+                                : undefined
+                          }
                         />
                       )}
                     />
@@ -499,7 +558,7 @@ export function RecruitingApplyForm({
             />
           ))}
         </div>
-        {step === 2 && isAnonymous && (
+        {step === 3 && isAnonymous && (
           <AnonymousPrivacyConsent
             term={privacyTerm}
             checked={privacyAgreed}
@@ -507,7 +566,7 @@ export function RecruitingApplyForm({
             onChange={(checked) => onPrivacyChange?.(checked)}
           />
         )}
-        {step === 1 ? (
+        {step !== 3 ? (
           <div className="mt-3 flex justify-end">
             <Button
               type="button"

@@ -21,10 +21,13 @@ import { useRecruitingPermissions } from "../hooks/useRecruitingPermissions"
 import { useRecruitingSeasonQuotas } from "../hooks/useRecruitingSeasonQuotas"
 import { hasAnyEditableSeason } from "../model/recruitingEditLock"
 import {
+  buildChapterTotalSteps,
   findMatchingSchoolQuotaRow,
   getChangedSchoolQuotaRows,
+  getChapterStoredTotals,
   getConflictedSchoolQuotaRows,
   getSchoolQuotaIdentity,
+  getSchoolQuotaRowTotal,
   mergeSchoolQuotaRows,
   type SchoolQuotaEdits,
   type SchoolQuotaRow,
@@ -36,6 +39,8 @@ import {
 } from "./ChapterQuotaTableCard"
 import { ChapterTabs } from "./ChapterTabs"
 import { QuotaApplicantStatusCard } from "./QuotaApplicantStatusCard"
+
+import type { ReplaceRecruitingSeasonTrackQuotasRequest } from "../api/types"
 
 const QUOTA_PAGE_REFETCH_INTERVAL = 30_000
 
@@ -416,23 +421,85 @@ export function RecruitmentQuotaPage() {
       },
     )
 
-    const payloadList = existingSeasonRows.map((row) => ({
-      seasonId: row.seasonId,
-      schoolName: row.schoolName,
-      payload: {
-        quotas: [
-          { track: "PLAN" as const, targetCount: row.pm },
-          { track: "DESIGN" as const, targetCount: row.design },
-          { track: "WEB_PRODUCT_ENGINEER" as const, targetCount: row.webPe },
-          {
-            track: "MOBILE_PRODUCT_ENGINEER" as const,
-            targetCount: row.mobilePe,
-          },
-        ],
-      },
-    }))
+    // 서버는 학교 TO 를 저장할 때마다 지부 전체 합계를 함께 받아 검산한다. 그
+    // 기준이 "요청 시점에 저장돼 있는 다른 학교 값" 이라, 한 지부에서 여러 학교를
+    // 고치면 요청마다 실어야 할 합계가 달라진다. 방금 만든 시즌도 그 시점에는
+    // 이미 저장된 값이므로, 생성이 끝난 뒤에 계산해야 기준이 맞는다.
+    const buildPayloadList = (
+      createdRows: { row: SchoolQuotaRow; seasonId: string }[],
+    ) => {
+      const payloads: {
+        seasonId: string
+        schoolName: string
+        chapterKey: string
+        payload: ReplaceRecruitingSeasonTrackQuotasRequest
+      }[] = []
 
-    if (payloadList.length === 0 && newSeasonRows.length === 0) {
+      targetChapters.forEach((chapterData) => {
+        const rowsToUpdate = existingSeasonRows.filter((row) =>
+          chapterData.schools.some(
+            (school) => String(school.seasonId) === String(row.seasonId),
+          ),
+        )
+        const createdInChapter = createdRows.filter(({ row }) =>
+          chapterData.schools.some(
+            (school) =>
+              String(school.schoolId) === String(row.schoolId) &&
+              !school.seasonId,
+          ),
+        )
+        if (rowsToUpdate.length === 0 && createdInChapter.length === 0) return
+
+        // 방금 만든 시즌은 그 값이 이미 서버에 들어가 있다. 기준에 넣지 않으면
+        // 뒤따르는 요청이 그만큼 모자란 합계를 보내 튕긴다.
+        const storedTotals = getChapterStoredTotals(chapterData.schools)
+        createdInChapter.forEach(({ row, seasonId }) => {
+          storedTotals.set(String(seasonId), getSchoolQuotaRowTotal(row))
+        })
+
+        // 시즌 생성 요청은 지부 합계를 받지 않는다. 그래서 새로 만들기만 하고
+        // 끝내면 지부 합계가 서버에 기록되지 않는다. 갱신할 학교가 하나도 없을
+        // 때만 만들어진 학교로 한 번 더 보내 합계를 남긴다.
+        const rowsToSend =
+          rowsToUpdate.length > 0
+            ? rowsToUpdate.map((row) => ({ row, seasonId: row.seasonId }))
+            : createdInChapter.slice(-1)
+
+        const steps = buildChapterTotalSteps(
+          storedTotals,
+          rowsToSend.map(({ row, seasonId }) => ({
+            seasonId,
+            nextTotal: getSchoolQuotaRowTotal(row),
+          })),
+        )
+
+        rowsToSend.forEach(({ row, seasonId }, index) => {
+          payloads.push({
+            seasonId: String(seasonId),
+            schoolName: row.schoolName,
+            chapterKey: chapterData.chapter,
+            payload: {
+              chapterTotalTargetCount:
+                steps[index]?.chapterTotalTargetCount ??
+                getSchoolQuotaRowTotal(row),
+              quotas: [
+                { track: "PLAN", targetCount: row.pm },
+                { track: "DESIGN", targetCount: row.design },
+                { track: "WEB_PRODUCT_ENGINEER", targetCount: row.webPe },
+                {
+                  track: "MOBILE_PRODUCT_ENGINEER",
+                  targetCount: row.mobilePe,
+                },
+              ],
+            },
+          })
+        })
+      })
+
+      return payloads
+    }
+
+    if (existingSeasonRows.length === 0 && newSeasonRows.length === 0) {
       setIsDirty(false)
       return
     }
@@ -440,11 +507,12 @@ export function RecruitmentQuotaPage() {
     try {
       let hasSuccessfulWrite = false
       let hasWriteFailure = false
+      const createdRows: { row: SchoolQuotaRow; seasonId: string }[] = []
 
       if (newSeasonRows.length > 0) {
         const createResults = await Promise.allSettled(
           newSeasonRows.map(async (row) => {
-            await createSeason({
+            const seasonId = await createSeason({
               gisuId: row.gisuId,
               schoolId: row.schoolId,
               quotas: [
@@ -454,7 +522,7 @@ export function RecruitmentQuotaPage() {
                 { track: "MOBILE_PRODUCT_ENGINEER", targetCount: row.mobilePe },
               ],
             })
-            return row
+            return { row, seasonId }
           }),
         )
 
@@ -467,6 +535,7 @@ export function RecruitmentQuotaPage() {
 
           if (result.status === "fulfilled") {
             hasSuccessfulWrite = true
+            createdRows.push(result.value)
           } else {
             hasWriteFailure = true
             failedCreateSchoolNames.push(row.schoolName)
@@ -501,6 +570,8 @@ export function RecruitmentQuotaPage() {
           })
         }
       }
+
+      const payloadList = buildPayloadList(createdRows)
 
       if (payloadList.length > 0) {
         const updateResult = await updateQuotas(payloadList)

@@ -12,7 +12,7 @@ export function RecruitmentSchoolSectionLabel({
   return (
     <div
       className={cn(
-        "flex items-center justify-between self-stretch rounded-t-lg border-t border-r border-l border-teal-300 bg-teal-100 py-2 pr-5 pl-7.5",
+        "flex items-center justify-between self-stretch rounded-t-xl border-t border-r border-l border-teal-300 bg-teal-100 px-6 py-2",
         className,
       )}
     >
