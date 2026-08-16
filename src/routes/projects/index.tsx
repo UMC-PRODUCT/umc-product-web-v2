@@ -11,7 +11,7 @@ export const Route = createFileRoute("/projects/")({
   head: () =>
     createMeta(
       "프로젝트 | UMC",
-      "UMC 에서 진행 중인 프로젝트를 학교·파트별로 확인할 수 있습니다.",
+      "지금까지 UMC 에서 만들어진 프로젝트를 한눈에 확인할 수 있습니다.",
       { canonical: `${SITE_URL}/projects` },
     ),
   validateSearch: validateProjectListSearch,
@@ -20,5 +20,5 @@ export const Route = createFileRoute("/projects/")({
 
 function ProjectsListRoute() {
   // 이 화면은 사이드바 없이 전폭이라 로그인 여부와 상관없이 3열이다.
-  return <MatchingProjectsListPage columns={3} />
+  return <MatchingProjectsListPage columns={3} publicView />
 }

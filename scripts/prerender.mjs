@@ -32,6 +32,10 @@ async function run() {
       const page = await browser.newPage()
 
       try {
+        // 기본 뷰포트(800x600)로 두면 모바일 안내 오버레이가 뜬 상태로 HTML 이
+        // 굳는다. 앱이 정상 동작하는 폭으로 맞춰 데스크톱 화면을 받아낸다.
+        await page.setViewport({ width: 1440, height: 900 })
+
         await page.setRequestInterception(true)
         page.on("request", (req) => {
           const url = req.url()
