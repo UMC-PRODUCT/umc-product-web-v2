@@ -175,12 +175,6 @@ export function RecruitingApplyPage({ roundId }: RecruitingApplyPageProps) {
       answers: toPayload(values),
     })
     setApplicationKey(draft.applicationKey)
-    if (isAnonymous && typeof window !== "undefined" && draft.applicationKey) {
-      sessionStorage.setItem("isApplicationVerified", "true")
-      sessionStorage.setItem("anonymousEmail", applicant.applicantEmail.trim())
-      sessionStorage.setItem("anonymousApplicationKey", draft.applicationKey)
-      getOrCreateAnonymousSessionId()
-    }
     return draft
   }
 
