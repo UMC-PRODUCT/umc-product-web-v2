@@ -1,11 +1,18 @@
+import GoalIcon from "@/shared/assets/icon/goal/GoalIcon"
 import TeamIcon from "@/shared/assets/icon/people/TeamIcon"
 import SchoolIcon from "@/shared/assets/icon/school/SchoolIcon"
 import SettingIcon from "@/shared/assets/icon/setting/SettingIcon"
 
 import type { FlatNavItem } from "@/shared/config/navigation"
 
-/** 설정 영역은 대분류 없이 평면 3항목이다. */
+/** 설정 영역은 대분류 없이 평면 4항목이다. */
 export const SETTINGS_SIDEBAR_ITEMS: FlatNavItem[] = [
+  {
+    id: "settings-gisu",
+    title: "기수 관리",
+    to: "/manage/gisu",
+    icon: GoalIcon,
+  },
   {
     id: "settings-school",
     title: "학교 관리",

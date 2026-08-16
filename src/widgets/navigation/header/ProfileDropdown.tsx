@@ -176,7 +176,7 @@ export function ProfileDropdown({
           <div className="flex flex-col gap-1 px-1.5">
             {canManageMembers && (
               <TextButton
-                onClick={() => navigate({ to: "/admin" })}
+                onClick={() => navigate({ to: "/manage/gisu" })}
                 size="14"
                 className="h-6 w-15"
               >
