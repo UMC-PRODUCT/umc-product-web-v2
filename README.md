@@ -1,10 +1,4 @@
-<p align="center">
-  <img width="1000" alt="UMC 데모데이 팀 매칭 시스템" src="public/og-image.png" />
-</p>
-
-<br/>
-
-# <img width="40" height="40" alt="UMC 로고" src="public/favicon.svg" /> UMC Product Web
+# <img width="30" height="30" alt="UMC 로고" src="public/favicon.svg" /> UMC Product Web
 
 > **UMC 데모데이 리크루팅 플랫폼**
 > 모집 공고 등록부터 지원, 서류 심사, 팀 매칭, 활동 관리까지 리크루팅 전 과정을 하나의 웹 서비스로 연결합니다.
@@ -37,6 +31,8 @@
 > 리크루팅 도메인은 전 기능 구현을 마쳤으나 안정화가 완료되지 않아 실서비스에 공개하지 않았습니다.
 > 아래 리크루팅 관련 기능·화면은 모두 구현된 상태를 기준으로 작성되었습니다.
 
+<br/>
+
 ### 👥 사용자 역할
 
 | 역할            | 설명                                                                     |
@@ -44,6 +40,8 @@
 | **운영진**      | 동아리 서비스 전반을 운영하고, 매칭 일정(차수)을 관리·공지합니다.        |
 | **Plan 챌린저** | 프로젝트 공고를 등록하고, 들어온 지원서를 심사해 합격자를 선별합니다.    |
 | **기타 챌린저** | 원하는 프로젝트에 지원서를 제출하고, 매칭 결과와 활동 기록을 확인합니다. |
+
+<br/>
 
 ### ⭐ 핵심 기능
 
@@ -57,6 +55,8 @@
 | 지원자 심사             | 지원자 목록과 지원서 상세 확인 후 합·불 판정                        |
 | 결과 공고 발행          | 매칭 결과를 정리해 공고로 발행                                      |
 
+<br/>
+
 **2. 리크루팅** - 지원자가 UMC에 합류하기까지
 
 | Feature             | Description                                                 |
@@ -67,6 +67,8 @@
 | 서류 · 면접 평가    | 평가자 배정, 서류/면접 평가 입력, 면접 일정 관리, 최종 확정 |
 | 지원 현황 대시보드  | 지부·학교·파트별 지원자 집계와 진행률을 차트로 조회         |
 | 리크루팅 히스토리   | 지난 차수의 지원·평가 기록 아카이브 조회                    |
+
+<br/>
 
 **3. 공통**
 
@@ -101,11 +103,11 @@
 > 같은 페이지라도 권한에 따라 다른 뷰가 렌더링되므로, 화면마다 해당 역할을 함께 표기했습니다.
 > 데모데이 매칭 화면은 위 [사용 가이드](#-팀-매칭-시스템-사용-가이드)에서 확인할 수 있습니다.
 
-### ⚪ 공통
+### 공통
 
 <img width="1920" alt="로그인 (공통)" src="docs/readme/screen-common-01-login.png" />
 
-### 🟡 리크루팅
+### 리크루팅
 
 > 개발 완료, 실서비스 미배포 화면입니다.
 
@@ -125,7 +127,6 @@
 | <img width="200" alt="이삭" src="https://github.com/user-attachments/assets/58e179ba-19ca-42a2-826a-cb512e317486" /> | <img width="200" alt="한현서" src="https://github.com/user-attachments/assets/338b174a-d32a-4630-9d30-4cd558a416b5" /> | <img width="200" alt="양혜원" src="https://github.com/user-attachments/assets/c184e49d-04e3-4a22-a0c6-6e36868ffcff" /> | <img width="200" alt="오창준" src="https://github.com/user-attachments/assets/3f6c3355-4ee2-41fe-a1a0-5f5f2bb6f5ec" /> |
 |                                                 `Web Developer Lead`                                                 |                                                    `Web Developer`                                                     |                                                    `Web Developer`                                                     |                                                    `Web Developer`                                                     |
 |                               [@theSnackOverflow](https://github.com/theSnackOverflow)                               |                                     [@hyunseo-han](https://github.com/hyunseo-han)                                     |                                    [@hyewonimdang](https://github.com/hyewonimdang)                                    |                                          [@OCJune](https://github.com/OCJune)                                          |
-|                       초기 세팅 · 디자인 시스템<br/>인증 · 공용 컴포넌트<br/>CI/CD · 아키텍처                        |                                    지원 현황 · 지원서 심사<br/>매칭 관리 · 히스토리                                    |                                         프로젝트 목록<br/>프로젝트 관리 페이지                                         |                                             로그인 · 공지<br/>드롭다운 UI                                              |
 
 <br/>
 <br/>
