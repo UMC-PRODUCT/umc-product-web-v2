@@ -1,7 +1,6 @@
 import { redirect } from "@tanstack/react-router"
 
 import { isWithinHeaderRecruitingWindow } from "@/shared/config/headerRecruitingWindow"
-import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 /** 모집 기간에 매칭으로 들어오면 여기로 돌려보낸다. */
 const FALLBACK_PATH = "/projects"
@@ -33,14 +32,6 @@ const FALLBACK_PATH = "/projects"
  */
 export function ensureMatchingAllowed(): void {
   if (!isWithinHeaderRecruitingWindow()) return
-
-  useToastStore.getState().addToast({
-    message: "모집 기간에는 접근할 수 없는 경로입니다.",
-    color: "red",
-    variant: "deep",
-    type: "default",
-    duration: 3000,
-  })
 
   throw redirect({ to: FALLBACK_PATH })
 }

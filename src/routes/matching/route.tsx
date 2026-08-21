@@ -1,7 +1,8 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 import { ensureMe } from "@/features/auth/lib/ensureMe"
-import { ensureMatchingAllowed } from "@/features/recruiting/lib/ensureMatchingAllowed"
+// TODO: 임시 개방. 모집 기간 차단을 다시 켤 때 아래 import 와 호출을 되살린다.
+// import { ensureMatchingAllowed } from "@/features/recruiting/lib/ensureMatchingAllowed"
 import Footer from "@/widgets/footer/Footer"
 import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
 import { MatchingSegmentRegion } from "@/widgets/navigation/sidebar/MatchingSegmentRegion"
@@ -15,7 +16,8 @@ export const Route = createFileRoute("/matching")({
     await ensureMe(context.queryClient, location.href)
     // 인증 확인이 먼저다. 로그인하지 않은 사람에게 모집 기간 안내를 띄우면
     // 로그인하면 들어갈 수 있는 곳처럼 읽힌다.
-    ensureMatchingAllowed()
+    // TODO: 임시 개방 - 모집 기간에도 매칭 진입을 허용한다. 다시 막을 때 주석 해제.
+    // ensureMatchingAllowed()
   },
   component: MatchingLayout,
 })
