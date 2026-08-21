@@ -80,20 +80,59 @@
 | 계정 설정          | 비밀번호·이메일·닉네임 등 계정/프로필 정보 변경             |
 | 서비스 소개 페이지 | 로그인 전 랜딩 페이지 제공, SEO를 위한 공개 경로 프리렌더링 |
 
+<br/>
+
 ### 📖 팀 매칭 시스템 사용 가이드
 
-> 실제 서비스 배포와 함께 챌린저에게 배포한 사용 매뉴얼입니다. 매칭 플로우 전체를 순서대로 담고 있습니다.
+> 서비스 배포와 함께 챌린저에게 제공한 사용 매뉴얼입니다. 매칭 플로우 전체를 순서대로 담고 있습니다.
+> 각 단계를 펼치면 해당 화면과 설명을 볼 수 있습니다.
 
-<img width="1920" alt="팀 매칭 시스템 사용 가이드" src="docs/readme/guide-01.png" />
-<img width="1920" alt="1-1 프로젝트 등록 - 기본 정보" src="docs/readme/guide-02.png" />
-<img width="1920" alt="1-2 프로젝트 등록 - 지원 문항" src="docs/readme/guide-03.png" />
-<img width="1920" alt="2-1 프로젝트 확인 - 프로젝트 목록" src="docs/readme/guide-04.png" />
-<img width="1920" alt="2-2 프로젝트 확인 - 프로젝트 상세" src="docs/readme/guide-05.png" />
-<img width="1920" alt="3-1 지원하기 - 지원 폼 작성" src="docs/readme/guide-06.png" />
-<img width="1920" alt="3-2 지원 현황 - 내 지원 내역" src="docs/readme/guide-07.png" />
-<img width="1920" alt="4-1 지원 현황 - 지원자 심사 및 합·불 처리" src="docs/readme/guide-08.png" />
-<img width="1920" alt="5 매칭 현황 - 지부별 통계와 결과 시트" src="docs/readme/guide-09.png" />
-<img width="1920" alt="6 사용자 경험 조사" src="docs/readme/guide-10.png" />
+![팀 매칭 시스템 사용 가이드](docs/readme/guide-01.png)
+
+<details>
+<summary><strong>1. 프로젝트 등록</strong> — Plan 챌린저가 매칭 기간 전 프로젝트를 등록합니다</summary>
+
+![1-1 프로젝트 등록 - 기본 정보](docs/readme/guide-02.png)
+![1-2 프로젝트 등록 - 지원 문항](docs/readme/guide-03.png)
+
+</details>
+
+<details>
+<summary><strong>2. 프로젝트 확인</strong> — 챌린저가 소속 지부의 프로젝트를 조회합니다</summary>
+
+![2-1 프로젝트 목록](docs/readme/guide-04.png)
+![2-2 프로젝트 상세](docs/readme/guide-05.png)
+
+</details>
+
+<details>
+<summary><strong>3. 지원하기</strong> — 지원 폼을 작성해 제출하고 지원 현황을 확인합니다</summary>
+
+![3-1 지원 폼 작성](docs/readme/guide-06.png)
+![3-2 내 지원 내역](docs/readme/guide-07.png)
+
+</details>
+
+<details>
+<summary><strong>4. 지원자 심사</strong> — Plan 챌린저가 합·불을 판정해 최종 팀원을 선발합니다</summary>
+
+![4-1 지원자 심사 및 합·불 처리](docs/readme/guide-08.png)
+
+</details>
+
+<details>
+<summary><strong>5. 매칭 현황</strong> — 지부별 매칭 통계와 결과 시트를 실시간으로 조회합니다</summary>
+
+![5 매칭 현황](docs/readme/guide-09.png)
+
+</details>
+
+<details>
+<summary><strong>6. 사용자 경험 조사</strong> — 매칭 경험에 대한 만족도를 수집합니다</summary>
+
+![6 사용자 경험 조사](docs/readme/guide-10.png)
+
+</details>
 
 <br/>
 <br/>
@@ -103,19 +142,45 @@
 > 같은 페이지라도 권한에 따라 다른 뷰가 렌더링되므로, 화면마다 해당 역할을 함께 표기했습니다.
 > 데모데이 매칭 화면은 위 [사용 가이드](#-팀-매칭-시스템-사용-가이드)에서 확인할 수 있습니다.
 
-### 공통
+### ⚪ 공통
 
-<img width="1920" alt="로그인 (공통)" src="docs/readme/screen-common-01-login.png" />
+**로그인** · 자체 로그인과 카카오·구글·애플 OAuth를 함께 제공합니다.
 
-### 리크루팅
+![로그인](docs/readme/screen-common-01-login.png)
+
+### 🟡 리크루팅
 
 > 개발 완료, 실서비스 미배포 화면입니다.
 
-<img width="1920" alt="모집 공고 등록 (운영진)" src="docs/readme/screen-recruiting-01-recruitment-new.png" />
-<img width="1920" alt="지원 현황 대시보드 (운영진)" src="docs/readme/screen-recruiting-02-dashboard.png" />
-<img width="1920" alt="서류 · 면접 평가 (운영진)" src="docs/readme/screen-recruiting-03-evaluation.png" />
-<img width="1920" alt="지원서 작성 (지원자)" src="docs/readme/screen-recruiting-04-apply.png" />
-<img width="1920" alt="내 지원 현황 (지원자)" src="docs/readme/screen-recruiting-05-my-application.png" />
+<details>
+<summary><strong>운영진 화면</strong> — 모집 공고 등록, 지원 현황 대시보드, 서류·면접 평가</summary>
+
+**모집 공고 등록** · 3단계(기본 정보 → 모집 문항 → 모집 공고) 중 문항 구성 단계입니다. 공통·파트별 섹션을 나누고 문항 유형 5종을 지정합니다.
+
+![모집 공고 등록](docs/readme/screen-recruiting-01-recruitment-new.png)
+
+**지원 현황 대시보드** · 지부·학교·파트별 지원자 집계를 차트로 조회합니다.
+
+![지원 현황 대시보드](docs/readme/screen-recruiting-02-dashboard.png)
+
+**서류 · 면접 평가** · 지원서를 좌측에 두고 우측에서 단계별 평가를 입력합니다. 다른 평가자의 판정도 함께 확인합니다.
+
+![서류 · 면접 평가](docs/readme/screen-recruiting-03-evaluation.png)
+
+</details>
+
+<details>
+<summary><strong>지원자 화면</strong> — 지원서 작성, 내 지원 현황</summary>
+
+**지원서 작성** · 비로그인 상태로 공개 모집 공고를 확인하고 지원서를 제출합니다.
+
+![지원서 작성](docs/readme/screen-recruiting-04-apply.png)
+
+**내 지원 현황** · 제출한 지원서와 단계별 진행 상태를 조회합니다.
+
+![내 지원 현황](docs/readme/screen-recruiting-05-my-application.png)
+
+</details>
 
 <br/>
 <br/>
