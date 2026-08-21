@@ -23,7 +23,11 @@ const dateInputClassName =
 export function GisuManagePage() {
   const addToast = useToastStore((s) => s.addToast)
 
-  const { data: gisuPageData, isLoading } = useGisuList({
+  const {
+    data: gisuPageData,
+    isLoading,
+    isError,
+  } = useGisuList({
     page: 0,
     size: GISU_PAGE_SIZE,
   })
@@ -254,6 +258,10 @@ export function GisuManagePage() {
         {isLoading ? (
           <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
             기수 정보를 불러오는 중입니다...
+          </div>
+        ) : isError ? (
+          <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
+            기수 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
           </div>
         ) : sortedGisuList.length === 0 ? (
           <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
