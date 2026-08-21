@@ -76,7 +76,7 @@ export function GisuManagePage() {
     }
     if (startDate >= endDate) {
       addToast({
-        message: "종료일은 시작일보다 빨라야 합니다.",
+        message: "종료일은 시작일보다 늦어야 합니다.",
         color: "red",
         variant: "deep",
         type: "default",
