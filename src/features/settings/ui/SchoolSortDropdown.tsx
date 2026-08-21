@@ -7,11 +7,15 @@ import { DropdownItem } from "@/shared/ui/dropdown/DropdownItem"
 
 export const SCHOOL_SORT_OPTIONS = [
   { value: "name", label: "학교 이름 순" },
-  { value: "branch", label: "지부 순" },
   { value: "count", label: "인원 순" },
 ] as const
 
 export type SchoolSortOption = (typeof SCHOOL_SORT_OPTIONS)[number]["value"]
+
+export const SCHOOL_SORT_SERVER_VALUES: Record<SchoolSortOption, string> = {
+  name: "schoolName,asc",
+  count: "activeChallengerCount,desc",
+}
 
 interface SchoolSortDropdownProps {
   value: SchoolSortOption

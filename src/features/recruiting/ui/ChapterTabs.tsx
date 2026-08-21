@@ -10,6 +10,7 @@ interface ChapterTabsProps {
   chapters?: Array<{ chapterId: string | number; chapterName: string } | string>
   allLabel?: string
   className?: string
+  gisuId?: number
 }
 
 export function ChapterTabs({
@@ -18,22 +19,27 @@ export function ChapterTabs({
   chapters: customChapters,
   allLabel = "전체",
   className,
+  gisuId,
 }: ChapterTabsProps) {
-  const { chapters: serverChapters } = useSchoolChapterMap()
+  const { chapters: serverChapters } = useSchoolChapterMap({ gisuId })
 
   const chapterOptions = useMemo(() => {
     if (customChapters && customChapters.length > 0) {
-      return customChapters.map((ch) =>
-        typeof ch === "string"
-          ? { value: ch, label: ch }
-          : { value: ch.chapterName, label: ch.chapterName },
-      )
+      return customChapters.map((ch) => {
+        const chapterName = typeof ch === "string" ? ch : ch.chapterName
+        return {
+          value: chapterName,
+          label: chapterName,
+          tooltipContent: chapterName,
+        }
+      })
     }
     if (serverChapters && serverChapters.length > 0) {
       return serverChapters.map(
         (ch: { chapterId: string | number; chapterName: string }) => ({
           value: ch.chapterName,
           label: ch.chapterName,
+          tooltipContent: ch.chapterName,
         }),
       )
     }

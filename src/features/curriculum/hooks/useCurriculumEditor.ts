@@ -19,7 +19,7 @@ import {
   updateCurriculum,
   updateWeeklyCurriculum,
 } from "@/entities/curriculum"
-import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
+import { useSelectedGisuId } from "@/shared/hooks/useSelectedGisu"
 import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import {
@@ -164,7 +164,7 @@ export function useCurriculumEditor({
     useState<CurriculumItem[]>(initialCurriculums)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const addToast = useToastStore((state) => state.addToast)
-  const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
+  const { data: activeGisuId, isLoading: isGisuLoading } = useSelectedGisuId()
 
   const pendingCurriculumPromisesRef = useRef<
     Map<string, Promise<number | string | null>>

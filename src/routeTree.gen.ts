@@ -77,6 +77,7 @@ import { Route as MatchingStatusRouteImport } from './routes/matching/status'
 import { Route as MatchingRoundsRouteImport } from './routes/matching/rounds'
 import { Route as MatchingNoticePublishRouteImport } from './routes/matching/notice-publish'
 import { Route as MatchingApplicationsRouteImport } from './routes/matching/applications'
+import { Route as ManageGisuRouteImport } from './routes/manage/gisu'
 import { Route as ManageChapterRouteImport } from './routes/manage/chapter'
 import { Route as LoginDefaultRouteImport } from './routes/login/default'
 import { Route as RecruitingEvaluationsRouteRouteImport } from './routes/recruiting/evaluations/route'
@@ -466,6 +467,11 @@ const MatchingApplicationsRoute = MatchingApplicationsRouteImport.update({
   path: '/applications',
   getParentRoute: () => MatchingRouteRoute,
 } as any)
+const ManageGisuRoute = ManageGisuRouteImport.update({
+  id: '/gisu',
+  path: '/gisu',
+  getParentRoute: () => ManageRouteRoute,
+} as any)
 const ManageChapterRoute = ManageChapterRouteImport.update({
   id: '/chapter',
   path: '/chapter',
@@ -702,6 +708,7 @@ export interface FileRoutesByFullPath {
   '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
+  '/manage/gisu': typeof ManageGisuRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -804,6 +811,7 @@ export interface FileRoutesByTo {
   '/recruiting-guide': typeof RecruitingGuideRoute
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
+  '/manage/gisu': typeof ManageGisuRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -913,6 +921,7 @@ export interface FileRoutesById {
   '/recruiting/evaluations': typeof RecruitingEvaluationsRouteRouteWithChildren
   '/login/default': typeof LoginDefaultRoute
   '/manage/chapter': typeof ManageChapterRoute
+  '/manage/gisu': typeof ManageGisuRoute
   '/matching/applications': typeof MatchingApplicationsRoute
   '/matching/notice-publish': typeof MatchingNoticePublishRouteWithChildren
   '/matching/rounds': typeof MatchingRoundsRoute
@@ -1024,6 +1033,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
+    | '/manage/gisu'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -1126,6 +1136,7 @@ export interface FileRouteTypes {
     | '/recruiting-guide'
     | '/login/default'
     | '/manage/chapter'
+    | '/manage/gisu'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -1234,6 +1245,7 @@ export interface FileRouteTypes {
     | '/recruiting/evaluations'
     | '/login/default'
     | '/manage/chapter'
+    | '/manage/gisu'
     | '/matching/applications'
     | '/matching/notice-publish'
     | '/matching/rounds'
@@ -1826,6 +1838,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatchingApplicationsRouteImport
       parentRoute: typeof MatchingRouteRoute
     }
+    '/manage/gisu': {
+      id: '/manage/gisu'
+      path: '/gisu'
+      fullPath: '/manage/gisu'
+      preLoaderRoute: typeof ManageGisuRouteImport
+      parentRoute: typeof ManageRouteRoute
+    }
     '/manage/chapter': {
       id: '/manage/chapter'
       path: '/chapter'
@@ -2120,6 +2139,7 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 
 interface ManageRouteRouteChildren {
   ManageChapterRoute: typeof ManageChapterRoute
+  ManageGisuRoute: typeof ManageGisuRoute
   ManageIndexRoute: typeof ManageIndexRoute
   ManageCurriculumCreateRoute: typeof ManageCurriculumCreateRoute
   ManageCurriculumEditRoute: typeof ManageCurriculumEditRoute
@@ -2131,6 +2151,7 @@ interface ManageRouteRouteChildren {
 
 const ManageRouteRouteChildren: ManageRouteRouteChildren = {
   ManageChapterRoute: ManageChapterRoute,
+  ManageGisuRoute: ManageGisuRoute,
   ManageIndexRoute: ManageIndexRoute,
   ManageCurriculumCreateRoute: ManageCurriculumCreateRoute,
   ManageCurriculumEditRoute: ManageCurriculumEditRoute,

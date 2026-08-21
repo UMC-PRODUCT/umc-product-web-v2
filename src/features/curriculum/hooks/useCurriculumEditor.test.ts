@@ -22,8 +22,8 @@ vi.mock("@/entities/curriculum", () => ({
   deleteWeeklyCurriculum: vi.fn(),
 }))
 
-vi.mock("@/shared/hooks/useActiveGisu", () => ({
-  useActiveGisuId: () => ({ data: 1, isLoading: false }),
+vi.mock("@/shared/hooks/useSelectedGisu", () => ({
+  useSelectedGisuId: () => ({ data: 1, isLoading: false }),
 }))
 
 describe("useCurriculumEditor - temporary ID handleBlur", () => {
