@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { isAxiosError } from "axios"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useAdminSchoolsSummary } from "@/entities/organization/hooks/useSchool"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
@@ -42,6 +42,15 @@ function SchoolManagePage() {
   const { data: selectedGisuIdData } = useSelectedGisuId()
   const selectedGisuId = selectedGisuIdData ?? undefined
   const { data: selectedGeneration } = useSelectedGeneration()
+
+  const loadedGisuIdRef = useRef(selectedGisuId)
+
+  useEffect(() => {
+    if (loadedGisuIdRef.current === selectedGisuId) return
+    loadedGisuIdRef.current = selectedGisuId
+    setSelectedChapter("all")
+    setCurrentPage(1)
+  }, [selectedGisuId])
 
   const { getChapterIdBySchool, getChapterIdByName } = useSchoolChapterMap({
     gisuId: selectedGisuId,

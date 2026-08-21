@@ -53,37 +53,22 @@ export function ChapterManagePage() {
     "waiting" | "assigned"
   >("waiting")
 
-  const isInitializedRef = useRef(false)
+  const loadedGisuIdRef = useRef<number | null>(null)
 
   const deleteChapterMutation = useDeleteChapter()
   const createChapterMutation = useCreateChapter()
   const createChaptersBulkMutation = useCreateChaptersBulk()
   const updateSchoolMutation = useUpdateSchool()
   const { data: activeGisuId, isLoading: isGisuLoading } = useSelectedGisuId()
-  const { chapters: serverChapters } = useSchoolChapterMap({
-    gisuId: activeGisuId ?? undefined,
-  })
+  const { chapters: serverChapters, isLoading: isServerChaptersLoading } =
+    useSchoolChapterMap({
+      gisuId: activeGisuId ?? undefined,
+    })
 
   const { data: allSchoolsData } = useQuery({
     queryKey: ["allSchools"],
     queryFn: getAllSchools,
   })
-
-  useEffect(() => {
-    if (isInitializedRef.current || !serverChapters) return
-    if (serverChapters.length > 0) {
-      const mappedChapters: ChapterData[] = serverChapters.map((ch) => ({
-        id: String(ch.chapterId),
-        name: ch.chapterName,
-        assignedSchools: ch.schools.map((s) => ({
-          id: String(s.schoolId),
-          name: s.schoolName,
-        })),
-      }))
-      setChapters(mappedChapters)
-      isInitializedRef.current = true
-    }
-  }, [serverChapters])
 
   useEffect(() => {
     if (!allSchoolsData?.schools) return
@@ -117,6 +102,30 @@ export function ChapterManagePage() {
   } = useChipAssignment<School>({
     onRemoveSelected: handleRemoveAssignedSchool,
   })
+
+  useEffect(() => {
+    if (activeGisuId == null) return
+    if (loadedGisuIdRef.current === activeGisuId) return
+
+    setSelectedChipId(null)
+
+    if (isServerChaptersLoading) {
+      setChapters(INITIAL_CHAPTERS)
+      return
+    }
+
+    setChapters(
+      serverChapters.map((ch) => ({
+        id: String(ch.chapterId),
+        name: ch.chapterName,
+        assignedSchools: ch.schools.map((s) => ({
+          id: String(s.schoolId),
+          name: s.schoolName,
+        })),
+      })),
+    )
+    loadedGisuIdRef.current = activeGisuId
+  }, [activeGisuId, isServerChaptersLoading, serverChapters, setSelectedChipId])
 
   function handleDragStart(event: DragStartEvent) {
     const school = event.active.data.current

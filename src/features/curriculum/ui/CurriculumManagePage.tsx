@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import {
   createCurriculum,
@@ -32,6 +32,7 @@ export function CurriculumManagePage() {
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
   const addToast = useToastStore((state) => state.addToast)
   const { data: activeGisuId, isLoading: isGisuLoading } = useSelectedGisuId()
+  const loadedGisuIdRef = useRef<number | null>(null)
 
   // Default expand card 01 (design-1)
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({
@@ -42,6 +43,11 @@ export function CurriculumManagePage() {
     if (isGisuLoading || activeGisuId == null) return
 
     const currentGisuId = activeGisuId
+    if (loadedGisuIdRef.current !== currentGisuId) {
+      loadedGisuIdRef.current = currentGisuId
+      setCurriculumData({})
+    }
+
     let isSubscribed = true
     async function loadCurriculum() {
       try {
@@ -50,15 +56,22 @@ export function CurriculumManagePage() {
           gisuId: currentGisuId,
           part: apiPart,
         })
-        if (isSubscribed && overview && overview.curriculumId) {
-          const item = mapOverviewToCurriculumItem(overview, 0)
+        if (!isSubscribed) return
+        const items =
+          overview && overview.curriculumId
+            ? [mapOverviewToCurriculumItem(overview, 0)]
+            : []
+        setCurriculumData((prev) => ({
+          ...prev,
+          [selectedPart]: items,
+        }))
+      } catch {
+        if (isSubscribed) {
           setCurriculumData((prev) => ({
             ...prev,
-            [selectedPart]: [item],
+            [selectedPart]: [],
           }))
         }
-      } catch {
-        // Fallback to initial local mock data if api has no entry
       }
     }
     loadCurriculum()
