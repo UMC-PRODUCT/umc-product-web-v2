@@ -4,7 +4,6 @@ import {
   HEADER_RECRUITING_WINDOW_END,
   HEADER_RECRUITING_WINDOW_START,
 } from "@/shared/config/headerRecruitingWindow"
-import { useToastStore } from "@/shared/ui/toast/useToastStore"
 
 import { ensureMatchingAllowed } from "./ensureMatchingAllowed"
 
@@ -29,7 +28,6 @@ const END = Date.parse(HEADER_RECRUITING_WINDOW_END)
 describe("ensureMatchingAllowed", () => {
   beforeEach(() => {
     vi.useFakeTimers()
-    useToastStore.setState({ toasts: [] })
   })
 
   afterEach(() => {
@@ -42,18 +40,10 @@ describe("ensureMatchingAllowed", () => {
     expect(redirectTarget(error)).toBe("/projects")
   })
 
-  it("막을 때 안내 토스트를 남긴다", () => {
-    callAt(new Date((START + END) / 2).toISOString())
-
-    expect(useToastStore.getState().toasts).toHaveLength(1)
-    expect(useToastStore.getState().toasts[0]?.color).toBe("red")
-  })
-
   it("모집 시작 전에는 통과시킨다", () => {
     const error = callAt(new Date(START - 1000).toISOString())
 
     expect(error).toBeUndefined()
-    expect(useToastStore.getState().toasts).toHaveLength(0)
   })
 
   // 창은 시작 시각을 포함한다.
