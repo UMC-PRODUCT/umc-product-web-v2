@@ -89,7 +89,11 @@ export function CurriculumManagePage() {
     }))
   }
 
+  const hasGisuChangedSince = (requestGisuId: number | null) =>
+    loadedGisuIdRef.current !== requestGisuId
+
   const handleDeleteItem = async (id: string): Promise<boolean> => {
+    const requestGisuId = loadedGisuIdRef.current
     const targetItem = (curriculumData[selectedPart] || []).find(
       (item) => item.id === id,
     )
@@ -117,16 +121,18 @@ export function CurriculumManagePage() {
         await deleteCurriculum(numericId)
       } catch {
         if (targetItem) {
-          setCurriculumData((prev) => {
-            const list = [...(prev[selectedPart] || [])]
-            const insertIndex = Math.min(targetIndex, list.length)
-            list.splice(insertIndex, 0, targetItem)
-            const renumbered = list.map((item, idx) => ({
-              ...item,
-              number: String(idx + 1).padStart(2, "0"),
-            }))
-            return { ...prev, [selectedPart]: renumbered }
-          })
+          if (!hasGisuChangedSince(requestGisuId)) {
+            setCurriculumData((prev) => {
+              const list = [...(prev[selectedPart] || [])]
+              const insertIndex = Math.min(targetIndex, list.length)
+              list.splice(insertIndex, 0, targetItem)
+              const renumbered = list.map((item, idx) => ({
+                ...item,
+                number: String(idx + 1).padStart(2, "0"),
+              }))
+              return { ...prev, [selectedPart]: renumbered }
+            })
+          }
           addToast({
             message: "커리큘럼 삭제에 실패했습니다.",
             color: "red",
@@ -173,13 +179,16 @@ export function CurriculumManagePage() {
       return
     }
 
+    const requestGisuId = loadedGisuIdRef.current
     const previousList = curriculumData[selectedPart] || []
 
     const rollbackState = () => {
-      setCurriculumData((prev) => ({
-        ...prev,
-        [selectedPart]: previousList,
-      }))
+      if (!hasGisuChangedSince(requestGisuId)) {
+        setCurriculumData((prev) => ({
+          ...prev,
+          [selectedPart]: previousList,
+        }))
+      }
       addToast({
         message: "커리큘럼 복원에 실패했습니다.",
         color: "red",
@@ -215,16 +224,20 @@ export function CurriculumManagePage() {
         return
       }
 
-      setCurriculumData((prev) => {
-        const list = prev[selectedPart] || []
-        const updated = list.map((c) =>
-          c.id === itemToRestore.id ? { ...c, id: String(newCurriculumId) } : c,
-        )
-        return {
-          ...prev,
-          [selectedPart]: updated,
-        }
-      })
+      if (!hasGisuChangedSince(requestGisuId)) {
+        setCurriculumData((prev) => {
+          const list = prev[selectedPart] || []
+          const updated = list.map((c) =>
+            c.id === itemToRestore.id
+              ? { ...c, id: String(newCurriculumId) }
+              : c,
+          )
+          return {
+            ...prev,
+            [selectedPart]: updated,
+          }
+        })
+      }
 
       if (itemToRestore.workbooks && itemToRestore.workbooks.length > 0) {
         for (const wb of itemToRestore.workbooks) {
@@ -243,17 +256,19 @@ export function CurriculumManagePage() {
             return
           }
 
-          setCurriculumData((prev) => {
-            const list = prev[selectedPart] || []
-            const updated = list.map((c) => {
-              if (c.id !== String(newCurriculumId)) return c
-              const updatedWbs = c.workbooks.map((w) =>
-                w.id === wb.id ? { ...w, id: String(createdWbId) } : w,
-              )
-              return { ...c, workbooks: updatedWbs }
+          if (!hasGisuChangedSince(requestGisuId)) {
+            setCurriculumData((prev) => {
+              const list = prev[selectedPart] || []
+              const updated = list.map((c) => {
+                if (c.id !== String(newCurriculumId)) return c
+                const updatedWbs = c.workbooks.map((w) =>
+                  w.id === wb.id ? { ...w, id: String(createdWbId) } : w,
+                )
+                return { ...c, workbooks: updatedWbs }
+              })
+              return { ...prev, [selectedPart]: updated }
             })
-            return { ...prev, [selectedPart]: updated }
-          })
+          }
         }
       }
     } catch {
