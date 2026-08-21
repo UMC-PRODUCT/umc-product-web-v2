@@ -3,7 +3,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 import { isCentralAdmin } from "@/entities/member/model/identity"
 import { ensureMe } from "@/features/auth/lib/ensureMe"
 import { SETTINGS_SIDEBAR_ITEMS } from "@/shared/config/settingsNavigation"
-import { useActiveGeneration } from "@/shared/hooks/useActiveGisu"
+import { useSelectedGeneration } from "@/shared/hooks/useSelectedGisu"
 import { notifyAccessDenied } from "@/shared/lib/accessDenied"
 import { toUmcGisuLabel } from "@/shared/lib/gisuLabel"
 import Footer from "@/widgets/footer/Footer"
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/manage")({
 })
 
 function ManageLayout() {
-  const { data: generation } = useActiveGeneration()
+  const { data: generation } = useSelectedGeneration()
 
   return (
     <main className="flex h-full min-h-screen w-full flex-col">

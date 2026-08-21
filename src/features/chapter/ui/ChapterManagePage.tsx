@@ -17,7 +17,7 @@ import { useUpdateSchool } from "@/entities/organization/hooks/useSchool"
 import { useSchoolChapterMap } from "@/entities/organization/hooks/useSchoolChapterMap"
 import PlusIcon from "@/shared/assets/icon/plus/PlusIcon"
 import ResetIcon from "@/shared/assets/icon/reset/ResetIcon"
-import { useActiveGisuId } from "@/shared/hooks/useActiveGisu"
+import { useSelectedGisuId } from "@/shared/hooks/useSelectedGisu"
 import { useChipAssignment } from "@/shared/lib/useChipAssignment"
 import { Button } from "@/shared/ui/Button"
 import { PageLabel } from "@/shared/ui/page-label/PageLabel"
@@ -53,35 +53,25 @@ export function ChapterManagePage() {
     "waiting" | "assigned"
   >("waiting")
 
-  const isInitializedRef = useRef(false)
+  const loadedGisuIdRef = useRef<number | null>(null)
 
   const deleteChapterMutation = useDeleteChapter()
   const createChapterMutation = useCreateChapter()
   const createChaptersBulkMutation = useCreateChaptersBulk()
   const updateSchoolMutation = useUpdateSchool()
-  const { data: activeGisuId, isLoading: isGisuLoading } = useActiveGisuId()
-  const { chapters: serverChapters } = useSchoolChapterMap()
+  const { data: activeGisuId, isLoading: isGisuLoading } = useSelectedGisuId()
+  const {
+    chapters: serverChapters,
+    isLoading: isServerChaptersLoading,
+    isError: isServerChaptersError,
+  } = useSchoolChapterMap({
+    gisuId: activeGisuId ?? undefined,
+  })
 
   const { data: allSchoolsData } = useQuery({
     queryKey: ["allSchools"],
     queryFn: getAllSchools,
   })
-
-  useEffect(() => {
-    if (isInitializedRef.current || !serverChapters) return
-    if (serverChapters.length > 0) {
-      const mappedChapters: ChapterData[] = serverChapters.map((ch) => ({
-        id: String(ch.chapterId),
-        name: ch.chapterName,
-        assignedSchools: ch.schools.map((s) => ({
-          id: String(s.schoolId),
-          name: s.schoolName,
-        })),
-      }))
-      setChapters(mappedChapters)
-      isInitializedRef.current = true
-    }
-  }, [serverChapters])
 
   useEffect(() => {
     if (!allSchoolsData?.schools) return
@@ -115,6 +105,36 @@ export function ChapterManagePage() {
   } = useChipAssignment<School>({
     onRemoveSelected: handleRemoveAssignedSchool,
   })
+
+  useEffect(() => {
+    if (activeGisuId == null) return
+    if (loadedGisuIdRef.current === activeGisuId) return
+
+    setSelectedChipId(null)
+
+    if (isServerChaptersLoading || isServerChaptersError) {
+      setChapters(INITIAL_CHAPTERS)
+      return
+    }
+
+    setChapters(
+      serverChapters.map((ch) => ({
+        id: String(ch.chapterId),
+        name: ch.chapterName,
+        assignedSchools: ch.schools.map((s) => ({
+          id: String(s.schoolId),
+          name: s.schoolName,
+        })),
+      })),
+    )
+    loadedGisuIdRef.current = activeGisuId
+  }, [
+    activeGisuId,
+    isServerChaptersLoading,
+    isServerChaptersError,
+    serverChapters,
+    setSelectedChipId,
+  ])
 
   function handleDragStart(event: DragStartEvent) {
     const school = event.active.data.current
@@ -321,6 +341,17 @@ export function ChapterManagePage() {
   }
 
   async function handleSave() {
+    if (isServerChaptersError) {
+      addToast({
+        message: "지부 정보를 불러오지 못해 저장할 수 없습니다.",
+        color: "red",
+        variant: "deep",
+        type: "default",
+        duration: 3000,
+      })
+      return
+    }
+
     const newChapters = chapters.filter((ch) => ch.id.startsWith("chapter-"))
     const existingChapters = chapters.filter(
       (ch) => !ch.id.startsWith("chapter-"),
@@ -467,6 +498,7 @@ export function ChapterManagePage() {
               variant="fill"
               className="w-fit rounded-[8px] px-3 py-1.5"
               onClick={handleSave}
+              disabled={isServerChaptersError}
             >
               저장하기
             </Button>
@@ -480,24 +512,32 @@ export function ChapterManagePage() {
 
             <div className="relative min-w-0 flex-1">
               <div className="absolute inset-0 flex flex-col gap-4 overflow-y-auto pr-1">
-                {chapters.map((chapter) => (
-                  <DroppableChapterBox
-                    key={chapter.id}
-                    chapter={chapter}
-                    selectedChipId={selectedChipId}
-                    onSelectChip={setSelectedChipId}
-                    onClear={() => handleClearChapter(chapter.id)}
-                    onDelete={() => handleDeleteChapter(chapter.id)}
-                    onUpdateName={(name) =>
-                      handleUpdateChapterName(chapter.id, name)
-                    }
-                  />
-                ))}
-                {chapters.length > 0 && (
-                  <div
-                    className="pointer-events-none h-[calc(100%-185px)] shrink-0"
-                    aria-hidden="true"
-                  />
+                {isServerChaptersError ? (
+                  <div className="text-body-1-medium text-teal-gray-400 py-12 text-center">
+                    지부 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+                  </div>
+                ) : (
+                  <>
+                    {chapters.map((chapter) => (
+                      <DroppableChapterBox
+                        key={chapter.id}
+                        chapter={chapter}
+                        selectedChipId={selectedChipId}
+                        onSelectChip={setSelectedChipId}
+                        onClear={() => handleClearChapter(chapter.id)}
+                        onDelete={() => handleDeleteChapter(chapter.id)}
+                        onUpdateName={(name) =>
+                          handleUpdateChapterName(chapter.id, name)
+                        }
+                      />
+                    ))}
+                    {chapters.length > 0 && (
+                      <div
+                        className="pointer-events-none h-[calc(100%-185px)] shrink-0"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </>
                 )}
               </div>
             </div>
