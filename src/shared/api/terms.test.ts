@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { api } from "@/shared/lib/axios"
+import { publicApi } from "@/shared/lib/publicApi"
 
 import { getPublicTermByType } from "./terms"
 
-vi.mock("@/shared/lib/axios", () => ({
-  api: {
+vi.mock("@/shared/lib/publicApi", () => ({
+  publicApi: {
     get: vi.fn(),
   },
 }))
@@ -16,7 +16,7 @@ describe("getPublicTermByType", () => {
   })
 
   it("문자열 약관 ID를 숫자로 정규화한다", async () => {
-    vi.mocked(api.get).mockResolvedValueOnce({
+    vi.mocked(publicApi.get).mockResolvedValueOnce({
       data: {
         success: true,
         code: "COMMON200",
@@ -31,7 +31,7 @@ describe("getPublicTermByType", () => {
 
     const result = await getPublicTermByType("PRIVACY")
 
-    expect(api.get).toHaveBeenCalledWith("/v1/terms/type/PRIVACY")
+    expect(publicApi.get).toHaveBeenCalledWith("/v1/terms/type/PRIVACY")
     expect(result).toEqual({
       id: 1,
       link: "https://example.com/privacy",
@@ -41,7 +41,7 @@ describe("getPublicTermByType", () => {
   })
 
   it("숫자로 변환할 수 없는 약관 ID는 거부한다", async () => {
-    vi.mocked(api.get).mockResolvedValueOnce({
+    vi.mocked(publicApi.get).mockResolvedValueOnce({
       data: {
         success: true,
         code: "COMMON200",
@@ -56,7 +56,7 @@ describe("getPublicTermByType", () => {
   })
 
   it("빈 문자열 약관 ID는 거부한다", async () => {
-    vi.mocked(api.get).mockResolvedValueOnce({
+    vi.mocked(publicApi.get).mockResolvedValueOnce({
       data: {
         success: true,
         code: "COMMON200",
@@ -71,7 +71,7 @@ describe("getPublicTermByType", () => {
   })
 
   it("안전 정수 범위를 벗어난 약관 ID는 거부한다", async () => {
-    vi.mocked(api.get).mockResolvedValueOnce({
+    vi.mocked(publicApi.get).mockResolvedValueOnce({
       data: {
         success: true,
         code: "COMMON200",
