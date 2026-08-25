@@ -440,6 +440,15 @@ pnpm preview      # 빌드 미리보기
 
 </details>
 
+### Storybook
+
+공통 UI 컴포넌트의 상태와 사용법은 Storybook에서 확인합니다. 스토리는 컴포넌트 파일 옆의 `*.stories.tsx`에 작성하며, 상세 구조와 작성 규칙은 [Storybook 인수인계 문서](docs/storybook-handoff.md)를 참고합니다.
+
+```bash
+pnpm storybook
+pnpm build-storybook
+```
+
 <br/>
 <br/>
 
