@@ -1,21 +1,12 @@
-import axios, { AxiosError } from "axios"
+import { isAxiosError } from "axios"
 
-import {
-  getCurrentPagePath,
-  trackApiRequest,
-  trackEvent,
-} from "@/shared/analytics"
+import { getCurrentPagePath, trackEvent } from "@/shared/analytics"
+import { createApiClient } from "@/shared/lib/apiClient"
 import { authBridge } from "@/shared/lib/authBridge"
 
-import type { AxiosRequestConfig, InternalAxiosRequestConfig } from "axios"
+import type { AxiosRequestConfig } from "axios"
 
 import type { ApiResponse } from "@/shared/lib/apiResponse"
-
-declare module "axios" {
-  interface InternalAxiosRequestConfig {
-    analyticsStartTime?: number
-  }
-}
 
 const AUTH_LOGIN_PATH = "/v1/auth/login"
 const TOKEN_RENEW_PATH = "/v1/auth/token/renew"
@@ -45,16 +36,9 @@ function isEmailVerificationRequest(url: string | undefined) {
   )
 }
 
-export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-})
+export const api = createApiClient()
 
 api.interceptors.request.use((config) => {
-  config.analyticsStartTime = performance.now()
   if (isTokenRenewRequest(config.url)) {
     config.headers.delete("Authorization")
     return config
@@ -97,31 +81,15 @@ function terminateAuthentication(
 }
 
 api.interceptors.response.use(
-  (response) => {
-    trackAxiosResponse(response.config, response.status, true)
-    const body = response.data as { success?: boolean; message?: string }
-    if (body && typeof body === "object" && body.success === false) {
-      return Promise.reject(
-        new AxiosError(
-          body.message ?? "요청에 실패했습니다.",
-          AxiosError.ERR_BAD_RESPONSE,
-          response.config,
-          response.request,
-          response,
-        ),
-      )
-    }
-    return response
-  },
+  (response) => response,
   async (error) => {
-    const originalRequest = error.config as AxiosRequestConfig & {
-      _retry?: boolean
-    }
-    trackAxiosResponse(
-      originalRequest as InternalAxiosRequestConfig | undefined,
-      error.response?.status,
-      false,
-    )
+    if (!isAxiosError(error)) return Promise.reject(error)
+    const originalRequest = error.config as
+      | (AxiosRequestConfig & {
+          _retry?: boolean
+        })
+      | undefined
+    if (!originalRequest) return Promise.reject(error)
 
     if (
       error.response?.status !== 401 ||
@@ -186,19 +154,3 @@ api.interceptors.response.use(
     }
   },
 )
-
-function trackAxiosResponse(
-  config: InternalAxiosRequestConfig | undefined,
-  status: number | undefined,
-  success: boolean,
-) {
-  const startTime = config?.analyticsStartTime
-  if (startTime == null) return
-  trackApiRequest({
-    method: config?.method,
-    path: config?.url,
-    status,
-    durationMs: performance.now() - startTime,
-    success,
-  })
-}

@@ -1,4 +1,4 @@
-import { api } from "@/shared/lib/axios"
+import { publicApi } from "@/shared/lib/publicApi"
 
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 import type { TermType } from "@/shared/model/domain"
@@ -18,7 +18,7 @@ export interface PublicTermResponse {
 export async function getPublicTermByType(
   termType: TermType,
 ): Promise<PublicTermResponse> {
-  const { data } = await api.get<ApiResponse<RawPublicTermResponse>>(
+  const { data } = await publicApi.get<ApiResponse<RawPublicTermResponse>>(
     `/v1/terms/type/${termType}`,
   )
   const rawId = data.result.id

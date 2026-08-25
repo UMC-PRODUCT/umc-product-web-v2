@@ -1,4 +1,5 @@
 import { api } from "@/shared/lib/axios"
+import { publicApi } from "@/shared/lib/publicApi"
 
 import type { ApiResponse } from "@/shared/lib/apiResponse"
 
@@ -73,7 +74,7 @@ const APPLICATIONS_PAGE_SIZE = 100
 export async function getPublicRounds(
   params: PublicRoundsQuery,
 ): Promise<RecruitingRoundGroup[]> {
-  const { data } = await api.get<ApiResponse<RecruitingRoundGroup[]>>(
+  const { data } = await publicApi.get<ApiResponse<RecruitingRoundGroup[]>>(
     "/v1/recruiting/public/rounds",
     { params, paramsSerializer: { indexes: null } },
   )
@@ -432,7 +433,7 @@ export async function getFormStructure(
   applicationFormId: string,
   params: FormStructureQuery,
 ): Promise<RecruitingFormStructure> {
-  const { data } = await api.get<ApiResponse<RecruitingFormStructure>>(
+  const { data } = await publicApi.get<ApiResponse<RecruitingFormStructure>>(
     `/v1/recruiting/public/forms/${applicationFormId}/structure`,
     { params },
   )
@@ -452,10 +453,9 @@ export async function createApplicationDraft(
 export async function createAnonymousApplicationDraft(
   body: CreateAnonymousApplicationDraftBody,
 ): Promise<RecruitingApplicationCreated> {
-  const { data } = await api.post<ApiResponse<RecruitingApplicationCreated>>(
-    "/v1/recruiting/public/applications",
-    body,
-  )
+  const { data } = await publicApi.post<
+    ApiResponse<RecruitingApplicationCreated>
+  >("/v1/recruiting/public/applications", body)
   return data.result
 }
 
@@ -497,7 +497,7 @@ export async function getMyApplications(): Promise<
 export async function lookupAnonymousApplication(
   body: RecruitingApplicationCredentialRequest,
 ): Promise<RecruitingPublicApplicationResponse> {
-  const { data } = await api.post<
+  const { data } = await publicApi.post<
     ApiResponse<RecruitingPublicApplicationResponse>
   >("/v1/recruiting/public/applications/lookup", body)
   return data.result
@@ -507,7 +507,7 @@ export async function lookupAnonymousApplication(
 export async function updateAnonymousApplication(
   body: UpdateAnonymousApplicationRequest,
 ): Promise<RecruitingApplicationMutationResult> {
-  const { data } = await api.put<
+  const { data } = await publicApi.put<
     ApiResponse<RecruitingApplicationMutationResult>
   >("/v1/recruiting/public/applications", body)
   return data.result
@@ -517,7 +517,7 @@ export async function updateAnonymousApplication(
 export async function cancelAnonymousApplication(
   body: RecruitingApplicationCredentialRequest,
 ): Promise<RecruitingApplicationMutationResult> {
-  const { data } = await api.post<
+  const { data } = await publicApi.post<
     ApiResponse<RecruitingApplicationMutationResult>
   >("/v1/recruiting/public/applications/cancel", body)
   return data.result
@@ -527,7 +527,7 @@ export async function cancelAnonymousApplication(
 export async function submitAnonymousApplication(
   body: SubmitAnonymousApplicationRequest,
 ): Promise<RecruitingApplicationMutationResult> {
-  const { data } = await api.post<
+  const { data } = await publicApi.post<
     ApiResponse<RecruitingApplicationMutationResult>
   >("/v1/recruiting/public/applications/submit", body)
   return data.result

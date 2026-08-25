@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api } from "@/shared/lib/axios"
+import { publicApi } from "@/shared/lib/publicApi"
 
 import {
   addRoundEvaluator,
@@ -38,6 +39,16 @@ import type {
 
 vi.mock("@/shared/lib/axios", () => ({
   api: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+  },
+}))
+
+vi.mock("@/shared/lib/publicApi", () => ({
+  publicApi: {
     get: vi.fn(),
     post: vi.fn(),
     put: vi.fn(),
@@ -304,10 +315,15 @@ describe("지원자 유형별 API", () => {
       answers: [],
     }
 
-    vi.mocked(api.post).mockResolvedValue({
-      data: { isSuccess: true, code: "COMMON200", message: "OK", result: created },
+    vi.mocked(publicApi.post).mockResolvedValue({
+      data: {
+        isSuccess: true,
+        code: "COMMON200",
+        message: "OK",
+        result: created,
+      },
     })
-    vi.mocked(api.put).mockResolvedValue({
+    vi.mocked(publicApi.put).mockResolvedValue({
       data: {
         isSuccess: true,
         code: "COMMON200",
@@ -323,16 +339,16 @@ describe("지원자 유형별 API", () => {
       applicationKey: "key-1",
     })
 
-    expect(api.post).toHaveBeenNthCalledWith(
+    expect(publicApi.post).toHaveBeenNthCalledWith(
       1,
       "/v1/recruiting/public/applications",
       draftBody,
     )
-    expect(api.put).toHaveBeenCalledWith(
+    expect(publicApi.put).toHaveBeenCalledWith(
       "/v1/recruiting/public/applications",
       updateBody,
     )
-    expect(api.post).toHaveBeenNthCalledWith(
+    expect(publicApi.post).toHaveBeenNthCalledWith(
       2,
       "/v1/recruiting/public/applications/submit",
       { email: "guest@example.com", applicationKey: "key-1" },
