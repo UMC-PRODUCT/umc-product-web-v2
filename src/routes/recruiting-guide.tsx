@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { RecruitingGuidePage } from "@/features/about/ui/RecruitingGuidePage"
 import { createMeta, SITE_URL } from "@/shared/seo"
-import RecruitingHeader from "@/widgets/navigation/header/RecruitingHeader"
+import PublicLandingHeader from "@/widgets/navigation/header/PublicLandingHeader"
 
 export const Route = createFileRoute("/recruiting-guide")({
   head: () =>
@@ -18,7 +18,7 @@ function RecruitingGuideRoute() {
   return (
     <div className="relative">
       <div className="sticky top-0 z-50 -mb-20">
-        <RecruitingHeader tone="glass" />
+        <PublicLandingHeader />
       </div>
       <RecruitingGuidePage />
     </div>
