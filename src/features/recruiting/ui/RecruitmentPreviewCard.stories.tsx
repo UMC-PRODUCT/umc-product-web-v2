@@ -33,6 +33,7 @@ const meta = {
   },
   parameters: {
     layout: "centered",
+    routePath: "/recruiting/recruitments/new",
   },
 } satisfies Meta<typeof RecruitmentPreviewCard>
 

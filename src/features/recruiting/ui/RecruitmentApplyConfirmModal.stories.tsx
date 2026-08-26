@@ -16,6 +16,9 @@ const meta = {
     recruitmentTitle: "UMC 11기 이화여대",
     status: "confirm",
   },
+  parameters: {
+    routePath: "/projects/notice",
+  },
 } satisfies Meta<typeof RecruitmentApplyConfirmModal>
 
 export default meta

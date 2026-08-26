@@ -442,7 +442,7 @@ pnpm preview      # 빌드 미리보기
 
 ### Storybook
 
-공통 UI와 모집·지원·매칭·평가 feature UI의 상태와 사용법은 Storybook에서 확인합니다. 스토리는 컴포넌트 파일 옆의 `*.stories.tsx`에 작성하며, 대표 위치는 `src/shared/ui`와 `src/features`입니다. 상세 구조와 작성 규칙은 [Storybook 인수인계 문서](docs/storybook-handoff.md)를 참고합니다.
+공통 UI와 모집·지원·매칭·평가 feature UI의 상태와 사용법은 Storybook에서 확인합니다. feature story에는 실제 사용 라우트도 표시되지만, 인증이나 앱 라우터를 실행하지 않습니다. 스토리는 컴포넌트 파일 옆의 `*.stories.tsx`에 작성하며, 대표 위치는 `src/shared/ui`와 `src/features`입니다. 상세 구조와 작성 규칙은 [Storybook 인수인계 문서](docs/storybook-handoff.md)를 참고합니다.
 
 ```bash
 pnpm storybook

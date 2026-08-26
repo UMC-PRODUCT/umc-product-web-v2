@@ -21,6 +21,7 @@ const meta = {
   },
   parameters: {
     layout: "centered",
+    routePath: "/matching/rounds",
   },
 } satisfies Meta<typeof RoundForm>
 

@@ -25,6 +25,7 @@ const meta = {
   },
   parameters: {
     layout: "centered",
+    routePath: "/recruiting/recruitments",
   },
 } satisfies Meta<typeof RecruitmentPostRow>
 

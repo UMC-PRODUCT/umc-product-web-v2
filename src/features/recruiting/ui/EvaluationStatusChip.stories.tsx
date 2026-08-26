@@ -15,6 +15,7 @@ const meta = {
   },
   parameters: {
     layout: "centered",
+    routePath: "/recruiting/dashboard/evaluations",
   },
 } satisfies Meta<typeof EvaluationStatusChip>
 

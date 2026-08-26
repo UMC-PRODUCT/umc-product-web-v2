@@ -24,6 +24,7 @@ const meta = {
   },
   parameters: {
     layout: "centered",
+    routePath: "/projects/notice",
   },
 } satisfies Meta<typeof RecruitmentNoticeCard>
 

@@ -97,7 +97,7 @@ const expandedSections = [
 ] satisfies Section[]
 
 const meta = {
-  title: "Feature/Recruiting/RecruitQuestionsViewModal",
+  title: "Feature/Application/RecruitQuestionsViewModal",
   component: RecruitQuestionsViewModal,
   tags: ["autodocs"],
   args: {
@@ -106,6 +106,7 @@ const meta = {
   },
   parameters: {
     layout: "fullscreen",
+    routePath: "/projects",
   },
 } satisfies Meta<typeof RecruitQuestionsViewModal>
 

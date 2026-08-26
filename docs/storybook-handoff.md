@@ -84,6 +84,8 @@ src/shared/ui/
 
 feature 스토리는 실제 API·인증·라우터 없이 대표 mock 데이터를 사용합니다. 화면 전체를 복제하기보다 상태 조합과 컴포넌트 간 역할을 보여주는 경계가 명확한 UI를 우선합니다.
 
+feature story의 `parameters.routePath`에는 해당 UI가 사용되는 실제 앱 경로를 기록합니다. Storybook canvas 상단에 이 경로가 표시되지만, 경로 이동·인증 확인·라우터 provider 실행은 하지 않습니다. 여러 화면에서 사용되는 경우 문자열 배열로 여러 경로를 기록할 수 있습니다.
+
 ## 스토리 작성 규칙
 
 ### 파일과 메타 정보
@@ -144,6 +146,22 @@ Modal과 Tooltip은 document body에 Portal을 생성합니다.
 - Portal이 닫혔는지 확인할 때는 callback 호출과 DOM 상태를 함께 확인합니다.
 - Storybook에서만 필요한 `modal-root`를 제품 코드에 추가하지 않습니다.
 
+### 라우트 경로 표시
+
+라우트 경로는 실행 대상이 아니라 인수인계용 문맥입니다.
+
+```tsx
+const meta = {
+  title: "Feature/Matching/RoundForm",
+  component: RoundForm,
+  parameters: {
+    routePath: "/matching/rounds",
+  },
+} satisfies Meta<typeof RoundForm>
+```
+
+이 설정은 전역 decorator가 `사용 라우트` 정보로 표시합니다. Storybook에서는 TanStack Router의 `Route`, `beforeLoad`, 인증 store를 불러오지 않으므로 로그인이나 실제 페이지 이동 없이 UI 상태를 확인할 수 있습니다. 실제 권한·라우팅·페이지 조합은 제품 라우트와 `src/routes/test`에서 검증합니다.
+
 ## 상호작용 검증
 
 대표 상호작용은 story의 `play` 함수에 작성합니다.
@@ -168,18 +186,19 @@ export const Interactive: Story = {
 3. `Meta`와 `StoryObj`를 선언하고 `Shared UI/...` 또는 `Feature/...` 제목을 지정합니다.
 4. 기본 상태와 중요한 경계 상태를 `args` 또는 `render`로 추가합니다.
 5. 상태가 부모 관리형이면 controlled wrapper를 작성합니다.
-6. 사용자가 수행하는 대표 동작은 `play` 함수로 추가합니다.
-7. Storybook 개발 서버에서 확인합니다.
-8. `pnpm build-storybook`와 기존 `pnpm test:run`을 실행합니다.
+6. feature UI라면 실제 사용 경로를 `parameters.routePath`에 기록합니다.
+7. 사용자가 수행하는 대표 동작은 `play` 함수로 추가합니다.
+8. Storybook 개발 서버에서 확인합니다.
+9. `pnpm build-storybook`와 기존 `pnpm test:run`을 실행합니다.
 
 ## 기존 테스트 라우트와의 역할
 
 기존 `src/routes/test` 라우트는 이번 작업에서 삭제하지 않습니다.
 
-| 도구              | 목적                                                     |
-| :---------------- | :------------------------------------------------------- |
-| Storybook         | 공통 UI와 핵심 업무 UI의 props·상태·대표 상호작용 문서화 |
-| `src/routes/test` | 실제 라우터와 페이지 조합 안에서 화면 흐름 확인          |
+| 도구              | 목적                                                                 |
+| :---------------- | :------------------------------------------------------------------- |
+| Storybook         | 공통 UI와 핵심 업무 UI의 props·상태·대표 상호작용·사용 라우트 문서화 |
+| `src/routes/test` | 실제 라우터와 페이지 조합 안에서 화면 흐름 확인                      |
 
 새 공통 UI와 API 독립적인 feature UI의 상태 문서는 Storybook을 우선 사용합니다. 실제 라우터·페이지 조합이나 API 연결이 필요한 확인은 기존 테스트 라우트를 사용합니다.
 
