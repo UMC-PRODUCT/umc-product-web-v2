@@ -15,6 +15,7 @@ export default tseslint.config(
       ".claude/**",
       ".playwright-mcp/**",
       "dist",
+      "storybook-static",
       "src/routeTree.gen.ts",
       "src/assets/svg/**",
       "src/types/api.d.ts",
