@@ -6,14 +6,15 @@
 
 ## 도입 목적
 
-현재 `src/routes/test`에는 컴포넌트를 실제 앱 라우트 안에서 확인하는 테스트 페이지가 있습니다. 이 방식은 페이지 조합을 확인하기에는 적합하지만, 인증·라우터·API 없이 공통 컴포넌트의 모든 상태를 빠르게 비교하기 어렵습니다.
+현재 `src/routes/test`에는 컴포넌트를 실제 앱 라우트 안에서 확인하는 테스트 페이지가 있습니다. 이 방식은 페이지 조합을 확인하기에는 적합하지만, 인증·라우터·API 없이 공통 UI와 핵심 업무 UI의 상태를 빠르게 비교하기 어렵습니다.
 
-Storybook은 공통 UI를 독립적으로 렌더링해 다음 정보를 한곳에서 제공합니다.
+Storybook은 공통 UI와 핵심 업무 UI를 독립적으로 렌더링해 다음 정보를 한곳에서 제공합니다.
 
 - 컴포넌트가 지원하는 props와 상태
 - disabled·loading·error·empty 등 확인하기 어려운 상태
 - 클릭·입력·선택과 같은 대표 상호작용
 - 자동 생성되는 props 문서와 Controls
+- 모집·지원·매칭·평가 feature가 공통 UI를 조합하는 방식
 
 제품 컴포넌트의 public API나 시각 스타일을 Storybook 도입을 위해 변경하지 않습니다.
 
@@ -59,7 +60,9 @@ src/shared/ui/
     └── CtaModal.stories.tsx
 ```
 
-현재 1차 문서화 대상은 다음 공통 UI입니다.
+현재 1차 문서화 대상은 다음 두 레이어입니다.
+
+공통 UI:
 
 - Button
 - InputBox
@@ -71,6 +74,15 @@ src/shared/ui/
 - Tooltip
 - SearchField
 - Tag / RecruitStatusChip
+
+핵심 업무 UI:
+
+- 모집: `RecruitmentPreviewCard`, `RecruitmentNoticeCard`, `RecruitmentPostRow`, `RecruitmentStepper`, `RecruitmentStatusChip`
+- 지원: `RecruitmentApplyConfirmModal`, `RecruitQuestionsViewModal`
+- 매칭: `MatchingTypeSelector`, `RoundForm`
+- 평가: `EvaluationStatusChip`
+
+feature 스토리는 실제 API·인증·라우터 없이 대표 mock 데이터를 사용합니다. 화면 전체를 복제하기보다 상태 조합과 컴포넌트 간 역할을 보여주는 경계가 명확한 UI를 우선합니다.
 
 ## 스토리 작성 규칙
 
@@ -112,7 +124,7 @@ type Story = StoryObj<typeof meta>
 3. 제품 흐름에서 반복적으로 사용되는가
 4. 기존 테스트 페이지에서 확인하던 중요한 상태인가
 
-정적인 상태는 `args`나 `render`로 구성합니다. 서버 응답, 인증, 라우터, 실제 API 데이터는 스토리에 넣지 않습니다.
+정적인 상태는 `args`나 `render`로 구성합니다. 서버 응답, 인증, 라우터, 실제 API 데이터는 스토리에 넣지 않습니다. API나 라우터에 직접 결합된 페이지는 별도 mock adapter를 만들지 않는 한 Storybook 대상에서 제외합니다.
 
 ### Controlled component
 
@@ -153,7 +165,7 @@ export const Interactive: Story = {
 
 1. 대상 컴포넌트와 기존 테스트 라우트의 상태를 확인합니다.
 2. 컴포넌트와 같은 디렉터리에 `ComponentName.stories.tsx`를 만듭니다.
-3. `Meta`와 `StoryObj`를 선언하고 `Shared UI/...` 제목을 지정합니다.
+3. `Meta`와 `StoryObj`를 선언하고 `Shared UI/...` 또는 `Feature/...` 제목을 지정합니다.
 4. 기본 상태와 중요한 경계 상태를 `args` 또는 `render`로 추가합니다.
 5. 상태가 부모 관리형이면 controlled wrapper를 작성합니다.
 6. 사용자가 수행하는 대표 동작은 `play` 함수로 추가합니다.
@@ -164,12 +176,12 @@ export const Interactive: Story = {
 
 기존 `src/routes/test` 라우트는 이번 작업에서 삭제하지 않습니다.
 
-| 도구              | 목적                                            |
-| :---------------- | :---------------------------------------------- |
-| Storybook         | 단일 컴포넌트의 props·상태·대표 상호작용 문서화 |
-| `src/routes/test` | 실제 라우터와 페이지 조합 안에서 화면 흐름 확인 |
+| 도구              | 목적                                                     |
+| :---------------- | :------------------------------------------------------- |
+| Storybook         | 공통 UI와 핵심 업무 UI의 props·상태·대표 상호작용 문서화 |
+| `src/routes/test` | 실제 라우터와 페이지 조합 안에서 화면 흐름 확인          |
 
-새 공통 UI의 상태 문서는 Storybook을 우선 사용합니다. 페이지 조합이나 실제 API 연결이 필요한 확인은 기존 테스트 라우트를 사용합니다.
+새 공통 UI와 API 독립적인 feature UI의 상태 문서는 Storybook을 우선 사용합니다. 실제 라우터·페이지 조합이나 API 연결이 필요한 확인은 기존 테스트 라우트를 사용합니다.
 
 ## 검증 명령
 
@@ -190,11 +202,11 @@ Storybook 실행과 빌드 후에는 다음도 확인합니다.
 
 ## 다음 확장 후보
 
-이번 범위에서는 다음 항목을 다루지 않습니다.
+이번 확장 범위에서도 다음 항목은 다루지 않습니다.
 
-- 모집·매칭·지원 페이지 전체
-- API와 인증이 필요한 Feature UI
+- 모집·매칭·지원·평가 페이지 전체
+- API와 인증에 직접 결합된 Feature UI
 - Storybook 배포와 GitHub Pages
 - 시각 회귀 테스트와 CI 실행
 
-공통 UI 스토리가 안정화된 뒤 FormHeader, SectionHeader, Pagination, Breadcrumb, 모집 공고 카드처럼 여러 화면에서 재사용되는 UI를 우선 확장합니다.
+다음 확장 후보는 지원자 목록의 필터·테이블, 모집 문항 편집 UI, 매칭 배정 UI처럼 mock 경계를 만들 수 있는 복합 feature UI입니다. 각 후보는 API 의존성을 끌어오지 않고도 독립 상태를 설명할 수 있는지 먼저 검토합니다.
